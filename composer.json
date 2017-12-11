@@ -9,7 +9,12 @@
         "cakephp/cakephp": "3.3.*",
         "mobiledetect/mobiledetectlib": "2.*",
         "cakephp/migrations": "~1.0",
-        "cakephp/plugin-installer": "*"
+        "cakephp/plugin-installer": "*",
+        "friendsofcake/bootstrap-ui": "^0.5.1",
+        "davidyell/proffer": "~0.6",
+        "friendsofcake/CakePdf": "^3.2",
+        "daoandco/cakephp-dompdf": "^1.1",
+        "Cewi/Excel": "dev-master"
     },
     "require-dev": {
         "psy/psysh": "@stable",
@@ -45,5 +50,11 @@
         "test": "vendor/bin/phpunit --colors=always"
     },
     "minimum-stability": "beta",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/cewi/excel"
+        }
+    ] 
 }

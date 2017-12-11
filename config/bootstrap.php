@@ -223,3 +223,11 @@ if (Configure::read('debug')) {
 }
 
 Plugin::load('Migrations');
+
+Plugin::load('BootstrapUI');
+
+Plugin::load('Proffer');
+
+Plugin::load('Dompdf');
+
+Plugin::load('Cewi/Excel', ['bootstrap' => true, 'routes'=>true]);
