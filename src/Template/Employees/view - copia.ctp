@@ -80,98 +80,115 @@
 			<?php endif; ?>
 		</div>		
     </div>
-	<h4>Datos personales</h4>
-    <div class="row panel panel-default" style="padding: 0% 3% 0% 3%;">
-        <div class="col col-xs-6">    
+    <div class="row">
+        <div class="col col-sm-8">    
             <br />
                 <b>Sexo:&nbsp;</b><?= h($employee->sex) ?>
+            <br />
+            <br />
+                <b>Fecha de nacimiento:&nbsp;</b><?= h($employee->birthdate->format('d-m-Y') ) ?>
             <br />
             <br />
                 <b>Nacionalidad:&nbsp;</b><?= h($employee->nationality) ?>
             <br />
             <br />
-                <b>Rif:&nbsp;</b><?= h($employee->type_of_identification . '-' . $employee->rif) ?>
-            <br />
-            <br />
-                <b>Número de teléfono fijo:&nbsp;</b><?= h($employee->landline) ?>
-            <br />
-            <br />
-                <b>Dirección de habitación:&nbsp;</b><?= h($employee->address) ?>
-            <br />
-            <br />
-		</div>
-        <div class="col col-xs-5">    
-            <br />
-                <b>Fecha de nacimiento:&nbsp;</b><?= h($employee->birthdate->format('d-m-Y') ) ?>
-            <br />
-            <br />
                 <b>Documento de identidad:&nbsp;</b><?= h($employee->type_of_identification . '-' . $employee->identity_card) ?>
+            <br />
+            <br />
+                <b>Rif:&nbsp;</b><?= h($employee->type_of_identification . '-' . $employee->rif) ?>
             <br />
             <br />
                 <b>Número de celular:&nbsp;</b><?= h($employee->cell_phone) ?>
             <br />
             <br />
+                <b>Número de teléfono fijo:&nbsp;</b><?= h($employee->landline) ?>
+            <br />
+            <br />
                 <b>Correo electrónico:&nbsp;</b><?= h($employee->email) ?>
+            <br />
+            <br />
+                <b>Dirección de habitación:&nbsp;</b><?= h($employee->address) ?>
             <br />
             <br />
                 <b>Grado de instrucción:&nbsp;</b><?= h($employee->degree_instruction) ?>
             <br />
             <br />
-		</div>
-	</div>
-	<div class="row panel panel-default" style="padding: 0% 3% 0% 3%;">
-		<h4>Datos laborales</h4>
-		<div class="col col-xs-6">
+                <b>Cargo que ocupa:&nbsp;</b><?= $employee->position->position ?>
             <br />
-				<b>Cargo que ocupa:&nbsp;</b><?= $employee->position->position ?>
+            <br />
+                <b>Tipo de empleado:&nbsp;</b><?= h($employee->working_agreement) ?>
             <br />
             <br />
                 <b>Fecha de ingreso:&nbsp;</b><?= h($employee->date_of_admission->format('d-m-Y')) ?>
             <br />
             <br />
-                <b>Horas semanales de trabajo:&nbsp;</b><?= $this->Number->format($employee->weekly_hours) ?>
-            <br />
-            <br />
-                <b>Porcentaje de ISLR a aplicar:&nbsp;</b><?= $this->Number->format($employee->percentage_imposed) ?>
-            <br />
-            <br />
-        </div>
-		<div class="col col-xs-5">
-            <br />
-                <b>Tipo de empleado:&nbsp;</b><?= h($employee->working_agreement) ?>
-            <br />
-            <br />
                 <b>Horas diarias de trabajo:&nbsp;</b><?= $this->Number->format($employee->daily_hours) ?>
+            <br />
+            <br />
+                <b>Horas semanales de trabajo:&nbsp;</b><?= $this->Number->format($employee->weekly_hours) ?>
             <br />
             <br />
                 <b>Horas mensuales de trabajo:&nbsp;</b><?= $this->Number->format($employee->hours_month) ?>
             <br />
             <br />
-        </div>
+                <b>Cantidad de secciones asignadas:&nbsp;</b><?= $this->Number->format($employee->number_assigned_sections) ?>
+            <br />
+            <br />
+                <b>Porcentaje de ISLR a aplicar:&nbsp;</b><?= $this->Number->format($employee->percentage_imposed) ?>
+            <br />
+            <br />
+         </div>
     </div>
-	<?php if (!empty($employee->teachingareas)): ?>
-		<div class="row panel panel-default" style="padding: 0% 3% 0% 3%;">
-			<h4>Materias que dicta</h4>
-			<div class="col col-xs-4">
-				<div class="table-responsive">
-					<table class="table table-striped table-hover">
-						<thead>
-							<tr>
-								<th scope="col">Materia</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php foreach ($employee->teachingareas as $teachingareas): ?>
-							<tr>
-								<td><?= h($teachingareas->description_teaching_area) ?></td>
-							</tr>
-							<?php endforeach; ?>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	<?php endif; ?>
+    <div class="related">
+        <?php if (!empty($employee->sections)): ?>
+            <h4><?= __('Secciones a las que está asignado(a):') ?></h4>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col"><?= $this->Paginator->sort('full_name', ['Sección']) ?></th>
+                            <th scope="col" class="actions"><?= __('Acciones') ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($employee->sections as $sections): ?>
+                        <tr>
+                            <td><?= h($sections->full_name) ?></td>
+                            <td class="actions">
+                                <?= $this->Html->link('Ver', ['controller' => 'Sections', 'action' => 'view', $sections->id], ['class' => 'btn btn-sm btn-info']) ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+    <div class="related">
+        <?php if (!empty($employee->teachingareas)): ?>
+            <h4><?= __('Materias que dicta:') ?></h4>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col"><?= $this->Paginator->sort('description_teaching_area', ['Materia']) ?></th>
+                            <th scope="col" class="actions"><?= __('Acciones') ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($employee->teachingareas as $teachingareas): ?>
+                        <tr>
+                            <td><?= h($teachingareas->description_teaching_area) ?></td>
+                            <td class="actions">
+                                <?= $this->Html->link('Ver', ['controller' => 'Sections', 'action' => 'view', $teachingareas->id], ['class' => 'btn btn-sm btn-info']) ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
 </div>
 <div id="menu-menos-employee" class="menumenos">
 	<p>
