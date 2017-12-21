@@ -120,7 +120,7 @@
 		</div>
 	</div>
 	<div class="row panel panel-default" style="padding: 0% 3% 0% 3%;">
-		<h4>Datos laborales</h4>
+		
 		<div class="col col-xs-6">
             <br />
 				<b>Cargo que ocupa:&nbsp;</b><?= $employee->position->position ?>
