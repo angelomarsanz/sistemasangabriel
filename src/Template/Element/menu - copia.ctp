@@ -45,9 +45,9 @@
                                     <li><?= $this->Html->link('Modificar lote de facturas', ['controller' => 'Controlnumbers', 'action' => 'edit']) ?></li>
                                     <li><?= $this->Html->link('Modificar el número control de facturas', ['controller' => 'Bills', 'action' => 'editControl']) ?></li>
                                     <li><?= $this->Html->link('Consultar factura', ['controller' => 'Bills', 'action' => 'consultBill']) ?></li>
-                                    <li><?= $this->Html->link('Crear libro de ventas PDF', ['controller' => 'Salesbooks', 'action' => 'createBookPdf']) ?></li>
-									<li><?= $this->Html->link('Listado de libros de ventas', ['controller' => 'Salesbooks', 'action' => 'viewDir']) ?></li>
-                                    <li><?= $this->Html->link('Crear libro de ventas EXCEL', ['controller' => 'Salesbooks', 'action' => 'createBookExcel']) ?></li>
+                                    <li><?= $this->Html->link('Libro de ventas', ['controller' => 'Salesbooks', 'action' => 'createBookPdf']) ?></li>
+                                    <li><?= $this->Html->link('EXCEL Libro de ventas', ['controller' => 'Salesbooks', 'action' => 'createBookExcel']) ?></li>
+    
                                 </ul>
                             </li>
                             <li class="dropdown">

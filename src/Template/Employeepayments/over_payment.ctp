@@ -150,7 +150,7 @@
 				<hr style='border-width: 5px; border-color: black;'>
 			</div>
 			<div style='width: 20%; float:left; text-align: right;'>
-				<p><td style='text-align: right;'><b><?= number_format(($totAsignaciones), 2, ",", ".") ?></p>
+				<p><?= number_format(($totAsignaciones), 2, ",", ".") ?></p>
 				<p>&nbsp;</p>
 				<p>&nbsp;</p>
 				<hr style='border-width: 5px; border-color: black;'>
