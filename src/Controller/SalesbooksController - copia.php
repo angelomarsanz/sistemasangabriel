@@ -289,12 +289,12 @@ class SalesbooksController extends AppController
 					break;
 				}
 			}
-            $monthYear = $_POST['month'] . $_POST['year'];
+            $yearMonth = $_POST['year'] . $_POST['month'];
 
             if ($errorBill == 0)  
             {
                 $this->Flash->success(__('La tabla salesbooks se creo exitosamente'));
-                return $this->redirect(['action' => 'salespdf', $_POST['month'], $_POST['year'], $monthYear, '_ext' => 'pdf']);
+                return $this->redirect(['action' => 'salespdf', $_POST['month'], $_POST['year'], $yearMonth, '_ext' => 'pdf']);
             }
             else
             {
@@ -303,7 +303,7 @@ class SalesbooksController extends AppController
             }
         }
     }
-    public function salespdf($month = null, $year = null, $monthYear = null)
+    public function salespdf($month = null, $year = null, $yearMonth = null)
     {
         $this->loadModel('Schools');
         
@@ -311,7 +311,7 @@ class SalesbooksController extends AppController
     
         $sales = $this->Salesbooks->find('all')->where([['Salesbooks.numero_control IS NOT NULL'], ['Salesbooks.numero_control >' => 0]]);
         
-        $nameFile = $monthYear . '.pdf';
+        $nameFile = $yearMonth . '.pdf';
 
         $this->viewBuilder()
             ->className('Dompdf.Pdf')
@@ -348,6 +348,11 @@ class SalesbooksController extends AppController
         $this->set(compact('sales', 'school', 'firstDayMonth', 'lastDayMonth', 'spanishMonth', 'year'));
     }
 
+	public function viewDir()
+	{
+		
+	}
+	
     public function lastDayMonth($month = null)
     {
         $monthNumbers = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
@@ -376,4 +381,5 @@ class SalesbooksController extends AppController
         $spanishMonth = str_replace($monthNumbers, $nameMonths, $month);
         return $spanishMonth;
     }
+	
 }

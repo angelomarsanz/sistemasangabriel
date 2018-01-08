@@ -252,14 +252,25 @@ class PaysheetsController extends AppController
     
                 if ($paysheet->fortnight == "1ra. Quincena")
                 {
-                    $paysheet->date_from = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-10';
-                    $paysheet->date_until = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-24';
+                    $paysheet->date_from = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-1';
+                    $paysheet->date_until = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-15';
                 }
                 else
                 {
-                    $nextMonth = $paysheet->month_paysheet + 1;
-                    $paysheet->date_from = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-25';
-                    $paysheet->date_until = $paysheet->year_paysheet . '-' . $nextMonth . '-09';
+                    $paysheet->date_from = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-16';
+
+					if ($paysheet->year_paysheet == "2020" || 
+						$paysheet->year_paysheet == "2024" ||
+						$paysheet->year_paysheet == "2028" ||
+						$paysheet->year_paysheet == "2032" )
+					{
+						$lastDay = $this->lastDayMonthLeap($paysheet->month_paysheet);
+					}
+					else
+					{
+						$lastDay = $this->lastDayMonth($paysheet->month_paysheet);
+					}					
+                    $paysheet->date_until = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-' . $lastDay;
                 }
                 
                 $firstDay = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-01';
@@ -339,5 +350,19 @@ class PaysheetsController extends AppController
         $namesClassification = ["Bachillerato y deporte", "Primaria", "Pre-escolar", "Administrativo y obrero", "Directivo"];
         $nameClassification = str_replace($classificationNumbers, $namesClassification, $classification);
         return $nameClassification;
+    }
+    public function lastDayMonth($month = null)
+    {
+        $monthNumbers = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+        $lastDay = ["31", "28", "31", "30", "31", "30", "31", "31", "30", "31", "30", "31"];
+        $englishMonth = str_replace($monthNumbers, $lastDay, $month);
+        return $englishMonth;
+    }
+    public function lastDayMonthLeap($month = null)
+    {
+        $monthNumbers = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+        $lastDay = ["31", "29", "31", "30", "31", "30", "31", "31", "30", "31", "30", "31"];
+        $englishMonth = str_replace($monthNumbers, $lastDay, $month);
+        return $englishMonth;
     }
 }

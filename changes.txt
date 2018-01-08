@@ -1,17 +1,1 @@
-Nota: Del filtro de alumnos egresados me falta verificar: alumnos egresados y aplicar descuento.
-
-bin/cake
-
-Base de datos:
-
-Config:
-
-Controller:
-
-Entity:
-
-Table:
-
-Template:
-
-webroot
+Nota: Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar descuento

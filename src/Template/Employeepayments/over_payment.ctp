@@ -64,8 +64,8 @@
 			</div>
 			<div style='width: 25%; float:left; text-align: right;'>
 				<p>&nbsp;</p>
-				<p><b>&nbsp;</b></p>
-				<p><b>&nbsp;</b></p>
+				<p><b><?= $paysheet->date_from->format('d-m-Y') ?></b></p>
+				<p><b><?= $paysheet->date_until->format('d-m-Y') ?></b></p>
 				<p><b><?= ($fortnightNumber == 1) ? '10-' . $monthNumber . '-' . $year : '25-' . $monthNumber . '-' . $year ; ?></b></p>
 			</div>				
 		</div>

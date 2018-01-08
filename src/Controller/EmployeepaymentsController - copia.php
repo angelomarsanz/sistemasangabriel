@@ -375,8 +375,6 @@ class EmployeepaymentsController extends AppController
     
     public function overPayment($idPaysheet = null, $year = null, $month = null, $fortnight = null, $classification = null, $monthNumber = null)
     {
-		$paysheet = $this->Employeepayments->Paysheets->get($idPaysheet);
-		
         $employeepayments = TableRegistry::get('Employeepayments');
         
         $arrayResult = $employeepayments->find('fortnight', ['idPaysheet' => $idPaysheet, 'classification' => $classification]);
@@ -398,8 +396,8 @@ class EmployeepaymentsController extends AppController
     
             $classificationNumber = $this->classificationNumber($classification);
             
-            $this->set(compact('employeesFor', 'currentView', 'idPaysheet', 'year', 'month', 'fortnight', 'classification', 'fortnightNumber', 'monthNumber', 'paysheet'));
-            $this->set('_serialize', ['employeesFor', 'currentView', 'idPaysheet', 'year', 'month', 'fortnight', 'classification', 'fortnightNumber', 'monthNumber', 'paysheet']);
+            $this->set(compact('employeesFor', 'currentView', 'idPaysheet', 'year', 'month', 'fortnight', 'classification', 'fortnightNumber', 'monthNumber'));
+            $this->set('_serialize', ['employeesFor', 'currentView', 'idPaysheet', 'year', 'month', 'fortnight', 'classification', 'fortnightNumber', 'monthNumber']);
         }        
     }
 

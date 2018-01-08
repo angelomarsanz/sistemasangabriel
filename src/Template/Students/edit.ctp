@@ -36,7 +36,7 @@
                                     ['label' => 'Condición del alumno:', 'options' => 
                                     [null => " ",
                                      'Alumno nuevo 2017' => 'Alumno nuevo 2017',
-                                     'Despedido' => 'Despedido',
+                                     'Expulsado' => 'Expulsado',
                                      'Egresado' => 'Egresado',
                                      'Eliminado' => 'Eliminado',
                                      'Regular' => 'Regular',
