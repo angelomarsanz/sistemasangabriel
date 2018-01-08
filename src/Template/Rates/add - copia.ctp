@@ -43,8 +43,6 @@
 <script>
     function enableInputs() 
     {
-		alert('Estimado usuario antes de agregar una nueva tarifa por favor comunicarse con el personal de sistema para que haga un respaldo de la base de datos');
-
         $("#rate-month").attr('disabled', true);
         $("#rate-year").attr('disabled', true);
 
