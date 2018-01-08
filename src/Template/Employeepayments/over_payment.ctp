@@ -81,7 +81,7 @@
 			<div style='width: 25%; float:left;'>
 				<p><?= $employeesFors->employee->first_name . ' ' . $employeesFors->employee->surname ?></p>
 				<p><?= $employeesFors->employee->type_of_identification . '-' . $employeesFors->employee->identity_card ?></p>
-				<p>&nbsp;</p>
+				<p><?= $employeesFors->employee->date_of_admission->format('d-m-Y') ?></p>
 			</div>					
 			<div style='width: 25%; float:left; text-align: right;'>
 				<p>Sueldo por hora:</p>

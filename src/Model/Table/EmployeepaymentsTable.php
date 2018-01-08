@@ -249,7 +249,7 @@ class EmployeepaymentsTable extends Table
             'Employees.first_name',
             'Employees.type_of_identification',
             'Employees.identity_card',
-            'Employees.date_of_admission',
+			'Employees.date_of_admission',
             'Positions.type_of_salary'])
         ->contain(['Employees' => ['Positions']])
         ->where([['paysheet_id' => $options['idPaysheet']], ['Employees.classification' => $options['classification']], 
