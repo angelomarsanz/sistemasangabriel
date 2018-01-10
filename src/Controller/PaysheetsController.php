@@ -191,6 +191,7 @@ class PaysheetsController extends AppController
         else
         {
             $this->Flash->error(__('No se encontró la nómina'));
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
         }
     }
 

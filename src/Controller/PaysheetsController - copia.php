@@ -131,7 +131,7 @@ class PaysheetsController extends AppController
      * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Network\Exception\NotFoundException When record not found.
      */
-    public function edit()
+    public function edit($id = null, $classificationC = null)
     {
         $this->autoRender = false;
         
@@ -149,19 +149,36 @@ class PaysheetsController extends AppController
             }
             
             $lastRecord = $this->Paysheets->find('all', ['conditions' => 
-                ['year_paysheet' => $_POST['yearPaysheet'],
-                'month_paysheet' => $_POST['monthPaysheet'],
-                'fortnight' => $fortnight],
+                [['year_paysheet' => $_POST['yearPaysheet']],
+                ['month_paysheet' => $_POST['monthPaysheet']],
+                ['fortnight' => $fortnight],
+                ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]]],
                 'order' => ['Paysheets.created' => 'DESC'] ]);
                 
                 $classification = $this->classificationName($_POST['classification']);
         }
         else
         {
-            $lastRecord = $this->Paysheets->find('all', 
-            ['order' => ['Paysheets.created' => 'DESC']]);
+            if (isset($id))
+            {
+                $lastRecord = $this->Paysheets->find('all', ['conditions' => 
+                    [['id' => $id], ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]]]]);
+            }
+            else
+            {
+                $lastRecord = $this->Paysheets->find('all', 
+                ['conditions' => 
+                    ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]], 'order' => ['Paysheets.created' => 'DESC']]);
+            }
             
-            $classification = 'Bachillerato y deporte';
+            if (isset($classificationC))
+            {
+                $classification = $classificationC; 
+            }
+            else
+            {
+                $classification = 'Bachillerato y deporte';
+            }
         }
         $row = $lastRecord->first();   
                 
@@ -169,7 +186,7 @@ class PaysheetsController extends AppController
         {
             $month = $this->nameMonthSpanish($row->month_paysheet);
                 
-            return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $row->id, $row->year_paysheet, $row->month_paysheet, $month, $row->fortnight, $classification]);
+            return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $row->id, $row->weeks_social_security, $row->year_paysheet, $row->month_paysheet, $month, $row->fortnight, $classification]);
         }
         else
         {
@@ -188,13 +205,21 @@ class PaysheetsController extends AppController
     {
         $this->request->allowMethod(['post', 'delete']);
         $paysheet = $this->Paysheets->get($id);
-        if ($this->Paysheets->delete($paysheet)) {
-            $this->Flash->success(__('The paysheet has been deleted.'));
-        } else {
-            $this->Flash->error(__('The paysheet could not be deleted. Please, try again.'));
+        
+        $paysheet->deleted_record = 1;
+        
+        $paysheet->responsible_user	= $this->Auth->user('username');
+        
+        if ($this->Paysheets->save($paysheet)) 
+        {
+            $this->Flash->success(__('La nómina fue eliminada exitosamente'));
+        }
+        else 
+        {
+            $this->Flash->error(__('No se pudo eliminar la nómina'));
         }
 
-        return $this->redirect(['action' => 'index']);
+        return $this->redirect(['controller' => 'Paysheets', 'action' => 'edit']);
     }
     public function createPayrollFortnight()
     {
@@ -210,7 +235,8 @@ class PaysheetsController extends AppController
             $lastRecord = $this->Paysheets->find('all', ['conditions' => 
                 [['year_paysheet' => $paysheet->year_paysheet],
                 ['month_paysheet' => $paysheet->month_paysheet],
-                ['fortnight' => $paysheet->fortnight]],
+                ['fortnight' => $paysheet->fortnight],
+                ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]]],
                 'order' => ['Paysheets.created' => 'DESC']]);
     
             $row = $lastRecord->first(); 
@@ -226,14 +252,25 @@ class PaysheetsController extends AppController
     
                 if ($paysheet->fortnight == "1ra. Quincena")
                 {
-                    $paysheet->date_from = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-10';
-                    $paysheet->date_until = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-24';
+                    $paysheet->date_from = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-1';
+                    $paysheet->date_until = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-15';
                 }
                 else
                 {
-                    $nextMonth = $paysheet->month_paysheet + 1;
-                    $paysheet->date_from = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-25';
-                    $paysheet->date_until = $paysheet->year_paysheet . '-' . $nextMonth . '-09';
+                    $paysheet->date_from = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-16';
+
+					if ($paysheet->year_paysheet == "2020" || 
+						$paysheet->year_paysheet == "2024" ||
+						$paysheet->year_paysheet == "2028" ||
+						$paysheet->year_paysheet == "2032" )
+					{
+						$lastDay = $this->lastDayMonthLeap($paysheet->month_paysheet);
+					}
+					else
+					{
+						$lastDay = $this->lastDayMonth($paysheet->month_paysheet);
+					}					
+                    $paysheet->date_until = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-' . $lastDay;
                 }
                 
                 $firstDay = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-01';
@@ -277,19 +314,16 @@ class PaysheetsController extends AppController
                     
                     if ($employeesPaysheets)
                     {
-                        $result = 0;
+                        $result = $employeepayments->add($row->id, $row->weeks_social_security, $employeesPaysheets);
                         
-                        $result = $employeepayments->add($row->id, $employeesPaysheets);
-                        
-                        if ($result == 1)
+                        if ($result == 0)
                         {
-                            $this->Flash->error(__('La nómina no se registró correctamente'));
+                            $this->Flash->success(__('Por favor complete los datos de La nómina'));
+                            return $this->redirect(['action' => 'edit']);
                         }
                         else
                         {
-                            $this->Flash->success(__('Por favor complete los datos de La nómina'));
-                            
-                            return $this->redirect(['action' => 'edit']);
+                            $this->Flash->error(__('La nómina no se registró correctamente'));
                         }
                     }
                     else
@@ -316,5 +350,19 @@ class PaysheetsController extends AppController
         $namesClassification = ["Bachillerato y deporte", "Primaria", "Pre-escolar", "Administrativo y obrero", "Directivo"];
         $nameClassification = str_replace($classificationNumbers, $namesClassification, $classification);
         return $nameClassification;
+    }
+    public function lastDayMonth($month = null)
+    {
+        $monthNumbers = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+        $lastDay = ["31", "28", "31", "30", "31", "30", "31", "31", "30", "31", "30", "31"];
+        $englishMonth = str_replace($monthNumbers, $lastDay, $month);
+        return $englishMonth;
+    }
+    public function lastDayMonthLeap($month = null)
+    {
+        $monthNumbers = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+        $lastDay = ["31", "29", "31", "30", "31", "30", "31", "31", "30", "31", "30", "31"];
+        $englishMonth = str_replace($monthNumbers, $lastDay, $month);
+        return $englishMonth;
     }
 }

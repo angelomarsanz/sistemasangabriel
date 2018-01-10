@@ -318,7 +318,7 @@ class EmployeepaymentsController extends AppController
                 
                 $employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;
 
-                $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->salary_advance + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+                $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 
                 $tableConfigurationJson = $this->moveConfiguration($valor);
                 
