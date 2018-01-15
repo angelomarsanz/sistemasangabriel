@@ -108,10 +108,15 @@ class EmployeesController extends AppController
         $employee = $this->Employees->get($id, [
             'contain' => ['Positions', 'Sections', 'Teachingareas', 'Employeepayments']
         ]);
+		
+        $this->loadModel('Schools');
+
+        $school = $this->Schools->get(2);
 
         $this->set('employee', $employee);
+		$this->set('school', $school);
         $this->set(compact('controller', 'action', 'idPaysheet', 'classification', 'idEmployeepayments', 'weeksSocialSecurity'));
-        $this->set('_serialize', ['employee']);
+        $this->set('_serialize', ['employee', 'school']);
     }
 
     /**

@@ -69,7 +69,7 @@ class StudentsController extends AppController
 
             if ($resultParentsandguardians) 
             {
-                $query = $this->Students->find('all')->where(['parentsandguardian_id' => $resultParentsandguardians[0]['id']]);
+                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]);
                 $this->set('students', $this->paginate($query));
             }           
         }
@@ -103,7 +103,7 @@ class StudentsController extends AppController
 
     public function indexConsult($idFamily = null, $family = null)
     {
-        $query = $this->Students->find('all')->where(['parentsandguardian_id' => $idFamily]);
+        $query = $this->Students->find('all')->where([['parentsandguardian_id' => $idFamily], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]);
 
         $this->set('students', $this->paginate($query));
 
@@ -124,7 +124,7 @@ class StudentsController extends AppController
 
     public function indexCardboard($idFamily = null, $family = null)
     {
-        $query = $this->Students->find('all')->where(['parentsandguardian_id' => $idFamily]);
+        $query = $this->Students->find('all')->where([['parentsandguardian_id' => $idFamily], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]);
             
         $this->set('students', $this->paginate($query));
             
@@ -134,7 +134,7 @@ class StudentsController extends AppController
 
     public function indexCardboardInscription($billNumber = null, $idParentsandguardian = null, $family = null)
     {
-        $query = $this->Students->find('all')->where(['parentsandguardian_id' => $idParentsandguardian]);
+        $query = $this->Students->find('all')->where([['parentsandguardian_id' => $idParentsandguardian], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]);
         
         $this->set('students', $this->paginate($query));
         
@@ -146,12 +146,12 @@ class StudentsController extends AppController
     {
         if ($this->request->is('post'))
         {
-            $query = $this->Students->find('all')->where(['parentsandguardian_id' => $_POST['idFamily']]);
+            $query = $this->Students->find('all')->where([['parentsandguardian_id' => $_POST['idFamily']], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]);
             $idFamilyP = $_POST['idFamily'];
         }    
         else
         {
-            $query = $this->Students->find('all')->where(['parentsandguardian_id' => $idFamily]);
+            $query = $this->Students->find('all')->where([['parentsandguardian_id' => $idFamily], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]);
             $idFamilyP = $idFamily;
         }
             
@@ -269,7 +269,7 @@ class StudentsController extends AppController
                 $student->profile_photo_dir = $resultUsers[0]['profile_photo_dir'];
                 $student->cell_phone = $resultUsers[0]['cell_phone'];
                 $student->email = $resultUsers[0]['email'];
-                $student->student_condition = "Alumno nuevo 2017";
+                $student->student_condition = "Regular";
                 $student->section_id = 1;
                 $student->scholarship = 0;
                 $student->balance = 0;
@@ -323,14 +323,14 @@ class StudentsController extends AppController
         {
             $student = $this->Students->patchEntity($student, $this->request->data);
     
-            $student->user_id = 3;
+            $student->user_id = 4;
             $student->parentsandguardian_id = $idParentsandguardians;
             $student->code_for_user = " ";
             $student->school_card = " ";
             $student->profile_photo = " ";
             $student->profile_photo_dir = " ";
             $student->section_id = 1;
-            $student->student_condition = "Alumno nuevo 2017";
+            $student->student_condition = "Regular";
             $student->scholarship = 0;
             $student->balance = 0;
             $student->creative_user = $this->Auth->user('username');
@@ -375,7 +375,7 @@ class StudentsController extends AppController
 
             $student = $this->Students->patchEntity($student, $this->request->data);
 
-            $student->user_id = 3;
+            $student->user_id = 4;
             $student->parentsandguardian_id = $idParentsandguardians;
             $student->second_surname = " ";
             $student->second_name = " ";
@@ -409,7 +409,7 @@ class StudentsController extends AppController
             $student->profile_photo = " ";
             $student->profile_photo_dir = " ";
             $student->section_id = 1;
-            $student->student_condition = "Alumno nuevo 2017";
+            $student->student_condition = "Regular";
             $student->scholarship = 0;
             $student->balance = 0;
             $student->creative_user = $this->Auth->user('username');
@@ -534,13 +534,13 @@ class StudentsController extends AppController
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
             $student = $this->Students->patchEntity($student, $this->request->data);
-            $student->user_id = 3;
+            $student->user_id = 4;
             $student->code_for_user = " ";
             $student->school_card = " ";
             $student->profile_photo = " ";
             $student->profile_photo_dir = " ";
             $student->section_id = 1;
-            $student->student_condition = "Alumno nuevo 2017";
+            $student->student_condition = "Regular";
             $student->scholarship = 0;
             $student->balance = 0;
             $student->creative_user = $this->Auth->user('username');
@@ -659,24 +659,22 @@ class StudentsController extends AppController
     }
     public function searchScholarship()
     {
-        $student = $this->Students->newEntity();
-        if ($this->request->is('post')) 
-        {
-            $student = $this->Students->patchEntity($student, $this->request->data);
 
-            if ($student->parentsandguardian_id == null) 
-                $this->Flash->error(__('No existe el representante'));
-            else    
-                return $this->redirect(['action' => 'enableScholarship', $student->parentsandguardian_id]);
+    }
+    public function enableScholarship($idParent = null)
+    {
+        if ($this->request->is('post'))
+        {
+            if (isset($_POST['idParent']))
+            {
+                $idParent = $_POST['idParent'];
+            }
         }
         
-        $this->set(compact('student'));
+        $query = $this->Students->find('all')
+            ->where(['parentsandguardian_id' => $idParent])
+            ->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
 
-        $this->set('_serialize', ['student']);
-    }
-    public function enableScholarship($parentId = null)
-    {
-        $query = $this->Students->find('all')->where(['parentsandguardian_id' => $parentId]);
         $this->set('students', $this->paginate($query));
 
         $this->set(compact('students'));
@@ -705,7 +703,10 @@ class StudentsController extends AppController
     }    
     public function scholarshipIndex()
     {
-        $query = $this->Students->find('all')->where(['scholarship' => 1]);
+        $query = $this->Students->find('all')
+            ->where(['scholarship' => 1])
+            ->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
+
         $this->set('students', $this->paginate($query));
 
         $this->set(compact('students'));
@@ -744,7 +745,7 @@ class StudentsController extends AppController
         {
             $jsondata = [];
 
-            $parentsandguardians = $this->Students->Parentsandguardians->find('all')->where(['Parentsandguardians.new_guardian' => $_POST['newFamily']])->order(['Parentsandguardians.family' => 'ASC']);
+            $parentsandguardians = $this->Students->Parentsandguardians->find('all')->where([['Parentsandguardians.new_guardian' => $_POST['newFamily']], ['Parentsandguardians.guardian !=' => 1]])->order(['Parentsandguardians.family' => 'ASC']);
 
             $results = $parentsandguardians->toArray();
 
@@ -846,17 +847,17 @@ class StudentsController extends AppController
             
             if ($new == 0)
             {
-                $students = $this->Students->find('all')->where(['parentsandguardian_id' => $parentId, 'new_student' => 0])
+                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['new_student' => 0], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
                 ->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
             }
             elseif ($new == 1)
             {
-                $students = $this->Students->find('all')->where(['parentsandguardian_id' => $parentId, 'new_student' => 1])
+                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['new_student' => 1], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
                 ->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
             }
             else
             {
-                $students = $this->Students->find('all')->where(['parentsandguardian_id' => $parentId])
+                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
                 ->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
             }
 
@@ -972,7 +973,7 @@ class StudentsController extends AppController
         $level = $this->sublevelLevel($nameSection->sublevel);
 
         $students = $this->Students->find('all')
-            ->where([['section_id' => $section], ['level_of_study' => $level]])
+            ->where([['section_id' => $section], ['level_of_study' => $level], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
             ->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
 
         $monthlyPayments = [];
@@ -1094,7 +1095,7 @@ class StudentsController extends AppController
                 'render' => 'browser',
             ]]);
 
-        $students = $this->Students->find('all')->where(['student_condition' => "Alumno nuevo 2017"])->order(['Students.level_of_study' => 'ASC', 
+        $students = $this->Students->find('all')->where(['Students.student_condition like' => 'Alumno nuevo%'])->order(['Students.level_of_study' => 'ASC', 
             'Students.surname' => 'ASC', 'Students.second_surname' => 'ASC',
             'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);;
 
@@ -1223,7 +1224,7 @@ class StudentsController extends AppController
             $this->autoRender = false;
             $name = $this->request->query['term'];
             $results = $this->Students->find('all', [
-                'conditions' => ['surname LIKE' => $name . '%']]);
+                'conditions' => [['surname LIKE' => $name . '%'], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]]);
             $resultsArr = [];
             foreach ($results as $result) {
                  $resultsArr[] = ['label' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'value' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'id' => $result['id']];

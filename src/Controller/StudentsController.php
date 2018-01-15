@@ -1368,4 +1368,41 @@ class StudentsController extends AppController
         $level = str_replace($sub, $levelOfStudy, $sublevel);
         return $level;
     }
+	public function defaulters()
+	{
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+               
+        $currentDate = Time::now();
+		
+		$currentYear = $currentDate->year;
+		$currentMonth = $currentDate->month;
+				
+		if ($currentMonth < 9)
+		{
+			$yearFrom = $currentYear - 1;
+		}
+		else
+		{
+			$yearFrom = $currentYear;
+		}
+		
+		$yearMonthFrom = $yearFrom . '09';
+		
+		$this->Flash->success(__('Año y mes desde: ' . $yearMonthFrom));
+		
+        if ($currentDate->month < 10)
+        {
+            $monthUntil = "0" . $currentDate->month;
+        }
+        else
+        {
+            $monthUntil = $currentDate->month;
+        }
+		
+		$yearMonthUntil = $currentDate->year . $monthUntil;
+		
+		$this->Flash->success(__('Año y mes hasta: ' . $yearMonthUntil));
+		
+	}
 }

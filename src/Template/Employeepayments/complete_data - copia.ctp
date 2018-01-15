@@ -110,14 +110,6 @@
                                             <th scope="col" class='datos-escalafon'><a href="#" id='datos-escalafon' title='Ocultar escalafón'>Escalafón&nbsp;&nbsp;&nbsp;</a></th>
                                         <?php endif; ?>
 
-                                        <?php if ($tableConfiguration->salary_advance == 0): ?>    
-                                            <th scope="col" class='adelanto-sueldo'><a href="#" id='adelanto-sueldo' title='Adelanto de sueldo'>+</a></th>
-                                            <th scope="col" class='datos-adelanto-sueldo' style='display: none;'><a href="#" id='datos-adelanto-sueldo' title='Ocultar adelanto sueldo'>Adelan.&nbsp;sueldo</a></th>
-                                        <?php else: ?>
-                                            <th scope="col" class='adelanto-sueldo' style='display: none;'><a href="#" id='adelanto-sueldo' title='Adelanto de sueldo'>+</a></th>
-                                            <th scope="col" class='datos-adelanto-sueldo'><a href="#" id='datos-adelanto-sueldo' title='Ocultar adelanto sueldo'>Adelan.&nbsp;sueldo</a></th>
-                                        <?php endif; ?>
-
                                         <?php if ($tableConfiguration->other_income == 0): ?>
                                             <th scope="col" class='otros-ingresos'><a href="#" id='otros-ingresos' title='Otros ingresos'>+</a></th>
                                             <th scope="col" class='datos-otros-ingresos' style='display: none;'><a href="#" id='datos-otros-ingresos' title='Ocultar otros ingresos'>Otros&nbsp;ingresos</a></th>
@@ -166,6 +158,14 @@
                                             <th scope="col" class='datos-reposo'><a href="#" id='datos-reposo' title='Ocultar reposo'>Reposo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
                                         <?php endif; ?>
 
+                                        <?php if ($tableConfiguration->salary_advance == 0): ?>    
+                                            <th scope="col" class='adelanto-sueldo'><a href="#" id='adelanto-sueldo' title='Adelanto de sueldo'>+</a></th>
+                                            <th scope="col" class='datos-adelanto-sueldo' style='display: none;'><a href="#" id='datos-adelanto-sueldo' title='Ocultar adelanto sueldo'>Adelan.&nbsp;sueldo</a></th>
+                                        <?php else: ?>
+                                            <th scope="col" class='adelanto-sueldo' style='display: none;'><a href="#" id='adelanto-sueldo' title='Adelanto de sueldo'>+</a></th>
+                                            <th scope="col" class='datos-adelanto-sueldo'><a href="#" id='datos-adelanto-sueldo' title='Ocultar adelanto sueldo'>Adelan.&nbsp;sueldo</a></th>
+                                        <?php endif; ?>
+										
                                         <?php if ($tableConfiguration->discount_loan == 0): ?>
                                             <th scope="col" class='prestamos'><a href="#" id='prestamos' title='Préstamos'>+</a></th>
                                             <th scope="col" class='datos-prestamos' style='display: none;'><a href="#" id='datos-prestamos' title='Ocultar préstamos'>Préstamos</a></th>
@@ -284,15 +284,6 @@
                                                 <td class='datos-escalafon' style='text-align: right;'><input disabled='true' class='input-escalafon' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Escalafón' ?> style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][amount_escalation_fortnight]" class="alternative-decimal-separator" value=<?= number_format(($employeesFors->amount_escalation/2), 2, ",", ".") ?>></td>
                                             <?php endif; ?>
 
-                                            <?php if ($tableConfiguration->salary_advance == 0): ?>    
-                                                <td class='adelanto-sueldo'><input type='hidden' class='ver-adelanto-sueldo' name="employeepayment[<?= $accountArray ?>][view_salary_advance]" value='0'></td>
-                                                <td class='datos-adelanto-sueldo' style='display: none;'><input class='input-adelanto-sueldo alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Adelanto&nbsp;sueldo' ?> style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][salary_advance]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->salary_advance, 2, ",", ".") ?>></td>
-                                            <?php else: ?>
-                                                <td class='adelanto-sueldo' style='display: none'><input type='hidden' class='ver-adelanto-sueldo' name="employeepayment[<?= $accountArray ?>][view_salary_advance]" value='1'></td>
-                                                <td class='datos-adelanto-sueldo'><input class='input-adelanto-sueldo alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Adelanto&nbsp;sueldo' ?> style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][salary_advance]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->salary_advance, 2, ",", ".") ?>></td>
-                                            <?php endif; ?>
-
-
                                             <?php if ($tableConfiguration->other_income == 0): ?>
                                                 <td class='otros-ingresos'><input type='hidden' class='ver-otros-ingresos' name="employeepayment[<?= $accountArray ?>][view_other_income]" value='0'></td>
                                                 <td class='datos-otros-ingresos' style='display: none;'><input class='input-otros-ingresos alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Otros&nbsp;ingresos' ?> style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][other_income]" value=<?= number_format($employeesFors->other_income, 2, ",", ".") ?>></td> 
@@ -340,7 +331,15 @@
                                                 <td class='reposo' style='display: none;'><input type='hidden' class='ver-reposo' name="employeepayment[<?= $accountArray ?>][view_discount_repose]" value='1'></td>
                                                 <td class='datos-reposo'><input class='input-reposo alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Reposo' ?> style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][discount_repose]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->discount_repose, 2, ",", ".") ?>></td>
                                             <?php endif; ?>
-    
+
+                                            <?php if ($tableConfiguration->salary_advance == 0): ?>    
+                                                <td class='adelanto-sueldo'><input type='hidden' class='ver-adelanto-sueldo' name="employeepayment[<?= $accountArray ?>][view_salary_advance]" value='0'></td>
+                                                <td class='datos-adelanto-sueldo' style='display: none;'><input class='input-adelanto-sueldo alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Adelanto&nbsp;sueldo' ?> style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][salary_advance]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->salary_advance, 2, ",", ".") ?>></td>
+                                            <?php else: ?>
+                                                <td class='adelanto-sueldo' style='display: none'><input type='hidden' class='ver-adelanto-sueldo' name="employeepayment[<?= $accountArray ?>][view_salary_advance]" value='1'></td>
+                                                <td class='datos-adelanto-sueldo'><input class='input-adelanto-sueldo alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Adelanto&nbsp;sueldo' ?> style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][salary_advance]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->salary_advance, 2, ",", ".") ?>></td>
+                                            <?php endif; ?>
+											
                                             <?php if ($tableConfiguration->discount_loan == 0): ?>
                                                 <td class='prestamos'><input type='hidden' class='ver-prestamos' name="employeepayment[<?= $accountArray ?>][view_discount_loan]" value='0'></td>
                                                 <td class='datos-prestamos' style='display: none;'><input class='input-prestamos alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Préstamos' ?> style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][discount_loan]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->discount_loan, 2, ",", ".") ?>></td>

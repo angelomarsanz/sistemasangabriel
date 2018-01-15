@@ -318,7 +318,7 @@ class EmployeepaymentsController extends AppController
                 
                 $employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;
 
-                $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->salary_advance + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+                $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 
                 $tableConfigurationJson = $this->moveConfiguration($valor);
                 
@@ -403,6 +403,36 @@ class EmployeepaymentsController extends AppController
         }        
     }
 
+    public function overTax($idPaysheet = null, $year = null, $month = null, $fortnight = null, $classification = null, $monthNumber = null)
+    {
+		$paysheet = $this->Employeepayments->Paysheets->get($idPaysheet);
+		
+        $employeepayments = TableRegistry::get('Employeepayments');
+        
+        $arrayResult = $employeepayments->find('fortnight', ['idPaysheet' => $idPaysheet, 'classification' => $classification]);
+        
+        if ($arrayResult['indicator'] == 0)
+        {
+            $employeesFor = $arrayResult['searchRequired'];
+
+            $currentView = 'overPayment';
+            
+            if ($fortnight == '1ra. Quincena')
+            {
+                $fortnightNumber = 1;
+            }
+            else
+            {
+                $fortnightNumber = 2;
+            }
+    
+            $classificationNumber = $this->classificationNumber($classification);
+            
+            $this->set(compact('employeesFor', 'currentView', 'idPaysheet', 'year', 'month', 'fortnight', 'classification', 'fortnightNumber', 'monthNumber', 'paysheet'));
+            $this->set('_serialize', ['employeesFor', 'currentView', 'idPaysheet', 'year', 'month', 'fortnight', 'classification', 'fortnightNumber', 'monthNumber', 'paysheet']);
+        }        
+    }
+	
     /**
      * Edit method
      *
