@@ -232,13 +232,15 @@ class StudenttransactionsController extends AppController
                     
                     if ($nameOfTheMonth == "Ago")
                     {
-                        $studenttransaction->amount = 44000;
+                        $studenttransaction->amount = 0;
+						$studenttransaction->original_amount = 1340000;
                     }
                     else
                     {
                         $studenttransaction->amount = $row['amount'];
+						$studenttransaction->original_amount = $row['amount'];
                     }
-                    $studenttransaction->original_amount = $row['amount'];
+                    
                     $studenttransaction->invoiced = 0;
                     $studenttransaction->paid_out = 0;
                     $studenttransaction->partial_payment = 0;
@@ -373,7 +375,7 @@ class StudenttransactionsController extends AppController
         }
     }
 
-    public function createQuotasNew($studentId = null)
+    public function createQuotasNew($studentId = null, $startYear = null)
     {
         $this->loadModel('Rates');
 
@@ -384,7 +386,7 @@ class StudenttransactionsController extends AppController
 
         $row = $lastRecord->first();
 
-        $quotaYear = date('Y');
+        $quotaYear = $startYear;
         
         $nextYear = $quotaYear + 1;
         

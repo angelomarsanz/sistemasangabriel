@@ -373,7 +373,7 @@ class StudenttransactionsController extends AppController
         }
     }
 
-    public function createQuotasNew($studentId = null)
+    public function createQuotasNew($studentId = null, $startYear = null)
     {
         $this->loadModel('Rates');
 
@@ -384,7 +384,7 @@ class StudenttransactionsController extends AppController
 
         $row = $lastRecord->first();
 
-        $quotaYear = date('Y');
+        $quotaYear = $startYear;
         
         $nextYear = $quotaYear + 1;
         

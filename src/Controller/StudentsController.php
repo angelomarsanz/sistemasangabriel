@@ -38,14 +38,29 @@ class StudentsController extends AppController
     public function testFunction()
     {
         $students = $this->Students->find('all')
-            ->where(['section_id' => 1]);
+            ->where(['new_student' => 1]);
 
         if ($students)
         {
             $account = $students->count();
         
             $this->Flash->success(__('Se encontraron ' . $account . ' registros'));
-        }
+			
+			foreach ($students as $student)
+			{
+				$studentOne = $this->Students->get($student->id);
+        
+				$studentOne->number_of_brothers = 2017;
+				$studentOne->balance = 2017; 
+/*	            
+				if (!($this->Students->save($studentOne)))
+				{
+					$This->Flash->error(___('No se pudo actualizar el registro Nro. ' . $studentOne->id));
+				}
+*/
+			}
+
+		}
         else
         {
             $this->Flash->error(__('No se encontraron registros'));
@@ -367,7 +382,13 @@ class StudentsController extends AppController
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
-
+		
+        $currentDate = Time::now();
+		
+		$currentYear = $currentDate->year;
+		$lastYear = $currentDate->year - 1;
+		$nextYear = $currentDate->year + 1;
+		
         $student = $this->Students->newEntity();
         if ($this->request->is('post')) 
         {
@@ -400,7 +421,6 @@ class StudentsController extends AppController
             $student->surname_mother = " ";
             $student->second_surname_mother = " ";
             $student->brothers_in_school = false;
-            $student->number_of_brothers = 0;
             $student->previous_school = " ";
             $student->student_illnesses = " ";
             $student->observations = " ";
@@ -411,11 +431,31 @@ class StudentsController extends AppController
             $student->section_id = 1;
             $student->student_condition = "Regular";
             $student->scholarship = 0;
-            $student->balance = 0;
             $student->creative_user = $this->Auth->user('username');
             $student->student_migration = 0;
             $student->mi_id = 0;
-
+			
+			$incomeType = $student->number_of_brothers;
+			
+			if ($incomeType == 0)
+			{
+				$student->new_student = 1;
+				$student->number_of_brothers = $lastYear;
+				$student->balance = $lastYear;
+			}
+			elseif ($incomeType == 1)
+			{
+				$student->new_student = 1;
+				$student->number_of_brothers = $currentYear;
+				$student->balance = $currentYear;				
+			}
+			else
+			{
+				$student->new_student = 0;
+				$student->number_of_brothers = $lastYear;
+				$student->balance = $currentYear;			
+			}
+				
             if ($this->Students->save($student)) 
             {
                 $lastRecord = $this->Students->find('all', ['conditions' => ['creative_user' => $this->Auth->user('username')],
@@ -426,16 +466,20 @@ class StudentsController extends AppController
                 if ($row)
                 {
                     $this->Flash->success(__('El alumno fue guardado exitosamente'));
-                    
-                    if ($row->new_student == 1)
-                    {
-                        $studentTransactions->createQuotasNew($row->id);
-                    }
-                    else
-                    {
-                        $studentTransactions->createQuotasRegularPrevious($row->id);
-                    }
-        
+					
+					if ($incomeType == 0)
+					{
+						$studentTransactions->createQuotasNew($row->id, $lastYear);
+					}
+					elseif ($incomeType == 1)
+					{
+						$studentTransactions->createQuotasNew($row->id, $currentYear);
+					}
+					else
+					{
+						$studentTransactions->createQuotasRegularPrevious($row->id);	
+					}					
+       
                     return $this->redirect(['action' => 'indexAdminb', $idParentsandguardians]);
                 }
             } 
@@ -444,7 +488,7 @@ class StudentsController extends AppController
         
         $parentsandguardian = $this->Students->Parentsandguardians->get($idParentsandguardians);
 
-        $this->set(compact('student', 'users', 'parentsandguardian'));
+        $this->set(compact('student', 'currentYear', 'nextYear', 'lastYear'));
         $this->set('_serialize', ['student']);
     }
 
@@ -458,6 +502,15 @@ class StudentsController extends AppController
  
     public function edit($id = null, $controller = null, $action = null)
     {
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		
+        $currentDate = Time::now();
+		
+		$currentYear = $currentDate->year;
+		$lastYear = $currentDate->year - 1;
+		$nextYear = $currentDate->year + 1;
+	
         $studentTransactions = new StudenttransactionsController();
 
         $student = $this->Students->get($id);
@@ -469,21 +522,23 @@ class StudentsController extends AppController
             $student = $this->Students->patchEntity($student, $this->request->data);
             
             $student->brothers_in_school = 0;
-            $student->number_of_brothers = 0;
-            
+		            
             if ($this->Students->save($student)) 
             {
-                $studentTransaction = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => 'Matrícula 2017']);
+				if ($student->new_student == 0)
+				{	
+					$studentTransaction = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => 'Matrícula 2017']);
 
-                $results = $studentTransaction->toArray();
+					$results = $studentTransaction->toArray();
 
-                if (!($results))
-                {
-                    $studentTransactions->createQuotasRegular($student->id);
-                }
-
-                $this->Flash->success(__('Los datos se actualizaron exitosamente'));
-                
+					if (!($results))
+					{
+						$studentTransactions->createQuotasRegular($student->id);
+					}
+				}
+				
+				$this->Flash->success(__('Los datos se actualizaron exitosamente'));
+				
                 if (isset($controller))
                 {
                     return $this->redirect(['controller' => $controller, 'action' => $action, $id]);
@@ -498,7 +553,7 @@ class StudentsController extends AppController
                 $this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
             }
         }    
-        $this->set(compact('student', 'parentsandguardian'));
+        $this->set(compact('student', 'parentsandguardian', 'currentYear', 'lastYear', 'nextYear'));
         $this->set('_serialize', ['student', 'parentsandguardian']);
     }
     

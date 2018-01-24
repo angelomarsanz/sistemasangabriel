@@ -506,7 +506,7 @@
 */            
             $("#page-turn").html("");
                                 
-            $.redirect('/turns/closeTurn', {turnData : turnValues}); 
+            $.redirect('/sistemasangabriel/turns/closeTurn', {turnData : turnValues}); 
 
         });
     });

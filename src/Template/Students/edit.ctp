@@ -15,6 +15,7 @@
                         <?php
                             setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
                             date_default_timezone_set('America/Caracas');
+													
                             echo $this->Form->input('first_name', ['label' => 'Primer nombre: *']);
                             echo $this->Form->input('second_name', ['label' => 'Segundo nombre:']);
                             echo $this->Form->input('surname', ['label' => 'Primer apellido: *']);
@@ -32,10 +33,9 @@
                             echo $this->Form->input('identity_card', ['label' => 'Número de cédula o pasaporte (si es partida de nacimiento coloque un cero): *', 'type' => 'number']);
 
                             if ($current_user['role'] != 'Representante'):
-                                echo $this->Form->input('student_condition', 
+								echo $this->Form->input('student_condition', 
                                     ['label' => 'Condición del alumno:', 'options' => 
                                     [null => " ",
-                                     'Alumno nuevo 2017' => 'Alumno nuevo 2017',
                                      'Expulsado' => 'Expulsado',
                                      'Egresado' => 'Egresado',
                                      'Eliminado' => 'Eliminado',

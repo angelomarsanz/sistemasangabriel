@@ -14,11 +14,10 @@
                         <?php
                             echo $this->Form->input('surname', ['label' => 'Primer apellido: *']);
                             echo $this->Form->input('first_name', ['label' => 'Primer nombre: *']);
-                            echo $this->Form->input('number_of_brothers', ['label' => 'Tipo (Alumno nuevo/caso especial): *', 'required' => true, 'options' => 
+                            echo $this->Form->input('new_student', ['label' => 'Tipo (Alumno nuevo/caso especial): *', 'required' => true, 'options' => 
                                 [null => " ",
-                                0 => 'Alumno nuevo ' . $lastYear . '-' . $currentYear, 
-								1 => 'Alumno nuevo ' . $currentYear . '-' . $nextYear,
-                                2 => 'Alumno regular (caso especial)']]);
+                                1 => 'Alumno nuevo',                                
+                                0 => 'Alumno regular (caso especial)']]);
                         ?>
             </fieldset>
         <?= $this->Form->button(__('Guardar'), ['class' =>'btn btn-success', 'id' => 'save-student']) ?>
