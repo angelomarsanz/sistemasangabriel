@@ -232,15 +232,13 @@ class StudenttransactionsController extends AppController
                     
                     if ($nameOfTheMonth == "Ago")
                     {
-                        $studenttransaction->amount = 0;
-						$studenttransaction->original_amount = 1340000;
+                        $studenttransaction->amount = 44000;
                     }
                     else
                     {
                         $studenttransaction->amount = $row['amount'];
-						$studenttransaction->original_amount = $row['amount'];
                     }
-                    
+                    $studenttransaction->original_amount = $row['amount'];
                     $studenttransaction->invoiced = 0;
                     $studenttransaction->paid_out = 0;
                     $studenttransaction->partial_payment = 0;

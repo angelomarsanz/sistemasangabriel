@@ -37,34 +37,7 @@ class StudentsController extends AppController
     
     public function testFunction()
     {
-        $students = $this->Students->find('all')
-            ->where(['new_student' => 1]);
 
-        if ($students)
-        {
-            $account = $students->count();
-        
-            $this->Flash->success(__('Se encontraron ' . $account . ' registros'));
-			
-			foreach ($students as $student)
-			{
-				$studentOne = $this->Students->get($student->id);
-        
-				$studentOne->number_of_brothers = 2017;
-				$studentOne->balance = 2017; 
-/*	            
-				if (!($this->Students->save($studentOne)))
-				{
-					$This->Flash->error(___('No se pudo actualizar el registro Nro. ' . $studentOne->id));
-				}
-*/
-			}
-
-		}
-        else
-        {
-            $this->Flash->error(__('No se encontraron registros'));
-        }
     }
     /**
      * Index method
@@ -1000,6 +973,7 @@ class StudentsController extends AppController
         if ($this->request->is('post')) 
         {
             return $this->redirect(['action' => 'relationpdf', $_POST['school_period'], $_POST['section_id'], '_ext' => 'pdf']);
+//          return $this->redirect(['action' => 'relationPayments', $_POST['school_period'], $_POST['section_id']]);
         }
 
         $sections = $this->Students->Sections->find('list', ['limit' => 200]);
@@ -1016,7 +990,6 @@ class StudentsController extends AppController
                 'filename' => $section,
                 'render' => 'browser',
             ]]);
-
         $yearFrom = substr($schoolperiod, 0, 4);
 
         $yearMonthFrom = substr($schoolperiod, 0, 4) . '08';
@@ -1028,7 +1001,7 @@ class StudentsController extends AppController
         $level = $this->sublevelLevel($nameSection->sublevel);
 
         $students = $this->Students->find('all')
-            ->where([['section_id' => $section], ['level_of_study' => $level], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
+            ->where([['id >' => 1], ['section_id' => $section], ['level_of_study' => $level], ['Students.student_condition' => 'Regular']])
             ->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
 
         $monthlyPayments = [];
@@ -1093,7 +1066,7 @@ class StudentsController extends AppController
                                 }
                                 else
                                 {
-                                    if ($studentTransaction->amount == 0)
+                                    if ($studentTransaction->paid_out == 1)
                                     {
                                         $monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = '*';    
                                     }
@@ -1113,6 +1086,104 @@ class StudentsController extends AppController
         $this->set(compact('nameSection', 'monthlyPayments', 'yearFrom', 'yearMonthFrom', 'yearMonthUp'));
     }
     
+    public function relationPayments($schoolperiod = null, $section = null)
+    {
+        $yearFrom = substr($schoolperiod, 0, 4);
+
+        $yearMonthFrom = substr($schoolperiod, 0, 4) . '08';
+        
+        $yearMonthUp = substr($schoolperiod, 5, 4) . '08';
+
+        $nameSection = $this->Students->Sections->get($section);
+        
+        $level = $this->sublevelLevel($nameSection->sublevel);
+
+        $students = $this->Students->find('all')
+            ->where([['id >' => 1], ['section_id' => $section], ['level_of_study' => $level], ['Students.student_condition' => 'Regular']])
+            ->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
+
+        $monthlyPayments = [];
+        
+        $accountantManager = 0;
+
+        $this->loadModel('Schools');
+
+        $school = $this->Schools->get(2);
+
+        $this->loadModel('Rates');
+        
+        $concept = 'Matrícula';
+        
+        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
+           'order' => ['Rates.created' => 'DESC'] ]);
+
+        $row = $lastRecord->first();
+
+        if($row)
+        {
+            foreach ($students as $student) 
+            {
+                $studentTransactions = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id]);
+
+                $swSignedUp = 0;
+
+                foreach ($studentTransactions as $studentTransaction) 
+                {
+                    if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
+                    {
+                        if ($studentTransaction->amount < $row->amount)
+                        {
+                            $swSignedUp = 1;
+                        }
+                    }
+                }                    
+
+                if ($swSignedUp == 1)
+                {
+                    $monthlyPayments[$accountantManager]['student'] = $student->full_name;
+                
+                    $monthlyPayments[$accountantManager]['studentTransactions'] = [];
+
+                    foreach ($studentTransactions as $studentTransaction) 
+                    {
+                        if ($studentTransaction->transaction_type == "Mensualidad")
+                        {
+                            $month = substr($studentTransaction->transaction_description, 0, 3);
+                            
+                            $year = substr($studentTransaction->transaction_description, 4, 4);
+                            
+                            $numberOfTheMonth = $this->nameMonth($month);
+                            
+                            $yearMonth = $year . $numberOfTheMonth;
+                            
+                            if ($yearMonth > $yearMonthFrom && $yearMonth < $yearMonthUp)
+                            {
+                                if ($student->scholarship == 1)
+                                {
+                                    $monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = 'B';
+                                }
+                                else
+                                {
+                                    if ($studentTransaction->paid_out == 1)
+                                    {
+                                        $monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = '*';    
+                                    }
+                                    else
+                                    {
+                                        $monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = 'P'; 
+                                    }
+                                }
+                            }
+                        }
+                    }  
+                }
+                $accountantManager++;
+            }
+        }
+
+        $this->set(compact('nameSection', 'monthlyPayments', 'yearFrom', 'yearMonthFrom', 'yearMonthUp'));
+    }
+	
     function nameMonth($month = null)
     {
         $monthsSpanish = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
@@ -1436,15 +1507,15 @@ class StudentsController extends AppController
 		if ($currentMonth < 9)
 		{
 			$yearFrom = $currentYear - 1;
+			$yearUntil = $currentYear;
 		}
 		else
 		{
 			$yearFrom = $currentYear;
+			$yearUntil = $currentYear + 1;
 		}
 		
 		$yearMonthFrom = $yearFrom . '09';
-		
-		$this->Flash->success(__('Año y mes desde: ' . $yearMonthFrom));
 		
         if ($currentDate->month < 10)
         {
@@ -1455,9 +1526,254 @@ class StudentsController extends AppController
             $monthUntil = $currentDate->month;
         }
 		
-		$yearMonthUntil = $currentDate->year . $monthUntil;
+		$yearMonthUntil = $yearUntil . $monthUntil;
+					
+		$yearMonthEnd = $yearUntil . '07';
+				
+		$totalDebt = 0;
 		
-		$this->Flash->success(__('Año y mes hasta: ' . $yearMonthUntil));
+		$this->loadModel('Schools');
+
+		$school = $this->Schools->get(2);
+
+		$this->loadModel('Rates');
+					
+		$concept = 'Matrícula';
+					
+		$lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
+		   'order' => ['Rates.created' => 'DESC'] ]);
+
+		$row = $lastRecord->first();
+					
+		if ($row)
+		{
+			$amountRegistration = $row->amount;
+		}
+		else
+		{
+			$this->Flash->error(__('No se encontró el monto de la matrícula'));
+			
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);		
+		}
+	
+        $students = TableRegistry::get('Students');
+        
+        $arrayResult = $students->find('regular');
+        
+        if ($arrayResult['indicator'] == 1)
+		{
+			$this->Flash->error(___('No se encontraron alumnos regulares'));
+			
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+		}
 		
+		$studentsFor = $arrayResult['searchRequired'];
+
+		$defaulters = [];
+        
+		$accountantManager = 0;	
+		
+		$defaulters[$accountantManager]['section'] = '';
+		$defaulters[$accountantManager]['one'] = 0;
+		$defaulters[$accountantManager]['two'] = 0;
+		$defaulters[$accountantManager]['three'] = 0;
+		$defaulters[$accountantManager]['four'] = 0;
+		$defaulters[$accountantManager]['fiveMore'] = 0;
+		$defaulters[$accountantManager]['solvents'] = 0;
+		$defaulters[$accountantManager]['defaulters'] = 0;
+		$defaulters[$accountantManager]['prepaid'] = 0;
+		$defaulters[$accountantManager]['scholarship'] = 0;	
+
+		$tDefaulters = [];
+			
+		$tDefaulters[0]['section'] = '';
+		$tDefaulters[0]['one'] = 0;
+		$tDefaulters[0]['two'] = 0;
+		$tDefaulters[0]['three'] = 0;
+		$tDefaulters[0]['four'] = 0;
+		$tDefaulters[0]['fiveMore'] = 0;
+		$tDefaulters[0]['solvents'] = 0;
+		$tDefaulters[0]['defaulters'] = 0;
+		$tDefaulters[0]['prepaid'] = 0;
+		$tDefaulters[0]['scholarship'] = 0;
+		
+		$swSection = 0;
+				
+		foreach ($studentsFor as $studentsFors)
+		{
+			$nameSection = $this->Students->Sections->get($studentsFors->section_id);
+				
+			$level = $this->sublevelLevel($nameSection->sublevel);
+				
+			if ($level == $studentsFors->level_of_study)
+			{
+				$delinquentMonths = 0;
+				
+				$wholeYear = 0;
+				
+				$swSignedUp = 0;
+				
+				$scholarship = 0;
+				
+				if ($studentsFors->scholarship == 1)
+				{
+					$scholarship = 1;
+				}
+				else
+				{				
+					$studentTransactions = $this->Students->Studenttransactions->find('all')->where(['student_id' => $studentsFors->id]);
+
+					foreach ($studentTransactions as $studentTransaction) 
+					{
+						if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
+						{
+							if ($studentTransaction->amount < $amountRegistration)
+							{
+								$swSignedUp = 1;
+							}
+							break;						
+						}
+					}
+					if ($swSignedUp == 1)
+					{
+						foreach ($studentTransactions as $studentTransaction)
+						{
+							if ($studentTransaction->transaction_type == "Mensualidad")
+							{
+								$month = substr($studentTransaction->transaction_description, 0, 3);
+									
+								$year = substr($studentTransaction->transaction_description, 4, 4);
+									
+								$numberOfTheMonth = $this->nameMonth($month);
+									
+								$yearMonth = $year . $numberOfTheMonth;
+									
+								if ($yearMonth >= $yearMonthFrom && $yearMonth <= $yearMonthEnd)
+								{
+									if ($studentTransaction->paid_out == 0)
+									{
+										$wholeYear = 1;
+										
+										if ($yearMonth <= $yearMonthUntil)
+										{
+											$delinquentMonths++;
+											$totalDebt = $totalDebt + $studentTransaction->amount;
+										}
+									}
+								}	
+							}
+						}	
+					}	
+				}
+				if ($scholarship == 1 || $swSignedUp == 1)
+				{
+					if ($swSection == 0)
+					{
+						$swSection = 1;
+						
+						$previousSection = $studentsFors->section_id;
+						
+						$defaulters[$accountantManager]['section'] = $nameSection->full_name;
+						
+						$arrayGeneral = $this->addCounter($defaulters, $accountantManager, $tDefaulters, $delinquentMonths, $wholeYear, $scholarship);
+						
+						$defaulters = $arrayGeneral[0];
+						
+						$accountantManager = $arrayGeneral[1];
+
+						$tDefaulters = $arrayGeneral[2];
+					}
+					else
+					{
+						if ($previousSection == $studentsFors->section_id)
+						{				
+							$arrayGeneral = $this->addCounter($defaulters, $accountantManager, $tDefaulters, $delinquentMonths, $wholeYear, $scholarship);
+						
+							$defaulters = $arrayGeneral[0];
+						
+							$accountantManager = $arrayGeneral[1]; 		
+
+							$tDefaulters = $arrayGeneral[2];
+						}
+						else
+						{
+							$previousSection = $studentsFors->section_id;
+						
+							$accountantManager++;		
+							
+							$defaulters[$accountantManager]['section'] = $nameSection->full_name;	
+							$defaulters[$accountantManager]['one'] = 0;
+							$defaulters[$accountantManager]['two'] = 0;
+							$defaulters[$accountantManager]['three'] = 0;
+							$defaulters[$accountantManager]['four'] = 0;
+							$defaulters[$accountantManager]['fiveMore'] = 0;
+							$defaulters[$accountantManager]['solvents'] = 0;
+							$defaulters[$accountantManager]['defaulters'] = 0;
+							$defaulters[$accountantManager]['prepaid'] = 0;	
+							$defaulters[$accountantManager]['scholarship'] = 0;
+
+							$arrayGeneral = $this->addCounter($defaulters, $accountantManager, $tDefaulters, $delinquentMonths, $wholeYear, $scholarship);
+						
+							$defaulters = $arrayGeneral[0];
+						
+							$accountantManager = $arrayGeneral[1]; 
+
+							$tDefaulters = $arrayGeneral[2];
+						}
+					}
+				}
+			}
+		}
+		$this->set(compact('school', 'defaulters', 'tDefaulters', 'totalDebt', 'currentDate'));
+	}
+	public function addCounter($defaulters = null, $accountantManager = null, $tDefaulters = null, $delinquentMonths = null, $wholeYear = null, $scholarship = null)
+	{
+		if ($scholarship == 1)
+		{
+			$defaulters[$accountantManager]['scholarship']++;
+			$tDefaulters[0]['scholarship']++;
+		}
+		else
+		{
+			if ($delinquentMonths == 0) 
+			{
+				$defaulters[$accountantManager]['solvents']++;
+				$tDefaulters[0]['solvents']++;
+			}
+			else
+			{
+				$defaulters[$accountantManager]['defaulters']++;
+				$tDefaulters[0]['defaulters']++;
+				
+				switch ($delinquentMonths) 
+				{	
+					case 1:
+						$defaulters[$accountantManager]['one']++;
+						$tDefaulters[0]['one']++;
+						break;
+					case 2:
+						$defaulters[$accountantManager]['two']++;
+						$tDefaulters[0]['two']++;
+						break;
+					case 3:
+						$defaulters[$accountantManager]['three']++;
+						$tDefaulters[0]['three']++;
+						break;
+					case 4:
+						$defaulters[$accountantManager]['four']++;
+						$tDefaulters[0]['four']++;
+						break;
+					default:
+						$defaulters[$accountantManager]['fiveMore']++;
+						$tDefaulters[0]['fiveMore']++;
+				}
+			}
+			if ($wholeYear == 0)
+			{
+				$defaulters[$accountantManager]['prepaid']++;
+				$tDefaulters[0]['prepaid']++;
+			}
+		}
+		return [$defaulters, $accountantManager, $tDefaulters];
 	}
 }

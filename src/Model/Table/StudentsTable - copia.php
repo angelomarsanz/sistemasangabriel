@@ -49,6 +49,23 @@ class StudentsTable extends Table
 
         $this->addBehavior('Timestamp');
 
+        $this->addBehavior('Proffer.Proffer', [
+            'profile_photo' => [    // The name of your upload field
+                'root' => WWW_ROOT . 'files', // Customise the root upload folder here, or omit to use the default
+                'dir' => 'profile_photo_dir',   // The name of the field to store the folder
+                'thumbnailSizes' => [ // Declare your thumbnails
+                    'thumb' => [   // Define the prefix of your thumbnail
+                        'w' => 500, // Width
+                        'h' => 500, // Height
+                        'crop' => true,  // Crop will crop the image as well as resize it
+                        'jpeg_quality'  => 100,
+                        'png_compression_level' => 9
+                    ],
+                ],
+                'thumbnailMethod' => 'php'  // Options are Imagick, Gd or Gmagick
+            ]
+        ]);
+
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
             'joinType' => 'INNER'
@@ -82,6 +99,10 @@ class StudentsTable extends Table
     {
 
         $validator
+            ->requirePresence('code_for_user', 'create')
+            ->notEmpty('code_for_user');
+
+        $validator
             ->requirePresence('first_name', 'create')
             ->notEmpty('first_name');
 
@@ -94,8 +115,20 @@ class StudentsTable extends Table
             ->notEmpty('sex');
 
         $validator
+            ->requirePresence('school_card', 'create')
+            ->notEmpty('school_card');
+
+        $validator
             ->requirePresence('nationality', 'create')
             ->notEmpty('nationality');
+
+        $validator
+            ->requirePresence('type_of_identification', 'create')
+            ->notEmpty('type_of_identification');
+
+        $validator
+            ->requirePresence('identity_card', 'create')
+            ->notEmpty('identity_card');
 
         $validator
             ->requirePresence('family_bond_guardian_student', 'create')
@@ -135,20 +168,22 @@ class StudentsTable extends Table
             ->notEmpty('address');
 
         $validator
-            ->requirePresence('cell_phone', 'create')
-            ->notEmpty('cell_phone');
-
-        $validator
-            ->email('email')
-            ->requirePresence('email', 'create')
-            ->notEmpty('email');
-
-        $validator
             ->requirePresence('level_of_study', 'create')
             ->notEmpty('level_of_study');
 
         $validator
-            ->boolean('brothers_in_school')
+            ->requirePresence('section_id', 'create')
+            ->notEmpty('section_id');
+
+        $validator
+            ->requirePresence('student_condition', 'create')
+            ->notEmpty('student_condition');
+
+        $validator
+            ->requirePresence('scholarship', 'create')
+            ->notEmpty('scholarship');
+
+        $validator
             ->requirePresence('brothers_in_school', 'create')
             ->notEmpty('brothers_in_school');
 
@@ -168,7 +203,28 @@ class StudentsTable extends Table
         $validator
             ->requirePresence('observations', 'create')
             ->notEmpty('observations');
-            
+        
+        $validator
+            ->numeric('balance')
+            ->requirePresence('balance', 'create')
+            ->notEmpty('balance');
+        
+        $validator
+            ->requirePresence('creative_user', 'create')
+            ->notEmpty('creative_user');
+        
+        $validator
+            ->requirePresence('student_migration', 'create')
+            ->notEmpty('student_migration');
+        
+        $validator
+            ->requirePresence('mi_id', 'create')
+            ->notEmpty('mi_id');
+
+        $validator
+            ->requirePresence('new_student', 'create')
+            ->notEmpty('new_student');
+
         return $validator;
     }
 
@@ -202,4 +258,23 @@ class StudentsTable extends Table
         }
     }    
 
+    public function findRegular(Query $query, array $options)
+    {
+        $query->where([['id >' => 1], ['student_condition' => 'Regular']])
+			->order(['section_id' => 'ASC']); 
+		
+        $arrayResult = [];
+        
+        if ($query)
+        {
+            $arrayResult['indicator'] = 0;
+            $arrayResult['searchRequired'] = $query;
+        }
+        else
+        {
+            $arrayResult['indicator'] = 1;
+        }
+        
+        return $arrayResult;
+    }
 }

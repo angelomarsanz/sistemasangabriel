@@ -258,4 +258,23 @@ class StudentsTable extends Table
         }
     }    
 
+    public function findRegular(Query $query, array $options)
+    {
+        $query->where([['id >' => 1], ['student_condition' => 'Regular']])
+			->order(['section_id' => 'ASC']); 
+		
+        $arrayResult = [];
+        
+        if ($query)
+        {
+            $arrayResult['indicator'] = 0;
+            $arrayResult['searchRequired'] = $query;
+        }
+        else
+        {
+            $arrayResult['indicator'] = 1;
+        }
+        
+        return $arrayResult;
+    }
 }
