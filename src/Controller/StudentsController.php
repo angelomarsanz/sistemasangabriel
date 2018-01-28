@@ -1596,6 +1596,8 @@ class StudentsController extends AppController
 		$tDefaulters[0]['defaulters'] = 0;
 		$tDefaulters[0]['prepaid'] = 0;
 		$tDefaulters[0]['scholarship'] = 0;
+		$tDefaulters[0]['totalStudents'] = 0;
+		
 		
 		$swSection = 0;
 				
@@ -1732,6 +1734,8 @@ class StudentsController extends AppController
 		{
 			$defaulters[$accountantManager]['scholarship']++;
 			$tDefaulters[0]['scholarship']++;
+			$tDefaulters[0]['totalStudents']++;
+			
 		}
 		else
 		{
@@ -1739,11 +1743,13 @@ class StudentsController extends AppController
 			{
 				$defaulters[$accountantManager]['solvents']++;
 				$tDefaulters[0]['solvents']++;
+				$tDefaulters[0]['totalStudents']++;
 			}
 			else
 			{
 				$defaulters[$accountantManager]['defaulters']++;
 				$tDefaulters[0]['defaulters']++;
+				$tDefaulters[0]['totalStudents']++;
 				
 				switch ($delinquentMonths) 
 				{	
