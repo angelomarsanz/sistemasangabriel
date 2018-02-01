@@ -501,9 +501,9 @@ class ParentsandguardiansController extends AppController
     {
         $officesParents = $this->Parentsandguardians->find('all')->where(['item' => $office]);
 
-        $pepitos = $this->paginate($officesParents);
+        $officeP = $this->paginate($officesParents);
 
-        $this->set(compact('office', 'pepitos'));
+        $this->set(compact('office', 'officeP'));
     }
     public function profilePhoto($id = null)
     {

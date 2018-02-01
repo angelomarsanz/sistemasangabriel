@@ -12,11 +12,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($pepitos as $pepito): ?>
+                    <?php foreach ($officeP as $officePs): ?>
 	                    <tr>
-	                        <td><?= h($pepito->full_name) ?></td>
+	                        <td><?= h($officePs->full_name) ?></td>
 	                        <td class="actions">
-	                            <?= $this->Html->link('Ver', ['action' => 'view', $pepito->id], ['class' => 'btn btn-sm btn-info']) ?>
+	                            <?= $this->Html->link('Ver', ['action' => 'view', $officePs->id], ['class' => 'btn btn-sm btn-info']) ?>
 	                        </td>
 	                    </tr>
 	                <?php endforeach; ?>
