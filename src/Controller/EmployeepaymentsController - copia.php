@@ -85,7 +85,7 @@ class EmployeepaymentsController extends AppController
      *
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
-    public function add($idPaysheet = null, $weeksSocialSecurity = null, $employeesPaysheets = null)
+    public function add($paysheet = null, $employeesPaysheets = null)
     {
         $this->autoRender = false;
         
@@ -93,7 +93,7 @@ class EmployeepaymentsController extends AppController
     
         foreach ($employeesPaysheets as $employeesPaysheet) 
         {
-            $result = $this->addRecord($idPaysheet, $weeksSocialSecurity, $employeesPaysheet);
+            $result = $this->addRecord($paysheet, $employeesPaysheet);
             if ($result == 1)
             {
                 break;
@@ -102,11 +102,11 @@ class EmployeepaymentsController extends AppController
         return $result;
     }
     
-    public function addRecord($idPaysheet = null, $weeksSocialSecurity = null, $employeesPaysheet = null)
+    public function addRecord($paysheet = null, $employeesPaysheet = null)
     {
         $employeepayment = $this->Employeepayments->newEntity();
         
-        $employeepayment->paysheet_id = $idPaysheet;
+        $employeepayment->paysheet_id = $paysheet->id;
         
         $employeepayment->employee_id = $employeesPaysheet->id;
         
@@ -176,11 +176,11 @@ class EmployeepaymentsController extends AppController
                 
         $employeepayment->faov = ($employeepayment->fortnight + ($employeepayment->amount_escalation/2) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
       
-        $employeepayment->ivss = (((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $weeksSocialSecurity) / 2;           
+        $employeepayment->ivss = (((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 2;           
         
-        $employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;
+        $employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation) * $employeepayment->percentage_imposed)/100;
 
-        $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->salary_advance + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+        $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 
         $tableConfigurationJson = $this->initialConfiguration();
             

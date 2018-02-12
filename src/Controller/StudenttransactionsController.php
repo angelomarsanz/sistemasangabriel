@@ -3,6 +3,8 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 
+use App\Controller\ExcelsController;
+
 use Cake\ORM\TableRegistry;
 
 use Cake\I18n\Time;
@@ -11,8 +13,8 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
-        phpinfo();
-    }
+
+	}
 
     public function index()
     {
@@ -742,9 +744,13 @@ class StudenttransactionsController extends AppController
         return;
     }
     
-    public function newMonthlyPayment($previousMonthlyPayment, $newAmount, $monthFrom, $yearFrom)
+    public function newMonthlyPayment($previousMonthlyPayment = null, $newAmount = null, $monthFrom = null, $yearFrom = null, $swDateException = null, $dateException = null)
     {
-        $this->autoRender = false;
+		$this->autoRender = false;
+	
+		$excels = new ExcelsController();
+		
+        $arrayResult = [];
 
         $previousMonthlyPayment80 = $previousMonthlyPayment * 0.8;
         
@@ -755,118 +761,202 @@ class StudenttransactionsController extends AppController
         $newAmount50 = $newAmount * 0.5;
 
         $yearMonthFrom = $yearFrom . $monthFrom;
-        
-        $account1 = 0;
-        $account2 = 0;
-        $account3 = 0;
-        $account4 = 0;
-        $account5 = 0;
-        $account6 = 0;
-    
-        $studentTransactions = $this->Studenttransactions->find('all', ['conditions' => ['transaction_type' => 'Mensualidad'],
-            'order' => ['Studenttransactions.student_id' => 'ASC'] ]);
-
+		
+		$dateFrom = new Time($yearFrom . '-' . $monthFrom . '-01 00:00:00');
+			       
+        $accountGeneral = 0;
+        $accountDifferentAugust = 0;
+        $accountAugust = 0;
+        $accountPaymentException = 0;
+        $accountAdjust = 0;
+        $accountOutSequence = 0;
+		$account20 = 0;
+		$account50 = 0;
+		$accountRegular = 0;
+		$accountIrregular = 0;
+		$swAdjust = 0;
+		$previousIdStudent = 0;
+		$swTruncateExcels = 0;
+		$swErrorTransactions = 0;
+				
+		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => [['id >' => 32000],['transaction_type' => 'Mensualidad'], ['payment_date >=' => $dateFrom]], 
+			'order' => ['Studenttransactions.student_id' => 'ASC', 'payment_date' => 'ASC']]);
+			
+		$accountSelect = $studentTransactions->count();
+		
         if ($studentTransactions) 
         {
             foreach ($studentTransactions as $studentTransaction)
-            {
-                $account1++;
+            {			
+                $accountGeneral++;
                 
                 $month = substr($studentTransaction->transaction_description, 0, 3);
                         
-                $year = substr($studentTransaction->transaction_description, 4, 4);
-                        
-                $numberOfTheMonth = $this->numberMonth($month);
-                        
-                $yearMonth = $year . $numberOfTheMonth;
-
-                if ($numberOfTheMonth != '08')
+                if ($month != 'Ago')
                 {
-                    if ($yearMonth >= $yearMonthFrom)
-                    {
-                        $account2++;
-                        
-                        $studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
-                        
-                        if ($studentTransaction->original_amount == $previousMonthlyPayment80)
-                        {
-                            $account3++;
-                            
-                            if ($studentTransactionGet->original_amount == $studentTransactionGet->amount)
-                            {
-                                $studentTransactionGet->original_amount = $newAmount80;
-                                $studentTransactionGet->amount = $newAmount80;
-                                $studentTransactionGet->paid_out = 0;
-                                $studentTransactionGet->partial_payment = 0;
-                            }
-                            elseif ($studentTransactionGet->original_amount > $studentTransactionGet->amount)
-                            {
-                                $differenceAmount = $newAmount80 - $studentTransactionGet->original_amount;
-                                $studentTransactionGet->amount = $studentTransactionGet->amount + $differenceAmount;
-                                $studentTransactionGet->original_amount = $newAmount80;
-                                $studentTransactionGet->paid_out = 0;
-                                $studentTransactionGet->partial_payment = 1;
-                            }
-                        }
-                        elseif ($studentTransaction->original_amount == $previousMonthlyPayment50)
-                        {
-                            $account4++;
-                            if ($studentTransactionGet->original_amount == $studentTransactionGet->amount)
-                            {
-                                $studentTransactionGet->original_amount = $newAmount50;
-                                $studentTransactionGet->amount = $newAmount50;
-                                $studentTransactionGet->paid_out = 0;
-                                $studentTransactionGet->partial_payment = 0;
-                            }
-                            elseif ($studentTransactionGet->original_amount > $studentTransactionGet->amount)
-                            {
-                                $differenceAmount = $newAmount50 - $studentTransactionGet->original_amount;
-                                $studentTransactionGet->amount = $studentTransactionGet->amount + $differenceAmount;
-                                $studentTransactionGet->original_amount = $newAmount50;
-                                $studentTransactionGet->paid_out = 0;
-                                $studentTransactionGet->partial_payment = 1;
-                            }
-                        }
-                        elseif ($studentTransaction->original_amount == $previousMonthlyPayment)
-                        {
-                            $account5++;    
-                            if ($studentTransactionGet->original_amount == $studentTransactionGet->amount)
-                            {
-                                $studentTransactionGet->original_amount = $newAmount;
-                                $studentTransactionGet->amount = $newAmount;
-                                $studentTransactionGet->paid_out = 0;
-                                $studentTransactionGet->partial_payment = 0;
-                            }
-                            elseif ($studentTransactionGet->original_amount > $studentTransactionGet->amount)
-                            {
-                                $differenceAmount = $newAmount - $studentTransactionGet->original_amount;
-                                $studentTransactionGet->amount = $studentTransactionGet->amount + $differenceAmount;
-                                $studentTransactionGet->original_amount = $newAmount;
-                                $studentTransactionGet->paid_out = 0;
-                                $studentTransactionGet->partial_payment = 1;
-                            }
-                        }
-                        else
-                        {
-                            $account5++;     
-                        }
-        
+                    $accountDifferentAugust++;
+													
+					if ($swDateException == 1)
+					{
+						if ($studentTransaction->payment_date == $dateFrom)
+						{							
+							if ($studentTransaction->amount == 0)
+							{
+								if ($previousIdStudent != $studentTransaction->student_id)
+								{
+									$previousIdStudent = $studentTransaction->student_id;
+								
+									$swAdjust = $this->verifyPayment($dateFrom, $dateException, $studentTransaction->student_id);
+							
+									if ($swAdjust == 0)
+									{
+										$columns = [];
+										
+										$accountPaymentException++;
+										
+										$student = $this->Studenttransactions->Students->get($studentTransaction->student_id);
+										
+										$columns['report'] = 'Alumnos pago completo año escolar';
+										$columns['number'] = $accountPaymentException;
+										$columns['col1'] = $student->full_name;
+										
+										if ($swTruncateExcels == 0)
+										{
+											$excels->truncateTable();
+											$swTruncateExcels = 1;
+										}
+										
+										$swExcel = $excels->add($columns);
+
+										if ($swExcel == 1)
+										{
+											$this->Flash->error(__('No pudo ser grabado en la tabla Excels el alumno: ' . $student->full_name));
+										}
+									}
+									else
+									{
+										$accountAdjust++;
+									}
+								}
+								else
+								{
+									$swAdjust = 0;
+									$accountOutSequence++;
+								}
+							}
+							else
+							{
+								$swAdjust = 1;
+								$accountAdjust++;
+							}
+						}
+					}
+					else
+					{
+						$accountAdjust++;
+						$swAdjust = 1;
+					}
+					
+					if ($swAdjust == 1)
+					{                       
+						$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
+						
+						if ($studentTransaction->original_amount == $previousMonthlyPayment80)
+						{
+							$account20++;
+							
+							if ($studentTransactionGet->original_amount == $studentTransactionGet->amount)
+							{
+								$studentTransactionGet->original_amount = $newAmount80;
+								$studentTransactionGet->amount = $newAmount80;
+								$studentTransactionGet->paid_out = 0;
+								$studentTransactionGet->partial_payment = 0;
+							}
+							elseif ($studentTransactionGet->original_amount > $studentTransactionGet->amount)
+							{
+								$differenceAmount = $newAmount80 - $studentTransactionGet->original_amount;
+								$studentTransactionGet->amount = $studentTransactionGet->amount + $differenceAmount;
+								$studentTransactionGet->original_amount = $newAmount80;
+								$studentTransactionGet->paid_out = 0;
+								$studentTransactionGet->partial_payment = 1;
+							}
+						}
+						elseif ($studentTransaction->original_amount == $previousMonthlyPayment50)
+						{
+							$account50++;
+							if ($studentTransactionGet->original_amount == $studentTransactionGet->amount)
+							{
+								$studentTransactionGet->original_amount = $newAmount50;
+								$studentTransactionGet->amount = $newAmount50;
+								$studentTransactionGet->paid_out = 0;
+								$studentTransactionGet->partial_payment = 0;
+							}
+							elseif ($studentTransactionGet->original_amount > $studentTransactionGet->amount)
+							{
+								$differenceAmount = $newAmount50 - $studentTransactionGet->original_amount;
+								$studentTransactionGet->amount = $studentTransactionGet->amount + $differenceAmount;
+								$studentTransactionGet->original_amount = $newAmount50;
+								$studentTransactionGet->paid_out = 0;
+								$studentTransactionGet->partial_payment = 1;
+							}
+						}
+						elseif ($studentTransaction->original_amount == $previousMonthlyPayment)
+						{
+							$accountRegular++;    
+							if ($studentTransactionGet->original_amount == $studentTransactionGet->amount)
+							{
+								$studentTransactionGet->original_amount = $newAmount;
+								$studentTransactionGet->amount = $newAmount;
+								$studentTransactionGet->paid_out = 0;
+								$studentTransactionGet->partial_payment = 0;
+							}
+							elseif ($studentTransactionGet->original_amount > $studentTransactionGet->amount)
+							{
+								$differenceAmount = $newAmount - $studentTransactionGet->original_amount;
+								$studentTransactionGet->amount = $studentTransactionGet->amount + $differenceAmount;
+								$studentTransactionGet->original_amount = $newAmount;
+								$studentTransactionGet->paid_out = 0;
+								$studentTransactionGet->partial_payment = 1;
+							}
+						}
+						else
+						{
+							$accountIrregular++;     
+						}
+
                         if (!($this->Studenttransactions->save($studentTransactionGet)))
                         {
-                            $this->Flash->error(__('No pudo ser grabada la matrícula correspondiente al alumno cuyo ID es: ' . $studentTransaction->student_id));
+							$swErrorTransactions = 1;
                         }
-        
-                    }
+
+					}  
                 }
+				else
+				{
+					$accountAugust++;
+				}
             }
-            $this->Flash->success(__('Total general transacciones: ' . $account1)); 
-            $this->Flash->success(__('Total mensualidades mayor o igual a ' . $yearMonthFrom . ': ' . $account2)); 
-            $this->Flash->success(__('Total mensualidades 80%: ' . $account3)); 
-            $this->Flash->success(__('Total mensualidades 50%: ' . $account4)); 
-            $this->Flash->success(__('Total mensualidades 100%: ' . $account5)); 
-            $this->Flash->success(__('Total otras mensualidades:  ' . $account6)); 
-        }
-        return;
+			if ($swErrorTransactions == 0)
+			{
+				$arrayResult['indicator'] = 0;
+				$arrayResult['message'] = 'Se actualizaron las mensualidades correctamente';			
+			}
+			else
+			{
+				$arrayResult['indicator'] = 1;
+				$arrayResult['message'] = 'Error al actualizar las mensualidades';				
+			}
+			$arrayResult['adjust'] = $accountAdjust;
+			$arrayResult['notAdjust'] = $accountPaymentException; 			
+		}
+		else
+		{
+			$arrayResult['indicator'] = 1;
+			$arrayResult['message'] = 'No se encontraron mensualidades';
+			$arrayResult['adjust'] = 0;
+			$arrayResult['notAdjust'] = 0;
+		}
+        return $arrayResult;
     }
 
     function numberMonth($month = null)
@@ -2476,4 +2566,82 @@ class StudenttransactionsController extends AppController
         $order = str_replace($levelOfStudy, $position, $level);
         return $order;
     }
+	public function verifyPayment($dateFrom = null, $dateException = null,  $idStudent = null)
+	{
+		$this->autoRender = false;
+		
+		$this->loadModel('Bills');
+		
+		$swAdjust = 0;
+		
+		$previousBill = 0;
+		
+		$verifyTransactions = $this->Studenttransactions->find('all', ['conditions' => [['student_id' => $idStudent], ['transaction_type' => 'Mensualidad'], 
+			['payment_date >' => $dateFrom]], 'order' => ['Studenttransactions.student_id' => 'ASC', 'payment_date' => 'ASC']]);			
+
+        foreach ($verifyTransactions as $verifyTransaction)
+        {			               
+            $month = substr($verifyTransaction->transaction_description, 0, 3);
+                        
+            if ($month != 'Ago')
+			{
+				if ($verifyTransaction->amount == 0)
+				{
+					if ($verifyTransaction->bill_number > $previousBill)
+					{
+						$previousBill = $verifyTransaction->bill_number;
+						
+						$lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $verifyTransaction->bill_number], 
+							'order' => ['created' => 'DESC'] ]);
+
+						$bill = $lastRecord->first();
+        
+						if ($bill->date_and_time > $dateException)
+						{
+							$swAdjust = 1;
+							break;
+						}
+					}
+				}
+				else
+				{
+					$swAdjust = 1;
+					break;
+				}
+			}	
+		}
+		return $swAdjust;
+	}
+    public function modifyTransactions()
+    {
+		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => [['transaction_type' => 'Mensualidad']]]);
+	
+		$account1 = $studentTransactions->count();
+		
+		$account2 = 0;
+	
+		foreach ($studentTransactions as $studentTransaction)
+        {		
+			$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
+						
+			$month = substr($studentTransactionGet->transaction_description, 0, 3);
+				
+			$year = substr($studentTransactionGet->transaction_description, 4, 4);
+				
+			$numberOfTheMonth = $this->numberMonth($month);
+		
+			$studentTransactionGet->payment_date = $year . '-' . $numberOfTheMonth . '-01'; 
+			
+			if ($this->Studenttransactions->save($studentTransactionGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$this->Flash->error(__('No pudo ser grabada la matrícula correspondiente al alumno cuyo ID es: ' . $studentTransactionGet->student_id));
+			}
+		}
+		$this->Flash->success(__('Total registros seleccionados: ' . $account1));
+		$this->Flash->success(__('Total registros actualizados: ' . $account2));
+	}	
 }

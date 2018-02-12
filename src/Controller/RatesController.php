@@ -5,6 +5,10 @@ use App\Controller\AppController;
 
 use App\Controller\StudenttransactionsController;
 
+use Cake\Mailer\Email;
+
+use Cake\I18n\Time;
+
 /**
  * Rates Controller
  *
@@ -53,18 +57,45 @@ class RatesController extends AppController
     public function add()
     {
         $studentTransactions = new StudenttransactionsController();
+		$swDateexception = 0;
+		$dateException = null;
+		$arrayResult = [];
+		$arrayMail = [];
 
         $rate = $this->Rates->newEntity();
         if ($this->request->is('post')) 
         {
-            $rate = $this->Rates->patchEntity($rate, $this->request->data);
+            $rate->concept = $_POST['concept'];
+			if (isset($_POST['rate_month']))
+			{
+				$rate->rate_month = $_POST['rate_month'];										
+			}
+            $rate->rate_year = $_POST['rate_year'];
+            $rate->amount = $_POST['amount'];			
+			
             if ($rate->concept == "Matrícula")
             {
-                $studentTransactions->newRegistration($rate->amount, $rate->rate_year);   
+                $studentTransactions->newRegistration($rate->amount, $rate->rate_year);
+				
+				if ($this->Rates->save($rate)) 
+				{
+					$this->Flash->success(__('La tarifa ha sido guardada'));
+				} 
+				else 
+				{
+					$this->Flash->error(__('La tarifa no pudo ser guardada, intente de nuevo'));
+				}		
+				return $this->redirect(['action' => 'index']);				
             }
             elseif ($rate->concept == "Mensualidad")
             {
-                $concept = 'Mensualidad';
+				if (isset($_POST['exception']))
+				{
+					$swDateException = 1;
+					$dateException = new Time($_POST['date_exception']['year'] . '-' . $_POST['date_exception']['month'] . '-' . $_POST['date_exception']['day']);				
+				}
+				
+				$concept = 'Mensualidad';
                         
                 $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
                    'order' => ['Rates.created' => 'DESC'] ]);
@@ -72,20 +103,34 @@ class RatesController extends AppController
                 $row = $lastRecord->first();
                 
                 $previousMonthlyPayment = $row->amount;
+					
+                $arrayResult = $studentTransactions->newMonthlyPayment($row->amount, $rate->amount, $rate->rate_month, $rate->rate_year, $swDateException, $dateException);   
 
-                $studentTransactions->newMonthlyPayment($row->amount, $rate->amount, $rate->rate_month, $rate->rate_year);   
-            }
-            if ($this->Rates->save($rate)) 
-            {
-                $this->Flash->success(__('La tarifa ha sido guardada'));
-
-                return $this->redirect(['action' => 'index']);
-            } 
-            else 
-            {
-                $this->Flash->error(__('La tarifa no pudo ser guardada, intente de nuevo'));
-            }
-        }
+				if ($arrayResult['indicator'] == 0)
+				{
+					if ($this->Rates->save($rate)) 
+					{ 
+						$arrayMail['error'] = 0;
+						$arrayMail['adjust'] = $arrayResult['adjust'];
+						$arrayMail['notAdjust'] = $arrayResult['notAdjust'];
+					}
+					else
+					{
+						$arrayMail['error'] = 1;	
+						$arrayMail['adjust'] = $arrayResult['adjust'];
+						$arrayMail['notAdjust'] = $arrayResult['notAdjust'];						
+					}
+				}
+				else
+				{
+					$arrayMail['error'] = 1;
+					$arrayMail['adjust'] = 0;
+					$arrayMail['notAdjust'] = 0;
+				}
+				$result = $this->mailUser($arrayMail);
+				exit;
+			}
+		}
         
         $this->set(compact('rate'));
         $this->set('_serialize', ['rate']);
@@ -135,5 +180,54 @@ class RatesController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+    public function mailUser($arrayMail = null)
+    {
+		Email::configTransport('mail', [
+		  'host' => 'ssl://smtp.gmail.com',
+		  'port' => 465,
+		  'username' => 'sistemasangabriel@gmail.com', 
+		  'password' => 'fundevipp$', 
+		  
+		  'className' => 'Smtp', 
+		  
+		  'context' => [
+			'ssl' => [
+			  'verify_peer' => false,
+			  'verify_peer_name' => false,
+			  'allow_self_signed' => true
+			]
+		  ]
+		]); 
+	
+		$correo = new Email(); 
+
+        $correo
+		  ->transport('mail')
+          ->template('monthly_adjust') 
+          ->emailFormat('html') 
+          ->to('transemainc@gmail.com') 
+		  ->cc('angelomarsanz@gmail.com')
+          ->from('sistemasangabriel@gmail.com') 
+          ->subject('Resultados ajuste de mensualidades')
+          ->viewVars([ 
+            'varError' => $arrayMail['error'],
+            'varAdjust' => $arrayMail['adjust'],
+            'varNotAdjust' => $arrayMail['notAdjust']
+          ]);
+  
+//        $correo->SMTPAuth = true;
+//        $correo->CharSet = "utf-8";     
+
+        if($correo->send())
+        {
+            $result = 0;
+        }
+        else
+        {
+            $result = 1;
+        }
+
+        return $result;
     }
 }

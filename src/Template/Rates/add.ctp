@@ -1,12 +1,71 @@
+<?php
+    use Cake\I18n\Time;
+?>
+
+<style>
+@media screen
+{
+    .volver 
+    {
+        display:scroll;
+        position:fixed;
+        top: 15%;
+        left: 50px;
+        opacity: 0.5;
+    }
+    .cerrar 
+    {
+        display:scroll;
+        position:fixed;
+        top: 15%;
+        left: 95px;
+        opacity: 0.5;
+    }
+    .menumenos
+    {
+        display:scroll;
+        position:fixed;
+        bottom: 5%;
+        right: 1%;
+        opacity: 0.5;
+        text-align: right;
+    }
+    .menumas 
+    {
+        display:scroll;
+        position:fixed;
+        bottom: 5%;
+        right: 1%;
+        opacity: 0.5;
+        text-align: right;
+    }
+    .noverScreen
+    {
+      display:none
+    }
+}
+@media print 
+{
+    .nover 
+    {
+      display:none
+    }
+    .saltopagina
+    {
+        display:block; 
+        page-break-before:always;
+    }
+}
+</style>
 <div class="row">
     <div class="col-md-6 col-md-offset-3">
     	<div class="page-header">
     		<h2>Agregar tarifa</h2>
     	</div>
-        <?= $this->Form->create($rate) ?>
+        <?= $this->Form->create() ?>
         <fieldset>
             <?php
-                echo $this->Form->input('concept', ['options' => 
+                echo $this->Form->input('concept', ['required' => 'required', 'options' => 
                     [null => '',
                     'Matrícula' => 'Matrícula',
                     'Seguro escolar' => 'Seguro escolar',
@@ -32,11 +91,27 @@
                     '2017' => '2017',
                     '2018' => '2018',
                     '2019' => '2019'], 'disabled' => 'disabled']);
-                echo $this->Form->input('amount', [
+                echo $this->Form->input('amount', ['required' => 'required',
                     'label' => 'Monto']);
+										
+                echo $this->Form->input('exception', ['type' => 'checkbox', 'id' => 'exception',
+                    'label' => 'Exceptuar alumnos que han pagado el año escolar completo', 'disabled' => 'disabled']);
+					
+				setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+                date_default_timezone_set('America/Caracas');
+
+				print ("<div id='date-top' class='noverScreen'>");
+				print ('<br />');
+				
+                echo $this->Form->input('date_exception', ['id' => 'date-exception', 'type' => 'date', 
+                    'label' => 'Por favor indique la fecha tope del pago del año escolar completo']);
+					
+				print ('<div>');
+				
             ?>
         </fieldset>
-        <?= $this->Form->button(__('Guardar'), ['class' =>'btn btn-success']) ?>
+		<br />
+        <?= $this->Form->button(__('Guardar'), ['id' => 'guardar', 'class' =>'btn btn-success']) ?>
         <?= $this->Form->end() ?>
     </div>
 </div>
@@ -47,20 +122,60 @@
 
         $("#rate-month").attr('disabled', true);
         $("#rate-year").attr('disabled', true);
+		$("#exception").attr('disabled', true);
 
         if ($("#concept").val().substring(0, 11) == "Mensualidad")
         {
             $("#rate-month").attr('disabled', false);
+			$("#rate-month").attr('required', true);
             $("#rate-year").attr('disabled', false);
+			$("#rate-year").attr('required', true);
+			$("#exception").attr('disabled', false);
         }
         else
         {
             $("#rate-year").attr('disabled', false);
+			$("#rate-year").attr('required', true);
         }
     }
-    
+	   
     $(document).ready(function() 
     {
-        $("#concept").change(enableInputs);
+        $('#concept').change(enableInputs);
+		$('#exception').on('click',function(){
+			$('#date-top').toggle('slow');
+		});
+		
+		$("#guardar").click(function(e)
+		{
+			if ($('#rate-month').length) 
+			{
+				dateFrom = $('#rate-month').val() + '/' +  $('#rate-year').val();
+			}
+			else
+			{
+				dateFrom = $('#rate-year').val();		
+			}
+			if( $('#exception').prop('checked')) 
+			{
+				topDate = ' exceptuando a aquellos alumnos que pagaron el año escolar completo antes del ' + $("select[name='date_exception[day]']").val() + '/' + $("select[name='date_exception[month]']").val() + '/' + $("select[name='date_exception[year]']").val();
+			}
+			else
+			{
+				topDate = '';
+			}
+			
+			var rateUpdate = confirm('Por favor confirme que desea ajustar la ' + $('#concept').val() + ' a ' + $('#amount').val() + ' a partir del ' + dateFrom + topDate);
+
+			if (rateUpdate == true)
+			{
+				alert('Estimado usuario la ejecución de este programa durará unos minutos, por favor pulse el botón aceptar y espere a que se le envíe un correo electrónico informándole sobre los resultados del proceso');
+			}
+			else
+			{
+				e.preventDefault();
+				$.redirect('/sistemasangabriel/rates/index');
+			}
+		}); 
     });
 </script>
