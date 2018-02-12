@@ -779,7 +779,7 @@ class StudenttransactionsController extends AppController
 		$swTruncateExcels = 0;
 		$swErrorTransactions = 0;
 				
-		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => [['id >' => 32000],['transaction_type' => 'Mensualidad'], ['payment_date >=' => $dateFrom]], 
+		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => [['transaction_type' => 'Mensualidad'], ['payment_date >=' => $dateFrom]], 
 			'order' => ['Studenttransactions.student_id' => 'ASC', 'payment_date' => 'ASC']]);
 			
 		$accountSelect = $studentTransactions->count();
