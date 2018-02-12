@@ -309,28 +309,32 @@ class PaysheetsController extends AppController
                     $lastRecord = $this->Paysheets->find('all', ['conditions' => ['responsible_user' => $this->Auth->user('username')],
                     'order' => ['Paysheets.created' => 'DESC'] ]);
     
-                    $row = $lastRecord->first();                
+                    $row = $lastRecord->first();  
+
+					if ($row)
+					{
                     
-                    $employeesPaysheets = $employees->searchEmployees();
-                    
-                    if ($employeesPaysheets)
-                    {
-                        $result = $employeepayments->add($row->id, $row->weeks_social_security, $employeesPaysheets);
-                        
-                        if ($result == 0)
-                        {
-                            $this->Flash->success(__('Por favor complete los datos de La nómina'));
-                            return $this->redirect(['action' => 'edit']);
-                        }
-                        else
-                        {
-                            $this->Flash->error(__('La nómina no se registró correctamente'));
-                        }
-                    }
-                    else
-                    {
-                        $this->Flash->error(__('No se consiguieron registros de empleados'));
-                    }
+						$employeesPaysheets = $employees->searchEmployees();
+						
+						if ($employeesPaysheets)
+						{
+							$result = $employeepayments->add($row, $employeesPaysheets);
+							
+							if ($result == 0)
+							{
+								$this->Flash->success(__('Por favor complete los datos de La nómina'));
+								return $this->redirect(['action' => 'edit']);
+							}
+							else
+							{
+								$this->Flash->error(__('La nómina no se registró correctamente'));
+							}
+						}
+						else
+						{
+							$this->Flash->error(__('No se consiguieron registros de empleados'));
+						}
+					}
                 }
             }
         }
