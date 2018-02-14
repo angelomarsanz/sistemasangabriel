@@ -413,20 +413,20 @@ class StudentsController extends AppController
 			if ($incomeType == 0)
 			{
 				$student->new_student = 1;
-				$student->number_of_brothers = $lastYear;
-				$student->balance = $lastYear;
+				$student->number_of_brothers = $lastYear; // Año escolar para el que se inscribió la primera vez
+				$student->balance = $lastYear; // Año escolar para el que se inscribió la última vez
 			}
 			elseif ($incomeType == 1)
 			{
 				$student->new_student = 1;
-				$student->number_of_brothers = $currentYear;
-				$student->balance = $currentYear;				
+				$student->number_of_brothers = $currentYear; // Año escolar para el que se inscribió la primera vez
+				$student->balance = $currentYear; // Año escolar para el que se inscribió la última vez				
 			}
 			else
 			{
 				$student->new_student = 0;
-				$student->number_of_brothers = $lastYear;
-				$student->balance = $currentYear;			
+				$student->number_of_brothers = $lastYear; // Año escolar para el que se inscribió la primera vez
+				$student->balance = $currentYear; // Año escolar para el que se inscribió la última vez			
 			}
 				
             if ($this->Students->save($student)) 

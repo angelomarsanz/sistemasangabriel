@@ -9,10 +9,11 @@
     <div style="width: 80%; float: left;">
         <h3 style="text-align: center;">Unidad Educativa Colegio "San Gabriel Arcángel"</h3>
         <p style="text-align: center;line-height: 5px;">Valencia, Estado Carabobo</p>
+		<?php $nextYear = $student->balance + 1; ?>
         <?php if ($student->new_student == 0): ?>
-            <p style="text-align: center;line-height: 5px;"><b>Ficha Renovación de Matrícula, Año Escolar 2017-2018</b></p>
+            <p style="text-align: center;line-height: 5px;"><b>Ficha Renovación de Matrícula, Año Escolar <?= $student->balance . '-' . $nextYear ?></b></p>
         <?php else: ?>
-            <p style="text-align: center;line-height: 5px;"><b>Ficha de inscripción, Año Escolar 2017-2018</b></p>
+            <p style="text-align: center;line-height: 5px;"><b>Ficha de inscripción, Año Escolar <?= $student->balance . '-' . $nextYear ?></b></p>
         <?php endif; ?>            
         <p style="text-align: center;line-height: 5px;"><?= $student->level_of_study ?></p>
     </div> 
