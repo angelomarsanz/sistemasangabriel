@@ -4,8 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "3df5c2f7ecd66f6331efbf19208866dc",
-    "content-hash": "bd5c9fde41f85e90ed0f8ec6ad429932",
+    "content-hash": "f5695b3d08c85d769da91028a764a640",
     "packages": [
         {
             "name": "Cewi/Excel",
@@ -61,7 +60,7 @@
                 "issues": "https://github.com/cewi/excel/issues",
                 "source": "https://github.com/cewi/excel"
             },
-            "time": "2017-05-27 09:08:22"
+            "time": "2017-05-27T09:08:22+00:00"
         },
         {
             "name": "aura/installer-default",
@@ -102,7 +101,7 @@
                 "aura",
                 "installer"
             ],
-            "time": "2012-11-26 21:35:57"
+            "time": "2012-11-26T21:35:57+00:00"
         },
         {
             "name": "aura/intl",
@@ -180,7 +179,7 @@
                 "l10n",
                 "localization"
             ],
-            "time": "2014-08-24 00:00:00"
+            "time": "2014-08-24T00:00:00+00:00"
         },
         {
             "name": "cakephp/cakephp",
@@ -253,7 +252,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2016-10-29 02:00:38"
+            "time": "2016-10-29T02:00:38+00:00"
         },
         {
             "name": "cakephp/chronos",
@@ -308,7 +307,7 @@
                 "datetime",
                 "time"
             ],
-            "time": "2016-07-14 05:16:14"
+            "time": "2016-07-14T05:16:14+00:00"
         },
         {
             "name": "cakephp/migrations",
@@ -358,7 +357,7 @@
                 "cakephp",
                 "migrations"
             ],
-            "time": "2016-06-23 17:18:29"
+            "time": "2016-06-23T17:18:29+00:00"
         },
         {
             "name": "cakephp/plugin-installer",
@@ -398,25 +397,25 @@
                 }
             ],
             "description": "A composer installer for CakePHP 3.0+ plugins.",
-            "time": "2016-04-28 03:01:34"
+            "time": "2016-04-28T03:01:34+00:00"
         },
         {
             "name": "daoandco/cakephp-dompdf",
-            "version": "v1.1.0",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DaoAndCo/cakephp-dompdf.git",
-                "reference": "6b8e365d0adb0105bdbbfad4d81b268fac3061bd"
+                "reference": "f49a63626958dedf32f3a482b14f8fc6916727fa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DaoAndCo/cakephp-dompdf/zipball/6b8e365d0adb0105bdbbfad4d81b268fac3061bd",
-                "reference": "6b8e365d0adb0105bdbbfad4d81b268fac3061bd",
+                "url": "https://api.github.com/repos/DaoAndCo/cakephp-dompdf/zipball/f49a63626958dedf32f3a482b14f8fc6916727fa",
+                "reference": "f49a63626958dedf32f3a482b14f8fc6916727fa",
                 "shasum": ""
             },
             "require": {
                 "cakephp/cakephp": "~3.0",
-                "dompdf/dompdf": "0.7.*",
+                "dompdf/dompdf": "0.8.*",
                 "php": ">=5.4.16"
             },
             "require-dev": {
@@ -449,7 +448,7 @@
                 "html",
                 "pdf"
             ],
-            "time": "2016-05-12 13:20:42"
+            "time": "2017-05-28T10:40:13+00:00"
         },
         {
             "name": "davidyell/proffer",
@@ -504,32 +503,33 @@
                 "orm",
                 "upload"
             ],
-            "time": "2016-03-03 12:38:33"
+            "time": "2016-03-03T12:38:33+00:00"
         },
         {
             "name": "dompdf/dompdf",
-            "version": "v0.7.0",
+            "version": "v0.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dompdf/dompdf.git",
-                "reference": "5c98652b1a5beb7e3cc8ec35419b2828dd63ab14"
+                "reference": "5113accd9ae5d466077cce5208dcf3fb871bf8f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dompdf/dompdf/zipball/5c98652b1a5beb7e3cc8ec35419b2828dd63ab14",
-                "reference": "5c98652b1a5beb7e3cc8ec35419b2828dd63ab14",
+                "url": "https://api.github.com/repos/dompdf/dompdf/zipball/5113accd9ae5d466077cce5208dcf3fb871bf8f6",
+                "reference": "5113accd9ae5d466077cce5208dcf3fb871bf8f6",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-gd": "*",
                 "ext-mbstring": "*",
-                "phenx/php-font-lib": "0.4.*",
-                "phenx/php-svg-lib": "0.1.*",
-                "php": ">=5.3.0"
+                "phenx/php-font-lib": "0.5.*",
+                "phenx/php-svg-lib": "0.3.*",
+                "php": ">=5.4.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "3.7.*"
+                "phpunit/phpunit": "4.8.*",
+                "squizlabs/php_codesniffer": "2.*"
             },
             "type": "library",
             "extra": {
@@ -565,7 +565,7 @@
             ],
             "description": "DOMPDF is a CSS 2.1 compliant HTML to PDF converter",
             "homepage": "https://github.com/dompdf/dompdf",
-            "time": "2016-05-11 00:36:29"
+            "time": "2017-11-26T14:49:08+00:00"
         },
         {
             "name": "friendsofcake/bootstrap-ui",
@@ -616,7 +616,7 @@
                 "cakephp",
                 "twitter"
             ],
-            "time": "2016-09-23 06:49:59"
+            "time": "2016-09-23T06:49:59+00:00"
         },
         {
             "name": "friendsofcake/cakepdf",
@@ -660,7 +660,7 @@
             ],
             "description": "CakePHP plugin for creating and/or rendering Pdfs, several Pdf engines supported.",
             "homepage": "http://github.com/friendsofcake/CakePdf",
-            "time": "2017-02-10 20:44:28"
+            "time": "2017-02-10T20:44:28+00:00"
         },
         {
             "name": "imagine/imagine",
@@ -717,7 +717,7 @@
                 "image manipulation",
                 "image processing"
             ],
-            "time": "2015-09-19 16:54:05"
+            "time": "2015-09-19T16:54:05+00:00"
         },
         {
             "name": "mobiledetect/mobiledetectlib",
@@ -771,26 +771,29 @@
                 "mobile detector",
                 "php mobile detect"
             ],
-            "time": "2016-04-24 09:47:16"
+            "time": "2016-04-24T09:47:16+00:00"
         },
         {
             "name": "phenx/php-font-lib",
-            "version": "0.4",
+            "version": "0.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PhenX/php-font-lib.git",
-                "reference": "b8af0cacdc3cbf1e41a586fcb78f506f4121a088"
+                "reference": "760148820110a1ae0936e5cc35851e25a938bc97"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PhenX/php-font-lib/zipball/b8af0cacdc3cbf1e41a586fcb78f506f4121a088",
-                "reference": "b8af0cacdc3cbf1e41a586fcb78f506f4121a088",
+                "url": "https://api.github.com/repos/PhenX/php-font-lib/zipball/760148820110a1ae0936e5cc35851e25a938bc97",
+                "reference": "760148820110a1ae0936e5cc35851e25a938bc97",
                 "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8"
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "FontLib\\": "src/"
+                "psr-4": {
+                    "FontLib\\": "src/FontLib"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -805,21 +808,27 @@
             ],
             "description": "A library to read, parse, export and make subsets of different types of font files.",
             "homepage": "https://github.com/PhenX/php-font-lib",
-            "time": "2015-05-06 20:02:39"
+            "time": "2017-09-13T16:14:37+00:00"
         },
         {
             "name": "phenx/php-svg-lib",
-            "version": "0.1",
+            "version": "v0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PhenX/php-svg-lib.git",
-                "reference": "b419766515b3426c6da74b0e29e93d71c4f17099"
+                "reference": "a85f7fe9fe08d093a4a8583cdd306b553ff918aa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PhenX/php-svg-lib/zipball/b419766515b3426c6da74b0e29e93d71c4f17099",
-                "reference": "b419766515b3426c6da74b0e29e93d71c4f17099",
+                "url": "https://api.github.com/repos/PhenX/php-svg-lib/zipball/a85f7fe9fe08d093a4a8583cdd306b553ff918aa",
+                "reference": "a85f7fe9fe08d093a4a8583cdd306b553ff918aa",
                 "shasum": ""
+            },
+            "require": {
+                "sabberworm/php-css-parser": "8.1.*"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~5.0"
             },
             "type": "library",
             "autoload": {
@@ -839,7 +848,7 @@
             ],
             "description": "A library to read, parse and export to PDF SVG files.",
             "homepage": "https://github.com/PhenX/php-svg-lib",
-            "time": "2015-05-06 18:49:49"
+            "time": "2017-05-24T10:07:27+00:00"
         },
         {
             "name": "phpoffice/phpexcel",
@@ -896,7 +905,8 @@
                 "xls",
                 "xlsx"
             ],
-            "time": "2015-05-01 07:00:55"
+            "abandoned": "phpoffice/phpspreadsheet",
+            "time": "2015-05-01T07:00:55+00:00"
         },
         {
             "name": "psr/http-message",
@@ -946,7 +956,7 @@
                 "request",
                 "response"
             ],
-            "time": "2016-08-06 14:39:51"
+            "time": "2016-08-06T14:39:51+00:00"
         },
         {
             "name": "psr/log",
@@ -984,7 +994,7 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2012-12-21 11:40:51"
+            "time": "2012-12-21T11:40:51+00:00"
         },
         {
             "name": "robmorgan/phinx",
@@ -1045,7 +1055,51 @@
                 "migrations",
                 "phinx"
             ],
-            "time": "2016-03-07 14:09:22"
+            "time": "2016-03-07T14:09:22+00:00"
+        },
+        {
+            "name": "sabberworm/php-css-parser",
+            "version": "8.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
+                "reference": "850cbbcbe7fbb155387a151ea562897a67e242ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/850cbbcbe7fbb155387a151ea562897a67e242ef",
+                "reference": "850cbbcbe7fbb155387a151ea562897a67e242ef",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Sabberworm\\CSS": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Raphael Schweikert"
+                }
+            ],
+            "description": "Parser for CSS Files written in PHP",
+            "homepage": "http://www.sabberworm.com/blog/2010/6/10/php-css-parser",
+            "keywords": [
+                "css",
+                "parser",
+                "stylesheet"
+            ],
+            "time": "2016-07-19T19:14:21+00:00"
         },
         {
             "name": "symfony/config",
@@ -1098,7 +1152,7 @@
             ],
             "description": "Symfony Config Component",
             "homepage": "https://symfony.com",
-            "time": "2016-09-25 08:27:07"
+            "time": "2016-09-25T08:27:07+00:00"
         },
         {
             "name": "symfony/console",
@@ -1159,7 +1213,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2016-10-06 01:44:51"
+            "time": "2016-10-06T01:44:51+00:00"
         },
         {
             "name": "symfony/debug",
@@ -1216,7 +1270,7 @@
             ],
             "description": "Symfony Debug Component",
             "homepage": "https://symfony.com",
-            "time": "2016-09-06 11:02:40"
+            "time": "2016-09-06T11:02:40+00:00"
         },
         {
             "name": "symfony/filesystem",
@@ -1265,7 +1319,7 @@
             ],
             "description": "Symfony Filesystem Component",
             "homepage": "https://symfony.com",
-            "time": "2016-10-18 04:30:12"
+            "time": "2016-10-18T04:30:12+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -1324,7 +1378,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2016-05-18 14:26:46"
+            "time": "2016-05-18T14:26:46+00:00"
         },
         {
             "name": "symfony/yaml",
@@ -1373,7 +1427,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2016-10-24 18:41:13"
+            "time": "2016-10-24T18:41:13+00:00"
         },
         {
             "name": "zendframework/zend-diactoros",
@@ -1423,7 +1477,7 @@
                 "psr",
                 "psr-7"
             ],
-            "time": "2016-10-11 13:25:21"
+            "time": "2016-10-11T13:25:21+00:00"
         }
     ],
     "packages-dev": [
@@ -1472,7 +1526,7 @@
                 "bake",
                 "cakephp"
             ],
-            "time": "2016-09-03 13:29:04"
+            "time": "2016-09-03T13:29:04+00:00"
         },
         {
             "name": "cakephp/debug_kit",
@@ -1529,7 +1583,7 @@
                 "debug",
                 "kit"
             ],
-            "time": "2016-10-24 02:10:49"
+            "time": "2016-10-24T02:10:49+00:00"
         },
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -1562,7 +1616,7 @@
                 "MIT"
             ],
             "description": "implementation of xdg base directory specification for php",
-            "time": "2014-10-24 07:27:01"
+            "time": "2014-10-24T07:27:01+00:00"
         },
         {
             "name": "jakub-onderka/php-console-color",
@@ -1605,7 +1659,7 @@
                     "homepage": "http://www.acci.cz"
                 }
             ],
-            "time": "2014-04-08 15:00:19"
+            "time": "2014-04-08T15:00:19+00:00"
         },
         {
             "name": "jakub-onderka/php-console-highlighter",
@@ -1649,7 +1703,7 @@
                     "homepage": "http://www.acci.cz/"
                 }
             ],
-            "time": "2015-04-20 18:58:01"
+            "time": "2015-04-20T18:58:01+00:00"
         },
         {
             "name": "jdorn/sql-formatter",
@@ -1699,7 +1753,7 @@
                 "highlight",
                 "sql"
             ],
-            "time": "2014-01-12 16:20:24"
+            "time": "2014-01-12T16:20:24+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -1750,7 +1804,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2016-09-16 12:04:44"
+            "time": "2016-09-16T12:04:44+00:00"
         },
         {
             "name": "psy/psysh",
@@ -1822,7 +1876,7 @@
                 "interactive",
                 "shell"
             ],
-            "time": "2016-03-09 05:03:14"
+            "time": "2016-03-09T05:03:14+00:00"
         },
         {
             "name": "symfony/var-dumper",
@@ -1885,7 +1939,7 @@
                 "debug",
                 "dump"
             ],
-            "time": "2016-10-18 15:46:07"
+            "time": "2016-10-18T15:46:07+00:00"
         }
     ],
     "aliases": [],
