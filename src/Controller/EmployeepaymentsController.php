@@ -288,7 +288,14 @@ class EmployeepaymentsController extends AppController
                 
                 $employeepayment->faov = ($employeepayment->fortnight + ($employeepayment->amount_escalation/2) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
 
-                $employeepayment->ivss = (((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $weeksSocialSecurity) / 2;           
+				if ($fortnight == '1ra. Quincena')
+				{				
+					$employeepayment->ivss = 0;
+				}
+				else
+				{
+	                $employeepayment->ivss = (((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $weeksSocialSecurity) / 2;	
+				}           
 
                 if (substr($valor['trust_days'], -3, 1) == ',')
                 {
@@ -325,8 +332,15 @@ class EmployeepaymentsController extends AppController
                      }
                 }
                 
-                $employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;
-
+				if ($fortnight == '1ra. Quincena')
+				{
+					$employeepayment->amount_imposed = 0;
+				}
+				else
+				{
+					$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;					
+				}
+			
                 $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 
                 $tableConfigurationJson = $this->moveConfiguration($valor);

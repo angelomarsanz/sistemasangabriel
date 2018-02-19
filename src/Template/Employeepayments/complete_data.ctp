@@ -23,6 +23,39 @@
     {
       display:none
     }
+@font-face {
+  font-family: 'icomoon';
+  src:  url('/sistemasangabriel/fonts/icomoon.eot?3f0j3e');
+  src:  url('/sistemasangabriel/fonts/icomoon.eot?3f0j3e#iefix') format('embedded-opentype'),
+    url('/sistemasangabriel/fonts/icomoon.ttf?3f0j3e') format('truetype'),
+    url('/sistemasangabriel/fonts/icomoon.woff?3f0j3e') format('woff'),
+    url('/sistemasangabriel/fonts/icomoon.svg?3f0j3e#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-favicon3:before {
+  content: "\e900";
+}
+.icon-favicon:before {
+  content: "\e901";
+}
+
 }
 @media print 
 {
@@ -416,9 +449,11 @@
         <?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
         <?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
         <?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight'], ['id' => 'nuevo', 'class' => 'glyphicon glyphicon-plus-sign btn btn-danger', 'title' => 'Crear nueva nómina']) ?>
-        <?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overPayment', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-pago', 'class' => 'glyphicon glyphicon-envelope btn btn-danger', 'title' => 'sobre de pago sueldo']) ?>
-        <?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overTax', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-islr', 'class' => 'glyphicon glyphicon-envelope btn btn-danger', 'title' => 'sobre de pago retención']) ?>
-        <?= $this->Form->postLink(__(''), ['controller' => 'Paysheets', 'action' => 'delete', $idPaysheet], ['confirm' => __('Está seguro de que desea eliminar esta nómina?'), 'class' => 'glyphicon glyphicon-trash btn btn-sm btn-danger', 'title' => 'Eliminar nómina', 'style' => 'padding: 7px 12px;']) ?>
+        <?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overPayment', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-pago', 'class' => 'glyphicon glyphicon-envelope btn btn-danger', 'title' => 'Sobre de pago sueldo']) ?>
+		<?php if ($fortnight == '2da. Quincena'): ?>
+			<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overTax', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-islr', 'class' => 'icon-favicon btn btn-danger', 'title' => 'Sobre de pago retención', 'style' => 'padding: 8px 12px 11px 12px;']) ?>
+		<?php endif; ?>
+		<?= $this->Form->postLink(__(''), ['controller' => 'Paysheets', 'action' => 'delete', $idPaysheet], ['confirm' => __('Está seguro de que desea eliminar esta nómina?'), 'class' => 'glyphicon glyphicon-trash btn btn-sm btn-danger', 'title' => 'Eliminar nómina', 'style' => 'padding: 7px 12px;']) ?>
         <a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
     </p>
 </div>
