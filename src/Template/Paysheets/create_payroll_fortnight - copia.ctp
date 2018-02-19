@@ -68,7 +68,6 @@
 	                    [null => '',
 	                    '1ra. Quincena' => '1ra. Quincena',
 	                    '2da. Quincena' => '2da. Quincena']]);
-					echo $this->Form->input('cesta_ticket_month', ['label' => 'Valor cesta ticket mensual: ', 'class' => 'alternative-decimal-separator', 'value' => number_format($cestaTicket, 2, ",", ".")]);
 		    	?>
 		    </fieldset>
         	<?= $this->Form->button(__('Crear nómina'), ['class' =>'btn btn-success']) ?>
@@ -90,19 +89,15 @@
     </p>
 </div>
 <script>
-    $(document).ready(function()
-    { 
-		$(".alternative-decimal-separator").numeric({ altDecimal: "," });
-		$('#mas').on('click',function()
-		{
-			$('.menu-menos').hide();
-			$('.menu-mas').show();
-		});
-		
-		$('#menos').on('click',function()
-		{
-			$('.menu-mas').hide();
-			$('.menu-menos').show();
-		});
-	});
+    $('#mas').on('click',function()
+    {
+        $('.menu-menos').hide();
+        $('.menu-mas').show();
+    });
+    
+    $('#menos').on('click',function()
+    {
+        $('.menu-mas').hide();
+        $('.menu-menos').show();
+    });
 </script>
