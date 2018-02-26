@@ -6,7 +6,7 @@
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><b>Cobro de mensualidades año 2017-2018</b></h3>
+                    <h3><b>Cobro de mensualidades</b></h3>
                     <h5 id="Turno" value=<?= $idTurn ?>>Fecha: <?= $dateTurn->format('d-m-Y') ?>, Turno: <?= $turn ?>, Cajero: <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h5>
                 </div>
             </div>
@@ -1223,14 +1223,14 @@
 
                 cleanPager();
             
-                $.redirect('/bills/recordInvoiceData', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
+                $.redirect('/sistemasangabriel/bills/recordInvoiceData', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
             });
         });
     }
     
     function listFamilies(newFamily)
     {
-        $.post('/students/everyfamily', {"newFamily" : newFamily}, null, "json")
+        $.post('/sistemasangabriel/students/everyfamily', {"newFamily" : newFamily}, null, "json")
             
         .done(function(response) 
         {
@@ -1360,7 +1360,7 @@
                 
             $("#header-messages").html("Por favor espere...");
                        
-            $.post('/students/relatedstudents', {"id" : idFamily, "new" : 2}, null, "json")        
+            $.post('/sistemasangabriel/students/relatedstudents', {"id" : idFamily, "new" : 2}, null, "json")        
                      
             .done(function(response) 
             {
@@ -1490,6 +1490,11 @@
                                 students += "<td>" + uservalue + "</td>";
                                 section = uservalue;
                             }
+                            else if (userkey == 'schoolYearFrom')
+                            {
+                                schoolYearFrom = uservalue;
+								schoolYearUntil = uservalue + 1;
+                            }
                         });
                     });
                     $("#header-messages").html(" ");
@@ -1513,7 +1518,7 @@
             $("#header-messages").html("Por favor espere...");
 
 
-            $.post('/parentsandguardians/updateClientData', 
+            $.post('/sistemasangabriel/parentsandguardians/updateClientData', 
                 {"id" : idParentsandguardians, 
                 "client" : $('#client').val(),
                 "typeOfIdentificationClient" : $('#type-of-identification-client').val(),
@@ -1944,7 +1949,7 @@
             payments.idTurn = $("#Turno").attr('value');
             payments.idParentsandguardians = idParentsandguardians;
             payments.invoiceDate = reversedDate;
-            payments.schoolYear = "Año escolar 2017-2018";
+            payments.schoolYear = "Año escolar " + schoolYearFrom + "-" + schoolYearUntil;
             payments.client = $('#client').val();
             payments.typeOfIdentificationClient = $('#type-of-identification-client').val();
             payments.identificationNumberClient = $('#identification-number-client').val();;

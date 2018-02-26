@@ -1432,6 +1432,8 @@
                                             paidOut = uservalue3;
                                             studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
                                             amountPayable = transactionAmount;
+                                            if (substr(monthlyPayment, 0, 3) == "Ago" || 
+											substr(monthlyPayment, 0, 9) == "Matrícula")
                                             {
                                                 insertRecord();
                                             }

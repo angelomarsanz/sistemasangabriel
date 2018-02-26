@@ -1432,6 +1432,7 @@
                                             paidOut = uservalue3;
                                             studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
                                             amountPayable = transactionAmount;
+                                            if (substr(monthlyPayment, 0, 18) == "Servicio educativo")
                                             {
                                                 insertRecord();
                                             }
