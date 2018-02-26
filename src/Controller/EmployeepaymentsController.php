@@ -191,6 +191,14 @@ class EmployeepaymentsController extends AppController
 		
         $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 
+		$employeepayment->days_cesta_ticket = 30 - $employeepayment->days_absence;
+		
+		$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
+		
+		$employeepayment->loan_cesta_ticket = 0;
+		
+		$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;
+		
         $tableConfigurationJson = $this->initialConfiguration();
             
         $employeepayment->table_configuration = $tableConfigurationJson;
@@ -390,9 +398,11 @@ class EmployeepaymentsController extends AppController
             }
     
             $classificationNumber = $this->classificationNumber($classification);
+			
+			$swCestaTicket = 1;
             
-            $this->set(compact('employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity'));
-            $this->set('_serialize', ['employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity']);
+            $this->set(compact('employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity', 'swCestaTicket'));
+            $this->set('_serialize', ['employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity', 'swCestaTicket']);
         }
     }
     
@@ -640,7 +650,15 @@ class EmployeepaymentsController extends AppController
         $tableConfiguration['discount_absences'] = '1';
 
         $tableConfiguration['total_fortnight'] = '1';
-        
+		
+		$tableConfiguration['days_cesta_ticket'] = '1';
+		
+		$tableConfiguration['amount_cesta_ticket'] = '1';
+		
+		$tableConfiguration['loan_cesta_ticket'] = '1';
+		
+		$tableConfiguration['total_cesta_ticket'] = '1';
+		
         $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
  
         return $tableConfigurationJson;       
@@ -688,7 +706,15 @@ class EmployeepaymentsController extends AppController
         $tableConfiguration['discount_absences'] = $valor['view_discount_absences'];
 
         $tableConfiguration['total_fortnight'] = $valor['view_total_fortnight'];
-        
+		
+		$tableConfiguration['days_cesta_ticket'] = $valor['view_days_cesta_ticket'];
+		
+		$tableConfiguration['amount_cesta_ticket'] = $valor['view_amount_cesta_ticket'];
+		
+		$tableConfiguration['loan_cesta_ticket'] = $valor['view_loan_cesta_ticket'];
+		
+		$tableConfiguration['total_cesta_ticket'] = $valor['view_total_cesta_ticket'];
+		
         $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
  
         return $tableConfigurationJson;       

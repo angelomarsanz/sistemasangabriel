@@ -6,7 +6,7 @@
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><b>Cobro de mensualidades año 2017-2018</b></h3>
+                    <h3><b>Cobro de servicio educativo</b></h3>
                     <h5 id="Turno" value=<?= $idTurn ?>>Fecha: <?= $dateTurn->format('d-m-Y') ?>, Turno: <?= $turn ?>, Cajero: <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h5>
                 </div>
             </div>
@@ -17,7 +17,7 @@
                     <br />
                     <input type="text" class="form-control" id="family-search">
                     <br />
-                    <button id="newfamily" class="btn btn-success" disabled>Listar familias nuevas</button>
+                    <button id="newfamily" class="btn btn-success">Listar familias nuevas</button>
                     <br />
                     <br />
                     <button id="everyfamily" class="btn btn-success">Listar familias del año escolar actual</button>
@@ -507,7 +507,7 @@
     payments.fiscalAddress = " ";
     payments.taxPhone = " ";
     payments.invoiceAmount = 0;
-    payments.fiscal = 1;
+    payments.fiscal = 0; 
 
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
@@ -658,7 +658,7 @@
         balance = 0;
         balanceIndicator = 0;
     }
-    
+
     function validateFields()
     {
         if($("#amount-" + paymentIdentifier).val().length < 1) 
@@ -928,11 +928,6 @@
                     
                     if (i == 0)
                     {
-                        if (item['dbScholarship'] == 1)
-                        {
-                            alert("Este alumno es becado, no se le deben cobrar cuotas");
-                            return false;
-                        }
                         studentName = item['dbStudentName'];
                     }
                     
@@ -1223,14 +1218,14 @@
 
                 cleanPager();
             
-                $.redirect('/bills/recordInvoiceData', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
+                $.redirect('/sistemasangabriel/bills/recordInvoiceData', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
             });
         });
     }
     
     function listFamilies(newFamily)
     {
-        $.post('/students/everyfamily', {"newFamily" : newFamily}, null, "json")
+        $.post('/sistemasangabriel/students/everyfamily', {"newFamily" : newFamily}, null, "json")
             
         .done(function(response) 
         {
@@ -1360,7 +1355,7 @@
                 
             $("#header-messages").html("Por favor espere...");
                        
-            $.post('/students/relatedstudents', {"id" : idFamily, "new" : 2}, null, "json")        
+            $.post('/sistemasangabriel/students/relatedstudents', {"id" : idFamily, "new" : 1}, null, "json")        
                      
             .done(function(response) 
             {
@@ -1437,7 +1432,10 @@
                                             paidOut = uservalue3;
                                             studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
                                             amountPayable = transactionAmount;
-                                            insertRecord();
+                                            if (monthlyPayment == "Servicio educativo " + schoolYearFrom)
+                                            {
+                                                insertRecord();
+                                            }
                                         }
                                     });
                                 });
@@ -1480,15 +1478,20 @@
                                 students += uservalue + "</td>";
                                 secondName = uservalue;
                             }
-                            else if (userkey == 'sublevel')
+                            else if (userkey == 'level_of_study')
                             {
                                 students += "<td>" + uservalue + "</td>";
                                 grade = uservalue;
                             }
                             else if (userkey == 'section')
                             {
-                                students += "<td>" + uservalue + "</td>";
+                                students += "<td>No asignada</td>";
                                 section = uservalue;
+                            }
+                            else if (userkey == 'schoolYearFrom')
+                            {
+                                schoolYearFrom = uservalue;
+								schoolYearUntil = uservalue + 1;
                             }
                         });
                     });
@@ -1513,7 +1516,7 @@
             $("#header-messages").html("Por favor espere...");
 
 
-            $.post('/parentsandguardians/updateClientData', 
+            $.post('/sistemasangabriel/parentsandguardians/updateClientData', 
                 {"id" : idParentsandguardians, 
                 "client" : $('#client').val(),
                 "typeOfIdentificationClient" : $('#type-of-identification-client').val(),
@@ -1542,7 +1545,7 @@
         {
             if (totalBill == 0)
             {
-                $("#student-messages").html("Por favor espere...");
+                $("#student-messages").html("<p>Por favor espere...</p>");
     
                 idStudent = $(this).attr('id').substring(2);
     
@@ -1559,7 +1562,7 @@
                 $("#student-balance").html("");
                 
                 showRecords();
-            }
+            }            
         });
         
         $("#mark-quotas").click(function () 
@@ -1730,8 +1733,8 @@
             updateAmount();
             indicatorUpdateAmount = 0;
             activateInvoiceButtons();
-        });     
-        
+        });        
+
         $("#automatic-adjustment").click(function(e) 
         {
             e.preventDefault();
@@ -1944,7 +1947,7 @@
             payments.idTurn = $("#Turno").attr('value');
             payments.idParentsandguardians = idParentsandguardians;
             payments.invoiceDate = reversedDate;
-            payments.schoolYear = "Año escolar 2017-2018";
+            payments.schoolYear = "Año escolar " + schoolYearFrom + "-" + schoolYearUntil;
             payments.client = $('#client').val();
             payments.typeOfIdentificationClient = $('#type-of-identification-client').val();
             payments.identificationNumberClient = $('#identification-number-client').val();;

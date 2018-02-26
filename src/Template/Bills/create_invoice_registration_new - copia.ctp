@@ -6,7 +6,7 @@
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><b>Cobro de matrícula alumnos regulares</b></h3>
+                    <h3><b>Cobro de matrícula alumnos nuevos</b></h3>
                     <h5 id="Turno" value=<?= $idTurn ?>>Fecha: <?= $dateTurn->format('d-m-Y') ?>, Turno: <?= $turn ?>, Cajero: <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h5>
                 </div>
             </div>
@@ -17,7 +17,7 @@
                     <br />
                     <input type="text" class="form-control" id="family-search">
                     <br />
-                    <button id="newfamily" class="btn btn-success" disabled>Listar familias nuevas</button>
+                    <button id="newfamily" class="btn btn-success">Listar familias nuevas</button>
                     <br />
                     <br />
                     <button id="everyfamily" class="btn btn-success">Listar familias del año escolar actual</button>
@@ -507,7 +507,7 @@
     payments.fiscalAddress = " ";
     payments.taxPhone = " ";
     payments.invoiceAmount = 0;
-    payments.fiscal = 1;
+    payments.fiscal = 1; 
 
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
@@ -1355,7 +1355,7 @@
                 
             $("#header-messages").html("Por favor espere...");
                        
-            $.post('/sistemasangabriel/students/relatedstudents', {"id" : idFamily, "new" : 0}, null, "json")        
+            $.post('/sistemasangabriel/students/relatedstudents', {"id" : idFamily, "new" : 1}, null, "json")        
                      
             .done(function(response) 
             {
@@ -1432,9 +1432,8 @@
                                             paidOut = uservalue3;
                                             studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
                                             amountPayable = transactionAmount;
-                                            if (substr(monthlyPayment, 0, 3) == "Ago" ||
-                                            substr(monthlyPayment, 0, 9) == "Matrícula" ||
-                                            substr(monthlyPayment, 0, 14) == "Seguro escolar")
+                                            if (monthlyPayment == "Ago " + schoolYearUntil ||
+                                            monthlyPayment == "Matrícula " + schoolYearFrom)
                                             {
                                                 insertRecord();
                                             }
@@ -1564,7 +1563,7 @@
                 $("#student-balance").html("");
                 
                 showRecords();
-            }
+            }            
         });
         
         $("#mark-quotas").click(function () 
@@ -1735,8 +1734,8 @@
             updateAmount();
             indicatorUpdateAmount = 0;
             activateInvoiceButtons();
-        });   
-        
+        });        
+
         $("#automatic-adjustment").click(function(e) 
         {
             e.preventDefault();

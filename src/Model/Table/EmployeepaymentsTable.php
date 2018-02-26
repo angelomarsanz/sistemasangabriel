@@ -191,10 +191,36 @@ class EmployeepaymentsTable extends Table
         $validator
             ->numeric('total_fortnight')
             ->allowEmpty('total_fortnight');
+			
+        $validator
+            ->integer('days_cesta_ticket')
+            ->allowEmpty('days_cesta_ticket');
+			
+        $validator
+            ->numeric('amount_cesta_ticket')
+            ->allowEmpty('amount_cesta_ticket');
+			
+        $validator
+            ->numeric('loan_cesta_ticket')
+            ->allowEmpty('loan_cesta_ticket');
 
+        $validator
+            ->numeric('total_cesta_ticket')
+            ->allowEmpty('total_cesta_ticket');
+			
         $validator
             ->numeric('table_configuration')
             ->allowEmpty('table_configuration');
+
+        $validator
+            ->allowEmpty('registration_status');
+			
+        $validator
+            ->allowEmpty('reason_status');
+			
+        $validator
+			->dateTime('date_status')
+            ->allowEmpty('date_status');
 
         $validator
             ->allowEmpty('record_deleted');

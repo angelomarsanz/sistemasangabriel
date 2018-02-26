@@ -191,6 +191,14 @@ class EmployeepaymentsController extends AppController
 		
         $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 
+		$employeepayment->days_cesta_ticket = 30 - $employeepayment->days_absence;
+		
+		$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
+		
+		$employeepayment->loan_cesta_ticket = 0;
+		
+		$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;
+		
         $tableConfigurationJson = $this->initialConfiguration();
             
         $employeepayment->table_configuration = $tableConfigurationJson;

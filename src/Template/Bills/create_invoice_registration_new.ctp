@@ -6,7 +6,7 @@
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><b>Cobro de matrícula alumnos nuevos 2017-2018</b></h3>
+                    <h3><b>Cobro de matrícula alumnos nuevos</b></h3>
                     <h5 id="Turno" value=<?= $idTurn ?>>Fecha: <?= $dateTurn->format('d-m-Y') ?>, Turno: <?= $turn ?>, Cajero: <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h5>
                 </div>
             </div>
@@ -1432,8 +1432,6 @@
                                             paidOut = uservalue3;
                                             studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
                                             amountPayable = transactionAmount;
-                                            if (monthlyPayment == "Ago 2018" ||
-                                            monthlyPayment == "Matrícula 2017")
                                             {
                                                 insertRecord();
                                             }
@@ -1488,6 +1486,11 @@
                             {
                                 students += "<td>No asignada</td>";
                                 section = uservalue;
+                            }
+                            else if (userkey == 'schoolYearFrom')
+                            {
+                                schoolYearFrom = uservalue;
+								schoolYearUntil = uservalue + 1;
                             }
                         });
                     });
@@ -1943,7 +1946,7 @@
             payments.idTurn = $("#Turno").attr('value');
             payments.idParentsandguardians = idParentsandguardians;
             payments.invoiceDate = reversedDate;
-            payments.schoolYear = "Año escolar 2017-2018";
+            payments.schoolYear = "Año escolar " + schoolYearFrom + "-" + schoolYearUntil;
             payments.client = $('#client').val();
             payments.typeOfIdentificationClient = $('#type-of-identification-client').val();
             payments.identificationNumberClient = $('#identification-number-client').val();;

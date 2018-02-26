@@ -66,12 +66,6 @@ class BillsController extends AppController
             {
                 $switchModify = 1;
                 $switchControl = 1;
-/*
-                if ($accountantControl < 5)
-                {
-                    $this->Flash->success(__('Número de control diferente id: ' . $invoice->id . ' Archivo: ' . $invoice->control_number . ' Número correcto: ' . $firstControlMonth));
-                }
-*/
             }
             if ($switchModify == 1)
             {
@@ -80,12 +74,6 @@ class BillsController extends AppController
                 {
                     $bill->right_bill_number = $firstBillMonth;
                     $accountantBill++;
-/*
-                    if ($accountantBill < 5)
-                    {
-                        $this->Flash->success(__('Número de factura diferente id: ' . $invoice->id . ' Archivo: ' . $invoice->bill_number . ' Número correcto: ' . $firstBillMonth));
-                    }
-*/
                 }
                 if ($switchControl == 1)
                 {
@@ -875,7 +863,7 @@ class BillsController extends AppController
                 die("Solicitud no válida");    
             }
             
-            $query = $this->Bills->find('all', ['conditions' => ['AND' => ['bill_number >=' => $_POST['invoiceFrom'], 'bill_number <=' => $_POST['invoiceUntil']]],
+            $query = $this->Bills->find('all', ['conditions' => [['bill_number >=' => $_POST['invoiceFrom']]],
                 'order' => ['Bills.created' => 'ASC'] ]);
 
             $bills = $query->toArray();
@@ -929,20 +917,26 @@ class BillsController extends AppController
             $_POST = [];
     
             $invoiceIndicator = 0;
+			$accountControl = 1;
+			$newControl = 0;
     
             foreach ($controlNumbers as $controlNumber) 
             {
+				if ($accountControl == 1)
+				{
+					$newControl = $controlNumber->controlNumber;
+				}
     
                 $bill = $this->Bills->get($controlNumber->idBill);
                 
-                $bill->control_number = $controlNumber->controlNumber;
+                $bill->control_number = $newControl;
                 
                 if (!($this->Bills->save($bill))) 
-                {
-                    $this->Flash->error(__('No se pudo actualizar la factura Nro. ' . $bill->bill_number));
-                    
+                {                   
                     $invoiceIndicator = 1; 
                 }
+				$accountControl++;
+				$newControl++;
             }        
     
             if ($invoiceIndicator == 0)
