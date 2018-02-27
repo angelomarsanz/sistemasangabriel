@@ -469,7 +469,10 @@
     var accountPaid = 0;
     var idParentsandguardians = 0; 
     var reversedDate = " ";
-
+	var schoolYearFrom = 0;
+	var biggestYearFrom = 0;
+	var biggestYearUntil = 0;
+	
     var selectedStudent = -1;
     var idStudent = 0;
     var studentName = " ";
@@ -795,6 +798,7 @@
         dbInvoiced INTEGER, \
         dbPartialPayment INTEGER, \
         dbPaidOut INTEGER, \
+		dbSchoolYearFrom INTEGER, \
         dbObservation VARCHAR(100))";
 
         db.transaction(function (tx) { tx.executeSql(createStatement, [], null, onError); });
@@ -815,7 +819,7 @@
 
     function insertRecord() // Get value from Input and insert record . Function Call when Save/Submit Button Click..
     {
-        var insertStatement = "INSERT INTO studentTransactions \
+        var insertStatement = "INSERT OR REPLACE INTO studentTransactions \
         (dbId, \
         dbIdStudent, \
         dbStudentName, \
@@ -827,7 +831,8 @@
         dbInvoiced, \
         dbPartialPayment, \
         dbPaidOut, \
-        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		dbSchoolYearFrom, \
+        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = transactionIdentifier;
         var tpIdStudent = idStudent;
@@ -840,6 +845,7 @@
         var tpInvoiced = invoiced;
         var tpPartialPayment = partialPayment;
         var tpPaidOut = paidOut;
+		var tpSchoolYearFrom = schoolYearFrom;
         var tpObservation = " ";
 
         db.transaction(function (tx) 
@@ -856,13 +862,14 @@
             tpInvoiced,
             tpPartialPayment,
             tpPaidOut,
+			tpSchoolYearFrom,
             tpObservation], null, onError); 
         });
     }
     
     function insertRecordPayments() // Get value from Input and insert record . Function Call when Save/Submit Button Click..
     {
-        var insertPayments = "INSERT INTO payments \
+        var insertPayments = "INSERT OR REPLACE INTO payments \
         (payId, \
         payPaymentType, \
         payAmountPaid, \
@@ -1026,6 +1033,8 @@
                     + " "
                     + item['dbPaidOut']
                     + " "
+                    + item['dbSchoolYearFrom']
+                    + " "
                     + item['dbObservation']
                     + "</li>";
                 }
@@ -1161,6 +1170,8 @@
 
     function uploadTransactions()
     {
+		biggestYearFrom = 0;
+		
         var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbInvoiced = 'true'";
 
         db.transaction(function (tx) 
@@ -1179,7 +1190,13 @@
                     tbStudentTransactions[transactionCounter].amountPayable = item['dbAmountPayable'];
                     tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 
                     transactionCounter++;
+					if (biggestYearFrom < item['dbSchoolYearFrom'])
+					{
+						biggestYearFrom = item['dbSchoolYearFrom'];
+					}
                 }
+				biggestYearUntil = biggestYearFrom + 1;
+				payments.schoolYear = "Año escolar " + biggestYearFrom + "-" + biggestYearUntil;
             });
         });
     }
@@ -1432,9 +1449,9 @@
                                             paidOut = uservalue3;
                                             studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
                                             amountPayable = transactionAmount;
-                                            if (substr(monthlyPayment, 0, 3) == "Ago" ||
-                                            substr(monthlyPayment, 0, 9) == "Matrícula" ||
-                                            substr(monthlyPayment, 0, 14) == "Seguro escolar")
+                                            if (monthlyPayment.substring(0, 3) == "Ago" ||
+                                            monthlyPayment.substring(0, 9) == "Matrícula" ||
+                                            monthlyPayment.substring(0, 14) == "Seguro escolar")
                                             {
                                                 insertRecord();
                                             }
@@ -1493,7 +1510,6 @@
                             else if (userkey == 'schoolYearFrom')
                             {
                                 schoolYearFrom = uservalue;
-								schoolYearUntil = uservalue + 1;
                             }
                         });
                     });
@@ -1949,7 +1965,6 @@
             payments.idTurn = $("#Turno").attr('value');
             payments.idParentsandguardians = idParentsandguardians;
             payments.invoiceDate = reversedDate;
-            payments.schoolYear = "Año escolar " + schoolYearFrom + "-" + schoolYearUntil;
             payments.client = $('#client').val();
             payments.typeOfIdentificationClient = $('#type-of-identification-client').val();
             payments.identificationNumberClient = $('#identification-number-client').val();;

@@ -426,7 +426,7 @@ class StudentsController extends AppController
 			{
 				$student->new_student = 0;
 				$student->number_of_brothers = $lastYear; // Año escolar para el que se inscribió la primera vez
-				$student->balance = $currentYear; // Año escolar para el que se inscribió la última vez			
+				$student->balance = $lastYear; // Año escolar para el que se inscribió la última vez			
 			}
 				
             if ($this->Students->save($student)) 
