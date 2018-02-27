@@ -330,6 +330,7 @@ class BillsController extends AppController
         $currentDate = Time::now();
         $currentDatei = $currentDate->year . $currentDate->month . $currentDate->day;
 		
+		$nextYear = $currentDate->year + 1;
 		$lastYear = $currentDate->year - 1;
 		$yearAncestor = $currentDate->year - 2;
         
@@ -396,7 +397,7 @@ class BillsController extends AppController
         foreach ($aConcepts as $aConcept) 
         {                  
             if ($previousStudentName != $aConcept->student_name)
-            {
+            {				
                 if ($lastInstallment != " ")
                 {
                     if ($firstMonthly == $lastInstallment)
@@ -420,11 +421,11 @@ class BillsController extends AppController
                     $lastInstallment = " ";
                     $amountConcept = 0;
                 }
-                elseif (substr($aConcept->concept, 0, 9) == "Matrícula")
-                {
+                elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
+                {				
 					if ($currentDate->month < 8)
 					{
-						if ($aConcept->concept) == "Matrícula " . $yearAncestor)
+						if ($aConcept->concept == "Matrícula " . $yearAncestor)
 						{
 							$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
 						}
@@ -435,7 +436,7 @@ class BillsController extends AppController
 					}
 					else
 					{
-						if ($aConcept->concept) == "Matrícula " . $currentDate->year)
+						if ($aConcept->concept == "Matrícula " . $currentDate->year)
 						{
 							$invoiceLine = $aConcept->student_name . " - Abono a inscripción";
 						}
@@ -455,7 +456,7 @@ class BillsController extends AppController
                 {	
 					if ($currentDate->month < 8)
 					{
-						if ($aConcept->concept) == "Ago " . $yearAncestor)
+						if ($aConcept->concept == "Ago " . $lastYear)
 						{
 							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
 						}
@@ -466,7 +467,7 @@ class BillsController extends AppController
 					}
 					else
 					{
-						if ($aConcept->concept) == "Ago " . $currentDate->year)
+						if ($aConcept->concept == "Ago " . $nextYear)
 						{
 							$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
 						}
@@ -541,7 +542,7 @@ class BillsController extends AppController
                     $lastInstallment = " ";
                     $amountConcept = 0;
                 }
-                elseif (substr($aConcept->concept, 0, 9) == "Matrícula")
+                elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
                 {
                     if ($lastInstallment != " ")
                     {
@@ -551,7 +552,7 @@ class BillsController extends AppController
                     }
 					if ($currentDate->month < 8)
 					{
-						if ($aConcept->concept) == "Matrícula " . $yearAncestor)
+						if ($aConcept->concept == "Matrícula " . $yearAncestor)
 						{
 							$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
 						}
@@ -562,7 +563,7 @@ class BillsController extends AppController
 					}
 					else
 					{
-						if ($aConcept->concept) == "Matrícula " . $currentDate->year)
+						if ($aConcept->concept == "Matrícula " . $currentDate->year)
 						{
 							$invoiceLine = $aConcept->student_name . " - Abono a inscripción";
 						}
@@ -587,7 +588,7 @@ class BillsController extends AppController
                     }
 					if ($currentDate->month < 8)
 					{
-						if ($aConcept->concept) == "Ago " . $yearAncestor)
+						if ($aConcept->concept == "Ago " . $lastYear)
 						{
 							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
 						}
@@ -598,7 +599,7 @@ class BillsController extends AppController
 					}
 					else
 					{
-						if ($aConcept->concept) == "Ago " . $currentDate->year)
+						if ($aConcept->concept == "Ago " . $nextYear)
 						{
 							$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
 						}

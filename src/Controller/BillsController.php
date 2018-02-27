@@ -456,7 +456,7 @@ class BillsController extends AppController
                 {	
 					if ($currentDate->month < 8)
 					{
-						if ($aConcept->concept == "Ago " . $yearAncestor)
+						if ($aConcept->concept == "Ago " . $lastYear)
 						{
 							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
 						}
@@ -588,7 +588,7 @@ class BillsController extends AppController
                     }
 					if ($currentDate->month < 8)
 					{
-						if ($aConcept->concept == "Ago " . $yearAncestor)
+						if ($aConcept->concept == "Ago " . $lastYear)
 						{
 							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
 						}
