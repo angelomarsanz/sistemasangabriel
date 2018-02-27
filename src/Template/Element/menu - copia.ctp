@@ -45,9 +45,9 @@
                                     <li><?= $this->Html->link('Modificar lote de facturas', ['controller' => 'Controlnumbers', 'action' => 'edit']) ?></li>
                                     <li><?= $this->Html->link('Modificar el número control de facturas', ['controller' => 'Bills', 'action' => 'editControl']) ?></li>
                                     <li><?= $this->Html->link('Consultar factura', ['controller' => 'Bills', 'action' => 'consultBill']) ?></li>
-                                    <li><?= $this->Html->link('Libro de ventas', ['controller' => 'Salesbooks', 'action' => 'createBookPdf']) ?></li>
-                                    <li><?= $this->Html->link('EXCEL Libro de ventas', ['controller' => 'Salesbooks', 'action' => 'createBookExcel']) ?></li>
-    
+                                    <li><?= $this->Html->link('Crear libro de ventas PDF', ['controller' => 'Salesbooks', 'action' => 'createBookPdf']) ?></li>
+									<li><?= $this->Html->link('Listado de libros de ventas PDF', ['controller' => 'Salesbooks', 'action' => 'viewDir']) ?></li>
+                                    <li><?= $this->Html->link('Crear libro de ventas EXCEL', ['controller' => 'Salesbooks', 'action' => 'createBookExcel']) ?></li>
                                 </ul>
                             </li>
                             <li class="dropdown">
@@ -68,6 +68,7 @@
                                     <li><?= $this->Html->link('Asignar sección', ['controller' => 'Studenttransactions', 'action' => 'assignSection']) ?></li>
                                     <li><?= $this->Html->link('Modificar las cuotas del alumno', ['controller' => 'Students', 'action' => 'modifyTransactions']) ?></li>
                                     <li><?= $this->Html->link('Relación de mensualidades', ['controller' => 'Students', 'action' => 'listMonthlyPayments']) ?></li>
+                                    <li><?= $this->Html->link('Alumnos con mensualidades pendientes', ['controller' => 'Students', 'action' => 'defaulters']) ?></li>
                                     <li><?= $this->Html->link('Pagos de nuevos alumnos', ['controller' => 'Students', 'action' => 'newstudentpdf', "nuevos", '_ext' => 'pdf']) ?>
                                     <li><?= $this->Html->link('Alumnos inscritos', ['controller' => 'Studenttransactions', 'action' => 'reportStudentGeneral']) ?></li>
                                     <li><?= $this->Html->link('Alumnos egresados', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
@@ -75,6 +76,7 @@
                                     <li><?= $this->Html->link('Aplicar descuento a alumnos (familias con cuatro o más hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota50']) ?></li>
                                     <li><?= $this->Html->link('Becar alumno', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
                                     <li><?= $this->Html->link('Alumnos Becados', ['controller' => 'Students', 'action' => 'scholarshipIndex']) ?></li>
+									<li><?= $this->Html->link('Reporte contacto alumnos', ['controller' => 'Students', 'action' => 'reportStudentsGeneral']) ?></li>
                                 </ul>
                             </li>
     

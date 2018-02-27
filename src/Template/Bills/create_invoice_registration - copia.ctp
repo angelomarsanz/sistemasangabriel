@@ -6,7 +6,7 @@
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><b>Cobro de servicio educativo</b></h3>
+                    <h3><b>Cobro de matrícula alumnos regulares 2017-2018</b></h3>
                     <h5 id="Turno" value=<?= $idTurn ?>>Fecha: <?= $dateTurn->format('d-m-Y') ?>, Turno: <?= $turn ?>, Cajero: <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h5>
                 </div>
             </div>
@@ -17,7 +17,7 @@
                     <br />
                     <input type="text" class="form-control" id="family-search">
                     <br />
-                    <button id="newfamily" class="btn btn-success">Listar familias nuevas</button>
+                    <button id="newfamily" class="btn btn-success" disabled>Listar familias nuevas</button>
                     <br />
                     <br />
                     <button id="everyfamily" class="btn btn-success">Listar familias del año escolar actual</button>
@@ -469,9 +469,6 @@
     var accountPaid = 0;
     var idParentsandguardians = 0; 
     var reversedDate = " ";
-	var schoolYearFrom = 0;
-	var biggestYearFrom = 0;
-	var biggestYearUntil = 0;
 
     var selectedStudent = -1;
     var idStudent = 0;
@@ -510,7 +507,7 @@
     payments.fiscalAddress = " ";
     payments.taxPhone = " ";
     payments.invoiceAmount = 0;
-    payments.fiscal = 0; 
+    payments.fiscal = 1;
 
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
@@ -798,7 +795,6 @@
         dbInvoiced INTEGER, \
         dbPartialPayment INTEGER, \
         dbPaidOut INTEGER, \
-		dbSchoolYearFrom INTEGER, \
         dbObservation VARCHAR(100))";
 
         db.transaction(function (tx) { tx.executeSql(createStatement, [], null, onError); });
@@ -819,7 +815,7 @@
 
     function insertRecord() // Get value from Input and insert record . Function Call when Save/Submit Button Click..
     {
-        var insertStatement = "INSERT OR REPLACE INTO studentTransactions \
+        var insertStatement = "INSERT INTO studentTransactions \
         (dbId, \
         dbIdStudent, \
         dbStudentName, \
@@ -831,8 +827,7 @@
         dbInvoiced, \
         dbPartialPayment, \
         dbPaidOut, \
-		dbSchoolYearFrom, \
-        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = transactionIdentifier;
         var tpIdStudent = idStudent;
@@ -845,7 +840,6 @@
         var tpInvoiced = invoiced;
         var tpPartialPayment = partialPayment;
         var tpPaidOut = paidOut;
-		var tpSchoolYearFrom = schoolYearFrom;
         var tpObservation = " ";
 
         db.transaction(function (tx) 
@@ -862,14 +856,13 @@
             tpInvoiced,
             tpPartialPayment,
             tpPaidOut,
-			tpSchoolYearFrom,
             tpObservation], null, onError); 
         });
     }
     
     function insertRecordPayments() // Get value from Input and insert record . Function Call when Save/Submit Button Click..
     {
-        var insertPayments = "INSERT OR REPLACE INTO payments \
+        var insertPayments = "INSERT INTO payments \
         (payId, \
         payPaymentType, \
         payAmountPaid, \
@@ -1033,8 +1026,6 @@
                     + " "
                     + item['dbPaidOut']
                     + " "
-                    + item['dbSchoolYearFrom']
-                    + " "
                     + item['dbObservation']
                     + "</li>";
                 }
@@ -1170,9 +1161,7 @@
 
     function uploadTransactions()
     {
-		biggestYearFrom = 0;
-        
-		var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbInvoiced = 'true'";
+        var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbInvoiced = 'true'";
 
         db.transaction(function (tx) 
         {
@@ -1190,13 +1179,7 @@
                     tbStudentTransactions[transactionCounter].amountPayable = item['dbAmountPayable'];
                     tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 
                     transactionCounter++;
-					if (biggestYearFrom < item['dbSchoolYearFrom'])
-					{
-						biggestYearFrom = item['dbSchoolYearFrom'];
-					}
                 }
-				biggestYearUntil = biggestYearFrom + 1;
-				payments.schoolYear = "Año escolar " + biggestYearFrom + "-" + biggestYearUntil;
             });
         });
     }
@@ -1372,7 +1355,7 @@
                 
             $("#header-messages").html("Por favor espere...");
                        
-            $.post('/sistemasangabriel/students/relatedstudents', {"id" : idFamily, "new" : 1}, null, "json")        
+            $.post('/sistemasangabriel/students/relatedstudents', {"id" : idFamily, "new" : 0}, null, "json")        
                      
             .done(function(response) 
             {
@@ -1449,7 +1432,10 @@
                                             paidOut = uservalue3;
                                             studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
                                             amountPayable = transactionAmount;
-                                            if (monthlyPayment.substring(0, 18) == "Servicio educativo")
+                                            if (monthlyPayment == "Ago 2017" ||
+                                            monthlyPayment == "Ago 2018" ||
+                                            monthlyPayment == "Matrícula 2017" ||
+                                            monthlyPayment == "Seguro escolar 2017")
                                             {
                                                 insertRecord();
                                             }
@@ -1504,10 +1490,6 @@
                             {
                                 students += "<td>No asignada</td>";
                                 section = uservalue;
-                            }
-                            else if (userkey == 'schoolYearFrom')
-                            {
-                                schoolYearFrom = uservalue;
                             }
                         });
                     });
@@ -1578,7 +1560,7 @@
                 $("#student-balance").html("");
                 
                 showRecords();
-            }            
+            }
         });
         
         $("#mark-quotas").click(function () 
@@ -1749,8 +1731,8 @@
             updateAmount();
             indicatorUpdateAmount = 0;
             activateInvoiceButtons();
-        });        
-
+        });   
+        
         $("#automatic-adjustment").click(function(e) 
         {
             e.preventDefault();
@@ -1963,6 +1945,7 @@
             payments.idTurn = $("#Turno").attr('value');
             payments.idParentsandguardians = idParentsandguardians;
             payments.invoiceDate = reversedDate;
+            payments.schoolYear = "Año escolar 2017-2018";
             payments.client = $('#client').val();
             payments.typeOfIdentificationClient = $('#type-of-identification-client').val();
             payments.identificationNumberClient = $('#identification-number-client').val();;

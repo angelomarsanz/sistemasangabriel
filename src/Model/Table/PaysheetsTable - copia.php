@@ -79,20 +79,6 @@ class PaysheetsTable extends Table
             ->allowEmpty('weeks_social_security');
             
         $validator
-            ->numeric('cesta_ticket_month')
-            ->allowEmpty('cesta_ticket_month');
-			
-        $validator
-            ->allowEmpty('registration_status');
-			
-        $validator
-            ->allowEmpty('reason_status');
-			
-        $validator
-			->dateTime('date_status')
-            ->allowEmpty('date_status');
-			
-        $validator
             ->allowEmpty('deleted_record');
             
         $validator

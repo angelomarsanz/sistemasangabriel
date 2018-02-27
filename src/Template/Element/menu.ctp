@@ -35,10 +35,10 @@
                                 <ul class="dropdown-menu" role="menu">
                                     <li><?= $this->Html->link('Abrir turno', ['controller' => 'Turns', 'action' => 'checkTurnOpen']) ?></li>
                                     <li><?= $this->Html->link('Cerrar turno', ['controller' => 'Turns', 'action' => 'checkTurnClose']) ?></li>
-                                    <li><?= $this->Html->link('Cobrar inscripción alumnos regulares 2017-2018', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Inscripción regulares']) ?></li> 
-                                    <li><?= $this->Html->link('Cobrar inscripción alumnos nuevos 2017-2018', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Inscripción nuevos']) ?></li> 
-                                    <li><?= $this->Html->link('Cobrar servicio educativo 2017', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Servicio educativo']) ?></li> 
-                                    <li><?= $this->Html->link('Cobrar mensualidades 2017-2018', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
+                                    <li><?= $this->Html->link('Cobrar inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Inscripción regulares']) ?></li> 
+                                    <li><?= $this->Html->link('Cobrar inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Inscripción nuevos']) ?></li> 
+                                    <li><?= $this->Html->link('Cobrar servicio educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Servicio educativo']) ?></li> 
+                                    <li><?= $this->Html->link('Cobrar mensualidades', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
                                     <li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
                                     <li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
                                     <li><?= $this->Html->link('Anular factura', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Anular']) ?></li>
@@ -76,6 +76,7 @@
                                     <li><?= $this->Html->link('Aplicar descuento a alumnos (familias con cuatro o más hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota50']) ?></li>
                                     <li><?= $this->Html->link('Becar alumno', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
                                     <li><?= $this->Html->link('Alumnos Becados', ['controller' => 'Students', 'action' => 'scholarshipIndex']) ?></li>
+									<!-- <li><?= $this->Html->link('Reporte contacto alumnos', ['controller' => 'Students', 'action' => 'reportStudentsGeneral']) ?></li> -->
                                 </ul>
                             </li>
     

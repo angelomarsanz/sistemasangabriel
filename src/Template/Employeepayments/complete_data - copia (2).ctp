@@ -254,20 +254,36 @@
 										
 											<?php if ($tableConfiguration->days_cesta_ticket == 0): ?>
 												<th scope="col" class='days-cesta-ticket'><a href="#" id='days-cesta-ticket' title='Días cesta ticket'>+</a></th>
-												<th scope="col" class='datos-days-cesta-ticket' style='display: none;'><a href="#" id='datos-days-cesta-ticket' title='Ocultar días cesta ticket'>Días&nbsp;cesta&nbsp;ticketa></th>
+												<th scope="col" class='datos-days-cesta-ticket' style='display: none;'><a href="#" id='datos-days-cesta-ticket' title='Ocultar días cesta ticket'>Tot.&nbsp;Quinc.</a></th>
 											<?php else: ?>
 												<th scope="col" class='days-cesta-ticket' style='display: none;'><a href="#" id='days-cesta-ticket' title='Días cesta ticket'>+</a></th>
-												<th scope="col" class='datos-days-cesta-ticket'><a href="#" id='datos-days-cesta-ticket' title='Ocultar días cesta ticket'>Días&nbsp;cesta&nbsp;ticket</a></th>
+												<th scope="col" class='datos-days-cesta-ticket'><a href="#" id='datos-days-cesta-ticket' title='Ocultar días cesta ticket'>Tot.&nbsp;Quinc.</a></th>
 											<?php endif; ?>
 											
 											<?php if ($tableConfiguration->amount_cesta_ticket == 0): ?>
 												<th scope="col" class='amount-cesta-ticket'><a href="#" id='amount-cesta-ticket' title='Monto cesta ticket'>+</a></th>
-												<th scope="col" class='datos-amount-cesta-ticket' style='display: none;'><a href="#" id='datos-amount-cesta-ticket' title='Ocultar monto cesta ticket'>Monto&nbsp;cesta&nbsp;ticket</a></th>
+												<th scope="col" class='datos-amount-cesta-ticket' style='display: none;'><a href="#" id='datos-amount-cesta-ticket' title='Ocultar monto cesta ticket'>Tot.&nbsp;Quinc.</a></th>
 											<?php else: ?>
 												<th scope="col" class='amount-cesta-ticket' style='display: none;'><a href="#" id='amount-cesta-ticket' title='Monto cesta ticket'>+</a></th>
-												<th scope="col" class='datos-amount-cesta-ticket'><a href="#" id='datos-amount-cesta-ticket' title='Ocultar monto cesta ticket'>Monto&nbsp;cesta&nbsp;ticket</a></th>
+												<th scope="col" class='datos-amount-cesta-ticket'><a href="#" id='datos-amount-cesta-ticket' title='Ocultar monto cesta ticket'>Tot.&nbsp;Quinc.</a></th>
 											<?php endif; ?>
-																																	
+											
+											<?php if ($tableConfiguration->loan_cesta_ticket == 0): ?>
+												<th scope="col" class='loan-cesta-ticket'><a href="#" id='loan-cesta-ticket' title='Préstamo cesta ticket'>+</a></th>
+												<th scope="col" class='datos-loan-cesta-ticket' style='display: none;'><a href="#" id='datos-loan-cesta-ticket' title='Ocultar préstamo cesta ticket'>Tot.&nbsp;Quinc.</a></th>
+											<?php else: ?>
+												<th scope="col" class='loan-cesta-ticket' style='display: none;'><a href="#" id='loan-cesta-ticket' title='Préstamo cesta ticket'>+</a></th>
+												<th scope="col" class='datos-loan-cesta-ticket'><a href="#" id='datos-loan-cesta-ticket' title='Ocultar préstamo cesta ticket'>Tot.&nbsp;Quinc.</a></th>
+											<?php endif; ?>
+
+											<?php if ($tableConfiguration->total_cesta_ticket == 0): ?>
+												<th scope="col" class='total-cesta-ticket'><a href="#" id='total-cesta-ticket' title='Total cesta ticket'>+</a></th>
+												<th scope="col" class='datos-total-cesta-ticket' style='display: none;'><a href="#" id='datos-total-cesta-ticket' title='Ocultar total cesta ticket'>Tot.&nbsp;Quinc.</a></th>
+											<?php else: ?>
+												<th scope="col" class='total-cesta-ticket' style='display: none;'><a href="#" id='total-cesta-ticket' title='Total cesta ticket'>+</a></th>
+												<th scope="col" class='datos-total-cesta-ticket'><a href="#" id='datos-total-cesta-ticket' title='Ocultar total cesta ticket'>Tot.&nbsp;Quinc.</a></th>
+											<?php endif; ?>											
+																						
 										<?php endif; ?>
                                     </tr>
                                 </thead>
@@ -447,20 +463,12 @@
 
 											<?php else: ?>
 											
-												<?php if ($tableConfiguration->days_cesta_ticket == 0): ?>
+												<?php if ($tableConfiguration->days-cesta-ticket == 0): ?>
 													<td class='days-cesta-ticket'><input type='hidden' class='ver-days-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_days_cesta_ticket]" value='0'></td>
-													<td class='datos-days-cesta-ticket' style='display: none;'><input class='input-days-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Días&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= $employeesFors->days_cesta_ticket ?>></td>
+													<td class='datos-days-cesta-ticket' style='display: none;'><input disabled='true' class='input-days-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Días&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= ($employeesFors->days_cesta_ticket) ?>></td>
 												<?php else: ?>
 													<td class='days-cesta-ticket' style='display: none;'><input type='hidden' class='ver-days-cesta-ticket' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value='1'></td>
-													<td class='datos-days-cesta-ticket'><input class='input-days-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Días&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= $employeesFors->days_cesta_ticket ?>></td>
-												<?php endif; ?>
-											
-												<?php if ($tableConfiguration->amount_cesta_ticket == 0): ?>
-													<td class='amount-cesta-ticket'><input type='hidden' class='ver-amount-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_amount_cesta_ticket]" value='0'></td>
-													<td class='datos-amount-cesta-ticket' style='display: none;'><input disabled='true' class='input-amount-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Monto&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= $employeesFors->amount_cesta_ticket ?>></td>
-												<?php else: ?>
-													<td class='amount-cesta-ticket' style='display: none;'><input type='hidden' class='ver-amount-cesta-ticket' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value='1'></td>
-													<td class='datos-amount-cesta-ticket'><input disabled='true' class='input-amount-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Monto&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= $employeesFors->amount_cesta_ticket ?>></td>
+													<td class='datos-days-cesta-ticket'><input disabled='true' class='input-days-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Días&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= $employeesFors->days-cesta-ticket) ?>></td>
 												<?php endif; ?>
 											
 											<?php endif; ?>
@@ -802,34 +810,6 @@
             $('.ver-total-quincena').val('0');
         });
 
-        $('#days-cesta-ticket').on('click',function()
-        {
-            $('.days-cesta-ticket').toggle();
-            $('.datos-days-cesta-ticket').toggle();
-            $('.ver-days-cesta-ticket').val('1');
-        });
-
-        $('#datos-days-cesta-ticket').on('click',function()
-        {
-            $('.datos-days-cesta-ticket').toggle();
-            $('.days-cesta-ticket').toggle();
-            $('.ver-days-cesta-ticket').val('0');
-        });
-		
-        $('#amount-cesta-ticket').on('click',function()
-        {
-            $('.amount-cesta-ticket').toggle();
-            $('.datos-amount-cesta-ticket').toggle();
-            $('.ver-amount-cesta-ticket').val('1');
-        });
-
-        $('#datos-amount-cesta-ticket').on('click',function()
-        {
-            $('.datos-amount-cesta-ticket').toggle();
-            $('.amount-cesta-ticket').toggle();
-            $('.ver-amount-cesta-ticket').val('0');
-        });
-		
         $('#mas').on('click',function()
         {
             $('.menu-menos').hide();

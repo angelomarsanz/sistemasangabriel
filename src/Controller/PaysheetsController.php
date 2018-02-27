@@ -232,6 +232,18 @@ class PaysheetsController extends AppController
         if ($this->request->is('post')) 
         {
             $paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
+						
+			if (substr($_POST['cesta_ticket_month'], -3, 1) == ',')
+			{
+				$replace1= str_replace('.', '', $_POST['cesta_ticket_month']);
+				$replace2 = str_replace(',', '.', $replace1);
+				$paysheet->cesta_ticket_month = $replace2;
+				$cestaTicket = $replace2;
+			}
+			else
+			{
+				$cestaTicket = $_POST['cesta_ticket_month'];
+			}
             
             $lastRecord = $this->Paysheets->find('all', ['conditions' => 
                 [['year_paysheet' => $paysheet->year_paysheet],
@@ -297,7 +309,7 @@ class PaysheetsController extends AppController
                 {
                     $paysheet->weeks_social_security = 4;
                 }
-                
+				                
                 $paysheet->responsible_user = $this->Auth->user('username'); 
                 
                 if (!($this->Paysheets->save($paysheet)))
@@ -332,14 +344,27 @@ class PaysheetsController extends AppController
 						}
 						else
 						{
-							$this->Flash->error(__('No se consiguieron registros de empleados'));
+							$this->Flash->error(__('No se encontraron registros de empleados'));
 						}
 					}
                 }
             }
         }
-        $this->set(compact('paysheet'));
-        $this->set('_serialize', ['paysheet']);
+		else
+		{
+            $lastRecord = $this->Paysheets->find('all', 
+                ['conditions' => 
+                ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]], 'order' => ['Paysheets.created' => 'DESC']]);
+			
+			$row = $lastRecord->first();   
+                
+			if ($row)
+			{
+				$cestaTicket = $row->cesta_ticket_month;
+			}
+		}
+        $this->set(compact('cestaTicket'));
+        $this->set('_serialize', ['cestaTicket']);
     }
     
     public function nameMonthSpanish($month = null)

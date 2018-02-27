@@ -1,4 +1,31 @@
 <style>
+    body
+    {
+        font-size: 30px;
+    }
+    .alignRight
+    {
+    	text-align: right;
+    }
+    hr
+    {
+    	color: #47476b;
+    }
+    #payments
+    {
+    	width: 25%;
+    	float: left;
+    }
+    #emptyColumn
+    {
+    	width: 50%;
+    	float: left;
+    }
+    #total
+    {
+    	width: 25%;
+    	float: left;
+    }
     .saltopagina
     {
         display:block; 
@@ -16,18 +43,18 @@
         <tbody>
             <tr>
                 <td>Cliente: <?= $bill->client ?></td>
-                <td class="alignRight"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+                <td style="text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
             </tr>
             <tr>
                 <td>C.I./RIF: <?= $bill->identification ?></td>
-                <td class="alignRight">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
+                <td style="text-align: right;">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
             </tr>
             <tr>
                 <td>Teléfono: <?= $bill->tax_phone ?></td>
-                <td class="alignRight"><?= $bill->school_year ?></td>
+                <td style="text-align: right;"><?= $bill->school_year ?></td>
             </tr>
             <tr>
-                <td>Dirección: <?= $bill->fiscal_address ?></td>
+                <td>Dirección: <spam style="font-size: 20px;"><?= $bill->fiscal_address ?></spam></td>
             </tr>
         </tbody>
     </table>
@@ -69,6 +96,7 @@
                         <td><?= h($aPayment->payment_type) ?></td>
                         <td><?= h($aPayment->account_or_card) ?></td>
                         <td><?= h($aPayment->serial) ?></td>
+                        <td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -95,7 +123,7 @@
     </div>
 </div>
 <?php
-$countSubtraction = 18 - $counter;
+$countSubtraction = 20 - $counter;
 for ($i = 1; $i <= $countSubtraction; $i++): ?>
     <br />
 <?php
@@ -104,19 +132,19 @@ endfor; ?>
     <table style="width:100%">
         <tbody>
             <tr>
-                <td>Cliente: <?= $bill->client . $counter ?> </td>
-                <td class="alignRight"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+                <td>Cliente: <?= $bill->client ?> </td>
+                <td style="text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
             </tr>
             <tr>
                 <td>C.I./RIF: <?= $bill->identification ?></td>
-                <td class="alignRight">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
+                <td style="text-align: right;">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
             </tr>
             <tr>
                 <td>Teléfono: <?= $bill->tax_phone ?></td>
-                <td class="alignRight"><?= $bill->school_year ?></td>
+                <td style="text-align: right;"><?= $bill->school_year ?></td>
             </tr>
             <tr>
-                <td>Dirección: <?= $bill->fiscal_address ?></td>
+                <td>Dirección: <spam style="font-size: 20px;"><?= $bill->fiscal_address ?></spam></td>
             </tr>
         </tbody>
     </table>
@@ -153,6 +181,7 @@ endfor; ?>
                         <td><?= h($aPayment->payment_type) ?></td>
                         <td><?= h($aPayment->account_or_card) ?></td>
                         <td><?= h($aPayment->serial) ?></td>
+                        <td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

@@ -426,7 +426,7 @@ class StudentsController extends AppController
 			{
 				$student->new_student = 0;
 				$student->number_of_brothers = $lastYear; // Año escolar para el que se inscribió la primera vez
-				$student->balance = $currentYear; // Año escolar para el que se inscribió la última vez			
+				$student->balance = $lastYear; // Año escolar para el que se inscribió la última vez			
 			}
 				
             if ($this->Students->save($student)) 
@@ -908,6 +908,7 @@ class StudentsController extends AppController
                     $jsondata["data"]["students"][]['section'] = $sections->section;
                     
                     $jsondata["data"]["students"][]['scholarship'] = $result->scholarship;
+					$jsondata["data"]["students"][]['schoolYearFrom'] = $result->balance;
                     
                     $variable = $studenttransactions->responsejson($result->id);
                     
@@ -1781,5 +1782,132 @@ class StudentsController extends AppController
 			}
 		}
 		return [$defaulters, $accountantManager, $tDefaulters];
+	}
+	public function reportStudentsGeneral()
+	{
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+               
+        $currentDate = Time::now();
+		
+		$currentYear = $currentDate->year;
+		$currentMonth = $currentDate->month;
+				
+		if ($currentMonth < 9)
+		{
+			$yearFrom = $currentYear - 1;
+			$yearUntil = $currentYear;
+		}
+		else
+		{
+			$yearFrom = $currentYear;
+			$yearUntil = $currentYear + 1;
+		}
+		
+		$this->loadModel('Schools');
+
+		$school = $this->Schools->get(2);
+
+		$this->loadModel('Rates');
+					
+		$concept = 'Matrícula';
+					
+		$lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
+		   'order' => ['Rates.created' => 'DESC'] ]);
+
+		$row = $lastRecord->first();
+					
+		if ($row)
+		{
+			$amountRegistration = $row->amount;
+		}
+		else
+		{
+			$this->Flash->error(__('No se encontró el monto de la matrícula'));
+			
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);		
+		}
+	
+        $students = TableRegistry::get('Students');
+        
+		$studentsFor = $students->find('all')
+			->select(
+				['Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.level_of_study',
+				'Students.type_of_identification',
+				'Students.identity_card',
+				'Students.section_id',
+				'Students.sex',
+				'Students.birthdate',
+				'Students.student_condition',
+				'Students.scholarship',
+				'Parentsandguardians.type_of_identification',
+				'Parentsandguardians.identidy_card',
+				'Parentsandguardians.surname',
+				'Parentsandguardians.second_surname',
+				'Parentsandguardians.first_name',
+				'Parentsandguardians.second_name',
+				'Parentsandguardians.email',
+				'Parentsandguardians.cell_phone',
+				'Parentsandguardians.landline',
+				'Parentsandguardians.work_phone',
+				'Sections.id',
+				'Sections.sublevel'])
+			->contain(['Parentsandguardians', 'Sections'])
+			->where([['Students.id >' => 1]])
+			->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
+				
+		$studentObservations = [];
+        
+		foreach ($studentsFor as $studentsFors)
+		{										
+			$studentObservations[$studentsFors->id]['observation'] = '';
+			
+			if ($studentsFors->student_condition == 'Regular')
+			{
+				$level = $this->sublevelLevel($studentsFors->section->sublevel);
+				
+				if ($level == $studentsFors->level_of_study)
+				{						
+					if ($studentsFors->scholarship == 1)
+					{
+						$studentObservations[$studentsFors->id]['observation'] = 'Becado';
+					}
+					else
+					{				
+						$studentTransactions = $this->Students->Studenttransactions->find('all')->where(['student_id' => $studentsFors->id]);
+
+						foreach ($studentTransactions as $studentTransaction) 
+						{
+							if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
+							{
+								if ($studentTransaction->amount < $amountRegistration)
+								{
+									$studentObservations[$studentsFors->id]['observation'] = 'Regular';
+								}
+								else
+								{
+									$studentObservations[$studentsFors->id]['observation'] = 'No está inscrito';
+								}
+								break;						
+							}
+						}
+					}
+				}
+				else
+				{
+					$studentObservations[$studentsFors->id]['observation'] = 'No está asignado a ninguna sección';
+				}
+			}
+			else
+			{
+				$studentObservations[$studentsFors->id]['observation'] = $studentsFors->student_condition;
+			}
+		}
+		$this->set(compact('school', 'studentsFor', 'studentObservations', 'currentDate'));
 	}
 }

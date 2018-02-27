@@ -213,7 +213,7 @@ endfor; ?>
     <h1 style="text-align: center;">Por Bs. <?= number_format($accountService, 2, ",", ".") ?></h1>
     <br />
     <p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs. <b><?= number_format($accountService, 2, ",", ".") ?></b>
-    por concepto de servicio educativo 2017, correspondiente a lo(s) alumno(s):</p>
+    por concepto de servicio educativo, correspondiente a lo(s) alumno(s):</p>
     <table style="width:100%;">
         <tbody>
             <?php foreach ($studentReceipt as $studentReceipts): ?>
