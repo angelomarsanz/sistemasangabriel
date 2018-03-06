@@ -95,24 +95,26 @@
                                         <th scope="col"></th>
                                         <th scope="col">Nro.</th>
                                         <th scope="col">Nombre&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-                                        
-										<?php if ($swCestaTicket == 0): ?>
-										
-											<?php if ($tableConfiguration->identidy == 0): ?>
-												<th scope="col" class='cedula'><a href="#" id='cedula' title='Cédula'>+</a></th>
-												<th scope="col" class='datos-cedula' style='display: none;'><a href="#" id='datos-cedula' title='Ocultar cédula'>Cédula&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
-											<?php else: ?>
-												<th scope="col" class='cedula' style='display: none;'><a href="#" id='cedula' title='Cédula'>+</a></th>
-												<th scope="col" class='datos-cedula'><a href="#" id='datos-cedula' title='Ocultar cédula'>Cédula&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
-											<?php endif; ?>                                        
 
-											<?php if ($tableConfiguration->position == 0): ?>
-												<th scope="col" class='cargo'><a href="#" id='cargo' title='Cargo'>+</a></th>
-												<th scope="col" class='datos-cargo' style='display: none;'><a href="#" id='datos-cargo' title='Ocultar cargo'>Cargo</a></th>
-											<?php else: ?>
-												<th scope="col" class='cargo' style='display: none;'><a href="#" id='cargo' title='Cargo'>+</a></th>
-												<th scope="col" class='datos-cargo'><a href="#" id='datos-cargo' title='Ocultar cargo'>Cargo</a></th>
-											<?php endif; ?>
+                                        <th scope="col" class='sw-cesta-ticket'></th>                                        
+										
+										<?php if ($tableConfiguration->identidy == 0): ?>
+											<th scope="col" class='cedula'><a href="#" id='cedula' title='Cédula'>+</a></th>
+											<th scope="col" class='datos-cedula' style='display: none;'><a href="#" id='datos-cedula' title='Ocultar cédula'>Cédula&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
+										<?php else: ?>
+											<th scope="col" class='cedula' style='display: none;'><a href="#" id='cedula' title='Cédula'>+</a></th>
+											<th scope="col" class='datos-cedula'><a href="#" id='datos-cedula' title='Ocultar cédula'>Cédula&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
+										<?php endif; ?>                                        
+
+										<?php if ($tableConfiguration->position == 0): ?>
+											<th scope="col" class='cargo'><a href="#" id='cargo' title='Cargo'>+</a></th>
+											<th scope="col" class='datos-cargo' style='display: none;'><a href="#" id='datos-cargo' title='Ocultar cargo'>Cargo</a></th>
+										<?php else: ?>
+											<th scope="col" class='cargo' style='display: none;'><a href="#" id='cargo' title='Cargo'>+</a></th>
+											<th scope="col" class='datos-cargo'><a href="#" id='datos-cargo' title='Ocultar cargo'>Cargo</a></th>
+										<?php endif; ?>
+																				
+										<?php if ($tableConfiguration->sw_cesta_ticket == 0): ?>
 		
 											<?php if ($tableConfiguration->date_of_admission == 0): ?>
 												<th scope="col" class='fecha-ingreso'><a href="#" id='fecha-ingreso' title='Fecha ingreso'>+</a></th>
@@ -251,10 +253,10 @@
 											<?php endif; ?>
 										
 										<?php else: ?>
-										
+			
 											<?php if ($tableConfiguration->days_cesta_ticket == 0): ?>
 												<th scope="col" class='days-cesta-ticket'><a href="#" id='days-cesta-ticket' title='Días cesta ticket'>+</a></th>
-												<th scope="col" class='datos-days-cesta-ticket' style='display: none;'><a href="#" id='datos-days-cesta-ticket' title='Ocultar días cesta ticket'>Días&nbsp;cesta&nbsp;ticketa></th>
+												<th scope="col" class='datos-days-cesta-ticket' style='display: none;'><a href="#" id='datos-days-cesta-ticket' title='Ocultar días cesta ticket'>Días&nbsp;cesta&nbsp;ticket</a></th>
 											<?php else: ?>
 												<th scope="col" class='days-cesta-ticket' style='display: none;'><a href="#" id='days-cesta-ticket' title='Días cesta ticket'>+</a></th>
 												<th scope="col" class='datos-days-cesta-ticket'><a href="#" id='datos-days-cesta-ticket' title='Ocultar días cesta ticket'>Días&nbsp;cesta&nbsp;ticket</a></th>
@@ -287,27 +289,33 @@
                                             <td><?= $accountEmployee ?></td>
                                             
                                             <td><?= $employeesFors->employee->surname . ' ' . $employeesFors->employee->first_name ?></td>
+											
+											<?php if ($tableConfiguration->sw_cesta_ticket == 0): ?>
+												<td class='sw-cesta-ticket'><input type='hidden' class='ver-sw-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_sw_cesta_ticket]" value='0'></td>
+											<?php else: ?>
+												<td class='sw-cesta-ticket'><input type='hidden' class='ver-sw-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_sw_cesta_ticket]" value='1'></td>
+											<?php endif; ?>
                                             
                                             <?php $apellidos = explode(' ', $employeesFors->employee->surname); ?>
                                             <?php $nombres = explode(' ', $employeesFors->employee->first_name); ?>
-											
-											<?php if ($swCestaTicket == 0): ?>
-											
-												<?php if ($tableConfiguration->identidy == 0): ?>
-													<td class='cedula'><input type='hidden' class='ver-cedula' name="employeepayment[<?= $accountArray ?>][view_identidy]" value='0'></td>
-													<td class='datos-cedula' style='display: none;'><?= $employeesFors->employee->type_of_identification . '-' . $employeesFors->employee->identity_card ?></td>
-												<?php else: ?>
-													<td class='cedula' style='display: none;'><input type='hidden' class='ver-cedula' name="employeepayment[<?= $accountArray ?>][view_identidy]" value='1'></td>
-													<td class='datos-cedula'><?= $employeesFors->employee->type_of_identification . '-' . $employeesFors->employee->identity_card ?></td>
-												<?php endif; ?>
+																				
+											<?php if ($tableConfiguration->identidy == 0): ?>
+												<td class='cedula'><input type='hidden' class='ver-cedula' name="employeepayment[<?= $accountArray ?>][view_identidy]" value='0'></td>
+												<td class='datos-cedula' style='display: none;'><?= $employeesFors->employee->type_of_identification . '-' . $employeesFors->employee->identity_card ?></td>
+											<?php else: ?>
+												<td class='cedula' style='display: none;'><input type='hidden' class='ver-cedula' name="employeepayment[<?= $accountArray ?>][view_identidy]" value='1'></td>
+												<td class='datos-cedula'><?= $employeesFors->employee->type_of_identification . '-' . $employeesFors->employee->identity_card ?></td>
+											<?php endif; ?>
 
-												<?php if ($tableConfiguration->position == 0): ?>
-													<td class='cargo'><input type='hidden' class='ver-cargo' name="employeepayment[<?= $accountArray ?>][view_position]" value='0'></td>
-													<td class="datos-cargo" style='display: none;'><?= $employeesFors->current_position ?></td>
-												<?php else: ?>
-													<td class='cargo' style='display: none;'><input type='hidden' class='ver-cargo' name="employeepayment[<?= $accountArray ?>][view_position]" value='1'></td>
-													<td class="datos-cargo"><?= $employeesFors->current_position ?></td>
-												<?php endif; ?>
+											<?php if ($tableConfiguration->position == 0): ?>
+												<td class='cargo'><input type='hidden' class='ver-cargo' name="employeepayment[<?= $accountArray ?>][view_position]" value='0'></td>
+												<td class="datos-cargo" style='display: none;'><?= $employeesFors->current_position ?></td>
+											<?php else: ?>
+												<td class='cargo' style='display: none;'><input type='hidden' class='ver-cargo' name="employeepayment[<?= $accountArray ?>][view_position]" value='1'></td>
+												<td class="datos-cargo"><?= $employeesFors->current_position ?></td>
+											<?php endif; ?>
+											
+											<?php if ($tableConfiguration->sw_cesta_ticket == 0): ?>
 
 												<?php if ($tableConfiguration->date_of_admission == 0): ?>
 													<td class='fecha-ingreso'><input type='hidden' class='ver-fecha-ingreso' name="employeepayment[<?= $accountArray ?>][view_date_of_admission]" value='0'></td>
@@ -446,12 +454,12 @@
 												<?php endif; ?>
 
 											<?php else: ?>
-											
+																						
 												<?php if ($tableConfiguration->days_cesta_ticket == 0): ?>
 													<td class='days-cesta-ticket'><input type='hidden' class='ver-days-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_days_cesta_ticket]" value='0'></td>
 													<td class='datos-days-cesta-ticket' style='display: none;'><input class='input-days-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Días&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= $employeesFors->days_cesta_ticket ?>></td>
 												<?php else: ?>
-													<td class='days-cesta-ticket' style='display: none;'><input type='hidden' class='ver-days-cesta-ticket' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value='1'></td>
+													<td class='days-cesta-ticket' style='display: none;'><input type='hidden' class='ver-days-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_days_cesta_ticket]" value='1'></td>
 													<td class='datos-days-cesta-ticket'><input class='input-days-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Días&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= $employeesFors->days_cesta_ticket ?>></td>
 												<?php endif; ?>
 											
@@ -459,7 +467,7 @@
 													<td class='amount-cesta-ticket'><input type='hidden' class='ver-amount-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_amount_cesta_ticket]" value='0'></td>
 													<td class='datos-amount-cesta-ticket' style='display: none;'><input disabled='true' class='input-amount-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Monto&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= $employeesFors->amount_cesta_ticket ?>></td>
 												<?php else: ?>
-													<td class='amount-cesta-ticket' style='display: none;'><input type='hidden' class='ver-amount-cesta-ticket' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value='1'></td>
+													<td class='amount-cesta-ticket' style='display: none;'><input type='hidden' class='ver-amount-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_amount_cesta_ticket]" value='1'></td>
 													<td class='datos-amount-cesta-ticket'><input disabled='true' class='input-amount-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Monto&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= $employeesFors->amount_cesta_ticket ?>></td>
 												<?php endif; ?>
 											
@@ -475,30 +483,39 @@
                             <br />
                             <br />
                         </div>
-                    </fieldset>   
-                    <?= $this->Form->button(__('Guardar'), ['class' =>'btn btn-success noverScreen']) ?> 
+                    </fieldset>
+					<?= $this->Form->button(__('Guardar'), ['id' => 'Guardar', 'class' =>'btn btn-success noverScreen']) ?>
+					<div class="menumenos nover menu-menos">
+						<p>
+						<a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
+						</p>
+					</div>
+					<div style="display:none;" class="menumas nover menu-mas">
+						<p>
+							<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
+							<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
+							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight'], ['id' => 'nuevo', 'class' => 'glyphicon glyphicon-plus-sign btn btn-danger', 'title' => 'Crear nueva nómina']) ?>
+
+							<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overPayment', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-pago', 'class' => 'glyphicon glyphicon-envelope btn btn-danger', 'title' => 'Sobre de pago sueldo']) ?>							
+							
+							<?php if ($tableConfiguration->sw_cesta_ticket == 0): ?> 
+								<button type="submit" id="ver-cesta-ticket" class="glyphicon glyphicon-eye-open btn btn-danger" title="Ver cesta ticket"></button>
+							<?php else: ?>
+								<button type="submit" id="ver-nomina" class="glyphicon glyphicon-eye-open btn btn-danger" title="Ver nómina"></button>
+							<?php endif; ?>
+
+							<?php if ($fortnight == '2da. Quincena'): ?>
+								<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overTax', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-islr', 'class' => 'glyphicon icon-ISLR btn btn-danger', 'title' => 'Sobre de pago retención', 'style' => 'padding: 8px 12px 10px 12px;']) ?>
+							<?php endif; ?>
+							
+							<button id="borrar" class="glyphicon glyphicon-trash btn btn-danger" title="Eliminar"></button>
+							<a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
+						</p>
+					</div> 					
                 <?= $this->Form->end() ?>
             </div>
         </div>
     </div>
-</div>
-<div class="menumenos nover menu-menos">
-    <p>
-    <a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
-    </p>
-</div>
-<div style="display:none;" class="menumas nover menu-mas">
-    <p>
-        <?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
-        <?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
-        <?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight'], ['id' => 'nuevo', 'class' => 'glyphicon glyphicon-plus-sign btn btn-danger', 'title' => 'Crear nueva nómina']) ?>
-        <?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overPayment', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-pago', 'class' => 'glyphicon glyphicon-envelope btn btn-danger', 'title' => 'Sobre de pago sueldo']) ?>
-		<?php if ($fortnight == '2da. Quincena'): ?>
-			<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overTax', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-islr', 'class' => 'glyphicon icon-ISLR btn btn-danger', 'title' => 'Sobre de pago retención', 'style' => 'padding: 8px 12px 10px 12px;']) ?>
-		<?php endif; ?>
-		<?= $this->Form->postLink(__(''), ['controller' => 'Paysheets', 'action' => 'delete', $idPaysheet], ['confirm' => __('Está seguro de que desea eliminar esta nómina?'), 'class' => 'glyphicon glyphicon-trash btn btn-sm btn-danger', 'title' => 'Eliminar nómina', 'style' => 'padding: 7px 12px;']) ?>
-        <a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
-    </p>
 </div>
 <script>
 // Variables
@@ -534,10 +551,24 @@
         $('#year').val($('#yearFor').val());
         $('#search-fortnight').click(function(e) 
         {
-            e.preventDefault();
-            $.redirect('../../../../../../../../paysheets/edit', {yearPaysheet : $("#year").val(), monthPaysheet : $("#month").val(), fortnight : $("#fortnight").val(), classification : $("#classification").val() }); 
+            e.preventDefault(); 
+            $.redirect('/sistemasangabriel/paysheets/edit', {yearPaysheet : $("#year").val(), monthPaysheet : $("#month").val(), fortnight : $("#fortnight").val(), classification : $("#classification").val() });
         });
-
+		
+        $('#borrar').click(function(e) 
+        {
+            e.preventDefault();
+			var r = confirm("Por favor confirme que desea eliminar esta nómina");
+            if (r == true)
+			{
+				$.redirect('/sistemasangabriel/paysheets/delete', {idPaysheet : $("#idPaysheet").val()});
+			}
+			else
+            {
+                return false;
+            } 
+        });
+	
         $('#cedula').on('click',function()
         {
             $('.cedula').toggle();
@@ -563,7 +594,7 @@
             $('.cargo').toggle();
             $('.ver-cargo').val('0');
         });
-
+		
         $('#fecha-ingreso').on('click',function()
         {
             $('.fecha-ingreso').toggle();
@@ -756,7 +787,7 @@
         $('#datos-monto-impuesto').on('click',function()
         {
             $('.datos-monto-impuesto').toggle();
-            $('.porcentaje-monto-impuesto').toggle();
+            $('.monto-impuesto').toggle();
             $('.ver-monto-impuesto').val('0');
         });
 
@@ -829,7 +860,7 @@
             $('.amount-cesta-ticket').toggle();
             $('.ver-amount-cesta-ticket').val('0');
         });
-		
+				
         $('#mas').on('click',function()
         {
             $('.menu-menos').hide();
@@ -854,6 +885,16 @@
             empleadoSeleccionado = idEmpleado;
             marcarEmpleado(empleadoSeleccionado); 
         });
-        
+
+		$('#ver-nomina').on('click',function()
+        {
+            $('.ver-sw-cesta-ticket').val('0');
+         });
+		
+        $('#ver-cesta-ticket').on('click',function()
+        {
+            $('.ver-sw-cesta-ticket').val('1');
+         });
+		         
     });
 </script>

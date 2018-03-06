@@ -18,30 +18,14 @@ class EmployeepaymentsController extends AppController
 {
     public function testFunction()
     {
-        $tableConfiguration = [];
-        
-        $tableConfiguration['cedula'] = 0;
-        
-        $tableConfiguration['cargo'] = 1;
-        
-        $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
-        
-        $paysheet = $this->Employeepayments->Paysheets->get(2);
-        
-        $paysheet->table_configuration = $tableConfigurationJson;
-        
-        if (!($this->Employeepayments->Paysheets->save($paysheet))) 
-        {
-            $this->Flash->error(__('No se pudo grabar el registro'));
-        }
-        else
-        {
-            $paysheet = $this->Employeepayments->Paysheets->get(2);
-            
-            $tableConfiguration = json_decode($paysheet->table_configuration); 
-            
-            debug($tableConfiguration);
-        }
+		$employeepayment = $this->Employeepayments->get(273);
+		
+		$tableConfiguration = json_decode($employeepayment->table_configuration); 
+		
+		$arrayTableConfiguration = (array) $tableConfiguration;
+		
+		debug($tableConfiguration);
+		debug($arrayTableConfiguration);
     }
     /**
      * Index method
@@ -228,130 +212,137 @@ class EmployeepaymentsController extends AppController
                 
                 if ($accountEmployee == 1)
                 {
-                    $classification = $employeepayment->employee->classification;
+                    $classification = $employeepayment->employee->classification;			
+					
+					$objectTableConfiguration = json_decode($employeepayment->table_configuration); 
+					$arrayTableConfiguration = (array) $objectTableConfiguration;
+					
                     $accountEmployee++;
                 }
-
-                if (substr($valor['salary_advance'], -3, 1) == ',')
-                {
-                    $replace1= str_replace('.', '', $valor['salary_advance']);
-                    $replace2 = str_replace(',', '.', $replace1);
-                    $employeepayment->salary_advance = $replace2;
-                }
-                else
-                {
-                    $employeepayment->salary_advance = $valor['salary_advance'];
-                }
-
-                if (substr($valor['other_income'], -3, 1) == ',')
-                {
-                    $replace1= str_replace('.', '', $valor['other_income']);
-                    $replace2 = str_replace(',', '.', $replace1);
-                    $employeepayment->other_income = $replace2;
-                }
-                else
-                {
-                    $employeepayment->other_income = $valor['other_income'];
-                }
-            
-                if ($valor['discount_repose'] > 0.00)
-                {
-                    $employeepayment->repose = true;
-                }
-
-                if (substr($valor['discount_repose'], -3, 1) == ',')
-                {
-                    $replace1= str_replace('.', '', $valor['discount_repose']);
-                    $replace2 = str_replace(',', '.', $replace1);
-                    $employeepayment->discount_repose = $replace2;
-                }
-                else
-                {
-                    $employeepayment->discount_repose = $valor['discount_repose'];
-                }
-                
-                if (substr($valor['discount_loan'], -3, 1) == ',')
-                {
-                    $replace1= str_replace('.', '', $valor['discount_loan']);
-                    $replace2 = str_replace(',', '.', $replace1);
-                    $employeepayment->discount_loan = $replace2;
-                }
-                else
-                {
-                    $employeepayment->discount_loan = $valor['discount_loan'];
-                }
-                
-                if (substr($valor['days_absence'], -3, 1) == ',')
-                {
-                    $replace1= str_replace('.', '', $valor['days_absence']);
-                    $replace2 = str_replace(',', '.', $replace1);
-                    $employeepayment->days_absence = $replace2;
-                }
-                else
-                {
-                    $employeepayment->days_absence = $valor['days_absence'];
-                }
-
-                $employeepayment->discount_absences = $employeepayment->days_absence * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30);
-                
-                $employeepayment->faov = ($employeepayment->fortnight + ($employeepayment->amount_escalation/2) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
-
-				if ($fortnight == '1ra. Quincena')
+				
+				if ($valor['view_sw_cesta_ticket'] == 1)
 				{				
-					$employeepayment->ivss = 0;
+					if (substr($valor['salary_advance'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['salary_advance']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->salary_advance = $replace2;
+					}
+					else
+					{
+						$employeepayment->salary_advance = $valor['salary_advance'];
+					}
+
+					if (substr($valor['other_income'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['other_income']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->other_income = $replace2;
+					}
+					else
+					{
+						$employeepayment->other_income = $valor['other_income'];
+					}
+				
+					if ($valor['discount_repose'] > 0.00)
+					{
+						$employeepayment->repose = true;
+					}
+
+					if (substr($valor['discount_repose'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['discount_repose']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->discount_repose = $replace2;
+					}
+					else
+					{
+						$employeepayment->discount_repose = $valor['discount_repose'];
+					}
+					
+					if (substr($valor['discount_loan'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['discount_loan']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->discount_loan = $replace2;
+					}
+					else
+					{
+						$employeepayment->discount_loan = $valor['discount_loan'];
+					}
+					
+					if (substr($valor['days_absence'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['days_absence']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->days_absence = $replace2;
+					}
+					else
+					{
+						$employeepayment->days_absence = $valor['days_absence'];
+					}
+
+					$employeepayment->discount_absences = $employeepayment->days_absence * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30);
+					
+					$employeepayment->faov = ($employeepayment->fortnight + ($employeepayment->amount_escalation/2) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
+
+					if ($fortnight == '1ra. Quincena')
+					{				
+						$employeepayment->ivss = 0;
+					}
+					else
+					{
+						$employeepayment->ivss = (((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $weeksSocialSecurity) / 2;	
+					}           
+
+					if (substr($valor['trust_days'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['trust_days']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->trust_days = $replace2;
+					}
+					else
+					{
+						$employeepayment->trust_days = $valor['trust_days'];
+					}
+
+					if (substr($valor['percentage_imposed'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['percentage_imposed']);
+						$replace2 = str_replace(',', '.', $replace1);
+					}
+					else
+					{
+						$replace2 = $valor['percentage_imposed'];
+					}
+
+					if ($employeepayment->percentage_imposed != $replace2)
+					{
+						 $result = $employee->editImposed($employeepayment->employee_id, $replace2);
+						 
+						 if ($result == 1)
+						 {
+							 $this->Flash->error(__('No se pudo actualizar el porcentaje de impuesto en la tabla empleado del empleado: ' . $employeepayment->employee_id));
+						 }
+						 else
+						 {
+							 $employeepayment->percentage_imposed = $replace2;
+						 }
+					}
+					
+					if ($fortnight == '1ra. Quincena')
+					{
+						$employeepayment->amount_imposed = 0;
+					}
+					else
+					{
+						$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;					
+					}
+				
+					$employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 				}
-				else
-				{
-	                $employeepayment->ivss = (((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $weeksSocialSecurity) / 2;	
-				}           
-
-                if (substr($valor['trust_days'], -3, 1) == ',')
-                {
-                    $replace1= str_replace('.', '', $valor['trust_days']);
-                    $replace2 = str_replace(',', '.', $replace1);
-                    $employeepayment->trust_days = $replace2;
-                }
-                else
-                {
-                    $employeepayment->trust_days = $valor['trust_days'];
-                }
-
-                if (substr($valor['percentage_imposed'], -3, 1) == ',')
-                {
-                    $replace1= str_replace('.', '', $valor['percentage_imposed']);
-                    $replace2 = str_replace(',', '.', $replace1);
-                }
-                else
-                {
-                    $replace2 = $valor['percentage_imposed'];
-                }
-
-                if ($employeepayment->percentage_imposed != $replace2)
-                {
-                     $result = $employee->editImposed($employeepayment->employee_id, $replace2);
-                     
-                     if ($result == 1)
-                     {
-                         $this->Flash->error(__('No se pudo actualizar el porcentaje de impuesto en la tabla empleado del empleado: ' . $employeepayment->employee_id));
-                     }
-                     else
-                     {
-                         $employeepayment->percentage_imposed = $replace2;
-                     }
-                }
-                
-				if ($fortnight == '1ra. Quincena')
-				{
-					$employeepayment->amount_imposed = 0;
-				}
-				else
-				{
-					$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;					
-				}
-			
-                $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
-
-                $tableConfigurationJson = $this->moveConfiguration($valor);
+				
+                $tableConfigurationJson = $this->moveConfiguration($arrayTableConfiguration, $valor);
                 
                 $employeepayment->table_configuration = $tableConfigurationJson;
 
@@ -398,7 +389,7 @@ class EmployeepaymentsController extends AppController
             }
     
             $classificationNumber = $this->classificationNumber($classification);
-            
+			           
             $this->set(compact('employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity'));
             $this->set('_serialize', ['employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity']);
         }
@@ -614,6 +605,8 @@ class EmployeepaymentsController extends AppController
         $tableConfiguration['identidy'] = '1';
 
         $tableConfiguration['position'] = '1';
+		
+		$tableConfiguration['sw_cesta_ticket'] = '0';
 
         $tableConfiguration['date_of_admission'] = '1';
 
@@ -648,55 +641,76 @@ class EmployeepaymentsController extends AppController
         $tableConfiguration['discount_absences'] = '1';
 
         $tableConfiguration['total_fortnight'] = '1';
-        
+		
+		$tableConfiguration['days_cesta_ticket'] = '1';
+		
+		$tableConfiguration['amount_cesta_ticket'] = '1';
+		
+		$tableConfiguration['loan_cesta_ticket'] = '1';
+		
+		$tableConfiguration['total_cesta_ticket'] = '1';
+		
         $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
  
         return $tableConfigurationJson;       
     }
 
 
-    public function moveConfiguration($valor = null)
-    {
-        $tableConfiguration = [];
-        
-        $tableConfiguration['identidy'] = $valor['view_identidy'];
+    public function moveConfiguration($tableConfiguration = null, $valor = null)
+    {		
+		if ($valor['view_sw_cesta_ticket'] == 1)
+        {
+			$tableConfiguration['identidy'] = $valor['view_identidy'];
 
-        $tableConfiguration['position'] = $valor['view_position'];
+			$tableConfiguration['position'] = $valor['view_position'];
 
-        $tableConfiguration['date_of_admission'] = $valor['view_date_of_admission'];
+			$tableConfiguration['date_of_admission'] = $valor['view_date_of_admission'];
 
-        $tableConfiguration['monthly_salary'] = $valor['view_monthly_salary'];
+			$tableConfiguration['monthly_salary'] = $valor['view_monthly_salary'];
 
-        $tableConfiguration['fortnight'] = $valor['view_fortnight'];
+			$tableConfiguration['fortnight'] = $valor['view_fortnight'];
 
-        $tableConfiguration['amount_escalation_fortnight'] = $valor['view_amount_escalation_fortnight'];
+			$tableConfiguration['amount_escalation_fortnight'] = $valor['view_amount_escalation_fortnight'];
 
-        $tableConfiguration['salary_advance'] = $valor['view_salary_advance'];
+			$tableConfiguration['salary_advance'] = $valor['view_salary_advance'];
 
-        $tableConfiguration['other_income'] = $valor['view_other_income'];
+			$tableConfiguration['other_income'] = $valor['view_other_income'];
 
-        $tableConfiguration['faov'] = $valor['view_faov'];
+			$tableConfiguration['faov'] = $valor['view_faov'];
 
-        $tableConfiguration['ivss'] = $valor['view_ivss'];
+			$tableConfiguration['ivss'] = $valor['view_ivss'];
 
-        $tableConfiguration['trust_days'] = $valor['view_trust_days'];
+			$tableConfiguration['trust_days'] = $valor['view_trust_days'];
 
-        $tableConfiguration['escrow'] = $valor['view_escrow'];
+			$tableConfiguration['escrow'] = $valor['view_escrow'];
 
-        $tableConfiguration['discount_repose'] = $valor['view_discount_repose'];
+			$tableConfiguration['discount_repose'] = $valor['view_discount_repose'];
 
-        $tableConfiguration['discount_loan'] = $valor['view_discount_loan'];
+			$tableConfiguration['discount_loan'] = $valor['view_discount_loan'];
 
-        $tableConfiguration['percentage_imposed'] = $valor['view_percentage_imposed'];
+			$tableConfiguration['percentage_imposed'] = $valor['view_percentage_imposed'];
 
-        $tableConfiguration['amount_imposed'] = $valor['view_amount_imposed'];
+			$tableConfiguration['amount_imposed'] = $valor['view_amount_imposed'];
 
-        $tableConfiguration['days_absence'] = $valor['view_days_absence'];                                         
-        
-        $tableConfiguration['discount_absences'] = $valor['view_discount_absences'];
+			$tableConfiguration['days_absence'] = $valor['view_days_absence'];                                         
+			
+			$tableConfiguration['discount_absences'] = $valor['view_discount_absences'];
 
-        $tableConfiguration['total_fortnight'] = $valor['view_total_fortnight'];
-        
+			$tableConfiguration['total_fortnight'] = $valor['view_total_fortnight'];
+		}
+		else
+		{
+			$tableConfiguration['days_cesta_ticket'] = $valor['view_days_cesta_ticket'];
+			
+			$tableConfiguration['amount_cesta_ticket'] = $valor['view_amount_cesta_ticket'];
+			
+			$tableConfiguration['loan_cesta_ticket'] = '0';
+			
+			$tableConfiguration['total_cesta_ticket'] = '0';
+		}
+		
+		$tableConfiguration['sw_cesta_ticket'] = $valor['view_sw_cesta_ticket'];
+			
         $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
  
         return $tableConfigurationJson;       
