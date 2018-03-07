@@ -232,17 +232,17 @@ class PaysheetsController extends AppController
         if ($this->request->is('post')) 
         {
             $paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
-			
-			if (substr($paysheet->cesta_ticket_month, -3, 1) == ',')
+						
+			if (substr($_POST['cesta_ticket_month'], -3, 1) == ',')
 			{
-				$replace1= str_replace('.', '', $paysheet->cesta_ticket_month);
+				$replace1= str_replace('.', '', $_POST['cesta_ticket_month']);
 				$replace2 = str_replace(',', '.', $replace1);
 				$paysheet->cesta_ticket_month = $replace2;
 				$cestaTicket = $replace2;
 			}
 			else
 			{
-				$cestaTicket = $paysheet->cesta_ticket_month;
+				$cestaTicket = $_POST['cesta_ticket_month'];
 			}
             
             $lastRecord = $this->Paysheets->find('all', ['conditions' => 
@@ -344,7 +344,7 @@ class PaysheetsController extends AppController
 						}
 						else
 						{
-							$this->Flash->error(__('No se consiguieron registros de empleados'));
+							$this->Flash->error(__('No se encontraron registros de empleados'));
 						}
 					}
                 }

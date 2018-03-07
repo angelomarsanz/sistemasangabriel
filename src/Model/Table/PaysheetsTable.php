@@ -83,6 +83,9 @@ class PaysheetsTable extends Table
             ->allowEmpty('cesta_ticket_month');
 			
         $validator
+            ->allowEmpty('table_configuration');			
+
+        $validator
             ->allowEmpty('registration_status');
 			
         $validator

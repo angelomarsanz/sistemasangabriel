@@ -265,6 +265,7 @@ class EmployeepaymentsTable extends Table
             'Employeepayments.percentage_imposed',
             'Employeepayments.amount_imposed',
             'Employeepayments.total_fortnight',
+            'Employeepayments.table_configuration',
             'Employees.id',
             'Employees.surname',
             'Employees.first_name',
