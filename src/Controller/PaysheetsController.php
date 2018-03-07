@@ -519,9 +519,9 @@ class PaysheetsController extends AppController
 			
 			$tableConfiguration['amount_cesta_ticket'] = $valor['view_amount_cesta_ticket'];
 			
-			$tableConfiguration['loan_cesta_ticket'] = '0';
+			$tableConfiguration['loan_cesta_ticket'] = $valor['view_loan_cesta_ticket'];
 			
-			$tableConfiguration['total_cesta_ticket'] = '0';
+			$tableConfiguration['total_cesta_ticket'] = $valor['view_total_cesta_ticket'];
 		}
 		
 		$previousSwCestaTicket = $tableConfiguration['sw_cesta_ticket'];

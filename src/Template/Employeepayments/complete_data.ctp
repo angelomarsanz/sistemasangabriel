@@ -269,7 +269,23 @@
 												<th scope="col" class='amount-cesta-ticket' style='display: none;'><a href="#" id='amount-cesta-ticket' title='Monto cesta ticket'>+</a></th>
 												<th scope="col" class='datos-amount-cesta-ticket'><a href="#" id='datos-amount-cesta-ticket' title='Ocultar monto cesta ticket'>Monto&nbsp;cesta&nbsp;ticket</a></th>
 											<?php endif; ?>
-																																	
+											
+											<?php if ($tableConfiguration->loan_cesta_ticket == 0): ?>
+												<th scope="col" class='loan-cesta-ticket'><a href="#" id='loan-cesta-ticket' title='Préstamos cesta ticket'>+</a></th>
+												<th scope="col" class='datos-loan-cesta-ticket' style='display: none;'><a href="#" id='datos-loan-cesta-ticket' title='Ocultar préstamo cesta ticket'>Préstamo&nbsp;cesta&nbsp;ticket</a></th>
+											<?php else: ?>
+												<th scope="col" class='loan-cesta-ticket' style='display: none;'><a href="#" id='loan-cesta-ticket' title='Préstamo cesta ticket'>+</a></th>
+												<th scope="col" class='datos-loan-cesta-ticket'><a href="#" id='datos-loan-cesta-ticket' title='Ocultar préstamo cesta ticket'>Préstamo&nbsp;cesta&nbsp;ticket</a></th>
+											<?php endif; ?>
+											
+											<?php if ($tableConfiguration->total_cesta_ticket == 0): ?>
+												<th scope="col" class='total-cesta-ticket'><a href="#" id='total-cesta-ticket' title='Total cesta ticket'>+</a></th>
+												<th scope="col" class='datos-total-cesta-ticket' style='display: none;'><a href="#" id='datos-total-cesta-ticket' title='Ocultar total cesta ticket'>Total&nbsp;cesta&nbsp;ticket</a></th>
+											<?php else: ?>
+												<th scope="col" class='total-cesta-ticket' style='display: none;'><a href="#" id='total-cesta-ticket' title='Total cesta ticket'>+</a></th>
+												<th scope="col" class='datos-total-cesta-ticket'><a href="#" id='datos-total-cesta-ticket' title='Ocultar total cesta ticket'>Total&nbsp;cesta&nbsp;ticket</a></th>
+											<?php endif; ?>
+																		
 										<?php endif; ?>
                                     </tr>
                                 </thead>
@@ -469,6 +485,22 @@
 												<?php else: ?>
 													<td class='amount-cesta-ticket' style='display: none;'><input type='hidden' class='ver-amount-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_amount_cesta_ticket]" value='1'></td>
 													<td class='datos-amount-cesta-ticket'><input disabled='true' class='input-amount-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Monto&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= $employeesFors->amount_cesta_ticket ?>></td>
+												<?php endif; ?>
+											
+												<?php if ($tableConfiguration->loan_cesta_ticket == 0): ?>
+													<td class='loan-cesta-ticket'><input type='hidden' class='ver-loan-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_loan_cesta_ticket]" value='0'></td>
+													<td class='datos-loan-cesta-ticket' style='display: none;'><input class='input-loan-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Préstamo&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][loan_cesta_ticket]" value=<?= $employeesFors->loan_cesta_ticket ?>></td>
+												<?php else: ?>
+													<td class='loan-cesta-ticket' style='display: none;'><input type='hidden' class='ver-loan-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_loan_cesta_ticket]" value='1'></td>
+													<td class='datos-loan-cesta-ticket'><input class='input-loan-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Préstamo&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][loan_cesta_ticket]" value=<?= $employeesFors->loan_cesta_ticket ?>></td>
+												<?php endif; ?>
+												
+												<?php if ($tableConfiguration->total_cesta_ticket == 0): ?>
+													<td class='total-cesta-ticket'><input type='hidden' class='ver-total-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_total_cesta_ticket]" value='0'></td>
+													<td class='datos-total-cesta-ticket' style='display: none;'><input disabled='true' class='input-total-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Total&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_cesta_ticket]" value=<?= $employeesFors->total_cesta_ticket ?>></td>
+												<?php else: ?>
+													<td class='total-cesta-ticket' style='display: none;'><input type='hidden' class='ver-total-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_total_cesta_ticket]" value='1'></td>
+													<td class='datos-total-cesta-ticket'><input disabled='true' class='input-total-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Total&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_cesta_ticket]" value=<?= $employeesFors->total_cesta_ticket ?>></td>
 												<?php endif; ?>
 											
 											<?php endif; ?>
@@ -861,6 +893,34 @@
             $('.ver-amount-cesta-ticket').val('0');
         });
 				
+        $('#loan-cesta-ticket').on('click',function()
+        {
+            $('.loan-cesta-ticket').toggle();
+            $('.datos-loan-cesta-ticket').toggle();
+            $('.ver-loan-cesta-ticket').val('1');
+        });
+		
+        $('#datos-loan-cesta-ticket').on('click',function()
+        {
+            $('.datos-loan-cesta-ticket').toggle();
+            $('.loan-cesta-ticket').toggle();
+            $('.ver-loan-cesta-ticket').val('0');
+        });
+				
+        $('#total-cesta-ticket').on('click',function()
+        {
+            $('.total-cesta-ticket').toggle();
+            $('.datos-total-cesta-ticket').toggle();
+            $('.ver-total-cesta-ticket').val('1');
+        });
+
+        $('#datos-total-cesta-ticket').on('click',function()
+        {
+            $('.datos-total-cesta-ticket').toggle();
+            $('.total-cesta-ticket').toggle();
+            $('.ver-total-cesta-ticket').val('0');
+        });
+							
         $('#mas').on('click',function()
         {
             $('.menu-menos').hide();

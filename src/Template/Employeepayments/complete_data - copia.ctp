@@ -1,7 +1,7 @@
 <style>
 @media screen
 {
-    .sw-nomina-cesta
+    .menumenos
     {
         display:scroll;
         position:fixed;
@@ -10,20 +10,11 @@
         opacity: 0.5;
         text-align: right;
     }
-    .menumenos
-    {
-        display:scroll;
-        position:fixed;
-        bottom: 12%;
-        right: 1%;
-        opacity: 0.5;
-        text-align: right;
-    }
     .menumas 
     {
         display:scroll;
         position:fixed;
-        bottom: 12%;
+        bottom: 5%;
         right: 1%;
         opacity: 0.5;
         text-align: right;
@@ -92,7 +83,6 @@
         	    <input type='hidden' id='fortnightFor' value=<?= $fortnightNumber ?> />
         	    <input type='hidden' id='monthFor' value=<?= $monthNumber ?> />
         	    <input type='hidden' id='yearFor' value=<?= $year ?> />
-				<input type='hidden' id='idPaysheet' value=<?= $idPaysheet ?> />
                 <?= $this->Form->create() ?>
                     <fieldset>
                     	<div class="table-responsive">
@@ -493,41 +483,39 @@
                             <br />
                             <br />
                         </div>
-                    </fieldset>   
-					<?= $this->Form->button(__('Guardar'), ['id' => 'Guardar', 'class' =>'btn btn-success noverScreen']) ?> 					
-					<div class="sw-nomina-cesta">
+                    </fieldset>
+					<?= $this->Form->button(__('Guardar'), ['id' => 'Guardar', 'class' =>'btn btn-success noverScreen']) ?>
+					<div class="menumenos nover menu-menos">
 						<p>
-						<?php if ($tableConfiguration->sw_cesta_ticket == 0): ?> 
-							<button type="submit" id="ver-cesta-ticket" class="glyphicon glyphicon-eye-open btn btn-danger" title="Ver cesta ticket"></button>
-						<?php else: ?>
-							<button type="submit" id="ver-nomina" class="glyphicon glyphicon-eye-open btn btn-danger" title="Ver nómina"></button>
-						<?php endif; ?>
+						<a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
 						</p>
 					</div>
+					<div style="display:none;" class="menumas nover menu-mas">
+						<p>
+							<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
+							<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
+							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight'], ['id' => 'nuevo', 'class' => 'glyphicon glyphicon-plus-sign btn btn-danger', 'title' => 'Crear nueva nómina']) ?>
+
+							<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overPayment', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-pago', 'class' => 'glyphicon glyphicon-envelope btn btn-danger', 'title' => 'Sobre de pago sueldo']) ?>							
+							
+							<?php if ($tableConfiguration->sw_cesta_ticket == 0): ?> 
+								<button type="submit" id="ver-cesta-ticket" class="glyphicon glyphicon-eye-open btn btn-danger" title="Ver cesta ticket"></button>
+							<?php else: ?>
+								<button type="submit" id="ver-nomina" class="glyphicon glyphicon-eye-open btn btn-danger" title="Ver nómina"></button>
+							<?php endif; ?>
+
+							<?php if ($fortnight == '2da. Quincena'): ?>
+								<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overTax', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-islr', 'class' => 'glyphicon icon-ISLR btn btn-danger', 'title' => 'Sobre de pago retención', 'style' => 'padding: 8px 12px 10px 12px;']) ?>
+							<?php endif; ?>
+							
+							<button id="borrar" class="glyphicon glyphicon-trash btn btn-danger" title="Eliminar"></button>
+							<a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
+						</p>
+					</div> 					
                 <?= $this->Form->end() ?>
             </div>
         </div>
     </div>
-</div>
-<div class="menumenos nover menu-menos">
-    <p>
-    <a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
-    </p>
-</div>
-<div style="display:none;" class="menumas nover menu-mas">
-    <p>
-        <?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
-        <?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
-        <?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight'], ['id' => 'nuevo', 'class' => 'glyphicon glyphicon-plus-sign btn btn-danger', 'title' => 'Crear nueva nómina']) ?>
-        <?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overPayment', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-pago', 'class' => 'glyphicon glyphicon-envelope btn btn-danger', 'title' => 'Sobre de pago sueldo']) ?>
-
-		<?php if ($fortnight == '2da. Quincena'): ?>
-			<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overTax', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-islr', 'class' => 'glyphicon icon-ISLR btn btn-danger', 'title' => 'Sobre de pago retención', 'style' => 'padding: 8px 12px 10px 12px;']) ?>
-		<?php endif; ?>
-		<!-- $this->Form->postLink(__(''), ['controller' => 'Paysheets', 'action' => 'delete', $idPaysheet], ['confirm' => __('Está seguro de que desea eliminar esta nómina?'), 'class' => 'glyphicon glyphicon-trash btn btn-sm btn-danger', 'title' => 'Eliminar nómina', 'style' => 'padding: 7px 12px;']) -->
-		<button id="borrar" class="glyphicon glyphicon-trash btn btn-danger" title="Eliminar"></button>
-        <a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
-    </p>
 </div>
 <script>
 // Variables
