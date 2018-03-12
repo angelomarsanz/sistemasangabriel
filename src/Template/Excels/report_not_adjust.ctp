@@ -12,11 +12,13 @@
                     </tr>
                 </thead>
                 <tbody>
+					<?php $accountStudent = 1; ?>
                     <?php foreach ($notAdjust as $notAdjusts): ?>
-                    <tr>
-                        <td><?= h($notAdjusts->number) ?></td>
-						<td><?= h($notAdjusts->col1) ?></td>
-                    </tr>
+						<tr>
+							<td><?= $accountStudent ?></td>
+							<td><?= h($notAdjusts->col1) ?></td>
+						</tr>
+						<?php $accountStudent++ ?>
                     <?php endforeach; ?>
                 </tbody>
             </table>

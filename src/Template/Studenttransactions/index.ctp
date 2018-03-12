@@ -79,7 +79,7 @@
             {
                 var stringTransactions = JSON.stringify(tbTransactions);
                                 
-                $.redirect('/studenttransactions/adjustTransactions', {transactions : stringTransactions});
+                $.redirect('/sistemasangabriel/studenttransactions/adjustTransactions', {transactions : stringTransactions});
             } 
         });
     }); 
