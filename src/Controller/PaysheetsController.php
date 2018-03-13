@@ -542,6 +542,7 @@ class PaysheetsController extends AppController
         {
 			$arrayResult['indicator'] = 0;
             $arrayResult['previousSwCestaTicket'] = $previousSwCestaTicket;
+			$arrayResult['cesta_ticket_month'] = $paysheet->cesta_ticket_month;
         } 
         else
         {

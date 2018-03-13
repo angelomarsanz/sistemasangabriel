@@ -5,6 +5,8 @@ use App\Controller\AppController;
 
 use App\Controller\EmployeesController;
 
+use App\Controller\PaysheetsController;
+
 use Cake\ORM\TableRegistry;
 
 use Cake\I18n\Time;
@@ -183,10 +185,6 @@ class EmployeepaymentsController extends AppController
 		
 		$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;
 		
-        $tableConfigurationJson = $this->initialConfiguration();
-            
-        $employeepayment->table_configuration = $tableConfigurationJson;
-
         if ($this->Employeepayments->save($employeepayment)) 
         {
             $result = 0;
@@ -201,6 +199,8 @@ class EmployeepaymentsController extends AppController
     public function completeData($idPaysheet = null, $weeksSocialSecurity = null, $year = null, $monthNumber = null, $month = null, $fortnight = null, $classification = null)
     {
         $employee = new EmployeesController();
+		
+		$paysheet = new PaysheetsController();
         
         if ($this->request->is('post')) 
         {
@@ -212,15 +212,23 @@ class EmployeepaymentsController extends AppController
                 
                 if ($accountEmployee == 1)
                 {
-                    $classification = $employeepayment->employee->classification;			
+                    $classification = $employeepayment->employee->classification;
 					
-					$objectTableConfiguration = json_decode($employeepayment->table_configuration); 
-					$arrayTableConfiguration = (array) $objectTableConfiguration;
+					$arrayResult = $paysheet->moveConfiguration($idPaysheet, $valor);
 					
+					if ($arrayResult['indicator'] == 0)
+					{
+						$previousSwCestaTicket = $arrayResult['previousSwCestaTicket']; 
+					}
+					else
+					{
+						$this->Flash->error(__('No se pudo actualizar la tabla de configuración de la nómina identificada con: ' . $idPaysheet));
+						return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+					}					
                     $accountEmployee++;
                 }
 				
-				if ($valor['view_sw_cesta_ticket'] == 1)
+				if ($previousSwCestaTicket == 0)
 				{				
 					if (substr($valor['salary_advance'], -3, 1) == ',')
 					{
@@ -342,10 +350,6 @@ class EmployeepaymentsController extends AppController
 					$employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 				}
 				
-                $tableConfigurationJson = $this->moveConfiguration($arrayTableConfiguration, $valor);
-                
-                $employeepayment->table_configuration = $tableConfigurationJson;
-
                 if (!($this->Employeepayments->save($employeepayment)))
                 {
                     $this->Flash->error(__('No pudo ser actualizado el pago identificado con el id: ' . $valor['id']));            
@@ -361,22 +365,11 @@ class EmployeepaymentsController extends AppController
         if ($arrayResult['indicator'] == 0)
         {
             $employeesFor = $arrayResult['searchRequired'];
-
-            $accountFor = 0;    
-    
-            foreach ($employeesFor as $employeesFors)
-            {
-                if ($accountFor == 0)
-                {    
-                    $tableConfiguration = json_decode($employeesFors->table_configuration);
-                    $accountFor++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            
+			
+			$paysheet = $this->Employeepayments->Paysheets->get($idPaysheet);
+                				
+			$tableConfiguration = json_decode($paysheet->table_configuration);
+           
             $currentView = 'employeepaymentsCompleteData';
             
             if ($fortnight == '1ra. Quincena')
@@ -597,122 +590,5 @@ class EmployeepaymentsController extends AppController
         $classificationNumbers = ["01", "02", "03", "04", "05"];
         $classificationNumber = str_replace($nameClassification, $classificationNumbers, $classification);
         return $classificationNumber;
-    }
-    public function initialConfiguration()
-    {
-        $tableConfiguration = [];
-        
-        $tableConfiguration['identidy'] = '1';
-
-        $tableConfiguration['position'] = '1';
-		
-		$tableConfiguration['sw_cesta_ticket'] = '0';
-
-        $tableConfiguration['date_of_admission'] = '1';
-
-        $tableConfiguration['monthly_salary'] = '1';
-
-        $tableConfiguration['fortnight'] = '1';
-
-        $tableConfiguration['amount_escalation_fortnight'] = '1';
-
-        $tableConfiguration['salary_advance'] = '1';
-
-        $tableConfiguration['other_income'] = '1';
-
-        $tableConfiguration['faov'] = '1';
-
-        $tableConfiguration['ivss'] = '1';
-
-        $tableConfiguration['trust_days'] = '1';
-
-        $tableConfiguration['escrow'] = '1';
-
-        $tableConfiguration['discount_repose'] = '1';
-
-        $tableConfiguration['discount_loan'] = '1';
-
-        $tableConfiguration['percentage_imposed'] = '1';
-
-        $tableConfiguration['amount_imposed'] = '1';
-
-        $tableConfiguration['days_absence'] = '1';                                         
-        
-        $tableConfiguration['discount_absences'] = '1';
-
-        $tableConfiguration['total_fortnight'] = '1';
-		
-		$tableConfiguration['days_cesta_ticket'] = '1';
-		
-		$tableConfiguration['amount_cesta_ticket'] = '1';
-		
-		$tableConfiguration['loan_cesta_ticket'] = '1';
-		
-		$tableConfiguration['total_cesta_ticket'] = '1';
-		
-        $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
- 
-        return $tableConfigurationJson;       
-    }
-
-
-    public function moveConfiguration($tableConfiguration = null, $valor = null)
-    {		
-		if ($valor['view_sw_cesta_ticket'] == 1)
-        {
-			$tableConfiguration['identidy'] = $valor['view_identidy'];
-
-			$tableConfiguration['position'] = $valor['view_position'];
-
-			$tableConfiguration['date_of_admission'] = $valor['view_date_of_admission'];
-
-			$tableConfiguration['monthly_salary'] = $valor['view_monthly_salary'];
-
-			$tableConfiguration['fortnight'] = $valor['view_fortnight'];
-
-			$tableConfiguration['amount_escalation_fortnight'] = $valor['view_amount_escalation_fortnight'];
-
-			$tableConfiguration['salary_advance'] = $valor['view_salary_advance'];
-
-			$tableConfiguration['other_income'] = $valor['view_other_income'];
-
-			$tableConfiguration['faov'] = $valor['view_faov'];
-
-			$tableConfiguration['ivss'] = $valor['view_ivss'];
-
-			$tableConfiguration['trust_days'] = $valor['view_trust_days'];
-
-			$tableConfiguration['escrow'] = $valor['view_escrow'];
-
-			$tableConfiguration['discount_repose'] = $valor['view_discount_repose'];
-
-			$tableConfiguration['discount_loan'] = $valor['view_discount_loan'];
-
-			$tableConfiguration['percentage_imposed'] = $valor['view_percentage_imposed'];
-
-			$tableConfiguration['amount_imposed'] = $valor['view_amount_imposed'];
-
-			$tableConfiguration['days_absence'] = $valor['view_days_absence'];                                         
-			
-			$tableConfiguration['discount_absences'] = $valor['view_discount_absences'];
-
-			$tableConfiguration['total_fortnight'] = $valor['view_total_fortnight'];
-		}
-		else
-		{
-			$tableConfiguration['days_cesta_ticket'] = $valor['view_days_cesta_ticket'];
-			
-			$tableConfiguration['amount_cesta_ticket'] = $valor['view_amount_cesta_ticket'];
-			
-			$tableConfiguration['loan_cesta_ticket'] = '0';
-			
-			$tableConfiguration['total_cesta_ticket'] = '0';
-		}
-		
-		$tableConfiguration['sw_cesta_ticket'] = $valor['view_sw_cesta_ticket'];
-			
-        $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
- 
-        return $tableConfigurationJson;       
     }
 }

@@ -473,34 +473,34 @@
 																						
 												<?php if ($tableConfiguration->days_cesta_ticket == 0): ?>
 													<td class='days-cesta-ticket'><input type='hidden' class='ver-days-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_days_cesta_ticket]" value='0'></td>
-													<td class='datos-days-cesta-ticket' style='display: none;'><input class='input-days-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Días&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= $employeesFors->days_cesta_ticket ?>></td>
+													<td class='datos-days-cesta-ticket' style='display: none;'><input class='input-days-cesta-ticket alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Días&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= number_format($employeesFors->days_cesta_ticket, 2, ",", ".") ?>></td>
 												<?php else: ?>
 													<td class='days-cesta-ticket' style='display: none;'><input type='hidden' class='ver-days-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_days_cesta_ticket]" value='1'></td>
-													<td class='datos-days-cesta-ticket'><input class='input-days-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Días&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= $employeesFors->days_cesta_ticket ?>></td>
+													<td class='datos-days-cesta-ticket'><input class='input-days-cesta-ticket alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Días&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= number_format($employeesFors->days_cesta_ticket, 2, ",", ".") ?>></td>
 												<?php endif; ?>
 											
 												<?php if ($tableConfiguration->amount_cesta_ticket == 0): ?>
 													<td class='amount-cesta-ticket'><input type='hidden' class='ver-amount-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_amount_cesta_ticket]" value='0'></td>
-													<td class='datos-amount-cesta-ticket' style='display: none;'><input disabled='true' class='input-amount-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Monto&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= $employeesFors->amount_cesta_ticket ?>></td>
+													<td class='datos-amount-cesta-ticket' style='display: none;'><input disabled='true' class='input-amount-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Monto&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= number_format($employeesFors->amount_cesta_ticket, 2, ",", ".") ?>></td>
 												<?php else: ?>
 													<td class='amount-cesta-ticket' style='display: none;'><input type='hidden' class='ver-amount-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_amount_cesta_ticket]" value='1'></td>
-													<td class='datos-amount-cesta-ticket'><input disabled='true' class='input-amount-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Monto&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= $employeesFors->amount_cesta_ticket ?>></td>
+													<td class='datos-amount-cesta-ticket'><input disabled='true' class='input-amount-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Monto&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= number_format($employeesFors->amount_cesta_ticket, 2, ",", ".") ?>></td>
 												<?php endif; ?>
 											
 												<?php if ($tableConfiguration->loan_cesta_ticket == 0): ?>
 													<td class='loan-cesta-ticket'><input type='hidden' class='ver-loan-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_loan_cesta_ticket]" value='0'></td>
-													<td class='datos-loan-cesta-ticket' style='display: none;'><input class='input-loan-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Préstamo&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][loan_cesta_ticket]" value=<?= $employeesFors->loan_cesta_ticket ?>></td>
+													<td class='datos-loan-cesta-ticket' style='display: none;'><input class='input-loan-cesta-ticket alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Préstamo&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][loan_cesta_ticket]" value=<?= number_format($employeesFors->loan_cesta_ticket, 2, ",", ".") ?>></td>
 												<?php else: ?>
 													<td class='loan-cesta-ticket' style='display: none;'><input type='hidden' class='ver-loan-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_loan_cesta_ticket]" value='1'></td>
-													<td class='datos-loan-cesta-ticket'><input class='input-loan-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Préstamo&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][loan_cesta_ticket]" value=<?= $employeesFors->loan_cesta_ticket ?>></td>
+													<td class='datos-loan-cesta-ticket'><input class='input-loan-cesta-ticket alternative-decimal-separator' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Préstamo&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][loan_cesta_ticket]" value=<?= number_format($employeesFors->loan_cesta_ticket, 2, ",", ".") ?>></td>
 												<?php endif; ?>
 												
 												<?php if ($tableConfiguration->total_cesta_ticket == 0): ?>
 													<td class='total-cesta-ticket'><input type='hidden' class='ver-total-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_total_cesta_ticket]" value='0'></td>
-													<td class='datos-total-cesta-ticket' style='display: none;'><input disabled='true' class='input-total-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Total&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_cesta_ticket]" value=<?= $employeesFors->total_cesta_ticket ?>></td>
+													<td class='datos-total-cesta-ticket' style='display: none;'><input disabled='true' class='input-total-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Total&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_cesta_ticket]" value=<?= number_format($employeesFors->total_cesta_ticket, 2, ",", ".") ?>></td>
 												<?php else: ?>
 													<td class='total-cesta-ticket' style='display: none;'><input type='hidden' class='ver-total-cesta-ticket' name="employeepayment[<?= $accountArray ?>][view_total_cesta_ticket]" value='1'></td>
-													<td class='datos-total-cesta-ticket'><input disabled='true' class='input-total-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Total&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_cesta_ticket]" value=<?= $employeesFors->total_cesta_ticket ?>></td>
+													<td class='datos-total-cesta-ticket'><input disabled='true' class='input-total-cesta-ticket' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Total&nbsp;cesta&nbsp;ticket' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_cesta_ticket]" value=<?= number_format($employeesFors->total_cesta_ticket, 2, ",", ".") ?>></td>
 												<?php endif; ?>
 											
 											<?php endif; ?>
@@ -530,14 +530,13 @@
 
 							<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overPayment', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-pago', 'class' => 'glyphicon glyphicon-envelope btn btn-danger', 'title' => 'Sobre de pago sueldo']) ?>							
 							
-							<?php if ($tableConfiguration->sw_cesta_ticket == 0): ?> 
-								<button type="submit" id="ver-cesta-ticket" class="glyphicon glyphicon-eye-open btn btn-danger" title="Ver cesta ticket"></button>
-							<?php else: ?>
-								<button type="submit" id="ver-nomina" class="glyphicon glyphicon-eye-open btn btn-danger" title="Ver nómina"></button>
-							<?php endif; ?>
-
 							<?php if ($fortnight == '2da. Quincena'): ?>
 								<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overTax', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-islr', 'class' => 'glyphicon icon-ISLR btn btn-danger', 'title' => 'Sobre de pago retención', 'style' => 'padding: 8px 12px 10px 12px;']) ?>
+								<?php if ($tableConfiguration->sw_cesta_ticket == 0): ?> 
+									<button type="submit" id="ver-cesta-ticket" class="glyphicon glyphicon-eye-open btn btn-danger" title="Ver cesta ticket"></button>
+								<?php else: ?>
+									<button type="submit" id="ver-nomina" class="glyphicon glyphicon-eye-open btn btn-danger" title="Ver nómina"></button>
+								<?php endif; ?>
 							<?php endif; ?>
 							
 							<button id="borrar" class="glyphicon glyphicon-trash btn btn-danger" title="Eliminar"></button>

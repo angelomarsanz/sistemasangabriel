@@ -218,7 +218,8 @@ class EmployeepaymentsController extends AppController
 					
 					if ($arrayResult['indicator'] == 0)
 					{
-						$previousSwCestaTicket = $arrayResult['previousSwCestaTicket']; 
+						$previousSwCestaTicket = $arrayResult['previousSwCestaTicket'];
+						$cestaTicketMonth = $arrayResult['cesta_ticket_month'];
 					}
 					else
 					{
@@ -348,6 +349,34 @@ class EmployeepaymentsController extends AppController
 					}
 				
 					$employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+				}
+				else
+				{
+					if (substr($valor['days_cesta_ticket'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['days_cesta_ticket']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->days_cesta_ticket = $replace2;
+					}
+					else
+					{
+						$employeepayment->days_cesta_ticket = $valor['days_cesta_ticket'];
+					}
+					
+					$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($cestaTicketMonth/30);
+					
+					if (substr($valor['loan_cesta_ticket'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['loan_cesta_ticket']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->loan_cesta_ticket = $replace2;
+					}
+					else
+					{
+						$employeepayment->loan_cesta_ticket = $valor['loan_cesta_ticket'];
+					}
+					
+					$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;
 				}
 				
                 if (!($this->Employeepayments->save($employeepayment)))
