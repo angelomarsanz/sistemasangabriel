@@ -277,4 +277,32 @@ class StudentsTable extends Table
         
         return $arrayResult;
     }
+    public function findFamily(Query $query, array $options)
+    {
+        $query->where([['Students.id >' => 1], ['student_condition' => 'Regular'], ['Students.section_id >' => 1]])
+			->contain(['Parentsandguardians', 'Sections'])
+			->order(['Parentsandguardians.family' => 'ASC',
+				'Parentsandguardians.surname' => 'ASC',
+				'Parentsandguardians.second_surname' => 'ASC',
+				'Parentsandguardians.first_name' => 'ASC',
+				'Parentsandguardians.second_name' => 'ASC',
+				'Students.surname' => 'ASC',
+				'Students.second_surname' => 'ASC',
+				'Students.first_name' => 'ASC',
+				'Students.second_name' => 'ASC']); 
+		
+        $arrayResult = [];
+        
+        if ($query)
+        {
+            $arrayResult['indicator'] = 0;
+            $arrayResult['searchRequired'] = $query;
+        }
+        else
+        {
+            $arrayResult['indicator'] = 1;
+        }
+        
+        return $arrayResult;
+    }
 }

@@ -224,12 +224,27 @@ class StudenttransactionsController extends AppController
                     $nameOfTheMonth = $this->nameMonth($monthNumber);
         
                     $studenttransaction->transaction_type = 'Mensualidad';
+					
+			        if ($monthNumber < 10)
+					{
+						$monthString = "0" . $monthNumber;
+					}
+					else
+					{
+						$monthString = (string) $monthNumber;
+					}
                         
                     if ($monthNumber < 9)
-                        $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;
-                    else
-                        $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
-                            
+					{
+                        $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;						
+						$studenttransaction->payment_date = $nextYear . '-' . $monthString . '-01';						
+                    }
+					else
+					{		
+						$studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
+						$studenttransaction->payment_date = $quotaYear . '-' . $monthString . '-01';
+                    }        
+					
                     $studenttransaction->paid_out = 0;
                     
                     if ($nameOfTheMonth == "Ago")
@@ -243,9 +258,8 @@ class StudenttransactionsController extends AppController
                     $studenttransaction->original_amount = $row['amount'];
                     $studenttransaction->invoiced = 0;
                     $studenttransaction->paid_out = 0;
-                    $studenttransaction->partial_payment = 0;
+					$studenttransaction->partial_payment = 0;
                     $studenttransaction->bill_number = 0;
-                    $studenttransaction->payment_date = 0;
                     $studenttransaction->transaction_migration = 0;
 
                     if (!($this->Studenttransactions->save($studenttransaction))) 
@@ -346,19 +360,33 @@ class StudenttransactionsController extends AppController
         
                     $studenttransaction->transaction_type = 'Mensualidad';
                         
+			        if ($monthNumber < 10)
+					{
+						$monthString = "0" . $monthNumber;
+					}
+					else
+					{
+						$monthString = (string) $monthNumber;
+					}
+                        
                     if ($monthNumber < 9)
-                        $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;
-                    else
-                        $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
-                            
+					{
+                        $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;				
+						$studenttransaction->payment_date = $nextYear . '-' . $monthString . '-01';						
+                    }
+					else
+					{		
+						$studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
+						$studenttransaction->payment_date = $quotaYear . '-' . $monthString . '-01';
+                    }        
+					
                     $studenttransaction->paid_out = 0;
                     $studenttransaction->amount = $row['amount'];
                     $studenttransaction->original_amount = $row['amount'];
                     $studenttransaction->invoiced = 0;
                     $studenttransaction->paid_out = 0;
-                    $studenttransaction->partial_payment = 0;
+					$studenttransaction->partial_payment = 0;
                     $studenttransaction->bill_number = 0;
-                    $studenttransaction->payment_date = 0;
                     $studenttransaction->transaction_migration = 0;
 
                     if (!($this->Studenttransactions->save($studenttransaction))) 
@@ -462,15 +490,34 @@ class StudenttransactionsController extends AppController
                     $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;
                 else
                     $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
-                            
+
+				if ($monthNumber < 10)
+				{
+					$monthString = "0" . $monthNumber;
+				}
+				else
+				{
+					$monthString = (string) $monthNumber;
+				}
+					
+				if ($monthNumber < 9)
+				{
+					$studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;						
+					$studenttransaction->payment_date = $nextYear . '-' . $monthString . '-01';						
+				}
+				else
+				{		
+					$studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
+					$studenttransaction->payment_date = $quotaYear . '-' . $monthString . '-01';
+				}
+					
                 $studenttransaction->paid_out = 0;
                 $studenttransaction->amount = $row['amount'];
                 $studenttransaction->original_amount = $row['amount'];
                 $studenttransaction->invoiced = 0;
                 $studenttransaction->paid_out = 0;
-                $studenttransaction->partial_payment = 0;
+				$studenttransaction->partial_payment = 0;
                 $studenttransaction->bill_number = 0;
-                $studenttransaction->payment_date = 0;
                 $studenttransaction->transaction_migration = 0;
 
                 if (!($this->Studenttransactions->save($studenttransaction))) 
@@ -2641,7 +2688,11 @@ class StudenttransactionsController extends AppController
 				$this->Flash->error(__('No pudo ser grabada la matrícula correspondiente al alumno cuyo ID es: ' . $studentTransactionGet->student_id));
 			}
 		}
+
 		$this->Flash->success(__('Total registros seleccionados: ' . $account1));
 		$this->Flash->success(__('Total registros actualizados: ' . $account2));
+		
+		return $this->redirect(['controller' => 'users', 'action' => 'wait']);
+
 	}	
 }

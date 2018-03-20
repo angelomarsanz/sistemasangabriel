@@ -6,11 +6,11 @@
 @font-face 
 {
   font-family: 'icomoon';
-  src:  url('/sistemasangabriel/fonts/icomoon.eot?6b409a');
-  src:  url('/sistemasangabriel/fonts/icomoon.eot?6b409a#iefix') format('embedded-opentype'),
-    url('/sistemasangabriel/fonts/icomoon.ttf?6b409a') format('truetype'),
-    url('/sistemasangabriel/fonts/icomoon.woff?6b409a') format('woff'),
-    url('/sistemasangabriel/fonts/icomoon.svg?6b409a#icomoon') format('svg');
+  src:  url('/desarrollosistemasangabriel/fonts/icomoon.eot?6b409a');
+  src:  url('/desarrollosistemasangabriel/fonts/icomoon.eot?6b409a#iefix') format('embedded-opentype'),
+    url('/desarrollosistemasangabriel/fonts/icomoon.ttf?6b409a') format('truetype'),
+    url('/desarrollosistemasangabriel/fonts/icomoon.woff?6b409a') format('woff'),
+    url('/desarrollosistemasangabriel/fonts/icomoon.svg?6b409a#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
 }

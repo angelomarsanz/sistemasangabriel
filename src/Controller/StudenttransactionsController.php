@@ -1641,7 +1641,24 @@ class StudenttransactionsController extends AppController
             
             $finalYear = $currentYear;  
         }
+		
+		$students20 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.discount' => 20]]);
 
+        if ($students20)
+		{
+			foreach ($students20 as $students20s)
+			{
+				$student = $this->Studenttransactions->Students->get($student20s->id);
+				
+				$student->discount = 0;
+				
+				if (!($this->Studenttransactions->Students->save($student)))
+				{
+					$this->Flash->error(__('No se pudo inicializar la columna discount en el registro Nro. ' . $student20s->id));
+				}
+            }
+		}
+		
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
@@ -1854,10 +1871,23 @@ class StudenttransactionsController extends AppController
             if ($accountHigher == 1)
             {
                 $swDiscounts = 0;
+				$swUpdateStudent = 0;
                 foreach ($studentsDiscounts as $studentsDiscount)
                 {
                     if ($studentsDiscount->student_id == $arrayStudent['id'])
                     {
+						if ($swDiscountStudent == 0)
+						{
+							$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
+				
+							$student->discount = 20;
+				
+							if (!($this->Studenttransactions->Students->save($student)))
+							{
+								$this->Flash->error(__('No se pudo actualizar la columna discount en el registro Nro. ' . $arrayStudent['id']));
+							}
+							$swUpdateStudent = 1;
+						}
                         if ($studentsDiscount->original_amount == $fee80)
                         {
                             $arrayDiscarded[$accountDiscarded]['reason'] = 'Descuento 20% aplicado anteriormente';
@@ -1997,7 +2027,24 @@ class StudenttransactionsController extends AppController
             
             $finalYear = $currentYear;  
         }
+		
+		$students50 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.discount' => 50]]);
 
+        if ($students50)
+		{
+			foreach ($students50 as $students50s)
+			{
+				$student = $this->Studenttransactions->Students->get($student50s->id);
+				
+				$student->discount = 0;
+				
+				if (!($this->Studenttransactions->Students->save($student)))
+				{
+					$this->Flash->error(__('No se pudo inicializar la columna discount en el registro Nro. ' . $student50s->id));
+				}
+            }
+		}
+		
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
@@ -2198,9 +2245,7 @@ class StudenttransactionsController extends AppController
     }
     
     public function discount50($arrayStudents = null, $studentsDiscounts = null, $amount = null, $arrayDiscounts = null, $accountDiscounts = null, $arrayDiscarded = null, $accountDiscarded = null)
-    {
-        $fee80 = $amount * 0.8;
-        
+    {       
         $fee50 = $amount * 0.5;
 
         arsort($arrayStudents);
@@ -2211,10 +2256,23 @@ class StudenttransactionsController extends AppController
             if ($accountHigher == 1)
             {
                 $swDiscounts = 0;
+				$swUpdateStudent = 0;
                 foreach ($studentsDiscounts as $studentsDiscount)
                 {
                     if ($studentsDiscount->student_id == $arrayStudent['id'])
                     {
+						if ($swDiscountStudent == 0)
+						{
+							$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
+				
+							$student->discount = 50;
+				
+							if (!($this->Studenttransactions->Students->save($student)))
+							{
+								$this->Flash->error(__('No se pudo actualizar la columna discount en el registro Nro. ' . $arrayStudent['id']));
+							}
+							$swUpdateStudent = 1;
+						}
                         if ($studentsDiscount->original_amount == $fee50)
                         {
                             $arrayDiscarded[$accountDiscarded]['reason'] = 'Descuento 50% aplicado anteriormente';
@@ -2693,6 +2751,24 @@ class StudenttransactionsController extends AppController
 		$this->Flash->success(__('Total registros actualizados: ' . $account2));
 		
 		return $this->redirect(['controller' => 'users', 'action' => 'wait']);
-
 	}	
+	public function initialDiscount()
+	{
+		$students = $this->Studenttransactions->Students->find('all');
+
+        if ($students)
+		{
+			foreach ($students as $student)
+			{
+				$student = $this->Studenttransactions->Students->get($student->id);
+				
+				$student->discount = 0;
+				
+				if (!($this->Studenttransactions->Students->save($student)))
+				{
+					$this->Flash->error(__('No se pudo inicializar la columna discount en el registro Nro. ' . $student->id));
+				}
+            }
+		}
+	}
 }

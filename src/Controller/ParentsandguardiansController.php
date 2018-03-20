@@ -526,4 +526,29 @@ class ParentsandguardiansController extends AppController
     {
         
     }
+	public function repairColumn()
+	{
+		$accountRecords = 0;
+		
+		$query = $this->Parentsandguardians->find('all')->where(['id >' => 1]);
+		
+		foreach ($query as $querys)
+		{
+			$parentsandguardian = $this->Parentsandguardians->get($querys->id);
+			
+			$temporary = trim($parentsandguardian->family);
+            
+            $parentsandguardian->family = $temporary;
+			
+            if (!($this->Parentsandguardians->save($parentsandguardian))) 
+            {
+                $this->Flash->error(__('No pudo ser actualizado el registro Nro. ' . $parentsandguardian->id));
+			}
+			else
+			{
+				$accountRecords++;
+			}
+		}
+		$this->Flash->success(__('Total registros actualizados: ' . $accountRecords));
+	}
 }
