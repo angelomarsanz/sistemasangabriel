@@ -71,6 +71,7 @@ class ExcelsController extends AppController
 		$excel->col3 = $columns['col3'];
 		$excel->col4 = $columns['col4'];
 		$excel->col5 = $columns['col5'];
+		$excel->col6 = $columns['col6'];
 		
 		if ($this->Excels->save($excel)) 
 		{
