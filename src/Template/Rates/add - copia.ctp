@@ -158,14 +158,14 @@
 			}
 			if( $('#exception').prop('checked')) 
 			{
-				alert('#date-exception:  tiene valor')
+				topDate = ' exceptuando a aquellos alumnos que pagaron el año escolar completo antes del ' + $("select[name='date_exception[day]']").val() + '/' + $("select[name='date_exception[month]']").val() + '/' + $("select[name='date_exception[year]']").val();
 			}
 			else
 			{
-				alert('#date-exception: null')
+				topDate = '';
 			}
 			
-			var rateUpdate = confirm('Por favor confirme que desea ajustar la ' + $('#concept').val() + ' a ' + $('#amount').val() + ' a partir del ' + dateFrom);
+			var rateUpdate = confirm('Por favor confirme que desea ajustar la ' + $('#concept').val() + ' a ' + $('#amount').val() + ' a partir del ' + dateFrom + topDate);
 
 			if (rateUpdate == true)
 			{

@@ -10,6 +10,18 @@ use App\Controller\AppController;
  */
 class ExcelsController extends AppController
 {
+    public function initialize()
+    {
+        parent::initialize();
+        $this->loadComponent('RequestHandler');
+    }
+
+    public function beforeFilter(\Cake\Event\Event $event)
+    {
+        parent::beforeFilter($event);
+        
+        $this->Auth->allow(['reportNotAdjust']);
+    }
 
     /**
      * Index method
@@ -46,21 +58,25 @@ class ExcelsController extends AppController
      *
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
-    public function add()
+    public function add($columns)
     {
-        $excel = $this->Excels->newEntity();
-        if ($this->request->is('post')) {
-            $excel = $this->Excels->patchEntity($excel, $this->request->data);
-            if ($this->Excels->save($excel)) {
-                $this->Flash->success(__('The excel has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            } else {
-                $this->Flash->error(__('The excel could not be saved. Please, try again.'));
-            }
-        }
-        $this->set(compact('excel'));
-        $this->set('_serialize', ['excel']);
+		$this->autoRender = false;
+		
+		$excel = $this->Excels->newEntity();
+		
+		$excel->report = $columns['report'];
+		$excel->number = $columns['number'];
+		$excel->col1 = $columns['col1'];
+		
+		if ($this->Excels->save($excel)) 
+		{
+			$swError = 0;
+		} 
+		else 
+		{
+			$swError = 1;
+		}
+		return $swError;
     }
 
     /**
@@ -107,5 +123,25 @@ class ExcelsController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+    public function truncateTable()
+    {
+        $this->autoRender = false;
+
+        $this->Excels->connection()->transactional(function ($conn) {
+            $sqls = $this->Excels->schema()->truncateSql($this->Excels->connection());
+            foreach ($sqls as $sql) {
+                $this->Excels->connection()->execute($sql)->execute();
+            }
+        });
+        
+        return;
+    }
+    public function reportNotAdjust()
+    {
+        $notAdjust = $this->Excels->find('all', ['order' => ['col1' => 'ASC']]);
+
+        $this->set(compact('notAdjust'));
+        $this->set('_serialize', ['notAdjust']);
     }
 }
