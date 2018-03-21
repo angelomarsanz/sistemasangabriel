@@ -3025,23 +3025,4 @@ class StudenttransactionsController extends AppController
 			return $this->redirect(['controller' => 'users', 'action' => 'wait']);
 		}
 	}
-	public function initialDiscount()
-	{
-		$students = $this->Studenttransactions->Students->find('all');
-
-        if ($students)
-		{
-			foreach ($students as $student)
-			{
-				$student = $this->Studenttransactions->Students->get($student->id);
-				
-				$student->discount = 0;
-				
-				if (!($this->Studenttransactions->Students->save($student)))
-				{
-					$this->Flash->error(__('No se pudo inicializar la columna discount en el registro Nro. ' . $student->id));
-				}
-            }
-		}
-	}
 }
