@@ -55,11 +55,12 @@
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Representantes <span class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">    
                                     <li><?= $this->Html->link('Datos de familia', ['controller' => 'Parentsandguardians', 'action' => 'consultFamily']) ?></li>
-                                    <li><?= $this->Html->link('Alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li>
+                                    <li><?= $this->Html->link('Excel familias - alumno', ['controller' => 'Students', 'action' => 'familyStudents']) ?></li>
                                     <li><?= $this->Html->link('Familias con tres hijos', ['controller' => 'Studenttransactions', 'action' => 'discountFamily80']) ?></li>
                                     <li><?= $this->Html->link('Familias con cuatro o más hijos', ['controller' => 'Studenttransactions', 'action' => 'discountFamily50']) ?></li>
-                                    <li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>
-                                </ul>
+                                    <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li>
+                                    <li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>									
+									</ul>
                             </li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Alumnos <span class="caret"></span></a>

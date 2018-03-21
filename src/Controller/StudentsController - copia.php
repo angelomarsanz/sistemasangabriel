@@ -426,7 +426,7 @@ class StudentsController extends AppController
 			{
 				$student->new_student = 0;
 				$student->number_of_brothers = $lastYear; // Año escolar para el que se inscribió la primera vez
-				$student->balance = $currentYear; // Año escolar para el que se inscribió la última vez			
+				$student->balance = $lastYear; // Año escolar para el que se inscribió la última vez			
 			}
 				
             if ($this->Students->save($student)) 
@@ -1909,5 +1909,60 @@ class StudentsController extends AppController
 			}
 		}
 		$this->set(compact('school', 'studentsFor', 'studentObservations', 'currentDate'));
+	}
+	public function selectFamilyStudents()
+	{
+	    if ($this->request->is('post')) 
+        {
+			$this->Flash->success(__('Entré por el post'));
+			
+			if (isset($_POST['columnsReport']))
+			{
+				$this->Flash->success(__('Entré por el columnsReport'));
+				
+				$arrayMark = $this->markColumns($_POST['columnsReport']);
+				
+				$this->familyStudents($arrayMark);
+			}
+			else
+			{
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+			}
+		}
+	}
+	public function markColumns($colummsReport = null)
+	{
+		$arrayMark = [];
+		
+		isset($columnsReport['Parentsandguardians.sex']) ? $arrayMark['Parentsandguardians.sex'] = 'siExl' : $arrayMark['Parentsandguardians.sex'] = 'noExl';
+		
+		isset($columnsReport['Parentsandguardians.identidy_card']) ? $arrayMark['Parentsandguardians.identidy_card'] = 'siExl' : $arrayMark['Parentsandguardians.identidy_card'] = 'noExl';
+
+		isset($columnsReport['Students.sex']) ? $arrayMark['Students.sex'] = 'siExl' : $arrayMark['Students.sex'] = 'noExl';
+		
+		isset($columnsReport['Students.identity_card']) ? $arrayMark['Students.identity_card'] = 'siExl' : $arrayMark['Students.identity_card'] = 'noExl';
+		
+		return $arrayMark;
+	}
+	
+	public function familyStudents($arrayMark = null)
+	{
+		$students = TableRegistry::get('Students');
+	
+	    $arrayResult = $students->find('familyStudents');
+        
+        if ($arrayResult['indicator'] == 1)
+		{
+			$this->Flash->error(___('No se encontraron alumnos'));
+			
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+		}
+		else
+		{
+			$familyStudents = $arrayResult['searchRequired'];
+		}
+		
+        $this->set(compact('familyStudents', 'arrayMark'));
+        $this->set('_serialize', ['familyStudents', 'arrayMark']);
 	}
 }

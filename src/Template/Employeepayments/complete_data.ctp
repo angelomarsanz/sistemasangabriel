@@ -23,40 +23,6 @@
     {
       display:none
     }
-	@font-face {
-	  font-family: 'icomoon';
-	  src:  url('/sistemasangabriel/fonts/icomoon.eot?ib3xyo');
-	  src:  url('/sistemasangabriel/fonts/icomoon.eot?ib3xyo#iefix') format('embedded-opentype'),
-		url('/sistemasangabriel/fonts/icomoon.ttf?ib3xyo') format('truetype'),
-		url('/sistemasangabriel/fonts/icomoon.woff?ib3xyo') format('woff'),
-		url('/sistemasangabriel/fonts/icomoon.svg?ib3xyo#icomoon') format('svg');
-	  font-weight: normal;
-	  font-style: normal;
-	}
-
-	[class^="icon-"], [class*=" icon-"] {
-	  /* use !important to prevent issues with browser extensions that change fonts */
-	  font-family: 'icomoon' !important;
-	  speak: none;
-	  font-style: normal;
-	  font-weight: normal;
-	  font-variant: normal;
-	  text-transform: none;
-	  line-height: 1;
-	  position:relative;
-	  top:1px;
-	  display:inline-block;
-	  font-weight:400;
-
-	  /* Better Font Rendering =========== */
-	  -webkit-font-smoothing: antialiased;
-	  -moz-osx-font-smoothing: grayscale;
-	}
-
-.icon-ISLR:before {
-  content: "\e900";
-}
-
 }
 @media print 
 {

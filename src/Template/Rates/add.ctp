@@ -93,6 +93,9 @@
                     '2019' => '2019'], 'disabled' => 'disabled']);
                 echo $this->Form->input('amount', ['required' => 'required',
                     'label' => 'Monto']);
+					
+				echo $this->Form->input('defaulters', ['type' => 'checkbox', 'id' => 'defaulters',
+                    'label' => 'Ajustar la mensualidad a alumnos morosos', 'disabled' => 'disabled']);
 										
                 echo $this->Form->input('exception', ['type' => 'checkbox', 'id' => 'exception',
                     'label' => 'Exceptuar alumnos que han pagado el año escolar completo', 'disabled' => 'disabled']);
@@ -123,6 +126,7 @@
         $("#rate-month").attr('disabled', true);
         $("#rate-year").attr('disabled', true);
 		$("#exception").attr('disabled', true);
+		$("#defaulters").attr('disabled', true);
 
         if ($("#concept").val().substring(0, 11) == "Mensualidad")
         {
@@ -131,6 +135,7 @@
             $("#rate-year").attr('disabled', false);
 			$("#rate-year").attr('required', true);
 			$("#exception").attr('disabled', false);
+			$("#defaulters").attr('disabled', false);
         }
         else
         {

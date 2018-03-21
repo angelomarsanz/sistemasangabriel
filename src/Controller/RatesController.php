@@ -61,6 +61,11 @@ class RatesController extends AppController
 		$dateException = null;
 		$arrayResult = [];
 		$arrayMail = [];
+		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+
+		$currentDate = Time::now();
 
         $rate = $this->Rates->newEntity();
         if ($this->request->is('post')) 
@@ -89,10 +94,24 @@ class RatesController extends AppController
             }
             elseif ($rate->concept == "Mensualidad")
             {
+				if (isset($_POST['defaulters']))
+				{
+					$defaulters = 1;
+				}
+				else
+				{
+					$defaulters = 0;
+				}
+				
 				if (isset($_POST['exception']))
 				{
 					$swDateException = 1;
 					$dateException = new Time($_POST['date_exception']['year'] . '-' . $_POST['date_exception']['month'] . '-' . $_POST['date_exception']['day']);				
+				}
+				else
+				{
+					$swDateException = 0;
+					$dateException = $currentDate;
 				}
 				
 				$concept = 'Mensualidad';
@@ -103,8 +122,8 @@ class RatesController extends AppController
                 $row = $lastRecord->first();
                 
                 $previousMonthlyPayment = $row->amount;
-					
-                $arrayResult = $studentTransactions->newMonthlyPayment($row->amount, $rate->amount, $rate->rate_month, $rate->rate_year, $swDateException, $dateException);   
+				
+				$arrayResult = $studentTransactions->newMonthlyPayment($row->amount, $rate->amount, $rate->rate_month, $rate->rate_year, $defaulters, $swDateException, $dateException);   
 
 				if ($arrayResult['indicator'] == 0)
 				{
@@ -206,7 +225,7 @@ class RatesController extends AppController
 		  ->transport('mail')
           ->template('monthly_adjust') 
           ->emailFormat('html') 
-          ->to('transemainc@gmail.com') 
+          ->to('u.esangabriel.admon@gmail.com') 
 		  ->cc('angelomarsanz@gmail.com')
           ->from('sistemasangabriel@gmail.com') 
           ->subject('Resultados ajuste de mensualidades')

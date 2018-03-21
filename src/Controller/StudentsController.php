@@ -1910,4 +1910,78 @@ class StudentsController extends AppController
 		}
 		$this->set(compact('school', 'studentsFor', 'studentObservations', 'currentDate'));
 	}
+	public function familyStudents()
+	{	
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		
+        $currentDate = Time::now();
+
+	    if ($this->request->is('post')) 
+        {					
+			if (isset($_POST['columnsReport']))
+			{
+				$columnsReport = $_POST['columnsReport'];
+			}
+			else
+			{
+				$columnsReport = [];
+			}
+			
+			$arrayMark = $this->markColumns($columnsReport);
+						
+			$students = TableRegistry::get('Students');
+
+			$arrayResult = $students->find('family');
+			
+			if ($arrayResult['indicator'] == 1)
+			{
+				$this->Flash->error(___('No se encontraron alumnos'));
+				
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+			}
+			else
+			{
+				$familyStudents = $arrayResult['searchRequired'];
+			}
+	
+			$swImpresion = 1;
+						
+			$this->set(compact('swImpresion', 'familyStudents', 'arrayMark', 'currentDate'));
+			$this->set('_serialize', ['swImpresion', 'familyStudents', 'arrayMark', 'currenDate']); 
+		
+		}
+		else
+		{
+			$swImpresion = 0;
+			$this->set(compact('swImpresion'));
+			$this->set('_serialize', ['swImpresion']);
+		}
+	}
+	public function markColumns($columnsReport = null)
+	{
+		$arrayMark = [];
+		
+		isset($columnsReport['Parentsandguardians.full_name']) ? $arrayMark['Parentsandguardians.full_name'] = 'siExl' : $arrayMark['Parentsandguardians.full_name'] = 'noExl';
+				
+		isset($columnsReport['Parentsandguardians.sex']) ? $arrayMark['Parentsandguardians.sex'] = 'siExl' : $arrayMark['Parentsandguardians.sex'] = 'noExl';
+		
+		isset($columnsReport['Parentsandguardians.identidy_card']) ? $arrayMark['Parentsandguardians.identidy_card'] = 'siExl' : $arrayMark['Parentsandguardians.identidy_card'] = 'noExl';
+
+		isset($columnsReport['Parentsandguardians.work_phone']) ? $arrayMark['Parentsandguardians.work_phone'] = 'siExl' : $arrayMark['Parentsandguardians.work_phone'] = 'noExl';
+
+		isset($columnsReport['Parentsandguardians.cell_phone']) ? $arrayMark['Parentsandguardians.cell_phone'] = 'siExl' : $arrayMark['Parentsandguardians.cell_phone'] = 'noExl';
+
+		isset($columnsReport['Parentsandguardians.email']) ? $arrayMark['Parentsandguardians.email'] = 'siExl' : $arrayMark['Parentsandguardians.email'] = 'noExl';		
+		
+		isset($columnsReport['Students.sex']) ? $arrayMark['Students.sex'] = 'siExl' : $arrayMark['Students.sex'] = 'noExl';
+		
+		isset($columnsReport['Students.nationality']) ? $arrayMark['Students.nationality'] = 'siExl' : $arrayMark['Students.nationality'] = 'noExl';
+		
+		isset($columnsReport['Students.identity_card']) ? $arrayMark['Students.identity_card'] = 'siExl' : $arrayMark['Students.identity_card'] = 'noExl';
+		
+		isset($columnsReport['Students.section_id']) ? $arrayMark['Students.section_id'] = 'siExl' : $arrayMark['Students.section_id'] = 'noExl';
+		
+		return $arrayMark;
+	}
 }
