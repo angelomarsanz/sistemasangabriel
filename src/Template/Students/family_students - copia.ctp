@@ -70,21 +70,21 @@
 							</div>
 							<div class="col-md-11">
 								<h5>Datos del representante:</h5>
-									<p><input type="checkbox" name="columnsReport[Parentsandguardians.full_name]"> Nombre</p>
-									<p><input type="checkbox" name="columnsReport[Parentsandguardians.sex]"> Sexo</p>
-									<p><input type="checkbox" name="columnsReport[Parentsandguardians.identidy_card]"> Cédula o pasaporte</p>
-									<p><input type="checkbox" name="columnsReport[Parentsandguardians.work_phone]"> Teléfono trabajo</p>
-									<p><input type="checkbox" name="columnsReport[Parentsandguardians.cell_phone]"> Celular</p>
-									<p><input type="checkbox" name="columnsReport[Parentsandguardians.email]"> Email</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.full_name]"> Nombre</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.sex]"> Sexo</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.identidy_card]"> Cédula o pasaporte</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.work_phone]"> Teléfono trabajo</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.cell_phone]"> Celular</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.email]"> Email</p>
 							</div>
 						</div>
 					</div>
 					<div class="col-md-6">
 						<h4>Datos del estudiante</h4>
-						<p><input type="checkbox" name="columnsReport[Students.sex]"> Sexo</p>
-						<p><input type="checkbox" name="columnsReport[Students.nationality]"> Nacionalidad</p>
-						<p><input type="checkbox" name="columnsReport[Students.identity_card]"> Cédula o pasaporte</p>
-						<p><input type="checkbox" name="columnsReport[Students.section_id]"> Grado y sección</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.sex]"> Sexo</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.nationality]"> Nacionalidad</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.identity_card]"> Cédula o pasaporte</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.section_id]"> Grado y sección</p>
 					</div>
 				</div>
 			</fieldset>
@@ -260,7 +260,7 @@ $(document).ready(function(){
 	{			
 		e.preventDefault();
 		
-		$("#columns-report input").each(function (index) 
+		$(".column-mark").each(function (index) 
 		{ 
 			$(this).attr('checked', true);
 		});
@@ -270,7 +270,7 @@ $(document).ready(function(){
 	{			
 		e.preventDefault();
 		
-		$("#columns-report input").each(function (index) 
+		$(".column-mark").each(function (index) 
 		{ 
 			$(this).attr('checked', false);
 		});
