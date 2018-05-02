@@ -1,0 +1,15 @@
+Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar descuento
+
+Para los estatus recordar que hay un boolean - new_student en la tabla student
+
+Girardo Brayan - Reporte de mensualidades
+
+En el reporte de familias con 3, 4 ó más hijos ignorar a los que no se inscribieron en el año escolar en curso
+
+Colocar estatus de egresado a alumnos de familia:
+Alvarado Castejón
+Avanzo Sequeira
+García Iannino
+Pumar Eugenia
+Suárez Cabaña
+Tellez García

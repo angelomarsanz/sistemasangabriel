@@ -176,6 +176,14 @@
                                 </ul>
                             </li> -->
                         <?php endif; ?>
+						<?php if ($current_user['username'] == 'angel2703'): ?>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Sistema <span class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><?= $this->Html->link('Alumnos con descuento en mensualidades', ['controller' => 'Studenttransactions', 'action' => 'discountStudents']) ?></li>
+                                </ul>
+                            </li>
+						<?php endif; ?>						
                         <?php if (isset($assign)): ?>
                             <form class="navbar-form navbar-left" role="search">
                                 <div class="form-group">

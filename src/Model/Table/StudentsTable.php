@@ -224,7 +224,10 @@ class StudentsTable extends Table
         $validator
             ->requirePresence('new_student', 'create')
             ->notEmpty('new_student');
-
+			
+        $validator
+            ->allowEmpty('discount');
+			
         return $validator;
     }
 
