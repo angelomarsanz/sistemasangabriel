@@ -5,6 +5,8 @@ use App\Controller\AppController;
 
 use App\Controller\ExcelsController;
 
+use App\Controller\BinnaclesController;
+
 use Cake\ORM\TableRegistry;
 
 use Cake\I18n\Time;
@@ -3294,6 +3296,119 @@ class StudenttransactionsController extends AppController
 					$this->Flash->error(__('No se pudo inicializar la columna discount en el registro Nro. ' . $student->id));
 				}
             }
+		}
+	}
+	public function discountStudents()
+	{
+		$excels = new ExcelsController();
+		
+		$excels->truncateTable();
+		
+		$binnacles = new BinnaclesController;
+				
+		if ($this->request->is('post')) 
+        {		
+			$monthlyPayment = $_POST['monthly_payment'];
+			
+			$monthlyPayment80 = $monthlyPayment * 0.8;
+			
+			$monthlyPayment50 = $monthlyPayment * 0.5;
+
+			$monthFrom = $_POST['month_from'];
+
+			$yearFrom = $_POST['year_from'];
+				
+			$dateFrom = new Time($yearFrom . '-' . $monthFrom . '-01 00:00:00');
+			
+			$swError = 0;
+			
+			$discountStudents = $this->Studenttransactions->Students->find('all', ['conditions' => [['Students.id >' => 1], ['Students.discount IS NOT NULL']]]);
+		
+			if ($discountStudents)
+			{
+				foreach ($discountStudents as $discountStudent)
+				{
+					$student = $this->Studenttransactions->Students->get($discountStudent->id);
+				
+					$student->discount = null;
+				
+					if (!($this->Studenttransactions->Students->save($student)))
+					{
+						$this->Flash->error(__('No se pudo inicializar la columna discount del registro' . $discountStudent->id));
+						$binnacles->add('controller', 'Studenttransactions', 'discountStudents', 'No se pudo inicializar la columna discount del registro' . $$discountStudent->id);
+						$swError = 1;
+					}
+				}
+			}
+			
+			$studentTransactions = $this->Studenttransactions->find('all', 
+				['conditions' => 
+				[['transaction_type' => 'Mensualidad'], 
+				['payment_date' => $dateFrom],
+				['OR' => [['Studenttransactions.original_amount' => $monthlyPayment80], ['Studenttransactions.original_amount' => $monthlyPayment50]]]], 
+				'order' => 
+				['Studenttransactions.student_id' => 'ASC', 'payment_date' => 'ASC']]);
+							
+			if ($studentTransactions) 
+			{				
+				$account20 = 0;
+				$account50 = 0;
+				$accountStudentDiscount = 0;
+							
+				foreach ($studentTransactions as $studentTransaction)
+				{		
+					$discountPercentage = 0;
+					$accountStudentDiscount++;
+					
+					$student = $this->Studenttransactions->Students->get($studentTransaction->student_id);
+					
+					if ($studentTransaction->original_amount == $monthlyPayment80)
+					{
+						$account20++;
+						$discountPercentage = 20;
+						$student->discount = 20;
+					}
+					else
+					{
+						$account50++;
+						$discountPercentage = 50;	
+						$student->discount = 50;
+					}		
+
+					if (!($this->Studenttransactions->Students->save($student)))
+					{
+						$this->Flash->error(__('No se pudo actualizar la columna discount del registro' . $studentTransaction->student_id));
+						$binnacles->add('controller', 'Studenttransactions', 'discountStudents', 'No se pudo actualizar la columna discount del registro' . $studentTransaction->student_id);
+						$swError = 1;
+					}					
+					
+					$columns = [];
+													
+					$columns['report'] = 'Alumnos con descuento en cuotas';
+					$columns['number'] = $accountStudentDiscount;
+					$columns['col1'] = $student->id;
+					$columns['col2'] = $student->full_name;
+					$columns['col3'] = $studentTransaction->original_amount;
+					$columns['col4'] = $discountPercentage;
+														
+					$returnExcel = $excels->add($columns);
+					
+					if ($returnExcel > 0)
+					{
+						$binnacles->add('controller', 'Studenttransactions', 'discountStudents', 'No se pudo grabar el registro correspondiente al alumno ' . $student->full_name);
+						$swError = 1;
+					}
+				}
+			}
+			if ($swError == 0)
+			{
+				$this->Flash->success(__('Se actualizaron ' . $account20 . ' registros con el 20% de descuento y ' . $account50 . ' con el 50%'));
+			}
+			else
+			{
+				$this->Flash->error(__('Algunos registros no pudieron ser grabados, revisar la bitácora'));
+			}
+			return $this->redirect(['controller' => 'users', 'action' => 'wait']);
 		}
 	}
 }

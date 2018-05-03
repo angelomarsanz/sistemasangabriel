@@ -3,6 +3,8 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 
+use App\Controller\BinnaclesController;
+
 /**
  * Excels Controller
  *
@@ -62,40 +64,82 @@ class ExcelsController extends AppController
     {
 		$this->autoRender = false;
 		
+		$binnacles = new BinnaclesController;
+		
 		$excel = $this->Excels->newEntity();
 		
-		$excel->report = $columns['report'];
-		$excel->number = $columns['number'];
+		if (isset($columns['report']))
+		{
+			$excel->report = $columns['report'];
+		}
+
+		if (isset($columns['start_end']))
+		{		
+			$excel->start_end = $columns['start_end'];
+		}		
+
+		if (isset($columns['number']))
+		{
+			$excel->number = $columns['number'];
+		}
+		
 		if (isset($columns['col1']))
 		{
-		$excel->col1 = $columns['col1'];			
+			$excel->col1 = $columns['col1'];			
 		}
+		
 		if (isset($columns['col2']))
 		{
 			$excel->col2 = $columns['col2'];
 		}
+		
 		if (isset($columns['col3']))
 		{
 			$excel->col3 = $columns['col3'];
 		}
+		
 		if (isset($columns['col4']))
 		{
 			$excel->col4 = $columns['col4'];
 		}
+		
 		if (isset($columns['col5']))
 		{		
 			$excel->col5 = $columns['col5'];
 		}
+		
 		if (isset($columns['col6']))
 		{
-			$excel->col5 = $columns['col6'];
+			$excel->col6 = $columns['col6'];
 		}
+
+		if (isset($columns['col7']))
+		{
+			$excel->col7 = $columns['col7'];
+		}
+
+		if (isset($columns['col8']))
+		{
+			$excel->col8 = $columns['col8'];
+		}
+		
+		if (isset($columns['col9']))
+		{
+			$excel->col9 = $columns['col9'];
+		}
+		
+		if (isset($columns['col10']))
+		{
+			$excel->col10 = $columns['col10'];
+		}
+
 		if ($this->Excels->save($excel)) 
 		{
 			$swError = 0;
 		} 
 		else 
 		{
+			$binnacles->add('controller', 'Excels', 'add', 'No se pudo grabar el registro correspondiente al reporte ' . $excel->report);
 			$swError = 1;
 		}
 		return $swError;

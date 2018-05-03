@@ -66,8 +66,30 @@ class ExcelsController extends AppController
 		
 		$excel->report = $columns['report'];
 		$excel->number = $columns['number'];
-		$excel->col1 = $columns['col1'];
-		
+		if (isset($columns['col1']))
+		{
+		$excel->col1 = $columns['col1'];			
+		}
+		if (isset($columns['col2']))
+		{
+			$excel->col2 = $columns['col2'];
+		}
+		if (isset($columns['col3']))
+		{
+			$excel->col3 = $columns['col3'];
+		}
+		if (isset($columns['col4']))
+		{
+			$excel->col4 = $columns['col4'];
+		}
+		if (isset($columns['col5']))
+		{		
+			$excel->col5 = $columns['col5'];
+		}
+		if (isset($columns['col6']))
+		{
+			$excel->col5 = $columns['col6'];
+		}
 		if ($this->Excels->save($excel)) 
 		{
 			$swError = 0;
