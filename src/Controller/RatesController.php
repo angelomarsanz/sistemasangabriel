@@ -127,25 +127,22 @@ class RatesController extends AppController
 
 				if ($arrayResult['indicator'] == 0)
 				{
-					if ($this->Rates->save($rate)) 
-					{ 
+					/* if ($this->Rates->save($rate)) 
+					{ */
 						$arrayMail['error'] = 0;
-						$arrayMail['adjust'] = $arrayResult['adjust'];
-						$arrayMail['notAdjust'] = $arrayResult['notAdjust'];
-					}
+					/* }
 					else
 					{
-						$arrayMail['error'] = 1;	
-						$arrayMail['adjust'] = $arrayResult['adjust'];
-						$arrayMail['notAdjust'] = $arrayResult['notAdjust'];						
-					}
+						$arrayMail['error'] = 1;							
+					} */
 				}
 				else
 				{
 					$arrayMail['error'] = 1;
-					$arrayMail['adjust'] = 0;
-					$arrayMail['notAdjust'] = 0;
 				}
+				$arrayMail['adjust'] = $arrayResult['adjust'];
+				$arrayMail['notAdjust'] = $arrayResult['notAdjust'];
+				$arrayMail['adjustDefaulters'] = $arrayResult['adjustDefaulters'];
 				$result = $this->mailUser($arrayMail);
 				exit;
 			}
@@ -225,7 +222,8 @@ class RatesController extends AppController
 		  ->transport('mail')
           ->template('monthly_adjust') 
           ->emailFormat('html') 
-          ->to('u.esangabriel.admon@gmail.com') 
+//          ->to('u.esangabriel.admon@gmail.com') 
+          ->to('transemainc@gmail.com') 
 		  ->cc('angelomarsanz@gmail.com')
           ->from('sistemasangabriel@gmail.com') 
           ->subject('Resultados ajuste de mensualidades')
@@ -233,6 +231,7 @@ class RatesController extends AppController
             'varError' => $arrayMail['error'],
             'varAdjust' => $arrayMail['adjust'],
             'varNotAdjust' => $arrayMail['notAdjust']
+			'varAdjustDefaulters' => $arrayMail['adjustDefaulters']
           ]);
   
 //        $correo->SMTPAuth = true;

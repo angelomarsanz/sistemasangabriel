@@ -16,7 +16,7 @@
                     <?php foreach ($notAdjust as $notAdjusts): ?>
 						<tr>
 							<td><?= $accountStudent ?></td>
-							<td><?= h($notAdjusts->col1) ?></td>
+							<td><?= h($notAdjusts->col2) ?></td>
 						</tr>
 						<?php $accountStudent++ ?>
                     <?php endforeach; ?>

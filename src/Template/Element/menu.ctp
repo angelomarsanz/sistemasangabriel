@@ -41,7 +41,6 @@
                                     <li><?= $this->Html->link('Cobrar mensualidades', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
                                     <li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
                                     <li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
-									<li><?= $this->Html->link('Tarifas morosos', ['controller' => 'Studenttransactions', 'action' => 'newMonthlyDefaulters']) ?></li>
                                     <li><?= $this->Html->link('Anular factura', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Anular']) ?></li>
                                     <li><?= $this->Html->link('Modificar lote de facturas', ['controller' => 'Controlnumbers', 'action' => 'edit']) ?></li>
                                     <li><?= $this->Html->link('Modificar el número control de facturas', ['controller' => 'Bills', 'action' => 'editControl']) ?></li>

@@ -205,7 +205,7 @@ class ExcelsController extends AppController
     }
     public function reportNotAdjust()
     {
-        $notAdjust = $this->Excels->find('all', ['order' => ['col1' => 'ASC']]);
+        $notAdjust = $this->Excels->find('all', ['order' => ['col2' => 'ASC']]);
 
         $this->set(compact('notAdjust'));
         $this->set('_serialize', ['notAdjust']);

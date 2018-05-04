@@ -15,7 +15,44 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+		
+		$binnacles = new BinnaclesController;
+		
+		$yearFrom = 2018;
+		
+		$monthFrom = 5;
+		
+		$dateFrom = time::now();
+		
+		debug($dateFrom);
+		
+		$dateFrom
+			->year($yearFrom)
+			->month($monthFrom)
+			->day(01)
+			->hour(00)
+			->minute(00)
+			->second(00);
+			
+		debug($dateFrom);
+		
+		$this->Flash->success(__('$dateFrom: ' . $dateFrom));
+		
+		if ($dateFrom->year == 2018)
+		{
+			$this->Flash->success(__('Si se puede preguntar así: ' . $dateFrom->year . '/' . $dateFrom->month));
+		}
+		else
+		{
+			$this->Flash->error(__('No se puede preguntar así: ' . $dateFrom->year . '/' . $dateFrom->month));
+		}
 
+		$binnacles->add('controller', 'Studenttransactions', 'testFunction', '$monthFrom: ' . $monthFrom);
+		$binnacles->add('controller', 'Studenttransactions', 'testFunction', '$yearFrom: ' . $yearFrom);
+		$binnacles->add('controller', 'Studenttransactions', 'testFunction', '$dateFrom->year: ' . $dateFrom->year . ' $dateFrom->month: ' . $dateFrom->month);
+		$binnacles->add('controller', 'Studenttransactions', 'testFunction', '$dateFrom: ' . $dateFrom);
 	}
 
     public function index()
@@ -796,59 +833,68 @@ class StudenttransactionsController extends AppController
     public function newMonthlyPayment($previousMonthlyPayment = null, $newAmount = null, $monthFrom = null, $yearFrom = null, $defaulters = null, $swDateException = null,$dateException = null)
     {
 		$this->autoRender = false;
-	
+		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+		
 		$excels = new ExcelsController();
 		
+		$binnacles = new BinnaclesController;
+			
 		$swError = 0;
+						
+		$arrayResult = [];
+
+		$previousMonthlyPayment80 = $previousMonthlyPayment * 0.8;
 		
-        $arrayResult = [];
+		$previousMonthlyPayment50 = $previousMonthlyPayment * 0.5;
+		
+		$newAmount80 = $newAmount * 0.8;
+		
+		$newAmount50 = $newAmount * 0.5;
 
-        $previousMonthlyPayment80 = $previousMonthlyPayment * 0.8;
-        
-        $previousMonthlyPayment50 = $previousMonthlyPayment * 0.5;
-        
-        $newAmount80 = $newAmount * 0.8;
-        
-        $newAmount50 = $newAmount * 0.5;
-
-        $yearMonthFrom = $yearFrom . $monthFrom;
+		$yearMonthFrom = $yearFrom . $monthFrom;
 		
 		$dateFrom = new Time($yearFrom . '-' . $monthFrom . '-01 00:00:00');
-			       
-        $accountGeneral = 0;
-        $accountDifferentAugust = 0;
-        $accountAugust = 0;
-        $accountPaymentException = 0;
-        $accountAdjust = 0;
-        $accountOutSequence = 0;
+		
+		$accountGeneral = 0;
+		$accountDifferentAugust = 0;
+		$accountAugust = 0;
+		$accountPaymentException = 0;
+		$accountAdjust = 0;
+		$accountOutSequence = 0;
 		$account20 = 0;
 		$account50 = 0;
 		$accountRegular = 0;
 		$accountIrregular = 0;
 		$swAdjust = 0;
 		$previousIdStudent = 0;
-		$swTruncateExcels = 0;
-		$swErrorTransactions = 0;
+		$accountDateFrom = 0;
+		$accountAmountCero = 0;
+		$accountStudentChange = 0;
+		$accountSelect = 0;
+		$adjustDefaulters = 0;
 		
 		if ($defaulters == 1)
 		{
-			$swError = $this->discountStudent($monthFrom, $yearFrom, $previousMonthlyPayment);
+			$swError = $this->discountStudents($monthFrom, $yearFrom, $previousMonthlyPayment);
 			if ($swError == 0)
 			{
-				$swError = $this->adjustDefaulters($monthFrom, $yearFrom, $newAmount); 
+				$arrayResult = $this->adjustDefaulters($monthFrom, $yearFrom, $newAmount); 
 			}
 		}
 		
-		if ($swError == 0)
-		{
-				
+		if ($arrayResult['indicator'] == 0)
+		{	
+			$adjustDefaulters = $arrayResult['adjust'];
+			
 			$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => [['transaction_type' => 'Mensualidad'], ['payment_date >=' => $dateFrom]], 
 				'order' => ['Studenttransactions.student_id' => 'ASC', 'payment_date' => 'ASC']]);
 				
 			$accountSelect = $studentTransactions->count();
 			
 			if ($studentTransactions) 
-			{
+			{				
 				foreach ($studentTransactions as $studentTransaction)
 				{			
 					$accountGeneral++;
@@ -860,40 +906,56 @@ class StudenttransactionsController extends AppController
 						$accountDifferentAugust++;
 														
 						if ($swDateException == 1)
-						{
-							if ($studentTransaction->payment_date == $dateFrom)
-							{							
+						{							
+							if ($studentTransaction->payment_date->year == $dateFrom->year && $studentTransaction->payment_date->month == $dateFrom->month)
+							{			
+								$accountDateFrom++;
+								
 								if ($studentTransaction->amount == 0)
 								{
+									$accountAmountCero++;
+									
 									if ($previousIdStudent != $studentTransaction->student_id)
 									{
+										$accountStudentChange++;
+										
 										$previousIdStudent = $studentTransaction->student_id;
 									
 										$swAdjust = $this->verifyPayment($dateFrom, $dateException, $studentTransaction->student_id);
-								
+																		
 										if ($swAdjust == 0)
 										{
-											$columns = [];
+											if ($accountPaymentException == 0)
+											{
+												$columns = [];
+												$columns['report'] = 'Alumnos pago completo año escolar';
+												$columns['start_end'] = 'start';
 											
+												$swError = $excels->add($columns);	
+												if ($swError > 0)
+												{
+													$arrayResult['indicator'] = 1;
+													$arrayResult['message'] = 'No se pudo inicializar la tabla excel con el reporte de Alumnos pago completo año escolar';
+													break;
+												}
+											}											
 											$accountPaymentException++;
 											
 											$student = $this->Studenttransactions->Students->get($studentTransaction->student_id);
-											
+
+											$columns = [];
 											$columns['report'] = 'Alumnos pago completo año escolar';
 											$columns['number'] = $accountPaymentException;
-											$columns['col1'] = $student->full_name;
+											$columns['col1'] = $student->id;
+											$columns['col2'] = $student->full_name;
 											
-											if ($swTruncateExcels == 0)
-											{
-												$excels->truncateTable();
-												$swTruncateExcels = 1;
-											}
+											$swError = $excels->add($columns);
 											
-											$swExcel = $excels->add($columns);
-
-											if ($swExcel == 1)
+											if ($swError > 0)
 											{
-												$this->Flash->error(__('No pudo ser grabado en la tabla Excels el alumno: ' . $student->full_name));
+												$arrayResult['indicator'] = 1;
+												$arrayResult['message'] = 'No se pudo grabar en la tabla excel el alumno pago completo año escolar id ' . student_id;
+												break;
 											}
 										}
 										else
@@ -921,7 +983,7 @@ class StudenttransactionsController extends AppController
 						}
 						
 						if ($swAdjust == 1)
-						{                       
+						{               							
 							$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
 							
 							if ($studentTransaction->original_amount == $previousMonthlyPayment80)
@@ -987,11 +1049,12 @@ class StudenttransactionsController extends AppController
 								$accountIrregular++;     
 							}
 
-							if (!($this->Studenttransactions->save($studentTransactionGet)))
+							/* if (!($this->Studenttransactions->save($studentTransactionGet)))
 							{
-								$swErrorTransactions = 1;
-							}
-
+								$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', 'No se pudo grabar la transacción con el id ' . $studentTransactionGet->id);
+								$swError = 1;
+								break;
+							} */
 						}  
 					}
 					else
@@ -999,34 +1062,65 @@ class StudenttransactionsController extends AppController
 						$accountAugust++;
 					}
 				}
-				if ($swErrorTransactions == 0)
+				if ($swError == 0)
 				{
-					$arrayResult['indicator'] = 0;
-					$arrayResult['message'] = 'Se actualizaron las mensualidades correctamente';			
+					if ($swDateException == 1 && $accountAdjust > 0)
+					{
+						$columns = [];
+						$columns['report'] = 'Alumnos pago completo año escolar';
+						$columns['start_end'] = 'end';
+					
+						$swError = $excels->add($columns);	
+						if ($swError == 0)
+						{
+							$arrayResult['indicator'] = 0;
+							$arrayResult['message'] = 'Se actualizaron las mensualidades correctamente';							
+						}
+						else
+						{
+							$arrayResult['indicator'] = 1;
+							$arrayResult['message'] = 'No se pudo finalizar la tabla excel con el reporte de alumnos pago completo año escolar';
+						}						
+					}
+					else
+					{
+						$arrayResult['indicator'] = 0;
+						$arrayResult['message'] = 'Se actualizaron las mensualidades correctamente';
+					}
 				}
 				else
 				{
 					$arrayResult['indicator'] = 1;
 					$arrayResult['message'] = 'Error al actualizar las mensualidades';				
 				}
-				$arrayResult['adjust'] = $accountAdjust;
-				$arrayResult['notAdjust'] = $accountPaymentException; 			
+				
 			}
 			else
 			{
 				$arrayResult['indicator'] = 1;
 				$arrayResult['message'] = 'No se encontraron mensualidades';
-				$arrayResult['adjust'] = 0;
-				$arrayResult['notAdjust'] = 0;
 			}
 		}
 		else
-		{
+		{ 
 			$arrayResult['indicator'] = 1;
-			$arrayResult['message'] = 'No se pudieron actualizar las mensualidades de alumnos morosos';
-			$arrayResult['adjust'] = 0;
-			$arrayResult['notAdjust'] = 0;		
+			$arrayResult['message'] = 'No se pudieron actualizar las mensualidades de alumnos morosos';		
 		}
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$yearFrom: ' . $yearFrom);
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$monthFrom: ' . $monthFrom);
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$dateFrom->year: ' . $dateFrom->year);
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$dateFrom->month: ' . $dateFrom->month);
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$dateFrom: ' . $dateFrom);
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountSelect: ' . $accountSelect);
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountDifferentAugust: ' . $accountDifferentAugust);	
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountAugust: ' . $accountAugust);
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountDateFrom: ' . $accountDateFrom);	
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountAmountCero: ' . $accountAmountCero);		
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountOutSequence: ' . $accountOutSequence);	
+
+		$arrayResult['adjust'] = $accountAdjust;
+		$arrayResult['notAdjust'] = $accountPaymentException; 	
+		$arrayResult['adjustDefaulters'] = $adjustDefaulters;		
         return $arrayResult;
     }
 
@@ -2699,6 +2793,9 @@ class StudenttransactionsController extends AppController
 	{
 		$this->autoRender = false;
 		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+		
 		$this->loadModel('Bills');
 		
 		$swAdjust = 0;
@@ -3048,11 +3145,16 @@ class StudenttransactionsController extends AppController
     {
 		$this->autoRender = false;
 		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+		
 		$binnacles = new BinnaclesController;	
 
 		$excels = new ExcelsController();
 		
 		$swError = 0;
+		
+		$arrayResult = [];
 		
 		$dateUntil = new Time($yearUntil . '-' . $monthUntil . '-01 00:00:00');		
 								
@@ -3107,6 +3209,7 @@ class StudenttransactionsController extends AppController
 						{
 							if ($accountStudentAdjust == 0)
 							{
+								$columns = [];
 								$columns['report'] = 'Alumnos morosos cuota ajustada';
 								$columns['start_end'] = 'start';
 								
@@ -3116,7 +3219,8 @@ class StudenttransactionsController extends AppController
 							if ($swError == 0)
 							{
 								$accountStudentAdjust++;
-							
+								
+								$columns = [];
 								$columns['report'] = 'Alumnos morosos cuota ajustada';
 								$columns['number'] = $accountStudentAdjust;
 								$columns['col1'] = $student->id;
@@ -3227,16 +3331,16 @@ class StudenttransactionsController extends AppController
 
 					if ($swSave == 1)
 					{
-						if ($this->Studenttransactions->save($studentTransactionGet))
-						{
+						/* if ($this->Studenttransactions->save($studentTransactionGet))
+						{ */
 							$accountSave++;	
-						}	
+						/* }	
 						else
 						{
 							$binnacles->add('controller', 'Studenttransactions', 'adjustDefaulters', 'No se pudo actualizar la mensualidad con id: ' . $studentTransactionGet->id);
 							$swError = 1;
 							break;
-						} 
+						} */
 						$swSave = 0;
 					}
 				}
@@ -3250,7 +3354,8 @@ class StudenttransactionsController extends AppController
 				if ($swAdjust == 1)
 				{				
 					$accountStudentAdjust++;
-
+					
+					$columns = [];
 					$columns['report'] = 'Alumnos morosos cuota ajustada';
 					$columns['number'] = $accountStudentAdjust;
 					$columns['col1'] = $student->id;
@@ -3258,14 +3363,14 @@ class StudenttransactionsController extends AppController
 					$columns['col3'] = $student->discount;
 					
 					$swError = $excels->add($columns);
-
-					if ($swError == 0)
-					{
-						$columns['report'] = 'Alumnos morosos cuota ajustada';
-						$columns['start_end'] = 'End';
-					
-						$swError = $excels->add($columns);
-					}
+				}
+				if ($swError == 0 && $accountStudentAdjust > 0)
+				{
+					$columns = [];
+					$columns['report'] = 'Alumnos morosos cuota ajustada';
+					$columns['start_end'] = 'end';
+				
+					$swError = $excels->add($columns);
 				}
 			}
 		}
@@ -3274,12 +3379,17 @@ class StudenttransactionsController extends AppController
 			$binnacles->add('controller', 'Studenttransactions', 'adjustDefaulters', 'No se encontraron alumnos con mensualidades morosas');
 			$swError = 1;
 		}
-		return $swError;
+		$arrayResult['indicator'] = $swError;
+		$arrayResult['adjust'] = $accountStudentAdjust;
+		return $arrayResult;
 	}
 
 	public function discountStudents($monthFrom = null, $yearFrom = null, $monthlyPayment = null)
 	{
 		$this->autoRender = false;
+		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');		
 		
 		$excels = new ExcelsController();
 			
@@ -3344,7 +3454,7 @@ class StudenttransactionsController extends AppController
 							$accountStudentDiscount++;
 
 							$columns = [];											
-							$columns['report'] = 'Alumnos con descuento en cuotas';
+							$columns['report'] = 'Alumnos con discount 20% y 50%';
 							$columns['number'] = $accountStudentDiscount;
 							$columns['col1'] = $student->id;
 							$columns['col2'] = $student->full_name;
@@ -3370,8 +3480,9 @@ class StudenttransactionsController extends AppController
 						break;
 					}
 				}
-				if ($swError == 0)
+				if ($swError == 0 && $accountStudentDiscount > 0)
 				{
+					$columns = [];
 					$columns['report'] = 'Alumnos con discount 20% y 50%';
 					$columns['start_end'] = 'end';
 				
