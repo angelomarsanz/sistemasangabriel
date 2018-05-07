@@ -127,14 +127,14 @@ class RatesController extends AppController
 
 				if ($arrayResult['indicator'] == 0)
 				{
-					/* if ($this->Rates->save($rate)) 
-					{ */
+					if ($this->Rates->save($rate)) 
+					{ 
 						$arrayMail['error'] = 0;
-					/* }
+					}
 					else
 					{
 						$arrayMail['error'] = 1;							
-					} */
+					}
 				}
 				else
 				{
@@ -230,7 +230,7 @@ class RatesController extends AppController
           ->viewVars([ 
             'varError' => $arrayMail['error'],
             'varAdjust' => $arrayMail['adjust'],
-            'varNotAdjust' => $arrayMail['notAdjust']
+            'varNotAdjust' => $arrayMail['notAdjust'],
 			'varAdjustDefaulters' => $arrayMail['adjustDefaulters']
           ]);
   

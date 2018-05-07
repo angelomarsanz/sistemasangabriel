@@ -1049,12 +1049,12 @@ class StudenttransactionsController extends AppController
 								$accountIrregular++;     
 							}
 
-							/* if (!($this->Studenttransactions->save($studentTransactionGet)))
+							if (!($this->Studenttransactions->save($studentTransactionGet)))
 							{
 								$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', 'No se pudo grabar la transacción con el id ' . $studentTransactionGet->id);
 								$swError = 1;
 								break;
-							} */
+							} 
 						}  
 					}
 					else
@@ -1116,8 +1116,11 @@ class StudenttransactionsController extends AppController
 		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountAugust: ' . $accountAugust);
 		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountDateFrom: ' . $accountDateFrom);	
 		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountAmountCero: ' . $accountAmountCero);		
-		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountOutSequence: ' . $accountOutSequence);	
-
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountOutSequence: ' . $accountOutSequence);
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountAdjust: ' . $accountAdjust);
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$accountPaymentException: ' . $accountPaymentException);
+		$binnacles->add('controller', 'Studenttransactions', 'newMonthlyPayment', '$adjustDefaulters: ' . $adjustDefaulters);		
+		
 		$arrayResult['adjust'] = $accountAdjust;
 		$arrayResult['notAdjust'] = $accountPaymentException; 	
 		$arrayResult['adjustDefaulters'] = $adjustDefaulters;		
@@ -3331,16 +3334,16 @@ class StudenttransactionsController extends AppController
 
 					if ($swSave == 1)
 					{
-						/* if ($this->Studenttransactions->save($studentTransactionGet))
-						{ */
+						if ($this->Studenttransactions->save($studentTransactionGet))
+						{ 
 							$accountSave++;	
-						/* }	
+						}	
 						else
 						{
 							$binnacles->add('controller', 'Studenttransactions', 'adjustDefaulters', 'No se pudo actualizar la mensualidad con id: ' . $studentTransactionGet->id);
 							$swError = 1;
 							break;
-						} */
+						}
 						$swSave = 0;
 					}
 				}
