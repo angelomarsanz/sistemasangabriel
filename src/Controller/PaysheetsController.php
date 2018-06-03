@@ -237,13 +237,16 @@ class PaysheetsController extends AppController
     }
     public function createPayrollFortnight()
     {
+		$cestaTicket = 0;
+		
         $employees = new EmployeesController();
         
         $employeepayments = new EmployeepaymentsController();
         
         $paysheet = $this->Paysheets->newEntity();
+		
         if ($this->request->is('post')) 
-        {
+        {				
             $paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
 						
 			if (substr($_POST['cesta_ticket_month'], -3, 1) == ',')
@@ -368,7 +371,7 @@ class PaysheetsController extends AppController
             }
         }
 		else
-		{
+		{			
             $lastRecord = $this->Paysheets->find('all', 
                 ['conditions' => 
                 ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]], 'order' => ['Paysheets.created' => 'DESC']]);
@@ -377,11 +380,18 @@ class PaysheetsController extends AppController
                 
 			if ($row)
 			{
-				$cestaTicket = $row->cesta_ticket_month;
+				if (isset($row->cesta_ticket_month))
+				{
+					$cestaTicket = $row->cesta_ticket_month;
+				}
 			}
 		}
-        $this->set(compact('cestaTicket'));
-        $this->set('_serialize', ['cestaTicket']);
+		
+		$controller = "Paysheets";
+		$action = "edit";
+		
+        $this->set(compact('paysheet', 'cestaTicket', 'controller', 'action'));
+        $this->set('_serialize', ['paysheet', 'cestaTicket', 'controller', 'action']);
     }
     
     public function nameMonthSpanish($month = null)

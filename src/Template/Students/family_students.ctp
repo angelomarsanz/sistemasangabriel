@@ -57,7 +57,7 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="page-header">
-				<h2>Reporte Familias - Estudiantes</h2>
+				<h2>Familias - Alumnos regulares</h2>
 				<h3>Selección de columnas a imprimir</h3>
 			</div>
 			<?= $this->Form->create() ?>
@@ -70,7 +70,7 @@
 							</div>
 							<div class="col-md-11">
 								<h5>Datos del representante:</h5>
-									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.full_name]"> Nombre</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.full_name]" id="nombre"> Nombre</p>
 									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.sex]"> Sexo</p>
 									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.identidy_card]"> Cédula o pasaporte</p>
 									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.work_phone]"> Teléfono trabajo</p>
@@ -85,30 +85,33 @@
 						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.nationality]"> Nacionalidad</p>
 						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.identity_card]"> Cédula o pasaporte</p>
 						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.section_id]"> Grado y sección</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.student_condition]"> Estatus</p>
 					</div>
 				</div>
 			</fieldset>
 			<br /> 					
-			<?= $this->Form->button(__('Generar reporte'), ['id' => 'generar-reporte', 'class' =>'btn btn-success']) ?>
+			<div id="menu-menos" class="menumenos nover">
+				<p>
+				<a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
+				</p>
+			</div>
+			<div id="menu-mas" style="display:none;" class="menumas nover">
+				<p>
+					<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
+					<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
+					
+					<button id="marcar-todos" class="glyphicon icon-checkbox-checked btn btn-danger" title="Marcar todos" style="padding: 8px 12px 10px 12px;"></button>
+
+					<button id="desmarcar-todos" class="glyphicon icon-checkbox-unchecked btn btn-danger" title="Desmarcar todos" style="padding: 8px 12px 10px 12px;"></button>
+
+					<?= $this->Form->button(__(''), ['id' => 'generar-reporte', 'title' => 'Generar reporte', 'class' => 'glyphicon glyphicon-th-list btn btn-danger']) ?>					
+					
+					<a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
+				</p>
+			</div>
+						
 			<?= $this->Form->end() ?>
 		</div>
-	</div>
-	<div id="menu-menos" class="menumenos nover">
-		<p>
-		<a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
-		</p>
-	</div>
-	<div id="menu-mas" style="display:none;" class="menumas nover">
-		<p>
-			<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
-			<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
-			
-			<button id="marcar-todos" class="glyphicon icon-checkbox-checked btn btn-danger" title="Marcar todos" style="padding: 8px 12px 10px 12px;"></button>
-
-			<button id="desmarcar-todos" class="glyphicon icon-checkbox-unchecked btn btn-danger" title="Desmarcar todos" style="padding: 8px 12px 10px 12px;"></button>
-			
-			<a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
-		</p>
 	</div>
 <?php else: ?>
 	<br />
@@ -124,7 +127,7 @@
 				<?php $accountFamily++; ?>
 				<?php $accountStudent++; ?>
 				<?php $currentFamily = $familyStudent->parentsandguardian->family; ?>
-				<table id="family-students" name="family_students" class="noverScreen table">
+				<table id="family-students" name="family_students" class="table noverScreen">
 					<thead>
 						<tr>
 							<th></th>
@@ -150,6 +153,7 @@
 							<th scope="col" class=<?= $arrayMark['Students.nationality'] ?>><b>Nacionalidad alumno</b></th>
 							<th scope="col" class=<?= $arrayMark['Students.identity_card'] ?>><b>Cédula o pasaporte alumno</b></th>
 							<th scope="col" class=<?= $arrayMark['Students.section_id'] ?>><b>Grado y sección</b></th>	
+							<th scope="col" class=<?= $arrayMark['Students.student_condition'] ?>><b>Estatus</b></th>	
 							<th scope="col" class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><b>Nombre Representante</b></th>
 							<th scope="col" class=<?= $arrayMark['Parentsandguardians.sex'] ?>><b>Sexo</b></th>
 							<th scope="col" class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><b>Cédula o pasaporte representante</b></th>
@@ -167,7 +171,8 @@
 							<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 							<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
 							<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
-							<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>
+							<td class=<?= $arrayMark['Students.student_condition'] ?>><?= $familyStudent->student_condition ?></td>
+							<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>							
 							<td class=<?= $arrayMark['Parentsandguardians.sex'] ?>><?= $familyStudent->parentsandguardian->sex ?></td>
 							<td class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><?= $familyStudent->parentsandguardian->type_of_identification . '-' . $familyStudent->parentsandguardian->identidy_card ?></td>
 							<td class=<?= $arrayMark['Parentsandguardians.work_phone'] ?>><?= $familyStudent->parentsandguardian->work_phone ?></td>
@@ -189,6 +194,7 @@
 					<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 					<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
 					<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
+					<td class=<?= $arrayMark['Students.student_condition'] ?>><?= $familyStudent->student_condition ?></td>
 					<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>
 					<td class=<?= $arrayMark['Parentsandguardians.sex'] ?>><?= $familyStudent->parentsandguardian->sex ?></td>
 					<td class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><?= $familyStudent->parentsandguardian->type_of_identification . '-' . $familyStudent->parentsandguardian->identidy_card ?></td>
@@ -221,8 +227,9 @@
 	</div>
 	<div id="menu-mas" style="display:none;" class="menumas nover">
 		<p>
-			<a href="/sistemasangabriel/users/wait" id="volver" title="Volver" class='glyphicon glyphicon-chevron-left btn btn-danger'></a>
-			<a href="/sistemasangabriel/users/wait" id="cerrar" title="Cerrar vista" class='glyphicon glyphicon-remove btn btn-danger'></a>
+			<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
+			<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
+			
 			<a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
 		</p>
 	</div>
@@ -261,6 +268,7 @@ $(document).ready(function(){
 		$(".column-mark").each(function (index) 
 		{ 
 			$(this).attr('checked', true);
+			$(this).prop('checked', true);
 		});
 	});
 	
@@ -271,8 +279,8 @@ $(document).ready(function(){
 		$(".column-mark").each(function (index) 
 		{ 
 			$(this).attr('checked', false);
+			$(this).prop('checked', false);
 		});
 	});
-	
 });
 </script>

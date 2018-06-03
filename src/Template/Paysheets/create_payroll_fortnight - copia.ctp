@@ -1,3 +1,6 @@
+<?php 
+use Cake\I18n\Time;
+?>
 <style>
 @media screen
 {
@@ -42,32 +45,52 @@
 		<div class="page-header">
 	        <h3>Crear Nómina</h3>
 	    </div>
-	    <?= $this->Form->create() ?>
+	    <?= $this->Form->create($paysheet) ?>
 	        <fieldset>
 		    	<?php
-	               	echo $this->Form->input('year_paysheet', ['label' => 'Año: ', 'options' => 
-	                    [null => '',
-	                    '2017' => '2017',
-	                    '2018' => '2018',
-	                    '2019' => '2019']]);
-	                echo $this->Form->input('month_paysheet', ['label' => 'Mes: ', 'options' => 
-	                    [null => '',
-	                    '01' => 'Enero',
-	                    '02' => 'Febrero',
-	                    '03' => 'Marzo',
-	                    '04' => 'Abril',
-	                    '05' => 'Mayo',
-	                    '06' => 'Junio',
-	                    '07' => 'Julio',
-	                    '08' => 'Agosto',
-	                    '09' => 'Septiembre',
-	                    '10' => 'Octubre',
-	                    '11' => 'Noviembre',
-	                    '12' => 'Diciembre']]);
-	               	echo $this->Form->input('fortnight', ['label' => 'Quincena: ', 'options' => 
-	                    [null => '',
-	                    '1ra. Quincena' => '1ra. Quincena',
-	                    '2da. Quincena' => '2da. Quincena']]);
+					setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+					date_default_timezone_set('America/Caracas');
+					
+					$currentDate = time::now();
+					
+					echo $this->Form->input('date_from', ['label' => 'Fecha de inicio de la nómina: ', 
+						'type' => 'date',
+						'value' => $currentDate,
+						'monthNames' =>
+						['01' => 'Enero',
+						'02' => 'Febrero',
+						'03' => 'Marzo',
+						'04' => 'Abril',
+						'05' => 'Mayo',
+						'06' => 'Junio',
+						'07' => 'Julio',
+						'08' => 'Agosto',
+						'09' => 'Septiembre',
+						'10' => 'Octubre',
+						'11' => 'Noviembre',
+						'12' => 'Diciembre'],
+						'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">Día{{day}}</li><li class="month">Mes{{month}}</li><li class="year">Año{{year}}</li></ul>']]);
+
+					echo $this->Form->input('date_until', ['label' => 'Fecha de culminación de la nómina: ', 
+						'type' => 'date',
+						'value' => $currentDate,
+						'monthNames' =>
+						['01' => 'Enero',
+						'02' => 'Febrero',
+						'03' => 'Marzo',
+						'04' => 'Abril',
+						'05' => 'Mayo',
+						'06' => 'Junio',
+						'07' => 'Julio',
+						'08' => 'Agosto',
+						'09' => 'Septiembre',
+						'10' => 'Octubre',
+						'11' => 'Noviembre',
+						'12' => 'Diciembre'],
+						'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">Día{{day}}</li><li class="month">Mes{{month}}</li><li class="year">Año{{year}}</li></ul>']]);
+
+					echo $this->Form->input('salary_days', ['label' => 'Cantidad de días base para el cálculo de esta nómina: ', 'class' => 'alternative-decimal-separator']);
+
 					echo $this->Form->input('cesta_ticket_month', ['label' => 'Valor cesta ticket mensual: ', 'class' => 'alternative-decimal-separator', 'value' => number_format($cestaTicket, 2, ",", ".")]);
 		    	?>
 		    </fieldset>

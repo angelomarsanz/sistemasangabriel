@@ -182,10 +182,8 @@
 					<?php if ($currentFamily != $familyStudent->parentsandguardian->family): ?>
 						<?php $currentFamily = $familyStudent->parentsandguardian->family; ?>
 						<?php $accountFamily++; ?>
-						<td><?= $currentFamily ?></td>
-					<?php else: ?>
-						<td></td>
 					<?php endif; ?>
+					<td><?= $currentFamily ?></td>
 					<td><?= $familyStudent->full_name ?></td>
 					<td class=<?= $arrayMark['Students.sex'] ?>><?= $familyStudent->sex ?></td>
 					<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>

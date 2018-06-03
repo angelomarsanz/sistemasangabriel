@@ -1240,7 +1240,8 @@ class StudenttransactionsController extends AppController
                     ->contain(['Students' => ['Sections']])
                     ->where([['Studenttransactions.transaction_description' => 'Matrícula 2017'],
                         ['Studenttransactions.amount <' => $row->amount],
-                        ['Students.level_of_study' => $level]])
+                        ['Students.level_of_study' => $level],
+						['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
                     ->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
                     
                 $totalLevel = $studentsLevel->count();

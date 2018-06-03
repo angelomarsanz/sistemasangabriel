@@ -65,14 +65,14 @@
         <?= $this->Form->create() ?>
         <fieldset>
             <?php
-                echo $this->Form->input('concept', ['required' => 'required', 'options' => 
+                echo $this->Form->input('concept', ['required' => 'required', 'label' => 'Tarifa', 'options' => 
                     [null => '',
+					'Agosto' => 'Agosto',
                     'Matrícula' => 'Matrícula',
-                    'Seguro escolar' => 'Seguro escolar',
                     'Mensualidad' => 'Mensualidad',
-                    'Servicio educativo' => 'Servicio educativo'],
-                    'label' => 'Tarifa']); 
-                echo $this->Form->input('rate_month', ['label' => 'A partir del mes: ', 'options' => 
+                    'Seguro escolar' => 'Seguro escolar',
+                    'Servicio educativo' => 'Servicio educativo']]); 
+                echo $this->Form->input('rate_month', ['label' => 'A partir del mes: ', 'disabled' => 'disabled', 'options' => 
                     [null => '',
                     '01' => 'Enero',
                     '02' => 'Febrero',
@@ -85,12 +85,12 @@
                     '09' => 'Septiembre',
                     '10' => 'Octubre',
                     '11' => 'Noviembre',
-                    '12' => 'Diciembre'], 'disabled' => 'disabled']);
-               	echo $this->Form->input('rate_year', ['label' => 'Del año: ', 'options' => 
+                    '12' => 'Diciembre']]);
+               	echo $this->Form->input('rate_year', ['label' => 'Del año: ', 'disabled' => 'disabled', 'options' => 
                     [null => '',
                     '2017' => '2017',
                     '2018' => '2018',
-                    '2019' => '2019'], 'disabled' => 'disabled']);
+                    '2019' => '2019']]);
                 echo $this->Form->input('amount', ['required' => 'required',
                     'label' => 'Monto']);
 					

@@ -131,7 +131,7 @@ class PaysheetsController extends AppController
      * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Network\Exception\NotFoundException When record not found.
      */
-    public function edit($id = null, $classificationC = null)
+    public function edit($id = null, $classificationC = null, $employeePayments = null)
     {
         $this->autoRender = false;
         
@@ -168,7 +168,7 @@ class PaysheetsController extends AppController
             {
                 $lastRecord = $this->Paysheets->find('all', 
                 ['conditions' => 
-                    ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]], 'order' => ['Paysheets.created' => 'DESC']]);
+                    ['id >' => 1, 'OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]], 'order' => ['Paysheets.created' => 'DESC']]);
             }
             
             if (isset($classificationC))
@@ -184,14 +184,21 @@ class PaysheetsController extends AppController
                 
         if ($row)
         {
-            $month = $this->nameMonthSpanish($row->month_paysheet);
-                
+            $month = $this->nameMonthSpanish($row->month_paysheet);               
             return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $row->id, $row->weeks_social_security, $row->year_paysheet, $row->month_paysheet, $month, $row->fortnight, $classification]);
         }
         else
         {
-            $this->Flash->error(__('No se encontró la nómina'));
-			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+			if (isset($id))
+			{
+				$this->Flash->error(__('No se encontró la nómina'));
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+			}
+			else
+			{
+				$this->Flash->error(__('No se encontraron nóminas'));
+				return $this->redirect(['controller' => 'Paysheets', 'action' => 'createPayrollFortnight']);
+			}
         }
     }
 
@@ -205,6 +212,12 @@ class PaysheetsController extends AppController
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
+		
+		if (isset($_POST['idPaysheet']))
+		{
+			$id = $_POST['idPaysheet'];
+		}
+		
         $paysheet = $this->Paysheets->get($id);
         
         $paysheet->deleted_record = 1;
@@ -311,6 +324,10 @@ class PaysheetsController extends AppController
                 }
 				                
                 $paysheet->responsible_user = $this->Auth->user('username'); 
+				
+				$tableConfigurationJson = $this->initialConfiguration();
+            
+				$paysheet->table_configuration = $tableConfigurationJson;
                 
                 if (!($this->Paysheets->save($paysheet)))
                 {
@@ -363,8 +380,8 @@ class PaysheetsController extends AppController
 				$cestaTicket = $row->cesta_ticket_month;
 			}
 		}
-        $this->set(compact('cestaTicket'));
-        $this->set('_serialize', ['cestaTicket']);
+        $this->set(compact('paysheet', 'cestaTicket'));
+        $this->set('_serialize', ['paysheet', 'cestaTicket']);
     }
     
     public function nameMonthSpanish($month = null)
@@ -394,5 +411,143 @@ class PaysheetsController extends AppController
         $lastDay = ["31", "29", "31", "30", "31", "30", "31", "31", "30", "31", "30", "31"];
         $englishMonth = str_replace($monthNumbers, $lastDay, $month);
         return $englishMonth;
+    }
+    public function initialConfiguration()
+    {
+        $tableConfiguration = [];
+        
+        $tableConfiguration['identidy'] = '1';
+
+        $tableConfiguration['position'] = '1';
+		
+		$tableConfiguration['sw_cesta_ticket'] = '0';
+
+        $tableConfiguration['date_of_admission'] = '1';
+
+        $tableConfiguration['monthly_salary'] = '1';
+
+        $tableConfiguration['fortnight'] = '1';
+
+        $tableConfiguration['amount_escalation_fortnight'] = '1';
+
+        $tableConfiguration['salary_advance'] = '1';
+
+        $tableConfiguration['other_income'] = '1';
+
+        $tableConfiguration['faov'] = '1';
+
+        $tableConfiguration['ivss'] = '1';
+
+        $tableConfiguration['trust_days'] = '1';
+
+        $tableConfiguration['escrow'] = '1';
+
+        $tableConfiguration['discount_repose'] = '1';
+
+        $tableConfiguration['discount_loan'] = '1';
+
+        $tableConfiguration['percentage_imposed'] = '1';
+
+        $tableConfiguration['amount_imposed'] = '1';
+
+        $tableConfiguration['days_absence'] = '1';                                         
+        
+        $tableConfiguration['discount_absences'] = '1';
+
+        $tableConfiguration['total_fortnight'] = '1';
+		
+		$tableConfiguration['days_cesta_ticket'] = '1';
+		
+		$tableConfiguration['amount_cesta_ticket'] = '1';
+		
+		$tableConfiguration['loan_cesta_ticket'] = '1';
+		
+		$tableConfiguration['total_cesta_ticket'] = '1';
+		
+        $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
+ 
+        return $tableConfigurationJson;       
+    }
+
+    public function moveConfiguration($idPaysheet = null, $valor = null)
+    {		
+		$paysheet = $this->Paysheets->get($idPaysheet);
+                				
+		$objectTableConfiguration = json_decode($paysheet->table_configuration);
+				
+		$tableConfiguration = (array) $objectTableConfiguration;
+						
+		if ($tableConfiguration['sw_cesta_ticket'] == 0)
+        {
+			$tableConfiguration['date_of_admission'] = $valor['view_date_of_admission'];
+
+			$tableConfiguration['monthly_salary'] = $valor['view_monthly_salary'];
+
+			$tableConfiguration['fortnight'] = $valor['view_fortnight'];
+
+			$tableConfiguration['amount_escalation_fortnight'] = $valor['view_amount_escalation_fortnight'];
+
+			$tableConfiguration['salary_advance'] = $valor['view_salary_advance'];
+
+			$tableConfiguration['other_income'] = $valor['view_other_income'];
+
+			$tableConfiguration['faov'] = $valor['view_faov'];
+
+			$tableConfiguration['ivss'] = $valor['view_ivss'];
+
+			$tableConfiguration['trust_days'] = $valor['view_trust_days'];
+
+			$tableConfiguration['escrow'] = $valor['view_escrow'];
+
+			$tableConfiguration['discount_repose'] = $valor['view_discount_repose'];
+
+			$tableConfiguration['discount_loan'] = $valor['view_discount_loan'];
+
+			$tableConfiguration['percentage_imposed'] = $valor['view_percentage_imposed'];
+
+			$tableConfiguration['amount_imposed'] = $valor['view_amount_imposed'];
+
+			$tableConfiguration['days_absence'] = $valor['view_days_absence'];                                         
+			
+			$tableConfiguration['discount_absences'] = $valor['view_discount_absences'];
+
+			$tableConfiguration['total_fortnight'] = $valor['view_total_fortnight'];
+		}
+		else
+		{
+			$tableConfiguration['days_cesta_ticket'] = $valor['view_days_cesta_ticket'];
+			
+			$tableConfiguration['amount_cesta_ticket'] = $valor['view_amount_cesta_ticket'];
+			
+			$tableConfiguration['loan_cesta_ticket'] = $valor['view_loan_cesta_ticket'];
+			
+			$tableConfiguration['total_cesta_ticket'] = $valor['view_total_cesta_ticket'];
+		}
+		
+		$previousSwCestaTicket = $tableConfiguration['sw_cesta_ticket'];
+		
+		$tableConfiguration['sw_cesta_ticket'] = $valor['view_sw_cesta_ticket'];
+		
+		$tableConfiguration['identidy'] = $valor['view_identidy'];
+
+		$tableConfiguration['position'] = $valor['view_position'];
+			
+        $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
+		
+        $paysheet->table_configuration = $tableConfigurationJson;	
+
+        $arrayResult = [];
+        		
+        if ($this->Paysheets->save($paysheet)) 
+        {
+			$arrayResult['indicator'] = 0;
+            $arrayResult['previousSwCestaTicket'] = $previousSwCestaTicket;
+			$arrayResult['cesta_ticket_month'] = $paysheet->cesta_ticket_month;
+        } 
+        else
+        {
+            $arrayResult['indicator'] = 1;
+        } 
+        return $arrayResult;       
     }
 }

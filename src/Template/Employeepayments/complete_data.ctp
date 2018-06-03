@@ -23,6 +23,33 @@
     {
       display:none
     }
+	.table-container
+	{
+		height: 500px;
+		overflow: auto;
+	}
+
+	.table-container th
+	{
+		position: relative;
+		z-index: 5;
+		background: white;
+	}
+
+	.table-container td
+	{
+		position: relative;
+	}
+	
+	.table-container tbody tr:nth-child(odd) td
+	{
+		background: #f9f9f9;
+	}
+
+	.table-container tbody tr:nth-child(even) td
+	{
+		background: white;
+	}
 }
 @media print 
 {
@@ -37,13 +64,14 @@
     }
 }
 </style>
+
 <div class='container'>
     <div class="row">
         <div class="col-md-12">
 
         	<div class="page-header">
             </div>
-
+       	
         	<div>
         	    <input type='hidden' id='classificationFor' value=<?= $classificationNumber ?> />
         	    <input type='hidden' id='fortnightFor' value=<?= $fortnightNumber ?> />
@@ -51,7 +79,7 @@
         	    <input type='hidden' id='yearFor' value=<?= $year ?> />
                 <?= $this->Form->create() ?>
                     <fieldset>
-                    	<div class="table-responsive">
+                    	<div class="table-responsive table-container">
                     		<table class="table table-striped table-hover">
                                 <thead>
                                     <tr>
@@ -60,7 +88,7 @@
                                         <th scope="col"></th>
                                         <th scope="col"></th>
                                         <th scope="col">Nro.</th>
-                                        <th scope="col">Nombre&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                                        <th scope="col" class="fixed">Nombre&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 
                                         <th scope="col" class='sw-cesta-ticket'></th>                                        
 										
@@ -537,6 +565,63 @@
     }
 
 // Documento
+	
+	document.addEventListener("DOMContentLoaded", function()
+	{
+		'use strict';
+		var tableContainer = document.querySelector(".table-container");
+		var headRow = tableContainer.querySelector("thead tr");
+		tableContainer.addEventListener("scroll", moveContent);
+
+		function moveContent(){
+			moveX(this);
+			moveY(this);
+		}
+
+		function moveX(self){
+			var rows = document.querySelectorAll(".table-container tr");
+			var fixedColumnIndex = findFixedIndex();
+			for (var i = 0; i < rows.length; i++){
+				var parentName = rows[i].parentNode.nodeName.toLowerCase();
+				var cells = getCells(rows[i], parentName);
+				for(var j = 0; j <= fixedColumnIndex; j++){
+					setZIndex(cells[j], parentName);
+					cells[j].style.left = self.scrollLeft + "px";
+				}
+			}
+		}
+
+		function moveY(self){
+			var cells = headRow.querySelectorAll("th");
+			for(var i = 0; i < cells.length; i++){
+				cells[i].style.top = self.scrollTop + "px";	
+			}
+		}
+
+		function setZIndex(cell, parentName){
+			if(!cell.style.zIndex){
+				if(parentName == "thead")
+					cell.style.zIndex = 10;
+				else
+					cell.style.zIndex = 5;
+			}
+		}
+
+		function getCells (row, parentName){
+			if(parentName == "thead")
+				return(row.querySelectorAll("th"));
+			else
+				return(row.querySelectorAll("td"));
+		}
+
+		function findFixedIndex(){
+			var cells = headRow.querySelectorAll("th");
+			for(var i = 0; i < cells.length; i++){
+				if(cells[i].classList.contains("fixed"))
+					return i; 
+			}
+		}
+	});
 
     $(document).ready(function()
     { 

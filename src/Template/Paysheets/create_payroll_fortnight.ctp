@@ -1,3 +1,10 @@
+<?php 
+	use Cake\I18n\Time;
+	setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+	date_default_timezone_set('America/Caracas');
+	
+	$currentDate = time::now();
+?>
 <style>
 @media screen
 {
@@ -37,45 +44,102 @@
     }
 }
 </style>
+<div class="page-header">
+	<h3>Crear Nómina</h3>
+</div>
 <div class="row">
-    <div class="col-md-4">
-		<div class="page-header">
-	        <h3>Crear Nómina</h3>
-	    </div>
-	    <?= $this->Form->create() ?>
-	        <fieldset>
-		    	<?php
-	               	echo $this->Form->input('year_paysheet', ['label' => 'Año: ', 'options' => 
-	                    [null => '',
-	                    '2017' => '2017',
-	                    '2018' => '2018',
-	                    '2019' => '2019']]);
-	                echo $this->Form->input('month_paysheet', ['label' => 'Mes: ', 'options' => 
-	                    [null => '',
-	                    '01' => 'Enero',
-	                    '02' => 'Febrero',
-	                    '03' => 'Marzo',
-	                    '04' => 'Abril',
-	                    '05' => 'Mayo',
-	                    '06' => 'Junio',
-	                    '07' => 'Julio',
-	                    '08' => 'Agosto',
-	                    '09' => 'Septiembre',
-	                    '10' => 'Octubre',
-	                    '11' => 'Noviembre',
-	                    '12' => 'Diciembre']]);
-	               	echo $this->Form->input('fortnight', ['label' => 'Quincena: ', 'options' => 
-	                    [null => '',
-	                    '1ra. Quincena' => '1ra. Quincena',
-	                    '2da. Quincena' => '2da. Quincena']]);
-					echo $this->Form->input('cesta_ticket_month', ['label' => 'Valor cesta ticket mensual: ', 'class' => 'alternative-decimal-separator', 'value' => number_format($cestaTicket, 2, ",", ".")]);
-		    	?>
-		    </fieldset>
-        	<?= $this->Form->button(__('Crear nómina'), ['class' =>'btn btn-success']) ?>
-        <?= $this->Form->end() ?>
-        <br />
-        <?= $this->Html->link('Volver al inicio', ['controller' => 'users', 'action' => 'wait'], ['class' => 'btn btn-sm btn-primary']); ?>
-	</div>
+	<?= $this->Form->create($paysheet) ?>
+        <fieldset>
+			<div class="row">
+				<div class="col-md-4">	
+					<?php echo $this->Form->input('date_from', ['label' => 'Fecha inicio nómina: ', 
+						'type' => 'date',
+						'value' => $currentDate,
+						'monthNames' =>
+						['01' => 'Enero',
+						'02' => 'Febrero',
+						'03' => 'Marzo',
+						'04' => 'Abril',
+						'05' => 'Mayo',
+						'06' => 'Junio',
+						'07' => 'Julio',
+						'08' => 'Agosto',
+						'09' => 'Septiembre',
+						'10' => 'Octubre',
+						'11' => 'Noviembre',
+						'12' => 'Diciembre'],
+						'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">Día{{day}}</li><li class="month">Mes{{month}}</li><li class="year">Año{{year}}</li></ul>']]);
+					?>
+				</div>
+				<div class="col-md-4">
+					<?php echo $this->Form->input('date_until', ['label' => 'Fecha culminación nómina: ', 
+						'type' => 'date',
+						'value' => $currentDate,
+						'monthNames' =>
+						['01' => 'Enero',
+						'02' => 'Febrero',
+						'03' => 'Marzo',
+						'04' => 'Abril',
+						'05' => 'Mayo',
+						'06' => 'Junio',
+						'07' => 'Julio',
+						'08' => 'Agosto',
+						'09' => 'Septiembre',
+						'10' => 'Octubre',
+						'11' => 'Noviembre',
+						'12' => 'Diciembre'],
+						'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">Día{{day}}</li><li class="month">Mes{{month}}</li><li class="year">Año{{year}}</li></ul>']]);
+					?>
+				</div>
+				<div class="col-md-4">
+					<br />
+					<div class="row">
+						<div class="col-md-6">
+							<label for="salary-days">Días base cálculos:</label>
+							<input name="salary_days" id="salary-day" type="number" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días base para el cálculo de esta nómina">
+						</div>
+					</div>
+				</div>
+			</div >
+			<hr />
+			<div class="row">				
+				<div class="col-md-4">
+					<div class="row">
+						<div class="col-md-6">
+							<label for="cesta-ticket-month">Cesta ticket:</label>
+							<input name="cesta_ticket_month" id="cesta-ticket-month" value="<?= $cestaTicket ?>" class="form-control alternative-decimal-separator" data-toggle="tooltip" data-placement="top" title="Valor de la cesta ticket mensual" />
+						</div>
+						<div class="col-md-6">						
+							<label for="days-cesta-ticket">Días base cálculos:</label>
+							<input name="days_cesta_ticket" id="days-cesta-ticket" type="number" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días base para el cálculo de esta cesta ticket">
+						</div>
+					</div>
+				</div>			
+				<div class="col-md-4">
+					<div class="row">
+						<div class="col-md-6">
+							<label for="days-utilities">Días utilidades:</label>
+							<input name="days_utilities" id="days-utilities" type="number" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días a pagar por concepto de utilidades">
+						</div>					
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="row">
+						<div class="col-md-6">
+							<label for="collective-holidays">Días vacaciones:</label>
+							<input name="collective_holidays" id="collective-holidays" type="number" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días disfrute de vacaciones">
+						</div>
+						<div class="col-md-6">
+							<label for="collective-vacation-bonus-days">Días bono:</label>
+							<input name="collective_vacation_bonus_days" id="collective-vacation-bonus-days" type="number" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días del bono vacacional">
+						</div>						
+					</div>
+				</div>
+			</div>
+		</fieldset>
+		<br />
+        <?= $this->Form->button(__('Crear nómina'), ['class' =>'btn btn-success']) ?>
+    <?= $this->Form->end() ?>
 </div>
 <div class="menumenos nover menu-menos">
     <p>
@@ -84,8 +148,8 @@
 </div>
 <div style="display:none;" class="menumas nover menu-mas">
     <p>
-        <a href="../paysheets/edit" id="volver" title="Volver" class='glyphicon glyphicon-chevron-left btn btn-danger'></a>
-        <a href="../users/wait" id="cerrar" title="Cerrar vista" class='glyphicon glyphicon-remove btn btn-danger'></a>
+		<?= $this->Html->link(__(''), ['controller' => $controller, 'action' => $action], ['class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
+		<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'Cerrar']) ?>
         <a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
     </p>
 </div>
@@ -104,5 +168,6 @@
 			$('.menu-mas').hide();
 			$('.menu-menos').show();
 		});
+		$('[data-toggle="tooltip"]').tooltip();
 	});
 </script>

@@ -78,21 +78,7 @@ class RatesController extends AppController
             $rate->rate_year = $_POST['rate_year'];
             $rate->amount = $_POST['amount'];			
 			
-            if ($rate->concept == "Matrícula")
-            {
-                $studentTransactions->newRegistration($rate->amount, $rate->rate_year);
-				
-				if ($this->Rates->save($rate)) 
-				{
-					$this->Flash->success(__('La tarifa ha sido guardada'));
-				} 
-				else 
-				{
-					$this->Flash->error(__('La tarifa no pudo ser guardada, intente de nuevo'));
-				}		
-				return $this->redirect(['action' => 'index']);				
-            }
-            elseif ($rate->concept == "Mensualidad")
+            if ($rate->concept == "Mensualidad")
             {
 				if (isset($_POST['defaulters']))
 				{
@@ -146,6 +132,23 @@ class RatesController extends AppController
 				$result = $this->mailUser($arrayMail);
 				exit;
 			}
+            else
+            {
+				if ($rate->concept == "Mensualidad")
+				{
+					$studentTransactions->newRegistration($rate->amount, $rate->rate_year);
+				}
+				
+				if ($this->Rates->save($rate)) 
+				{
+					$this->Flash->success(__('La tarifa ha sido guardada'));
+				} 
+				else 
+				{
+					$this->Flash->error(__('La tarifa no pudo ser guardada, intente de nuevo'));
+				}		
+				return $this->redirect(['action' => 'index']);				
+            }
 		}
         
         $this->set(compact('rate'));

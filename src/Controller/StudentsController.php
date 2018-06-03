@@ -495,12 +495,13 @@ class StudentsController extends AppController
             $student = $this->Students->patchEntity($student, $this->request->data);
             
             $student->brothers_in_school = 0;
+			$student->balance = $currentYear; // Año escolar para el que se inscribió la última vez				
 		            
             if ($this->Students->save($student)) 
             {
 				if ($student->new_student == 0)
 				{	
-					$studentTransaction = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => 'Matrícula 2017']);
+					$studentTransaction = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => 'Matrícula 2018']);
 
 					$results = $studentTransaction->toArray();
 
@@ -1948,8 +1949,7 @@ class StudentsController extends AppController
 			$swImpresion = 1;
 						
 			$this->set(compact('swImpresion', 'familyStudents', 'arrayMark', 'currentDate'));
-			$this->set('_serialize', ['swImpresion', 'familyStudents', 'arrayMark', 'currenDate']); 
-		
+			$this->set('_serialize', ['swImpresion', 'familyStudents', 'arrayMark', 'currenDate']); 		
 		}
 		else
 		{
@@ -1982,6 +1982,44 @@ class StudentsController extends AppController
 		
 		isset($columnsReport['Students.section_id']) ? $arrayMark['Students.section_id'] = 'siExl' : $arrayMark['Students.section_id'] = 'noExl';
 		
+		isset($columnsReport['Students.student_condition']) ? $arrayMark['Students.student_condition'] = 'siExl' : $arrayMark['Students.student_condition'] = 'noExl';
+		
 		return $arrayMark;
 	}
+    public function editStatus($id = null, $controller = null, $action = null)
+    {
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		
+        $currentDate = Time::now();
+		
+        $student = $this->Students->get($id);
+        
+        if ($this->request->is(['patch', 'post', 'put'])) 
+        {
+            $student = $this->Students->patchEntity($student, $this->request->data);
+            
+            $student->brothers_in_school = 0;
+		            
+            if ($this->Students->save($student)) 
+            {			
+				$this->Flash->success(__('El estatus del alumno se actualizó correctamente'));
+				
+                if (isset($controller))
+                {
+                    return $this->redirect(['controller' => $controller, 'action' => $action, $id]);
+                }
+                else
+                {
+                    return $this->redirect(['controller' => 'users', 'action' => 'wait']);
+                }
+            }
+            else 
+            {
+                $this->Flash->error(__('El estatus del alumno no se pudo actualizar'));
+            }
+        }    
+        $this->set(compact('student'));
+        $this->set('_serialize', ['student']);
+    }
 }

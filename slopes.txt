@@ -1,15 +1,43 @@
 Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar descuento
 
+---
+
 Para los estatus recordar que hay un boolean - new_student en la tabla student
 
-Girardo Brayan - Reporte de mensualidades
+---
+
+Girardo Brayan - Reporte de mensualidades - no aparece aun asignándole la sección
+
+---
 
 En el reporte de familias con 3, 4 ó más hijos ignorar a los que no se inscribieron en el año escolar en curso
 
-Colocar estatus de egresado a alumnos de familia:
+Colocar estatus de egresado a alumnos (lo revise con lorelys y son alumnos que pagaron año completo)
 Alvarado Castejón
 Avanzo Sequeira
 García Iannino
 Pumar Eugenia
 Suárez Cabaña
 Tellez García
+
+---
+
+Reportes maestro (minuta):
+Detalles Para Reporte:  
+Reporte Familias - Alumnos: agregar todos los campos: Mama, Papa, estatus... etc.
+
+Total de Familias -> Cambiar por Total de Datos
+Agregar Total Familias Activas
+Agregar Total Familias Inactivas
+
+Reportes Maestros:
+
+Reporte de Alumnos Egresados : Alumnos egresados / Exalumnos son aquellos que se gradúan de 5to Año.
+
+Alumnos Retirados: Son aquellos que en el transcurso de su vida escolar se van del colegio.
+
+Eliminar memoria de selección en reportes maestros (Listo)
+
+---
+
+En Stutudenttransactions/assignSection quitar la constante Matrícula 2017

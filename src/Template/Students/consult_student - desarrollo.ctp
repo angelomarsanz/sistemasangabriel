@@ -78,7 +78,7 @@
             
             $("#header-messages").html("Por favor espere...");
                        
-            $.redirect('/sistemasangabriel/students/viewStudent', {idStudent : idStudent}); 
+            $.redirect('/desarrollosistemasangabriel/students/viewStudent', {idStudent : idStudent}); 
 
         });
 
