@@ -673,44 +673,60 @@ class StudenttransactionsController extends AppController
             $this->Flash->error(__('La transacción del estudiante no pudo ser actualizada, intente nuevamente'));
         }
     }
-    public function differenceAugust()
+    public function differenceAugust($newAmount = null, $yearDifference = null)
     {
+		$accountAugustBig = 0;
+		
+		$accountRecords = 0;
+		
+		$swUpdate = 0;
+		
         $this->loadModel('Rates');
 
-        $concept = 'Diferencia agosto';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-                               'order' => ['Rates.created' => 'DESC'] ]);
-
-        $row = $lastRecord->first();
-
-        $studenttransactions = $this->Studenttransactions->find('all', ['conditions' => ['transaction_description' => "Ago 2017"]]);
-        
-        $results = $studenttransactions->toArray();
-        
-        if ($results) 
+        $studentTransactions = $this->Studenttransactions->find('all', ['conditions' => ['transaction_description' => "Ago " . $yearDifference]]);
+                            
+        foreach ($studentTransactions as $studentTransaction)
         {
-            $accountantRecords = 0;
-            
-            foreach ($results as $result)
-            {
-                $studenttransaction = $this->Studenttransactions->get($result->id);
-                
-                $studenttransaction->amount = $row['amount'];
-                $studenttransaction->original_amount = $row['amount'];
-                $studenttransaction->paid_out = 0;
-
-                if (!($this->Studenttransactions->save($studenttransaction))) 
+			$swUpdate = 0;
+			
+			$studentTransactionGet = $this->Studenttransactions->get($studenttransaction->id);
+			
+			if ($studentTransactionGet->original_amount <= $newAmount)
+			{
+				if ($studentTransactionGet->original_amount == $studentTransactionGet->amount)
+				{
+					$studentTransactionGet->original_amount = $newAmount;
+					$studentTransactionGet->amount = $newAmount;
+					$studentTransactionGet->paid_out = 0;
+					$studentTransactionGet->partial_payment = 0;
+				}
+				elseif ($studentTransactionGet->original_amount > $studentTransactionGet->amount)
+				{
+					$differenceAmount = $newAmount - $studentTransactionGet->original_amount;
+					$studentTransactionGet->amount = $studentTransactionGet->amount + $differenceAmount;
+					$studentTransactionGet->original_amount = $newAmount;
+					$studentTransactionGet->paid_out = 0;
+					$studentTransactionGet->partial_payment = 1;
+				}		
+				$swUpdate = 1;
+			}
+			else
+			{
+				$accountAugustBig++
+			}
+		
+			if ($swUpdate == 1)
+			{
+                if (!($this->Studenttransactions->save($studentTransactionGet))) 
                 {
-                    $this->Flash->error(__('La transacción del estudiante no pudo ser actualizada, intente nuevamente'));
+                    // Grabar en Binnacles
                 }
                 else
                 {
                     $accountantRecords++;
-                }
-            }
-            echo "Total registros actualizados: " . $accountantRecords++;
-        }
+                }				
+			}
+		}
     }
 
     public function adjustTransactions()
@@ -844,6 +860,8 @@ class StudenttransactionsController extends AppController
 		$swError = 0;
 						
 		$arrayResult = [];
+		
+		$arrayResult['indicator'] = 0;
 
 		$previousMonthlyPayment80 = $previousMonthlyPayment * 0.8;
 		

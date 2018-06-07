@@ -1980,6 +1980,8 @@ class StudentsController extends AppController
 		
 		isset($columnsReport['Students.identity_card']) ? $arrayMark['Students.identity_card'] = 'siExl' : $arrayMark['Students.identity_card'] = 'noExl';
 		
+		isset($columnsReport['Students.balance']) ? $arrayMark['Students.balance'] = 'siExl' : $arrayMark['Students.balance'] = 'noExl';
+		
 		isset($columnsReport['Students.section_id']) ? $arrayMark['Students.section_id'] = 'siExl' : $arrayMark['Students.section_id'] = 'noExl';
 		
 		isset($columnsReport['Students.student_condition']) ? $arrayMark['Students.student_condition'] = 'siExl' : $arrayMark['Students.student_condition'] = 'noExl';

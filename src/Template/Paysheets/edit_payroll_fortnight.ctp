@@ -45,7 +45,7 @@
 }
 </style>
 <div class="page-header">
-	<h3>Crear Nómina</h3>
+	<h3>Modificar nómina</h3>
 </div>
 <div class="row">
 	<?= $this->Form->create($paysheet) ?>
@@ -96,7 +96,7 @@
 					<div class="row">
 						<div class="col-md-6">
 							<label for="salary-days">Días base cálculos:</label>
-							<input name="salary_days" id="salary-day" value="<?= number_format($payrollParameters['salaryDays'], 2, ",", ".") ?>" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días base para el cálculo de esta nómina">
+							<input name="salary_days" id="salary-day" value=<?= number_format($paysheet->salary_days, 2, ",", ".") ?> class="form-control alternative-decimal-separator" data-toggle="tooltip" data-placement="top" title="Cantidad de días a pagar por concepto de utilidades" style="text-align: right;" />
 						</div>
 					</div>
 				</div>
@@ -107,11 +107,11 @@
 					<div class="row">
 						<div class="col-md-6">
 							<label for="cesta-ticket-month">Cesta ticket:</label>
-							<input name="cesta_ticket_month" id="cesta-ticket-month" value="<?= number_format($payrollParameters['cestaTicketMonth'], 2, ",", ".") ?>" class="form-control alternative-decimal-separator" data-toggle="tooltip" data-placement="top" title="Valor de la cesta ticket mensual" />
+							<input name="cesta_ticket_month" id="cesta-ticket-month" value=<?= number_format($paysheet->cesta_ticket_month, 2, ",", ".") ?> class="form-control alternative-decimal-separator" data-toggle="tooltip" data-placement="top" title="Valor de la cesta ticket mensual" style="text-align: right;" />
 						</div>
 						<div class="col-md-6">						
 							<label for="days-cesta-ticket">Días base cálculos:</label>
-							<input name="days_cesta_ticket" id="days-cesta-ticket" value="<?= number_format($payrollParameters['daysCestaTicket'], 2, ",", ".") ?>" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días base para el cálculo de esta cesta ticket">
+							<input name="days_cesta_ticket" id="days-cesta-ticket" value=<?= number_format($paysheet->days_cesta_ticket, 2, ",", ".") ?> class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días base para el cálculo de esta cesta ticket" style="text-align: right;" />
 						</div>
 					</div>
 				</div>			
@@ -119,7 +119,7 @@
 					<div class="row">
 						<div class="col-md-6">
 							<label for="days-utilities">Días utilidades:</label>
-							<input name="days_utilities" id="days-utilities" value="<?= number_format($payrollParameters['daysUtilities'], 2, ",", ".") ?>" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días a pagar por concepto de utilidades">
+							<input name="days_utilities" id="days-utilities" value=<?= number_format($paysheet->days_utilities, 2, ",", ".") ?> class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días a pagar por concepto de utilidades" style="text-align: right;" />
 						</div>					
 					</div>
 				</div>
@@ -127,11 +127,11 @@
 					<div class="row">
 						<div class="col-md-6">
 							<label for="collective-holidays">Días vacaciones:</label>
-							<input name="collective_holidays" id="collective-holidays" value="<?= number_format($payrollParameters['collectiveHolidays'], 2, ",", ".") ?>" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días disfrute de vacaciones">
+							<input name="collective_holidays" id="collective-holidays" value=<?= number_format($paysheet->collective_holidays, 2, ",", ".") ?> class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días disfrute de vacaciones" style="text-align: right;" />
 						</div>
 						<div class="col-md-6">
 							<label for="collective-vacation-bonus-days">Días bono:</label>
-							<input name="collective_vacation_bonus_days" id="collective-vacation-bonus-days" value="<?= number_format($payrollParameters['collectiveVacationBonusDays'], 2, ",", ".") ?>" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días del bono vacacional">
+							<input name="collective_vacation_bonus_days" id="collective-vacation-bonus-days" value=<?= number_format($paysheet->collective_vacation_bonus_days, 2, ",", ".") ?> class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días del bono vacacional" style="text-align: right;" />
 						</div>						
 					</div>
 				</div>

@@ -237,29 +237,93 @@ class PaysheetsController extends AppController
     }
     public function createPayrollFortnight()
     {
-		$cestaTicket = 0;
+		$this->loadModel('Positioncategories');
+
+		$payrollParameters = [];
+		$payrollParameters['salaryDays'] = 0;
+		$payrollParameters['cestaTicketMonth'] = 0;
+		$payrollParameters['daysCestaTicket'] = 0;
+		$payrollParameters['daysUtilities'] = 0;
+		$payrollParameters['collectiveHolidays'] = 0;
+		$payrollParameters['collectiveVacationBonusDays'] = 0;
+		$arrayCategories = [];
 		
         $employees = new EmployeesController();
         
         $employeepayments = new EmployeepaymentsController();
-        
+		
+		$positionCategories = $this->Positioncategories->find('all', 
+			['conditions' => ['id >' => 1],
+            'order' => ['Positioncategories.description_category' => 'ASC']]);
+			
+		foreach ($positionCategories as $positionCategorie)
+		{
+			$arrayCategories[$positionCategorie->description_category] = 0;
+		}
+        		
         $paysheet = $this->Paysheets->newEntity();
 		
         if ($this->request->is('post')) 
-        {				
-            $paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
+        {
+			$paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
+			
+			$arrayResult = $this->moveColumns($paysheet, $payrollParameters);
+			
+			$paysheet = $arrayResult['paysheet'];
+			
+			$paysheet->responsible_user = $this->Auth->user('username'); 
+			
+			$tableConfigurationJson = $this->initialConfiguration();
+		
+			$paysheet->table_configuration = $tableConfigurationJson;
+											
+			$tableCategoriesJson = json_encode($_POST['arrayCategories'], JSON_FORCE_OBJECT);
+					
+			$paysheet->table_categories = $tableCategoriesJson;
+			
+			if (!($this->Paysheets->save($paysheet)))
+			{
+				$this->Flash->error(__('Los datos de la quincena no pudieron ser grabados, intente nuevamente'));                
+			}
+			else 
+			{
+				$this->Flash->success(__('Por favor complete los datos de La nómina'));
+			}
+		}
+		else
+		{
+           $lastRecord = $this->Paysheets->find('all', 
+                ['conditions' => 
+                ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]], 'order' => ['Paysheets.created' => 'DESC']]);
+			
+			$row = $lastRecord->first();   
+                
+			if ($row)
+			{				
+				!(isset($row->salary_days)) ? : $payrollParameters['salaryDays'] = $row->salary_days;
+				
+				!(isset($row->cesta_ticket_month)) ? : $payrollParameters['cestaTicketMonth'] = $row->cesta_ticket_month;
+
+				!(isset($row->days_cesta_ticket)) ? : $payrollParameters['daysCestaTicket'] = $row->days_cesta_ticket;
+			
+				!(isset($row->days_utilities)) ? : $payrollParameters['daysUtilities'] = $row->days_utilities;
+				
+				!(isset($row->collective_holidays)) ? : $payrollParameters['collectiveHolidays'] = $row->collective_holidays;
+				
+				!(isset($row->collective_vacation_bonus_days)) ? : $payrollParameters['collectiveVacationBonusDays'] = $row->collective_vacation_bonus_days;
+			}
+		}
+		
+		$controller = "Paysheets";
+		$action = "edit";
+		
+        $this->set(compact('paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories', 'arrayCategories'));
+        $this->set('_serialize', ['paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories', 'arrayCategories']); 
+	}
+				
+            /* $paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
 						
-			if (substr($_POST['cesta_ticket_month'], -3, 1) == ',')
-			{
-				$replace1= str_replace('.', '', $_POST['cesta_ticket_month']);
-				$replace2 = str_replace(',', '.', $replace1);
-				$paysheet->cesta_ticket_month = $replace2;
-				$cestaTicket = $replace2;
-			}
-			else
-			{
-				$cestaTicket = $_POST['cesta_ticket_month'];
-			}
+			
             
             $lastRecord = $this->Paysheets->find('all', ['conditions' => 
                 [['year_paysheet' => $paysheet->year_paysheet],
@@ -331,6 +395,10 @@ class PaysheetsController extends AppController
 				$tableConfigurationJson = $this->initialConfiguration();
             
 				$paysheet->table_configuration = $tableConfigurationJson;
+												
+				$tableCategoriesJson = json_encode($_POST['arrayCategories'], JSON_FORCE_OBJECT);
+						
+				$paysheet->table_categories = $tableCategoriesJson;
                 
                 if (!($this->Paysheets->save($paysheet)))
                 {
@@ -368,7 +436,7 @@ class PaysheetsController extends AppController
 						}
 					}
                 }
-            }
+            } 
         }
 		else
 		{			
@@ -379,21 +447,89 @@ class PaysheetsController extends AppController
 			$row = $lastRecord->first();   
                 
 			if ($row)
-			{
-				if (isset($row->cesta_ticket_month))
-				{
-					$cestaTicket = $row->cesta_ticket_month;
-				}
+			{				
+				!(isset($row->salary_days)) ? : $payrollParameters['salaryDays'] = $row->salary_days;
+				
+				!(isset($row->cesta_ticket_month)) ? : $payrollParameters['cestaTicketMonth'] = $row->cesta_ticket_month;
+
+				!(isset($row->days_cesta_ticket)) ? : $payrollParameters['daysCestaTicket'] = $row->days_cesta_ticket;
+			
+				!(isset($row->days_utilities)) ? : $payrollParameters['daysUtilities'] = $row->days_utilities;
+				
+				!(isset($row->collective_holidays)) ? : $payrollParameters['collectiveHolidays'] = $row->collective_holidays;
+				
+				!(isset($row->collective_vacation_bonus_days)) ? : $payrollParameters['collectiveVacationBonusDays'] = $row->collective_vacation_bonus_days;
 			}
 		}
 		
 		$controller = "Paysheets";
 		$action = "edit";
 		
-        $this->set(compact('paysheet', 'cestaTicket', 'controller', 'action'));
-        $this->set('_serialize', ['paysheet', 'cestaTicket', 'controller', 'action']);
-    }
+        $this->set(compact('paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories', 'arrayCategories'));
+        $this->set('_serialize', ['paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories', 'arrayCategories']); */
     
+    public function editPayrollFortnight($id = null, $controller = null, $action = null)
+    {
+		$this->loadModel('Positioncategories');
+
+		$payrollParameters = [];
+		$payrollParameters['salaryDays'] = 0;
+		$payrollParameters['cestaTicketMonth'] = 0;
+		$payrollParameters['daysCestaTicket'] = 0;
+		$payrollParameters['daysUtilities'] = 0;
+		$payrollParameters['collectiveHolidays'] = 0;
+		$payrollParameters['collectiveVacationBonusDays'] = 0;
+		$arrayCategories = [];
+		
+        $employees = new EmployeesController();
+        
+        $employeepayments = new EmployeepaymentsController();
+		
+		$positionCategories = $this->Positioncategories->find('all', 
+			['conditions' => ['id >' => 1],
+            'order' => ['Positioncategories.description_category' => 'ASC']]);
+			
+		foreach ($positionCategories as $positionCategorie)
+		{
+			$arrayCategories[$positionCategorie->description_category] = 0;
+		}
+        		
+        $paysheet = $this->Paysheets->get($id, [
+            'contain' => []
+        ]);
+			
+        if ($this->request->is(['patch', 'post', 'put'])) 
+        {
+			$paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
+			
+			$arrayResult = $this->moveColumns($paysheet, $payrollParameters);
+			
+			$paysheet = $arrayResult['paysheet'];
+			
+			$paysheet->responsible_user = $this->Auth->user('username'); 
+			
+			$tableConfigurationJson = $this->initialConfiguration();
+		
+			$paysheet->table_configuration = $tableConfigurationJson;
+											
+			$tableCategoriesJson = json_encode($_POST['arrayCategories'], JSON_FORCE_OBJECT);
+					
+			$paysheet->table_categories = $tableCategoriesJson;
+			
+			if (!($this->Paysheets->save($paysheet)))
+			{
+				$this->Flash->error(__('Los datos de la quincena no pudieron ser grabados, intente nuevamente'));                
+			}
+			else 
+			{
+				$this->Flash->success(__('Por favor complete los datos de La nómina'));
+			}
+		}
+				
+        $this->set(compact('paysheet', 'controller', 'action', 'positionCategories', 'arrayCategories'));
+        $this->set('_serialize', ['paysheet', 'controller', 'action', 'positionCategories', 'arrayCategories']); 
+	}
+	
     public function nameMonthSpanish($month = null)
     {
         $monthNumbers = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
@@ -560,4 +696,86 @@ class PaysheetsController extends AppController
         } 
         return $arrayResult;       
     }
+	public function moveColumns($paysheet = null, $payrollParameters = null)
+	{		
+		$arrayResult = [];
+		
+		if (substr($_POST['salary_days'], -3, 1) == ',')
+		{
+			$replace1= str_replace('.', '', $_POST['salary_days']);
+			$replace2 = str_replace(',', '.', $replace1);
+			$paysheet->salary_days = $replace2;
+			$payrollParameters['salaryDays'] = $replace2;
+		}
+		else
+		{
+			$payrollParameters['salaryDays'] = $_POST['salary_days'];
+		}
+	
+		if (substr($_POST['cesta_ticket_month'], -3, 1) == ',')
+		{
+			$replace1= str_replace('.', '', $_POST['cesta_ticket_month']);
+			$replace2 = str_replace(',', '.', $replace1);
+			$paysheet->cesta_ticket_month = $replace2;
+			$payrollParameters['cestaTicketMonth'] = $replace2;
+		}
+		else
+		{
+			$payrollParameters['cestaTicketMonth'] = $_POST['cesta_ticket_month'];
+		}	
+		
+		if (substr($_POST['days_cesta_ticket'], -3, 1) == ',')
+		{
+			$replace1= str_replace('.', '', $_POST['days_cesta_ticket']);
+			$replace2 = str_replace(',', '.', $replace1);
+			$paysheet->days_cesta_ticket = $replace2;
+			$payrollParameters['daysCestaTicket'] = $replace2;
+		}
+		else
+		{
+			$payrollParameters['daysCestaTicket'] = $_POST['days_cesta_ticket'];
+		}	
+		
+		if (substr($_POST['days_utilities'], -3, 1) == ',')
+		{
+			$replace1= str_replace('.', '', $_POST['days_utilities']);
+			$replace2 = str_replace(',', '.', $replace1);
+			$paysheet->days_utilities = $replace2;
+			$payrollParameters['daysUtilities'] = $replace2;
+		}
+		else
+		{
+			$payrollParameters['daysUtilities'] = $_POST['days_utilities'];
+		}
+		
+		if (substr($_POST['collective_holidays'], -3, 1) == ',')
+		{
+			$replace1= str_replace('.', '', $_POST['collective_holidays']);
+			$replace2 = str_replace(',', '.', $replace1);
+			$paysheet->collective_holidays = $replace2;
+			$payrollParameters['collectiveHolidays'] = $replace2;
+		}
+		else
+		{
+			$payrollParameters['collectiveHolidays'] = $_POST['collective_holidays'];
+		}
+		
+		if (substr($_POST['collective_vacation_bonus_days'], -3, 1) == ',')
+		{
+			$replace1= str_replace('.', '', $_POST['collective_vacation_bonus_days']);
+			$replace2 = str_replace(',', '.', $replace1);
+			$paysheet->collective_vacation_bonus_days = $replace2;
+			$payrollParameters['collectiveVacationBonusDays'] = $replace2;
+		}
+		else
+		{
+			$payrollParameters['collectiveVacationBonusDays'] = $_POST['collective_vacation_bonus_days'];
+		}		
+
+		$arrayResult['indicator'] = 0;
+		$arrayResult['paysheet'] = $paysheet;
+		$arrayResult['payrollParameters'] = $payrollParameters;
+		
+		return $arrayResult;
+	}
 }

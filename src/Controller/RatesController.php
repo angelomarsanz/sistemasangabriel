@@ -134,9 +134,13 @@ class RatesController extends AppController
 			}
             else
             {
-				if ($rate->concept == "Mensualidad")
+				if ($rate->concept == "Matrícula")
 				{
 					$studentTransactions->newRegistration($rate->amount, $rate->rate_year);
+				}
+				elseif ($rate->concept == "Diferencia de agosto")
+				{
+					
 				}
 				
 				if ($this->Rates->save($rate)) 

@@ -67,7 +67,7 @@
             <?php
                 echo $this->Form->input('concept', ['required' => 'required', 'label' => 'Tarifa', 'options' => 
                     [null => '',
-					'Agosto' => 'Agosto',
+					'Diferencia de agosto' => 'Diferencia de agosto',
                     'Matrícula' => 'Matrícula',
                     'Mensualidad' => 'Mensualidad',
                     'Seguro escolar' => 'Seguro escolar',
@@ -90,8 +90,10 @@
                     [null => '',
                     '2017' => '2017',
                     '2018' => '2018',
-                    '2019' => '2019']]);
-                echo $this->Form->input('amount', ['required' => 'required',
+                    '2019' => '2019',
+					'2020' => '2020',
+					'2021' => '2021']]);
+                echo $this->Form->input('amount', ['disabled' => 'disabled',
                     'label' => 'Monto']);
 					
 				echo $this->Form->input('defaulters', ['type' => 'checkbox', 'id' => 'defaulters',
@@ -125,6 +127,7 @@
 
         $("#rate-month").attr('disabled', true);
         $("#rate-year").attr('disabled', true);
+		$("#amount").attr('disabled', true);
 		$("#exception").attr('disabled', true);
 		$("#defaulters").attr('disabled', true);
 
@@ -134,6 +137,8 @@
 			$("#rate-month").attr('required', true);
             $("#rate-year").attr('disabled', false);
 			$("#rate-year").attr('required', true);
+			$("#amount").attr('disabled', false);
+			$("#amount").attr('required', true);
 			$("#exception").attr('disabled', false);
 			$("#defaulters").attr('disabled', false);
         }
@@ -141,7 +146,13 @@
         {
             $("#rate-year").attr('disabled', false);
 			$("#rate-year").attr('required', true);
-        }
+
+			if ($("#concept").val() != "Diferencia de agosto")
+			{
+				$("#amount").attr('disabled', false);
+				$("#amount").attr('required', true);
+			}
+		}
     }
 	   
     $(document).ready(function() 

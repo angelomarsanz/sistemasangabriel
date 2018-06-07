@@ -81,11 +81,12 @@
 					</div>
 					<div class="col-md-6">
 						<h4>Datos del estudiante</h4>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.student_condition]"> Estatus</p>
 						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.sex]"> Sexo</p>
 						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.nationality]"> Nacionalidad</p>
 						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.identity_card]"> Cédula o pasaporte</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.balance]"> Año escolar</p>
 						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.section_id]"> Grado y sección</p>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.student_condition]"> Estatus</p>
 					</div>
 				</div>
 			</fieldset>
@@ -127,7 +128,7 @@
 				<?php $accountFamily++; ?>
 				<?php $accountStudent++; ?>
 				<?php $currentFamily = $familyStudent->parentsandguardian->family; ?>
-				<table id="family-students" name="family_students" class="table noverScreen">
+				<table id="family-students" name="family_students" class="table">
 					<thead>
 						<tr>
 							<th></th>
@@ -148,12 +149,15 @@
 						<tr>
 							<th scope="col"><b>Nro.</b></th>
 							<th scope="col"><b>Familia</b></th>
+							<th scope="col" class=<?= $arrayMark['Students.student_condition'] ?>><b>Estatus</b></th>
+							<th scope="col" class="siExl"><b>Alumno nuevo</b></th>
 							<th scope="col"><b>Alumno</b></th>
 							<th scope="col" class=<?= $arrayMark['Students.sex'] ?>><b>Sexo</b></th>
 							<th scope="col" class=<?= $arrayMark['Students.nationality'] ?>><b>Nacionalidad alumno</b></th>
 							<th scope="col" class=<?= $arrayMark['Students.identity_card'] ?>><b>Cédula o pasaporte alumno</b></th>
+							<th scope="col" class="siExl"><b>Año ingreso al colegio</b></th>
+							<th scope="col" class=<?= $arrayMark['Students.balance'] ?>><b>Año escolar</b></th>							
 							<th scope="col" class=<?= $arrayMark['Students.section_id'] ?>><b>Grado y sección</b></th>	
-							<th scope="col" class=<?= $arrayMark['Students.student_condition'] ?>><b>Estatus</b></th>	
 							<th scope="col" class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><b>Nombre Representante</b></th>
 							<th scope="col" class=<?= $arrayMark['Parentsandguardians.sex'] ?>><b>Sexo</b></th>
 							<th scope="col" class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><b>Cédula o pasaporte representante</b></th>
@@ -166,12 +170,15 @@
 						<tr>
 							<td><?= $accountStudent ?></td>
 							<td><?= $currentFamily ?></td>                        
+							<td class=<?= $arrayMark['Students.student_condition'] ?>><?= $familyStudent->student_condition ?></td>
+							<td class="siExl"><?= ($familyStudent->new_student == 1) ? "Sí" : "No"; ?></td>
 							<td><?= $familyStudent->full_name ?></td>
 							<td class=<?= $arrayMark['Students.sex'] ?>><?= $familyStudent->sex ?></td>
 							<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 							<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
+							<td class="siExl"><?= $familyStudent->number_of_brothers ?></td>
+							<td class=<?= $arrayMark['Students.balance'] ?>><?= $familyStudent->balance . '-' . ($familyStudent->balance + 1) ?></td>
 							<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
-							<td class=<?= $arrayMark['Students.student_condition'] ?>><?= $familyStudent->student_condition ?></td>
 							<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>							
 							<td class=<?= $arrayMark['Parentsandguardians.sex'] ?>><?= $familyStudent->parentsandguardian->sex ?></td>
 							<td class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><?= $familyStudent->parentsandguardian->type_of_identification . '-' . $familyStudent->parentsandguardian->identidy_card ?></td>
@@ -189,12 +196,15 @@
 						<?php $accountFamily++; ?>
 					<?php endif; ?>
 					<td><?= $currentFamily ?></td>
+					<td class=<?= $arrayMark['Students.student_condition'] ?>><?= $familyStudent->student_condition ?></td>
+					<td class="siExl"><?= ($familyStudent->new_student == 1) ? "Sí" : "No"; ?></td>
 					<td><?= $familyStudent->full_name ?></td>
 					<td class=<?= $arrayMark['Students.sex'] ?>><?= $familyStudent->sex ?></td>
 					<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 					<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
+					<td class="siExl"><?= $familyStudent->number_of_brothers ?></td>
+					<td class=<?= $arrayMark['Students.balance'] ?>><?= $familyStudent->balance . '-' . ($familyStudent->balance + 1) ?></td>
 					<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
-					<td class=<?= $arrayMark['Students.student_condition'] ?>><?= $familyStudent->student_condition ?></td>
 					<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>
 					<td class=<?= $arrayMark['Parentsandguardians.sex'] ?>><?= $familyStudent->parentsandguardian->sex ?></td>
 					<td class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><?= $familyStudent->parentsandguardian->type_of_identification . '-' . $familyStudent->parentsandguardian->identidy_card ?></td>
