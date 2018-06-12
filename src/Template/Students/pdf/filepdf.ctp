@@ -29,8 +29,8 @@
 </div>
 <div style="clear:both; width: 100%;">
     <?php if ($student->new_student == 0): ?>
-        <p style="font-size: 25px;">Abono a matrícula: 69.500,00 Bs. - Abono a agosto 2018: 69.500,00 Bs. - Abono seguro escolar: 10.000,00 Bs.</p>  
-        <p style="font-size: 25px;">Diferencia agosto 2017: 44.000,00 - Total Bs. 193.000,00</p>
+        <p style="font-size: 25px;">Abono a matrícula: 12.500.000,00 Bs. - Abono a agosto 2019: 12.500.000,00 Bs. - Abono seguro escolar: 4.000.000,00 Bs.</p>  
+        <p style="font-size: 25px;">Diferencia agosto 2018: 12.366.000,00 - Total Bs. 41.366.000,00</p>
     <?php endif; ?>    
     <p><b>Alumno:&nbsp;<?= $student->full_name ?></b></p>
 </div>
@@ -173,21 +173,18 @@
             <p>a) Fotocopia de la partida de nacimiento.</p>
             <p>b) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
             del alumno o la foto de perfil no sea visualice correctamente</p>
-            <p>c) Control de pago año 2016-2017 o el recibo de julio cancelado</p>
-            <p>d) Recibo de pago del consejo educativo año escolar 2016-2017</p>
+            <p>c) Recibo de pago del consejo educativo año escolar 2017-2018</p>
         <?php elseif (substr($student->level_of_study, 0, 8) == "Primaria"): ?>
             <p>a) Fotocopia de la partida de nacimiento.</p>
             <p>b) Fotocopia de la cédula de identidad (de 5to. grado en adelante es indispensable por orden del M.P.P.E.).</p>
             <p>c) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
             del alumno o la foto de perfil no sea visualice correctamente</p>
-            <p>d) Control de pago año 2016-2017 o el recibo de julio cancelado</p>
-            <p>e) Recibo de pago del consejo educativo año escolar 2016-2017</p>
+            <p>d) Recibo de pago del consejo educativo año escolar 2017-2018</p>
         <?php else: ?>
             <p>a) Fotocopia de la cédula de identidad del alumno vigente.</p>
             <p>b) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
             del alumno o la foto de perfil no sea visualice correctamente</p>
-            <p>c) Control de pago año 2016-2017 o el recibo de julio cancelado</p>
-            <p>d) Recibo de pago del consejo educativo año escolar 2016-2017</p>
+            <p>c) Recibo de pago del consejo educativo año escolar 2017-2018</p>
         <?php endif; ?>
         <p><b>Horario de inscripción:</b></p>
         <p>7:00 am - 12:00 m</p>

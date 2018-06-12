@@ -1,3 +1,10 @@
+<?php 
+	use Cake\I18n\Time;
+	setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+	date_default_timezone_set('America/Caracas');
+	
+	$currentDate = time::now();
+?>
 <style>
 @media screen
 {
@@ -66,18 +73,78 @@
 </style>
 
 <div class='container'>
+	<div class="page-header">
+		<input type='hidden' id='classificationFor' value=<?= $classificationNumber ?> />
+		<input type='hidden' id='fortnightFor' value=<?= $fortnightNumber ?> />
+		<input type='hidden' id='monthFor' value=<?= $monthNumber ?> />
+		<input type='hidden' id='yearFor' value=<?= $year ?> />
+		<input type='hidden' id='idPaysheet' value=<?= $idPaysheet ?> />
+
+		<br />
+		<?= $this->Form->create() ?>
+			<div class="row">
+				<div class="col-md-11">								
+					<fieldset>
+						<div class="row">
+							<div class="col-md-4">
+								<?php echo $this->Form->input('date_from', ['label' => 'Fecha inicio nómina: ', 
+									'type' => 'date',
+									'value' => $currentDate,
+									'monthNames' =>
+									['01' => 'Enero',
+									'02' => 'Febrero',
+									'03' => 'Marzo',
+									'04' => 'Abril',
+									'05' => 'Mayo',
+									'06' => 'Junio',
+									'07' => 'Julio',
+									'08' => 'Agosto',
+									'09' => 'Septiembre',
+									'10' => 'Octubre',
+									'11' => 'Noviembre',
+									'12' => 'Diciembre'],
+									'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">{{day}}</li><li class="month">{{month}}</li><li class="year">{{year}}</li></ul>']]);
+								?>
+							</div>
+							<div class="col-md-4">
+								<?php echo $this->Form->input('date_until', ['label' => 'Fecha culminación nómina: ', 
+									'type' => 'date',
+									'value' => $currentDate,
+									'monthNames' =>
+									['01' => 'Enero',
+									'02' => 'Febrero',
+									'03' => 'Marzo',
+									'04' => 'Abril',
+									'05' => 'Mayo',
+									'06' => 'Junio',
+									'07' => 'Julio',
+									'08' => 'Agosto',
+									'09' => 'Septiembre',
+									'10' => 'Octubre',
+									'11' => 'Noviembre',
+									'12' => 'Diciembre'],
+									'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">{{day}}</li><li class="month">{{month}}</li><li class="year">{{year}}</li></ul>']]);
+								?>
+							</div>
+							<div class="col-md-4">
+							</div>
+						</div>
+					</fieldset>	
+				</div>
+				<div class="col-md-1">	
+					<br />
+					<button type="submit" id="search-fortnight" class="glyphicon glyphicon-search btn btn-default"></button>
+				</div>
+			</div>
+		<?= $this->Form->end() ?>
+	</div>
+       	
+    <div>				
     <div class="row">
         <div class="col-md-12">
 
-        	<div class="page-header">
-            </div>
-       	
-        	<div>
-        	    <input type='hidden' id='classificationFor' value=<?= $classificationNumber ?> />
-        	    <input type='hidden' id='fortnightFor' value=<?= $fortnightNumber ?> />
-        	    <input type='hidden' id='monthFor' value=<?= $monthNumber ?> />
-        	    <input type='hidden' id='yearFor' value=<?= $year ?> />
-                <?= $this->Form->create() ?>
+
+			<?= $this->Form->create() ?>
                     <fieldset>
                     	<div class="table-responsive table-container">
                     		<table class="table table-striped table-hover">
@@ -520,7 +587,6 @@
 						<p>
 							<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
 							<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
-							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight'], ['id' => 'nuevo', 'class' => 'glyphicon glyphicon-plus-sign btn btn-danger', 'title' => 'Crear nueva nómina']) ?>
 
 							<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overPayment', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-pago', 'class' => 'glyphicon glyphicon-envelope btn btn-danger', 'title' => 'Sobre de pago sueldo']) ?>							
 							
@@ -533,6 +599,8 @@
 								<?php endif; ?>
 							<?php endif; ?>
 							
+							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight'], ['id' => 'nuevo', 'class' => 'glyphicon glyphicon-plus-sign btn btn-danger', 'title' => 'Crear nueva nómina']) ?>
+							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'editPayrollFortnight', $idPaysheet, 'Employeepayments', 'completeData'], ['id' => 'modificar', 'class' => 'glyphicon glyphicon-edit btn btn-danger', 'title' => 'Modificar nómina']) ?>
 							<button id="borrar" class="glyphicon glyphicon-trash btn btn-danger" title="Eliminar"></button>
 							<a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
 						</p>
@@ -643,7 +711,7 @@
 			var r = confirm("Por favor confirme que desea eliminar esta nómina");
             if (r == true)
 			{
-				$.redirect('/sistemasangabriel/paysheets/delete', {idPaysheet : $("#idPaysheet").val()});
+				$.redirect('/sistemasangabriel/paysheets/delete', {idPaysheet : $("#idPaysheet").val(), controller : "Paysheets", action : "edit" });
 			}
 			else
             {

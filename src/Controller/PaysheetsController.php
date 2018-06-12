@@ -16,6 +16,38 @@ use Cake\I18n\Time;
  */
 class PaysheetsController extends AppController
 {
+	public function testFunction()
+	{
+		$this->loadModel('Positioncategories');
+		
+		$positionCategories = $this->Positioncategories->find('all', 
+			['conditions' => ['id >' => 1],
+            'order' => ['Positioncategories.description_category' => 'ASC']]);
+					
+		$paysheet = $this->Paysheets->get(2);
+		
+		$objectArrayCategories = json_decode($paysheet->table_categories);
+				
+		$tableCategories = (array) $objectArrayCategories;
+		
+		print "<br />";
+		print "<br />";
+
+		debug($objectArrayCategories);		
+		debug($tableCategories);
+
+		foreach ($positionCategories as $positionCategorie)
+		{
+			if (isset($tableCategories[$positionCategorie->description_category]))
+			{
+				print "<p>" . $positionCategorie->description_category . " checked</p>";
+			}
+			else
+			{
+				print "<p>" . $positionCategorie->description_category . " unchecked</p>";
+			}
+		}
+	}
 
     /**
      * Index method
@@ -152,7 +184,7 @@ class PaysheetsController extends AppController
                 [['year_paysheet' => $_POST['yearPaysheet']],
                 ['month_paysheet' => $_POST['monthPaysheet']],
                 ['fortnight' => $fortnight],
-                ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]]],
+                ['OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]]],
                 'order' => ['Paysheets.created' => 'DESC'] ]);
                 
                 $classification = $this->classificationName($_POST['classification']);
@@ -162,13 +194,13 @@ class PaysheetsController extends AppController
             if (isset($id))
             {
                 $lastRecord = $this->Paysheets->find('all', ['conditions' => 
-                    [['id' => $id], ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]]]]);
+                    [['id' => $id], ['OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]]]]);
             }
             else
             {
                 $lastRecord = $this->Paysheets->find('all', 
                 ['conditions' => 
-                    ['id >' => 1, 'OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]], 'order' => ['Paysheets.created' => 'DESC']]);
+                    ['id >' => 1, 'OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]], 'order' => ['Paysheets.created' => 'DESC']]);
             }
             
             if (isset($classificationC))
@@ -209,18 +241,20 @@ class PaysheetsController extends AppController
      * @return \Cake\Network\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete($id = null, $controller = null, $action = null)
     {
         $this->request->allowMethod(['post', 'delete']);
 		
 		if (isset($_POST['idPaysheet']))
 		{
 			$id = $_POST['idPaysheet'];
+			$controller = $_POST['controller'];
+			$action = $_POST['action'];
 		}
 		
         $paysheet = $this->Paysheets->get($id);
         
-        $paysheet->deleted_record = 1;
+        $paysheet->registration_status = "Eliminada";
         
         $paysheet->responsible_user	= $this->Auth->user('username');
         
@@ -233,7 +267,7 @@ class PaysheetsController extends AppController
             $this->Flash->error(__('No se pudo eliminar la nómina'));
         }
 
-        return $this->redirect(['controller' => 'Paysheets', 'action' => 'edit']);
+        return $this->redirect(['controller' => $controller, 'action' => $action]);
     }
     public function createPayrollFortnight()
     {
@@ -255,12 +289,7 @@ class PaysheetsController extends AppController
 		$positionCategories = $this->Positioncategories->find('all', 
 			['conditions' => ['id >' => 1],
             'order' => ['Positioncategories.description_category' => 'ASC']]);
-			
-		foreach ($positionCategories as $positionCategorie)
-		{
-			$arrayCategories[$positionCategorie->description_category] = 0;
-		}
-        		
+			        		
         $paysheet = $this->Paysheets->newEntity();
 		
         if ($this->request->is('post')) 
@@ -283,7 +312,7 @@ class PaysheetsController extends AppController
 			
 			if (!($this->Paysheets->save($paysheet)))
 			{
-				$this->Flash->error(__('Los datos de la quincena no pudieron ser grabados, intente nuevamente'));                
+				$this->Flash->error(__('Los datos de la nómina no pudieron ser grabados, intente nuevamente'));                
 			}
 			else 
 			{
@@ -294,7 +323,7 @@ class PaysheetsController extends AppController
 		{
            $lastRecord = $this->Paysheets->find('all', 
                 ['conditions' => 
-                ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]], 'order' => ['Paysheets.created' => 'DESC']]);
+                ['OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]], 'order' => ['Paysheets.created' => 'DESC']]);
 			
 			$row = $lastRecord->first();   
                 
@@ -317,8 +346,8 @@ class PaysheetsController extends AppController
 		$controller = "Paysheets";
 		$action = "edit";
 		
-        $this->set(compact('paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories', 'arrayCategories'));
-        $this->set('_serialize', ['paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories', 'arrayCategories']); 
+        $this->set(compact('paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories'));
+        $this->set('_serialize', ['paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories']); 
 	}
 				
             /* $paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
@@ -471,7 +500,11 @@ class PaysheetsController extends AppController
     public function editPayrollFortnight($id = null, $controller = null, $action = null)
     {
 		$this->loadModel('Positioncategories');
-
+		
+        $employees = new EmployeesController();
+        
+        $employeepayments = new EmployeepaymentsController();
+		
 		$payrollParameters = [];
 		$payrollParameters['salaryDays'] = 0;
 		$payrollParameters['cestaTicketMonth'] = 0;
@@ -479,25 +512,19 @@ class PaysheetsController extends AppController
 		$payrollParameters['daysUtilities'] = 0;
 		$payrollParameters['collectiveHolidays'] = 0;
 		$payrollParameters['collectiveVacationBonusDays'] = 0;
-		$arrayCategories = [];
-		
-        $employees = new EmployeesController();
-        
-        $employeepayments = new EmployeepaymentsController();
 		
 		$positionCategories = $this->Positioncategories->find('all', 
 			['conditions' => ['id >' => 1],
             'order' => ['Positioncategories.description_category' => 'ASC']]);
 			
-		foreach ($positionCategories as $positionCategorie)
-		{
-			$arrayCategories[$positionCategorie->description_category] = 0;
-		}
-        		
-        $paysheet = $this->Paysheets->get($id, [
+		$paysheet = $this->Paysheets->get($id, [
             'contain' => []
         ]);
-			
+		
+		$objectArrayCategories = json_decode($paysheet->table_categories);
+				
+		$tableCategories = (array) $objectArrayCategories;
+		
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
 			$paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
@@ -505,7 +532,7 @@ class PaysheetsController extends AppController
 			$arrayResult = $this->moveColumns($paysheet, $payrollParameters);
 			
 			$paysheet = $arrayResult['paysheet'];
-			
+									
 			$paysheet->responsible_user = $this->Auth->user('username'); 
 			
 			$tableConfigurationJson = $this->initialConfiguration();
@@ -518,7 +545,7 @@ class PaysheetsController extends AppController
 			
 			if (!($this->Paysheets->save($paysheet)))
 			{
-				$this->Flash->error(__('Los datos de la quincena no pudieron ser grabados, intente nuevamente'));                
+				$this->Flash->error(__('Los datos de la nómina no pudieron ser actualizados, intente nuevamente'));                
 			}
 			else 
 			{
@@ -526,8 +553,8 @@ class PaysheetsController extends AppController
 			}
 		}
 				
-        $this->set(compact('paysheet', 'controller', 'action', 'positionCategories', 'arrayCategories'));
-        $this->set('_serialize', ['paysheet', 'controller', 'action', 'positionCategories', 'arrayCategories']); 
+        $this->set(compact('paysheet', 'controller', 'action', 'positionCategories', 'tableCategories'));
+        $this->set('_serialize', ['paysheet', 'controller', 'action', 'positionCategories', 'tableCategories']); 
 	}
 	
     public function nameMonthSpanish($month = null)

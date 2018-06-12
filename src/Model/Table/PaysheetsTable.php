@@ -94,10 +94,7 @@ class PaysheetsTable extends Table
         $validator
 			->dateTime('date_status')
             ->allowEmpty('date_status');
-			
-        $validator
-            ->allowEmpty('deleted_record');
-            
+			            
         $validator
             ->allowEmpty('responsible_user');
 

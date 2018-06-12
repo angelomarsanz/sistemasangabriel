@@ -96,7 +96,7 @@
 					<div class="row">
 						<div class="col-md-6">
 							<label for="salary-days">Días base cálculos:</label>
-							<input name="salary_days" id="salary-day" value="<?= number_format($payrollParameters['salaryDays'], 2, ",", ".") ?>" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días base para el cálculo de esta nómina">
+							<input name="salary_days" id="salary-day" value="<?= number_format($payrollParameters['salaryDays'], 2, ",", ".") ?>" class="form-control alternative-decimal-separator" data-toggle="tooltip" data-placement="top" title="Cantidad de días base para el cálculo de esta nómina">
 						</div>
 					</div>
 				</div>
@@ -111,7 +111,7 @@
 						</div>
 						<div class="col-md-6">						
 							<label for="days-cesta-ticket">Días base cálculos:</label>
-							<input name="days_cesta_ticket" id="days-cesta-ticket" value="<?= number_format($payrollParameters['daysCestaTicket'], 2, ",", ".") ?>" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días base para el cálculo de esta cesta ticket">
+							<input name="days_cesta_ticket" id="days-cesta-ticket" value="<?= number_format($payrollParameters['daysCestaTicket'], 2, ",", ".") ?>" class="form-control alternative-decimal-separator" data-toggle="tooltip" data-placement="top" title="Cantidad de días base para el cálculo de esta cesta ticket">
 						</div>
 					</div>
 				</div>			
@@ -119,7 +119,7 @@
 					<div class="row">
 						<div class="col-md-6">
 							<label for="days-utilities">Días utilidades:</label>
-							<input name="days_utilities" id="days-utilities" value="<?= number_format($payrollParameters['daysUtilities'], 2, ",", ".") ?>" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días a pagar por concepto de utilidades">
+							<input name="days_utilities" id="days-utilities" value="<?= number_format($payrollParameters['daysUtilities'], 2, ",", ".") ?>" class="form-control alternative-decimal-separator" data-toggle="tooltip" data-placement="top" title="Cantidad de días a pagar por concepto de utilidades">
 						</div>					
 					</div>
 				</div>
@@ -127,11 +127,11 @@
 					<div class="row">
 						<div class="col-md-6">
 							<label for="collective-holidays">Días vacaciones:</label>
-							<input name="collective_holidays" id="collective-holidays" value="<?= number_format($payrollParameters['collectiveHolidays'], 2, ",", ".") ?>" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días disfrute de vacaciones">
+							<input name="collective_holidays" id="collective-holidays" value="<?= number_format($payrollParameters['collectiveHolidays'], 2, ",", ".") ?>" class="form-control alternative-decimal-separator" data-toggle="tooltip" data-placement="top" title="Cantidad de días disfrute de vacaciones">
 						</div>
 						<div class="col-md-6">
 							<label for="collective-vacation-bonus-days">Días bono:</label>
-							<input name="collective_vacation_bonus_days" id="collective-vacation-bonus-days" value="<?= number_format($payrollParameters['collectiveVacationBonusDays'], 2, ",", ".") ?>" class="form-control" data-toggle="tooltip" data-placement="top" title="Cantidad de días del bono vacacional">
+							<input name="collective_vacation_bonus_days" id="collective-vacation-bonus-days" value="<?= number_format($payrollParameters['collectiveVacationBonusDays'], 2, ",", ".") ?>" class="form-control alternative-decimal-separator" data-toggle="tooltip" data-placement="top" title="Cantidad de días del bono vacacional">
 						</div>						
 					</div>
 				</div>
@@ -141,7 +141,7 @@
 				<div class="col-md-4">
 					<h5><b>Por favor seleccione una ó más categorías de nómina:</b></h5>
 					<?php foreach ($positionCategories as $positionCategorie): ?>
-						<p><input type="checkbox" name="arrayCategories[<?= $positionCategorie->description_category ?>] ?>" class="mark-categories" /><?= " " . $positionCategorie->description_category ?></p>
+						<p><input type="checkbox" name="arrayCategories[<?= $positionCategorie->description_category ?>]" class="mark-categories" /><?= " " . $positionCategorie->description_category ?></p>
 					<?php endforeach; ?>
 				</div>			
 			</div>
@@ -208,7 +208,7 @@
 		});
 		
 		$('#crear-nomina').click(function(e) 
-        {
+        {		
 			var swMark = 0;
 			
 			$(".mark-categories").each(function (index) 

@@ -57,7 +57,7 @@
                 echo $this->Form->input('time_transaction', ['label' => 'Hora de la transacción: *']);
                 echo $this->Form->input('serial', ['label' => 'serial: *']);
                 echo $this->Form->input('amount', ['label' => 'monto: *']);
-                echo $this->Form->input('concept', ['label' => 'Concepto: *', 'options' => ['Inscripción 2017-2018' => 'Inscripción 2017-2018']]);
+                echo $this->Form->input('concept', ['label' => 'Concepto: *', 'options' => ['Renovación inscripción 2018-2019' => 'Renovación inscripción 2018-2019']]);
             ?>
         </fieldset>
         <?= $this->Form->button(__('Guardar'), ['class' =>'btn btn-success']) ?>

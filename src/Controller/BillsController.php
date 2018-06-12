@@ -167,12 +167,12 @@ class BillsController extends AppController
             }
             else    
             {
-                $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente.'));
+                $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente (add-save).'));
             }
         }
         else
         {
-            $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente.'));            
+            $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente (add-headboard).'));            
         }
     }
 
@@ -295,7 +295,7 @@ class BillsController extends AppController
         }
         else
         {
-            $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente.'));            
+            $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente (recordInvoiceData)'));            
         }
     }
 
@@ -454,28 +454,14 @@ class BillsController extends AppController
                 }
                 elseif (substr($aConcept->concept, 0, 3) == "Ago")
                 {	
-					if ($currentDate->month < 8)
+					if ($aConcept->concept == "Ago " . $currentDate->year)
 					{
-						if ($aConcept->concept == "Ago " . $lastYear)
-						{
-							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
-						}
+						$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
 					}
 					else
 					{
-						if ($aConcept->concept == "Ago " . $nextYear)
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;						
-						}
-					}				
+						$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+					}
                     $amountConcept = $aConcept->amount;
                     $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
                     $loadIndicator = 1;
@@ -586,27 +572,13 @@ class BillsController extends AppController
                         $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
                         $loadIndicator = 1;
                     }
-					if ($currentDate->month < 8)
+					if ($aConcept->concept == "Ago " . $currentDate->year)
 					{
-						if ($aConcept->concept == "Ago " . $lastYear)
-						{
-							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
-						}
+						$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
 					}
 					else
 					{
-						if ($aConcept->concept == "Ago " . $nextYear)
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;						
-						}
+						$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
 					}
                     $amountConcept = $aConcept->amount;
                     $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);

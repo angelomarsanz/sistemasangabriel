@@ -114,49 +114,6 @@
 -->
                                 </ul>
                             </li>
-                            <?php if (isset($currentView)): ?>
-                                <?php if ($currentView == 'employeepaymentsCompleteData'): ?>
-                                    <form class="navbar-form navbar-left" role="search">
-                                        <div class="form-group">
-                                            
-                                            <select id='classification' class='form-control'>
-                                                <option value='01'>Bachillerato y deporte</option>
-                                                <option value='02'>Primaria</option>
-                                                <option value='03'>Pre-escolar</option>
-                                                <option value='04'>Administrativo y obrero</option>
-                                                <option value='05'>Directivo</option>
-                                            </select>
-    
-                                            <select id='fortnight' class='form-control'>
-                            	                <option value='1'>1ra. Quincena</option>
-                            	                <option value='2'>2da. Quincena</option>
-                                            </select>
-    
-                                            <select id='month' class='form-control'>
-                        	                    <option value='01'>Enero</option>
-                        	                    <option value='02'>Febrero</option>
-                        	                    <option value='03'>Marzo</option>
-                        	                    <option value='04'>Abril</option>
-                        	                    <option value='05'>Mayo</option>
-                        	                    <option value='06'>Junio</option>
-                        	                    <option value='07'>Julio</option>
-                        	                    <option value='08'>Agosto</option>
-                        	                    <option value='09'>Septiembre</option>
-                        	                    <option value='10'>Octubre</option>
-                        	                    <option value='11'>Noviembre</option>
-                        	                    <option value='12'>Diciembre</option>
-                                            </select>
-    
-                                            <select id='year' class='form-control'>
-                        	                    <option value='2017'>2017</option>
-                        	                    <option value='2018'>2018</option>
-                        	                    <option value='2019'>2019</option>
-                                            </select>
-                                        </div>
-                                        <button type="submit" id="search-fortnight" class="glyphicon glyphicon-search btn btn-default navbar-btn" style="margin: 4px;"></button>
-                                    </form>
-                                <?php endif; ?>
-                            <?php endif; ?>
                             <!-- <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Migración <span class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">

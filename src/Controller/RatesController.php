@@ -7,6 +7,8 @@ use App\Controller\StudenttransactionsController;
 
 use Cake\Mailer\Email;
 
+use App\Controller\BinnaclesController;
+
 use Cake\I18n\Time;
 
 /**
@@ -134,24 +136,42 @@ class RatesController extends AppController
 			}
             else
             {
-				if ($rate->concept == "Matrícula")
+				if ($rate->concept == "Diferencia de agosto")
 				{
-					$studentTransactions->newRegistration($rate->amount, $rate->rate_year);
+					$arrayResult = $studentTransactions->differenceAugust($rate->amount, $rate->rate_year);
+										
+					if ($arrayResult['indicator'] == 0)
+					{
+						if ($this->Rates->save($rate)) 
+						{ 
+							$arrayMail['error'] = 0;
+						}
+						else
+						{
+							$arrayMail['error'] = 1;							
+						}
+					}
+					else
+					{
+						$arrayMail['error'] = 1;
+					}
+					$arrayMail['year'] = $rate->rate_year;
+					$arrayMail['adjust'] = $arrayResult['adjust'];
+					$result = $this->mailAugust($arrayMail);
+					exit;
 				}
-				elseif ($rate->concept == "Diferencia de agosto")
+				else
 				{
-					
+					if ($this->Rates->save($rate)) 
+					{
+						$this->Flash->success(__('La tarifa ha sido guardada'));
+					} 
+					else 
+					{
+						$this->Flash->error(__('La tarifa no pudo ser guardada, intente de nuevo'));
+					}		
+					return $this->redirect(['action' => 'index']);
 				}
-				
-				if ($this->Rates->save($rate)) 
-				{
-					$this->Flash->success(__('La tarifa ha sido guardada'));
-				} 
-				else 
-				{
-					$this->Flash->error(__('La tarifa no pudo ser guardada, intente de nuevo'));
-				}		
-				return $this->redirect(['action' => 'index']);				
             }
 		}
         
@@ -244,6 +264,88 @@ class RatesController extends AppController
 //        $correo->SMTPAuth = true;
 //        $correo->CharSet = "utf-8";     
 
+        if($correo->send())
+        {
+            $result = 0;
+        }
+        else
+        {
+            $result = 1;
+        }
+
+        return $result;
+    }
+    public function consultFee()
+    {
+        $this->autoRender = false;
+
+		$binnacles = new BinnaclesController;
+		
+        if ($this->request->is('json')) 
+        {
+			$binnacles->add('controller', 'Rates', 'consultFee', 'Valor recibido: ' . $_POST['yearAugust']);
+			
+            $jsondata = [];
+			
+            $lastRecord = $this->Rates->find('all', ['conditions' => [['concept' => 'Agosto'], ['rate_year' => $_POST['yearAugust']]], 
+				'order' => ['Rates.created' => 'DESC']]);
+
+            $row = $lastRecord->first();
+			
+            if ($row) 
+            {
+                $jsondata["success"] = true;
+				$jsondata["message"] = "Búsqueda exitosa";
+                $jsondata["data"] = $row->amount;
+			}
+			else
+			{
+                $jsondata["success"] = false;
+				$jsondata["message"] = "Falló la búsqueda";
+                $jsondata["data"] = "No se encontró el monto abonado al mes de agosto " . $_POST['yearAugust'];
+            }
+			
+			$binnacles->add('controller', 'Rates', 'consultFee', $jsondata['success'] . ' ' . $jsondata['data']);
+
+            exit(json_encode($jsondata, JSON_FORCE_OBJECT));
+        }
+    }
+    public function mailAugust($arrayMail = null)
+    {
+		Email::configTransport('mail', [
+		  'host' => 'ssl://smtp.gmail.com',
+		  'port' => 465,
+		  'username' => 'sistemasangabriel@gmail.com', 
+		  'password' => 'fundevipp$', 
+		  
+		  'className' => 'Smtp', 
+		  
+		  'context' => [
+			'ssl' => [
+			  'verify_peer' => false,
+			  'verify_peer_name' => false,
+			  'allow_self_signed' => true
+			]
+		  ]
+		]); 
+	
+		$correo = new Email(); 
+
+        $correo
+		  ->transport('mail')
+          ->template('difference_august') 
+          ->emailFormat('html') 
+//          ->to('u.esangabriel.admon@gmail.com') 
+          ->to('transemainc@gmail.com')  
+		  ->cc('angelomarsanz@gmail.com')
+          ->from('sistemasangabriel@gmail.com') 
+          ->subject('Resultado actualización monto diferencia de agosto ' . $arrayMail['year'])
+          ->viewVars([ 
+            'varError' => $arrayMail['error'],
+			'varYear' => $arrayMail['year'],
+            'varAdjust' => $arrayMail['adjust']
+          ]);
+  
         if($correo->send())
         {
             $result = 0;

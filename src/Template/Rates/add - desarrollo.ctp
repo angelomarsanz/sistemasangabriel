@@ -158,7 +158,7 @@
 	{	
 		if ($("#concept").val() == "Diferencia de agosto")
 		{
-			$.post('/sistemasangabriel/rates/consultFee', {"yearAugust" : $("#rate-year").val() }, null, "json")
+			$.post('/desarrollosistemasangabriel/rates/consultFee', {"yearAugust" : $("#rate-year").val() }, null, "json")
             
 			.done(function(response) 
 			{
@@ -219,7 +219,7 @@
 				else
 				{
 					e.preventDefault();
-					$.redirect('/sistemasangabriel/rates/index');
+					$.redirect('/desarrollosistemasangabriel/rates/index');
 				}
 			}
 			else if ($("#concept").val() == "Diferencia de agosto")
@@ -233,7 +233,7 @@
 				else
 				{
 					e.preventDefault();
-					$.redirect('/sistemasangabriel/rates/index');
+					$.redirect('/desarrollosistemasangabriel/rates/index');
 				}
 			}
 			else
@@ -243,7 +243,7 @@
 				if (rateOther == false)
 				{
 					e.preventDefault();
-					$.redirect('/sistemasangabriel/rates/index');
+					$.redirect('/desarrollosistemasangabriel/rates/index');
 				}			
 			}
 		}); 
