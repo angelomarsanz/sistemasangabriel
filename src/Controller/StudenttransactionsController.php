@@ -669,12 +669,14 @@ class StudenttransactionsController extends AppController
             $this->Flash->error(__('La transacción del estudiante no pudo ser actualizada, intente nuevamente'));
         }
     }
-    public function differenceAugust($newAmount = null, $yearDifference = null)
+    public function differenceAugust($newAmount = null, $yearDifference = null, $noDifference = null)
     {
 		$this->autoRender = false;
 		
 		$binnacles = new BinnaclesController;
-						
+
+		$binnacles->add('controller', 'Studenttransactions', 'differenceAugust', '$newAmount: ' . $newAmount . ' $yearDifference: ' . $yearDifference . ' $noDifference: ' . $noDifference );
+		
 		$accountRecords = 0;
 		
 		$swUpdate = 0;
@@ -684,6 +686,7 @@ class StudenttransactionsController extends AppController
 		$arrayResult = [];	
 		$arrayResult['indicator'] = 0;
 		$arrayResult['message'] = '';
+		$arrayResult['adjust'] = 0;
 		
 		$arrayResult = $this->resetStudents();
 
@@ -694,24 +697,35 @@ class StudenttransactionsController extends AppController
 			if ($studentTransactions)
 			{			
 				foreach ($studentTransactions as $studentTransaction)
-				{			
-					$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
-					
-					$studentTransactionGet->original_amount = $newAmount;
-					$studentTransactionGet->amount = $newAmount;
-					$studentTransactionGet->paid_out = 0;
-					$studentTransactionGet->partial_payment = 0;
-					
-					if ($this->Studenttransactions->save($studentTransactionGet)) 
-					{ 
-						$accountRecords++;
+				{
+					$swUpdate = 0;
+					$arrayResult = [];	
+					$arrayResult['indicator'] = 0;
+					$arrayResult['message'] = '';
+										
+					if ($noDifference == 0)
+					{
+						$swUpdate = 1;
+						$arrayResult = $this->updateTransaction($studentTransaction, $newAmount);
+					}	
+					elseif ($studentTransaction->paid_out == 0)
+					{
+						$swUpdate = 1;
+						$arrayResult = $this->updateTransaction($studentTransaction, $newAmount);						
+					}
+										
+					if ($arrayResult['indicator'] == 0)
+					{
+						if ($swUpdate == 1)
+						{
+							$accountRecords++;
+						}
 					}
 					else
 					{
-						$binnacles->add('controller', 'Studenttransactions', 'differenceAugust', 'No se pudo grabar la transacción con el id ' . $studentTransactionGet->id);
 						$swError = 1;
 						break;
-					} 
+					}
 				}
 			}
 			else
@@ -721,6 +735,7 @@ class StudenttransactionsController extends AppController
 			}
 			
 			$arrayResult['indicator'] = $swError;
+			
 			if ($swError == 0)
 			{
 				$binnacles->add('controller', 'Studenttransactions', 'differenceAugust', 'Registros actualizados: ' . $accountRecords);
@@ -729,6 +744,7 @@ class StudenttransactionsController extends AppController
 			}
 			else
 			{
+				$binnacles->add('controller', 'Studenttransactions', 'differenceAugust', 'Programa con error, solo se actualizaron ' . $accountRecords . ' transacciones');
 				$arrayResult['message'] = 'No se actualizó exitosamente la diferencia de agosto';
 				$arrayResult['adjust'] = $accountRecords;
 			}
@@ -3587,7 +3603,7 @@ class StudenttransactionsController extends AppController
 		$arrayResult['message'] = '';
 
 		$students = $this->Studenttransactions->Students->find('all', 
-			['conditions' => [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.balance' => $lastYear]]]);
+			['conditions' => [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.balance <=' => $lastYear]]]);
 
 		if ($students)
 		{
@@ -3598,8 +3614,13 @@ class StudenttransactionsController extends AppController
 				if ($studentGet->section_id == 1)
 				{
 					$studentGet->student_condition = 'Retirado';
-					$binnacles->add('controller', 'Studenttransactions', 'resetStudents', 'Alumno retirado: ' . $studentGet->full_name . ' id: ' . $studentGet->id);
+					$binnacles->add('controller', 'Studenttransactions', 'resetStudents', 'Alumno retirado por section_id == 1: ' . $studentGet->full_name . ' id: ' . $studentGet->id);
 				}					
+				if ($studentGet->balance < $lastYear && $studentGet->level_of_study == "")
+				{
+					$studentGet->student_condition = 'Retirado';
+					$binnacles->add('controller', 'Studenttransactions', 'resetStudents', 'Alumno retirado por level_of_study == Blancos: ' . $studentGet->full_name . ' id: ' . $studentGet->id);					
+				}
 				$studentGet->level_of_study = "";
 				$studentGet->new_student = 0;
                 if ($this->Studenttransactions->Students->save($studentGet))
@@ -3611,7 +3632,7 @@ class StudenttransactionsController extends AppController
 					$binnacles->add('controller', 'Studenttransactions', 'resetStudents', 'No se pudo actualizar el alumno con id ' . $studentGet->id);
 					$swError = 1;	
 					break;
-				} 
+				}
 			}
 		}
 		else
@@ -3620,15 +3641,46 @@ class StudenttransactionsController extends AppController
 			$swError = 1;				
 		}
 		$arrayResult['indicator'] = $swError;
+		
 		if ($swError == 0)
 		{
-			$arrayResult['message'] = 'Actualización exitosa de los estatus de los alumnos';
 			$binnacles->add('controller', 'Studenttransactions', 'resetStudents', 'Se resetearon ' . $accountUpdate . ' alumnos');
+			$arrayResult['message'] = 'Actualización exitosa de los estatus de los alumnos';
 		}
 		else
 		{
+			$binnacles->add('controller', 'Studenttransactions', 'resetStudents', 'Error en la ejecución del programa. Solo se resetearon ' . $accountUpdate . ' alumnos');
 			$arrayResult['message'] = 'No se actualizaron correctamente los estatus de los alumnos';
 		}
+		return $arrayResult;
+	}
+	public function updateTransaction($studentTransaction = null, $newAmount = null)
+	{
+		$this->autoRender = false;
+		
+		$binnacles = new BinnaclesController;
+				
+		$arrayResult = [];	
+		$arrayResult['indicator'] = 0;
+		$arrayResult['message'] = '';
+		
+		$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
+		
+		$studentTransactionGet->original_amount = $newAmount;
+		$studentTransactionGet->amount = $newAmount;
+		$studentTransactionGet->paid_out = 0;
+		$studentTransactionGet->partial_payment = 0;
+		
+		if ($this->Studenttransactions->save($studentTransactionGet))
+		{ 
+			$arrayResult['message'] = 'La transacción identificada con el id: ' . $studentTransactionGet->id . ' se actualizó exitosamente';			
+		}
+		else
+		{ 
+			$binnacles->add('controller', 'Studenttransactions', 'differenceAugust', 'No se pudo actualizar la transacción con el id ' . $studentTransactionGet->id);
+			$arrayResult['indicator'] = 1;
+			$arrayResult['message'] = 'No se pudo grabar la transacción con el id ' . $studentTransactionGet->id;
+		} 
 		return $arrayResult;
 	}
 }

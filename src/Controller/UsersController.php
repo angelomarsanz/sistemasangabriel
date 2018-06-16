@@ -303,4 +303,47 @@ class UsersController extends AppController
 	{
 		
 	}
+	public function updateUsername()
+	{
+        $this->autoRender = false;
+         
+        if ($this->request->is('json'))
+        {
+            $jsondata = [];
+
+            if (isset($_POST['username']))
+            {               
+                $username = trim($_POST['username']);
+		                
+                $lastRecord = $this->Users->find('all', ['conditions' => [['Users.username' => $username]], 
+                    'order' => ['Users.created' => 'DESC']]);
+            
+                $row = $lastRecord->first();
+                
+                if (!($row))
+                {        
+					$user = $this->Users->get($_POST['idUser']);
+					
+					$user->username = $username;
+					
+		            if ($this->Users->save($user)) 
+					{
+						$jsondata["success"] = true;
+						$jsondata["message"] = "El usuario se modificó exitosamente";
+					}
+					else
+					{
+						$jsondata["success"] = false;
+						$jsondata["message"] = "No se pudo actualizar el usuario";
+					}
+				}
+				else
+				{
+					$jsondata["success"] = false;
+					$jsondata["message"] = "Ya existe otro representante con el mismo usuario, por favor intente nuevamente";
+				}
+                exit(json_encode($jsondata, JSON_FORCE_OBJECT));
+			}
+        }
+	}
 }

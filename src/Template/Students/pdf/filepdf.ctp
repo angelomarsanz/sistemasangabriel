@@ -174,17 +174,20 @@
             <p>b) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
             del alumno o la foto de perfil no sea visualice correctamente</p>
             <p>c) Recibo de pago del consejo educativo año escolar 2017-2018</p>
+			<p>d) Factura del mes de julio 2018</p>
         <?php elseif (substr($student->level_of_study, 0, 8) == "Primaria"): ?>
             <p>a) Fotocopia de la partida de nacimiento.</p>
             <p>b) Fotocopia de la cédula de identidad (de 5to. grado en adelante es indispensable por orden del M.P.P.E.).</p>
             <p>c) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
             del alumno o la foto de perfil no sea visualice correctamente</p>
             <p>d) Recibo de pago del consejo educativo año escolar 2017-2018</p>
+			<p>e) Factura del mes de julio 2018</p>
         <?php else: ?>
             <p>a) Fotocopia de la cédula de identidad del alumno vigente.</p>
             <p>b) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
             del alumno o la foto de perfil no sea visualice correctamente</p>
             <p>c) Recibo de pago del consejo educativo año escolar 2017-2018</p>
+			<p>d) Factura del mes de julio 2018</p>
         <?php endif; ?>
         <p><b>Horario de inscripción:</b></p>
         <p>7:00 am - 12:00 m</p>

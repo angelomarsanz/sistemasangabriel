@@ -59,10 +59,12 @@ class RatesController extends AppController
     public function add()
     {
         $studentTransactions = new StudenttransactionsController();
+		$binnacles = new BinnaclesController;
 		$swDateexception = 0;
 		$dateException = null;
 		$arrayResult = [];
 		$arrayMail = [];
+		$noDifference = 0;
 		
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
 		date_default_timezone_set('America/Caracas');
@@ -135,10 +137,20 @@ class RatesController extends AppController
 				exit;
 			}
             else
-            {
+            {				
 				if ($rate->concept == "Diferencia de agosto")
-				{
-					$arrayResult = $studentTransactions->differenceAugust($rate->amount, $rate->rate_year);
+				{                        
+					$lastRecord = $this->Rates->find('all', ['conditions' => [['concept' => $rate->concept], ['rate_year' => $rate->rate_year]], 
+						'order' => ['Rates.created' => 'DESC'] ]);
+				   
+					$row = $lastRecord->first();
+				
+					if ($row)
+					{
+						$noDifference = 1;
+					}
+				
+					$arrayResult = $studentTransactions->differenceAugust($rate->amount, $rate->rate_year, $noDifference);
 										
 					if ($arrayResult['indicator'] == 0)
 					{
@@ -157,6 +169,7 @@ class RatesController extends AppController
 					}
 					$arrayMail['year'] = $rate->rate_year;
 					$arrayMail['adjust'] = $arrayResult['adjust'];
+					$binnacles->add('controller', 'Rates', 'add', 'Se ejecutó la función de enviar correo de diferencia de agosto');
 					$result = $this->mailAugust($arrayMail);
 					exit;
 				}
@@ -249,8 +262,8 @@ class RatesController extends AppController
 		  ->transport('mail')
           ->template('monthly_adjust') 
           ->emailFormat('html') 
-//          ->to('u.esangabriel.admon@gmail.com') 
-          ->to('transemainc@gmail.com') 
+          ->to('u.esangabriel.admon@gmail.com') 
+//          ->to('transemainc@gmail.com') 
 		  ->cc('angelomarsanz@gmail.com')
           ->from('sistemasangabriel@gmail.com') 
           ->subject('Resultados ajuste de mensualidades')
@@ -261,9 +274,6 @@ class RatesController extends AppController
 			'varAdjustDefaulters' => $arrayMail['adjustDefaulters']
           ]);
   
-//        $correo->SMTPAuth = true;
-//        $correo->CharSet = "utf-8";     
-
         if($correo->send())
         {
             $result = 0;
@@ -335,8 +345,8 @@ class RatesController extends AppController
 		  ->transport('mail')
           ->template('difference_august') 
           ->emailFormat('html') 
-//          ->to('u.esangabriel.admon@gmail.com') 
-          ->to('transemainc@gmail.com')  
+          ->to('u.esangabriel.admon@gmail.com') 
+//          ->to('transemainc@gmail.com')  
 		  ->cc('angelomarsanz@gmail.com')
           ->from('sistemasangabriel@gmail.com') 
           ->subject('Resultado actualización monto diferencia de agosto ' . $arrayMail['year'])

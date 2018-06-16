@@ -515,12 +515,28 @@ class ParentsandguardiansController extends AppController
     }
     public function viewData($idFamily = null, $family = null)
     {
+		$this->loadModel('Schools');
+
+		$schools = $this->Schools->get(2);
+		
         if ($this->request->is('post')) 
         {
             $idFamily = $_POST['idFamily'];
             $family = $_POST['family'];
         }
-        $this->set(compact('idFamily', 'family'));
+		
+        $lastRecord = $this->Parentsandguardians->find('all', ['conditions' => [['id' => $idFamily]], 
+            'order' => ['Parentsandguardians.created' => 'DESC']]);
+            
+        $row = $lastRecord->first();
+                
+        if ($row)
+        {        				
+			$user = $this->Parentsandguardians->Users->get($row->user_id);			
+		}
+
+        $this->set(compact('idFamily', 'family', 'schools', 'user'));
+		$this->set('_serialize', ['schools', 'user']);
     }
     public function consultCardboard()
     {
