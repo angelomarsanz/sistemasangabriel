@@ -30,8 +30,8 @@
     {
         $('#save-student').click(function(e) 
         {
-            $('#surname').val($('#surname').val().toUpperCase());
-            $('#first-name').val($('#first-name').val().toUpperCase());
+            $('#surname').val($.trim($('#surname').val().toUpperCase()));
+            $('#first-name').val($.trim($('#first-name').val().toUpperCase()));
         });
     });
 </script>

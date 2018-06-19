@@ -441,36 +441,38 @@
 
         $('#save-parentsandguardians').click(function(e) 
         {
-            $('#surname').val($('#surname').val().toUpperCase());
-            $('#second-surname').val($('#second-surname').val().toUpperCase());
-            $('#first-name').val($('#first-name').val().toUpperCase());
-            $('#second-name').val($('#second-name').val().toUpperCase());
-            $('#email').val($('#email').val().toLowerCase());
-            $('#address').val($('#address').val().toUpperCase());
-            $('#profession').val($('#profession').val().toUpperCase());
-            $('#workplace').val($('#workplace').val().toUpperCase());
-            $('#professional-position').val($('#professional-position').val().toUpperCase());
-            $('#work-phone').val($('#work-phone').val().toUpperCase());
-            $('#work-address').val($('#work-address').val().toUpperCase());
+            $('#surname').val($.trim($('#surname').val().toUpperCase()));
+            $('#second-surname').val($.trim($('#second-surname').val().toUpperCase()));
+            $('#first-name').val($.trim($('#first-name').val().toUpperCase()));
+            $('#second-name').val($.trim($('#second-name').val().toUpperCase()));
+            $('#email').val($.trim($('#email').val().toLowerCase()));
+            $('#address').val($.trim($('#address').val().toUpperCase()));
+            $('#profession').val($.trim($('#profession').val().toUpperCase()));
+            $('#workplace').val($.trim($('#workplace').val().toUpperCase()));
+            $('#professional-position').val($.trim($('#professional-position').val().toUpperCase()));
+            $('#work-phone').val($.trim($('#work-phone').val().toUpperCase()));
+            $('#work-address').val($.trim($('#work-address').val().toUpperCase()));
 
-            $('#family').val($('#family').val().toUpperCase());
+            $('#family').val($.trim($('#family').val().toUpperCase()));
 
-            $('#surname-father').val($('#surname-father').val().toUpperCase());
-            $('#second-surname-father').val($('#second-surname-father').val().toUpperCase());
-            $('#first-name-father').val($('#first-name-father').val().toUpperCase());
-            $('#second-name-father').val($('#second-name-father').val().toUpperCase());
-            $('#email-father').val($('#email-father').val().toLowerCase());
-            $('#address-father').val($('#address-father').val().toUpperCase());
+            $('#surname-father').val($.trim($('#surname-father').val().toUpperCase()));
+            $('#second-surname-father').val($.trim($('#second-surname-father').val().toUpperCase()));
+            $('#first-name-father').val($.trim($('#first-name-father').val().toUpperCase()));
+            $('#second-name-father').val($.trim($('#second-name-father').val().toUpperCase()));
+            $('#email-father').val($.trim($('#email-father').val().toLowerCase()));
+            $('#address-father').val($.trim($('#address-father').val().toUpperCase()));
+			$('#profession-father').val($.trim($('#profession-father').val().toUpperCase()));
             
-            $('#surname-mother').val($('#surname-mother').val().toUpperCase());
-            $('#second-surname-mother').val($('#second-surname-mother').val().toUpperCase());
-            $('#first-name-mother').val($('#first-name-mother').val().toUpperCase());
-            $('#second-name-mother').val($('#second-name-mother').val().toUpperCase());
-            $('#email-mother').val($('#email-mother').val().toLowerCase());
-            $('#address-mother').val($('#address-mother').val().toUpperCase());
-
-            $('#client').val($('#client').val().toUpperCase());
-            $('#fiscal-address').val($('#fiscal-address').val().toUpperCase());
+            $('#surname-mother').val($.trim($('#surname-mother').val().toUpperCase()));
+            $('#second-surname-mother').val($.trim($('#second-surname-mother').val().toUpperCase()));
+            $('#first-name-mother').val($.trim($('#first-name-mother').val().toUpperCase()));
+            $('#second-name-mother').val($.trim($('#second-name-mother').val().toUpperCase()));
+            $('#email-mother').val($.trim($('#email-mother').val().toLowerCase()));
+            $('#address-mother').val($.trim($('#address-mother').val().toUpperCase()));
+			$('#profession-mother').val($.trim($('#profession-mother').val().toUpperCase()));
+			
+            $('#client').val($.trim($('#client').val().toUpperCase()));
+            $('#fiscal-address').val($.trim($('#fiscal-address').val().toUpperCase()));
         });
         $("#item").change(displayVals);
     });    

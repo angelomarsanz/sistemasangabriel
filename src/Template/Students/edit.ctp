@@ -55,6 +55,10 @@
                             echo $this->Form->input('address', ['label' => 'Dirección de habitacion: *',
                                         'value' => $parentsandguardian->address,
                                         'style' => 'background-color : #ffff99;']);
+										
+                            if ($current_user['role'] != 'Representante'):
+								echo $this->Form->input('section_id', ['label' => 'Grado y sección al que está asignado el alumno actualmente', 'options' => $sections]); 										
+							endif;			
                             echo $this->Form->input('level_of_study', ['options' => 
                                 [null => " ",
                                 'Pre-escolar, pre-kinder' => 'Pre-escolar, pre-kinder',                                
@@ -145,25 +149,25 @@
     {
         $('#save-student').click(function(e) 
         {
-            $('#first-name').val($('#first-name').val().toUpperCase());
-            $('#second-name').val($('#second-name').val().toUpperCase());
-            $('#surname').val($('#surname').val().toUpperCase());
-            $('#second-surname').val($('#second-surname').val().toUpperCase());
-            $('#place-of-birth').val($('#place-of-birth').val().toUpperCase());
-            $('#country-of-birth').val($('#country-of-birth').val().toUpperCase());
-            $('#email').val($('#email').val().toLowerCase());
-            $('#address').val($('#address').val().toUpperCase());
-            $('#first-name-father').val($('#first-name-father').val().toUpperCase());
-            $('#second-name-father').val($('#second-name-father').val().toUpperCase());
-            $('#surname-father').val($('#surname-father').val().toUpperCase());
-            $('#second-surname-father').val($('#second-surname-father').val().toUpperCase());
-            $('#first-name-mother').val($('#first-name-mother').val().toUpperCase());
-            $('#second-name-mother').val($('#second-name-mother').val().toUpperCase());
-            $('#surname-mother').val($('#surname-mother').val().toUpperCase());
-            $('#second-surname-mother').val($('#second-surname-mother').val().toUpperCase());
-            $('#previous-school').val($('#previous-school').val().toUpperCase());
-            $('#student-illnesses').val($('#student-illnesses').val().toUpperCase());
-            $('#observations').val($('#observations').val().toUpperCase());
+            $('#first-name').val($.trim($('#first-name').val().toUpperCase()));
+            $('#second-name').val($.trim($('#second-name').val().toUpperCase()));
+            $('#surname').val($.trim($('#surname').val().toUpperCase()));
+            $('#second-surname').val($.trim($('#second-surname').val().toUpperCase()));
+            $('#place-of-birth').val($.trim($('#place-of-birth').val().toUpperCase()));
+            $('#country-of-birth').val($.trim($('#country-of-birth').val().toUpperCase()));
+            $('#email').val($.trim($('#email').val().toLowerCase()));
+            $('#address').val($.trim($('#address').val().toUpperCase()));
+            $('#first-name-father').val($.trim($('#first-name-father').val().toUpperCase()));
+            $('#second-name-father').val($.trim($('#second-name-father').val().toUpperCase()));
+            $('#surname-father').val($.trim($('#surname-father').val().toUpperCase()));
+            $('#second-surname-father').val($.trim($('#second-surname-father').val().toUpperCase()));
+            $('#first-name-mother').val($.trim($('#first-name-mother').val().toUpperCase()));
+            $('#second-name-mother').val($.trim($('#second-name-mother').val().toUpperCase()));
+            $('#surname-mother').val($.trim($('#surname-mother').val().toUpperCase()));
+            $('#second-surname-mother').val($.trim($('#second-surname-mother').val().toUpperCase()));
+            $('#previous-school').val($.trim($('#previous-school').val().toUpperCase()));
+            $('#student-illnesses').val($.trim($('#student-illnesses').val().toUpperCase()));
+            $('#observations').val($.trim($('#observations').val().toUpperCase()));
         });
     });
 </script>

@@ -1265,7 +1265,8 @@ class StudenttransactionsController extends AppController
                     ->contain(['Students'])
                     ->where([['Studenttransactions.transaction_description' => 'Matrícula 2017'],
                         ['Studenttransactions.amount <' => $row->amount],
-                        ['Students.level_of_study IS NOT NULL'], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]);
+                        ['Students.level_of_study IS NOT NULL'], 
+						['Students.student_condition' => 'Regular']]);
         
                 $totalEnrolled = $inscribed->count();
                 
@@ -1288,7 +1289,7 @@ class StudenttransactionsController extends AppController
                     ->where([['Studenttransactions.transaction_description' => 'Matrícula 2017'],
                         ['Studenttransactions.amount <' => $row->amount],
                         ['Students.level_of_study' => $level],
-						['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
+						['Students.student_condition' => 'Regular']])
                     ->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
                     
                 $totalLevel = $studentsLevel->count();

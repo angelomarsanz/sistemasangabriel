@@ -57,7 +57,7 @@ class StudentsController extends AppController
 
             if ($resultParentsandguardians) 
             {
-                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]);
+                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['Students.student_condition' => 'Regular']]);
                 $this->set('students', $this->paginate($query));
             }           
         }
@@ -489,6 +489,8 @@ class StudentsController extends AppController
         $student = $this->Students->get($id);
         
         $parentsandguardian = $this->Students->Parentsandguardians->get($student->parentsandguardian_id);
+		
+        $sections = $this->Students->Sections->find('list', ['limit' => 200]);
 
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
@@ -527,8 +529,8 @@ class StudentsController extends AppController
                 $this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
             }
         }    
-        $this->set(compact('student', 'parentsandguardian', 'currentYear', 'lastYear', 'nextYear'));
-        $this->set('_serialize', ['student', 'parentsandguardian']);
+        $this->set(compact('student', 'parentsandguardian', 'currentYear', 'lastYear', 'nextYear', 'sections'));
+        $this->set('_serialize', ['student', 'parentsandguardian', 'sections']);
     }
     
     public function editPhoto($id = null)
