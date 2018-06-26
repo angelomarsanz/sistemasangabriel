@@ -33,10 +33,17 @@ class PositioncategoriesTable extends Table
         parent::initialize($config);
 
         $this->table('positioncategories');
-        $this->displayField('id');
+        $this->displayField('description_category');
         $this->primaryKey('id');
 
         $this->addBehavior('Timestamp');
+
+        $this->hasMany('Employees', [
+            'foreignKey' => 'positioncategory_id'
+        ]);
+        $this->hasMany('Paysheets', [
+            'foreignKey' => 'positioncategory_id'
+        ]);
     }
 
     /**

@@ -40,6 +40,10 @@ class PaysheetsTable extends Table
 
         $this->addBehavior('Timestamp');
 
+        $this->belongsTo('Positioncategories', [
+            'foreignKey' => 'positioncategory_id',
+            'joinType' => 'INNER'
+        ]);
         $this->hasMany('Employeepayments', [
             'foreignKey' => 'paysheet_id'
         ]);
@@ -97,7 +101,11 @@ class PaysheetsTable extends Table
 			            
         $validator
             ->allowEmpty('responsible_user');
-
+			
+        $validator
+            ->requirePresence('payroll_name', 'create')
+            ->notEmpty('payroll_name');
+			
         return $validator;
     }
 }

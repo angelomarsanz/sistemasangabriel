@@ -17,21 +17,41 @@ class EmployeesController extends AppController
     public function testFunction()
     {
         $employees = TableRegistry::get('Employees');
+		
+		$account = 0;
         
-        $employeesList = $employees->find()
-            ->select(
-            ['Employees.id',
-            'Employees.reason_withdrawal']);
+        $employeesList = $employees->find();
 
         if ($employeesList)
-        {
-            $account = 0;
-            
+        {            
             foreach ($employeesList as $employeesLists)
             {
-                $employee = $this->Employees->get($employeesLists->id);
-                
-                $employee->reason_withdrawal = 'Activo';
+				$employee = $this->Employees->get($employeesLists->id);
+				
+                if ($employeesLists->classification == "Bachillerato y deporte")
+				{
+					$employee->positioncategory_id = 2;
+				}
+				elseif ($employeesLists->classification == "Primaria")
+				{
+					$employee->positioncategory_id = 3;
+				}
+				elseif ($employeesLists->classification == "Pre-escolar")
+				{
+					$employee->positioncategory_id = 4;
+				}				
+				elseif ($employeesLists->classification == "Administrativo y obrero")
+				{
+					$employee->positioncategory_id = 5;
+				}
+				elseif ($employeesLists->classification == "Directivo")
+				{
+					$employee->positioncategory_id = 6;
+				}
+				else
+				{
+					$this->Flash->error(__('Clasificación no reconocida: ' . $employeesLists->classification));
+				}
                 
                 if (!($this->Employees->save($employee)))
                 {

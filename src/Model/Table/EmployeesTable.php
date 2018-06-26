@@ -70,6 +70,10 @@ class EmployeesTable extends Table
             'foreignKey' => 'position_id',
             'joinType' => 'INNER'
         ]);
+        $this->belongsTo('Positioncategories', [
+            'foreignKey' => 'positioncategory_id',
+            'joinType' => 'INNER'
+        ]);
         $this->hasMany('Employeepayments', [
             'foreignKey' => 'employee_id'
         ]);

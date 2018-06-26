@@ -1,5 +1,6 @@
 <?php 
 	use Cake\I18n\Time;
+	
 	setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
 	date_default_timezone_set('America/Caracas');
 	
@@ -45,11 +46,19 @@
 }
 </style>
 <div class="page-header">
-	<h3>Modificar nómina</h3>
+	<h3>Modificar parámetros de la nómina</h3>
 </div>
 <div class="row">
 	<?= $this->Form->create($paysheet) ?>
         <fieldset>
+			<div class="row">
+				<div class="col-md-6">
+					<?php echo $this->Form->input('positioncategory_id', ['label' => 'Categoría:', 'options' => $positionCategories]); ?>
+				</div>
+				<div class="col-md-6">				
+					<?php echo $this->Form->input('payroll_name', ['label' => 'Nombre de la nómina: ']); ?> 
+				</div>
+			</div>
 			<div class="row">
 				<div class="col-md-4">	
 					<?php echo $this->Form->input('date_from', ['label' => 'Fecha inicio nómina: ', 
@@ -136,19 +145,6 @@
 					</div>
 				</div>
 			</div>
-			<hr />			
-			<div class="row">
-				<div class="col-md-4">
-					<h5><b>Por favor seleccione una ó más categorías de nómina:</b></h5>
-					<?php foreach ($positionCategories as $positionCategorie): ?>
-						<?php if (isset($tableCategories[$positionCategorie->description_category])): ?>
-							<p><input type="checkbox" name="arrayCategories[<?= $positionCategorie->description_category ?>]" class="mark-categories" checked /><?= " " . $positionCategorie->description_category ?></p>
-						<?php else: ?>
-							<p><input type="checkbox" name="arrayCategories[<?= $positionCategorie->description_category ?>]" class="mark-categories" /><?= " " . $positionCategorie->description_category ?></p>						
-						<?php endif; ?>
-					<?php endforeach; ?>
-				</div>			
-			</div>
 		</fieldset>
 		<hr />
 		<div class="row">
@@ -213,20 +209,11 @@
 		
 		$('#crear-nomina').click(function(e) 
         {
-			var swMark = 0;
-			
-			$(".mark-categories").each(function (index) 
-			{ 
-				if ($(this).is(":checked"))
-				{
-					swMark = 1;
-					return false;
-				}
-			});
-			if (swMark == 0)
+			if ($("#positioncategory-id").val() == "1")
 			{
 				e.preventDefault();
-				alert('Por favor seleccione una ó más categorías de nómina');
+				$("#positioncategory-id").css("background-color", "#ffffe6");
+				alert('Por favor seleccione una categoría');
 			}
 		});
 	});

@@ -1,5 +1,6 @@
 <?php 
 	use Cake\I18n\Time;
+	
 	setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
 	date_default_timezone_set('America/Caracas');
 	
@@ -79,15 +80,16 @@
 		<input type='hidden' id='monthFor' value=<?= $monthNumber ?> />
 		<input type='hidden' id='yearFor' value=<?= $year ?> />
 		<input type='hidden' id='idPaysheet' value=<?= $idPaysheet ?> />
+		<input type='hidden' id='ambiente' value=<?= $school->ambient ?>
 
-		<br />
 		<?= $this->Form->create() ?>
 			<div class="row">
+				<h4><b>Buscar nómina:</b></h4>
 				<div class="col-md-11">								
 					<fieldset>
 						<div class="row">
 							<div class="col-md-4">
-								<?php echo $this->Form->input('date_from', ['label' => 'Fecha inicio nómina: ', 
+								<?php echo $this->Form->input('date_from', ['label' => 'Desde: ', 
 									'type' => 'date',
 									'value' => $currentDate,
 									'monthNames' =>
@@ -107,7 +109,7 @@
 								?>
 							</div>
 							<div class="col-md-4">
-								<?php echo $this->Form->input('date_until', ['label' => 'Fecha culminación nómina: ', 
+								<?php echo $this->Form->input('date_until', ['label' => 'Hasta: ', 
 									'type' => 'date',
 									'value' => $currentDate,
 									'monthNames' =>
@@ -127,6 +129,7 @@
 								?>
 							</div>
 							<div class="col-md-4">
+								<?php echo $this->Form->input('position_categories', ['label' => 'Categoría:', 'options' => $positionCategories]); ?>
 							</div>
 						</div>
 					</fieldset>	
@@ -600,7 +603,7 @@
 							<?php endif; ?>
 							
 							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight'], ['id' => 'nuevo', 'class' => 'glyphicon glyphicon-plus-sign btn btn-danger', 'title' => 'Crear nueva nómina']) ?>
-							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'editPayrollFortnight', $idPaysheet, 'Employeepayments', 'completeData'], ['id' => 'modificar', 'class' => 'glyphicon glyphicon-edit btn btn-danger', 'title' => 'Modificar nómina']) ?>
+							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'editPayrollFortnight', $idPaysheet, 'Employeepayments', 'completeData'], ['id' => 'modificar', 'class' => 'glyphicon glyphicon-edit btn btn-danger', 'title' => 'Modificar parámetros']) ?>
 							<button id="borrar" class="glyphicon glyphicon-trash btn btn-danger" title="Eliminar"></button>
 							<a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
 						</p>
@@ -702,7 +705,17 @@
         $('#search-fortnight').click(function(e) 
         {
             e.preventDefault(); 
-            $.redirect('/sistemasangabriel/paysheets/edit', {yearPaysheet : $("#year").val(), monthPaysheet : $("#month").val(), fortnight : $("#fortnight").val(), classification : $("#classification").val() });
+			
+			if ($('#ambiente').val() == "Producción")
+			{
+				$.redirect('/sistemasangabriel/paysheets/index', {ddFrom : $("select[name='date_from[day]']").val(), mmFrom : $("select[name='date_from[month]']").val(), yyFrom : $("select[name='date_from[year]']").val(), ddUntil : $("select[name='date_until[day]']").val(), mmUntil : $("select[name='date_until[month]']").val(), yyUntil : $("select[name='date_until[year]']").val(), positionCategories : $("#position-categories").val() });
+			}
+			else
+			{
+				$.redirect('/desarrollosistemasangabriel/paysheets/index', {dateFrom : $("#date-from").val(), dateUntil : $("#date-until").val(), positionCategories : $("#position-categories").val() });			
+			}
+			
+//            $.redirect('/sistemasangabriel/paysheets/edit', {yearPaysheet : $("#year").val(), monthPaysheet : $("#month").val(), fortnight : $("#fortnight").val(), classification : $("#classification").val() });
         });
 		
         $('#borrar').click(function(e) 

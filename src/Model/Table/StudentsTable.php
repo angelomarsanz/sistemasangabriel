@@ -282,7 +282,7 @@ class StudentsTable extends Table
     }
     public function findFamily(Query $query, array $options)
     {
-        $query->where([['Students.id >' => 1]])
+        $query->where([['Students.id >' => 1], ['Students.student_condition !=' => 'Eliminado']])
 			->contain(['Parentsandguardians', 'Sections'])
 			->order(['Parentsandguardians.family' => 'ASC',
 				'Parentsandguardians.surname' => 'ASC',

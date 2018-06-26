@@ -61,7 +61,7 @@ class User extends Entity
         return $hasher->hash($value);
     }
     
-        protected function _getFullName()
+    protected function _getFullName()
     {
         return $this->_properties['surname'] . ' ' .
             $this->_properties['second_surname'] . ' ' .

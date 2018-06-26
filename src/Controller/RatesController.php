@@ -140,35 +140,56 @@ class RatesController extends AppController
             {				
 				if ($rate->concept == "Diferencia de agosto")
 				{                        
-					$lastRecord = $this->Rates->find('all', ['conditions' => [['concept' => $rate->concept], ['rate_year' => $rate->rate_year]], 
-						'order' => ['Rates.created' => 'DESC'] ]);
-				   
-					$row = $lastRecord->first();
-				
-					if ($row)
+					$this->loadModel('Schools');
+
+					$school = $this->Schools->get(2);
+					
+					$school->current_year_registration = $rate->rate_year;
+					
+					$school->previous_year_registration = $rate->rate_year - 1;
+					
+					$school->next_year_registration = $rate->rate_year + 1;
+					
+		            if ($this->Schools->save($school)) 
 					{
-						$noDifference = 1;
-					}
-				
-					$arrayResult = $studentTransactions->differenceAugust($rate->amount, $rate->rate_year, $noDifference);
-										
-					if ($arrayResult['indicator'] == 0)
-					{
-						if ($this->Rates->save($rate)) 
-						{ 
-							$arrayMail['error'] = 0;
+						$binnacles->add('controller', 'Rates', 'add', 'Se actualizaron correctamente los años de período de inscripción');
+
+						$lastRecord = $this->Rates->find('all', ['conditions' => [['concept' => $rate->concept], ['rate_year' => $rate->rate_year]], 
+							'order' => ['Rates.created' => 'DESC'] ]);
+					   
+						$row = $lastRecord->first();
+					
+						if ($row)
+						{
+							$noDifference = 1;
+						}
+					
+						$arrayResult = $studentTransactions->differenceAugust($rate->amount, $rate->rate_year, $noDifference);
+											
+						if ($arrayResult['indicator'] == 0)
+						{
+							if ($this->Rates->save($rate)) 
+							{ 
+								$arrayMail['error'] = 0;
+							}
+							else
+							{
+								$arrayMail['error'] = 1;							
+							}
 						}
 						else
 						{
-							$arrayMail['error'] = 1;							
+							$arrayMail['error'] = 1;
 						}
+						$arrayMail['adjust'] = $arrayResult['adjust'];
 					}
 					else
 					{
+						$binnacles->add('controller', 'Rates', 'add', 'No se pudieron actualizar los años de inscripción');						
 						$arrayMail['error'] = 1;
+						$arrayMail['adjust'] = 0;
 					}
 					$arrayMail['year'] = $rate->rate_year;
-					$arrayMail['adjust'] = $arrayResult['adjust'];
 					$binnacles->add('controller', 'Rates', 'add', 'Se ejecutó la función de enviar correo de diferencia de agosto');
 					$result = $this->mailAugust($arrayMail);
 					exit;

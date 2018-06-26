@@ -201,6 +201,14 @@ class EmployeepaymentsController extends AppController
         $employee = new EmployeesController();
 		
 		$paysheet = new PaysheetsController();
+		
+        $this->loadModel('Positioncategories');
+
+        $positionCategories = $this->Positioncategories->find('list', ['limit' => 200, "order" => ["description_category" => "ASC"]]);
+		
+		$this->loadModel('Schools');
+
+        $school = $this->Schools->get(2);
         
         if ($this->request->is('post')) 
         {
@@ -412,8 +420,8 @@ class EmployeepaymentsController extends AppController
     
             $classificationNumber = $this->classificationNumber($classification);
 			           
-            $this->set(compact('employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity'));
-            $this->set('_serialize', ['employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity']);
+            $this->set(compact('employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity', 'positionCategories', 'school'));
+            $this->set('_serialize', ['employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity', 'positionCategories', 'school']);
         }
     }
     

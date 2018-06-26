@@ -1919,6 +1919,15 @@ class StudentsController extends AppController
         date_default_timezone_set('America/Caracas');
 		
         $currentDate = Time::now();
+		
+		$accountStudents = [];
+		
+		$accountStudents['Regular'] = 0; 
+		$accountStudents['New'] = 0; 
+		$accountStudents['Graduated'] = 0; 
+		$accountStudents['Retired'] = 0; 
+		$accountStudents['Expelled'] = 0;
+		$accountStudents['Discontinued'] = 0;
 
 	    if ($this->request->is('post')) 
         {					
@@ -1949,9 +1958,40 @@ class StudentsController extends AppController
 			}
 	
 			$swImpresion = 1;
+			
+			foreach ($familyStudents as $familyStudent)
+			{
+				if ($familyStudent->student_condition == "Regular")
+				{
+					if ($familyStudent->new_student == 0)
+					{
+						$accountStudents['Regular']++;
+					}
+					else
+					{
+						$accountStudents['New']++;
+					}
+				}
+				elseif ($familyStudent->student_condition == "Egresado")
+				{
+					$accountStudents['Graduated']++;
+				}
+				elseif ($familyStudent->student_condition == "Retirado")
+				{
+					$accountStudents['Retired']++;
+				}				
+				elseif ($familyStudent->student_condition == "Expulsado")
+				{
+					$accountStudents['Expelled']++;
+				}
+				elseif ($familyStudent->student_condition == "Suspendido")
+				{
+					$accountStudents['Discontinued']++;
+				}
+			}
 						
-			$this->set(compact('swImpresion', 'familyStudents', 'arrayMark', 'currentDate'));
-			$this->set('_serialize', ['swImpresion', 'familyStudents', 'arrayMark', 'currenDate']); 		
+			$this->set(compact('swImpresion', 'familyStudents', 'arrayMark', 'currentDate', 'accountStudents'));
+			$this->set('_serialize', ['swImpresion', 'familyStudents', 'arrayMark', 'currenDate', 'accountStudents']); 		
 		}
 		else
 		{
@@ -1981,13 +2021,9 @@ class StudentsController extends AppController
 		isset($columnsReport['Students.nationality']) ? $arrayMark['Students.nationality'] = 'siExl' : $arrayMark['Students.nationality'] = 'noExl';
 		
 		isset($columnsReport['Students.identity_card']) ? $arrayMark['Students.identity_card'] = 'siExl' : $arrayMark['Students.identity_card'] = 'noExl';
-		
-		isset($columnsReport['Students.balance']) ? $arrayMark['Students.balance'] = 'siExl' : $arrayMark['Students.balance'] = 'noExl';
-		
+				
 		isset($columnsReport['Students.section_id']) ? $arrayMark['Students.section_id'] = 'siExl' : $arrayMark['Students.section_id'] = 'noExl';
-		
-		isset($columnsReport['Students.student_condition']) ? $arrayMark['Students.student_condition'] = 'siExl' : $arrayMark['Students.student_condition'] = 'noExl';
-		
+				
 		return $arrayMark;
 	}
     public function editStatus($id = null, $controller = null, $action = null)

@@ -56,10 +56,60 @@ class PaysheetsController extends AppController
      */
     public function index()
     {
-        $paysheets = $this->paginate($this->Paysheets);
-
-        $this->set(compact('paysheets'));
-        $this->set('_serialize', ['paysheets']);
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+				
+		if ($this->request->is('post')) 
+        {			
+			$this->loadModel('Positioncategories');
+			
+			$dateFrom = new Time();
+			
+			$dateFrom
+				->year($_POST['yyFrom'])
+				->month($_POST['mmFrom'])
+				->day($_POST['ddFrom'])
+				->hour(00)
+				->minute(00)
+				->second(00);
+							
+			$dateUntil = new Time();
+						
+			$dateUntil
+				->year($_POST['yyUntil'])
+				->month($_POST['mmUntil'])
+				->day($_POST['ddUntil'])
+				->hour(00)
+				->minute(00)
+				->second(00);
+											
+			if ($_POST['positionCategories'] == 1)
+			{
+				$paysheets = $this->Paysheets->find('all', 
+					['contain' => ['Positioncategories'],
+					'conditions' => [['date_from >=' => $dateFrom], ['date_until <=' => $dateUntil]],
+					'order' => ['date_from' => 'ASC']]);
+			}
+			else
+			{
+				$paysheets = $this->Paysheets->find('all', 
+					['conditions' => [['date_from >=' => $dateFrom], ['date_until <=' => $dateUntil], ['positioncategory_id' => $_POST['positionCategories']]],
+					'order' => ['date_from' => 'ASC']]);
+			}
+			
+			$accountRecords = $paysheets->count();
+			
+			if ($accountRecords > 0)
+			{				
+				$this->set(compact('paysheets'));
+				$this->set('_serialize', ['paysheets']);
+			}
+			else
+			{
+				$this->Flash->error(__("No se encontraron nóminas en ese período, por favor intente nuevamente"));
+				return $this->redirect(['controller' => 'Paysheets', 'action' => 'searchPayroll']);				
+			}
+		}
     }
 
     /**
@@ -286,9 +336,7 @@ class PaysheetsController extends AppController
         
         $employeepayments = new EmployeepaymentsController();
 		
-		$positionCategories = $this->Positioncategories->find('all', 
-			['conditions' => ['id >' => 1],
-            'order' => ['Positioncategories.description_category' => 'ASC']]);
+		$positionCategories = $this->Positioncategories->find('list', ['limit' => 200, "order" => ["description_category" => "ASC"]]);
 			        		
         $paysheet = $this->Paysheets->newEntity();
 		
@@ -305,11 +353,7 @@ class PaysheetsController extends AppController
 			$tableConfigurationJson = $this->initialConfiguration();
 		
 			$paysheet->table_configuration = $tableConfigurationJson;
-											
-			$tableCategoriesJson = json_encode($_POST['arrayCategories'], JSON_FORCE_OBJECT);
-					
-			$paysheet->table_categories = $tableCategoriesJson;
-			
+													
 			if (!($this->Paysheets->save($paysheet)))
 			{
 				$this->Flash->error(__('Los datos de la nómina no pudieron ser grabados, intente nuevamente'));                
@@ -513,18 +557,12 @@ class PaysheetsController extends AppController
 		$payrollParameters['collectiveHolidays'] = 0;
 		$payrollParameters['collectiveVacationBonusDays'] = 0;
 		
-		$positionCategories = $this->Positioncategories->find('all', 
-			['conditions' => ['id >' => 1],
-            'order' => ['Positioncategories.description_category' => 'ASC']]);
+		$positionCategories = $this->Positioncategories->find('list', ['limit' => 200, "order" => ["description_category" => "ASC"]]);
 			
 		$paysheet = $this->Paysheets->get($id, [
             'contain' => []
         ]);
-		
-		$objectArrayCategories = json_decode($paysheet->table_categories);
 				
-		$tableCategories = (array) $objectArrayCategories;
-		
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
 			$paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
@@ -538,11 +576,7 @@ class PaysheetsController extends AppController
 			$tableConfigurationJson = $this->initialConfiguration();
 		
 			$paysheet->table_configuration = $tableConfigurationJson;
-											
-			$tableCategoriesJson = json_encode($_POST['arrayCategories'], JSON_FORCE_OBJECT);
-					
-			$paysheet->table_categories = $tableCategoriesJson;
-			
+													
 			if (!($this->Paysheets->save($paysheet)))
 			{
 				$this->Flash->error(__('Los datos de la nómina no pudieron ser actualizados, intente nuevamente'));                
@@ -804,5 +838,18 @@ class PaysheetsController extends AppController
 		$arrayResult['payrollParameters'] = $payrollParameters;
 		
 		return $arrayResult;
+	}
+	public function searchPayroll()
+	{
+		$this->loadModel('Schools');
+
+        $school = $this->Schools->get(2);
+		
+		$this->loadModel('Positioncategories');
+
+        $positionCategories = $this->Positioncategories->find('list', ['limit' => 200, "order" => ["description_category" => "ASC"]]);	
+
+        $this->set(compact('school', 'positionCategories'));
+        $this->set('_serialize', ['school', 'positionCategories']);
 	}
 }
