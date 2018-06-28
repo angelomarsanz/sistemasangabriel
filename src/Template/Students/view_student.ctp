@@ -111,6 +111,7 @@
         <p>
         <?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'edit', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-edit btn btn-sm btn-danger', 'title' => 'Modificar alumno']) ?>
         <?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'editStatus', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-pencil btn btn-sm btn-danger', 'title' => 'Cambiar condición del alumno']) ?>
+		<?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'editSection', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-font btn btn-sm btn-danger', 'title' => 'Asignar sección']) ?>
         <?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'filepdf', $student->id, '_ext' => 'pdf'], ['class' => 'glyphicon glyphicon-download-alt btn btn-sm btn-danger', 'title' => 'Descargar ficha de inscripción']) ?>
         <a href="#" id="menu-menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger' style='padding: 4px 9px;'></a>
         </p>

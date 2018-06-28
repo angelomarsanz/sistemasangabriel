@@ -1342,6 +1342,16 @@ class StudentsController extends AppController
     {
         
     }
+	
+    public function consultStudentDelete()
+    {
+        $this->loadModel('Schools');
+
+        $school = $this->Schools->get(2);
+	
+		$this->set(compact('school'));
+		$this->set('_serialize', ['school']);		
+    }
     
     public function modifyTransactions()
     {
@@ -1355,6 +1365,20 @@ class StudentsController extends AppController
             $name = $this->request->query['term'];
             $results = $this->Students->find('all', [
                 'conditions' => [['surname LIKE' => $name . '%'], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]]);
+            $resultsArr = [];
+            foreach ($results as $result) {
+                 $resultsArr[] = ['label' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'value' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'id' => $result['id']];
+            }
+            echo json_encode($resultsArr);
+        }
+    }
+    public function findStudentDelete()
+    {
+        $this->autoRender = false;
+		if ($this->request->is('ajax')) {
+            $name = $this->request->query['term'];
+            $results = $this->Students->find('all', [
+                'conditions' => [['surname LIKE' => $name . '%'], ['Students.student_condition !=' => 'Regular']]]);
             $resultsArr = [];
             foreach ($results as $result) {
                  $resultsArr[] = ['label' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'value' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'id' => $result['id']];
@@ -2061,5 +2085,43 @@ class StudentsController extends AppController
         }    
         $this->set(compact('student'));
         $this->set('_serialize', ['student']);
+    }
+    public function editSection($id = null, $controller = null, $action = null)
+    {
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		
+        $currentDate = Time::now();
+		
+		$sections = $this->Students->Sections->find('list', ['limit' => 200]);
+		
+        $student = $this->Students->get($id);
+        
+        if ($this->request->is(['patch', 'post', 'put'])) 
+        {
+            $student = $this->Students->patchEntity($student, $this->request->data);
+            
+            $student->brothers_in_school = 0;
+		            
+            if ($this->Students->save($student)) 
+            {			
+				$this->Flash->success(__('El alumno fue asignado correctamente a la sección'));
+				
+                if (isset($controller))
+                {
+                    return $this->redirect(['controller' => $controller, 'action' => $action, $id]);
+                }
+                else
+                {
+                    return $this->redirect(['controller' => 'users', 'action' => 'wait']);
+                }
+            }
+            else 
+            {
+                $this->Flash->error(__('No se pudo asignar el alumno a la sección'));
+            }
+        }    
+        $this->set(compact('student', 'sections'));
+        $this->set('_serialize', ['student', 'sections']);
     }
 }

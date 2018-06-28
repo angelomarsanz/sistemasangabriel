@@ -213,74 +213,24 @@ class PaysheetsController extends AppController
      * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Network\Exception\NotFoundException When record not found.
      */
-    public function edit($id = null, $classificationC = null, $employeePayments = null)
+    public function directPayroll($id = null)
     {
         $this->autoRender = false;
         
-        $employeepayments = new EmployeepaymentsController();
-
-        if ($this->request->is('post')) 
-        {
-            if ($_POST['fortnight'] == 1)
-            {
-                $fortnight = '1ra. Quincena';
-            }
-            else
-            {
-                $fortnight = '2da. Quincena';
-            }
-            
-            $lastRecord = $this->Paysheets->find('all', ['conditions' => 
-                [['year_paysheet' => $_POST['yearPaysheet']],
-                ['month_paysheet' => $_POST['monthPaysheet']],
-                ['fortnight' => $fortnight],
-                ['OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]]],
-                'order' => ['Paysheets.created' => 'DESC'] ]);
-                
-                $classification = $this->classificationName($_POST['classification']);
-        }
-        else
-        {
-            if (isset($id))
-            {
-                $lastRecord = $this->Paysheets->find('all', ['conditions' => 
-                    [['id' => $id], ['OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]]]]);
-            }
-            else
-            {
-                $lastRecord = $this->Paysheets->find('all', 
-                ['conditions' => 
-                    ['id >' => 1, 'OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]], 'order' => ['Paysheets.created' => 'DESC']]);
-            }
-            
-            if (isset($classificationC))
-            {
-                $classification = $classificationC; 
-            }
-            else
-            {
-                $classification = 'Bachillerato y deporte';
-            }
-        }
+		$lastRecord = $this->Paysheets->find('all', 
+			['conditions' => ['id >' => 1, 'OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]], 
+			'order' => ['Paysheets.created' => 'DESC']]);
+		
         $row = $lastRecord->first();   
                 
         if ($row)
         {
-            $month = $this->nameMonthSpanish($row->month_paysheet);               
-            return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $row->id, $row->weeks_social_security, $row->year_paysheet, $row->month_paysheet, $month, $row->fortnight, $classification]);
+            return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $row->id, $row->payroll_name, $row->dateFrom, $row->dateUntil, $row->weeks_social_security]);
         }
         else
         {
-			if (isset($id))
-			{
-				$this->Flash->error(__('No se encontró la nómina'));
-				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
-			}
-			else
-			{
-				$this->Flash->error(__('No se encontraron nóminas'));
-				return $this->redirect(['controller' => 'Paysheets', 'action' => 'createPayrollFortnight']);
-			}
+			$this->Flash->error(__('No se encontraron nóminas'));
+			return $this->redirect(['controller' => 'Paysheets', 'action' => 'createPayrollFortnight', 1]);
         }
     }
 
@@ -319,8 +269,11 @@ class PaysheetsController extends AppController
 
         return $this->redirect(['controller' => $controller, 'action' => $action]);
     }
-    public function createPayrollFortnight()
+    public function createPayrollFortnight($noPayroll = null)
     {
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+				
 		$this->loadModel('Positioncategories');
 
 		$payrollParameters = [];
@@ -347,7 +300,40 @@ class PaysheetsController extends AppController
 			$arrayResult = $this->moveColumns($paysheet, $payrollParameters);
 			
 			$paysheet = $arrayResult['paysheet'];
+						
+			if ($paysheet->date_until->month < 10 )
+			{
+				$month = "0" . $paysheet->date_until->month;
+			}
+			else
+			{
+				$month = $paysheet->date_until->month;
+			}
 			
+			$firstDay = $paysheet->date_until->year . '-' . $month . '-01';
+			
+			$firstDayMonth = strtotime($firstDay);  
+
+			switch (date('w', $firstDayMonth))
+			{ 
+				case 0: $nameDay = "Domingo"; break; 
+				case 1: $nameDay = "Lunes"; break;
+				case 2: $nameDay = "Martes"; break;
+				case 3: $nameDay = "Miércoles"; break; 
+				case 4: $nameDay = "Jueves"; break; 
+				case 5: $nameDay = "Viernes"; break;
+				case 6: $nameDay = "Sábado"; break;
+			}  
+
+			if ($nameDay == "Lunes")
+			{
+				$paysheet->weeks_social_security = 5;
+			}
+			else
+			{
+				$paysheet->weeks_social_security = 4;
+			} 
+						                			
 			$paysheet->responsible_user = $this->Auth->user('username'); 
 			
 			$tableConfigurationJson = $this->initialConfiguration();
@@ -365,25 +351,28 @@ class PaysheetsController extends AppController
 		}
 		else
 		{
-           $lastRecord = $this->Paysheets->find('all', 
-                ['conditions' => 
-                ['OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]], 'order' => ['Paysheets.created' => 'DESC']]);
-			
-			$row = $lastRecord->first();   
-                
-			if ($row)
+			if (!isset($noPayroll))
 			{				
-				!(isset($row->salary_days)) ? : $payrollParameters['salaryDays'] = $row->salary_days;
+				$lastRecord = $this->Paysheets->find('all', 
+					['conditions' => 
+					['OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]], 'order' => ['Paysheets.created' => 'DESC']]);
 				
-				!(isset($row->cesta_ticket_month)) ? : $payrollParameters['cestaTicketMonth'] = $row->cesta_ticket_month;
+				$row = $lastRecord->first();   
+					
+				if ($row)
+				{				
+					!(isset($row->salary_days)) ? : $payrollParameters['salaryDays'] = $row->salary_days;
+					
+					!(isset($row->cesta_ticket_month)) ? : $payrollParameters['cestaTicketMonth'] = $row->cesta_ticket_month;
 
-				!(isset($row->days_cesta_ticket)) ? : $payrollParameters['daysCestaTicket'] = $row->days_cesta_ticket;
-			
-				!(isset($row->days_utilities)) ? : $payrollParameters['daysUtilities'] = $row->days_utilities;
+					!(isset($row->days_cesta_ticket)) ? : $payrollParameters['daysCestaTicket'] = $row->days_cesta_ticket;
 				
-				!(isset($row->collective_holidays)) ? : $payrollParameters['collectiveHolidays'] = $row->collective_holidays;
-				
-				!(isset($row->collective_vacation_bonus_days)) ? : $payrollParameters['collectiveVacationBonusDays'] = $row->collective_vacation_bonus_days;
+					!(isset($row->days_utilities)) ? : $payrollParameters['daysUtilities'] = $row->days_utilities;
+					
+					!(isset($row->collective_holidays)) ? : $payrollParameters['collectiveHolidays'] = $row->collective_holidays;
+					
+					!(isset($row->collective_vacation_bonus_days)) ? : $payrollParameters['collectiveVacationBonusDays'] = $row->collective_vacation_bonus_days;
+				}
 			}
 		}
 		

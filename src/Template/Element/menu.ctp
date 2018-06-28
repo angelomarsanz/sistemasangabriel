@@ -66,6 +66,7 @@
                                 <ul class="dropdown-menu" role="menu">    
                                     <li><?= $this->Html->link('Registro básico de nuevos alumnos', ['controller' => 'Students', 'action' => 'registerNewStudents']) ?></li>
                                     <li><?= $this->Html->link('Datos de alumnos', ['controller' => 'Students', 'action' => 'consultStudent']) ?></li>
+									<li><?= $this->Html->link('Alumnos con condición distinta a regular', ['controller' => 'Students', 'action' => 'consultStudentDelete']) ?></li>
                                     <li><?= $this->Html->link('Asignar sección', ['controller' => 'Studenttransactions', 'action' => 'assignSection']) ?></li>
                                     <li><?= $this->Html->link('Modificar las cuotas del alumno', ['controller' => 'Students', 'action' => 'modifyTransactions']) ?></li>
                                     <li><?= $this->Html->link('Relación de mensualidades', ['controller' => 'Students', 'action' => 'listMonthlyPayments']) ?></li>
@@ -106,7 +107,7 @@
                                 <ul class="dropdown-menu" role="menu">
                                     <li><?= $this->Html->link('Puestos de trabajo', ['controller' => 'Positions', 'action' => 'index']) ?></li>
                                     <li><?= $this->Html->link('Empleados', ['controller' => 'Employees', 'action' => 'index']) ?></li>
-                                    <li><?= $this->Html->link('Nómina', ['controller' => 'Paysheets', 'action' => 'edit']) ?></li>
+                                    <li><?= $this->Html->link('Nómina', ['controller' => 'Paysheets', 'action' => 'directPayroll']) ?></li>
 <!--
                                     <li><?= $this->Html->link('Crear nómina', ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight']) ?></li>
                                     <li><?= $this->Html->link('Ver datos nómina', ['controller' => 'Paysheets', 'action' => 'viewFortnight']) ?></li>
