@@ -105,19 +105,13 @@ class EmployeepaymentsController extends AppController
         if ($employeesPaysheet->position->type_of_salary == "Por horas")
         {
             $employeepayment->monthly_salary = $employeesPaysheet->position->minimum_wage * $employeesPaysheet->hours_month;
-            
-            $fortnight = $employeepayment->monthly_salary/2;
-            
-            $employeepayment->fortnight = round($fortnight, 2);
         }
         else
         {
             $employeepayment->monthly_salary = $employeesPaysheet->position->minimum_wage;
-            
-            $fortnight = $employeepayment->monthly_salary/2;
-
-            $employeepayment->fortnight = round($fortnight, 2);
         }
+		
+		$employeepayment->base_payment = ($employeepayment->monthly_salary/30) * $paysheet->salary_days; 
         
         $employeepayment->percentage_imposed = $employeesPaysheet->percentage_imposed;
         
@@ -126,12 +120,16 @@ class EmployeepaymentsController extends AppController
         $years = $period->format('%Y');
         
         $employeepayment->years_service = $years;
+                
+        $employeepayment->scale = floor($years / 5) * 0.05;
         
+        $employeepayment->amount_escalation = $employeepayment->scale * $employeepayment->monthly_salary;
+
         if ((15 + ($years - 1)) > 30)
         {
             $employeepayment->bv = 30;
         }
-        else if ((15 + ($years - 1)) <= 15)
+        elseif ((15 + ($years - 1)) <= 15)
         {
             $employeepayment->bv = 15;
         }
@@ -139,11 +137,7 @@ class EmployeepaymentsController extends AppController
         {
             $employeepayment->bv = 15 + ($years - 1);
         }
-        
-        $employeepayment->scale = floor($years / 5) * 0.05;
-        
-        $employeepayment->amount_escalation = $employeepayment->scale * $employeepayment->monthly_salary;
-
+		
         $employeepayment->integral_salary = (($employeepayment->bv + 60)/360) * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30) + (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30); 
 
         $employeepayment->trust_days = 5;
@@ -160,24 +154,25 @@ class EmployeepaymentsController extends AppController
                 
         $employeepayment->discount_absences = $employeepayment->days_absence * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30);
                 
-        $employeepayment->faov = ($employeepayment->fortnight + ($employeepayment->amount_escalation/2) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
+        $employeepayment->faov = ($employeepayment->base_payment + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
 
-		if ($paysheet->fortnight == '1ra. Quincena')
-		{
-			$employeepayment->ivss = 0;           
-        
+		$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;           
+
+		$employeepayment->fideicomiso = $employeepayment->integral_salary * $employeepayment->trust_days;
+		
+		if ($paysheet->date_until->day < 28)
+		{        
 			$employeepayment->amount_imposed = 0;
 		}
 		else
 		{
-			$employeepayment->ivss = (((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 2;           
         
 			$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation) * $employeepayment->percentage_imposed)/100;
 		}
 		
-        $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+        $employeepayment->total_payment = $employeepayment->base_payment + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 
-		$employeepayment->days_cesta_ticket = 30 - $employeepayment->days_absence;
+		$employeepayment->days_cesta_ticket = $paysheet->days_cesta_ticket - $employeepayment->days_absence;
 		
 		$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
 		
@@ -196,7 +191,7 @@ class EmployeepaymentsController extends AppController
         return $result;
     }
 
-    public function completeData($idPaysheet = null, $weeksSocialSecurity = null, $year = null, $monthNumber = null, $month = null, $fortnight = null, $classification = null)
+    public function completeData($idPaysheet = null)
     {
         $employee = new EmployeesController();
 		
@@ -356,7 +351,7 @@ class EmployeepaymentsController extends AppController
 						$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;					
 					}
 				
-					$employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+					$employeepayment->total_payment = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 				}
 				else
 				{
@@ -397,31 +392,20 @@ class EmployeepaymentsController extends AppController
 
         $employeepayments = TableRegistry::get('Employeepayments');
         
-        $arrayResult = $employeepayments->find('fortnight', ['idPaysheet' => $idPaysheet, 'classification' => $classification]);
+        $arrayResult = $employeepayments->find('fortnight', ['idPaysheet' => $idPaysheet]);
         
         if ($arrayResult['indicator'] == 0)
         {
             $employeesFor = $arrayResult['searchRequired'];
 			
-			$paysheet = $this->Employeepayments->Paysheets->get($idPaysheet);
-                				
+			$paysheet = $this->Employeepayments->Paysheets->get($idPaysheet, ['contain' => ['Positioncategories']]);
+			                				
 			$tableConfiguration = json_decode($paysheet->table_configuration);
            
             $currentView = 'employeepaymentsCompleteData';
-            
-            if ($fortnight == '1ra. Quincena')
-            {
-                $fortnightNumber = 1;
-            }
-            else
-            {
-                $fortnightNumber = 2;
-            }
-    
-            $classificationNumber = $this->classificationNumber($classification);
-			           
-            $this->set(compact('employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity', 'positionCategories', 'school'));
-            $this->set('_serialize', ['employeesFor', 'year', 'monthNumber', 'month', 'fortnightNumber', 'fortnight', 'classificationNumber', 'classification', 'currentView', 'idPaysheet', 'tableConfiguration', 'weeksSocialSecurity', 'positionCategories', 'school']);
+                		           
+            $this->set(compact('employeesFor', 'currentView', 'paysheet', 'tableConfiguration', 'weeksSocialSecurity', 'positionCategories', 'school'));
+            $this->set('_serialize', ['employeesFor', 'currentView', 'paysheet', 'tableConfiguration', 'weeksSocialSecurity', 'positionCategories', 'school']);
         }
     }
     
@@ -556,7 +540,7 @@ class EmployeepaymentsController extends AppController
         
         $employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;
 
-        $employeepayment->total_fortnight = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->salary_advance + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+        $employeepayment->total_payment = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->salary_advance + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 
         if ($this->Employeepayments->save($employeepayment)) 
         {

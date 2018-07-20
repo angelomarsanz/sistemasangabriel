@@ -7,6 +7,8 @@ use App\Controller\ParentsandguardiansController;
 
 use App\Controller\StudenttransactionsController;
 
+use App\Controller\BinnaclesController;
+
 use Cake\I18n\Time;
 
 use Cake\ORM\TableRegistry;
@@ -37,8 +39,70 @@ class StudentsController extends AppController
     
     public function testFunction()
     {
+		$binnacles = new BinnaclesController;
+		
+		$accountSelect = 0;
+		
+        $students = $this->Students->find('all')
+            ->where([['id >' => 1], ['student_condition' => 'Regular'], ['section_id >' => 1], ['new_student !=' => 1]]);
 
+		foreach ($students as $student)
+		{
+			$arrayExtra = [$student->id, $student->section_id];
+			
+			$binnacles->add('controller', 'Students', 'testFunction', $student->full_name, $arrayExtra);
+			
+			$accountSelect++;
+		}
+
+		$binnacles->add('controller', 'Students', 'testFunction', 'Total registros seleccionados: ' . $accountSelect);
     }
+	
+    public function testFunction2()
+    {
+		$binnacles = new BinnaclesController;
+		
+		$this->loadModel('Binnacles');
+		
+		$accountUpdate = 0;
+		
+        $binnacles = $this->Binnacles->find('all')
+            ->where([['method_name' => 'testFunction'], ['extra_column1 is NOT NULL']]);
+
+		foreach ($binnacles as $binnacle)
+		{
+			$student = $this->Students->get($binnacle->extra_column1);
+			
+			if ($student->section_id != $binnacle->extra_column2)
+			{
+				$binnacleR = $this->Binnacles->get($binnacle->id);
+				
+				$binnacleR->extra_column3 = "Sección diferente";
+				
+				$binnacleR->extra_column4 = $student->section_id;
+				
+				if ($this->Binnacles->save($binnacleR))
+				{
+					$student->section_id = $binnacle->extra_column2;
+					
+					if (!($this->Students->save($student)))
+					{
+						$this->Flash->error(__("No se pudo actualizar el alumno: " . $student->full_name));
+					}
+					else
+					{
+						$accountUpdate++;
+					}
+				}
+				else	
+				{
+					$this->Flash->error(__("No se pudo actualizar el binnacle->id: " . $binnacleR->id));
+				}
+			}	
+		}
+		$this->Flash->success(__("Total alumnos actualizados: " . $accountUpdate));
+    }
+	
     /**
      * Index method
      *
@@ -1005,7 +1069,7 @@ class StudentsController extends AppController
         $level = $this->sublevelLevel($nameSection->sublevel);
 
         $students = $this->Students->find('all')
-            ->where([['id >' => 1], ['section_id' => $section], ['level_of_study' => $level], ['Students.student_condition' => 'Regular']])
+            ->where([['id >' => 1], ['section_id' => $section], ['new_student !=' => 1], ['Students.student_condition' => 'Regular']])
             ->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
 
         $monthlyPayments = [];

@@ -18,40 +18,21 @@ class EmployeesController extends AppController
     {
         $employees = TableRegistry::get('Employees');
 		
-		$account = 0;
+		$accountRecords = 0;
+		$accountUpdate = 0;
         
         $employeesList = $employees->find();
+		
+		$accountRecords = $employeesList->count();
 
-        if ($employeesList)
+        if ($accountRecords > 0)
         {            
             foreach ($employeesList as $employeesLists)
             {
 				$employee = $this->Employees->get($employeesLists->id);
 				
-                if ($employeesLists->classification == "Bachillerato y deporte")
-				{
-					$employee->positioncategory_id = 2;
-				}
-				elseif ($employeesLists->classification == "Primaria")
-				{
-					$employee->positioncategory_id = 3;
-				}
-				elseif ($employeesLists->classification == "Pre-escolar")
-				{
-					$employee->positioncategory_id = 4;
-				}				
-				elseif ($employeesLists->classification == "Administrativo y obrero")
-				{
-					$employee->positioncategory_id = 5;
-				}
-				elseif ($employeesLists->classification == "Directivo")
-				{
-					$employee->positioncategory_id = 6;
-				}
-				else
-				{
-					$this->Flash->error(__('Clasificación no reconocida: ' . $employeesLists->classification));
-				}
+				$employee->registration_status = "Activo";
+				$employee->retirement_date = null;
                 
                 if (!($this->Employees->save($employee)))
                 {
@@ -59,10 +40,10 @@ class EmployeesController extends AppController
                 }
                 else
                 {
-                    $account++;
+                    $accountUpdate++;
                 }
             }
-            $this->Flash->success(__('Total registros actualizados: ' . $account));
+            $this->Flash->success(__('Total registros actualizados: ' . $accountUpdate));
         }
     }
 
@@ -372,10 +353,14 @@ class EmployeesController extends AppController
         $this->set('_serialize', ['employee', 'idPaysheet', 'classification']);
     }
 
-
-    public function searchEmployees()
+    public function searchEmployees($positionCategory = null)
     {
         $this->autoRender = false;
+		
+		$arrayResult = [];
+		$arrayResult['indicator'] = 0;
+		$arrayResult['message'] = "";
+		$arrayResult['employees'] = "";
 
         $employees = TableRegistry::get('Employees');
         
@@ -390,8 +375,20 @@ class EmployeesController extends AppController
             'Positions.type_of_salary', 
             'Positions.minimum_wage'])
             ->contain(['Positions'])
-            ->where(['Employees.reason_withdrawal' => 'Activo']);
-        
-        return $employeesPaysheets;
+            ->where([['Employees.registration_status' => 'Activo'], ['Employees.positioncategory_id' => $positionCategory]]);
+			
+		$accountSelected = $employeesPaysheets->count();
+				
+		if ($accountSelected > 0)
+		{
+			$arrayResult['message'] = "Búsqueda exitosa";
+			$arrayResult['employees'] = $employeesPaysheets;
+		}
+		else
+		{
+			$arrayResult['indicator'] = 1;
+			$arrayResult['message'] = "No se encontraron registros";			
+		}
+        return $arrayResult;
     }
 }

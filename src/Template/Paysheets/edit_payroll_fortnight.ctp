@@ -49,7 +49,7 @@
 	<h3>Modificar parámetros de la nómina</h3>
 </div>
 <div class="row">
-	<?= $this->Form->create($paysheet) ?>
+	<?= $this->Form->create($paysheet, ['novalidate']) ?>
         <fieldset>
 			<div class="row">
 				<div class="col-md-6">

@@ -42,4 +42,7 @@ Eliminar memoria de selección en reportes maestros (Listo)
 
 En Stutudenttransactions/assignSection quitar la constante Matrícula 2017
 En Students/createQuotaRegular quitar la constante Matrícula 2018
-En Studenttransactions/assignSection quitar la constante Matrícula 2017
+En Student/listMonthltyPayment.ctp Matrícula 2017
+
+-- 
+Balance - nro. de hermanos

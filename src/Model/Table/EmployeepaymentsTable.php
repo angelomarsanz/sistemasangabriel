@@ -193,7 +193,7 @@ class EmployeepaymentsTable extends Table
             ->allowEmpty('total_fortnight');
 			
         $validator
-            ->integer('days_cesta_ticket')
+            ->numeric('days_cesta_ticket')
             ->allowEmpty('days_cesta_ticket');
 			
         $validator
@@ -209,6 +209,36 @@ class EmployeepaymentsTable extends Table
             ->allowEmpty('total_cesta_ticket');
 			
         $validator
+            ->allowEmpty('extra_column1');
+			
+        $validator
+            ->allowEmpty('extra_column2');
+			
+        $validator
+            ->allowEmpty('extra_column3');
+			
+        $validator
+            ->allowEmpty('extra_column4');
+			
+        $validator
+            ->allowEmpty('extra_column5');
+			
+        $validator
+            ->allowEmpty('extra_column6');
+			
+        $validator
+            ->allowEmpty('extra_column7');
+			
+        $validator
+            ->allowEmpty('extra_column8');
+			
+        $validator
+            ->allowEmpty('extra_column9');
+			
+        $validator
+            ->allowEmpty('extra_column10');
+			
+        $validator
             ->allowEmpty('registration_status');
 			
         $validator
@@ -217,9 +247,6 @@ class EmployeepaymentsTable extends Table
         $validator
 			->dateTime('date_status')
             ->allowEmpty('date_status');
-
-        $validator
-            ->allowEmpty('record_deleted');
 
         $validator
             ->allowEmpty('responsible_user');            
@@ -249,7 +276,7 @@ class EmployeepaymentsTable extends Table
             'Employeepayments.current_basic_salary',
             'Employeepayments.current_monthly_hours',
             'Employeepayments.monthly_salary',
-            'Employeepayments.fortnight',
+            'Employeepayments.base_payment',
             'Employeepayments.scale',
             'Employeepayments.amount_escalation',
             'Employeepayments.other_income',
@@ -264,7 +291,7 @@ class EmployeepaymentsTable extends Table
             'Employeepayments.salary_advance',
             'Employeepayments.percentage_imposed',
             'Employeepayments.amount_imposed',
-            'Employeepayments.total_fortnight',
+            'Employeepayments.total_payment',
 			'Employeepayments.days_cesta_ticket',
 			'Employeepayments.amount_cesta_ticket',
 			'Employeepayments.loan_cesta_ticket',
@@ -277,8 +304,8 @@ class EmployeepaymentsTable extends Table
 			'Employees.date_of_admission',
             'Positions.type_of_salary'])
         ->contain(['Employees' => ['Positions']])
-        ->where([['paysheet_id' => $options['idPaysheet']], ['Employees.classification' => $options['classification']], 
-            ['OR' => [['Employeepayments.deleted_record IS NULL'], ['Employeepayments.deleted_record' => 0]]]])
+        ->where([['paysheet_id' => $options['idPaysheet']], 
+            ['OR' => [['Employeepayments.registration_status IS NULL'], ['Employeepayments.registration_status !=' => "Eliminado"]]]])
         ->order(['Employees.surname' => 'ASC', 'Employees.first_name' => 'ASC']);
         
         $arrayResult = [];

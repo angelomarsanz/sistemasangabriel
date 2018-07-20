@@ -7,6 +7,8 @@ use App\Controller\EmployeesController;
 
 use App\Controller\EmployeepaymentsController;
 
+use App\Controller\BinnaclesController;
+
 use Cake\I18n\Time;
 
 /**
@@ -225,7 +227,7 @@ class PaysheetsController extends AppController
                 
         if ($row)
         {
-            return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $row->id, $row->payroll_name, $row->dateFrom, $row->dateUntil, $row->weeks_social_security]);
+            return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $row->id]);
         }
         else
         {
@@ -274,6 +276,8 @@ class PaysheetsController extends AppController
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
 		date_default_timezone_set('America/Caracas');
 				
+		$binnacles = new BinnaclesController;
+				
 		$this->loadModel('Positioncategories');
 
 		$payrollParameters = [];
@@ -283,6 +287,7 @@ class PaysheetsController extends AppController
 		$payrollParameters['daysUtilities'] = 0;
 		$payrollParameters['collectiveHolidays'] = 0;
 		$payrollParameters['collectiveVacationBonusDays'] = 0;
+		
 		$arrayCategories = [];
 		
         $employees = new EmployeesController();
@@ -290,17 +295,13 @@ class PaysheetsController extends AppController
         $employeepayments = new EmployeepaymentsController();
 		
 		$positionCategories = $this->Positioncategories->find('list', ['limit' => 200, "order" => ["description_category" => "ASC"]]);
-			        		
+					        		
         $paysheet = $this->Paysheets->newEntity();
 		
         if ($this->request->is('post')) 
         {
 			$paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
-			
-			$arrayResult = $this->moveColumns($paysheet, $payrollParameters);
-			
-			$paysheet = $arrayResult['paysheet'];
-						
+									
 			if ($paysheet->date_until->month < 10 )
 			{
 				$month = "0" . $paysheet->date_until->month;
@@ -334,19 +335,57 @@ class PaysheetsController extends AppController
 				$paysheet->weeks_social_security = 4;
 			} 
 						                			
-			$paysheet->responsible_user = $this->Auth->user('username'); 
-			
 			$tableConfigurationJson = $this->initialConfiguration();
 		
 			$paysheet->table_configuration = $tableConfigurationJson;
-													
-			if (!($this->Paysheets->save($paysheet)))
+			
+			$paysheet->registration_status = "Abierta"; 
+			
+			$paysheet->responsible_user = $this->Auth->user('username'); 
+			
+			if ($this->Paysheets->save($paysheet))
 			{
-				$this->Flash->error(__('Los datos de la nómina no pudieron ser grabados, intente nuevamente'));                
+				$arrayResult = $employees->searchEmployees($paysheet->positioncategory_id);
+				
+				if ($arrayResult["indicator"] == 0)
+				{
+					$lastRecord = $this->Paysheets->find('all', ['conditions' => ['responsible_user' => $this->Auth->user('username')],
+                    'order' => ['Paysheets.created' => 'DESC'] ]);
+    
+                    $row = $lastRecord->first();
+					
+					$result = $employeepayments->add($row, $arrayResult["employees"]);
+					
+					if ($result == 0)
+					{
+						$this->Flash->success(__('Por favor complete los datos de La nómina'));
+						return $this->redirect(['controller' => 'Paysheets', 'action' => 'directPayroll']);
+					}
+					else
+					{
+						$this->Flash->error(__('La nómina no se registró correctamente'));
+					}
+				}
+				else
+				{
+					$this->Flash->error(__('No se encontraron empleados activos en esa categoría'));
+				}
 			}
 			else 
-			{
-				$this->Flash->success(__('Por favor complete los datos de La nómina'));
+			{				
+				if($paysheet->errors())
+				{
+					$error_msg = $this->arrayErrors($paysheet->errors());
+				}
+				else
+				{
+					$error_msg = ['Error desconocido'];
+				}
+				foreach($error_msg as $noveltys)
+				{
+					$result = $binnacles->add('controller', 'Paysheet', 'createPayrollFortnight', $noveltys);
+				}
+				$this->Flash->error(__('No se pudo crear la nómina debido a: ' . implode(" - ", $error_msg)));				
 			}
 		}
 		else
@@ -382,154 +421,7 @@ class PaysheetsController extends AppController
         $this->set(compact('paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories'));
         $this->set('_serialize', ['paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories']); 
 	}
-				
-            /* $paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
-						
-			
-            
-            $lastRecord = $this->Paysheets->find('all', ['conditions' => 
-                [['year_paysheet' => $paysheet->year_paysheet],
-                ['month_paysheet' => $paysheet->month_paysheet],
-                ['fortnight' => $paysheet->fortnight],
-                ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]]],
-                'order' => ['Paysheets.created' => 'DESC']]);
-    
-            $row = $lastRecord->first(); 
-                
-            if ($row)
-            {
-                $this->Flash->error(__('Esta nómina ya existe'));
-            }
-            else
-            {
-                setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-                date_default_timezone_set('America/Caracas');
-    
-                if ($paysheet->fortnight == "1ra. Quincena")
-                {
-                    $paysheet->date_from = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-1';
-                    $paysheet->date_until = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-15';
-                }
-                else
-                {
-                    $paysheet->date_from = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-16';
-
-					if ($paysheet->year_paysheet == "2020" || 
-						$paysheet->year_paysheet == "2024" ||
-						$paysheet->year_paysheet == "2028" ||
-						$paysheet->year_paysheet == "2032" )
-					{
-						$lastDay = $this->lastDayMonthLeap($paysheet->month_paysheet);
-					}
-					else
-					{
-						$lastDay = $this->lastDayMonth($paysheet->month_paysheet);
-					}					
-                    $paysheet->date_until = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-' . $lastDay;
-                }
-                
-                $firstDay = $paysheet->year_paysheet . '-' . $paysheet->month_paysheet . '-01';
-    
-                $firstDayMonth = strtotime($firstDay);  
-    
-                switch (date('w', $firstDayMonth))
-                { 
-                    case 0: $nameDay = "Domingo"; break; 
-                    case 1: $nameDay = "Lunes"; break;
-                    case 2: $nameDay = "Martes"; break;
-                    case 3: $nameDay = "Miércoles"; break; 
-                    case 4: $nameDay = "Jueves"; break; 
-                    case 5: $nameDay = "Viernes"; break;
-                    case 6: $nameDay = "Sábado"; break;
-                }  
-    
-                if ($nameDay == "Lunes")
-                {
-                    $paysheet->weeks_social_security = 5;
-                }
-                else
-                {
-                    $paysheet->weeks_social_security = 4;
-                }
-				                
-                $paysheet->responsible_user = $this->Auth->user('username'); 
-				
-				$tableConfigurationJson = $this->initialConfiguration();
-            
-				$paysheet->table_configuration = $tableConfigurationJson;
-												
-				$tableCategoriesJson = json_encode($_POST['arrayCategories'], JSON_FORCE_OBJECT);
-						
-				$paysheet->table_categories = $tableCategoriesJson;
-                
-                if (!($this->Paysheets->save($paysheet)))
-                {
-                    $this->Flash->error(__('Los datos de la quincena no pudieron ser grabados, intente nuevamente'));                
-                }
-                else 
-                {
-                    $lastRecord = $this->Paysheets->find('all', ['conditions' => ['responsible_user' => $this->Auth->user('username')],
-                    'order' => ['Paysheets.created' => 'DESC'] ]);
-    
-                    $row = $lastRecord->first();  
-
-					if ($row)
-					{
-                    
-						$employeesPaysheets = $employees->searchEmployees();
-						
-						if ($employeesPaysheets)
-						{
-							$result = $employeepayments->add($row, $employeesPaysheets);
-							
-							if ($result == 0)
-							{
-								$this->Flash->success(__('Por favor complete los datos de La nómina'));
-								return $this->redirect(['action' => 'edit']);
-							}
-							else
-							{
-								$this->Flash->error(__('La nómina no se registró correctamente'));
-							}
-						}
-						else
-						{
-							$this->Flash->error(__('No se encontraron registros de empleados'));
-						}
-					}
-                }
-            } 
-        }
-		else
-		{			
-            $lastRecord = $this->Paysheets->find('all', 
-                ['conditions' => 
-                ['OR' => [['deleted_record IS NULL'], ['deleted_record' => 0]]], 'order' => ['Paysheets.created' => 'DESC']]);
-			
-			$row = $lastRecord->first();   
-                
-			if ($row)
-			{				
-				!(isset($row->salary_days)) ? : $payrollParameters['salaryDays'] = $row->salary_days;
-				
-				!(isset($row->cesta_ticket_month)) ? : $payrollParameters['cestaTicketMonth'] = $row->cesta_ticket_month;
-
-				!(isset($row->days_cesta_ticket)) ? : $payrollParameters['daysCestaTicket'] = $row->days_cesta_ticket;
-			
-				!(isset($row->days_utilities)) ? : $payrollParameters['daysUtilities'] = $row->days_utilities;
-				
-				!(isset($row->collective_holidays)) ? : $payrollParameters['collectiveHolidays'] = $row->collective_holidays;
-				
-				!(isset($row->collective_vacation_bonus_days)) ? : $payrollParameters['collectiveVacationBonusDays'] = $row->collective_vacation_bonus_days;
-			}
-		}
-		
-		$controller = "Paysheets";
-		$action = "edit";
-		
-        $this->set(compact('paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories', 'arrayCategories'));
-        $this->set('_serialize', ['paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories', 'arrayCategories']); */
-    
+				    
     public function editPayrollFortnight($id = null, $controller = null, $action = null)
     {
 		$this->loadModel('Positioncategories');
@@ -555,11 +447,7 @@ class PaysheetsController extends AppController
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
 			$paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
-			
-			$arrayResult = $this->moveColumns($paysheet, $payrollParameters);
-			
-			$paysheet = $arrayResult['paysheet'];
-									
+						
 			$paysheet->responsible_user = $this->Auth->user('username'); 
 			
 			$tableConfigurationJson = $this->initialConfiguration();
@@ -650,7 +538,7 @@ class PaysheetsController extends AppController
         
         $tableConfiguration['discount_absences'] = '1';
 
-        $tableConfiguration['total_fortnight'] = '1';
+        $tableConfiguration['total_payment'] = '1';
 		
 		$tableConfiguration['days_cesta_ticket'] = '1';
 		
@@ -707,7 +595,7 @@ class PaysheetsController extends AppController
 			
 			$tableConfiguration['discount_absences'] = $valor['view_discount_absences'];
 
-			$tableConfiguration['total_fortnight'] = $valor['view_total_fortnight'];
+			$tableConfiguration['total_payment'] = $valor['view_total_payment'];
 		}
 		else
 		{
@@ -746,88 +634,6 @@ class PaysheetsController extends AppController
         } 
         return $arrayResult;       
     }
-	public function moveColumns($paysheet = null, $payrollParameters = null)
-	{		
-		$arrayResult = [];
-		
-		if (substr($_POST['salary_days'], -3, 1) == ',')
-		{
-			$replace1= str_replace('.', '', $_POST['salary_days']);
-			$replace2 = str_replace(',', '.', $replace1);
-			$paysheet->salary_days = $replace2;
-			$payrollParameters['salaryDays'] = $replace2;
-		}
-		else
-		{
-			$payrollParameters['salaryDays'] = $_POST['salary_days'];
-		}
-	
-		if (substr($_POST['cesta_ticket_month'], -3, 1) == ',')
-		{
-			$replace1= str_replace('.', '', $_POST['cesta_ticket_month']);
-			$replace2 = str_replace(',', '.', $replace1);
-			$paysheet->cesta_ticket_month = $replace2;
-			$payrollParameters['cestaTicketMonth'] = $replace2;
-		}
-		else
-		{
-			$payrollParameters['cestaTicketMonth'] = $_POST['cesta_ticket_month'];
-		}	
-		
-		if (substr($_POST['days_cesta_ticket'], -3, 1) == ',')
-		{
-			$replace1= str_replace('.', '', $_POST['days_cesta_ticket']);
-			$replace2 = str_replace(',', '.', $replace1);
-			$paysheet->days_cesta_ticket = $replace2;
-			$payrollParameters['daysCestaTicket'] = $replace2;
-		}
-		else
-		{
-			$payrollParameters['daysCestaTicket'] = $_POST['days_cesta_ticket'];
-		}	
-		
-		if (substr($_POST['days_utilities'], -3, 1) == ',')
-		{
-			$replace1= str_replace('.', '', $_POST['days_utilities']);
-			$replace2 = str_replace(',', '.', $replace1);
-			$paysheet->days_utilities = $replace2;
-			$payrollParameters['daysUtilities'] = $replace2;
-		}
-		else
-		{
-			$payrollParameters['daysUtilities'] = $_POST['days_utilities'];
-		}
-		
-		if (substr($_POST['collective_holidays'], -3, 1) == ',')
-		{
-			$replace1= str_replace('.', '', $_POST['collective_holidays']);
-			$replace2 = str_replace(',', '.', $replace1);
-			$paysheet->collective_holidays = $replace2;
-			$payrollParameters['collectiveHolidays'] = $replace2;
-		}
-		else
-		{
-			$payrollParameters['collectiveHolidays'] = $_POST['collective_holidays'];
-		}
-		
-		if (substr($_POST['collective_vacation_bonus_days'], -3, 1) == ',')
-		{
-			$replace1= str_replace('.', '', $_POST['collective_vacation_bonus_days']);
-			$replace2 = str_replace(',', '.', $replace1);
-			$paysheet->collective_vacation_bonus_days = $replace2;
-			$payrollParameters['collectiveVacationBonusDays'] = $replace2;
-		}
-		else
-		{
-			$payrollParameters['collectiveVacationBonusDays'] = $_POST['collective_vacation_bonus_days'];
-		}		
-
-		$arrayResult['indicator'] = 0;
-		$arrayResult['paysheet'] = $paysheet;
-		$arrayResult['payrollParameters'] = $payrollParameters;
-		
-		return $arrayResult;
-	}
 	public function searchPayroll()
 	{
 		$this->loadModel('Schools');
@@ -840,5 +646,27 @@ class PaysheetsController extends AppController
 
         $this->set(compact('school', 'positionCategories'));
         $this->set('_serialize', ['school', 'positionCategories']);
+	}
+	public function arrayErrors($arrayCake = null)
+	{
+		$error_msg = [];
+		
+		foreach($arrayCake as $errors)
+		{
+			if(is_array($errors))
+			{
+				foreach($errors as $error)
+				{
+					
+					$error_msg[] = $error;
+				}
+			}
+			else
+			{
+				$error_msg[] = $errors;
+			}
+		}
+		
+		return $error_msg;
 	}
 }

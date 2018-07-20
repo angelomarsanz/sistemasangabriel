@@ -103,13 +103,10 @@ class EmployeesTable extends Table
         $validator
             ->integer('id')
             ->allowEmpty('id', 'create');
-
-        $validator
-            ->allowEmpty('code_for_user');
             
         $validator
-            ->requirePresence('surname', 'create')
-            ->notEmpty('surname');
+            ->requirePresence('first_name', 'create')
+            ->notEmpty('first_name');
 
         $validator
             ->allowEmpty('second_name');
@@ -181,10 +178,27 @@ class EmployeesTable extends Table
 
         $validator
             ->allowEmpty('reason_withdrawal');
-
+			
         $validator
-            ->allowEmpty('classification');
-
+            ->numeric('salary_type2')
+            ->allowEmpty('salary_type2');
+			
+        $validator
+            ->numeric('salary_type3')
+            ->allowEmpty('salary_type3');
+			
+        $validator
+            ->numeric('salary_type4')
+            ->allowEmpty('salary_type4');
+			
+        $validator
+            ->numeric('salary_type5')
+            ->allowEmpty('salary_type5');
+		
+        $validator
+            ->numeric('salary_type6')
+            ->allowEmpty('salary_type6');
+	
         $validator
             ->allowEmpty('working_agreement');
 
@@ -213,8 +227,15 @@ class EmployeesTable extends Table
             ->allowEmpty('percentage_imposed');
 
         $validator
-            ->allowEmpty('record_deleted');
+            ->allowEmpty('registration_status');
 
+        $validator
+            ->allowEmpty('reason_status');
+			
+        $validator
+            ->date('date_status')
+            ->allowEmpty('date_status');
+			
         $validator
             ->allowEmpty('responsible_user');
 

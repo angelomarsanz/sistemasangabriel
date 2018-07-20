@@ -1,3 +1,11 @@
+<?php 
+	use Cake\I18n\Time;
+	
+	setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+	date_default_timezone_set('America/Caracas');
+	
+	$currentDate = time::now();
+?>
 <style>
 @media screen
 {
@@ -23,6 +31,33 @@
     {
       display:none
     }
+	.table-container
+	{
+		height: 500px;
+		overflow: auto;
+	}
+
+	.table-container th
+	{
+		position: relative;
+		z-index: 5;
+		background: white;
+	}
+
+	.table-container td
+	{
+		position: relative;
+	}
+	
+	.table-container tbody tr:nth-child(odd) td
+	{
+		background: #f9f9f9;
+	}
+
+	.table-container tbody tr:nth-child(even) td
+	{
+		background: white;
+	}
 }
 @media print 
 {
@@ -37,21 +72,81 @@
     }
 }
 </style>
+
 <div class='container'>
+	<div class="page-header">
+		<input type='hidden' id='idPaysheet' value=<?= $paysheet->id ?> />
+		<input type='hidden' id='ambiente' value=<?= $school->ambient ?>
+
+		<?= $this->Form->create() ?>
+			<div class="row">
+				<h5><b>Buscar nómina:</b></h5>
+				<div class="col-md-11">								
+					<fieldset>
+						<div class="row">
+							<div class="col-md-4">
+								<?php echo $this->Form->input('position_categories', ['label' => 'Categoría:', 'options' => $positionCategories]); ?>
+							</div>
+							<div class="col-md-4">
+								<?php echo $this->Form->input('date_from', ['label' => 'Desde: ', 
+									'type' => 'date',
+									'value' => $currentDate,
+									'monthNames' =>
+									['01' => 'Enero',
+									'02' => 'Febrero',
+									'03' => 'Marzo',
+									'04' => 'Abril',
+									'05' => 'Mayo',
+									'06' => 'Junio',
+									'07' => 'Julio',
+									'08' => 'Agosto',
+									'09' => 'Septiembre',
+									'10' => 'Octubre',
+									'11' => 'Noviembre',
+									'12' => 'Diciembre'],
+									'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">{{day}}</li><li class="month">{{month}}</li><li class="year">{{year}}</li></ul>']]);
+								?>
+							</div>
+							<div class="col-md-4">
+								<?php echo $this->Form->input('date_until', ['label' => 'Hasta: ', 
+									'type' => 'date',
+									'value' => $currentDate,
+									'monthNames' =>
+									['01' => 'Enero',
+									'02' => 'Febrero',
+									'03' => 'Marzo',
+									'04' => 'Abril',
+									'05' => 'Mayo',
+									'06' => 'Junio',
+									'07' => 'Julio',
+									'08' => 'Agosto',
+									'09' => 'Septiembre',
+									'10' => 'Octubre',
+									'11' => 'Noviembre',
+									'12' => 'Diciembre'],
+									'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">{{day}}</li><li class="month">{{month}}</li><li class="year">{{year}}</li></ul>']]);
+								?>
+							</div>
+						</div>
+					</fieldset>	
+				</div>
+				<div class="col-md-1">	
+					<br />
+					<button type="submit" id="search-fortnight" class="glyphicon glyphicon-search btn btn-default"></button>
+				</div>
+			</div>
+		<?= $this->Form->end() ?>
+		<h4>Nómina del personal <?= $paysheet->positioncategory->description_category . ' correspondiente a ' . $paysheet->payroll_name . ' período del ' . $paysheet->date_from->format('d-m-Y') . ' al ' . $paysheet->date_until->format('d-m-Y') ?></h4>
+	</div>
+       	
+    <div>				
     <div class="row">
         <div class="col-md-12">
 
-        	<div class="page-header">
-            </div>
 
-        	<div>
-        	    <input type='hidden' id='classificationFor' value=<?= $classificationNumber ?> />
-        	    <input type='hidden' id='fortnightFor' value=<?= $fortnightNumber ?> />
-        	    <input type='hidden' id='monthFor' value=<?= $monthNumber ?> />
-        	    <input type='hidden' id='yearFor' value=<?= $year ?> />
-                <?= $this->Form->create() ?>
+			<?= $this->Form->create() ?>
                     <fieldset>
-                    	<div class="table-responsive">
+                    	<div class="table-responsive table-container">
                     		<table class="table table-striped table-hover">
                                 <thead>
                                     <tr>
@@ -60,7 +155,7 @@
                                         <th scope="col"></th>
                                         <th scope="col"></th>
                                         <th scope="col">Nro.</th>
-                                        <th scope="col">Nombre&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                                        <th scope="col" class="fixed">Nombre&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 
                                         <th scope="col" class='sw-cesta-ticket'></th>                                        
 										
@@ -210,7 +305,7 @@
 												<th scope="col" class='datos-inasistencias'><a href="#" id='datos-inasistencias' title='Ocultar inasistencias'>Inasistencias</a></th>
 											<?php endif; ?>
 
-											<?php if ($tableConfiguration->total_fortnight == 0): ?>
+											<?php if ($tableConfiguration->total_payment == 0): ?>
 												<th scope="col" class='total-quincena'><a href="#" id='total-quincena' title='Total quincena'>+</a></th>
 												<th scope="col" class='datos-total-quincena' style='display: none;'><a href="#" id='datos-total-quincena' title='Ocultar total quincena'>Tot.&nbsp;Quinc.</a></th>
 											<?php else: ?>
@@ -264,9 +359,9 @@
                                         <tr id=<?= 'emp' . $employeesFors->id ?> class='linea-empleado'>
                                             <td><input style="width: 100%;" type="hidden" name="employeepayment[<?= $accountArray ?>][id]" value=<?=$employeesFors->id ?>></td>
 
-                                            <td><?= $this->Html->link(__(''), ['controller' => 'Employees', 'action' => 'view', $employeesFors->employee->id, 'Paysheets', 'edit', $idPaysheet, $classification, $employeesFors->id, $weeksSocialSecurity], ['id' => 'ver-empleado', 'class' => 'glyphicon glyphicon-eye-open btn btn-default', 'title' => 'Ver empleado', 'style' => 'color: #9494b8; padding: 1px 3px;']) ?></td>                                            
-                                            <td><?= $this->Html->link(__(''), ['controller' => 'Employees', 'action' => 'edit', $employeesFors->employee->id, 'Paysheets', 'edit', $idPaysheet, $weeksSocialSecurity, $classification, $employeesFors->id], ['id' => 'modificar-empleado', 'class' => 'glyphicon glyphicon-edit btn btn-default', 'title' => 'Modificar empleado', 'style' => 'color: #9494b8; padding: 1px 3px;']) ?></td>
-                                            <td><?= $this->html->link(__(''), ['controller' => 'Employees', 'action' => 'changeState', $employeesFors->employee->id, $idPaysheet, $classification, $employeesFors->id], ['id' => 'eliminar-empleado', 'class' => 'glyphicon glyphicon-trash btn btn-sm btn-default', 'title' => 'Eliminar empleado', 'style' => 'color: #9494b8; padding: 1px 3px;']) ?></td>
+                                            <td><?= $this->Html->link(__(''), ['controller' => 'Employees', 'action' => 'view', $employeesFors->employee->id, 'Paysheets', 'edit', $paysheet->id, $employeesFors->id, $paysheet->weeks_social_security], ['id' => 'ver-empleado', 'class' => 'glyphicon glyphicon-eye-open btn btn-default', 'title' => 'Ver empleado', 'style' => 'color: #9494b8; padding: 1px 3px;']) ?></td>                                            
+                                            <td><?= $this->Html->link(__(''), ['controller' => 'Employees', 'action' => 'edit', $employeesFors->employee->id, 'Paysheets', 'edit', $paysheet->id, $paysheet->weeks_social_security, $employeesFors->id], ['id' => 'modificar-empleado', 'class' => 'glyphicon glyphicon-edit btn btn-default', 'title' => 'Modificar empleado', 'style' => 'color: #9494b8; padding: 1px 3px;']) ?></td>
+                                            <td><?= $this->html->link(__(''), ['controller' => 'Employees', 'action' => 'changeState', $employeesFors->employee->id, $paysheet->id, $employeesFors->id], ['id' => 'eliminar-empleado', 'class' => 'glyphicon glyphicon-trash btn btn-sm btn-default', 'title' => 'Eliminar empleado', 'style' => 'color: #9494b8; padding: 1px 3px;']) ?></td>
                                             
                                             <td><?= $accountEmployee ?></td>
                                             
@@ -427,12 +522,12 @@
 													<td class='datos-inasistencias'><input disabled='true' class='input-inasistencia' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Inasistencias' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][discount_absences]" value=<?= number_format($employeesFors->discount_absences, 2, ",", ".") ?>></td>
 												<?php endif; ?>
 
-												<?php if ($tableConfiguration->total_fortnight == 0): ?>
-													<td class='total-quincena'><input type='hidden' class='ver-total-quincena' name="employeepayment[<?= $accountArray ?>][view_total_fortnight]" value='0'></td>
-													<td class='datos-total-quincena' style='display: none;'><input disabled='true' class='input-total-quincena' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Total&nbsp;quincena' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_fortnight]" value=<?= number_format($employeesFors->total_fortnight, 2, ",", ".") ?>></td>
+												<?php if ($tableConfiguration->total_payment == 0): ?>
+													<td class='total-quincena'><input type='hidden' class='ver-total-quincena' name="employeepayment[<?= $accountArray ?>][view_total_payment]" value='0'></td>
+													<td class='datos-total-quincena' style='display: none;'><input disabled='true' class='input-total-quincena' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Total&nbsp;quincena' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_payment]" value=<?= number_format($employeesFors->total_payment, 2, ",", ".") ?>></td>
 												<?php else: ?>
-													<td class='total-quincena' style='display: none;'><input type='hidden' class='ver-total-quincena' name="employeepayment[<?= $accountArray ?>][view_total_fortnight]" value='1'></td>
-													<td class='datos-total-quincena'><input disabled='true' class='input-total-quincena' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Total&nbsp;quincena' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_fortnight]" value=<?= number_format($employeesFors->total_fortnight, 2, ",", ".") ?>></td>
+													<td class='total-quincena' style='display: none;'><input type='hidden' class='ver-total-quincena' name="employeepayment[<?= $accountArray ?>][view_total_payment]" value='1'></td>
+													<td class='datos-total-quincena'><input disabled='true' class='input-total-quincena' title=<?= $apellidos[0] ?><?= (isset($apellidos[1])) ? '&nbsp;' . $apellidos[1] . '&nbsp;' : '&nbsp;' ; ?><?= $nombres[0] ?><?= (isset($nombres[1])) ? '&nbsp;' . $nombres[1] . ',&nbsp;' : ',&nbsp;' ; ?><?= 'Total&nbsp;quincena' ?> style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_payment]" value=<?= number_format($employeesFors->total_payment, 2, ",", ".") ?>></td>
 												<?php endif; ?>
 
 											<?php else: ?>
@@ -477,7 +572,7 @@
                                         endforeach; ?>
                                 </tbody>
                             </table>
-                            <?= $this->Html->link(__(''), ['controller' => 'Employees', 'action' => 'add', $idPaysheet, $weeksSocialSecurity, $classification], ['id' => 'agregar-empleado', 'class' => 'glyphicon glyphicon-user btn btn-default', 'title' => 'Agregar empleado', 'style' => 'color: #9494b8; padding: 3px 5px;']) ?>
+                            <?= $this->Html->link(__(''), ['controller' => 'Employees', 'action' => 'add', $paysheet->id, $paysheet->weeks_social_security], ['id' => 'agregar-empleado', 'class' => 'glyphicon glyphicon-user btn btn-default', 'title' => 'Agregar empleado', 'style' => 'color: #9494b8; padding: 3px 5px;']) ?>
                             <br />
                             <br />
                         </div>
@@ -492,7 +587,6 @@
 						<p>
 							<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
 							<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
-							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight'], ['id' => 'nuevo', 'class' => 'glyphicon glyphicon-plus-sign btn btn-danger', 'title' => 'Crear nueva nómina']) ?>
 
 							<?= $this->Html->link(__(''), ['controller' => 'Employeepayments', 'action' => 'overPayment', $idPaysheet, $year, $month, $fortnight, $classification, $monthNumber], ['id' => 'sobre-pago', 'class' => 'glyphicon glyphicon-envelope btn btn-danger', 'title' => 'Sobre de pago sueldo']) ?>							
 							
@@ -505,6 +599,8 @@
 								<?php endif; ?>
 							<?php endif; ?>
 							
+							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight'], ['id' => 'nuevo', 'class' => 'glyphicon glyphicon-plus-sign btn btn-danger', 'title' => 'Crear nueva nómina']) ?>
+							<?= $this->Html->link(__(''), ['controller' => 'Paysheets', 'action' => 'editPayrollFortnight', $idPaysheet, 'Employeepayments', 'completeData'], ['id' => 'modificar', 'class' => 'glyphicon glyphicon-edit btn btn-danger', 'title' => 'Modificar parámetros']) ?>
 							<button id="borrar" class="glyphicon glyphicon-trash btn btn-danger" title="Eliminar"></button>
 							<a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
 						</p>
@@ -537,6 +633,63 @@
     }
 
 // Documento
+	
+	document.addEventListener("DOMContentLoaded", function()
+	{
+		'use strict';
+		var tableContainer = document.querySelector(".table-container");
+		var headRow = tableContainer.querySelector("thead tr");
+		tableContainer.addEventListener("scroll", moveContent);
+
+		function moveContent(){
+			moveX(this);
+			moveY(this);
+		}
+
+		function moveX(self){
+			var rows = document.querySelectorAll(".table-container tr");
+			var fixedColumnIndex = findFixedIndex();
+			for (var i = 0; i < rows.length; i++){
+				var parentName = rows[i].parentNode.nodeName.toLowerCase();
+				var cells = getCells(rows[i], parentName);
+				for(var j = 0; j <= fixedColumnIndex; j++){
+					setZIndex(cells[j], parentName);
+					cells[j].style.left = self.scrollLeft + "px";
+				}
+			}
+		}
+
+		function moveY(self){
+			var cells = headRow.querySelectorAll("th");
+			for(var i = 0; i < cells.length; i++){
+				cells[i].style.top = self.scrollTop + "px";	
+			}
+		}
+
+		function setZIndex(cell, parentName){
+			if(!cell.style.zIndex){
+				if(parentName == "thead")
+					cell.style.zIndex = 10;
+				else
+					cell.style.zIndex = 5;
+			}
+		}
+
+		function getCells (row, parentName){
+			if(parentName == "thead")
+				return(row.querySelectorAll("th"));
+			else
+				return(row.querySelectorAll("td"));
+		}
+
+		function findFixedIndex(){
+			var cells = headRow.querySelectorAll("th");
+			for(var i = 0; i < cells.length; i++){
+				if(cells[i].classList.contains("fixed"))
+					return i; 
+			}
+		}
+	});
 
     $(document).ready(function()
     { 
@@ -549,7 +702,17 @@
         $('#search-fortnight').click(function(e) 
         {
             e.preventDefault(); 
-            $.redirect('/sistemasangabriel/paysheets/edit', {yearPaysheet : $("#year").val(), monthPaysheet : $("#month").val(), fortnight : $("#fortnight").val(), classification : $("#classification").val() });
+			
+			if ($('#ambiente').val() == "Producción")
+			{
+				$.redirect('/sistemasangabriel/paysheets/index', {ddFrom : $("select[name='date_from[day]']").val(), mmFrom : $("select[name='date_from[month]']").val(), yyFrom : $("select[name='date_from[year]']").val(), ddUntil : $("select[name='date_until[day]']").val(), mmUntil : $("select[name='date_until[month]']").val(), yyUntil : $("select[name='date_until[year]']").val(), positionCategories : $("#position-categories").val() });
+			}
+			else
+			{
+				$.redirect('/desarrollosistemasangabriel/paysheets/index', {dateFrom : $("#date-from").val(), dateUntil : $("#date-until").val(), positionCategories : $("#position-categories").val() });			
+			}
+			
+//            $.redirect('/sistemasangabriel/paysheets/edit', {yearPaysheet : $("#year").val(), monthPaysheet : $("#month").val(), fortnight : $("#fortnight").val(), classification : $("#classification").val() });
         });
 		
         $('#borrar').click(function(e) 
@@ -558,7 +721,7 @@
 			var r = confirm("Por favor confirme que desea eliminar esta nómina");
             if (r == true)
 			{
-				$.redirect('/sistemasangabriel/paysheets/delete', {idPaysheet : $("#idPaysheet").val()});
+				$.redirect('/sistemasangabriel/paysheets/delete', {idPaysheet : $("#idPaysheet").val(), controller : "Paysheets", action : "edit" });
 			}
 			else
             {

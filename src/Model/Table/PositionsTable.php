@@ -82,8 +82,15 @@ class PositionsTable extends Table
             ->allowEmpty('effective_date_increase');
 
         $validator
-            ->allowEmpty('record_deleted');
+            ->allowEmpty('registration_status');
 
+        $validator
+            ->allowEmpty('reason_status');
+			
+        $validator
+            ->date('date_status')
+            ->allowEmpty('date_status');
+			
         $validator
             ->allowEmpty('responsible_user');
 

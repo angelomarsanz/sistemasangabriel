@@ -31,6 +31,29 @@
     {
       display:none
     }
+	.error 
+	{
+		position: relative;
+		z-index: 1;
+		padding: 10px;
+		border-radius: 10px;
+		color: white;
+		width: 235px;
+		text-align: center; 
+		font-size: 12px;
+		background: RGB(194, 46, 79);
+	}
+
+	.error::after 
+	{
+		content: '';
+		border-bottom: 15px solid RGB(194, 46, 79);
+		border-right: 15px solid transparent;
+		border-left: 15px solid transparent;
+		position: absolute;
+		left: 45%;
+		top: -14px;
+	}
 }
 @media print 
 {
@@ -49,7 +72,7 @@
 	<h3>Crear Nómina</h3>
 </div>
 <div class="row">
-	<?= $this->Form->create($paysheet) ?>
+	<?= $this->Form->create($paysheet, ['novalidate']) ?>
         <fieldset>
 			<div class="row">
 				<div class="col-md-6">
@@ -193,6 +216,6 @@
 				$("#positioncategory-id").css("background-color", "#ffffe6");
 				alert('Por favor seleccione una categoría');
 			}
-		});
+		});		
 	});
 </script>

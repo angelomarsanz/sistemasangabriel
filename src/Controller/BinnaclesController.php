@@ -54,7 +54,7 @@ class BinnaclesController extends AppController
      *
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
-    public function add($typeClass = null, $className = null, $methodName = null, $novelty = null)
+    public function add($typeClass = null, $className = null, $methodName = null, $novelty = null, $arrayExtra = null)
     {
 		$this->autoRender = false;
 		
@@ -68,6 +68,66 @@ class BinnaclesController extends AppController
 		
 		$binnacle->novelty = $novelty;
 		
+		if (isset($arrayExtra))
+		{
+			$accountArray = 1;
+			
+			foreach ($arrayExtra as $arrayExtras)
+			{
+				if ($accountArray == 1)
+				{
+					$binnacle->extra_column1 = $arrayExtras;
+				}
+				
+				if ($accountArray == 2)
+				{
+					$binnacle->extra_column2 = $arrayExtras;
+				}
+
+				if ($accountArray == 3)
+				{
+					$binnacle->extra_column3 = $arrayExtras;
+				}
+				
+				if ($accountArray == 4)
+				{
+					$binnacle->extra_column4 = $arrayExtras;
+				}
+				
+				if ($accountArray == 5)
+				{
+					$binnacle->extra_column5 = $arrayExtras;
+				}
+				
+				if ($accountArray == 6)
+				{
+					$binnacle->extra_column6 = $arrayExtras;
+				}
+				
+				if ($accountArray == 7)
+				{
+					$binnacle->extra_column7 = $arrayExtras;
+				}
+				
+				if ($accountArray == 8)
+				{
+					$binnacle->extra_column8 = $arrayExtras;
+				}
+				
+				if ($accountArray == 9)
+				{
+					$binnacle->extra_column9 = $arrayExtras;
+				}
+				
+				if ($accountArray == 10)
+				{
+					$binnacle->extra_column10 = $arrayExtras;
+				}
+				
+				$accountArray++;
+			}
+		}
+				
 		$result = 0;
 		
         if (!($this->Binnacles->save($binnacle)))
