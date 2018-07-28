@@ -219,21 +219,28 @@ class PaysheetsController extends AppController
     {
         $this->autoRender = false;
         
-		$lastRecord = $this->Paysheets->find('all', 
-			['conditions' => ['id >' => 1, 'OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]], 
-			'order' => ['Paysheets.created' => 'DESC']]);
-		
-        $row = $lastRecord->first();   
-                
-        if ($row)
-        {
-            return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $row->id]);
-        }
-        else
-        {
-			$this->Flash->error(__('No se encontraron nóminas'));
-			return $this->redirect(['controller' => 'Paysheets', 'action' => 'createPayrollFortnight', 1]);
-        }
+		if (isset($id))
+		{
+			return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $id]);
+		}
+		else
+		{
+			$lastRecord = $this->Paysheets->find('all', 
+				['conditions' => ['id >' => 1, 'OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]], 
+				'order' => ['Paysheets.created' => 'DESC']]);
+			
+			$row = $lastRecord->first();   
+					
+			if ($row)
+			{
+				return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $row->id]);
+			}
+			else
+			{
+				$this->Flash->error(__('No se encontraron nóminas'));
+				return $this->redirect(['controller' => 'Paysheets', 'action' => 'createPayrollFortnight', 1]);
+			}
+		}
     }
 
     /**
@@ -500,12 +507,10 @@ class PaysheetsController extends AppController
     {
         $tableConfiguration = [];
         
-        $tableConfiguration['identidy'] = '1';
+        $tableConfiguration['identidy'] = 'allColumns identificacion';
 
         $tableConfiguration['position'] = '1';
 		
-		$tableConfiguration['sw_cesta_ticket'] = '0';
-
         $tableConfiguration['date_of_admission'] = '1';
 
         $tableConfiguration['monthly_salary'] = '1';
@@ -553,68 +558,15 @@ class PaysheetsController extends AppController
         return $tableConfigurationJson;       
     }
 
-    public function moveConfiguration($idPaysheet = null, $valor = null)
+    public function moveConfiguration($idPaysheet = null, $columnsReport = null)
     {		
 		$paysheet = $this->Paysheets->get($idPaysheet);
                 				
 		$objectTableConfiguration = json_decode($paysheet->table_configuration);
 				
 		$tableConfiguration = (array) $objectTableConfiguration;
-						
-		if ($tableConfiguration['sw_cesta_ticket'] == 0)
-        {
-			$tableConfiguration['date_of_admission'] = $valor['view_date_of_admission'];
 
-			$tableConfiguration['monthly_salary'] = $valor['view_monthly_salary'];
-
-			$tableConfiguration['fortnight'] = $valor['view_fortnight'];
-
-			$tableConfiguration['amount_escalation_fortnight'] = $valor['view_amount_escalation_fortnight'];
-
-			$tableConfiguration['salary_advance'] = $valor['view_salary_advance'];
-
-			$tableConfiguration['other_income'] = $valor['view_other_income'];
-
-			$tableConfiguration['faov'] = $valor['view_faov'];
-
-			$tableConfiguration['ivss'] = $valor['view_ivss'];
-
-			$tableConfiguration['trust_days'] = $valor['view_trust_days'];
-
-			$tableConfiguration['escrow'] = $valor['view_escrow'];
-
-			$tableConfiguration['discount_repose'] = $valor['view_discount_repose'];
-
-			$tableConfiguration['discount_loan'] = $valor['view_discount_loan'];
-
-			$tableConfiguration['percentage_imposed'] = $valor['view_percentage_imposed'];
-
-			$tableConfiguration['amount_imposed'] = $valor['view_amount_imposed'];
-
-			$tableConfiguration['days_absence'] = $valor['view_days_absence'];                                         
-			
-			$tableConfiguration['discount_absences'] = $valor['view_discount_absences'];
-
-			$tableConfiguration['total_payment'] = $valor['view_total_payment'];
-		}
-		else
-		{
-			$tableConfiguration['days_cesta_ticket'] = $valor['view_days_cesta_ticket'];
-			
-			$tableConfiguration['amount_cesta_ticket'] = $valor['view_amount_cesta_ticket'];
-			
-			$tableConfiguration['loan_cesta_ticket'] = $valor['view_loan_cesta_ticket'];
-			
-			$tableConfiguration['total_cesta_ticket'] = $valor['view_total_cesta_ticket'];
-		}
-		
-		$previousSwCestaTicket = $tableConfiguration['sw_cesta_ticket'];
-		
-		$tableConfiguration['sw_cesta_ticket'] = $valor['view_sw_cesta_ticket'];
-		
-		$tableConfiguration['identidy'] = $valor['view_identidy'];
-
-		$tableConfiguration['position'] = $valor['view_position'];
+		isset($columnsReport['identidy']) ? $tableConfiguration['identidy'] = 'allColumns identificacion' : $tableConfiguration['identidy'] = 'allColumns identificacion noverScreen';
 			
         $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
 		
@@ -625,7 +577,6 @@ class PaysheetsController extends AppController
         if ($this->Paysheets->save($paysheet)) 
         {
 			$arrayResult['indicator'] = 0;
-            $arrayResult['previousSwCestaTicket'] = $previousSwCestaTicket;
 			$arrayResult['cesta_ticket_month'] = $paysheet->cesta_ticket_month;
         } 
         else

@@ -132,7 +132,7 @@
 				</div>
 				<div class="col-md-1">	
 					<br />
-					<button type="submit" id="search-fortnight" class="glyphicon glyphicon-search btn btn-default"></button>
+					<button type="submit" id="search-payroll" class="glyphicon glyphicon-search btn btn-default"></button>
 				</div>
 			</div>
 		<?= $this->Form->end() ?>
@@ -155,7 +155,7 @@
 									<th scope="col">Nro.</th>
 									<th scope="col" class="fixed">Nombre&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 																			
-									<th scope="col" class='cedula'><a href="#" id='cedula' title='Ocultar'>Cédula&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
+									<th scope="col" class="<?= $tableConfiguration->identidy ?>"><a href="#" id='identificacion' title='Ocultar'>Cédula&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
 
 									<th scope="col" class='cargo'><a href="#" id='cargo' title='Ocultar'>Cargo</a></th>
 																			
@@ -221,7 +221,7 @@
 										
 										<td><?= $employeesFors->employee->surname . ' ' . $employeesFors->employee->first_name ?></td>		
 										
-										<td class='cedula'><?= $employeesFors->employee->type_of_identification . '-' . $employeesFors->employee->identity_card ?></td>
+										<td class="<?= $tableConfiguration->identidy ?>"><?= $employeesFors->employee->type_of_identification . '-' . $employeesFors->employee->identity_card ?></td>
 
 										<td class="cargo"><?= $employeesFors->current_position ?></td>
 										
@@ -274,31 +274,34 @@
 							</tbody>
 						</table>
 						<?= $this->Html->link(__(''), ['controller' => 'Employees', 'action' => 'add', $paysheet->id, $paysheet->weeks_social_security], ['id' => 'agregar-empleado', 'class' => 'glyphicon glyphicon-user btn btn-default', 'title' => 'Agregar empleado', 'style' => 'color: #9494b8; padding: 3px 5px;']) ?>
+
+						<!-- Modal -->
+						<div class="modal fade" id="myModal" role="dialog">
+							<div class="modal-dialog">				
+								<!-- Modal content-->
+								<div class="modal-content">
+									<div class="modal-header">
+										<button type="button" class="close" data-dismiss="modal">&times;</button>
+										<h4 class="modal-title">Mostrar/ocultar columnas</h4>
+									</div>
+									<div class="modal-body">
+										<p><input class="column-mark" type="checkbox" name="columnsReport[identidy]" id="mostrar-identificacion" <?php if ($tableConfiguration->identidy == 'allColumns identificacion') echo 'checked'; ?>> Cédula</p>
+									</div>
+									<div class="modal-footer">
+										<button type="button" id="marcar-todos" class="glyphicon icon-checkbox-checked btn btn-default" data-toggle="tooltip" data-placement="top" title="Marcar todos" style="padding: 8px 12px 10px 12px;"></button>
+										<button type="button" id="desmarcar-todos" class="glyphicon icon-checkbox-unchecked btn btn-default" data-toggle="tooltip" data-placement="top" title="Desmarcar todos" style="padding: 8px 12px 10px 12px;"></button>										
+										<button type="button" class="glyphicon glyphicon-remove btn btn-default" data-dismiss="modal" data-toggle="tooltip" data-placement="top" title="Cerrar"></button>
+									</div>
+								</div>
+							</div>
+						</div>
+
 						<br />
 						<br />
 					</div>
 				</fieldset>
 				<?= $this->Form->button(__('Guardar'), ['id' => 'Guardar', 'class' =>'btn btn-success noverScreen']) ?>
-
-				<!-- Modal -->
-				<div class="modal fade" id="myModal" role="dialog">
-					<div class="modal-dialog">				
-						<!-- Modal content-->
-						<div class="modal-content">
-							<div class="modal-header">
-								<button type="button" class="close" data-dismiss="modal">&times;</button>
-								<h4 class="modal-title">Mostrar/ocultar columnas</h4>
-							</div>
-							<div class="modal-body">
-								<p><input class="column-mark" type="checkbox" name="columnsReport[view_cedula]" id="ver-cedula" checked="true"> Cédula</p>
-							</div>
-							<div class="modal-footer">
-								<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-							</div>
-						</div>
-					</div>
-				</div>
-				
+								
 				<div class="menumenos nover menu-menos">
 					<p>
 					<a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
@@ -413,26 +416,31 @@
 
     $(document).ready(function()
     { 
+		if ($('#ambiente').val() == "Producción")
+		{
+			paysheetIndex = "/sistemasangabriel/paysheets/index";
+			paysheetDelete = "/sistemasangabriel/paysheets/delete";
+		}
+		else
+		{
+			paysheetIndex = "/desarrollosistemasangabriel/paysheets/index";
+			paysheetDelete = "/desarrollosistemasangabriel/paysheets/delete";
+		}
+		
+		$('[data-toggle="tooltip"]').tooltip();
     	$(".alternative-decimal-separator").numeric({ altDecimal: "," });
     	$(".positive-integer").numeric({ decimal: false, negative: false }, function() { alert("Positive integers only"); this.value = ""; this.focus(); });
         $('#classification').val($('#classificationFor').val());
         $('#fortnight').val($('#fortnightFor').val());
         $('#month').val($('#monthFor').val());
         $('#year').val($('#yearFor').val());
-        $('#search-fortnight').click(function(e) 
+		
+        $('#search-payroll').click(function(e) 
         {
             e.preventDefault(); 
 			
-			if ($('#ambiente').val() == "Producción")
-			{
-				$.redirect('/sistemasangabriel/paysheets/index', {ddFrom : $("select[name='date_from[day]']").val(), mmFrom : $("select[name='date_from[month]']").val(), yyFrom : $("select[name='date_from[year]']").val(), ddUntil : $("select[name='date_until[day]']").val(), mmUntil : $("select[name='date_until[month]']").val(), yyUntil : $("select[name='date_until[year]']").val(), positionCategories : $("#position-categories").val() });
-			}
-			else
-			{
-				$.redirect('/desarrollosistemasangabriel/paysheets/index', {dateFrom : $("#date-from").val(), dateUntil : $("#date-until").val(), positionCategories : $("#position-categories").val() });			
-			}
-			
-//            $.redirect('/sistemasangabriel/paysheets/edit', {yearPaysheet : $("#year").val(), monthPaysheet : $("#month").val(), fortnight : $("#fortnight").val(), classification : $("#classification").val() });
+			$.redirect(paysheetIndex, {ddFrom : $("select[name='date_from[day]']").val(), mmFrom : $("select[name='date_from[month]']").val(), yyFrom : $("select[name='date_from[year]']").val(), ddUntil : $("select[name='date_until[day]']").val(), mmUntil : $("select[name='date_until[month]']").val(), yyUntil : $("select[name='date_until[year]']").val(), positionCategories : $("#position-categories").val() });
+
         });
 		
         $('#borrar').click(function(e) 
@@ -441,31 +449,61 @@
 			var r = confirm("Por favor confirme que desea eliminar esta nómina");
             if (r == true)
 			{
-				$.redirect('/sistemasangabriel/paysheets/delete', {idPaysheet : $("#idPaysheet").val(), controller : "Paysheets", action : "edit" });
+				$.redirect(paysheetDelete, {idPaysheet : $("#idPaysheet").val(), controller : "Paysheets", action : "edit" });
 			}
 			else
             {
                 return false;
             } 
         });
-	
-        $('#cedula').on('click',function()
+		
+		$('#marcar-todos').click(function(e)
+		{			
+			e.preventDefault();
+			
+			$(".column-mark").each(function (index) 
+			{ 
+				$(this).attr('checked', true);
+				$(this).prop('checked', true);
+			});
+			
+			$('.allColumns').removeClass("noverScreen");
+			
+		});
+		
+		$('#desmarcar-todos').click(function(e)
+		{			
+			e.preventDefault();
+			
+			$(".column-mark").each(function (index) 
+			{ 
+				$(this).attr('checked', false);
+				$(this).prop('checked', false);
+			});
+			
+			$('.allColumns').addClass("noverScreen");
+			
+		});
+					
+        $('#identificacion').on('click',function()
         {
-            $('.cedula').addClass("noverScreen");
-			$('#ver-cedula').attr('checked', false);
-			$('#ver-cedula').prop('checked', false);
+            $('.identificacion').addClass("noverScreen");
+			$('#mostrar-identificacion').attr('checked', false);
+			$('#mostrar-identificacion').prop('checked', false);
 
         });
 		
-        $('#ver-cedula').on('click',function()
+        $('#mostrar-identificacion').on('click',function()
         {
-			if  ($('#ver-cedula').prop('checked'))
+			if  ($('#mostrar-identificacion').prop('checked'))
 			{
-				$('.cedula').removeClass("noverScreen");
+				$('.identificacion').removeClass("noverScreen");
+				$('#mostrar-identificacion').attr('checked', true);
 			}
 			else
 			{
-				$('.cedula').addClass("noverScreen");
+				$('.identificacion').addClass("noverScreen");
+				$('#mostrar-identificacion').attr('checked', false);
 			}
         });
 

@@ -46,3 +46,5 @@ En Student/listMonthltyPayment.ctp Matrícula 2017
 
 -- 
 Balance - nro. de hermanos
+
+Students/family_students
