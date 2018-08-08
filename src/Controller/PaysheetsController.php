@@ -238,7 +238,7 @@ class PaysheetsController extends AppController
 			else
 			{
 				$this->Flash->error(__('No se encontraron nóminas'));
-				return $this->redirect(['controller' => 'Paysheets', 'action' => 'createPayrollFortnight', 1]);
+				return $this->redirect(['controller' => 'Paysheets', 'action' => 'createPayroll', 1]);
 			}
 		}
     }
@@ -278,7 +278,7 @@ class PaysheetsController extends AppController
 
         return $this->redirect(['controller' => $controller, 'action' => $action]);
     }
-    public function createPayrollFortnight($noPayroll = null)
+    public function createPayroll($noPayroll = null)
     {
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
 		date_default_timezone_set('America/Caracas');
@@ -390,7 +390,7 @@ class PaysheetsController extends AppController
 				}
 				foreach($error_msg as $noveltys)
 				{
-					$result = $binnacles->add('controller', 'Paysheet', 'createPayrollFortnight', $noveltys);
+					$result = $binnacles->add('controller', 'Paysheet', 'createPayroll', $noveltys);
 				}
 				$this->Flash->error(__('No se pudo crear la nómina debido a: ' . implode(" - ", $error_msg)));				
 			}
@@ -429,7 +429,7 @@ class PaysheetsController extends AppController
         $this->set('_serialize', ['paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories']); 
 	}
 				    
-    public function editPayrollFortnight($id = null, $controller = null, $action = null)
+    public function editPayroll($id = null, $controller = null, $action = null)
     {
 		$this->loadModel('Positioncategories');
 		
@@ -509,49 +509,49 @@ class PaysheetsController extends AppController
         
         $tableConfiguration['identidy'] = 'allColumns identificacion';
 
-        $tableConfiguration['position'] = '1';
+        $tableConfiguration['position'] = 'allColumns cargo';
 		
-        $tableConfiguration['date_of_admission'] = '1';
+        $tableConfiguration['date_of_admission'] = 'allColumns fecha-ingreso';
 
-        $tableConfiguration['monthly_salary'] = '1';
+        $tableConfiguration['monthly_salary'] = 'allColumns sueldo-mensual';
 
-        $tableConfiguration['fortnight'] = '1';
+        $tableConfiguration['payment_period'] = 'allColumns pago-periodo';
 
-        $tableConfiguration['amount_escalation_fortnight'] = '1';
+        $tableConfiguration['amount_escalation_period'] = 'allColumns escalafon';
 
-        $tableConfiguration['salary_advance'] = '1';
+        $tableConfiguration['other_income'] = 'allColumns otros-ingresos';
+		
+        $tableConfiguration['faov'] = 'allColumns faov';
 
-        $tableConfiguration['other_income'] = '1';
+        $tableConfiguration['ivss'] = 'allColumns ivss';
 
-        $tableConfiguration['faov'] = '1';
+        $tableConfiguration['trust_days'] = 'allColumns dias-fideicomiso';
 
-        $tableConfiguration['ivss'] = '1';
+        $tableConfiguration['escrow'] = 'allColumns fideicomiso';
 
-        $tableConfiguration['trust_days'] = '1';
+        $tableConfiguration['discount_repose'] = 'allColumns reposo';
+		
+        $tableConfiguration['salary_advance'] = 'allColumns adelanto-sueldo';
 
-        $tableConfiguration['escrow'] = '1';
+        $tableConfiguration['discount_loan'] = 'allColumns prestamos';
 
-        $tableConfiguration['discount_repose'] = '1';
+        $tableConfiguration['percentage_imposed'] = 'allColumns porcentaje-impuesto';
 
-        $tableConfiguration['discount_loan'] = '1';
+        $tableConfiguration['amount_imposed'] = 'allColumns monto-impuesto';
 
-        $tableConfiguration['percentage_imposed'] = '1';
-
-        $tableConfiguration['amount_imposed'] = '1';
-
-        $tableConfiguration['days_absence'] = '1';                                         
+        $tableConfiguration['days_absence'] = 'allColumns dias-inasistencias';                                         
         
-        $tableConfiguration['discount_absences'] = '1';
+        $tableConfiguration['discount_absences'] = 'allColumns inasistencias';
 
-        $tableConfiguration['total_payment'] = '1';
+        $tableConfiguration['total_payment'] = 'allColumns total-pago';
 		
-		$tableConfiguration['days_cesta_ticket'] = '1';
+		$tableConfiguration['days_cesta_ticket'] = 'allColumns dias-cesta-ticket';
 		
-		$tableConfiguration['amount_cesta_ticket'] = '1';
+		$tableConfiguration['amount_cesta_ticket'] = 'allColumns monto-cesta-ticket';
 		
-		$tableConfiguration['loan_cesta_ticket'] = '1';
+		$tableConfiguration['loan_cesta_ticket'] = 'allColumns prestamos-cesta-ticket';
 		
-		$tableConfiguration['total_cesta_ticket'] = '1';
+		$tableConfiguration['total_cesta_ticket'] = 'allColumns total-cesta-ticket';
 		
         $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
  
@@ -567,7 +567,51 @@ class PaysheetsController extends AppController
 		$tableConfiguration = (array) $objectTableConfiguration;
 
 		isset($columnsReport['identidy']) ? $tableConfiguration['identidy'] = 'allColumns identificacion' : $tableConfiguration['identidy'] = 'allColumns identificacion noverScreen';
-			
+
+		isset($columnsReport['position']) ? $tableConfiguration['position'] = 'allColumns cargo' : $tableConfiguration['position'] = 'allColumns cargo noverScreen';		
+
+		isset($columnsReport['date_of_admission']) ? $tableConfiguration['date_of_admission'] = 'allColumns fecha-ingreso' : $tableConfiguration['date_of_admission'] = 'allColumns fecha-ingreso noverScreen';
+		
+		isset($columnsReport['monthly_salary']) ? $tableConfiguration['monthly_salary'] = 'allColumns sueldo-mensual' : $tableConfiguration['monthly_salary'] = 'allColumns sueldo-mensual noverScreen';
+		
+		isset($columnsReport['payment_period']) ? $tableConfiguration['payment_period'] = 'allColumns pago-periodo' : $tableConfiguration['payment_period'] = 'allColumns pago-periodo noverScreen';
+		
+		isset($columnsReport['amount_escalation_period']) ? $tableConfiguration['amount_escalation_period'] = 'allColumns escalafon' : $tableConfiguration['amount_escalation_period'] = 'allColumns escalafon noverScreen';
+		
+		isset($columnsReport['other_income']) ? $tableConfiguration['other_income'] = 'allColumns otros-ingresos' : $tableConfiguration['other_income'] = 'allColumns otros-ingresos noverScreen';		
+
+		isset($columnsReport['faov']) ? $tableConfiguration['faov'] = 'allColumns faov' : $tableConfiguration['faov'] = 'allColumns faov noverScreen';
+		
+		isset($columnsReport['ivss']) ? $tableConfiguration['ivss'] = 'allColumns ivss' : $tableConfiguration['ivss'] = 'allColumns ivss noverScreen';
+		
+		isset($columnsReport['trust_days']) ? $tableConfiguration['trust_days'] = 'allColumns dias-fideicomiso' : $tableConfiguration['trust_days'] = 'allColumns dias-fideicomiso noverScreen';
+		
+		isset($columnsReport['escrow']) ? $tableConfiguration['escrow'] = 'allColumns fideicomiso' : $tableConfiguration['escrow'] = 'allColumns fideicomiso noverScreen';
+
+		isset($columnsReport['discount_repose']) ? $tableConfiguration['discount_repose'] = 'allColumns reposo' : $tableConfiguration['discount_repose'] = 'allColumns reposo noverScreen';		
+
+		isset($columnsReport['salary_advance']) ? $tableConfiguration['salary_advance'] = 'allColumns adelanto-sueldo' : $tableConfiguration['salary_advance'] = 'allColumns adelanto-sueldo noverScreen';
+		
+		isset($columnsReport['discount_loan']) ? $tableConfiguration['discount_loan'] = 'allColumns prestamos' : $tableConfiguration['discount_loan'] = 'allColumns prestamos noverScreen';
+		
+		isset($columnsReport['percentage_imposed']) ? $tableConfiguration['percentage_imposed'] = 'allColumns porcentaje-impuesto' : $tableConfiguration['percentage_imposed'] = 'allColumns porcentaje-impuesto noverScreen';
+		
+		isset($columnsReport['amount_imposed']) ? $tableConfiguration['amount_imposed'] = 'allColumns monto-impuesto' : $tableConfiguration['amount_imposed'] = 'allColumns monto-impuesto noverScreen';
+
+		isset($columnsReport['days_absence']) ? $tableConfiguration['days_absence'] = 'allColumns dias-inasistencias' : $tableConfiguration['days_absence'] = 'allColumns dias-inasistencias noverScreen';		
+
+		isset($columnsReport['discount_absences']) ? $tableConfiguration['discount_absences'] = 'allColumns inasistencias' : $tableConfiguration['discount_absences'] = 'allColumns inasistencias noverScreen';
+		
+		isset($columnsReport['total_payment']) ? $tableConfiguration['total_payment'] = 'allColumns total-pago' : $tableConfiguration['total_payment'] = 'allColumns total-pago noverScreen';
+		
+		isset($columnsReport['days_cesta_ticket']) ? $tableConfiguration['days_cesta_ticket'] = 'allColumns dias-cesta-ticket' : $tableConfiguration['days_cesta_ticket'] = 'allColumns dias-cesta-ticket noverScreen';
+		
+		isset($columnsReport['amount_cesta_ticket']) ? $tableConfiguration['amount_cesta_ticket'] = 'allColumns monto-cesta-ticket' : $tableConfiguration['amount_cesta_ticket'] = 'allColumns monto-cesta-ticket noverScreen';
+
+		isset($columnsReport['loan_cesta_ticket']) ? $tableConfiguration['loan_cesta_ticket'] = 'allColumns prestamos-cesta-ticket' : $tableConfiguration['loan_cesta_ticket'] = 'allColumns prestamos-cesta-ticket noverScreen';		
+
+		isset($columnsReport['total_cesta_ticket']) ? $tableConfiguration['total_cesta_ticket'] = 'allColumns total-cesta-ticket' : $tableConfiguration['total_cesta_ticket'] = 'allColumns total-cesta-ticket noverScreen';
+				
         $tableConfigurationJson = json_encode($tableConfiguration, JSON_FORCE_OBJECT);
 		
         $paysheet->table_configuration = $tableConfigurationJson;	
@@ -585,6 +629,7 @@ class PaysheetsController extends AppController
         } 
         return $arrayResult;       
     }
+	
 	public function searchPayroll()
 	{
 		$this->loadModel('Schools');

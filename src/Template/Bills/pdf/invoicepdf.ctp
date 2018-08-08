@@ -121,7 +121,7 @@
             </tr>
             <tr>
                 <td style="width: 50%;"><b>Total Bs.S:</b></td>
-                <td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid/1000), 2, ",", ".") ?></b></td>
+                <td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid/100000), 2, ",", ".") ?></b></td>
             </tr>
         </table>
     </div>
@@ -210,7 +210,7 @@ endfor; ?>
             </tr>
             <tr>
                 <td style="width: 50%;"><b>Total Bs.S:</b></td>
-                <td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid/1000), 2, ",", ".") ?></b></td>
+                <td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid/100000), 2, ",", ".") ?></b></td>
             </tr>
         </table>
     </div>
@@ -219,7 +219,7 @@ endfor; ?>
 <div>
     <h3 style="text-align: right;">Recibo Nro. <?= $bill->bill_number ?></h3>
     <h2 style="text-align: center;">Por Bs.F <?= number_format($accountService, 2, ",", ".") ?></h2>
-	<h2 style="text-align: center;">Por Bs.S <?= number_format(($accountService/1000), 2, ",", ".") ?></h2>
+	<h2 style="text-align: center;">Por Bs.S <?= number_format(($accountService/100000), 2, ",", ".") ?></h2>
     <br />
     <p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.F <b><?= number_format($accountService, 2, ",", ".") ?></b>
     por concepto de servicio educativo, correspondiente a lo(s) alumno(s):</p>

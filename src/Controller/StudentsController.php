@@ -2029,7 +2029,17 @@ class StudentsController extends AppController
 			}
 			
 			$arrayMark = $this->markColumns($columnsReport);
+			
+			$arraySignedUp = [];
 						
+			$this->loadModel('Schools');
+
+			$school = $this->Schools->get(2);
+			
+			$currentYearRegistration = $school->current_year_registration;
+			            
+            $concept = 'Matrícula ' . $currentYearRegistration;
+            								
 			$students = TableRegistry::get('Students');
 
 			$arrayResult = $students->find('family');
@@ -2059,6 +2069,28 @@ class StudentsController extends AppController
 					{
 						$accountStudents['New']++;
 					}
+					$signedUp = $this->Students->Studenttransactions->find('all')
+						->select(['Studenttransactions.student_id', 
+							'Studenttransactions.transaction_description', 
+							'Studenttransactions.amount', 
+							'Studenttransactions.original_amount'])
+						->where([['Studenttransactions.student_id' => $familyStudent->id],
+							['Studenttransactions.transaction_description' => $concept]])
+						->order(['Studenttransactions.created' => 'DESC']);
+
+					$row = $signedUp->first();	
+
+					if ($row)
+					{
+						if ($row->amount < $row->original_amount)
+						{
+							$arraySignedUp[$familyStudent->id] = 'Pagado';
+						}
+						else
+						{
+							$arraySignedUp[$familyStudent->id] = 'No pagado';							
+						}
+					}
 				}
 				elseif ($familyStudent->student_condition == "Egresado")
 				{
@@ -2078,8 +2110,8 @@ class StudentsController extends AppController
 				}
 			}
 						
-			$this->set(compact('swImpresion', 'familyStudents', 'arrayMark', 'currentDate', 'accountStudents'));
-			$this->set('_serialize', ['swImpresion', 'familyStudents', 'arrayMark', 'currenDate', 'accountStudents']); 		
+			$this->set(compact('swImpresion', 'familyStudents', 'arrayMark', 'currentDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration'));
+			$this->set('_serialize', ['swImpresion', 'familyStudents', 'arrayMark', 'currenDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration']); 		
 		}
 		else
 		{

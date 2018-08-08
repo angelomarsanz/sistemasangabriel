@@ -120,11 +120,15 @@
 		<?php $accountRecords = 0; ?>
 		<?php foreach ($familyStudents as $familyStudent): ?>
 			<?php 
+				$lastYearRegistration = $familyStudent->balance;		
 				if ($familyStudent->student_condition == "Regular"):
 					if ($familyStudent->new_student == 0):
 						$studentCondition = $familyStudent->student_condition;
 					else:
 						$studentCondition = "Nuevo";
+					endif;
+					if ($familyStudent->balance == $currentYearRegistration && isset($arraySignedUp[$familyStudent->id])):
+						$lastYearRegistration .= '-' . $arraySignedUp[$familyStudent->id];
 					endif;
 				else:
 					$studentCondition = $familyStudent->student_condition;
@@ -226,7 +230,7 @@
 							<td class=<?= $arrayMark['Students.sex'] ?>><?= $familyStudent->sex ?></td>
 							<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 							<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
-							<td><?= $familyStudent->balance ?></td>
+							<td><?= $lastYearRegistration ?></td>
 							<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
 
 							<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>							
@@ -258,7 +262,7 @@
 					<td class=<?= $arrayMark['Students.sex'] ?>><?= $familyStudent->sex ?></td>
 					<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 					<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
-					<td><?= $familyStudent->balance ?></td>
+					<td><?= $lastYearRegistration ?></td>
 					<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
 
 					<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>

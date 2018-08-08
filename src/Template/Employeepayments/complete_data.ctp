@@ -157,52 +157,52 @@
 																			
 									<th scope="col" class="<?= $tableConfiguration->identidy ?>"><a href="#" id='identificacion' title='Ocultar'>Cédula&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
 
-									<th scope="col" class='cargo'><a href="#" id='cargo' title='Ocultar'>Cargo</a></th>
+									<th scope="col" class="<?= $tableConfiguration->position ?>"><a href="#" id='cargo' title='Ocultar'>Cargo</a></th>
 																			
-									<th scope="col" class='fecha-ingreso'><a href="#" id='fecha-ingreso' title='Ocultar'>Fecha&nbsp;ingreso</a></th>
+									<th scope="col" class="<?= $tableConfiguration->date_of_admission ?>"><a href="#" id='fecha-ingreso' title='Ocultar'>Fecha&nbsp;ingreso</a></th>
 
-									<th scope="col" class='sueldo-mensual'><a href="#" id='sueldo-mensual' title='Ocultar'>Sueldo&nbsp;mens.</a></th>
+									<th scope="col" class="<?= $tableConfiguration->monthly_salary ?>"><a href="#" id='sueldo-mensual' title='Ocultar'>Sueldo&nbsp;mens.</a></th>
 
-									<th scope="col" class='quincena'><a href="#" id='quincena' title='Ocultar'>Quincena&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
+									<th scope="col" class="<?= $tableConfiguration->payment_period ?>"><a href="#" id='pago-periodo' title='Ocultar'>Pago&nbsp;período</a></th>
 
-									<th scope="col" class='escalafon'><a href="#" id='escalafon' title='Ocultar'>Escalafón&nbsp;&nbsp;&nbsp;</a></th>
+									<th scope="col" class="<?= $tableConfiguration->amount_escalation_period ?>"><a href="#" id='escalafon' title='Ocultar'>Escalafón&nbsp;&nbsp;&nbsp;</a></th>
 
-									<th scope="col" class='otros-ingresos'><a href="#" id='otros-ingresos' title='Ocultar'>Otros&nbsp;ingresos</a></th>
+									<th scope="col" class="<?= $tableConfiguration->other_income ?>"><a href="#" id='otros-ingresos' title='Ocultar'>Otros&nbsp;ingresos</a></th>
 
-									<th scope="col" class='faov'><a href="#" id='faov' title='Ocultar'>FAOV&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
+									<th scope="col" class="<?= $tableConfiguration->faov ?>"><a href="#" id='faov' title='Ocultar'>FAOV&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
 
-									<th scope="col" class='ivss'><a href="#" id='ivss' title='Ocultar'>IVSS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
+									<th scope="col" class="<?= $tableConfiguration->ivss ?>"><a href="#" id='ivss' title='Ocultar'>IVSS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
 
-									<th scope="col" class='dias-fideicomiso'><a href="#" id='dias-fideicomiso' title='Ocultar'>Días&nbsp;fidei.</a></th>
+									<th scope="col" class="<?= $tableConfiguration->trust_days ?>"><a href="#" id='dias-fideicomiso' title='Ocultar'>Días&nbsp;fidei.</a></th>
 
-									<th scope="col" class='fideicomiso'><a href="#" id='fideicomiso' title='Ocultar'>Fideicomiso</a></a></th>
+									<th scope="col" class="<?= $tableConfiguration->escrow ?>"><a href="#" id='fideicomiso' title='Ocultar'>Fideicomiso</a></a></th>
 
-									<th scope="col" class='reposo'><a href="#" id='reposo' title='Ocultar'>Reposo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
+									<th scope="col" class="<?= $tableConfiguration->discount_repose ?>"><a href="#" id='reposo' title='Ocultar'>Reposo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
 
-									<th scope="col" class='adelanto-sueldo'><a href="#" id='adelanto-sueldo' title='Ocultar'>Adelan.&nbsp;sueldo</a></th>
+									<th scope="col" class="<?= $tableConfiguration->salary_advance ?>"><a href="#" id='adelanto-sueldo' title='Ocultar'>Adelan.&nbsp;sueldo</a></th>
 								
-									<th scope="col" class='prestamos'><a href="#" id='prestamos' title='Ocultar'>Préstamos</a></th>
+									<th scope="col" class="<?= $tableConfiguration->discount_loan ?>"><a href="#" id='prestamos' title='Ocultar'>Préstamos</a></th>
 								
-									<th scope="col" class='porcentaje-impuesto'><a href="#" id='porcentaje-impuesto' title='Ocultar'>%&nbsp;Imp.&nbsp;</a></th>
+									<th scope="col" class="<?= $tableConfiguration->percentage_imposed ?>"><a href="#" id='porcentaje-impuesto' title='Ocultar'>%&nbsp;Imp.&nbsp;</a></th>
 
-									<th scope="col" class='monto-impuesto'><a href="#" id='monto-impuesto' title='Ocultar'>Monto&nbsp;Imp.&nbsp;</a></th>
+									<th scope="col" class="<?= $tableConfiguration->amount_imposed ?>"><a href="#" id='monto-impuesto' title='Ocultar'>Monto&nbsp;Imp.&nbsp;</a></th>
 
-									<th scope="col" class='dias-inasistencias'><a href="#" id='dias-inasistencias' title='Ocultar'>Días&nbsp;Inasist.</a></th>
+									<th scope="col" class="<?= $tableConfiguration->days_absence ?>"><a href="#" id='dias-inasistencias' title='Ocultar'>Días&nbsp;Inasist.</a></th>
 
-									<th scope="col" class='inasistencias'><a href="#" id='inasistencias' title='Ocultar'>Inasistencias</a></th>
+									<th scope="col" class="<?= $tableConfiguration->discount_absences ?>"><a href="#" id='inasistencias' title='Ocultar'>Inasistencias</a></th>
 
-									<th scope="col" class='total-quincena'><a href="#" id='total-quincena' title='Ocultar'>Tot.&nbsp;Quinc.</a></th>
+									<th scope="col" class="<?= $tableConfiguration->total_payment ?>"><a href="#" id='total-pago' title='Ocultar'>Total&nbsp;Pago</a></th>
 							
-									<th scope="col" class='days-cesta-ticket'><a href="#" id='days-cesta-ticket' title='Ocultar'>Días&nbsp;cesta&nbsp;ticket</a></th>
+									<th scope="col" class="<?= $tableConfiguration->days_cesta_ticket ?>"><a href="#" id='dias-cesta-ticket' title='Ocultar'>Días&nbsp;cesta&nbsp;ticket</a></th>
 								
-									<th scope="col" class='amount-cesta-ticket'><a href="#" id='amount-cesta-ticket' title='Ocultar'>Monto&nbsp;cesta&nbsp;ticket</a></th>
+									<th scope="col" class="<?= $tableConfiguration->amount_cesta_ticket ?>"><a href="#" id='monto-cesta-ticket' title='Ocultar'>Monto&nbsp;cesta&nbsp;ticket</a></th>
 								
-									<th scope="col" class='loan-cesta-ticket'><a href="#" id='loan-cesta-ticket' title='Ocultar'>Préstamo&nbsp;cesta&nbsp;ticket</a></th>
+									<th scope="col" class="<?= $tableConfiguration->loan_cesta_ticket ?>"><a href="#" id='prestamos-cesta-ticket' title='Ocultar'>Préstamos&nbsp;cesta&nbsp;ticket</a></th>
 								
-									<th scope="col" class='total-cesta-ticket'><a href="#" id='total-cesta-ticket' title='Ocultar'>Total&nbsp;cesta&nbsp;ticket</a></th>									
+									<th scope="col" class="<?= $tableConfiguration->total_cesta_ticket ?>"><a href="#" id='total-cesta-ticket' title='Ocultar'>Total&nbsp;cesta&nbsp;ticket</a></th>									
 								</tr>
 							</thead>
-							<tbody id='table-fortnight'>
+							<tbody id='table-payment'>
 								<?php 
 									$accountArray = 0;
 									$accountEmployee = 1;
@@ -223,49 +223,49 @@
 										
 										<td class="<?= $tableConfiguration->identidy ?>"><?= $employeesFors->employee->type_of_identification . '-' . $employeesFors->employee->identity_card ?></td>
 
-										<td class="cargo"><?= $employeesFors->current_position ?></td>
+										<td class="<?= $tableConfiguration->position ?>"><?= $employeesFors->current_position ?></td>
 										
-										<td class="fecha-ingreso"><input disabled='true' class='input-fecha-ingreso' style="text-align: center; width: 100%;" name="employeepayment[<?= $accountArray ?>][date_of_admission]" value=<?= $employeesFors->employee->date_of_admission->format('d-m-Y') ?>></td>
+										<td class="<?= $tableConfiguration->date_of_admission ?>"><input disabled='true' style="text-align: center; width: 100%;" name="employeepayment[<?= $accountArray ?>][date_of_admission]" value=<?= $employeesFors->employee->date_of_admission->format('d-m-Y') ?>></td>
 
-										<td class="sueldo-mensual"><input disabled='true' class='input-sueldo-mensual' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][monthly_salary]" class="alternative-decimal-separator" value=<?= number_format(($employeesFors->monthly_salary), 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->monthly_salary ?>"><input disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][monthly_salary]" value=<?= number_format(($employeesFors->monthly_salary), 2, ",", ".") ?>></td>
 
-										<td class='quincena'><input disabled='true' class='input-quincena' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][fortnight]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->fortnight, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->payment_period ?>"><input disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][payment-period]" value=<?= number_format($employeesFors->payment_period, 2, ",", ".") ?>></td>
 									
-										<td class='escalafon'><input disabled='true' class='input-escalafon' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][amount_escalation_fortnight]" class="alternative-decimal-separator" value=<?= number_format(($employeesFors->amount_escalation/2), 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->amount_escalation_period ?>"><input disabled='true'  style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][amount_escalation_period]" value=<?= number_format(($employeesFors->amount_escalation/2), 2, ",", ".") ?>></td>
 
-										<td class='otros-ingresos'><input class='input-otros-ingresos alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][other_income]" value=<?= number_format($employeesFors->other_income, 2, ",", ".") ?>></td> 
+										<td class="<?= $tableConfiguration->other_income ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][other_income]" value=<?= number_format($employeesFors->other_income, 2, ",", ".") ?>></td> 
 			
-										<td class='faov' style='text-align: right;'><input disabled='true' class='input-faov' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][faov]" value=<?= number_format($employeesFors->faov, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->faov ?>" style='text-align: right;'><input disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][faov]" value=<?= number_format($employeesFors->faov, 2, ",", ".") ?>></td>
 
-										<td class='ivss' style='text-align: right;'><input disabled='true' class='input-ivss' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][ivss]" value=<?= number_format($employeesFors->ivss, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->ivss ?>" style='text-align: right;'><input disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][ivss]" value=<?= number_format($employeesFors->ivss, 2, ",", ".") ?>></td>
 
-										<td class='dias-fideicomiso' style='text-align: right;'><input class='input-dias-fideicomiso alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][trust_days]" value=<?= number_format($employeesFors->trust_days, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->trust_days ?>" style='text-align: right;'><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][trust_days]" value=<?= number_format($employeesFors->trust_days, 2, ",", ".") ?>></td>
 
-										<td class='fideicomiso' style='text-align: right;'><input disabled='true' class='input-fideicomiso' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][escrow]" value=<?= number_format(($employeesFors->trust_days * $employeesFors->integral_salary), 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->escrow ?>" style='text-align: right;'><input disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][escrow]" value=<?= number_format(($employeesFors->trust_days * $employeesFors->integral_salary), 2, ",", ".") ?>></td>
 
-										<td class='reposo'><input class='input-reposo alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][discount_repose]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->discount_repose, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->discount_repose ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][discount_repose]" value=<?= number_format($employeesFors->discount_repose, 2, ",", ".") ?>></td>
 
-										<td class='adelanto-sueldo'><input class='input-adelanto-sueldo alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][salary_advance]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->salary_advance, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->salary_advance ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][salary_advance]" value=<?= number_format($employeesFors->salary_advance, 2, ",", ".") ?>></td>
 									
-										<td class='prestamos'><input class='input-prestamos alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][discount_loan]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->discount_loan, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->discount_loan ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][discount_loan]" value=<?= number_format($employeesFors->discount_loan, 2, ",", ".") ?>></td>
 
-										<td class='porcentaje-impuesto'><input class='input-porcentaje-impuesto alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][percentage_imposed]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->percentage_imposed, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->percentage_imposed ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][percentage_imposed]" value=<?= number_format($employeesFors->percentage_imposed, 2, ",", ".") ?>></td>
 
-										<td class='monto-impuesto'><input  disabled='true' class='input-monto-impuesto' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][amount_imposed]" class="alternative-decimal-separator" value=<?= number_format($employeesFors->amount_imposed, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->amount_imposed ?>"><input  disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][amount_imposed]" value=<?= number_format($employeesFors->amount_imposed, 2, ",", ".") ?>></td>
 
-										<td class='dias-inasistencias' style='text-align: right;'><input class='input-dias-inasistencias alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][days_absence]" value=<?= number_format($employeesFors->days_absence, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->days_absence ?>" style='text-align: right;'><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][days_absence]" value=<?= number_format($employeesFors->days_absence, 2, ",", ".") ?>></td>
 
-										<td class='inasistencias'><input disabled='true' class='input-inasistencia' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][discount_absences]" value=<?= number_format($employeesFors->discount_absences, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->discount_absences ?>"><input disabled='true' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][discount_absences]" value=<?= number_format($employeesFors->discount_absences, 2, ",", ".") ?>></td>
 
-										<td class='total-quincena'><input disabled='true' class='input-total-quincena' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_payment]" value=<?= number_format($employeesFors->total_payment, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->total_payment ?>"><input disabled='true' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_payment]" value=<?= number_format($employeesFors->total_payment, 2, ",", ".") ?>></td>
 
-										<td class='days-cesta-ticket'><input class='input-days-cesta-ticket alternative-decimal-separator' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= number_format($employeesFors->days_cesta_ticket, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->days_cesta_ticket ?>"><input class='alternative-decimal-separator' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= number_format($employeesFors->days_cesta_ticket, 2, ",", ".") ?>></td>
 								
-										<td class='amount-cesta-ticket'><input disabled='true' class='input-amount-cesta-ticket' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= number_format($employeesFors->amount_cesta_ticket, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->amount_cesta_ticket ?>"><input disabled='true' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= number_format($employeesFors->amount_cesta_ticket, 2, ",", ".") ?>></td>
 								
-										<td class='loan-cesta-ticket'><input class='input-loan-cesta-ticket alternative-decimal-separator' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][loan_cesta_ticket]" value=<?= number_format($employeesFors->loan_cesta_ticket, 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->loan_cesta_ticket ?>"><input class='alternative-decimal-separator' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][loan_cesta_ticket]" value=<?= number_format($employeesFors->loan_cesta_ticket, 2, ",", ".") ?>></td>
 									
-										<td class='total-cesta-ticket'><input disabled='true' class='input-total-cesta-ticket' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_cesta_ticket]" value=<?= number_format($employeesFors->total_cesta_ticket, 2, ",", ".") ?>></td>	
+										<td class="<?= $tableConfiguration->total_cesta_ticket ?>"><input disabled='true' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_cesta_ticket]" value=<?= number_format($employeesFors->total_cesta_ticket, 2, ",", ".") ?>></td>	
 									</tr>
 								<?php 
 									$accountArray++; 
@@ -285,17 +285,70 @@
 										<h4 class="modal-title">Mostrar/ocultar columnas</h4>
 									</div>
 									<div class="modal-body">
-										<p><input class="column-mark" type="checkbox" name="columnsReport[identidy]" id="mostrar-identificacion" <?php if ($tableConfiguration->identidy == 'allColumns identificacion') echo 'checked'; ?>> Cédula</p>
+										<div class="row">
+											<div class="col-md-4">
+												<p><input class="column-mark" type="checkbox" name="columnsReport[identidy]" id="mostrar-identificacion" <?php if ($tableConfiguration->identidy == 'allColumns identificacion') echo 'checked'; ?>> Cédula</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[position]" id="mostrar-cargo" <?php if ($tableConfiguration->position == 'allColumns cargo') echo 'checked'; ?>> Cargo</p>
+
+												<p><input class="column-mark" type="checkbox" name="columnsReport[date_of_admission]" id="mostrar-fecha-ingreso" <?php if ($tableConfiguration->date_of_admission == 'allColumns fecha-ingreso') echo 'checked'; ?>> Fecha de ingreso</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[monthly_salary]" id="mostrar-sueldo-mensual" <?php if ($tableConfiguration->monthly_salary == 'allColumns sueldo-mensual') echo 'checked'; ?>> Sueldo mensual</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[payment_period]" id="mostrar-pago-periodo" <?php if ($tableConfiguration->payment_period == 'allColumns pago-periodo') echo 'checked'; ?>> Pago período</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[amount_escalation_period]" id="mostrar-escalafon-periodo" <?php if ($tableConfiguration->amount_escalation_period == 'allColumns escalafon') echo 'checked'; ?>> Escalafón período</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[other_income]" id="mostrar-otros-ingresos" <?php if ($tableConfiguration->other_income == 'allColumns otros-ingresos') echo 'checked'; ?>> Otros ingresos</p>
+
+												<p><input class="column-mark" type="checkbox" name="columnsReport[faov]" id="mostrar-faov" <?php if ($tableConfiguration->faov == 'allColumns faov') echo 'checked'; ?>> FAOV</p>
+																						
+											</div>
+											<div class="col-md-4">
+												<p><input class="column-mark" type="checkbox" name="columnsReport[ivss]" id="mostrar-ivss" <?php if ($tableConfiguration->ivss == 'allColumns ivss') echo 'checked'; ?>> IVSS</p>
+											
+												<p><input class="column-mark" type="checkbox" name="columnsReport[trust_days]" id="mostrar-dias-fideicomiso" <?php if ($tableConfiguration->trust_days == 'allColumns dias-fideicomiso') echo 'checked'; ?>> Días fideicomiso</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[escrow]" id="mostrar-fideicomiso" <?php if ($tableConfiguration->escrow == 'allColumns fideicomiso') echo 'checked'; ?>> Fideicomiso</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[discount_repose]" id="mostrar-reposo" <?php if ($tableConfiguration->discount_repose == 'allColumns reposo') echo 'checked'; ?>> Reposo</p>
+
+												<p><input class="column-mark" type="checkbox" name="columnsReport[salary_advance]" id="mostrar-adelanto-sueldo" <?php if ($tableConfiguration->salary_advance == 'allColumns adelanto-sueldo') echo 'checked'; ?>> Adelanto sueldo</p>
+														
+												<p><input class="column-mark" type="checkbox" name="columnsReport[discount_loan]" id="mostrar-prestamos" <?php if ($tableConfiguration->discount_loan == 'allColumns prestamos') echo 'checked'; ?>> Préstamos</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[percentage_imposed]" id="mostrar-porcentaje-impuesto" <?php if ($tableConfiguration->percentage_imposed == 'allColumns porcentaje-impuesto') echo 'checked'; ?>> Porcentaje impuesto</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[amount_imposed]" id="mostrar-monto-impuesto" <?php if ($tableConfiguration->amount_imposed == 'allColumns impuesto') echo 'checked'; ?>> Monto impuesto</p>										
+
+											</div>
+											<div class="col-md-4">
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[days_absence]" id="mostrar-dias-inasistencias" <?php if ($tableConfiguration->days_absence == 'allColumns dias-inasistencias') echo 'checked'; ?>> Días inasistencia</p>
+
+												<p><input class="column-mark" type="checkbox" name="columnsReport[discount_absences]" id="mostrar-inasistencias" <?php if ($tableConfiguration->discount_absences == 'allColumns inasistencias') echo 'checked'; ?>> Inasistencia</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[total_payment]" id="mostrar-total-pago" <?php if ($tableConfiguration->total_payment == 'allColumns total-pago') echo 'checked'; ?>> Total pago</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[days_cesta_ticket]" id="mostrar-dias-cesta-ticket" <?php if ($tableConfiguration->days_cesta_ticket == 'allColumns dias-cesta-ticket') echo 'checked'; ?>> Días cesta ticket</p>
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[amount_cesta_ticket]" id="mostrar-monto-cesta-ticket" <?php if ($tableConfiguration->amount_cesta_ticket == 'allColumns monto-cesta-ticket') echo 'checked'; ?>> Monto cesta ticket</p>										
+												
+												<p><input class="column-mark" type="checkbox" name="columnsReport[loan_cesta_ticket]" id="mostrar-prestamos-cesta-ticket" <?php if ($tableConfiguration->loan_cesta_ticket == 'allColumns prestamos-cesta-ticket') echo 'checked'; ?>> Préstamos cesta ticket</p>
+
+												<p><input class="column-mark" type="checkbox" name="columnsReport[total_cesta_ticket]" id="mostrar-total-cesta-ticket" <?php if ($tableConfiguration->total_cesta_ticket == 'allColumns total-cesta-ticket') echo 'checked'; ?>> Total cesta ticket</p>													
+											
+											</div>
+										</div>
 									</div>
 									<div class="modal-footer">
-										<button type="button" id="marcar-todos" class="glyphicon icon-checkbox-checked btn btn-default" data-toggle="tooltip" data-placement="top" title="Marcar todos" style="padding: 8px 12px 10px 12px;"></button>
-										<button type="button" id="desmarcar-todos" class="glyphicon icon-checkbox-unchecked btn btn-default" data-toggle="tooltip" data-placement="top" title="Desmarcar todos" style="padding: 8px 12px 10px 12px;"></button>										
-										<button type="button" class="glyphicon glyphicon-remove btn btn-default" data-dismiss="modal" data-toggle="tooltip" data-placement="top" title="Cerrar"></button>
+										<button type="button" id="marcar-todos" class="glyphicon icon-checkbox-checked btn btn-default" title="Marcar todos" style="padding: 8px 12px 10px 12px"></button>
+										<button type="button" id="desmarcar-todos" class="glyphicon icon-checkbox-unchecked btn btn-default" title="Desmarcar todos" style="padding: 8px 12px 10px 12px"></button>										
+										<button type="button" class="glyphicon glyphicon-remove btn btn-default" data-dismiss="modal" title="Cerrar""></button>
 									</div>
 								</div>
 							</div>
 						</div>
-
 						<br />
 						<br />
 					</div>
@@ -508,122 +561,474 @@
         });
 
         $('#cargo').on('click',function()
-        {
-            $('.cargo').hide();
+        {			
+            $('.cargo').addClass("noverScreen");
+			$('#mostrar-cargo').attr('checked', false);
+			$('#mostrar-cargo').prop('checked', false);
 			
+        });
+		
+        $('#mostrar-cargo').on('click',function()
+        {
+			if  ($('#mostrar-cargo').prop('checked'))
+			{
+				$('.cargo').removeClass("noverScreen");
+				$('#mostrar-cargo').attr('checked', true);
+			}
+			else
+			{
+				$('.cargo').addClass("noverScreen");
+				$('#mostrar-cargo').attr('checked', false);
+			}
         });
 		
         $('#fecha-ingreso').on('click',function()
         {
-            $('.fecha-ingreso').hide();
+            $('.fecha-ingreso').addClass("noverScreen");
+			$('#mostrar-fecha-ingreso').attr('checked', false);
+			$('#mostrar-fecha-ingreso').prop('checked', false);
+        });
+		
+        $('#mostrar-fecha-ingreso').on('click',function()
+        {
+			if  ($('#mostrar-fecha-ingreso').prop('checked'))
+			{
+				$('.fecha-ingreso').removeClass("noverScreen");
+				$('#mostrar-fecha-ingreso').attr('checked', true);
+			}
+			else
+			{
+				$('.fecha-ingreso').addClass("noverScreen");
+				$('#mostrar-fecha-ingreso').attr('checked', false);
+			}
         });
 
         $('#sueldo-mensual').on('click',function()
         {
-            $('.sueldo-mensual').hide();
+            $('.sueldo-mensual').addClass("noverScreen");
+			$('#mostrar-sueldo-mensual').attr('checked', false);
+			$('#mostrar-sueldo-mensual').prop('checked', false);
+        });
+		
+        $('#mostrar-sueldo-mensual').on('click',function()
+        {
+			if  ($('#mostrar-sueldo-mensual').prop('checked'))
+			{
+				$('.sueldo-mensual').removeClass("noverScreen");
+				$('#mostrar-sueldo-mensual').attr('checked', true);
+			}
+			else
+			{
+				$('.sueldo-mensual').addClass("noverScreen");
+				$('#mostrar-sueldo-mensual').attr('checked', false);
+			}
         });
 
-        $('#quincena').on('click',function()
+        $('#pago-periodo').on('click',function()
         {
-            $('.quincena').hide();
+            $('.pago-periodo').addClass("noverScreen");
+			$('#mostrar-pago-periodo').attr('checked', false);
+			$('#mostrar-pago-periodo').prop('checked', false);
+        });
+
+        $('#mostrar-pago-periodo').on('click',function()
+        {
+			if  ($('#mostrar-pago-periodo').prop('checked'))
+			{
+				$('.pago-periodo').removeClass("noverScreen");
+				$('#mostrar-pago-periodo').attr('checked', true);
+			}
+			else
+			{
+				$('.pago-periodo').addClass("noverScreen");
+				$('#mostrar-pago-periodo').attr('checked', false);
+			}
         });
         
         $('#escalafon').on('click',function()
         {
-            $('.escalafon').hide();
+            $('.escalafon').addClass("noverScreen");
+			$('#mostrar-escalafon-periodo').attr('checked', false);
+			$('#mostrar-escalafon-periodo').prop('checked', false);
+        });
+		
+        $('#mostrar-escalafon-periodo').on('click',function()
+        {
+			if  ($('#mostrar-escalafon-periodo').prop('checked'))
+			{
+				$('.escalafon').removeClass("noverScreen");
+				$('#mostrar-escalafon').attr('checked', true);
+			}
+			else
+			{
+				$('.escalafon').addClass("noverScreen");
+				$('#mostrar-escalafon').attr('checked', false);
+			}
         });
         
-        $('#adelanto-sueldo').on('click',function()
-        {
-            $('.adelanto-sueldo').hide();
-        });
-
         $('#otros-ingresos').on('click',function()
         {
-            $('.otros-ingresos').hide();
+            $('.otros-ingresos').addClass("noverScreen");
+			$('#mostrar-otros-ingresos').attr('checked', false);
+			$('#mostrar-otros-ingresos').prop('checked', false);
+        });
+		
+        $('#mostrar-otros-ingresos').on('click',function()
+        {
+			if  ($('#mostrar-otros-ingresos').prop('checked'))
+			{
+				$('.otros-ingresos').removeClass("noverScreen");
+				$('#mostrar-otros-ingresos').attr('checked', true);
+			}
+			else
+			{
+				$('.otros-ingresos').addClass("noverScreen");
+				$('#mostrar-otros-ingresos').attr('checked', false);
+			}
         });
 
         $('#faov').on('click',function()
         {
-            $('.faov').hide();
+            $('.faov').addClass("noverScreen");
+			$('#mostrar-faov').attr('checked', false);
+			$('#mostrar-faov').prop('checked', false);
+        });
+		
+        $('#mostrar-faov').on('click',function()
+        {
+			if  ($('#mostrar-faov').prop('checked'))
+			{
+				$('.faov').removeClass("noverScreen");
+				$('#mostrar-faov').attr('checked', true);
+			}
+			else
+			{
+				$('.faov').addClass("noverScreen");
+				$('#mostrar-faov').attr('checked', false);
+			}
         });
 
         $('#ivss').on('click',function()
         {
-            $('.ivss').hide();
-        });
-
-        $('#dias-fideicomiso').on('click',function()
-        {
-            $('.dias-fideicomiso').hide();
-        });
-
-        $('#fideicomiso').on('click',function()
-        {
-            $('.fideicomiso').hide();
-        });
-
-        $('#reposo').on('click',function()
-        {
-            $('.reposo').hide();
-        });
-
-        $('#prestamos').on('click',function()
-        {
-            $('.prestamos').hide();
-        });
-
-        $('#porcentaje-impuesto').on('click',function()
-        {
-            $('.porcentaje-impuesto').hide();
-        });
-
-        $('#monto-impuesto').on('click',function()
-        {
-            $('.monto-impuesto').hide();
-        });
-
-        $('#dias-inasistencias').on('click',function()
-        {
-            $('.dias-inasistencias').hide();
-        });
-
-        $('#inasistencias').on('click',function()
-        {
-            $('.inasistencias').hide();
-        });
-        
-        $('#total-quincena').on('click',function()
-        {
-            $('.total-quincena').hide();
-        });
-
-        $('#days-cesta-ticket').on('click',function()
-        {
-            $('.days-cesta-ticket').hide();
+            $('.ivss').addClass("noverScreen");
+			$('#mostrar-ivss').attr('checked', false);
+			$('#mostrar-ivss').prop('checked', false);
         });
 		
-        $('#amount-cesta-ticket').on('click',function()
+        $('#mostrar-ivss').on('click',function()
         {
-            $('.amount-cesta-ticket').hide();
+			if  ($('#mostrar-ivss').prop('checked'))
+			{
+				$('.ivss').removeClass("noverScreen");
+				$('#mostrar-ivss').attr('checked', true);
+			}
+			else
+			{
+				$('.ivss').addClass("noverScreen");
+				$('#mostrar-ivss').attr('checked', false);
+			}
         });
-				
-        $('#loan-cesta-ticket').on('click',function()
+		
+        $('#dias-fideicomiso').on('click',function()
         {
-            $('.loan-cesta-ticket').hide();
+            $('.dias-fideicomiso').addClass("noverScreen");
+			$('#mostrar-dias-fideicomiso').attr('checked', false);
+			$('#mostrar-dias-fideicomiso').prop('checked', false);
         });
-				
+		
+        $('#mostrar-dias-fideicomiso').on('click',function()
+        {
+			if  ($('#mostrar-dias-fideicomiso').prop('checked'))
+			{
+				$('.dias-fideicomiso').removeClass("noverScreen");
+				$('#mostrar-dias-fideicomiso').attr('checked', true);
+			}
+			else
+			{
+				$('.dias-fideicomiso').addClass("noverScreen");
+				$('#mostrar-dias-fideicomiso').attr('checked', false);
+			}
+        });
+	
+        $('#fideicomiso').on('click',function()
+        {
+            $('.fideicomiso').addClass("noverScreen");
+			$('#mostrar-fideicomiso').attr('checked', false);
+			$('#mostrar-fideicomiso').prop('checked', false);
+        });
+		
+        $('#mostrar-fideicomiso').on('click',function()
+        {
+			if  ($('#mostrar-fideicomiso').prop('checked'))
+			{
+				$('.fideicomiso').removeClass("noverScreen");
+				$('#mostrar-fideicomiso').attr('checked', true);
+			}
+			else
+			{
+				$('.fideicomiso').addClass("noverScreen");
+				$('#mostrar-fideicomiso').attr('checked', false);
+			}
+        });
+	
+        $('#reposo').on('click',function()
+        {
+            $('.reposo').addClass("noverScreen");
+			$('#mostrar-reposo').attr('checked', false);
+			$('#mostrar-reposo').prop('checked', false);
+        });
+		
+        $('#mostrar-reposo').on('click',function()
+        {
+			if  ($('#mostrar-reposo').prop('checked'))
+			{
+				$('.reposo').removeClass("noverScreen");
+				$('#mostrar-reposo').attr('checked', true);
+			}
+			else
+			{
+				$('.reposo').addClass("noverScreen");
+				$('#mostrar-reposo').attr('checked', false);
+			}
+        });
+		
+        $('#adelanto-sueldo').on('click',function()
+        {
+            $('.adelanto-sueldo').addClass("noverScreen");
+			$('#mostrar-adelanto-sueldo').attr('checked', false);
+			$('#mostrar-adelanto-sueldo').prop('checked', false);
+        });
+		
+        $('#mostrar-adelanto-sueldo').on('click',function()
+        {
+			if  ($('#mostrar-adelanto-sueldo').prop('checked'))
+			{
+				$('.adelanto-sueldo').removeClass("noverScreen");
+				$('#mostrar-adelanto-sueldo').attr('checked', true);
+			}
+			else
+			{
+				$('.adelanto-sueldo').addClass("noverScreen");
+				$('#mostrar-adelanto-sueldo').attr('checked', false);
+			}
+        });
+	
+        $('#prestamos').on('click',function()
+        {
+            $('.prestamos').addClass("noverScreen");
+			$('#mostrar-prestamos').attr('checked', false);
+			$('#mostrar-prestamos').prop('checked', false);
+        });
+		
+        $('#mostrar-prestamos').on('click',function()
+        {
+			if  ($('#mostrar-prestamos').prop('checked'))
+			{
+				$('.prestamos').removeClass("noverScreen");
+				$('#mostrar-prestamos').attr('checked', true);
+			}
+			else
+			{
+				$('.prestamos').addClass("noverScreen");
+				$('#mostrar-prestamos').attr('checked', false);
+			}
+        });
+	
+        $('#porcentaje-impuesto').on('click',function()
+        {
+            $('.porcentaje-impuesto').addClass("noverScreen");
+			$('#mostrar-porcentaje-impuesto').attr('checked', false);
+			$('#mostrar-porcentaje-impuesto').prop('checked', false);
+        });
+		
+        $('#mostrar-porcentaje-impuesto').on('click',function()
+        {
+			if  ($('#mostrar-porcentaje-impuesto').prop('checked'))
+			{
+				$('.porcentaje-impuesto').removeClass("noverScreen");
+				$('#mostrar-porcentaje-impuesto').attr('checked', true);
+			}
+			else
+			{
+				$('.porcentaje-impuesto').addClass("noverScreen");
+				$('#mostrar-porcentaje-impuesto').attr('checked', false);
+			}
+        });
+	
+        $('#monto-impuesto').on('click',function()
+        {
+            $('.monto-impuesto').addClass("noverScreen");
+			$('#mostrar-monto-impuesto').attr('checked', false);
+			$('#mostrar-monto-impuesto').prop('checked', false);
+        });
+		
+        $('#mostrar-monto-impuesto').on('click',function()
+        {
+			if  ($('#mostrar-monto-impuesto').prop('checked'))
+			{
+				$('.monto-impuesto').removeClass("noverScreen");
+				$('#mostrar-monto-impuesto').attr('checked', true);
+			}
+			else
+			{
+				$('.monto-impuesto').addClass("noverScreen");
+				$('#mostrar-monto-impuesto').attr('checked', false);
+			}
+        });
+	
+        $('#dias-inasistencias').on('click',function()
+        {
+            $('.dias-inasistencias').addClass("noverScreen");
+			$('#mostrar-dias-inasistencias').attr('checked', false);
+			$('#mostrar-dias-inasistencias').prop('checked', false);
+        });
+		
+        $('#mostrar-dias-inasistencias').on('click',function()
+        {
+			if  ($('#mostrar-dias-inasistencias').prop('checked'))
+			{
+				$('.dias-inasistencias').removeClass("noverScreen");
+				$('#mostrar-dias-inasistencias').attr('checked', true);
+			}
+			else
+			{
+				$('.dias-inasistencias').addClass("noverScreen");
+				$('#mostrar-dias-inasistencias').attr('checked', false);
+			}
+        });
+	
+        $('#inasistencias').on('click',function()
+        {
+            $('.inasistencias').addClass("noverScreen");
+			$('#mostrar-inasistencias').attr('checked', false);
+			$('#mostrar-inasistencias').prop('checked', false);
+        });
+		
+        $('#mostrar-inasistencias').on('click',function()
+        {
+			if  ($('#mostrar-inasistencias').prop('checked'))
+			{
+				$('.inasistencias').removeClass("noverScreen");
+				$('#mostrar-inasistencias').attr('checked', true);
+			}
+			else
+			{
+				$('.inasistencias').addClass("noverScreen");
+				$('#mostrar-inasistencias').attr('checked', false);
+			}
+        });
+	        
+        $('#total-pago').on('click',function()
+        {
+            $('.total-pago').addClass("noverScreen");
+			$('#mostrar-total-pago').attr('checked', false);
+			$('#mostrar-total-pago').prop('checked', false);
+        });
+		
+        $('#mostrar-total-pago').on('click',function()
+        {
+			if  ($('#mostrar-total-pago').prop('checked'))
+			{
+				$('.total-pago').removeClass("noverScreen");
+				$('#mostrar-total-pago').attr('checked', true);
+			}
+			else
+			{
+				$('.total-pago').addClass("noverScreen");
+				$('#mostrar-total-pago').attr('checked', false);
+			}
+        });
+	
+        $('#dias-cesta-ticket').on('click',function()
+        {
+            $('.dias-cesta-ticket').addClass("noverScreen");
+			$('#mostrar-dias-cesta-ticket').attr('checked', false);
+			$('#mostrar-dias-cesta-ticket').prop('checked', false);
+        });
+		
+        $('#mostrar-dias-cesta-ticket').on('click',function()
+        {
+			if  ($('#mostrar-dias-cesta-ticket').prop('checked'))
+			{
+				$('.dias-cesta-ticket').removeClass("noverScreen");
+				$('#mostrar-dias-cesta-ticket').attr('checked', true);
+			}
+			else
+			{
+				$('.dias-cesta-ticket').addClass("noverScreen");
+				$('#mostrar-dias-cesta-ticket').attr('checked', false);
+			}
+        });
+			
+        $('#monto-cesta-ticket').on('click',function()
+        {
+            $('.monto-cesta-ticket').addClass("noverScreen");
+			$('#mostrar-monto-cesta-ticket').attr('checked', false);
+			$('#mostrar-monto-cesta-ticket').prop('checked', false);
+        });
+		
+        $('#mostrar-monto-cesta-ticket').on('click',function()
+        {
+			if  ($('#mostrar-monto-cesta-ticket').prop('checked'))
+			{
+				$('.monto-cesta-ticket').removeClass("noverScreen");
+				$('#mostrar-monto-cesta-ticket').attr('checked', true);
+			}
+			else
+			{
+				$('.monto-cesta-ticket').addClass("noverScreen");
+				$('#mostrar-monto-cesta-ticket').attr('checked', false);
+			}
+        });
+					
+        $('#prestamos-cesta-ticket').on('click',function()
+        {
+            $('.prestamos-cesta-ticket').addClass("noverScreen");
+			$('#mostrar-prestamos-cesta-ticket').attr('checked', false);
+			$('#mostrar-prestamos-cesta-ticket').prop('checked', false);
+        });
+		
+        $('#mostrar-prestamos-cesta-ticket').on('click',function()
+        {
+			if  ($('#mostrar-prestamos-cesta-ticket').prop('checked'))
+			{
+				$('.prestamos-cesta-ticket').removeClass("noverScreen");
+				$('#prestamos-loan-cesta-ticket').attr('checked', true);
+			}
+			else
+			{
+				$('.prestamos-cesta-ticket').addClass("noverScreen");
+				$('#mostrar-prestamos-cesta-ticket').attr('checked', false);
+			}
+        });
+					
         $('#total-cesta-ticket').on('click',function()
         {
-            $('.total-cesta-ticket').hide();
+            $('.total-cesta-ticket').addClass("noverScreen");
+			$('#mostrar-total-cesta-ticket').attr('checked', false);
+			$('#mostrar-total-cesta-ticket').prop('checked', false);
         });
-							
+		
+        $('#mostrar-total-cesta-ticket').on('click',function()
+        {
+			if  ($('#mostrar-total-cesta-ticket').prop('checked'))
+			{
+				$('.total-cesta-ticket').removeClass("noverScreen");
+				$('#mostrar-total-cesta-ticket').attr('checked', true);
+			}
+			else
+			{
+				$('.total-cesta-ticket').addClass("noverScreen");
+				$('#mostrar-total-cesta-ticket').attr('checked', false);
+			}
+        });
+								
         $('#mas').on('click',function()
         {
             $('.menu-menos').hide();
             $('.menu-mas').show();
         });
-        
+			        
         $('#menos').on('click',function()
         {
             $('.menu-mas').hide();

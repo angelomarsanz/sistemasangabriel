@@ -268,7 +268,7 @@ class EmployeepaymentsTable extends Table
 
         return $rules;
     }
-    public function findFortnight(Query $query, array $options)
+    public function findPayroll(Query $query, array $options)
     {
         $query->select(
             ['Employeepayments.id',

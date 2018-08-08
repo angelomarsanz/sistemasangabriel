@@ -296,7 +296,7 @@ class EmployeepaymentsController extends AppController
 
 				$employeepayment->discount_absences = $employeepayment->days_absence * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30);
 				
-				$employeepayment->faov = ($employeepayment->fortnight + ($employeepayment->amount_escalation/2) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
+				$employeepayment->faov = ($employeepayment->base_payment + ($employeepayment->amount_escalation/2) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
 
 				if ($paysheet->date_until->day < 28)
 				{				
@@ -351,7 +351,7 @@ class EmployeepaymentsController extends AppController
 					$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;					
 				}
 			
-				$employeepayment->total_payment = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+				$employeepayment->total_payment = $employeepayment->base_payment + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 
 				if (substr($valor['days_cesta_ticket'], -3, 1) == ',')
 				{
@@ -389,7 +389,7 @@ class EmployeepaymentsController extends AppController
 
         $employeepayments = TableRegistry::get('Employeepayments');
         
-        $arrayResult = $employeepayments->find('fortnight', ['idPaysheet' => $idPaysheet]);
+        $arrayResult = $employeepayments->find('payroll', ['idPaysheet' => $idPaysheet]);
         
         if ($arrayResult['indicator'] == 0)
         {
