@@ -57,6 +57,9 @@
 				<fieldset>
 					<div class="row">
 						<div class="col-md-4">
+							<?php echo $this->Form->input('position_categories', ['label' => 'Categoría:', 'options' => $positionCategories]); ?>
+						</div>
+						<div class="col-md-4">
 							<?php echo $this->Form->input('date_from', ['label' => 'Desde: ', 
 								'type' => 'date',
 								'value' => $currentDate,
@@ -96,15 +99,12 @@
 								'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">{{day}}</li><li class="month">{{month}}</li><li class="year">{{year}}</li></ul>']]);
 							?>
 						</div>
-						<div class="col-md-4">
-							<?php echo $this->Form->input('position_categories', ['label' => 'Categoría:', 'options' => $positionCategories]); ?>
-						</div>
 					</div>
 				</fieldset>	
 			</div>
 			<div class="col-md-1">	
 				<br />
-				<button type="submit" id="search-fortnight" class="glyphicon glyphicon-search btn btn-default"></button>
+				<button type="submit" id="search-payroll" class="glyphicon glyphicon-search btn btn-default"></button>
 			</div>
 		</div>
 		<?= $this->Form->end() ?>
@@ -125,6 +125,15 @@
 <script>
     $(document).ready(function()
     { 		
+		if ($('#ambiente').val() == "Producción")
+		{
+			paysheetIndex = "/sistemasangabriel/paysheets/index";
+		}
+		else
+		{
+			paysheetIndex = "/desarrollosistemasangabriel/paysheets/index";
+		}	
+
 		$('[data-toggle="tooltip"]').tooltip();
         
 		$('#mas').on('click',function()
@@ -139,18 +148,12 @@
             $('.menu-menos').show();
         });
 
-        $('#search-fortnight').click(function(e) 
+        $('#search-payroll').click(function(e) 
         {
             e.preventDefault(); 
 			
-			if ($('#ambiente').val() == "Producción")
-			{
-				$.redirect('/sistemasangabriel/paysheets/index', {ddFrom : $("select[name='date_from[day]']").val(), mmFrom : $("select[name='date_from[month]']").val(), yyFrom : $("select[name='date_from[year]']").val(), ddUntil : $("select[name='date_until[day]']").val(), mmUntil : $("select[name='date_until[month]']").val(), yyUntil : $("select[name='date_until[year]']").val(), positionCategories : $("#position-categories").val() });
-			}
-			else
-			{
-				$.redirect('/desarrollosistemasangabriel/paysheets/index', {dateFrom : $("#date-from").val(), dateUntil : $("#date-until").val(), positionCategories : $("#position-categories").val() });			
-			}			
+			$.redirect(paysheetIndex, {ddFrom : $("select[name='date_from[day]']").val(), mmFrom : $("select[name='date_from[month]']").val(), yyFrom : $("select[name='date_from[year]']").val(), ddUntil : $("select[name='date_until[day]']").val(), mmUntil : $("select[name='date_until[month]']").val(), yyUntil : $("select[name='date_until[year]']").val(), positionCategories : $("#position-categories").val() });
+
         });
-	});
+});
 </script>

@@ -3,6 +3,8 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 
+use App\Controller\BinnaclesController;
+
 /**
  * Payments Controller
  *
@@ -159,4 +161,38 @@ class PaymentsController extends AppController
 
         return $paymentsTurn;
     }
+	
+    public function monetaryReconversion()
+    {				
+		$binnacles = new BinnaclesController;
+	
+		$payments = $this->Payments->find('all', ['conditions' => ['id >' => 0]]);
+	
+		$account1 = $payments->count();
+			
+		$account2 = 0;
+		
+		foreach ($payments as $payment)
+        {		
+			$paymentGet = $this->Payments->get($payment->id);
+			
+			$previousAmount = $paymentGet->amount;
+										
+			$paymentGet->amount = $previousAmount / 100000;
+					
+			if ($this->Payments->save($paymentGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$binnacles->add('controller', 'Payments', 'monetaryReconversion', 'No se actualizó registro con id: ' . $paymentGet->id);
+			}
+		}
+
+		$binnacles->add('controller', 'Payments', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
+		$binnacles->add('controller', 'Payments', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
+
+		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+	}
 }

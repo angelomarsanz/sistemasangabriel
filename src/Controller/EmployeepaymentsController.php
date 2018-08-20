@@ -9,6 +9,8 @@ use App\Controller\PaysheetsController;
 
 use Cake\ORM\TableRegistry;
 
+use App\Controller\BinnaclesController;
+
 use Cake\I18n\Time;
 
 /**
@@ -71,127 +73,130 @@ class EmployeepaymentsController extends AppController
      *
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
+    
     public function add($paysheet = null, $employeesPaysheets = null)
     {
         $this->autoRender = false;
-        
-        $result = 0;
-    
+		
+		$binnacles = new BinnaclesController;
+		
+		$result = 0;	
+
         foreach ($employeesPaysheets as $employeesPaysheet) 
-        {
-            $result = $this->addRecord($paysheet, $employeesPaysheet);
-            if ($result == 1)
-            {
-                break;
-            }
-        }
+        {		
+			$employeepayment = $this->Employeepayments->newEntity();
+			
+			$employeepayment->paysheet_id = $paysheet->id;
+			
+			$employeepayment->employee_id = $employeesPaysheet->id;
+			
+			$employeepayment->current_position = $employeesPaysheet->position->short_name;
+		
+			$employeepayment->current_basic_salary = $employeesPaysheet->position->minimum_wage;
+			
+			$employeepayment->current_monthly_hours = $employeesPaysheet->hours_month;
+
+			if ($employeesPaysheet->position->type_of_salary == "Por horas")
+			{
+				$employeepayment->monthly_salary = $employeesPaysheet->position->minimum_wage * $employeesPaysheet->hours_month;
+			}
+			else
+			{
+				$employeepayment->monthly_salary = $employeesPaysheet->position->minimum_wage;
+			}
+			
+			$employeepayment->payment_period = ($employeepayment->monthly_salary/30) * $paysheet->salary_days; 
+			
+			$employeepayment->percentage_imposed = $employeesPaysheet->percentage_imposed;
+			
+			$period = $this->calculatePeriod($employeesPaysheet->date_of_admission);
+			
+			$years = $period->format('%Y');
+			
+			$employeepayment->years_service = $years;
+					
+			$employeepayment->scale = floor($years / 5) * 0.05;
+			
+			$employeepayment->amount_escalation = $employeepayment->scale * $employeepayment->monthly_salary;
+
+			if ((15 + ($years - 1)) > 30)
+			{
+				$employeepayment->bv = 30;
+			}
+			elseif ((15 + ($years - 1)) <= 15)
+			{
+				$employeepayment->bv = 15;
+			}
+			else
+			{
+				$employeepayment->bv = 15 + ($years - 1);
+			}
+			
+			$employeepayment->integral_salary = (($employeepayment->bv + 60)/360) * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30) + (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30); 
+
+			$employeepayment->trust_days = 5;
+
+			$employeepayment->salary_advance = 0.00;
+
+			$employeepayment->other_income = 0.00;
+					
+			$employeepayment->discount_repose = 0.00;
+					
+			$employeepayment->discount_loan = 0.00;
+					
+			$employeepayment->days_absence = 0;
+					
+			$employeepayment->discount_absences = $employeepayment->days_absence * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30);
+					
+			$employeepayment->faov = ($employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
+
+			$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;           
+
+			$employeepayment->fideicomiso = $employeepayment->integral_salary * $employeepayment->trust_days;
+			
+			if ($paysheet->date_until->day < 28)
+			{        
+				$employeepayment->amount_imposed = 0;
+			}
+			else
+			{
+				$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation) * $employeepayment->percentage_imposed)/100;
+			}
+			
+			$employeepayment->total_payment = $employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_repose - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+
+			if ($paysheet->days_cesta_ticket == 0)
+			{
+				$employeepayment->days_cesta_ticket = 0;
+			
+				$employeepayment->amount_cesta_ticket = 0;
+			
+				$employeepayment->loan_cesta_ticket = 0;
+			
+				$employeepayment->total_cesta_ticket = 0;
+			}
+			else
+			{
+				$employeepayment->days_cesta_ticket = $paysheet->days_cesta_ticket - $employeepayment->days_absence;
+				
+				$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
+				
+				$employeepayment->loan_cesta_ticket = 0;
+				
+				$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;				
+			}
+			
+			if (!($this->Employeepayments->save($employeepayment))) 
+			{
+				$result = 1;
+				$result = $binnacles->add('controller', 'Employeepayments', 'add', 'No se pudo grabar el pago correspondiente al empleado con id: ' . $employeesPaysheet->id);
+				break;
+			} 
+		}
         return $result;
     }
-    
-    public function addRecord($paysheet = null, $employeesPaysheet = null)
-    {
-        $employeepayment = $this->Employeepayments->newEntity();
-        
-        $employeepayment->paysheet_id = $paysheet->id;
-        
-        $employeepayment->employee_id = $employeesPaysheet->id;
-        
-        $employeepayment->current_position = $employeesPaysheet->position->short_name;
-    
-        $employeepayment->current_basic_salary = $employeesPaysheet->position->minimum_wage;
-        
-        $employeepayment->current_monthly_hours = $employeesPaysheet->hours_month;
 
-        if ($employeesPaysheet->position->type_of_salary == "Por horas")
-        {
-            $employeepayment->monthly_salary = $employeesPaysheet->position->minimum_wage * $employeesPaysheet->hours_month;
-        }
-        else
-        {
-            $employeepayment->monthly_salary = $employeesPaysheet->position->minimum_wage;
-        }
-		
-		$employeepayment->base_payment = ($employeepayment->monthly_salary/30) * $paysheet->salary_days; 
-        
-        $employeepayment->percentage_imposed = $employeesPaysheet->percentage_imposed;
-        
-        $period = $this->calculatePeriod($employeesPaysheet->date_of_admission);
-        
-        $years = $period->format('%Y');
-        
-        $employeepayment->years_service = $years;
-                
-        $employeepayment->scale = floor($years / 5) * 0.05;
-        
-        $employeepayment->amount_escalation = $employeepayment->scale * $employeepayment->monthly_salary;
-
-        if ((15 + ($years - 1)) > 30)
-        {
-            $employeepayment->bv = 30;
-        }
-        elseif ((15 + ($years - 1)) <= 15)
-        {
-            $employeepayment->bv = 15;
-        }
-        else
-        {
-            $employeepayment->bv = 15 + ($years - 1);
-        }
-		
-        $employeepayment->integral_salary = (($employeepayment->bv + 60)/360) * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30) + (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30); 
-
-        $employeepayment->trust_days = 5;
-
-        $employeepayment->salary_advance = 0.00;
-
-        $employeepayment->other_income = 0.00;
-                
-        $employeepayment->discount_repose = 0.00;
-                
-        $employeepayment->discount_loan = 0.00;
-                
-        $employeepayment->days_absence = 0;
-                
-        $employeepayment->discount_absences = $employeepayment->days_absence * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30);
-                
-        $employeepayment->faov = ($employeepayment->base_payment + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
-
-		$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;           
-
-		$employeepayment->fideicomiso = $employeepayment->integral_salary * $employeepayment->trust_days;
-		
-		if ($paysheet->date_until->day < 28)
-		{        
-			$employeepayment->amount_imposed = 0;
-		}
-		else
-		{
-        
-			$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation) * $employeepayment->percentage_imposed)/100;
-		}
-		
-        $employeepayment->total_payment = $employeepayment->base_payment + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
-
-		$employeepayment->days_cesta_ticket = $paysheet->days_cesta_ticket - $employeepayment->days_absence;
-		
-		$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
-		
-		$employeepayment->loan_cesta_ticket = 0;
-		
-		$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;
-		
-        if ($this->Employeepayments->save($employeepayment)) 
-        {
-            $result = 0;
-        } 
-        else
-        {
-            $result = 1;
-        }
-        return $result;
-    }
-
-    public function completeData($idPaysheet = null)
+    public function edit($idPaysheet = null)
     {
         $employee = new EmployeesController();
 		
@@ -256,11 +261,6 @@ class EmployeepaymentsController extends AppController
 					$employeepayment->other_income = $valor['other_income'];
 				}
 			
-				if ($valor['discount_repose'] > 0.00)
-				{
-					$employeepayment->repose = true;
-				}
-
 				if (substr($valor['discount_repose'], -3, 1) == ',')
 				{
 					$replace1= str_replace('.', '', $valor['discount_repose']);
@@ -270,6 +270,11 @@ class EmployeepaymentsController extends AppController
 				else
 				{
 					$employeepayment->discount_repose = $valor['discount_repose'];
+				}
+				
+				if ($employeepayment->discount_repose > 0)
+				{
+					$employeepayment->repose = true;
 				}
 				
 				if (substr($valor['discount_loan'], -3, 1) == ',')
@@ -296,7 +301,7 @@ class EmployeepaymentsController extends AppController
 
 				$employeepayment->discount_absences = $employeepayment->days_absence * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30);
 				
-				$employeepayment->faov = ($employeepayment->base_payment + ($employeepayment->amount_escalation/2) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
+				$employeepayment->faov = ($employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
 
 				if ($paysheet->date_until->day < 28)
 				{				
@@ -304,7 +309,7 @@ class EmployeepaymentsController extends AppController
 				}
 				else
 				{
-					$employeepayment->ivss = (((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 2;	
+					$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;           
 				}           
 
 				if (substr($valor['trust_days'], -3, 1) == ',')
@@ -317,6 +322,8 @@ class EmployeepaymentsController extends AppController
 				{
 					$employeepayment->trust_days = $valor['trust_days'];
 				}
+				
+				$employeepayment->fideicomiso = $employeepayment->integral_salary * $employeepayment->trust_days;
 
 				if (substr($valor['percentage_imposed'], -3, 1) == ',')
 				{
@@ -348,37 +355,40 @@ class EmployeepaymentsController extends AppController
 				}
 				else
 				{
-					$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;					
+					$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation) * $employeepayment->percentage_imposed)/100;
 				}
 			
-				$employeepayment->total_payment = $employeepayment->base_payment + ($employeepayment->amount_escalation/2) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
-
-				if (substr($valor['days_cesta_ticket'], -3, 1) == ',')
-				{
-					$replace1= str_replace('.', '', $valor['days_cesta_ticket']);
-					$replace2 = str_replace(',', '.', $replace1);
-					$employeepayment->days_cesta_ticket = $replace2;
-				}
-				else
-				{
-					$employeepayment->days_cesta_ticket = $valor['days_cesta_ticket'];
-				}
-				
-				$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($cestaTicketMonth/30);
-				
-				if (substr($valor['loan_cesta_ticket'], -3, 1) == ',')
-				{
-					$replace1= str_replace('.', '', $valor['loan_cesta_ticket']);
-					$replace2 = str_replace(',', '.', $replace1);
-					$employeepayment->loan_cesta_ticket = $replace2;
-				}
-				else
-				{
-					$employeepayment->loan_cesta_ticket = $valor['loan_cesta_ticket'];
-				}
-				
-				$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;
+				$employeepayment->total_payment = $employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_repose - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+		
+				if ($paysheet->days_cesta_ticket > 0)
+				{			
+					if (substr($valor['days_cesta_ticket'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['days_cesta_ticket']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->days_cesta_ticket = $replace2;
+					}
+					else
+					{
+						$employeepayment->days_cesta_ticket = $valor['days_cesta_ticket'];
+					}
+								
+					$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
 					
+					if (substr($valor['loan_cesta_ticket'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['loan_cesta_ticket']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->loan_cesta_ticket = $replace2;
+					}
+					else
+					{
+						$employeepayment->loan_cesta_ticket = $valor['loan_cesta_ticket'];
+					}
+								
+					$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;	
+				}
+				
                 if (!($this->Employeepayments->save($employeepayment)))
                 {
                     $this->Flash->error(__('No pudo ser actualizado el pago identificado con el id: ' . $valor['id']));            
@@ -397,7 +407,7 @@ class EmployeepaymentsController extends AppController
 			                				
 			$tableConfiguration = json_decode($paysheet->table_configuration);
            
-            $currentView = 'employeepaymentsCompleteData';
+            $currentView = 'employeepaymentsEdit';
                 		           
             $this->set(compact('employeesFor', 'currentView', 'paysheet', 'tableConfiguration', 'weeksSocialSecurity', 'positionCategories', 'school'));
             $this->set('_serialize', ['employeesFor', 'currentView', 'paysheet', 'tableConfiguration', 'weeksSocialSecurity', 'positionCategories', 'school']);
@@ -464,90 +474,6 @@ class EmployeepaymentsController extends AppController
         }        
     }
 	
-    /**
-     * Edit method
-     *
-     * @param string|null $id Employeepayment id.
-     * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Network\Exception\NotFoundException When record not found.
-     */
-    public function edit($id = null, $weeksSocialSecurity = null, $employeesPaysheet = null)
-    {
-        $employeepayment = $this->Employeepayments->get($id, [
-            'contain' => []
-        ]);
-
-        $employeepayment->current_position = $employeesPaysheet->position->short_name;
-    
-        $employeepayment->current_basic_salary = $employeesPaysheet->position->minimum_wage;
-        
-        $employeepayment->current_monthly_hours = $employeesPaysheet->hours_month;
-
-        if ($employeesPaysheet->position->type_of_salary == "Por horas")
-        {
-            $employeepayment->monthly_salary = $employeesPaysheet->position->minimum_wage * $employeesPaysheet->hours_month;
-            
-            $fortnight = $employeepayment->monthly_salary/2;
-            
-            $employeepayment->fortnight = round($fortnight, 2);
-        }
-        else
-        {
-            $employeepayment->monthly_salary = $employeesPaysheet->position->minimum_wage;
-            
-            $fortnight = $employeepayment->monthly_salary/2;
-
-            $employeepayment->fortnight = round($fortnight, 2);
-        }
-        
-        $employeepayment->percentage_imposed = $employeesPaysheet->percentage_imposed;
-        
-        $period = $this->calculatePeriod($employeesPaysheet->date_of_admission);
-        
-        $years = $period->format('%Y');
-        
-        $employeepayment->years_service = $years;
-        
-        if ((15 + ($years - 1)) > 30)
-        {
-            $employeepayment->bv = 30;
-        }
-        else if ((15 + ($years - 1)) <= 15)
-        {
-            $employeepayment->bv = 15;
-        }
-        else
-        {
-            $employeepayment->bv = 15 + ($years - 1);
-        }
-        
-        $employeepayment->scale = floor($years / 5) * 0.05;
-        
-        $employeepayment->amount_escalation = $employeepayment->scale * $employeepayment->monthly_salary;
-
-        $employeepayment->integral_salary = (($employeepayment->bv + 60)/360) * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30) + (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30); 
-
-        $employeepayment->discount_absences = $employeepayment->days_absence * (($employeepayment->monthly_salary + $employeepayment->amount_escalation)/30);
-                
-        $employeepayment->faov = ($employeepayment->fortnight + ($employeepayment->amount_escalation/2) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
-      
-        $employeepayment->ivss = (((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $weeksSocialSecurity) / 2;           
-        
-        $employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation + $employeepayment->salary_advance) * $employeepayment->percentage_imposed)/100;
-
-        $employeepayment->total_payment = $employeepayment->fortnight + ($employeepayment->amount_escalation/2) + $employeepayment->salary_advance + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
-
-        if ($this->Employeepayments->save($employeepayment)) 
-        {
-            $result = 0;
-        } 
-        else
-        {
-            $result = 1;
-        }
-        return $result;
-    }
-
     /**
      * Delete method
      *

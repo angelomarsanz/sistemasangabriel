@@ -13,6 +13,8 @@ use App\Controller\ConsecutiveinvoicesController;
 
 use App\Controller\ConsecutivereceiptsController;
 
+use App\Controller\BinnaclesController;
+
 use Cake\I18n\Time;
 
 class BillsController extends AppController
@@ -1052,5 +1054,42 @@ class BillsController extends AppController
     public function pruebaIntercambioDatos()
     {
 
-    } 
+    }
+    public function monetaryReconversion()
+    {				
+		$binnacles = new BinnaclesController;
+	
+		$bills = $this->Bills->find('all', ['conditions' => ['id >' => 0]]);
+	
+		$account1 = $bills->count();
+			
+		$account2 = 0;
+		
+		foreach ($bills as $bill)
+        {		
+			$billGet = $this->Bills->get($bill->id);
+			
+			$previousAmount = $billGet->amount;
+										
+			$billGet->amount = $previousAmount / 100000;
+			
+			$previousAmount = $billGet->amount_paid;
+										
+			$billGet->amount_paid = $previousAmount / 100000;
+			
+			if ($this->Bills->save($billGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$binnacles->add('controller', 'Bills', 'monetaryReconversion', 'No se actualizó registro con id: ' . $billGet->id);
+			}
+		}
+
+		$binnacles->add('controller', 'Bills', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
+		$binnacles->add('controller', 'Bills', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
+
+		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+	}	
 }

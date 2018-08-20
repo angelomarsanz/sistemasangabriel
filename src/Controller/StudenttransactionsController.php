@@ -3684,4 +3684,83 @@ class StudenttransactionsController extends AppController
 		} 
 		return $arrayResult;
 	}
+	
+    public function modifyPaymentDate()
+    {
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+				
+		$defaultDate = new Time();
+			
+		$defaultDate
+			->year(1970)
+			->month(01)
+			->day(01)
+			->hour(00)
+			->minute(00)
+			->second(00);
+					
+		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => ['payment_date <' => $defaultDate]]);
+	
+		$account1 = $studentTransactions->count();
+			
+		$account2 = 0;
+		
+		foreach ($studentTransactions as $studentTransaction)
+        {		
+			$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
+							
+			$studentTransactionGet->payment_date = $defaultDate; 
+			
+			if ($this->Studenttransactions->save($studentTransactionGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$this->Flash->error(__('No pudo ser grabada la transacción con id: ' . $studentTransactionGet->id));
+			}
+		}
+
+		$this->Flash->success(__('Total registros seleccionados: ' . $account1));
+		$this->Flash->success(__('Total registros actualizados: ' . $account2));
+		
+		return $this->redirect(['controller' => 'users', 'action' => 'wait']);
+	}
+    public function monetaryReconversion()
+    {				
+		$binnacles = new BinnaclesController;
+	
+		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => ['id >' => 0]]);
+	
+		$account1 = $studentTransactions->count();
+			
+		$account2 = 0;
+		
+		foreach ($studentTransactions as $studentTransaction)
+        {		
+			$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
+			
+			$previousAmount = $studentTransactionGet->amount;
+										
+			$studentTransactionGet->amount = $previousAmount / 100000;
+
+			$previousAmount = $studentTransactionGet->original_amount;
+										
+			$studentTransactionGet->original_amount = $previousAmount / 100000;			
+			
+			if ($this->Studenttransactions->save($studentTransactionGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$binnacles->add('controller', 'Studenttransactions', 'monetaryReconversion', 'No se actualizó registro con id: ' . $studentTransactionGet->id);
+			}
+		}
+
+		$binnacles->add('controller', 'Studenttransactions', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
+		$binnacles->add('controller', 'Studenttransactions', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
+		exit;
+	}
 }

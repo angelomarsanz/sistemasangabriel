@@ -5,6 +5,8 @@ use App\Controller\AppController;
 
 use App\Controller\StudenttransactionsController;
 
+use App\Controller\BinnaclesController;
+
 /**
  * Concepts Controller
  *
@@ -127,4 +129,38 @@ class ConceptsController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
+	
+    public function monetaryReconversion()
+    {				
+		$binnacles = new BinnaclesController;
+	
+		$concepts = $this->Concepts->find('all', ['conditions' => ['id >' => 0]]);
+	
+		$account1 = $concepts->count();
+			
+		$account2 = 0;
+		
+		foreach ($concepts as $concept)
+        {		
+			$conceptGet = $this->Concepts->get($concept->id);
+			
+			$previousAmount = $conceptGet->amount;
+										
+			$conceptGet->amount = $previousAmount / 100000;
+					
+			if ($this->Concepts->save($conceptGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$binnacles->add('controller', 'Concepts', 'monetaryReconversion', 'No se actualizó registro con id: ' . $conceptGet->id);
+			}
+		}
+
+		$binnacles->add('controller', 'Concepts', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
+		$binnacles->add('controller', 'Concepts', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
+
+		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+	}	
 }

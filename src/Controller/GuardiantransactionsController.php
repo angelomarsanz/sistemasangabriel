@@ -3,6 +3,8 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 
+use App\Controller\BinnaclesController;
+
 /**
  * Guardiantransactions Controller
  *
@@ -157,4 +159,37 @@ class GuardiantransactionsController extends AppController
         $this->set(compact('idParentsAndGuardian'));
         $this->set('_serialize', ['idParentsAndGuardian']);
     }
+    public function monetaryReconversion()
+    {				
+		$binnacles = new BinnaclesController;
+	
+		$guardiantransactions = $this->Guardiantransactions->find('all', ['conditions' => ['id >' => 0]]);
+	
+		$account1 = $guardiantransactions->count();
+			
+		$account2 = 0;
+		
+		foreach ($guardiantransactions as $guardiantransaction)
+        {		
+			$guardiantransactionGet = $this->Guardiantransactions->get($guardiantransaction->id);
+			
+			$previousAmount = $guardiantransactionGet->amount;
+										
+			$guardiantransactionGet->amount = $previousAmount / 100000;
+					
+			if ($this->Guardiantransactions->save($guardiantransactionGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$binnacles->add('controller', 'Guardiantransactions', 'monetaryReconversion', 'No se actualizó registro con id: ' . $guardiantransactionGet->id);
+			}
+		}
+
+		$binnacles->add('controller', 'Guardiantransactions', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
+		$binnacles->add('controller', 'Guardiantransactions', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
+
+		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+	}
 }

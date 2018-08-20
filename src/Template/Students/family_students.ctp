@@ -61,54 +61,68 @@
 				<h3>Selección de columnas a imprimir</h3>
 			</div>
 			<?= $this->Form->create() ?>
-			<fieldset>	
-				<div id="columns-report" class="row">
-					<div class="col-md-6">
-						<h4>Datos de la familia</h4>
-						<div class="row">
-							<div class="col-md-1">
-							</div>
-							<div class="col-md-11">
-								<h5>Datos del representante:</h5>
-									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.full_name]" id="nombre"> Nombre</p>
-									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.sex]"> Sexo</p>
-									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.identidy_card]"> Cédula o pasaporte</p>
-									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.work_phone]"> Teléfono trabajo</p>
-									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.cell_phone]"> Celular</p>
-									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.email]"> Email</p>
+				<fieldset>	
+					<div id="columns-report" class="row">
+						<div class="col-md-6">
+							<h4>Datos de la familia</h4>
+							<div class="row">
+								<div class="col-md-1">
+								</div>
+								<div class="col-md-11">
+									<h5>Datos del representante:</h5>
+										<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.full_name]" id="nombre"> Nombre</p>
+										<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.sex]"> Sexo</p>
+										<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.identidy_card]"> Cédula o pasaporte</p>
+										<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.work_phone]"> Teléfono trabajo</p>
+										<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.cell_phone]"> Celular</p>
+										<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.email]"> Email</p>
+								</div>
 							</div>
 						</div>
+						<div class="col-md-6">
+							<h4>Datos del estudiante</h4>
+							<p><input class="column-mark" type="checkbox" name="columnsReport[Students.sex]"> Sexo</p>
+							<p><input class="column-mark" type="checkbox" name="columnsReport[Students.nationality]"> Nacionalidad</p>
+							<p><input class="column-mark" type="checkbox" name="columnsReport[Students.identity_card]"> Cédula o pasaporte</p>
+							<p><input class="column-mark" type="checkbox" name="columnsReport[Students.balance]"> Año escolar</p>
+							<p><input class="column-mark" type="checkbox" name="columnsReport[Students.section_id]"> Grado y sección</p>
+						</div>
 					</div>
-					<div class="col-md-6">
-						<h4>Datos del estudiante</h4>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.sex]"> Sexo</p>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.nationality]"> Nacionalidad</p>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.identity_card]"> Cédula o pasaporte</p>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.balance]"> Año escolar</p>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.section_id]"> Grado y sección</p>
+					<div id="filter" class="row">
+						<div class="col-md-3">
+							<?php
+								echo $this->Form->input('filters_report', ['label' => 'Filtro: *', 'required' => true, 'options' => 
+								[null => " ",
+								 'Regular' => 'Alumnos nuevos',
+								 'Nuevo' => 'Alumnos regulares',
+								 '*' => 'Todos'],
+								 ]);
+							?>
+						</div>
+						<div class="col-md-9">
+						</div>
 					</div>
+				</fieldset>
+				<br /> 					
+				<div id="menu-menos" class="menumenos nover">
+					<p>
+					<a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
+					</p>
 				</div>
-			</fieldset>
-			<br /> 					
-			<div id="menu-menos" class="menumenos nover">
-				<p>
-				<a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
-				</p>
-			</div>
-			<div id="menu-mas" style="display:none;" class="menumas nover">
-				<p>
-					<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
-					<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
-					
-					<button id="marcar-todos" class="glyphicon icon-checkbox-checked btn btn-danger" title="Marcar todos" style="padding: 8px 12px 10px 12px;"></button>
+				<div id="menu-mas" style="display:none;" class="menumas nover">
+					<p>
+						<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'volver', 'class' => 'glyphicon glyphicon-chevron-left btn btn-danger', 'title' => 'Volver']) ?>
+						<?= $this->Html->link(__(''), ['controller' => 'Users', 'action' => 'wait'], ['id' => 'cerrar', 'class' => 'glyphicon glyphicon-remove btn btn-danger', 'title' => 'cerrar vista']) ?>
+						
+						<button id="marcar-todos" class="glyphicon icon-checkbox-checked btn btn-danger" title="Marcar todos" style="padding: 8px 12px 10px 12px;"></button>
 
-					<button id="desmarcar-todos" class="glyphicon icon-checkbox-unchecked btn btn-danger" title="Desmarcar todos" style="padding: 8px 12px 10px 12px;"></button>
+						<button id="desmarcar-todos" class="glyphicon icon-checkbox-unchecked btn btn-danger" title="Desmarcar todos" style="padding: 8px 12px 10px 12px;"></button>
 
-					<?= $this->Form->button(__(''), ['id' => 'generar-reporte', 'title' => 'Generar reporte', 'class' => 'glyphicon glyphicon-th-list btn btn-danger']) ?>					
-					
-					<a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
-				</p>
-			</div>
+						<?= $this->Form->button(__(''), ['id' => 'generar-reporte', 'title' => 'Generar reporte', 'class' => 'glyphicon glyphicon-th-list btn btn-danger']) ?>					
+						
+						<a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
+					</p>
+				</div>
 						
 			<?= $this->Form->end() ?>
 		</div>

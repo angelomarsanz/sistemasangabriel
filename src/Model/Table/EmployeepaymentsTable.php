@@ -79,8 +79,8 @@ class EmployeepaymentsTable extends Table
             ->allowEmpty('monthly_salary');
 
         $validator
-            ->numeric('fortnight')
-            ->allowEmpty('fortnight');
+            ->numeric('payment_period')
+            ->allowEmpty('payment_period');
 
         $validator
             ->numeric('years_service')
@@ -145,14 +145,6 @@ class EmployeepaymentsTable extends Table
             ->allowEmpty('other_income');
 
         $validator
-            ->integer('days_escrow')
-            ->allowEmpty('days_escrow');
-
-        $validator
-            ->numeric('amount_escrow')
-            ->allowEmpty('amount_escrow');
-
-        $validator
             ->numeric('faov')
             ->allowEmpty('faov');
 
@@ -160,6 +152,14 @@ class EmployeepaymentsTable extends Table
             ->numeric('ivss')
             ->allowEmpty('ivss');
 
+        $validator
+            ->numeric('trust_days')
+            ->allowEmpty('trust_days');
+
+        $validator
+            ->numeric('fideicomiso')
+            ->allowEmpty('fideicomiso');
+			
         $validator
             ->numeric('percentage_imposed')
             ->allowEmpty('percentage_imposed');
@@ -189,8 +189,8 @@ class EmployeepaymentsTable extends Table
             ->allowEmpty('discount_absences');
 
         $validator
-            ->numeric('total_fortnight')
-            ->allowEmpty('total_fortnight');
+            ->numeric('total_payment')
+            ->allowEmpty('total_payment');
 			
         $validator
             ->numeric('days_cesta_ticket')
@@ -276,7 +276,7 @@ class EmployeepaymentsTable extends Table
             'Employeepayments.current_basic_salary',
             'Employeepayments.current_monthly_hours',
             'Employeepayments.monthly_salary',
-            'Employeepayments.base_payment',
+            'Employeepayments.payment_period',
             'Employeepayments.scale',
             'Employeepayments.amount_escalation',
             'Employeepayments.other_income',
@@ -286,9 +286,10 @@ class EmployeepaymentsTable extends Table
             'Employeepayments.discount_absences',
             'Employeepayments.faov',
             'Employeepayments.ivss',
-            'Employeepayments.trust_days',
             'Employeepayments.integral_salary',
             'Employeepayments.salary_advance',
+			'Employeepayments.trust_days',
+			'Employeepayments.fideicomiso',
             'Employeepayments.percentage_imposed',
             'Employeepayments.amount_imposed',
             'Employeepayments.total_payment',

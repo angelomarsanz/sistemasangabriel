@@ -63,7 +63,13 @@ class PaysheetsController extends AppController
 				
 		if ($this->request->is('post')) 
         {			
+			$this->loadModel('Schools');
+
+			$school = $this->Schools->get(2);
+			
 			$this->loadModel('Positioncategories');
+
+			$positionCategories = $this->Positioncategories->find('list', ['limit' => 200, "order" => ["description_category" => "ASC"]]);
 			
 			$dateFrom = new Time();
 			
@@ -84,27 +90,28 @@ class PaysheetsController extends AppController
 				->hour(00)
 				->minute(00)
 				->second(00);
-											
+													
 			if ($_POST['positionCategories'] == 1)
-			{
+			{				
 				$paysheets = $this->Paysheets->find('all', 
 					['contain' => ['Positioncategories'],
-					'conditions' => [['date_from >=' => $dateFrom], ['date_until <=' => $dateUntil]],
+					'conditions' => [['Paysheets.id >' => 1], ['date_from >=' => $dateFrom], ['date_until <=' => $dateUntil]],
 					'order' => ['date_from' => 'ASC']]);
 			}
 			else
-			{
+			{			
 				$paysheets = $this->Paysheets->find('all', 
-					['conditions' => [['date_from >=' => $dateFrom], ['date_until <=' => $dateUntil], ['positioncategory_id' => $_POST['positionCategories']]],
+					['contain' => ['Positioncategories'],
+					'conditions' => [['Paysheets.id >' => 1], ['Paysheets.date_from >=' => $dateFrom], ['Paysheets.date_until <=' => $dateUntil], ['Paysheets.positioncategory_id' => $_POST['positionCategories']]],
 					'order' => ['date_from' => 'ASC']]);
 			}
-			
+						
 			$accountRecords = $paysheets->count();
-			
+						
 			if ($accountRecords > 0)
 			{				
-				$this->set(compact('paysheets'));
-				$this->set('_serialize', ['paysheets']);
+				$this->set(compact('paysheets', 'school', 'positionCategories'));
+				$this->set('_serialize', ['paysheets', 'school', 'positionCategories']);
 			}
 			else
 			{
@@ -157,128 +164,7 @@ class PaysheetsController extends AppController
             }
         }
     }
-
-    public function printFortnight()
-    {
-        $employeepayments = new EmployeepaymentsController();
-
-        if ($this->request->is('post')) 
-        {
-            $lastRecord = $this->Paysheets->find('all', ['conditions' => 
-                ['year_paysheet' => $_POST['year_paysheet'],
-                'month_paysheet' => $_POST['month_paysheet'],
-                'fortnight' => $_POST['fortnight']],
-                'order' => ['Paysheets.created' => 'DESC'] ]);
-                
-            if ($lastRecord)
-            {
-                $row = $lastRecord->first();   
-                
-                $month = $this->nameMonthSpanish($_POST['month_paysheet']);
-                
-                return $this->redirect(['controller' => 'Employeepayments', 'action' => 'reportPrint', $row->id, $_POST['year_paysheet'], $month, $_POST['fortnight'], $_POST['classification']]);
-            }
-            else
-            {
-                $this->Flash->error(__('No se han encontrado registros'));
-            }
-        }
-    }
-
-    
-    /**
-     * Add method
-     *
-     * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
-     */
-    public function add()
-    {
-        $paysheet = $this->Paysheets->newEntity();
-        if ($this->request->is('post')) {
-            $paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
-            if ($this->Paysheets->save($paysheet)) {
-                $this->Flash->success(__('The paysheet has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            } else {
-                $this->Flash->error(__('The paysheet could not be saved. Please, try again.'));
-            }
-        }
-        $this->set(compact('paysheet'));
-        $this->set('_serialize', ['paysheet']);
-    }
-
-    /**
-     * Edit method
-     *
-     * @param string|null $id Paysheet id.
-     * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Network\Exception\NotFoundException When record not found.
-     */
-    public function directPayroll($id = null)
-    {
-        $this->autoRender = false;
-        
-		if (isset($id))
-		{
-			return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $id]);
-		}
-		else
-		{
-			$lastRecord = $this->Paysheets->find('all', 
-				['conditions' => ['id >' => 1, 'OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]], 
-				'order' => ['Paysheets.created' => 'DESC']]);
-			
-			$row = $lastRecord->first();   
-					
-			if ($row)
-			{
-				return $this->redirect(['controller' => 'Employeepayments', 'action' => 'completeData', $row->id]);
-			}
-			else
-			{
-				$this->Flash->error(__('No se encontraron nóminas'));
-				return $this->redirect(['controller' => 'Paysheets', 'action' => 'createPayroll', 1]);
-			}
-		}
-    }
-
-    /**
-     * Delete method
-     *
-     * @param string|null $id Paysheet id.
-     * @return \Cake\Network\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function delete($id = null, $controller = null, $action = null)
-    {
-        $this->request->allowMethod(['post', 'delete']);
-		
-		if (isset($_POST['idPaysheet']))
-		{
-			$id = $_POST['idPaysheet'];
-			$controller = $_POST['controller'];
-			$action = $_POST['action'];
-		}
-		
-        $paysheet = $this->Paysheets->get($id);
-        
-        $paysheet->registration_status = "Eliminada";
-        
-        $paysheet->responsible_user	= $this->Auth->user('username');
-        
-        if ($this->Paysheets->save($paysheet)) 
-        {
-            $this->Flash->success(__('La nómina fue eliminada exitosamente'));
-        }
-        else 
-        {
-            $this->Flash->error(__('No se pudo eliminar la nómina'));
-        }
-
-        return $this->redirect(['controller' => $controller, 'action' => $action]);
-    }
-    public function createPayroll($noPayroll = null)
+    public function add($noPayroll = null)
     {
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
 		date_default_timezone_set('America/Caracas');
@@ -390,7 +276,7 @@ class PaysheetsController extends AppController
 				}
 				foreach($error_msg as $noveltys)
 				{
-					$result = $binnacles->add('controller', 'Paysheet', 'createPayroll', $noveltys);
+					$result = $binnacles->add('controller', 'Paysheet', 'add', $noveltys);
 				}
 				$this->Flash->error(__('No se pudo crear la nómina debido a: ' . implode(" - ", $error_msg)));				
 			}
@@ -429,7 +315,7 @@ class PaysheetsController extends AppController
         $this->set('_serialize', ['paysheet', 'payrollParameters', 'controller', 'action', 'positionCategories']); 
 	}
 				    
-    public function editPayroll($id = null, $controller = null, $action = null)
+    public function edit($id = null, $controller = null, $action = null)
     {
 		$this->loadModel('Positioncategories');
 		
@@ -474,6 +360,96 @@ class PaysheetsController extends AppController
         $this->set(compact('paysheet', 'controller', 'action', 'positionCategories', 'tableCategories'));
         $this->set('_serialize', ['paysheet', 'controller', 'action', 'positionCategories', 'tableCategories']); 
 	}
+    public function printFortnight()
+    {
+        $employeepayments = new EmployeepaymentsController();
+
+        if ($this->request->is('post')) 
+        {
+            $lastRecord = $this->Paysheets->find('all', ['conditions' => 
+                ['year_paysheet' => $_POST['year_paysheet'],
+                'month_paysheet' => $_POST['month_paysheet'],
+                'fortnight' => $_POST['fortnight']],
+                'order' => ['Paysheets.created' => 'DESC'] ]);
+                
+            if ($lastRecord)
+            {
+                $row = $lastRecord->first();   
+                
+                $month = $this->nameMonthSpanish($_POST['month_paysheet']);
+                
+                return $this->redirect(['controller' => 'Employeepayments', 'action' => 'reportPrint', $row->id, $_POST['year_paysheet'], $month, $_POST['fortnight'], $_POST['classification']]);
+            }
+            else
+            {
+                $this->Flash->error(__('No se han encontrado registros'));
+            }
+        }
+    }
+
+    public function directPayroll($id = null)
+    {
+        $this->autoRender = false;
+        
+		if (isset($id))
+		{
+			return $this->redirect(['controller' => 'Employeepayments', 'action' => 'edit', $id]);
+		}
+		else
+		{
+			$lastRecord = $this->Paysheets->find('all', 
+				['conditions' => ['id >' => 1, 'OR' => [['registration_status IS NULL'], ['registration_status !=' => "Eliminada"]]], 
+				'order' => ['Paysheets.created' => 'DESC']]);
+			
+			$row = $lastRecord->first();   
+					
+			if ($row)
+			{
+				return $this->redirect(['controller' => 'Employeepayments', 'action' => 'edit', $row->id]);
+			}
+			else
+			{
+				$this->Flash->error(__('No se encontraron nóminas'));
+				return $this->redirect(['controller' => 'Paysheets', 'action' => 'add', 1]);
+			}
+		}
+    }
+
+    /**
+     * Delete method
+     *
+     * @param string|null $id Paysheet id.
+     * @return \Cake\Network\Response|null Redirects to index.
+     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     */
+    public function delete($id = null, $controller = null, $action = null)
+    {
+        $this->request->allowMethod(['post', 'delete']);
+		
+		if (isset($_POST['idPaysheet']))
+		{
+			$id = $_POST['idPaysheet'];
+			$controller = $_POST['controller'];
+			$action = $_POST['action'];
+		}
+		
+        $paysheet = $this->Paysheets->get($id);
+        
+        $paysheet->registration_status = "Eliminada";
+        
+        $paysheet->responsible_user	= $this->Auth->user('username');
+        
+        if ($this->Paysheets->save($paysheet)) 
+        {
+            $this->Flash->success(__('La nómina fue eliminada exitosamente'));
+        }
+        else 
+        {
+            $this->Flash->error(__('No se pudo eliminar la nómina'));
+        }
+
+        return $this->redirect(['controller' => $controller, 'action' => $action]);
+    }
 	
     public function nameMonthSpanish($month = null)
     {

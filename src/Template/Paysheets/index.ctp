@@ -1,3 +1,12 @@
+<?php 
+	use Cake\I18n\Time;
+	
+	setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+	date_default_timezone_set('America/Caracas');
+	
+	$currentDate = time::now();
+?>
+
 <style>
 @media screen
 {
@@ -41,7 +50,68 @@
     <div class="col-md-12">
         <div class="page-header">
 			<h2>Nóminas encontradas</h2>
+			<input type='hidden' id='ambiente' value=<?= $school->ambient ?>
         </div>
+		
+		<?= $this->Form->create() ?>
+			<div class="row">
+				<h5><b>Buscar nómina:</b></h5>
+				<div class="col-md-11">								
+					<fieldset>
+						<div class="row">
+							<div class="col-md-4">
+								<?php echo $this->Form->input('position_categories', ['label' => 'Categoría:', 'options' => $positionCategories]); ?>
+							</div>
+							<div class="col-md-4">
+								<?php echo $this->Form->input('date_from', ['label' => 'Desde: ', 
+									'type' => 'date',
+									'value' => $currentDate,
+									'monthNames' =>
+									['01' => 'Enero',
+									'02' => 'Febrero',
+									'03' => 'Marzo',
+									'04' => 'Abril',
+									'05' => 'Mayo',
+									'06' => 'Junio',
+									'07' => 'Julio',
+									'08' => 'Agosto',
+									'09' => 'Septiembre',
+									'10' => 'Octubre',
+									'11' => 'Noviembre',
+									'12' => 'Diciembre'],
+									'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">{{day}}</li><li class="month">{{month}}</li><li class="year">{{year}}</li></ul>']]);
+								?>
+							</div>
+							<div class="col-md-4">
+								<?php echo $this->Form->input('date_until', ['label' => 'Hasta: ', 
+									'type' => 'date',
+									'value' => $currentDate,
+									'monthNames' =>
+									['01' => 'Enero',
+									'02' => 'Febrero',
+									'03' => 'Marzo',
+									'04' => 'Abril',
+									'05' => 'Mayo',
+									'06' => 'Junio',
+									'07' => 'Julio',
+									'08' => 'Agosto',
+									'09' => 'Septiembre',
+									'10' => 'Octubre',
+									'11' => 'Noviembre',
+									'12' => 'Diciembre'],
+									'templates' => ['dateWidget' => '<ul class="list-inline"><li class="day">{{day}}</li><li class="month">{{month}}</li><li class="year">{{year}}</li></ul>']]);
+								?>
+							</div>
+						</div>
+					</fieldset>	
+				</div>
+				<div class="col-md-1">	
+					<br />
+					<button type="submit" id="search-payroll" class="glyphicon glyphicon-search btn btn-default"></button>
+				</div>
+			</div>
+		<?= $this->Form->end() ?>
+		
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead>
@@ -58,10 +128,10 @@
                     <tr>
                         <td><?= h($paysheet->positioncategory->description_category) ?></td>
 						<td><?= h($paysheet->payroll_name) ?></td>
-						<td><?= $paysheet->date_from->format('d-m-Y') ?></td>
-						<td><?= $paysheet->date_until->format('d-m-Y') ?></td>
+						<td><?= $paysheet->date_from ?></td>
+						<td><?= $paysheet->date_until ?></td>
                         <td class="actions">
-                            <?= $this->Html->link('', ['controller' => 'Paysheets', 'action' => 'editPayrollFortnight', $paysheet->id], ['class' => 'glyphicon glyphicon-eye-open btn btn-info', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Ver nómina']) ?>
+                            <?= $this->Html->link('', ['controller' => 'Paysheets', 'action' => 'directPayroll', $paysheet->id], ['class' => 'glyphicon glyphicon-eye-open btn btn-info', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => 'Ver nómina']) ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -85,6 +155,23 @@
 <script>
     $(document).ready(function()
     { 		
+		if ($('#ambiente').val() == "Producción")
+		{
+			paysheetIndex = "/sistemasangabriel/paysheets/index";
+		}
+		else
+		{
+			paysheetIndex = "/desarrollosistemasangabriel/paysheets/index";
+		}
+		
+        $('#search-payroll').click(function(e) 
+        {
+            e.preventDefault(); 
+			
+			$.redirect(paysheetIndex, {ddFrom : $("select[name='date_from[day]']").val(), mmFrom : $("select[name='date_from[month]']").val(), yyFrom : $("select[name='date_from[year]']").val(), ddUntil : $("select[name='date_until[day]']").val(), mmUntil : $("select[name='date_until[month]']").val(), yyUntil : $("select[name='date_until[year]']").val(), positionCategories : $("#position-categories").val() });
+
+        });
+	
 		$('[data-toggle="tooltip"]').tooltip();
         
 		$('#mas').on('click',function()

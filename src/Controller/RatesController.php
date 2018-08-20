@@ -134,7 +134,7 @@ class RatesController extends AppController
 				$arrayMail['notAdjust'] = $arrayResult['notAdjust'];
 				$arrayMail['adjustDefaulters'] = $arrayResult['adjustDefaulters'];
 				$result = $this->mailUser($arrayMail);
-				exit;
+				return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
 			}
             else
             {				
@@ -192,7 +192,7 @@ class RatesController extends AppController
 					$arrayMail['year'] = $rate->rate_year;
 					$binnacles->add('controller', 'Rates', 'add', 'Se ejecutó la función de enviar correo de diferencia de agosto');
 					$result = $this->mailAugust($arrayMail);
-					exit;
+					return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
 				}
 				else
 				{
@@ -388,4 +388,36 @@ class RatesController extends AppController
 
         return $result;
     }
+    public function monetaryReconversion()
+    {				
+		$binnacles = new BinnaclesController;
+	
+		$rates = $this->Rates->find('all', ['conditions' => ['id >' => 0]]);
+	
+		$account1 = $rates->count();
+			
+		$account2 = 0;
+		
+		foreach ($rates as $rate)
+        {		
+			$rateGet = $this->Rates->get($rate->id);
+			
+			$previousAmount = $rateGet->amount;
+										
+			$rateGet->amount = $previousAmount / 100000;
+	
+			if ($this->Rates->save($rateGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$binnacles->add('controller', 'Rates', 'monetaryReconversion', 'No se actualizó registro con id: ' . $rateGet->id);
+			}
+		}
+
+		$binnacles->add('controller', 'Rates', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
+		$binnacles->add('controller', 'Rates', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
+		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+	}
 }
