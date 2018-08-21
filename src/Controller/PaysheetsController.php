@@ -322,15 +322,7 @@ class PaysheetsController extends AppController
         $employees = new EmployeesController();
         
         $employeepayments = new EmployeepaymentsController();
-		
-		$payrollParameters = [];
-		$payrollParameters['salaryDays'] = 0;
-		$payrollParameters['cestaTicketMonth'] = 0;
-		$payrollParameters['daysCestaTicket'] = 0;
-		$payrollParameters['daysUtilities'] = 0;
-		$payrollParameters['collectiveHolidays'] = 0;
-		$payrollParameters['collectiveVacationBonusDays'] = 0;
-		
+				
 		$positionCategories = $this->Positioncategories->find('list', ['limit' => 200, "order" => ["description_category" => "ASC"]]);
 			
 		$paysheet = $this->Paysheets->get($id, [
@@ -342,18 +334,15 @@ class PaysheetsController extends AppController
 			$paysheet = $this->Paysheets->patchEntity($paysheet, $this->request->data);
 						
 			$paysheet->responsible_user = $this->Auth->user('username'); 
-			
-			$tableConfigurationJson = $this->initialConfiguration();
-		
-			$paysheet->table_configuration = $tableConfigurationJson;
-													
-			if (!($this->Paysheets->save($paysheet)))
+															
+			if ($this->Paysheets->save($paysheet))
 			{
-				$this->Flash->error(__('Los datos de la nómina no pudieron ser actualizados, intente nuevamente'));                
+				$this->Flash->success(__('Por favor complete los datos de La nómina'));
+				return $this->redirect(['controller' => 'Paysheets', 'action' => 'directPayroll', $id]);
 			}
 			else 
 			{
-				$this->Flash->success(__('Por favor complete los datos de La nómina'));
+				$this->Flash->error(__('Los datos de la nómina no pudieron ser actualizados, intente nuevamente'));                				
 			}
 		}
 				

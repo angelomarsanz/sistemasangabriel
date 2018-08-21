@@ -5,6 +5,8 @@ use App\Controller\AppController;
 
 use App\Controller\PaymentsController;
 
+use App\Controller\BinnaclesController;
+
 use Cake\I18n\Time;
 
 
@@ -373,4 +375,108 @@ class TurnsController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
+    public function monetaryReconversion()
+    {				
+		$binnacles = new BinnaclesController;
+	
+		$turns = $this->Turns->find('all', ['conditions' => ['id >' => 0]]);
+	
+		$account1 = $turns->count();
+			
+		$account2 = 0;
+		
+		foreach ($turns as $turns)
+        {		
+			$turnGet = $this->Turns->get($turn->id);
+			
+			$previousAmount = $turnGet->initial_cash;
+										
+			$turnGet->initial_cash = $previousAmount / 100000;	
+
+			$previousAmount = $turnGet->cash_received;
+										
+			$turnGet->cash_received = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->cash_paid;
+										
+			$turnGet->cash_paid = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_cash;
+										
+			$turnGet->real_cash = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->debit_card_amount;
+										
+			$turnGet->debit_card_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_debit_card_amount;
+										
+			$turnGet-real_debit_card_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->credit_card_amount;
+										
+			$turnGet->credit_card_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_credit_amount;
+										
+			$turnGet->real_credit_amount = $previousAmount / 100000;	
+					
+			$previousAmount = $turnGet->transfer_amount;
+										
+			$turnGet->transfer_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_transfer_amount;
+										
+			$turnGet->real_transfer_amount = $previousAmount / 100000;
+			
+			$previousAmount = $turnGet->deposit_amount;
+										
+			$turnGet->deposit_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_deposit_amount;
+										
+			$turnGet->real_deposit_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->check_amount;
+										
+			$turnGet->check_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_check_amount;
+										
+			$turnGet->real_check_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->retention_amount;
+										
+			$turnGet->retention_amount = $previousAmount / 100000;
+			
+			$previousAmount = $turnGet->real_retention_amount;
+										
+			$turnGet->real_retention_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->total_system;
+										
+			$turnGet->total_system = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->total_box;
+										
+			$turnGet->total_box = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->total_difference;
+										
+			$turnGet->total_difference = $previousAmount / 100000;	
+						
+			if ($this->Turns->save($turnGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$binnacles->add('controller', 'Turns', 'monetaryReconversion', 'No se actualizó registro con id: ' . $turnGet->id);
+			}
+		}
+
+		$binnacles->add('controller', 'Turns', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
+		$binnacles->add('controller', 'Turns', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
+		exit;
+	}
 }
