@@ -152,14 +152,14 @@ class EmployeepaymentsController extends AppController
 
 			$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;           
 
-			$employeepayment->fideicomiso = $employeepayment->integral_salary * $employeepayment->trust_days;
-			
 			if ($paysheet->date_until->day < 28)
-			{        
+			{        			
+				$employeepayment->fideicomiso = 0;
 				$employeepayment->amount_imposed = 0;
 			}
 			else
 			{
+				$employeepayment->fideicomiso = $employeepayment->integral_salary * $employeepayment->trust_days;
 				$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation) * $employeepayment->percentage_imposed)/100;
 			}
 			
@@ -182,6 +182,44 @@ class EmployeepaymentsController extends AppController
 				$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
 				
 				$employeepayment->loan_cesta_ticket = 0;
+				
+				$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;				
+			}
+			
+			if (!($this->Employeepayments->save($employeepayment))) 
+			{
+				$result = 1;
+				$result = $binnacles->add('controller', 'Employeepayments', 'add', 'No se pudo grabar el pago correspondiente al empleado con id: ' . $employeesPaysheet->id);
+				break;
+			} 
+		}
+        return $result;
+    }
+	
+    public function updatePayments($paysheet = null)
+    {
+        $this->autoRender = false;
+		
+		$binnacles = new BinnaclesController;
+		
+		$result = 0;	
+
+        foreach ($employeesPaysheets as $employeesPaysheet) 
+        {		
+			$employeepayment->payment_period = ($employeepayment->monthly_salary/30) * $paysheet->salary_days; 
+			
+			$employeepayment->faov = ($employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
+
+			$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;
+			
+			$employeepayment->total_payment = $employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_repose - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+
+			if ($paysheet->days_cesta_ticket > 0)
+			{
+				$employeepayment->days_cesta_ticket = $paysheet->days_cesta_ticket - $employeepayment->days_absence;
+				
+				$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
+				
 				
 				$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;				
 			}
@@ -303,14 +341,7 @@ class EmployeepaymentsController extends AppController
 				
 				$employeepayment->faov = ($employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
 
-				if ($paysheet->date_until->day < 28)
-				{				
-					$employeepayment->ivss = 0;
-				}
-				else
-				{
-					$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;           
-				}           
+				$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;           
 
 				if (substr($valor['trust_days'], -3, 1) == ',')
 				{

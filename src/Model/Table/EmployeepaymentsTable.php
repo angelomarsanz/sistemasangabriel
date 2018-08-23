@@ -323,4 +323,59 @@ class EmployeepaymentsTable extends Table
         
         return $arrayResult;
     }
+    public function findSimple(Query $query, array $options)
+    {
+        $query->select(
+            ['Employeepayments.id',
+            'Employeepayments.current_position',
+            'Employeepayments.current_basic_salary',
+            'Employeepayments.current_monthly_hours',
+            'Employeepayments.monthly_salary',
+            'Employeepayments.payment_period',
+            'Employeepayments.scale',
+            'Employeepayments.amount_escalation',
+            'Employeepayments.other_income',
+            'Employeepayments.discount_repose',
+            'Employeepayments.discount_loan',
+            'Employeepayments.days_absence',
+            'Employeepayments.discount_absences',
+            'Employeepayments.faov',
+            'Employeepayments.ivss',
+            'Employeepayments.integral_salary',
+            'Employeepayments.salary_advance',
+			'Employeepayments.trust_days',
+			'Employeepayments.fideicomiso',
+            'Employeepayments.percentage_imposed',
+            'Employeepayments.amount_imposed',
+            'Employeepayments.total_payment',
+			'Employeepayments.days_cesta_ticket',
+			'Employeepayments.amount_cesta_ticket',
+			'Employeepayments.loan_cesta_ticket',
+			'Employeepayments.total_cesta_ticket',
+            'Employees.id',
+            'Employees.surname',
+            'Employees.first_name',
+            'Employees.type_of_identification',
+            'Employees.identity_card',
+			'Employees.date_of_admission',
+            'Positions.type_of_salary'])
+        ->contain(['Employees' => ['Positions']])
+        ->where([['paysheet_id' => $options['idPaysheet']], 
+            ['OR' => [['Employeepayments.registration_status IS NULL'], ['Employeepayments.registration_status !=' => "Eliminado"]]]])
+        ->order(['Employees.surname' => 'ASC', 'Employees.first_name' => 'ASC']);
+        
+        $arrayResult = [];
+        
+        if ($query)
+        {
+            $arrayResult['indicator'] = 0;
+            $arrayResult['searchRequired'] = $query;
+        }
+        else
+        {
+            $arrayResult['indicator'] = 1;
+        }
+        
+        return $arrayResult;
+    }
 }

@@ -385,7 +385,7 @@ class TurnsController extends AppController
 			
 		$account2 = 0;
 		
-		foreach ($turns as $turns)
+		foreach ($turns as $turn)
         {		
 			$turnGet = $this->Turns->get($turn->id);
 			
@@ -411,7 +411,7 @@ class TurnsController extends AppController
 			
 			$previousAmount = $turnGet->real_debit_card_amount;
 										
-			$turnGet-real_debit_card_amount = $previousAmount / 100000;	
+			$turnGet->real_debit_card_amount = $previousAmount / 100000;	
 			
 			$previousAmount = $turnGet->credit_card_amount;
 										
@@ -477,6 +477,7 @@ class TurnsController extends AppController
 
 		$binnacles->add('controller', 'Turns', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
 		$binnacles->add('controller', 'Turns', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
-		exit;
+		
+		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
 	}
 }
