@@ -325,9 +325,7 @@ class PaysheetsController extends AppController
 				
 		$positionCategories = $this->Positioncategories->find('list', ['limit' => 200, "order" => ["description_category" => "ASC"]]);
 			
-		$paysheet = $this->Paysheets->get($id, [
-            'contain' => []
-        ]);
+		$paysheet = $this->Paysheets->get($id);
 				
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
@@ -337,8 +335,29 @@ class PaysheetsController extends AppController
 															
 			if ($this->Paysheets->save($paysheet))
 			{
-				$this->Flash->success(__('Por favor complete los datos de La nómina'));
-				return $this->redirect(['controller' => 'Paysheets', 'action' => 'directPayroll', $id]);
+				$lastRecord = $this->Paysheets->find('all', ['conditions' => ['id' => $paysheet->id],
+                    'order' => ['Paysheets.created' => 'DESC'] ]);
+    
+                $row = $lastRecord->first();
+				
+				if ($row)
+				{
+					$arrayResult = $employeepayments->updatePayments($row);
+					
+					if ($arrayResult['indicator'] == 0)
+					{
+						$this->Flash->success(__('Por favor complete los datos de La nómina'));
+						return $this->redirect(['controller' => 'Paysheets', 'action' => 'directPayroll', $paysheet->id]);
+					}
+					else
+					{
+						$this->Flash->error(__('No se pudieron actualizar los pagos correspondientes a la nòmina'));
+					}
+				}
+				else
+				{
+					$this->Flash->error(__('No se encontró el registro de nómina con id: ' . $paysheet->id));
+				}
 			}
 			else 
 			{

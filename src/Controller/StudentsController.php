@@ -2008,6 +2008,40 @@ class StudentsController extends AppController
 		
         $currentDate = Time::now();
 		
+		$binnacles = new BinnaclesController;
+		
+	    if ($this->request->is('post')) 
+        {					
+			if (isset($_POST['columnsReport']))
+			{
+				$columnsReport = $_POST['columnsReport'];
+			}
+			else
+			{
+				$columnsReport = [];
+			}
+			
+			$arrayMark = $this->markColumns($columnsReport);
+			
+			$jsonArrayMark = json_encode($arrayMark, JSON_FORCE_OBJECT);				
+		
+			$arrayResult = $binnacles->add('controller', 'Students', 'familyStudents', $jsonArrayMark);
+		}
+		else
+		{
+			$swImpresion = 0;
+			$this->set(compact('swImpresion'));
+			$this->set('_serialize', ['swImpresion']);
+		}
+	}
+	
+	public function reportFamilyStudents()
+	{	
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		
+        $currentDate = Time::now();
+		
 		$accountStudents = [];
 		
 		$accountStudents['Regular'] = 0; 
@@ -2120,6 +2154,7 @@ class StudentsController extends AppController
 			$this->set('_serialize', ['swImpresion']);
 		}
 	}
+	
 	public function markColumns($columnsReport = null)
 	{
 		$arrayMark = [];

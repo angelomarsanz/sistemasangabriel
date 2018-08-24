@@ -58,6 +58,11 @@ class BinnaclesController extends AppController
     {
 		$this->autoRender = false;
 		
+		$arrayResult = [];
+		$arrayResult['indicator'] = 0;
+		$arrayResult['message'] = "Registro grabado exitosamente";
+		$arrayResult['id'] = 0;
+		
         $binnacle = $this->Binnacles->newEntity();
 		
 		$binnacle->type_class = $typeClass;
@@ -128,14 +133,28 @@ class BinnaclesController extends AppController
 			}
 		}
 				
-		$result = 0;
-		
-        if (!($this->Binnacles->save($binnacle)))
+		$binnacle->responsible_user = $this->Auth->user('username');
+				
+        if ($this->Binnacles->save($binnacle))
 		{
-			$result = 1;
+			$lastRecord = $this->Binnacles->find('all')
+				->where(['responsible_user' => $this->Auth->user('username')])
+				->order(['created' => 'DESC']);
+				
+			$row = $lastRecord->first();
+			
+			if ($row)
+			{
+				$arrayResult['id'] = $row->id;
+			}
 		}
-		
-		return $result;
+		else
+		{
+			$arrayResult['indicator'] = 1;
+			$arrayResult['message'] = "No se pudo grabar el registro";
+		}
+	
+		return $arrayResult;
     }
 
     /**

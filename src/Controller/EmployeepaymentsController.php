@@ -202,36 +202,49 @@ class EmployeepaymentsController extends AppController
 		
 		$binnacles = new BinnaclesController;
 		
-		$result = 0;	
+		$arrayResult = [];
+		
+		$arrayResult = $employeepayments->find('simple', ['idPaysheet' => $paysheet->id]);	
 
-        foreach ($employeesPaysheets as $employeesPaysheet) 
-        {		
-			$employeepayment->payment_period = ($employeepayment->monthly_salary/30) * $paysheet->salary_days; 
+		if ($arrayResult['indicator'] == 0)
+		{
+			$employeepaymentQuery = $arrayResult['searchRequired'];
+
+			foreach ($employeepaymentQuery as $employeepaymentQuerys) 
+			{		
+				$employeepayment = $this->Employeepayments->get($employeepaymentQuerys->id);
+				
+				$employeepayment->payment_period = ($employeepayment->monthly_salary/30) * $paysheet->salary_days; 
 			
-			$employeepayment->faov = ($employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
+				$employeepayment->faov = ($employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
 
-			$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;
+				$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;
 			
-			$employeepayment->total_payment = $employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_repose - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+				$employeepayment->total_payment = $employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_repose - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
 
-			if ($paysheet->days_cesta_ticket > 0)
-			{
-				$employeepayment->days_cesta_ticket = $paysheet->days_cesta_ticket - $employeepayment->days_absence;
+				if ($paysheet->days_cesta_ticket > 0)
+				{
+					$employeepayment->days_cesta_ticket = $paysheet->days_cesta_ticket - $employeepayment->days_absence;
 				
-				$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
+					$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
 				
-				
-				$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;				
+					$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;				
+				}
+			
+				if (!($this->Employeepayments->save($employeepayment))) 
+				{
+					$result = $binnacles->add('controller', 'Employeepayments', 'updatePayments', 'No se pudo actualizar el registro con el id: '  . $employeesPaysheet->id);
+					$arrayResult['indicator'] = 1;
+					break;
+				} 
 			}
-			
-			if (!($this->Employeepayments->save($employeepayment))) 
-			{
-				$result = 1;
-				$result = $binnacles->add('controller', 'Employeepayments', 'add', 'No se pudo grabar el pago correspondiente al empleado con id: ' . $employeesPaysheet->id);
-				break;
-			} 
 		}
-        return $result;
+		else
+		{
+			$result = $binnacles->add('controller', 'Employeepayments', 'updatePayments', 'No se encontraron pagos de la nómina con id: '  . $paysheet->id);
+		}
+		
+        return $arrayResult;
     }
 
     public function edit($idPaysheet = null)
