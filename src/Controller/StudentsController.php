@@ -2009,6 +2009,8 @@ class StudentsController extends AppController
         $currentDate = Time::now();
 		
 		$binnacles = new BinnaclesController;
+
+		$arrayExtra = [];
 		
 	    if ($this->request->is('post')) 
         {					
@@ -2023,24 +2025,34 @@ class StudentsController extends AppController
 			
 			$arrayMark = $this->markColumns($columnsReport);
 			
-			$jsonArrayMark = json_encode($arrayMark, JSON_FORCE_OBJECT);				
+			$jsonArrayMark = json_encode($arrayMark, JSON_FORCE_OBJECT);	
+
+			if (isset($_POST['filters_report']))
+			{
+				$arrayExtra[0] = $_POST['filters_report'];
+			}
 		
-			$arrayResult = $binnacles->add('controller', 'Students', 'familyStudents', $jsonArrayMark);
-		}
-		else
-		{
-			$swImpresion = 0;
-			$this->set(compact('swImpresion'));
-			$this->set('_serialize', ['swImpresion']);
+			$arrayResult = $binnacles->add('controller', 'Students', 'familyStudents', $jsonArrayMark, $arrayExtra);
+			
+			if ($arrayResult['indicator'] == 0)
+			{
+				return $this->redirect(['controller' => 'Students', 'action' => 'reportFamilyStudents', $arrayResult['id']]);
+			}
+			else
+			{
+				$this->Flash->error(___('No se encontraron alumnos'));
+			}
 		}
 	}
 	
-	public function reportFamilyStudents()
+	public function reportFamilyStudents($id = null)
 	{	
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
 		
         $currentDate = Time::now();
+		
+		$this->loadModel('Binnacles');
 		
 		$accountStudents = [];
 		
@@ -2050,109 +2062,94 @@ class StudentsController extends AppController
 		$accountStudents['Retired'] = 0; 
 		$accountStudents['Expelled'] = 0;
 		$accountStudents['Discontinued'] = 0;
-
-	    if ($this->request->is('post')) 
-        {					
-			if (isset($_POST['columnsReport']))
-			{
-				$columnsReport = $_POST['columnsReport'];
-			}
-			else
-			{
-				$columnsReport = [];
-			}
-			
-			$arrayMark = $this->markColumns($columnsReport);
-			
-			$arraySignedUp = [];
+					
+		$binnacle = $this->Binnacles->get($id);
+		
+		$objetColumnsReport = json_decode($binnacle->novelty);
 						
-			$this->loadModel('Schools');
-
-			$school = $this->Schools->get(2);
+		$arrayColumnsReport = (array) $objetColumnsReport;
+		
+		$arrayMark = $this->markColumns($arrayColumnsReport);
 			
-			$currentYearRegistration = $school->current_year_registration;
-			            
-            $concept = 'Matrícula ' . $currentYearRegistration;
-            								
-			$students = TableRegistry::get('Students');
+		$arraySignedUp = [];
+					
+		$this->loadModel('Schools');
 
-			$arrayResult = $students->find('family');
+		$school = $this->Schools->get(2);
+		
+		$currentYearRegistration = $school->current_year_registration;
+					
+		$concept = 'Matrícula ' . $currentYearRegistration;
+										
+		$students = TableRegistry::get('Students');
+
+		$arrayResult = $students->find('family');
+		
+		if ($arrayResult['indicator'] == 1)
+		{
+			$this->Flash->error(___('No se encontraron alumnos'));
 			
-			if ($arrayResult['indicator'] == 1)
-			{
-				$this->Flash->error(___('No se encontraron alumnos'));
-				
-				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
-			}
-			else
-			{
-				$familyStudents = $arrayResult['searchRequired'];
-			}
-	
-			$swImpresion = 1;
-			
-			foreach ($familyStudents as $familyStudent)
-			{
-				if ($familyStudent->student_condition == "Regular")
-				{
-					if ($familyStudent->new_student == 0)
-					{
-						$accountStudents['Regular']++;
-					}
-					else
-					{
-						$accountStudents['New']++;
-					}
-					$signedUp = $this->Students->Studenttransactions->find('all')
-						->select(['Studenttransactions.student_id', 
-							'Studenttransactions.transaction_description', 
-							'Studenttransactions.amount', 
-							'Studenttransactions.original_amount'])
-						->where([['Studenttransactions.student_id' => $familyStudent->id],
-							['Studenttransactions.transaction_description' => $concept]])
-						->order(['Studenttransactions.created' => 'DESC']);
-
-					$row = $signedUp->first();	
-
-					if ($row)
-					{
-						if ($row->amount < $row->original_amount)
-						{
-							$arraySignedUp[$familyStudent->id] = 'Pagado';
-						}
-						else
-						{
-							$arraySignedUp[$familyStudent->id] = 'No pagado';							
-						}
-					}
-				}
-				elseif ($familyStudent->student_condition == "Egresado")
-				{
-					$accountStudents['Graduated']++;
-				}
-				elseif ($familyStudent->student_condition == "Retirado")
-				{
-					$accountStudents['Retired']++;
-				}				
-				elseif ($familyStudent->student_condition == "Expulsado")
-				{
-					$accountStudents['Expelled']++;
-				}
-				elseif ($familyStudent->student_condition == "Suspendido")
-				{
-					$accountStudents['Discontinued']++;
-				}
-			}
-						
-			$this->set(compact('swImpresion', 'familyStudents', 'arrayMark', 'currentDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration'));
-			$this->set('_serialize', ['swImpresion', 'familyStudents', 'arrayMark', 'currenDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration']); 		
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 		}
 		else
 		{
-			$swImpresion = 0;
-			$this->set(compact('swImpresion'));
-			$this->set('_serialize', ['swImpresion']);
+			$familyStudents = $arrayResult['searchRequired'];
 		}
+		
+		foreach ($familyStudents as $familyStudent)
+		{
+			if ($familyStudent->student_condition == "Regular")
+			{
+				if ($familyStudent->new_student == 0)
+				{
+					$accountStudents['Regular']++;
+				}
+				else
+				{
+					$accountStudents['New']++;
+				}
+				$signedUp = $this->Students->Studenttransactions->find('all')
+					->select(['Studenttransactions.student_id', 
+						'Studenttransactions.transaction_description', 
+						'Studenttransactions.amount', 
+						'Studenttransactions.original_amount'])
+					->where([['Studenttransactions.student_id' => $familyStudent->id],
+						['Studenttransactions.transaction_description' => $concept]])
+					->order(['Studenttransactions.created' => 'DESC']);
+
+				$row = $signedUp->first();	
+
+				if ($row)
+				{
+					if ($row->amount < $row->original_amount)
+					{
+						$arraySignedUp[$familyStudent->id] = 'Pagado';
+					}
+					else
+					{
+						$arraySignedUp[$familyStudent->id] = 'No pagado';							
+					}
+				}
+			}
+			elseif ($familyStudent->student_condition == "Egresado")
+			{
+				$accountStudents['Graduated']++;
+			}
+			elseif ($familyStudent->student_condition == "Retirado")
+			{
+				$accountStudents['Retired']++;
+			}				
+			elseif ($familyStudent->student_condition == "Expulsado")
+			{
+				$accountStudents['Expelled']++;
+			}
+			elseif ($familyStudent->student_condition == "Suspendido")
+			{
+				$accountStudents['Discontinued']++;
+			}
+		}			
+		$this->set(compact('familyStudents', 'arrayMark', 'currentDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration'));
+		$this->set('_serialize', ['familyStudents', 'arrayMark', 'currenDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration']); 		
 	}
 	
 	public function markColumns($columnsReport = null)

@@ -63,7 +63,7 @@
 				<div class="col-md-4">	
 					<?php echo $this->Form->input('date_from', ['label' => 'Fecha inicio nómina: ', 
 						'type' => 'date',
-						'value' => $currentDate,
+						'value' => $paysheet->date_from,
 						'monthNames' =>
 						['01' => 'Enero',
 						'02' => 'Febrero',
@@ -83,7 +83,7 @@
 				<div class="col-md-4">
 					<?php echo $this->Form->input('date_until', ['label' => 'Fecha culminación nómina: ', 
 						'type' => 'date',
-						'value' => $currentDate,
+						'value' => $paysheet->date_until,
 						'monthNames' =>
 						['01' => 'Enero',
 						'02' => 'Febrero',

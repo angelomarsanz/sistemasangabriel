@@ -166,7 +166,7 @@
 
 									<th scope="col" class="<?= $tableConfiguration->payment_period ?>"><a href="#" id='pago-periodo' title='Ocultar'>Pago&nbsp;período</a></th>
 
-									<th scope="col" class="<?= $tableConfiguration->amount_escalation_period ?>"><a href="#" id='escalafon' title='Ocultar'>Escalafón&nbsp;&nbsp;&nbsp;</a></th>
+									<th scope="col" class="<?= $tableConfiguration->amount_escalation ?>"><a href="#" id='escalafon' title='Ocultar'>Escalafón&nbsp;&nbsp;&nbsp;</a></th>
 
 									<th scope="col" class="<?= $tableConfiguration->other_income ?>"><a href="#" id='otros-ingresos' title='Ocultar'>Otros&nbsp;ingresos</a></th>
 
@@ -174,33 +174,39 @@
 
 									<th scope="col" class="<?= $tableConfiguration->ivss ?>"><a href="#" id='ivss' title='Ocultar'>IVSS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
 
-									<th scope="col" class="<?= $tableConfiguration->trust_days ?>"><a href="#" id='dias-fideicomiso' title='Ocultar'>Días&nbsp;fidei.</a></th>
+									<?php if ($paysheet->date_until->day > 28): ?>
+										<th scope="col" class="<?= $tableConfiguration->trust_days ?>"><a href="#" id='dias-fideicomiso' title='Ocultar'>Días&nbsp;fidei.</a></th>
 
-									<th scope="col" class="<?= $tableConfiguration->escrow ?>"><a href="#" id='fideicomiso' title='Ocultar'>Fideicomiso</a></a></th>
-
+										<th scope="col" class="<?= $tableConfiguration->escrow ?>"><a href="#" id='fideicomiso' title='Ocultar'>Fideicomiso</a></a></th>
+									<?php endif; ?>
+										
 									<th scope="col" class="<?= $tableConfiguration->discount_repose ?>"><a href="#" id='reposo' title='Ocultar'>Reposo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></th>
 
 									<th scope="col" class="<?= $tableConfiguration->salary_advance ?>"><a href="#" id='adelanto-sueldo' title='Ocultar'>Adelan.&nbsp;sueldo</a></th>
 								
 									<th scope="col" class="<?= $tableConfiguration->discount_loan ?>"><a href="#" id='prestamos' title='Ocultar'>Préstamos</a></th>
 								
-									<th scope="col" class="<?= $tableConfiguration->percentage_imposed ?>"><a href="#" id='porcentaje-impuesto' title='Ocultar'>%&nbsp;Imp.&nbsp;</a></th>
-
-									<th scope="col" class="<?= $tableConfiguration->amount_imposed ?>"><a href="#" id='monto-impuesto' title='Ocultar'>Monto&nbsp;Imp.&nbsp;</a></th>
-
+									<?php if ($paysheet->date_until->day > 28): ?>
+										<th scope="col" class="<?= $tableConfiguration->percentage_imposed ?>"><a href="#" id='porcentaje-impuesto' title='Ocultar'>%&nbsp;Imp.&nbsp;</a></th>
+										
+										<th scope="col" class="<?= $tableConfiguration->amount_imposed ?>"><a href="#" id='monto-impuesto' title='Ocultar'>Monto&nbsp;Imp.&nbsp;</a></th>
+									<?php endif; ?>
+									
 									<th scope="col" class="<?= $tableConfiguration->days_absence ?>"><a href="#" id='dias-inasistencias' title='Ocultar'>Días&nbsp;Inasist.</a></th>
 
 									<th scope="col" class="<?= $tableConfiguration->discount_absences ?>"><a href="#" id='inasistencias' title='Ocultar'>Inasistencias</a></th>
 
 									<th scope="col" class="<?= $tableConfiguration->total_payment ?>"><a href="#" id='total-pago' title='Ocultar'>Total&nbsp;Pago</a></th>
 							
-									<th scope="col" class="<?= $tableConfiguration->days_cesta_ticket ?>"><a href="#" id='dias-cesta-ticket' title='Ocultar'>Días&nbsp;cesta&nbsp;ticket</a></th>
+									<?php if ($paysheet->days_cesta_ticket > 0): ?>
+										<th scope="col" class="<?= $tableConfiguration->days_cesta_ticket ?>"><a href="#" id='dias-cesta-ticket' title='Ocultar'>Días&nbsp;cesta&nbsp;ticket</a></th>
 								
-									<th scope="col" class="<?= $tableConfiguration->amount_cesta_ticket ?>"><a href="#" id='monto-cesta-ticket' title='Ocultar'>Monto&nbsp;cesta&nbsp;ticket</a></th>
+										<th scope="col" class="<?= $tableConfiguration->amount_cesta_ticket ?>"><a href="#" id='monto-cesta-ticket' title='Ocultar'>Monto&nbsp;cesta&nbsp;ticket</a></th>
 								
-									<th scope="col" class="<?= $tableConfiguration->loan_cesta_ticket ?>"><a href="#" id='prestamos-cesta-ticket' title='Ocultar'>Préstamos&nbsp;cesta&nbsp;ticket</a></th>
+										<th scope="col" class="<?= $tableConfiguration->loan_cesta_ticket ?>"><a href="#" id='prestamos-cesta-ticket' title='Ocultar'>Préstamos&nbsp;cesta&nbsp;ticket</a></th>
 								
-									<th scope="col" class="<?= $tableConfiguration->total_cesta_ticket ?>"><a href="#" id='total-cesta-ticket' title='Ocultar'>Total&nbsp;cesta&nbsp;ticket</a></th>									
+										<th scope="col" class="<?= $tableConfiguration->total_cesta_ticket ?>"><a href="#" id='total-cesta-ticket' title='Ocultar'>Total&nbsp;cesta&nbsp;ticket</a></th>											
+									<?php endif; ?>
 								</tr>
 							</thead>
 							<tbody id='table-payment'>
@@ -232,7 +238,7 @@
 
 										<td class="<?= $tableConfiguration->payment_period ?>"><input disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][payment-period]" value=<?= number_format($employeesFors->payment_period, 2, ",", ".") ?>></td>
 									
-										<td class="<?= $tableConfiguration->amount_escalation_period ?>"><input disabled='true'  style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][amount_escalation_period]" value=<?= number_format(($employeesFors->amount_escalation/2), 2, ",", ".") ?>></td>
+										<td class="<?= $tableConfiguration->amount_escalation ?>"><input disabled='true'  style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][amount_escalation]" value=<?= number_format(($employeesFors->amount_escalation), 2, ",", ".") ?>></td>
 
 										<td class="<?= $tableConfiguration->other_income ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][other_income]" value=<?= number_format($employeesFors->other_income, 2, ",", ".") ?>></td> 
 			
@@ -240,34 +246,37 @@
 
 										<td class="<?= $tableConfiguration->ivss ?>" style='text-align: right;'><input disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][ivss]" value=<?= number_format($employeesFors->ivss, 2, ",", ".") ?>></td>
 
-										<td class="<?= $tableConfiguration->trust_days ?>" style='text-align: right;'><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][trust_days]" value=<?= number_format($employeesFors->trust_days, 2, ",", ".") ?>></td>
-
-										<td class="<?= $tableConfiguration->escrow ?>" style='text-align: right;'><input disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][escrow]" value=<?= number_format($employeesFors->fideicomiso, 2, ",", ".") ?>></td>
-
+										<?php if ($paysheet->date_until->day > 28): ?>
+											<td class="<?= $tableConfiguration->trust_days ?>" style='text-align: right;'><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][trust_days]" value=<?= number_format($employeesFors->trust_days, 2, ",", ".") ?>></td>
+											
+											<td class="<?= $tableConfiguration->escrow ?>" style='text-align: right;'><input disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][escrow]" value=<?= number_format($employeesFors->fideicomiso, 2, ",", ".") ?>></td>
+										<?php endif; ?>
+										
 										<td class="<?= $tableConfiguration->discount_repose ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][discount_repose]" value=<?= number_format($employeesFors->discount_repose, 2, ",", ".") ?>></td>
 
 										<td class="<?= $tableConfiguration->salary_advance ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][salary_advance]" value=<?= number_format($employeesFors->salary_advance, 2, ",", ".") ?>></td>
 									
 										<td class="<?= $tableConfiguration->discount_loan ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][discount_loan]" value=<?= number_format($employeesFors->discount_loan, 2, ",", ".") ?>></td>
 
-										<td class="<?= $tableConfiguration->percentage_imposed ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][percentage_imposed]" value=<?= number_format($employeesFors->percentage_imposed, 2, ",", ".") ?>></td>
+										<?php if ($paysheet->date_until->day > 28): ?>
+											<td class="<?= $tableConfiguration->percentage_imposed ?>"><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][percentage_imposed]" value=<?= number_format($employeesFors->percentage_imposed, 2, ",", ".") ?>></td>
 
-										<td class="<?= $tableConfiguration->amount_imposed ?>"><input  disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][amount_imposed]" value=<?= number_format($employeesFors->amount_imposed, 2, ",", ".") ?>></td>
-
+											<td class="<?= $tableConfiguration->amount_imposed ?>"><input  disabled='true' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][amount_imposed]" value=<?= number_format($employeesFors->amount_imposed, 2, ",", ".") ?>></td>
+										<?php endif; ?>
+										
 										<td class="<?= $tableConfiguration->days_absence ?>" style='text-align: right;'><input class='alternative-decimal-separator' style="text-align: right; width: 100%;" name="employeepayment[<?= $accountArray ?>][days_absence]" value=<?= number_format($employeesFors->days_absence, 2, ",", ".") ?>></td>
 
 										<td class="<?= $tableConfiguration->discount_absences ?>"><input disabled='true' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][discount_absences]" value=<?= number_format($employeesFors->discount_absences, 2, ",", ".") ?>></td>
 
 										<td class="<?= $tableConfiguration->total_payment ?>"><input disabled='true' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_payment]" value=<?= number_format($employeesFors->total_payment, 2, ",", ".") ?>></td>
 
-										<td class="<?= $tableConfiguration->days_cesta_ticket ?>"><input class='alternative-decimal-separator' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= number_format($employeesFors->days_cesta_ticket, 2, ",", ".") ?>></td>
-								
-										<td class="<?= $tableConfiguration->amount_cesta_ticket ?>"><input disabled='true' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= number_format($employeesFors->amount_cesta_ticket, 2, ",", ".") ?>></td>
-								
-										<td class="<?= $tableConfiguration->loan_cesta_ticket ?>"><input class='alternative-decimal-separator' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][loan_cesta_ticket]" value=<?= number_format($employeesFors->loan_cesta_ticket, 2, ",", ".") ?>></td>
-									
-										<td class="<?= $tableConfiguration->total_cesta_ticket ?>"><input disabled='true' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_cesta_ticket]" value=<?= number_format($employeesFors->total_cesta_ticket, 2, ",", ".") ?>></td>	
-									</tr>
+										<?php if ($paysheet->days_cesta_ticket > 0): ?>
+											<td class="<?= $tableConfiguration->days_cesta_ticket ?>"><input class='alternative-decimal-separator' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][days_cesta_ticket]" value=<?= number_format($employeesFors->days_cesta_ticket, 2, ",", ".") ?>></td>
+											<td class="<?= $tableConfiguration->amount_cesta_ticket ?>"><input disabled='true' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][amount_cesta_ticket]" value=<?= number_format($employeesFors->amount_cesta_ticket, 2, ",", ".") ?>></td>
+											<td class="<?= $tableConfiguration->loan_cesta_ticket ?>"><input class='alternative-decimal-separator' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][loan_cesta_ticket]" value=<?= number_format($employeesFors->loan_cesta_ticket, 2, ",", ".") ?>></td>
+											<td class="<?= $tableConfiguration->total_cesta_ticket ?>"><input disabled='true' style='text-align: right; width: 100%;' name="employeepayment[<?= $accountArray ?>][total_cesta_ticket]" value=<?= number_format($employeesFors->total_cesta_ticket, 2, ",", ".") ?>></td>	
+										<?php endif; ?>									
+										</tr>
 								<?php 
 									$accountArray++; 
 									$accountEmployee++;
@@ -298,7 +307,7 @@
 												
 												<p><input class="column-mark" type="checkbox" name="columnsReport[payment_period]" id="mostrar-pago-periodo" <?php if ($tableConfiguration->payment_period == 'allColumns pago-periodo') echo 'checked'; ?>> Pago período</p>
 												
-												<p><input class="column-mark" type="checkbox" name="columnsReport[amount_escalation_period]" id="mostrar-escalafon-periodo" <?php if ($tableConfiguration->amount_escalation_period == 'allColumns escalafon') echo 'checked'; ?>> Escalafón período</p>
+												<p><input class="column-mark" type="checkbox" name="columnsReport[amount_escalation]" id="mostrar-escalafon" <?php if ($tableConfiguration->amount_escalation == 'allColumns escalafon') echo 'checked'; ?>> Escalafón</p>
 												
 												<p><input class="column-mark" type="checkbox" name="columnsReport[other_income]" id="mostrar-otros-ingresos" <?php if ($tableConfiguration->other_income == 'allColumns otros-ingresos') echo 'checked'; ?>> Otros ingresos</p>
 
@@ -308,9 +317,11 @@
 											<div class="col-md-4">
 												<p><input class="column-mark" type="checkbox" name="columnsReport[ivss]" id="mostrar-ivss" <?php if ($tableConfiguration->ivss == 'allColumns ivss') echo 'checked'; ?>> IVSS</p>
 											
-												<p><input class="column-mark" type="checkbox" name="columnsReport[trust_days]" id="mostrar-dias-fideicomiso" <?php if ($tableConfiguration->trust_days == 'allColumns dias-fideicomiso') echo 'checked'; ?>> Días fideicomiso</p>
+												<?php if ($paysheet->date_until->day > 28): ?>
+													<p><input class="column-mark" type="checkbox" name="columnsReport[trust_days]" id="mostrar-dias-fideicomiso" <?php if ($tableConfiguration->trust_days == 'allColumns dias-fideicomiso') echo 'checked'; ?>> Días fideicomiso</p>
 												
-												<p><input class="column-mark" type="checkbox" name="columnsReport[escrow]" id="mostrar-fideicomiso" <?php if ($tableConfiguration->escrow == 'allColumns fideicomiso') echo 'checked'; ?>> Fideicomiso</p>
+													<p><input class="column-mark" type="checkbox" name="columnsReport[escrow]" id="mostrar-fideicomiso" <?php if ($tableConfiguration->escrow == 'allColumns fideicomiso') echo 'checked'; ?>> Fideicomiso</p>
+												<?php endif; ?>
 												
 												<p><input class="column-mark" type="checkbox" name="columnsReport[discount_repose]" id="mostrar-reposo" <?php if ($tableConfiguration->discount_repose == 'allColumns reposo') echo 'checked'; ?>> Reposo</p>
 
@@ -318,10 +329,12 @@
 														
 												<p><input class="column-mark" type="checkbox" name="columnsReport[discount_loan]" id="mostrar-prestamos" <?php if ($tableConfiguration->discount_loan == 'allColumns prestamos') echo 'checked'; ?>> Préstamos</p>
 												
-												<p><input class="column-mark" type="checkbox" name="columnsReport[percentage_imposed]" id="mostrar-porcentaje-impuesto" <?php if ($tableConfiguration->percentage_imposed == 'allColumns porcentaje-impuesto') echo 'checked'; ?>> Porcentaje impuesto</p>
+												<?php if ($paysheet->date_until->day > 28): ?>
+													<p><input class="column-mark" type="checkbox" name="columnsReport[percentage_imposed]" id="mostrar-porcentaje-impuesto" <?php if ($tableConfiguration->percentage_imposed == 'allColumns porcentaje-impuesto') echo 'checked'; ?>> Porcentaje impuesto</p>
 												
-												<p><input class="column-mark" type="checkbox" name="columnsReport[amount_imposed]" id="mostrar-monto-impuesto" <?php if ($tableConfiguration->amount_imposed == 'allColumns monto-impuesto') echo 'checked'; ?>> Monto impuesto</p>										
-
+													<p><input class="column-mark" type="checkbox" name="columnsReport[amount_imposed]" id="mostrar-monto-impuesto" <?php if ($tableConfiguration->amount_imposed == 'allColumns monto-impuesto') echo 'checked'; ?>> Monto impuesto</p>										
+												<?php endif; ?>
+												
 											</div>
 											<div class="col-md-4">
 												
@@ -331,13 +344,17 @@
 												
 												<p><input class="column-mark" type="checkbox" name="columnsReport[total_payment]" id="mostrar-total-pago" <?php if ($tableConfiguration->total_payment == 'allColumns total-pago') echo 'checked'; ?>> Total pago</p>
 												
-												<p><input class="column-mark" type="checkbox" name="columnsReport[days_cesta_ticket]" id="mostrar-dias-cesta-ticket" <?php if ($tableConfiguration->days_cesta_ticket == 'allColumns dias-cesta-ticket') echo 'checked'; ?>> Días cesta ticket</p>
+												<?php if ($paysheet->days_cesta_ticket > 0): ?>
 												
-												<p><input class="column-mark" type="checkbox" name="columnsReport[amount_cesta_ticket]" id="mostrar-monto-cesta-ticket" <?php if ($tableConfiguration->amount_cesta_ticket == 'allColumns monto-cesta-ticket') echo 'checked'; ?>> Monto cesta ticket</p>										
+													<p><input class="column-mark" type="checkbox" name="columnsReport[days_cesta_ticket]" id="mostrar-dias-cesta-ticket" <?php if ($tableConfiguration->days_cesta_ticket == 'allColumns dias-cesta-ticket') echo 'checked'; ?>> Días cesta ticket</p>
 												
-												<p><input class="column-mark" type="checkbox" name="columnsReport[loan_cesta_ticket]" id="mostrar-prestamos-cesta-ticket" <?php if ($tableConfiguration->loan_cesta_ticket == 'allColumns prestamos-cesta-ticket') echo 'checked'; ?>> Préstamos cesta ticket</p>
+													<p><input class="column-mark" type="checkbox" name="columnsReport[amount_cesta_ticket]" id="mostrar-monto-cesta-ticket" <?php if ($tableConfiguration->amount_cesta_ticket == 'allColumns monto-cesta-ticket') echo 'checked'; ?>> Monto cesta ticket</p>										
+												
+													<p><input class="column-mark" type="checkbox" name="columnsReport[loan_cesta_ticket]" id="mostrar-prestamos-cesta-ticket" <?php if ($tableConfiguration->loan_cesta_ticket == 'allColumns prestamos-cesta-ticket') echo 'checked'; ?>> Préstamos cesta ticket</p>
 
-												<p><input class="column-mark" type="checkbox" name="columnsReport[total_cesta_ticket]" id="mostrar-total-cesta-ticket" <?php if ($tableConfiguration->total_cesta_ticket == 'allColumns total-cesta-ticket') echo 'checked'; ?>> Total cesta ticket</p>													
+													<p><input class="column-mark" type="checkbox" name="columnsReport[total_cesta_ticket]" id="mostrar-total-cesta-ticket" <?php if ($tableConfiguration->total_cesta_ticket == 'allColumns total-cesta-ticket') echo 'checked'; ?>> Total cesta ticket</p>													
+											
+												<?php endif; ?>
 											
 											</div>
 										</div>
@@ -649,13 +666,13 @@
         $('#escalafon').on('click',function()
         {
             $('.escalafon').addClass("noverScreen");
-			$('#mostrar-escalafon-periodo').attr('checked', false);
-			$('#mostrar-escalafon-periodo').prop('checked', false);
+			$('#mostrar-escalafon').attr('checked', false);
+			$('#mostrar-escalafon').prop('checked', false);
         });
 		
-        $('#mostrar-escalafon-periodo').on('click',function()
+        $('#mostrar-escalafon').on('click',function()
         {
-			if  ($('#mostrar-escalafon-periodo').prop('checked'))
+			if  ($('#mostrar-escalafon').prop('checked'))
 			{
 				$('.escalafon').removeClass("noverScreen");
 				$('#mostrar-escalafon').attr('checked', true);

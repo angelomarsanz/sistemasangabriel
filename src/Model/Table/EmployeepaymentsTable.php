@@ -328,6 +328,7 @@ class EmployeepaymentsTable extends Table
         $arrayResult = [];
 		
 		$query
+			->contain(['Employees'])
 			->where([['paysheet_id' => $options['idPaysheet']], 
             ['OR' => [['Employeepayments.registration_status IS NULL'], ['Employeepayments.registration_status !=' => "Eliminado"]]]])
 			->order(['Employees.surname' => 'ASC', 'Employees.first_name' => 'ASC']);

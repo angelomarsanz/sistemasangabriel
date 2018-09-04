@@ -196,57 +196,6 @@ class EmployeepaymentsController extends AppController
         return $result;
     }
 	
-    public function updatePayments($paysheet = null)
-    {
-        $this->autoRender = false;
-		
-		$binnacles = new BinnaclesController;
-		
-		$arrayResult = [];
-		
-		$arrayResult = $employeepayments->find('simple', ['idPaysheet' => $paysheet->id]);	
-
-		if ($arrayResult['indicator'] == 0)
-		{
-			$employeepaymentQuery = $arrayResult['searchRequired'];
-
-			foreach ($employeepaymentQuery as $employeepaymentQuerys) 
-			{		
-				$employeepayment = $this->Employeepayments->get($employeepaymentQuerys->id);
-				
-				$employeepayment->payment_period = ($employeepayment->monthly_salary/30) * $paysheet->salary_days; 
-			
-				$employeepayment->faov = ($employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
-
-				$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;
-			
-				$employeepayment->total_payment = $employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_repose - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
-
-				if ($paysheet->days_cesta_ticket > 0)
-				{
-					$employeepayment->days_cesta_ticket = $paysheet->days_cesta_ticket - $employeepayment->days_absence;
-				
-					$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
-				
-					$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;				
-				}
-			
-				if (!($this->Employeepayments->save($employeepayment))) 
-				{
-					$result = $binnacles->add('controller', 'Employeepayments', 'updatePayments', 'No se pudo actualizar el registro con el id: '  . $employeesPaysheet->id);
-					$arrayResult['indicator'] = 1;
-					break;
-				} 
-			}
-		}
-		else
-		{
-			$result = $binnacles->add('controller', 'Employeepayments', 'updatePayments', 'No se encontraron pagos de la nómina con id: '  . $paysheet->id);
-		}
-		
-        return $arrayResult;
-    }
-
     public function edit($idPaysheet = null)
     {
         $employee = new EmployeesController();
@@ -356,50 +305,45 @@ class EmployeepaymentsController extends AppController
 
 				$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;           
 
-				if (substr($valor['trust_days'], -3, 1) == ',')
+				if ($paysheet->date_until->day > 28)
 				{
-					$replace1= str_replace('.', '', $valor['trust_days']);
-					$replace2 = str_replace(',', '.', $replace1);
-					$employeepayment->trust_days = $replace2;
-				}
-				else
-				{
-					$employeepayment->trust_days = $valor['trust_days'];
-				}
+					if (substr($valor['trust_days'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['trust_days']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$employeepayment->trust_days = $replace2;
+					}
+					else
+					{
+						$employeepayment->trust_days = $valor['trust_days'];
+					}
 				
-				$employeepayment->fideicomiso = $employeepayment->integral_salary * $employeepayment->trust_days;
+					$employeepayment->fideicomiso = $employeepayment->integral_salary * $employeepayment->trust_days;
 
-				if (substr($valor['percentage_imposed'], -3, 1) == ',')
-				{
-					$replace1= str_replace('.', '', $valor['percentage_imposed']);
-					$replace2 = str_replace(',', '.', $replace1);
-				}
-				else
-				{
-					$replace2 = $valor['percentage_imposed'];
-				}
+					if (substr($valor['percentage_imposed'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $valor['percentage_imposed']);
+						$replace2 = str_replace(',', '.', $replace1);
+					}
+					else
+					{
+						$replace2 = $valor['percentage_imposed'];
+					}
 
-				if ($employeepayment->percentage_imposed != $replace2)
-				{
-					 $result = $employee->editImposed($employeepayment->employee_id, $replace2);
-					 
-					 if ($result == 1)
-					 {
-						 $this->Flash->error(__('No se pudo actualizar el porcentaje de impuesto en la tabla empleado del empleado: ' . $employeepayment->employee_id));
-					 }
-					 else
-					 {
-						 $employeepayment->percentage_imposed = $replace2;
-					 }
-				}
-				
-				if ($paysheet->date_until->day < 28)
-				{
-					$employeepayment->amount_imposed = 0;
-				}
-				else
-				{
-					$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation) * $employeepayment->percentage_imposed)/100;
+					if ($employeepayment->percentage_imposed != $replace2)
+					{
+						 $result = $employee->editImposed($employeepayment->employee_id, $replace2);
+						 
+						if ($result == 0)
+						{
+							$employeepayment->percentage_imposed = $replace2;
+							$employeepayment->amount_imposed = (($employeepayment->monthly_salary + $employeepayment->amount_escalation) * $employeepayment->percentage_imposed)/100;
+						}
+						else
+						{
+							$this->Flash->error(__('No se pudo actualizar el porcentaje de impuesto en la tabla empleado del empleado: ' . $employeepayment->employee_id));
+						}
+					}
 				}
 			
 				$employeepayment->total_payment = $employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_repose - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
@@ -456,6 +400,59 @@ class EmployeepaymentsController extends AppController
             $this->set(compact('employeesFor', 'currentView', 'paysheet', 'tableConfiguration', 'weeksSocialSecurity', 'positionCategories', 'school'));
             $this->set('_serialize', ['employeesFor', 'currentView', 'paysheet', 'tableConfiguration', 'weeksSocialSecurity', 'positionCategories', 'school']);
         }
+    }
+
+    public function updatePayments($paysheet = null)
+    {
+        $this->autoRender = false;
+		
+		$binnacles = new BinnaclesController;
+		
+		$arrayResult = [];
+		
+		$employeepayments = TableRegistry::get('Employeepayments');
+		
+		$arrayResult = $employeepayments->find('simple', ['idPaysheet' => $paysheet->id]);	
+
+		if ($arrayResult['indicator'] == 0)
+		{
+			$employeepaymentQuery = $arrayResult['searchRequired'];
+
+			foreach ($employeepaymentQuery as $employeepaymentQuerys) 
+			{		
+				$employeepayment = $this->Employeepayments->get($employeepaymentQuerys->id);
+				
+				$employeepayment->payment_period = ($employeepayment->monthly_salary/30) * $paysheet->salary_days; 
+			
+				$employeepayment->faov = ($employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) +  $employeepayment->other_income -  $employeepayment->discount_absences) * 0.01;
+
+				$employeepayment->ivss = ((((($employeepayment->monthly_salary + $employeepayment->amount_escalation) * 12) / 52) * 0.045 * $paysheet->weeks_social_security) / 30) * $paysheet->salary_days;
+			
+				$employeepayment->total_payment = $employeepayment->payment_period + (($employeepayment->amount_escalation / 30) * $paysheet->salary_days) + $employeepayment->other_income - $employeepayment->faov - $employeepayment->ivss - $employeepayment->discount_repose - $employeepayment->salary_advance - $employeepayment->discount_loan - $employeepayment->amount_imposed - $employeepayment->discount_absences; 
+
+				if ($paysheet->days_cesta_ticket > 0)
+				{
+					$employeepayment->days_cesta_ticket = $paysheet->days_cesta_ticket - $employeepayment->days_absence;
+				
+					$employeepayment->amount_cesta_ticket = $employeepayment->days_cesta_ticket * ($paysheet->cesta_ticket_month/30);
+				
+					$employeepayment->total_cesta_ticket = $employeepayment->amount_cesta_ticket - $employeepayment->loan_cesta_ticket;				
+				}
+			
+				if (!($this->Employeepayments->save($employeepayment))) 
+				{
+					$result = $binnacles->add('controller', 'Employeepayments', 'updatePayments', 'No se pudo actualizar el registro con el id: '  . $employeepayment->id);
+					$arrayResult['indicator'] = 1;
+					break;
+				} 
+			}
+		}
+		else
+		{
+			$result = $binnacles->add('controller', 'Employeepayments', 'updatePayments', 'No se encontraron pagos de la nómina con id: '  . $paysheet->id);
+		}
+		
+        return $arrayResult;
     }
     
     public function overPayment($idPaysheet = null, $year = null, $month = null, $fortnight = null, $classification = null, $monthNumber = null)

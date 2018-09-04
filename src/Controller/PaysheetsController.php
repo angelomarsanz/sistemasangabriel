@@ -501,7 +501,7 @@ class PaysheetsController extends AppController
 
         $tableConfiguration['payment_period'] = 'allColumns pago-periodo';
 
-        $tableConfiguration['amount_escalation_period'] = 'allColumns escalafon';
+        $tableConfiguration['amount_escalation'] = 'allColumns escalafon';
 
         $tableConfiguration['other_income'] = 'allColumns otros-ingresos';
 		
@@ -560,7 +560,7 @@ class PaysheetsController extends AppController
 		
 		isset($columnsReport['payment_period']) ? $tableConfiguration['payment_period'] = 'allColumns pago-periodo' : $tableConfiguration['payment_period'] = 'allColumns pago-periodo noverScreen';
 		
-		isset($columnsReport['amount_escalation_period']) ? $tableConfiguration['amount_escalation_period'] = 'allColumns escalafon' : $tableConfiguration['amount_escalation_period'] = 'allColumns escalafon noverScreen';
+		isset($columnsReport['amount_escalation']) ? $tableConfiguration['amount_escalation'] = 'allColumns escalafon' : $tableConfiguration['amount_escalation'] = 'allColumns escalafon noverScreen';
 		
 		isset($columnsReport['other_income']) ? $tableConfiguration['other_income'] = 'allColumns otros-ingresos' : $tableConfiguration['other_income'] = 'allColumns otros-ingresos noverScreen';		
 
