@@ -92,31 +92,37 @@
 					<tr>
 						<th></th>
 						<th></th>
-					</tr>						
-					<tr>
-						<th></th>
-						<th><?= 'Alumnos regulares: ' . $accountStudents['Regular'] ?></th>
-					</tr>
-					<tr>
-						<th></th>
-						<th><?= 'Alumnos nuevos: ' . $accountStudents['New'] ?></th>
-					</tr>
-					<tr>
-						<th></th>
-						<th><?= 'Alumnos egresados: ' . $accountStudents['Graduated'] ?></th>
-					</tr>
-					<tr>
-						<th></th>
-						<th><?= 'Alumnos retirados: ' . $accountStudents['Retired'] ?></th>
-					</tr>
-					<tr>
-						<th></th>
-						<th><?= 'Alumnos expulsados: ' . $accountStudents['Expelled'] ?></th>
-					</tr>
-					<tr>
-						<th></th>
-						<th><?= 'Alumnos suspendidos: ' . $accountStudents['Discontinued'] ?></th>
-					</tr>						
+					</tr>	
+					<?php if ($filtersReport == 'Regular' || $filtersReport == '*'): ?>
+						<tr>
+							<th></th>
+							<th><?= 'Alumnos regulares: ' . $accountStudents['Regular'] ?></th>
+						</tr>
+					<?php endif; ?>
+					<?php if ($filtersReport == 'Nuevo' || $filtersReport == '*'): ?>
+						<tr>
+							<th></th>
+							<th><?= 'Alumnos nuevos: ' . $accountStudents['New'] ?></th>
+						</tr>
+					<?php endif; ?>
+					<?php if ($filtersReport == '*'): ?>
+						<tr>
+							<th></th>
+							<th><?= 'Alumnos egresados: ' . $accountStudents['Graduated'] ?></th>
+						</tr>
+						<tr>
+							<th></th>
+							<th><?= 'Alumnos retirados: ' . $accountStudents['Retired'] ?></th>
+						</tr>
+						<tr>
+							<th></th>
+							<th><?= 'Alumnos expulsados: ' . $accountStudents['Expelled'] ?></th>
+						</tr>
+						<tr>
+							<th></th>
+							<th><?= 'Alumnos suspendidos: ' . $accountStudents['Discontinued'] ?></th>
+						</tr>		
+					<?php endif; ?>
 					<tr>
 						<th></th>
 						<th></th>

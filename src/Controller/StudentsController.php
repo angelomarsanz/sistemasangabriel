@@ -2030,6 +2030,7 @@ class StudentsController extends AppController
 			if (isset($_POST['filters_report']))
 			{
 				$arrayExtra[0] = $_POST['filters_report'];
+				$arrayExtra[1] = $_POST['order_report'];
 			}
 		
 			$arrayResult = $binnacles->add('controller', 'Students', 'familyStudents', $jsonArrayMark, $arrayExtra);
@@ -2070,6 +2071,10 @@ class StudentsController extends AppController
 		$arrayColumnsReport = (array) $objetColumnsReport;
 		
 		$arrayMark = $this->markColumns($arrayColumnsReport);
+		
+		$filtersReport = $binnacle->extra_column1;
+		
+		$orderReport = $binnacle->extra_column2;
 			
 		$arraySignedUp = [];
 					
@@ -2083,7 +2088,7 @@ class StudentsController extends AppController
 										
 		$students = TableRegistry::get('Students');
 
-		$arrayResult = $students->find('family');
+		$arrayResult = $students->find('family', ['filtersReport' => $filtersReport, 'orderReport' => $orderReport]);
 		
 		if ($arrayResult['indicator'] == 1)
 		{
@@ -2148,8 +2153,8 @@ class StudentsController extends AppController
 				$accountStudents['Discontinued']++;
 			}
 		}			
-		$this->set(compact('familyStudents', 'arrayMark', 'currentDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration'));
-		$this->set('_serialize', ['familyStudents', 'arrayMark', 'currenDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration']); 		
+		$this->set(compact('familyStudents', 'arrayMark', 'currentDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration', 'filtersReport'));
+		$this->set('_serialize', ['familyStudents', 'arrayMark', 'currenDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration', 'filtersReport']); 		
 	}
 	
 	public function markColumns($columnsReport = null)

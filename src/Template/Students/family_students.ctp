@@ -56,11 +56,33 @@
 <div class="row">
 	<div class="col-md-12">
 		<div class="page-header">
-			<h2>Familias - Alumnos regulares</h2>
-			<h3>Selección de columnas a imprimir</h3>
+			<h2>Familias - Alumnos</h2>
 		</div>
 		<?= $this->Form->create() ?>
 			<fieldset>	
+				<div id="filter-order" class="row">
+					<div class="col-md-3">
+						<?php
+							echo $this->Form->input('filters_report', ['label' => 'Seleccionar: *', 'required' => true, 'options' => 
+							[null => " ",
+							 'Nuevo' => 'Alumnos nuevos',
+							 'Regular' => 'Alumnos regulares',
+							 '*' => 'Todos'],
+							 ]);
+						?>
+					</div>
+					<div class="col-md-3">
+						<?php
+							echo $this->Form->input('order_report', ['label' => 'Ordenar por: *', 'required' => true, 'options' => 
+							[null => " ",
+							 'Familia' => 'Familia',
+							 'Alumno' => 'Alumno'],
+							 ]);
+						?>
+					</div>
+					<div class="col-md-6">
+					</div>
+				</div>
 				<div id="columns-report" class="row">
 					<div class="col-md-6">
 						<h4>Datos de la familia</h4>
@@ -85,20 +107,6 @@
 						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.identity_card]"> Cédula o pasaporte</p>
 						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.balance]"> Año escolar</p>
 						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.section_id]"> Grado y sección</p>
-					</div>
-				</div>
-				<div id="filter" class="row">
-					<div class="col-md-3">
-						<?php
-							echo $this->Form->input('filters_report', ['label' => 'Filtro: *', 'required' => true, 'options' => 
-							[null => " ",
-							 'Regular' => 'Alumnos nuevos',
-							 'Nuevo' => 'Alumnos regulares',
-							 '*' => 'Todos'],
-							 ]);
-						?>
-					</div>
-					<div class="col-md-9">
 					</div>
 				</div>
 			</fieldset>
