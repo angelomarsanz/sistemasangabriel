@@ -66,9 +66,8 @@
 							echo $this->Form->input('filters_report', ['label' => 'Seleccionar: *', 'required' => true, 'options' => 
 							[null => " ",
 							 'Nuevo' => 'Alumnos nuevos',
-							 'Regular' => 'Alumnos regulares',
-							 '*' => 'Todos'],
-							 ]);
+							 'Regular' => 'Alumnos regulares'
+							 ]]);
 						?>
 					</div>
 					<div class="col-md-3">

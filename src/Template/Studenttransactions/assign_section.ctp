@@ -82,7 +82,7 @@
                                             <td><input type="hidden" name="student[<?= $accountArray ?>][id]" value=<?= $studentsLevels->student->id ?>></td>
                                             <td><?= $accountStudent ?></td>
                                             <td><?= $studentsLevels->student->full_name ?></td>
-                                            <td style="text-align: center;"><?= number_format(($lastRate - $studentsLevels->amount), 2, ",", ".") ?></td>
+                                            <td style="text-align: center;"><?= number_format(($studentsLevels->amount - $studentsLevels->amount), 2, ",", ".") ?></td>
                                             <td><select name="student[<?= $accountArray ?>][section]" class="section">
                                                 <?php if ($studentsLevels->student->section->section == 'A'): ?>
                                                     <option value="A" selected>A</option>

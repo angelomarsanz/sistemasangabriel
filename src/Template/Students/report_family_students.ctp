@@ -58,6 +58,8 @@
 <div>
 	<?php $accountRecords = 0; ?>
 	<?php foreach ($familyStudents as $familyStudent): ?>
+		<?php if (isset($arraySignedUp[$familyStudent->id])): ?>
+		<?php if ($arraySignedUp[$familyStudent->id] == "Pagado"): ?>
 		<?php 
 			$lastYearRegistration = $familyStudent->balance;		
 			if ($familyStudent->student_condition == "Regular"):
@@ -96,13 +98,13 @@
 					<?php if ($filtersReport == 'Regular' || $filtersReport == '*'): ?>
 						<tr>
 							<th></th>
-							<th><?= 'Alumnos regulares: ' . $accountStudents['Regular'] ?></th>
+							<th><?= 'Alumnos regulares inscritos para este período: ' . $accountRegularRegistration ?></th>
 						</tr>
 					<?php endif; ?>
 					<?php if ($filtersReport == 'Nuevo' || $filtersReport == '*'): ?>
 						<tr>
 							<th></th>
-							<th><?= 'Alumnos nuevos: ' . $accountStudents['New'] ?></th>
+							<th><?= 'Alumnos nuevos inscritos para este período: ' . $accountNewRegistration ?></th>
 						</tr>
 					<?php endif; ?>
 					<?php if ($filtersReport == '*'): ?>
@@ -230,6 +232,8 @@
 				<td><?= $familyStudent->parentsandguardian->email_mother ?></td>
 
 			</tr>
+		<?php endif; ?>
+		<?php endif; ?>
 		<?php endif; ?>
 	<?php endforeach ?>
 	</tbody>

@@ -116,14 +116,18 @@
                 <td style="width: 50%;"><b></b></td>
             </tr>
             <tr>
-                <td style="width: 50%;"><b>Total Bs.S:</b></td>
+                <td style="width: 50%;"><b>Total Bs.F:</b></td>
                 <td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b></td>
+            </tr>
+            <tr>
+                <td style="width: 50%;"><b>Total Bs.S:</b></td>
+                <td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid/100000), 2, ",", ".") ?></b></td>
             </tr>
         </table>
     </div>
 </div>
 <?php
-$countSubtraction = 20 - $counter;
+$countSubtraction = 16 - $counter;
 for ($i = 1; $i <= $countSubtraction; $i++): ?>
     <br />
 <?php
@@ -201,8 +205,12 @@ endfor; ?>
                 <td style="width: 50%;"><b></b></td>
             </tr>
             <tr>
-                <td style="width: 50%;"><b>Total Bs.S:</b></td>
+                <td style="width: 50%;"><b>Total Bs.F:</b></td>
                 <td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b></td>
+            </tr>
+            <tr>
+                <td style="width: 50%;"><b>Total Bs.S:</b></td>
+                <td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid/100000), 2, ",", ".") ?></b></td>
             </tr>
         </table>
     </div>
@@ -210,9 +218,10 @@ endfor; ?>
 <?php else: ?>
 <div>
     <h3 style="text-align: right;">Recibo Nro. <?= $bill->bill_number ?></h3>
-    <h2 style="text-align: center;">Por Bs.S <?= number_format($accountService, 2, ",", ".") ?></h2>
+    <h2 style="text-align: center;">Por Bs.F <?= number_format($accountService, 2, ",", ".") ?></h2>
+	<h2 style="text-align: center;">Por Bs.S <?= number_format(($accountService/100000), 2, ",", ".") ?></h2>
     <br />
-    <p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.S <b><?= number_format($accountService, 2, ",", ".") ?></b>
+    <p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.F <b><?= number_format($accountService, 2, ",", ".") ?></b>
     por concepto de servicio educativo, correspondiente a lo(s) alumno(s):</p>
     <table style="width:100%;">
         <tbody>

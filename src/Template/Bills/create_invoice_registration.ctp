@@ -177,7 +177,7 @@
                         </div>
                         <div class="col-md-4">
                             <p><b>Sub-total Bs. <spam id="invoice-subtotal"></spam></b></p>
-                            <p><b>Iva 12% Bs. 0 </b></p>
+                            <p><b>Iva 16% Bs. 0 </b></p>
                             <p><b>Total Bs. <spam id="total-bill"></spam></spam></b></p>
                             <p><b>Pagado Bs. <spam id="paid-out"></spam></spam></b></p>
                             <p><b>Por pagar Bs. <spam id="to-pay"></spam></b></p>
@@ -692,24 +692,24 @@
 
     function updateAmount()
     {
-        $('#paid-out').text(accumulatedPayment);
+        $('#paid-out').text(accumulatedPayment.toFixed(2));
             
         if (balance > 0)
         {
-            $('#to-pay').text(balance);
+            $('#to-pay').text(balance.toFixed(2));
             $('#change').text(0);
-            $('#amount-01').val(balance);
-            $('#amount-02').val(balance);
-            $('#amount-03').val(balance);
-            $('#amount-04').val(balance);
-            $('#amount-05').val(balance);
-            $('#amount-06').val(balance);
-            $('#amount-07').val(balance);
+            $('#amount-01').val(balance.toFixed(2));
+            $('#amount-02').val(balance.toFixed(2));
+            $('#amount-03').val(balance.toFixed(2));
+            $('#amount-04').val(balance.toFixed(2));
+            $('#amount-05').val(balance.toFixed(2));
+            $('#amount-06').val(balance.toFixed(2));
+            $('#amount-07').val(balance.toFixed(2));
         }
         else
         {
             $('#to-pay').text(0);
-            $('#change').text(-(balance));
+            $('#change').text(change.toFixed(2));
             $('#amount-01').val(0);
             $('#amount-02').val(0);
             $('#amount-03').val(0);
@@ -989,7 +989,7 @@
                     $("#student-name").html(studentName);
                     $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
                     concept = firstInstallment + ' - ' + lastInstallment;
-                    $("#student-balance").html(studentBalance);
+                    $("#student-balance").html(studentBalance.toFixed(2));
                     $("#mark-quotas").html(nextPayment);  
                     $("#mark-quotas").attr('disabled', false);
                 }
@@ -1104,7 +1104,7 @@
         linePayments += "<tr id=pa" + accountant + "> \
             <td><button id=p" + accountant + " name='" + paymentType + "' value=" + amountPaid + " class='registeredPayments glyphicon glyphicon-trash'></button></td> \
             <td>" + paymentType + "</td> \
-            <td>" + amountPaid + "</td> \
+            <td>" + amountPaid.toFixed(2) + "</td> \
             <td>" + bank + "</td> \
             <td>" + accountOrCard + "</td> \
             <td>" + serial + "</td></tr>";
@@ -1613,10 +1613,10 @@
                             $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
                             concept = firstInstallment + ' - ' + lastInstallment;
                             studentBalance = studentBalance + parseFloat($(this).attr('value'));
-                            $("#student-balance").html(studentBalance);
+							$("#student-balance").html(studentBalance.toFixed(2));
                             totalBalance = totalBalance + parseFloat($(this).attr('value'));
-                            $("#total-balance").html(totalBalance);
-                        }
+                            $("#total-balance").html(totalBalance.toFixed(2));
+						}
                         else
                         {
                             $("#mark-quotas").html($(this).attr('name'));
@@ -1693,9 +1693,9 @@
                                 concept = firstInstallment + ' - ' + lastInstallment;
                             }
                             studentBalance = studentBalance - transactionAmount;
-                            $("#student-balance").html(studentBalance);
+                            $("#student-balance").html(studentBalance.toFixed(2));
                             totalBalance = totalBalance - transactionAmount;
-                            $("#total-balance").html(totalBalance);
+                            $("#total-balance").html(totalBalance.toFixed(2));
                             return false;
                         }
                     }
@@ -1726,9 +1726,9 @@
                         concept = firstInstallment + ' - ' + lastInstallment;
                     }
                     studentBalance = studentBalance - transactionAmount;
-                    $("#student-balance").html(studentBalance);
+                    $("#student-balance").html(studentBalance.toFixed(2));
                     totalBalance = totalBalance - transactionAmount;
-                    $("#total-balance").html(totalBalance);
+                    $("#total-balance").html(totalBalance.toFixed(2));
                 }
             }
         }); 
@@ -1744,8 +1744,8 @@
             showInvoiceLines();
             
             totalBill = totalBalance;
-            $("#invoice-subtotal").html(totalBill);
-            $("#total-bill").html(totalBill);
+            $("#invoice-subtotal").html(totalBill.toFixed(2));
+            $("#total-bill").html(totalBill.toFixed(2));
             balance = totalBalance - accumulatedPayment;
             indicatorUpdateAmount = 1;
             updateAmount();
@@ -1785,8 +1785,8 @@
             });
             showInvoiceLines();
             totalBill = accumulatedPayment;
-            $("#invoice-subtotal").html(totalBill);
-            $("#total-bill").html(totalBill);
+            $("#invoice-subtotal").html(totalBill.toFixed(2));
+            $("#total-bill").html(totalBill.toFixed(2));
             balance = totalBill - accumulatedPayment;
             indicatorUpdateAmount = 1;
             updateAmount();
@@ -1830,8 +1830,8 @@
                 
             });
             showInvoiceLines();
-            $("#invoice-subtotal").html(totalBill);
-            $("#total-bill").html(totalBill);
+            $("#invoice-subtotal").html(totalBill.toFixed(2));
+            $("#total-bill").html(totalBill.toFixed(2));
             balance = totalBill - accumulatedPayment;
             indicatorUpdateAmount = 1;
             updateAmount();
@@ -1847,7 +1847,7 @@
             
             if (balanceIndicator == 0)
             {
-                balance = totalBalance;
+                balance = parseFloat(totalBalance.toFixed(2));
                 balanceIndicator = 1;
             }
             
@@ -1905,7 +1905,7 @@
 
                 printPayments();
 
-                alert('Pago registrado con éxito: Bs. ' + amountPaid);
+                alert('Pago registrado con éxito: Bs. ' + amountPaid.toFixed(2));
 
                 if (change > 0)
                 {

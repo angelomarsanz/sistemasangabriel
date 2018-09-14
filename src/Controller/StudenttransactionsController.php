@@ -1236,138 +1236,131 @@ class StudenttransactionsController extends AppController
                 if ($result == 0)
                 {
                     $this->Flash->success(__('Los alumnos fueron asignados exitosamente a su sección'));
-                }
-                
+                } 
             }
         }
-        
+		        
         $assign = 1;
 
         if (isset($level))
         {
             $studentTransactions = TableRegistry::get('Studenttransactions');
             
-            $this->loadModel('Rates');
-            
-            $concept = 'Matrícula';
-            
-            $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-               'order' => ['Rates.created' => 'DESC'] ]);
+			$this->loadModel('Schools');
 
-            $row = $lastRecord->first();
+			$school = $this->Schools->get(2);
+			
+			$currentYearRegistration = $school->current_year_registration;
+						
+			$transactionDescription = 'Matrícula ' . $currentYearRegistration;
+			
+			$inscribed = $studentTransactions->find()
+				->select(
+					['Studenttransactions.id',
+					'Students.level_of_study'])
+				->contain(['Students'])
+				->where([['Studenttransactions.transaction_description' => $transactionDescription],
+					['Studenttransactions.amount < Studenttransactions.original_amount'],
+					['Students.level_of_study IS NOT NULL'], 
+					['Students.student_condition' => 'Regular']]);
+	
+			$totalEnrolled = $inscribed->count();
+						
+			$studentsLevel = $studentTransactions->find()
+				->select(
+					['Studenttransactions.id',
+					'Studenttransactions.transaction_description',
+					'Studenttransactions.amount',
+					'Studenttransactions.original_amount',
+					'Students.id',
+					'Students.surname',
+					'Students.second_surname',
+					'Students.first_name',
+					'Students.second_name',
+					'Students.level_of_study',
+					'Students.section_id',
+					'Sections.level',
+					'Sections.sublevel',
+					'Sections.section'])
+				->contain(['Students' => ['Sections']])
+				->where([['Studenttransactions.transaction_description' => $transactionDescription],
+					['Studenttransactions.amount < Studenttransactions.original_amount'],
+					['Students.level_of_study' => $level],
+					['Students.student_condition' => 'Regular']])
+				->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
+				
+			$totalLevel = $studentsLevel->count();
+						
+			$sectionA = 0;
+			$sectionB = 0;
+			$sectionC = 0;
 
-            if($row)
-            {
-                $inscribed = $studentTransactions->find()
-                    ->select(
-                        ['Studenttransactions.id',
-                        'Students.level_of_study'])
-                    ->contain(['Students'])
-                    ->where([['Studenttransactions.transaction_description' => 'Matrícula 2017'],
-                        ['Studenttransactions.amount <' => $row->amount],
-                        ['Students.level_of_study IS NOT NULL'], 
-						['Students.student_condition' => 'Regular']]);
-        
-                $totalEnrolled = $inscribed->count();
-                
-                $studentsLevel = $studentTransactions->find()
-                    ->select(
-                        ['Studenttransactions.id',
-                        'Studenttransactions.transaction_description',
-                        'Studenttransactions.amount',
-                        'Students.id',
-                        'Students.surname',
-                        'Students.second_surname',
-                        'Students.first_name',
-                        'Students.second_name',
-                        'Students.level_of_study',
-                        'Students.section_id',
-                        'Sections.level',
-                        'Sections.sublevel',
-                        'Sections.section'])
-                    ->contain(['Students' => ['Sections']])
-                    ->where([['Studenttransactions.transaction_description' => 'Matrícula 2017'],
-                        ['Studenttransactions.amount <' => $row->amount],
-                        ['Students.level_of_study' => $level],
-						['Students.student_condition' => 'Regular']])
-                    ->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
-                    
-                $totalLevel = $studentsLevel->count();
-                
-                $sectionA = 0;
-                $sectionB = 0;
-                $sectionC = 0;
+			if ($level != '')
+			{
+				$sublevel = $this->levelSublevel($level);
 
-                if ($level != '')
-                {
-                    $sublevel = $this->levelSublevel($level);
+				$sections = $this->Studenttransactions->Students->Sections->find('all')
+					->where(['sublevel' => $sublevel])
+					->order(['Sections.section' => 'ASC']);
 
-                    $sections = $this->Studenttransactions->Students->Sections->find('all')
-                        ->where(['sublevel' => $sublevel])
-                        ->order(['Sections.section' => 'ASC']);
+				foreach ($sections as $section)
+				{
+					if ($section->section == 'A')
+					{
+						$idSectionA = $section->id;
+					}
+				}                    
+			}
 
-                    foreach ($sections as $section)
-                    {
-                        if ($section->section == 'A')
-                        {
-                            $idSectionA = $section->id;
-                        }
-                    }                    
-                }
+			foreach ($studentsLevel as $studentsLevels)
+			{     
+				if ($level != '')
+				{
+					$swSection = 0;
 
-                foreach ($studentsLevel as $studentsLevels)
-                {     
-                    if ($level != '')
-                    {
-                        $swSection = 0;
+					foreach ($sections as $section)
+					{
+						if ($studentsLevels->student->section_id == $section->id)
+						{
+							$swSection = 1;
+						}
+					}
 
-                        foreach ($sections as $section)
-                        {
-                            if ($studentsLevels->student->section_id == $section->id)
-                            {
-                                $swSection = 1;
-                            }
-                        }
+					if ($swSection == 0)
+					{
+						$student = $this->Studenttransactions->Students->get($studentsLevels->student->id);
 
-                        if ($swSection == 0)
-                        {
-                            $student = $this->Studenttransactions->Students->get($studentsLevels->student->id);
+						$student->section_id = $idSectionA;        
 
-                            $student->section_id = $idSectionA;        
+						if (!($this->Studenttransactions->Students->save($student)))
+						{                       
+							$this->Flash->error(__('No pudo ser actualizado el alumno identificado con el id: ' . $student->id));            
+						}
+					}
+				}
 
-                            if (!($this->Studenttransactions->Students->save($student)))
-                            {                       
-                                $this->Flash->error(__('No pudo ser actualizado el alumno identificado con el id: ' . $student->id));            
-                            }
-
-                        }
-                    }
-
-                    if ($studentsLevels->student->section->section == 'A')
-                    {
-                        $sectionA++;
-                    }
-                    elseif ($studentsLevels->student->section->section == 'B')
-                    {
-                        $sectionB++;
-                    }
-                    elseif ($studentsLevels->student->section->section == 'C')
-                    {
-                        $sectionC++;
-                    }
-                    else
-                    {
-                        $sectionA++;
-                    }
-                }
-                
-                $levelChat = $this->replaceCharacters($level);
-
-                $lastRate = $row->amount;
-                
-                $this->set(compact('level', 'studentsLevel', 'totalEnrolled', 'totalLevel', 'sectionA', 'sectionB', 'sectionC', 'levelChat', 'assign', 'lastRate'));
-                $this->set('_serialize', ['level', 'studentsLevel', 'totalEnrolled', 'totalLevel', 'sectionA', 'sectionB', 'sectionC', 'levelChat', 'assign', 'lastRate']);
-            }
+				if ($studentsLevels->student->section->section == 'A')
+				{
+					$sectionA++;
+				}
+				elseif ($studentsLevels->student->section->section == 'B')
+				{
+					$sectionB++;
+				}
+				elseif ($studentsLevels->student->section->section == 'C')
+				{
+					$sectionC++;
+				}
+				else
+				{
+					$sectionA++;
+				}
+			}
+			
+			$levelChat = $this->replaceCharacters($level);
+		
+			$this->set(compact('level', 'studentsLevel', 'totalEnrolled', 'totalLevel', 'sectionA', 'sectionB', 'sectionC', 'levelChat', 'assign'));
+			$this->set('_serialize', ['level', 'studentsLevel', 'totalEnrolled', 'totalLevel', 'sectionA', 'sectionB', 'sectionC', 'levelChat', 'assign']);
         }
         else
         {
@@ -1460,49 +1453,42 @@ class StudenttransactionsController extends AppController
 
         $school = $this->Schools->get(2);
 
-        $this->loadModel('Rates');
-        
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-           'order' => ['Rates.created' => 'DESC'] ]);
+		$currentYearRegistration = $school->current_year_registration;
+					
+		$transactionDescription = 'Matrícula ' . $currentYearRegistration;
 
-        $row = $lastRecord->first();
+		$studentTransactions = TableRegistry::get('Studenttransactions');
 
-        if($row)
-        {
-            $studentTransactions = TableRegistry::get('Studenttransactions');
+		$studentsFor = $studentTransactions->find()
+			->select(
+				['Studenttransactions.id',
+				'Studenttransactions.transaction_description',
+				'Studenttransactions.amount',
+				'Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.level_of_study',
+				'Students.section_id',
+				'Sections.level',
+				'Sections.sublevel',
+				'Sections.section'])
+			->contain(['Students' => ['Sections']])
+			->where([['Studenttransactions.transaction_description' => $transactionDescription],
+				['Studenttransactions.amount < Studenttransactions.original_amount'],
+				['Students.level_of_study' => $level],
+				['Students.student_condition' => 'Regular']])
+			->order(['Sections.section' => 'ASC', 'Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 
-            $studentsFor = $studentTransactions->find()
-                ->select(
-                    ['Studenttransactions.id',
-                    'Studenttransactions.transaction_description',
-                    'Studenttransactions.amount',
-                    'Students.id',
-                    'Students.surname',
-                    'Students.second_surname',
-                    'Students.first_name',
-                    'Students.second_name',
-                    'Students.level_of_study',
-                    'Students.section_id',
-                    'Sections.level',
-                    'Sections.sublevel',
-                    'Sections.section'])
-                ->contain(['Students' => ['Sections']])
-                ->where([['Studenttransactions.transaction_description' => 'Matrícula 2017'],
-                    ['Studenttransactions.amount <' => $row->amount],
-                    ['Students.level_of_study' => $level]])
-                ->order(['Sections.section' => 'ASC', 'Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
+		$account = $studentsFor->count();
+		
+		$totalPages = ceil($studentsFor->count() / 30) + 2;
+		
+		$levelChatScript = $this->replaceChatScript($level);
 
-            $account = $studentsFor->count();
-            
-            $totalPages = ceil($studentsFor->count() / 30) + 2;
-            
-            $levelChatScript = $this->replaceChatScript($level);
-
-            $this->set(compact('school', 'studentsFor', 'level', 'totalPages', 'levelChatScript'));
-            $this->set('_serialize', ['school', 'studentsFor', 'level', 'totalPages', 'levelChatScript']);
-        }
+		$this->set(compact('school', 'studentsFor', 'level', 'totalPages', 'levelChatScript'));
+		$this->set('_serialize', ['school', 'studentsFor', 'level', 'totalPages', 'levelChatScript']);
     }
     public function replaceCharacters($level = null)
     {
@@ -1635,140 +1621,132 @@ class StudenttransactionsController extends AppController
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
+			
+		$currentYearRegistration = $school->current_year_registration;
+					
+		$transactionDescription = 'Matrícula ' . $currentYearRegistration;
+		
+		$studentTransactions = TableRegistry::get('Studenttransactions');
 
-        $this->loadModel('Rates');
-        
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-           'order' => ['Rates.created' => 'DESC'] ]);
+		$studentsFor = $studentTransactions->find()
+			->select(
+				['Studenttransactions.id',
+				'Studenttransactions.transaction_description',
+				'Studenttransactions.amount',
+				'Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.level_of_study',
+				'Students.type_of_identification',
+				'Students.identity_card',
+				'Students.section_id',
+				'Parentsandguardians.id',
+				'Parentsandguardians.type_of_identification',
+				'Parentsandguardians.identidy_card',
+				'Parentsandguardians.surname',
+				'Parentsandguardians.second_surname',
+				'Parentsandguardians.first_name',
+				'Parentsandguardians.second_name'])
+			->contain(['Students' => ['Parentsandguardians']])
+			->where([['Studenttransactions.transaction_description' => $transactionDescription],
+				['Studenttransactions.amount < Studenttransactions.original_amount'], ['Students.student_condition' => 'Regular']])
+			->order(['Parentsandguardians.id' => 'ASC']);
 
-        $row = $lastRecord->first();
+		$account = $studentsFor->count();
+		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
 
-        if($row)
-        {
-            $studentTransactions = TableRegistry::get('Studenttransactions');
+		$currentDate = Time::now();
 
-            $studentsFor = $studentTransactions->find()
-                ->select(
-                    ['Studenttransactions.id',
-                    'Studenttransactions.transaction_description',
-                    'Studenttransactions.amount',
-                    'Students.id',
-                    'Students.surname',
-                    'Students.second_surname',
-                    'Students.first_name',
-                    'Students.second_name',
-                    'Students.level_of_study',
-                    'Students.type_of_identification',
-                    'Students.identity_card',
-                    'Students.section_id',
-                    'Parentsandguardians.id',
-                    'Parentsandguardians.type_of_identification',
-                    'Parentsandguardians.identidy_card',
-                    'Parentsandguardians.surname',
-                    'Parentsandguardians.second_surname',
-                    'Parentsandguardians.first_name',
-                    'Parentsandguardians.second_name'])
-                ->contain(['Students' => ['Parentsandguardians']])
-                ->where([['Studenttransactions.transaction_description' => 'Matrícula 2017'],
-                    ['Studenttransactions.amount <' => $row->amount], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
-                ->order(['Parentsandguardians.id' => 'ASC']);
+		$idParent = 0;
+		$accountRecords = 0;
+		$accountChildren = 0;
+		$accountFamily = 0;
+		$accountUnHijo = 0;
+		$accountDosHijos = 0;
+		$accountTresHijos = 0;
+		$accountCuatroHijos = 0;
+		$accountCincoOMas = 0;
 
-            $account = $studentsFor->count();
-            
-            setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-            date_default_timezone_set('America/Caracas');
+		foreach ($studentsFor as $studentsFors)
+		{
+			if ($accountRecords == 0)
+			{
+				$idParent = $studentsFors->student->parentsandguardian->id;
+				$accountChildren++;
+				$accountFamily++;
+				$accountRecords++;
+			}
+			else
+			{
+				if ($idParent != $studentsFors->student->parentsandguardian->id)
+				{
+					if ($accountChildren < 1)
+					{
+						$this->Flash->error(__('Error en contador de registros del padre identificado con el ID: ' . $studentsFors->student->parentsandguardian->id));
+					}
+					elseif ($accountChildren == 1)
+					{
+						$accountUnHijo++;
+					}
+					elseif ($accountChildren == 2)
+					{
+						$accountDosHijos++;
+					}
+					elseif ($accountChildren == 3)
+					{
+						$accountTresHijos++;
+					}
+					elseif ($accountChildren == 4)
+					{
+						$accountCuatroHijos++;
+					}
+					elseif ($accountChildren >= 5)
+					{
+						$accountCincoOMas++;
+					}
+					$idParent = $studentsFors->student->parentsandguardian->id;
+					$accountChildren = 1;
+					$accountFamily++;
+					$accountRecords++;
+				}
+				else
+				{
+					$accountChildren++; 
+					$accountRecords++;                        
+				}
+			}
+		}
+		if ($accountChildren < 1)
+		{
+			$this->Flash->error(__('Error en contador de registros del padre identificado con el ID: ' . $studentsFors->student->parentsandguardian->id));
+		}
+		elseif ($accountChildren == 1)
+		{
+			$accountUnHijo++;
+		}
+		elseif ($accountChildren == 2)
+		{
+			$accountDosHijos++;
+		}
+		elseif ($accountChildren == 3)
+		{
+			$accountTresHijos++;
+		}
+		elseif ($accountChildren == 4)
+		{
+			$accountCuatroHijos++;
+		}
+		elseif ($accountChildren >= 5)
+		{
+			$accountCincoOMas++;
+		}
 
-            $currentDate = Time::now();
-
-            $idParent = 0;
-            $accountRecords = 0;
-            $accountChildren = 0;
-            $accountFamily = 0;
-            $accountUnHijo = 0;
-            $accountDosHijos = 0;
-            $accountTresHijos = 0;
-            $accountCuatroHijos = 0;
-            $accountCincoOMas = 0;
-
-            foreach ($studentsFor as $studentsFors)
-            {
-                if ($accountRecords == 0)
-                {
-                    $idParent = $studentsFors->student->parentsandguardian->id;
-                    $accountChildren++;
-                    $accountFamily++;
-                    $accountRecords++;
-                }
-                else
-                {
-                    if ($idParent != $studentsFors->student->parentsandguardian->id)
-                    {
-                        if ($accountChildren < 1)
-                        {
-                            $this->Flash->error(__('Error en contador de registros del padre identificado con el ID: ' . $studentsFors->student->parentsandguardian->id));
-                        }
-                        elseif ($accountChildren == 1)
-                        {
-                            $accountUnHijo++;
-                        }
-                        elseif ($accountChildren == 2)
-                        {
-                            $accountDosHijos++;
-                        }
-                        elseif ($accountChildren == 3)
-                        {
-                            $accountTresHijos++;
-                        }
-                        elseif ($accountChildren == 4)
-                        {
-                            $accountCuatroHijos++;
-                        }
-                        elseif ($accountChildren >= 5)
-                        {
-                            $accountCincoOMas++;
-                        }
-                        $idParent = $studentsFors->student->parentsandguardian->id;
-                        $accountChildren = 1;
-                        $accountFamily++;
-                        $accountRecords++;
-                    }
-                    else
-                    {
-                        $accountChildren++; 
-                        $accountRecords++;                        
-                    }
-                }
-            }
-            if ($accountChildren < 1)
-            {
-                $this->Flash->error(__('Error en contador de registros del padre identificado con el ID: ' . $studentsFors->student->parentsandguardian->id));
-            }
-            elseif ($accountChildren == 1)
-            {
-                $accountUnHijo++;
-            }
-            elseif ($accountChildren == 2)
-            {
-                $accountDosHijos++;
-            }
-            elseif ($accountChildren == 3)
-            {
-                $accountTresHijos++;
-            }
-            elseif ($accountChildren == 4)
-            {
-                $accountCuatroHijos++;
-            }
-            elseif ($accountChildren >= 5)
-            {
-                $accountCincoOMas++;
-            }
-
-            $this->set(compact('school', 'studentsFor', 'currentDate', 'account', 'accountUnHijo', 'accountDosHijos', 'accountTresHijos', 'accountCuatroHijos', 'accountCincoOMas', 'accountFamily'));
-            $this->set('_serialize', ['school', 'studentsFor', 'currentDate', 'account', 'accountUnHijo', 'accountDosHijos', 'accountTresHijos', 'accountCuatroHijos', 'accountCincoOMas', 'accountFamily']);
-        }
+		$this->set(compact('school', 'studentsFor', 'currentDate', 'account', 'accountUnHijo', 'accountDosHijos', 'accountTresHijos', 'accountCuatroHijos', 'accountCincoOMas', 'accountFamily'));
+		$this->set('_serialize', ['school', 'studentsFor', 'currentDate', 'account', 'accountUnHijo', 'accountDosHijos', 'accountTresHijos', 'accountCuatroHijos', 'accountCincoOMas', 'accountFamily']);
     }
     public function discountQuota80()
     {
@@ -3761,6 +3739,6 @@ class StudenttransactionsController extends AppController
 
 		$binnacles->add('controller', 'Studenttransactions', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
 		$binnacles->add('controller', 'Studenttransactions', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
-		exit;
-	}
+		
+		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);	}
 }

@@ -67,13 +67,13 @@
                                     <li><?= $this->Html->link('Registro básico de nuevos alumnos', ['controller' => 'Students', 'action' => 'registerNewStudents']) ?></li>
                                     <li><?= $this->Html->link('Datos de alumnos', ['controller' => 'Students', 'action' => 'consultStudent']) ?></li>
 									<li><?= $this->Html->link('Alumnos con condición distinta a regular', ['controller' => 'Students', 'action' => 'consultStudentDelete']) ?></li>
-                                    <!-- <li><?= $this->Html->link('Asignar sección', ['controller' => 'Studenttransactions', 'action' => 'assignSection']) ?></li> -->
+                                    <li><?= $this->Html->link('Asignar sección', ['controller' => 'Studenttransactions', 'action' => 'assignSection']) ?></li>
                                     <li><?= $this->Html->link('Modificar las cuotas del alumno', ['controller' => 'Students', 'action' => 'modifyTransactions']) ?></li>
                                     <li><?= $this->Html->link('Relación de mensualidades', ['controller' => 'Students', 'action' => 'listMonthlyPayments']) ?></li>
                                     <li><?= $this->Html->link('Alumnos con mensualidades pendientes', ['controller' => 'Students', 'action' => 'defaulters']) ?></li>
                                     <li><?= $this->Html->link('Pagos de nuevos alumnos', ['controller' => 'Students', 'action' => 'newstudentpdf', "nuevos", '_ext' => 'pdf']) ?>
-                                    <li><?= $this->Html->link('Alumnos inscritos', ['controller' => 'Studenttransactions', 'action' => 'reportStudentGeneral']) ?></li>
-                                    <li><?= $this->Html->link('Alumnos egresados', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
+                                    <!-- <li><?= $this->Html->link('Alumnos inscritos', ['controller' => 'Studenttransactions', 'action' => 'reportStudentGeneral']) ?></li> -->
+                                    <!-- <li><?= $this->Html->link('Alumnos egresados', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li> -->
                                     <li><?= $this->Html->link('Aplicar descuento a alumnos (familias con tres hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota80']) ?></li>
                                     <li><?= $this->Html->link('Aplicar descuento a alumnos (familias con cuatro o más hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota50']) ?></li>
                                     <li><?= $this->Html->link('Becar alumno', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>

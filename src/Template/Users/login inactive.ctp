@@ -3,7 +3,7 @@
 <div class="container">
 	<div class="jumbotron">
     	<h1>Bienvenidos al Sistema San Gabriel Arcángel...</h1>
-    	<p>Por favor escriba en el campo usuario, el número de cédula de la madre del(los) alumno(s), en contraseña sga40 y pulse el botón Acceder</p>
+    	<p>Por favor escriba en el campo usuario, el número de cédula de la madre del(los) estudiante(s), en contraseña sga40 y pulse el botón Acceder</p>
 	</div>
 	<h2 id="message" style="color: red; font-style: italic;"></h2>
 	<div class="row" style="margin-top:20px">
@@ -41,8 +41,8 @@
         {
         	usernameUser = $("#username").val();
 
-//        	if (usernameUser.toLowerCase() == "angel2703" || usernameUser.toLowerCase() == "titularsistema" || usernameUser.toLowerCase() == "adminsg")
-         	if (usernameUser.toLowerCase() == "angel2703")
+        	if (usernameUser.toLowerCase() == "angel2703" || usernameUser.toLowerCase() == "titularsistema" || usernameUser.toLowerCase() == "adminsg")
+//         	if (usernameUser.toLowerCase() == "angel2703")
         	{
         		$('#message').css('color', '#00ace6');
 	            $('#message').text("Acceso concedido");
