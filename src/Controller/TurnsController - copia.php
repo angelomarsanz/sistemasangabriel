@@ -5,6 +5,8 @@ use App\Controller\AppController;
 
 use App\Controller\PaymentsController;
 
+use App\Controller\BinnaclesController;
+
 use Cake\I18n\Time;
 
 
@@ -96,22 +98,15 @@ class TurnsController extends AppController
             
             if ($dateTurni == $currentDatei)
             {
-                if ($menuOption == 'Mensualidades')
-                {
-                    return $this->redirect(['controller' => 'bills', 'action' => 'createInvoice', $result[0]['id'], $result[0]['turn']]);
-                }
-                elseif ($menuOption == 'Anular')
+                if ($menuOption == 'Anular')
                 {
                     return $this->redirect(['controller' => 'bills', 'action' => 'annulInvoice', $result[0]['id'], $result[0]['turn']]);
                 }
-                elseif ($menuOption == "Inscripción regulares")
+                else
                 {
-                    return $this->redirect(['controller' => 'bills', 'action' => 'createInvoiceRegistration', $result[0]['id'], $result[0]['turn']]);
+                    return $this->redirect(['controller' => 'bills', 'action' => 'createInvoice', $menuOption, $result[0]['id'], $result[0]['turn']]);
                 }
-                elseif ($menuOption == "Inscripción nuevos")
-                {
-                    return $this->redirect(['controller' => 'bills', 'action' => 'createInvoiceRegistrationNew', $result[0]['id'], $result[0]['turn']]);
-                }
+
             }
             else
             {
@@ -120,7 +115,7 @@ class TurnsController extends AppController
         }
         else
         {
-            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder facturar'));    
+            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder facturar o anular facturas'));    
         }
     }
 
@@ -157,6 +152,7 @@ class TurnsController extends AppController
             $turn->start_date = Time::now();
             $turn->end_date = Time::now();
             $turn->status = 1;
+            $turn->initial_cash = 0;
             $turn->cash_received = 0;
             $turn->cash_paid = 0;
             $turn->real_cash = 0;
@@ -179,7 +175,7 @@ class TurnsController extends AppController
             $turn->supervisor_close = 0;
             if ($this->Turns->save($turn)) 
             {
-                $this->Flash->success(__('El turno ha sido abierto satisfactoriamente.'));
+                $this->Flash->success(__('El turno ha sido abierto satisfactoriamente'));
     
                 return $this->redirect(['controller' => 'users', 'action' => 'wait']);
             } 
@@ -210,43 +206,52 @@ class TurnsController extends AppController
         
         $totalAmounts = $turn->initial_cash;
         
+        $receipt = 0;
+        
         foreach ($paymentsTurn as $paymentsTurns) 
         {
-            switch ($paymentsTurns->payment_type) 
+            if ($paymentsTurns->fiscal == 0)
             {
-                case "Efectivo":
-                    $turn->cash_received = $turn->cash_received + $paymentsTurns->amount;
-                    $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                    break;
-                case "Tarjeta de débito":
-                    $turn->debit_card_amount = $turn->debit_card_amount + $paymentsTurns->amount;
-                    $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                    break;
-                case "Tarjeta de crédito":
-                    $turn->credit_card_amount = $turn->credit_card_amount + $paymentsTurns->amount;
-                    $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                    break;
-                case "Transferencia":
-                    $turn->transfer_amount = $turn->transfer_amount + $paymentsTurns->amount;
-                    $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                    break;
-                case "Depósito":
-                    $turn->deposit_amount = $turn->deposit_amount + $paymentsTurns->amount;
-                    $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                    break;
-                case "Cheque":
-                    $turn->check_amount = $turn->check_amount + $paymentsTurns->amount;
-                    $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                    break;
-                case "Retención de impuesto":
-                    $turn->retention_amount = $turn->retention_amount + $paymentsTurns->amount;
-                    $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                    break;
+                $receipt = 1;
+            }
+            else
+            {
+                switch ($paymentsTurns->payment_type) 
+                {
+                    case "Efectivo":
+                        $turn->cash_received = $turn->cash_received + $paymentsTurns->amount;
+                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
+                        break;
+                    case "Tarjeta de débito":
+                        $turn->debit_card_amount = $turn->debit_card_amount + $paymentsTurns->amount;
+                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
+                        break;
+                    case "Tarjeta de crédito":
+                        $turn->credit_card_amount = $turn->credit_card_amount + $paymentsTurns->amount;
+                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
+                        break;
+                    case "Transferencia":
+                        $turn->transfer_amount = $turn->transfer_amount + $paymentsTurns->amount;
+                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
+                        break;
+                    case "Depósito":
+                        $turn->deposit_amount = $turn->deposit_amount + $paymentsTurns->amount;
+                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
+                        break;
+                    case "Cheque":
+                        $turn->check_amount = $turn->check_amount + $paymentsTurns->amount;
+                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
+                        break;
+                    case "Retención de impuesto":
+                        $turn->retention_amount = $turn->retention_amount + $paymentsTurns->amount;
+                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
+                        break;
+                }
             }
         }
 
-        $this->set(compact('turn', 'paymentsTurn', 'totalAmounts'));
-        $this->set('_serialize', ['turn', 'paymentsTurn', 'totalAmounts']);
+        $this->set(compact('turn', 'paymentsTurn', 'totalAmounts', 'receipt'));
+        $this->set('_serialize', ['turn', 'paymentsTurn', 'totalAmounts', 'receipt']);
     }
     
     function closeTurn()
@@ -316,6 +321,16 @@ class TurnsController extends AppController
         $turn = $this->Turns->get($idTurn); 
         
         $paymentsTurn = $payment->searchPayments($idTurn);
+
+        $receipt = 0;
+        
+        foreach ($paymentsTurn as $paymentsTurns) 
+        {
+            if ($paymentsTurns->fiscal == 0)
+            {
+                $receipt = 1;
+            }
+        }
         
         $this->viewBuilder()
             ->className('Dompdf.Pdf')
@@ -325,8 +340,8 @@ class TurnsController extends AppController
                 'render' => 'browser',
             ]]);
 
-        $this->set(compact('turn', 'paymentsTurn'));
-        $this->set('_serialize', ['turn', 'paymentsTurn']);
+        $this->set(compact('turn', 'paymentsTurn', 'receipt'));
+        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt']);
     }
 
     /**
@@ -348,4 +363,109 @@ class TurnsController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
+    public function monetaryReconversion()
+    {				
+		$binnacles = new BinnaclesController;
+	
+		$turns = $this->Turns->find('all', ['conditions' => ['id >' => 0]]);
+	
+		$account1 = $turns->count();
+			
+		$account2 = 0;
+		
+		foreach ($turns as $turn)
+        {		
+			$turnGet = $this->Turns->get($turn->id);
+			
+			$previousAmount = $turnGet->initial_cash;
+										
+			$turnGet->initial_cash = $previousAmount / 100000;	
+
+			$previousAmount = $turnGet->cash_received;
+										
+			$turnGet->cash_received = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->cash_paid;
+										
+			$turnGet->cash_paid = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_cash;
+										
+			$turnGet->real_cash = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->debit_card_amount;
+										
+			$turnGet->debit_card_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_debit_card_amount;
+										
+			$turnGet->real_debit_card_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->credit_card_amount;
+										
+			$turnGet->credit_card_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_credit_amount;
+										
+			$turnGet->real_credit_amount = $previousAmount / 100000;	
+					
+			$previousAmount = $turnGet->transfer_amount;
+										
+			$turnGet->transfer_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_transfer_amount;
+										
+			$turnGet->real_transfer_amount = $previousAmount / 100000;
+			
+			$previousAmount = $turnGet->deposit_amount;
+										
+			$turnGet->deposit_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_deposit_amount;
+										
+			$turnGet->real_deposit_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->check_amount;
+										
+			$turnGet->check_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->real_check_amount;
+										
+			$turnGet->real_check_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->retention_amount;
+										
+			$turnGet->retention_amount = $previousAmount / 100000;
+			
+			$previousAmount = $turnGet->real_retention_amount;
+										
+			$turnGet->real_retention_amount = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->total_system;
+										
+			$turnGet->total_system = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->total_box;
+										
+			$turnGet->total_box = $previousAmount / 100000;	
+			
+			$previousAmount = $turnGet->total_difference;
+										
+			$turnGet->total_difference = $previousAmount / 100000;	
+						
+			if ($this->Turns->save($turnGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$binnacles->add('controller', 'Turns', 'monetaryReconversion', 'No se actualizó registro con id: ' . $turnGet->id);
+			}
+		}
+
+		$binnacles->add('controller', 'Turns', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
+		$binnacles->add('controller', 'Turns', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
+		
+		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+	}
 }

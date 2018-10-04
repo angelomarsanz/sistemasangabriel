@@ -135,78 +135,99 @@ class RatesController extends AppController
 				$arrayMail['adjustDefaulters'] = $arrayResult['adjustDefaulters'];
 				$result = $this->mailUser($arrayMail);
 				return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
-			}
-            else
-            {				
-				if ($rate->concept == "Diferencia de agosto")
-				{                        
-					$this->loadModel('Schools');
+			}	
+			elseif ($rate->concept == "Diferencia de agosto")
+			{                        
+				$this->loadModel('Schools');
 
-					$school = $this->Schools->get(2);
-					
-					$school->current_year_registration = $rate->rate_year;
-					
-					$school->previous_year_registration = $rate->rate_year - 1;
-					
-					$school->next_year_registration = $rate->rate_year + 1;
-					
-		            if ($this->Schools->save($school)) 
+				$school = $this->Schools->get(2);
+				
+				$school->current_year_registration = $rate->rate_year;
+				
+				$school->previous_year_registration = $rate->rate_year - 1;
+				
+				$school->next_year_registration = $rate->rate_year + 1;
+				
+				if ($this->Schools->save($school)) 
+				{
+					$binnacles->add('controller', 'Rates', 'add', 'Se actualizaron correctamente los años de período de inscripción');
+
+					$lastRecord = $this->Rates->find('all', ['conditions' => [['concept' => $rate->concept], ['rate_year' => $rate->rate_year]], 
+						'order' => ['Rates.created' => 'DESC'] ]);
+				   
+					$row = $lastRecord->first();
+				
+					if ($row)
 					{
-						$binnacles->add('controller', 'Rates', 'add', 'Se actualizaron correctamente los años de período de inscripción');
-
-						$lastRecord = $this->Rates->find('all', ['conditions' => [['concept' => $rate->concept], ['rate_year' => $rate->rate_year]], 
-							'order' => ['Rates.created' => 'DESC'] ]);
-					   
-						$row = $lastRecord->first();
-					
-						if ($row)
-						{
-							$noDifference = 1;
-						}
-					
-						$arrayResult = $studentTransactions->differenceAugust($rate->amount, $rate->rate_year, $noDifference);
-											
-						if ($arrayResult['indicator'] == 0)
-						{
-							if ($this->Rates->save($rate)) 
-							{ 
-								$arrayMail['error'] = 0;
-							}
-							else
-							{
-								$arrayMail['error'] = 1;							
-							}
+						$noDifference = 1;
+					}
+				
+					$arrayResult = $studentTransactions->differenceAugust($rate->amount, $rate->rate_year, $noDifference);
+										
+					if ($arrayResult['indicator'] == 0)
+					{
+						if ($this->Rates->save($rate)) 
+						{ 
+							$arrayMail['error'] = 0;
 						}
 						else
 						{
-							$arrayMail['error'] = 1;
+							$arrayMail['error'] = 1;							
 						}
-						$arrayMail['adjust'] = $arrayResult['adjust'];
 					}
 					else
 					{
-						$binnacles->add('controller', 'Rates', 'add', 'No se pudieron actualizar los años de inscripción');						
 						$arrayMail['error'] = 1;
-						$arrayMail['adjust'] = 0;
 					}
-					$arrayMail['year'] = $rate->rate_year;
-					$binnacles->add('controller', 'Rates', 'add', 'Se ejecutó la función de enviar correo de diferencia de agosto');
-					$result = $this->mailAugust($arrayMail);
-					return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+					$arrayMail['adjust'] = $arrayResult['adjust'];
 				}
 				else
 				{
-					if ($this->Rates->save($rate)) 
-					{
-						$this->Flash->success(__('La tarifa ha sido guardada'));
-					} 
-					else 
-					{
-						$this->Flash->error(__('La tarifa no pudo ser guardada, intente de nuevo'));
-					}		
-					return $this->redirect(['action' => 'index']);
+					$binnacles->add('controller', 'Rates', 'add', 'No se pudieron actualizar los años de inscripción');						
+					$arrayMail['error'] = 1;
+					$arrayMail['adjust'] = 0;
 				}
-            }
+				$arrayMail['year'] = $rate->rate_year;
+				$binnacles->add('controller', 'Rates', 'add', 'Se ejecutó la función de enviar correo de diferencia de agosto');
+				$result = $this->mailAugust($arrayMail);
+				return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+			}
+			elseif ($rate->concept == "Diferencia de matrícula")
+			{
+				$error = 0;
+				$messageError = '';
+								
+				$arrayResult = $studentTransactions->differenceRegistration($rate->amount, $rate->rate_year);
+									
+				if ($arrayResult['indicator'] == 0)
+				{
+					if (!($this->Rates->save($rate))) 
+					{ 
+						$error = 1;
+						$messageError = 'No se pudo actualizar la tarifa';
+					}
+				}
+				else
+				{
+					$error = 1;
+					$messageError = 'No se pudo actualizaron correctamente las diferencias de matrícula';
+				}
+				$binnacles->add('controller', 'Rates', 'add', 'Error: ' . $error . ' Mensaje: ' . $messageError);
+				return $this->redirect(['controller' => 'Users', 'action' => 'logout']);					
+			}
+			else
+			{
+				if ($this->Rates->save($rate)) 
+				{
+					$this->Flash->success(__('La tarifa ha sido guardada'));
+				} 
+				else 
+				{
+					$this->Flash->error(__('La tarifa no pudo ser guardada, intente de nuevo'));
+				}		
+				return $this->redirect(['action' => 'index']);
+			}
+            
 		}
         
         $this->set(compact('rate'));

@@ -1951,9 +1951,9 @@
 
         $("#print-invoice").click(function () 
         {
-            if (totalBill > accumulatedPayment)
+            if (totalBill != accumulatedPayment)
             {
-                alert('Los pagos registrados no son suficientes para cancelar la factura');
+                alert('El monto total de los pagos registrados (Bs.S ' + accumulatedPayment.toFixed(2) + ') es diferente al monto total de la factura Bs.S (' + totalBill.toFixed(2) + '). Por favor corrija...');
                 return false;
             }    
             var r= confirm('¿Está seguro de que desea guardar la facturar? Después no podrá hacer cambios');

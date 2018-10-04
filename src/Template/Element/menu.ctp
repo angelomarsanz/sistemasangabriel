@@ -89,6 +89,8 @@
                                         <li><?= $this->Html->link('Materias', ['controller' => 'Teachingareas', 'action' => 'index']) ?></li>
                                 </ul>
                             </li>
+							<li><?= $this->Html->link('Descuentos', ['controller' => 'Discounts', 'action' => 'index']) ?></li>
+													
 <!--
                                     <li><?= $this->Html->link('Registro completo de nuevos alumnos', ['controller' => 'Students', 'action' => 'newRegistration']) ?></li>
                                     <li><?= $this->Html->link('Matrícula', ['controller' => 'Students', 'action' => 'guardian']) ?></li> 

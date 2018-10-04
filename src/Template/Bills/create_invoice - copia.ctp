@@ -4,9 +4,18 @@
 <div class="container">
     <div class="row">
         <div class="col-md-12">
+			<input type="hidden" id="type-invoice" value="<?= $menuOption ?>">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><b>Cobro de mensualidades</b></h3>
+					<?php if ($menuOption == 'Inscripción regulares'): ?>
+						<h3><b>Inscripción alumnos regulares</b></h3>
+					<?php elseif ($menuOption == 'Inscripción nuevos'): ?>
+						<h3><b>Inscripción alumnos nuevos</b></h3>
+					<?php elseif ($menuOption == 'Servicio educativo'): ?>
+						<h3><b>Servicio educativo</b></h3>
+					<?php else: ?>
+						<h3><b>Cobro de mensualidades</b></h3>
+					<?php endif; ?>
                     <h5 id="Turno" value=<?= $idTurn ?>>Fecha: <?= $dateTurn->format('d-m-Y') ?>, Turno: <?= $turn ?>, Cajero: <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h5>
                 </div>
             </div>
@@ -17,9 +26,13 @@
                     <br />
                     <input type="text" class="form-control" id="family-search">
                     <br />
-                    <button id="newfamily" class="btn btn-success" disabled>Listar familias nuevas</button>
-                    <br />
-                    <br />
+					<?php if ($menuOption == 'Inscripción regulares' || $menuOption == 'Mensualidades'): ?>
+						<button id="newfamily" class="btn btn-success" disabled>Listar familias nuevas</button>
+					<?php else: ?>
+						<button id="newfamily" class="btn btn-success">Listar familias nuevas</button>
+					<?php endif; ?>
+					<br />
+					<br />
                     <button id="everyfamily" class="btn btn-success">Listar familias del año escolar actual</button>
                     <br />
                     <br />
@@ -67,7 +80,7 @@
                 <div class="col-md-4">
                     <br />
                     <p><b>Alumnos relacionados:</b></p>
-                    <div class="panel panel-default pre-scrollable" style="height:250px;">
+                    <div class="panel panel-default pre-scrollable" style="height:260px;">
                         <div class="panel-body">
                             <div class="table-responsive">          
                                 <table class="table table-striped table-hover" >
@@ -89,7 +102,7 @@
                 <div class="col-md-4">
                     <br />
                     <p><b>Cuotas del alumno:</b></p>
-                    <div class="panel panel-default pre-scrollable" style="height:200px;">
+                    <div class="panel panel-default pre-scrollable" style="height:210px;">
                         <div class="panel-body">
                             <div class="table-responsive">          
                                 <table class="table table-striped table-hover" >
@@ -114,16 +127,16 @@
                 <div class="col-md-4">
                     <br />
                     <p><b>Totales:</b></p>
-                    <div class="panel panel-default" style="height:160px; padding: 0% 3% 0% 3%;">
+                    <div class="panel panel-default" style="height:260px; padding: 0% 3% 0% 3%;">
                         <br />
-                        <p><b>Alumno: <spam id="student-name"></spam></b></p>
-                        <p><b>Cuotas: <spam id="student-concept"></spam></b></p>
-                        <p><b>Saldo: Bs. <spam id="student-balance">0</spam></b></p>
-                        <p><b>Total a pagar por la familia: Bs. <spam id="total-balance"></spam></b></p>   
-                        <br />
-                        <br />
-                        <p id="student-messages"></p>       
+                        <p><b>Alumno: </b><spam id="student-name"></spam></p>
+                        <p><b>Cuotas: </b><spam id="student-concept"></spam></p>
+                        <p><b>Sub-total alumno: Bs.S </b><spam id="student-balance">0</spam></b></p>
+                        <p><b>Sub-total familia: Bs.S </b><spam id="total-balance"></spam></p>   
+                        <p><?= $this->Form->input('select_discount', ['label' => 'Descuento/Recargo:', 'class' => 'select-discount', 'options' => $discounts]); ?></p>
+						<p><b>Total a pagar: Bs.S </b><spam id="total-general"></spam></p>     
                     </div>
+					<p id="student-messages"></p>  
                 </div>
             </div>
             <div class="row">
@@ -176,12 +189,13 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <p><b>Sub-total Bs. <spam id="invoice-subtotal"></spam></b></p>
-                            <p><b>Iva 12% Bs. 0 </b></p>
-                            <p><b>Total Bs. <spam id="total-bill"></spam></spam></b></p>
-                            <p><b>Pagado Bs. <spam id="paid-out"></spam></spam></b></p>
-                            <p><b>Por pagar Bs. <spam id="to-pay"></spam></b></p>
-                            <p><b>Cambio Bs. <spam id="change"></spam></b></p>
+                            <p><b>Sub-total Bs.S </b><spam id="invoice-subtotal"></spam></p>
+							<p><b>Desc/Recar Bs.S </b><spam id="invoice-descuento"></spam></p>
+                            <p><b>Iva 16% Bs. </b>0,00</p>
+                            <p><b>Total Bs.S <spam id="total-bill"></spam></spam></p>
+                            <p><b>Pagado Bs.S <spam id="paid-out"></spam></spam></p>
+                            <p><b>Por pagar Bs.S <spam id="to-pay"></spam></p>
+                            <p><b>Cambio Bs.S <spam id="change"></spam></p>
                             <br />
                             <button id="automatic-adjustment" class="btn btn-success" disabled>Ajuste automático</button>
                             <button id="adjust-invoice" class="btn btn-success" disabled>Ajuste manual</button>
@@ -242,7 +256,7 @@
                                         'Tesoro' => 'Tesoro',
                                         'Venezolano de Crédito' => 'Venezolano de Crédito',
                                         'Venezuela' => 'Venezuela',
-                                        'Otro banco no especificado en la lista']]) ?>;
+                                        'Otro banco no especificado en la lista']]) ?>
                                         
                                     <?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'id' => 'account_or_card-02']) ?>
                                     <?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-02']) ?>
@@ -285,7 +299,7 @@
                                         'Tesoro' => 'Tesoro',
                                         'Venezolano de Crédito' => 'Venezolano de Crédito',
                                         'Venezuela' => 'Venezuela',
-                                        'Otro banco no especificado en la lista']]) ?>;
+                                        'Otro banco no especificado en la lista']]) ?>
                                         
                                     <?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'id' => 'account_or_card-03']) ?>
                                     <?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-03']) ?>
@@ -328,7 +342,7 @@
                                         'Tesoro' => 'Tesoro',
                                         'Venezolano de Crédito' => 'Venezolano de Crédito',
                                         'Venezuela' => 'Venezuela',
-                                        'Otro banco no especificado en la lista']]) ?>;
+                                        'Otro banco no especificado en la lista']]) ?>
                                     <?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-04']) ?>
                                     <?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-04']) ?>
                                     <button id="bt-04" class="record-payment btn btn-success" disabled>Registrar pago</button>
@@ -370,7 +384,7 @@
                                         'Tesoro' => 'Tesoro',
                                         'Venezolano de Crédito' => 'Venezolano de Crédito',
                                         'Venezuela' => 'Venezuela',
-                                        'Otro banco no especificado en la lista']]) ?>;
+                                        'Otro banco no especificado en la lista']]) ?>
                                     <?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-05']) ?>
                                     <?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-05']) ?>
                                     <button id="bt-05" class="record-payment btn btn-success" disabled>Registrar pago</button>
@@ -412,7 +426,7 @@
                                         'Tesoro' => 'Tesoro',
                                         'Venezolano de Crédito' => 'Venezolano de Crédito',
                                         'Venezuela' => 'Venezuela',
-                                        'Otro banco no especificado en la lista']]) ?>;
+                                        'Otro banco no especificado en la lista']]) ?>
                                     <?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'id' => 'account_or_card-06']) ?>
                                     <?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-06']) ?>
                                     <button id="bt-06" class="record-payment btn btn-success" disabled>Registrar pago</button>
@@ -443,8 +457,14 @@
     var idFamily = 0;
     var nameFamily = " ";
     var selectFamily = -1;
+	var typeStudent = 0;
     var customerEmail = " ";
     var totalBalance = 0;
+	var discountMode = '';
+	var discountAmount = 0;
+	var discount = 0;
+	var totalGeneral = 0;
+	var invoiceDescuento = 0;
     var totalBill = 0;
     var paymentType = " ";
     var amountPaid = 0;
@@ -458,7 +478,7 @@
     var accountant = 1;
     var linePayments = " ";
     var valid = true;
-    var studentBalance = 0;
+    var studentBalance = 0.00;
     var indicatorUpdateAmount = 0;
     var paymentNumber = " ";
     var change = 0;
@@ -510,7 +530,8 @@
     payments.fiscalAddress = " ";
     payments.taxPhone = " ";
     payments.invoiceAmount = 0;
-    payments.fiscal = 1;
+	payments.discount = 0;
+    payments.fiscal = 0;
 
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
@@ -610,11 +631,17 @@
         $("#registered-payments").text(" ");
         $("#student-balance").html("");
         $("#total-balance").html("");
+		$("#total-general").html("");
+		$("#invoice-descuento").html("");
         $("#invoice-subtotal").html(" ");
         $("#total-bill").html(" ");
         $('#paid-out').text(" ");
         $('#to-pay').text(" ");
         $('#change').text(" ");
+		$(".select-discount").attr('disabled', false);
+		$('.select-discount').css('background-color', 'white');
+		$('.select-discount').val(1);
+		
         
         for (var i = 0, item = 0; i < 7; i++)
         {
@@ -656,7 +683,12 @@
 
         studentBalance = 0;
         totalBalance = 0;
+		discount = 0;
+		discountMode = '';
+		discountAmount = 0;
+		totalGeneral = 0;
         totalBill = 0;
+		invoiceDescuento = 0;
         accumulatedPayment = 0;
         balance = 0;
         balanceIndicator = 0;
@@ -692,24 +724,24 @@
 
     function updateAmount()
     {
-        $('#paid-out').text(accumulatedPayment);
+        $('#paid-out').text(accumulatedPayment.toFixed(2));
             
         if (balance > 0)
         {
-            $('#to-pay').text(balance);
+            $('#to-pay').text(balance.toFixed(2));
             $('#change').text(0);
-            $('#amount-01').val(balance);
-            $('#amount-02').val(balance);
-            $('#amount-03').val(balance);
-            $('#amount-04').val(balance);
-            $('#amount-05').val(balance);
-            $('#amount-06').val(balance);
-            $('#amount-07').val(balance);
+            $('#amount-01').val(balance.toFixed(2));
+            $('#amount-02').val(balance.toFixed(2));
+            $('#amount-03').val(balance.toFixed(2));
+            $('#amount-04').val(balance.toFixed(2));
+            $('#amount-05').val(balance.toFixed(2));
+            $('#amount-06').val(balance.toFixed(2));
+            $('#amount-07').val(balance.toFixed(2));
         }
         else
         {
             $('#to-pay').text(0);
-            $('#change').text(-(balance));
+            $('#change').text(change.toFixed(2));
             $('#amount-01').val(0);
             $('#amount-02').val(0);
             $('#amount-03').val(0);
@@ -937,8 +969,11 @@
                     {
                         if (item['dbScholarship'] == 1)
                         {
-                            alert("Este alumno es becado, no se le deben cobrar cuotas");
-                            return false;
+							if ($('#type-invoice').val() == 'Mensualidades')
+							{
+								alert("Este alumno es becado, no se le deben cobrar cuotas");
+								return false;
+							}
                         }
                         studentName = item['dbStudentName'];
                     }
@@ -994,7 +1029,7 @@
                     $("#student-name").html(studentName);
                     $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
                     concept = firstInstallment + ' - ' + lastInstallment;
-                    $("#student-balance").html(studentBalance);
+                    $("#student-balance").html(studentBalance.toFixed(2));
                     $("#mark-quotas").html(nextPayment);  
                     $("#mark-quotas").attr('disabled', false);
                 }
@@ -1109,7 +1144,7 @@
         linePayments += "<tr id=pa" + accountant + "> \
             <td><button id=p" + accountant + " name='" + paymentType + "' value=" + amountPaid + " class='registeredPayments glyphicon glyphicon-trash'></button></td> \
             <td>" + paymentType + "</td> \
-            <td>" + amountPaid + "</td> \
+            <td>" + amountPaid.toFixed(2) + "</td> \
             <td>" + bank + "</td> \
             <td>" + accountOrCard + "</td> \
             <td>" + serial + "</td></tr>";
@@ -1239,15 +1274,15 @@
                 var stringPaymentsMade = JSON.stringify(tbPaymentsMade);
 
                 cleanPager();
-            
-                $.redirect('/desarrollosistemasangabriel/bills/recordInvoiceData', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
+				
+                $.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "recordInvoiceData"]); ?>', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
             });
         });
     }
     
     function listFamilies(newFamily)
-    {
-        $.post('/desarrollosistemasangabriel/students/everyfamily', {"newFamily" : newFamily}, null, "json")
+    {	
+        $.post('<?php echo Router::url(["controller" => "Students", "action" => "everyFamily"]); ?>', {"newFamily" : newFamily}, null, "json")
             
         .done(function(response) 
         {
@@ -1376,8 +1411,21 @@
             disableButtons();
                 
             $("#header-messages").html("Por favor espere...");
-                       
-            $.post('/desarrollosistemasangabriel/students/relatedstudents', {"id" : idFamily, "new" : 2}, null, "json")        
+			
+			if ($('#type-invoice').val() == 'Inscripción regulares')
+			{
+				typeStudent = 0;
+			}
+			else if ($('#type-invoice').val() == 'Inscripción nuevos' || $('#type-invoice').val() == 'Servicio educativo')
+			{
+				typeStudent = 1;
+			}
+			else
+			{
+				typeStudent = 2;
+			}
+						
+			$.post('<?php echo Router::url(["controller" => "Students", "action" => "relatedStudents"]); ?>', {"id" : idFamily, "new" : typeStudent}, null, "json")				
                      
             .done(function(response) 
             {
@@ -1454,7 +1502,34 @@
                                             paidOut = uservalue3;
                                             studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
                                             amountPayable = transactionAmount;
-                                            insertRecord();
+											if ($('#type-invoice').val() == 'Inscripción regulares')
+											{
+												if (monthlyPayment.substring(0, 3) == "Ago" ||
+													monthlyPayment.substring(0, 9) == "Matrícula" ||
+													monthlyPayment.substring(0, 14) == "Seguro escolar")
+												{
+													insertRecord();
+												}
+											}
+											else if ($('#type-invoice').val() == 'Inscripción nuevos')
+											{
+												if (monthlyPayment.substring(0, 3) == "Ago" || 
+												monthlyPayment.substring(0, 9) == "Matrícula")
+												{
+													insertRecord();
+												}												
+											}
+											else if ($('#type-invoice').val() == 'Servicio educativo')
+											{
+												if (monthlyPayment.substring(0, 18) == 'Servicio educativo')
+												{
+													insertRecord();
+												}
+											}
+											else
+											{
+												insertRecord();
+											}
                                         }
                                     });
                                 });
@@ -1533,8 +1608,7 @@
 
             $("#header-messages").html("Por favor espere...");
 
-
-            $.post('/desarrollosistemasangabriel/parentsandguardians/updateClientData', 
+            $.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "updateClientData"]); ?>', 
                 {"id" : idParentsandguardians, 
                 "client" : $('#client').val(),
                 "typeOfIdentificationClient" : $('#type-of-identification-client').val(),
@@ -1588,6 +1662,11 @@
             var firstInstallment = " ";
             var lastInstallment = " ";
             var flaggedFlag = 0;
+			discount = 0;
+			discountMode = '';
+			discountAmount = 0;
+			$('.select-discount').val(1);
+			$('#total-general').html('');
             
             $("#monthly-payment input").each(function (index) 
             { 
@@ -1613,9 +1692,9 @@
                             $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
                             concept = firstInstallment + ' - ' + lastInstallment;
                             studentBalance = studentBalance + parseFloat($(this).attr('value'));
-                            $("#student-balance").html(studentBalance);
+                            $("#student-balance").html(studentBalance.toFixed(2));
                             totalBalance = totalBalance + parseFloat($(this).attr('value'));
-                            $("#total-balance").html(totalBalance);
+                            $("#total-balance").html(totalBalance.toFixed(2));
                         }
                         else
                         {
@@ -1643,6 +1722,11 @@
             var indicatorUnmark = 0;
             idStudentTransactions = " ";
             transactionDescription = " ";
+			discount = 0;
+			discountMode = '';
+			discountAmount = 0;
+			$('.select-discount').val(1);
+			$('#total-general').html('');
 
             $("#monthly-payment input").each(function (index) 
             { 
@@ -1693,9 +1777,9 @@
                                 concept = firstInstallment + ' - ' + lastInstallment;
                             }
                             studentBalance = studentBalance - transactionAmount;
-                            $("#student-balance").html(studentBalance);
+                            $("#student-balance").html(studentBalance.toFixed(2));
                             totalBalance = totalBalance - transactionAmount;
-                            $("#total-balance").html(totalBalance);
+                            $("#total-balance").html(totalBalance.toFixed(2));
                             return false;
                         }
                     }
@@ -1726,9 +1810,9 @@
                         concept = firstInstallment + ' - ' + lastInstallment;
                     }
                     studentBalance = studentBalance - transactionAmount;
-                    $("#student-balance").html(studentBalance);
+                    $("#student-balance").html(studentBalance.toFixed(2));
                     totalBalance = totalBalance - transactionAmount;
-                    $("#total-balance").html(totalBalance);
+                    $("#total-balance").html(totalBalance.toFixed(2));
                 }
             }
         }); 
@@ -1736,29 +1820,64 @@
         $("#save-payments").click(function(e)
         {
             e.preventDefault();
-            
-            $("#mark-quotas").attr('disabled', true);
-            $("#uncheck-quotas").attr('disabled', true);
-            $("#save-payments").attr('disabled', true);
+						
+			if ($('.select-discount').val() == 1)
+			{
+				alert("Por favor indique si se aplicará algún descuento o recargo");
+				$('.select-discount').css('background-color', "#ffffe6");
+			}
+			else
+			{         
+				$("#mark-quotas").attr('disabled', true);
+				$("#uncheck-quotas").attr('disabled', true);
+				$("#save-payments").attr('disabled', true);
+				$(".select-discount").attr('disabled', true);
 
-            showInvoiceLines();
-            
-            totalBill = totalBalance;
-            $("#invoice-subtotal").html(totalBill);
-            $("#total-bill").html(totalBill);
-            balance = totalBalance - accumulatedPayment;
-            indicatorUpdateAmount = 1;
-            updateAmount();
-            indicatorUpdateAmount = 0;
-            activateInvoiceButtons();
+				showInvoiceLines();
+				
+				totalBill = totalBalance;
+				$("#invoice-subtotal").html(totalBill.toFixed(2));
+				$("#invoice-descuento").html(discount.toFixed(2));
+				totalBill = totalBill + discount;
+				$("#total-bill").html(totalBill.toFixed(2));
+				balance = totalBalance + discount - accumulatedPayment;
+				indicatorUpdateAmount = 1;
+				updateAmount();
+				indicatorUpdateAmount = 0;
+				activateInvoiceButtons();
+			}
         });     
         
         $("#automatic-adjustment").click(function(e) 
         {
             e.preventDefault();
         
-            var remainingBalance = accumulatedPayment;
-    
+            var remainingBalance = 0;
+			
+			if (discountMode == 'Porcentaje')
+			{
+				if (discountAmount > 0)
+				{
+					discountBase = accumulatedPayment / (1 + discountAmount);
+					discountDecimal = discountBase * discountAmount;
+					discount = Math.round(discountDecimal);
+					remainingBalance = accumulatedPayment - discount;
+				}
+				else
+				{
+					positiveDiscount = discountAmount * -1;
+					discountBase = accumulatedPayment / (1 - positiveDiscount);
+					discountDecimal = discountBase * positiveDiscount;
+					discount = (Math.round(discountDecimal)) * -1;
+					remainingBalance = accumulatedPayment - discount;
+				}
+			}
+			else
+			{
+				discount = discountAmount;
+				remainingBalance = accumulatedPayment - discount;
+			}
+			    
             $("#invoice-lines input").each(function (index) 
             {
                 transactionIdentifier = $(this).attr('id').substring(2);
@@ -1784,13 +1903,15 @@
 
             });
             showInvoiceLines();
-            totalBill = accumulatedPayment;
-            $("#invoice-subtotal").html(totalBill);
-            $("#total-bill").html(totalBill);
+            totalBill = accumulatedPayment - discount;
+            $("#invoice-subtotal").html(totalBill.toFixed(2));
+			$("#invoice-descuento").html(discount.toFixed(2));
+			totalBill = totalBill + discount;
+            $("#total-bill").html(totalBill.toFixed(2));
             balance = totalBill - accumulatedPayment;
             indicatorUpdateAmount = 1;
             updateAmount();
-            indicatorUpdateAmount = 0;
+            indicatorUpdateAmount = 0;			
         });
 
         $("#adjust-invoice").click(function(e) 
@@ -1829,9 +1950,32 @@
                 }
                 
             });
+
             showInvoiceLines();
-            $("#invoice-subtotal").html(totalBill);
-            $("#total-bill").html(totalBill);
+            $("#invoice-subtotal").html(totalBill.toFixed(2));
+			
+			if (discountMode == 'Porcentaje')
+			{
+				if (discountAmount > 0)
+				{
+					discountDecimal = totalBill * discountAmount;
+					discount = Math.round(discountDecimal);
+				}
+				else
+				{
+					positiveDiscount = discountAmount * -1;
+					discountDecimal = totalBill * positiveDiscount;
+					discount = (Math.round(discountDecimal)) * -1;
+				}
+			}
+			else
+			{
+				discount = discountAmount;
+			}
+			
+			$("#invoice-descuento").html(discount.toFixed(2));
+			totalBill = totalBill + discount;			
+            $("#total-bill").html(totalBill.toFixed(2));
             balance = totalBill - accumulatedPayment;
             indicatorUpdateAmount = 1;
             updateAmount();
@@ -1847,9 +1991,9 @@
             
             if (balanceIndicator == 0)
             {
-                balance = totalBalance;
+                balance = parseFloat((totalBalance + discount).toFixed(2));
                 balanceIndicator = 1;
-            }
+			}
             
             if (balance > 0)
             {
@@ -1890,7 +2034,7 @@
                 bank = $('#bank-' + paymentIdentifier).val();
                 accountOrCard = $('#account_or_card-' + paymentIdentifier).val();
                 serial = $('#serial-' + paymentIdentifier).val();
-
+				
                 balance = balance - amountPaid;
     
                 accumulatedPayment = accumulatedPayment + amountPaid;
@@ -1905,7 +2049,7 @@
 
                 printPayments();
 
-                alert('Pago registrado con éxito: Bs. ' + amountPaid);
+                alert('Pago registrado con éxito: Bs. ' + amountPaid.toFixed(2));
 
                 if (change > 0)
                 {
@@ -1950,12 +2094,12 @@
         });
 
         $("#print-invoice").click(function () 
-        {
-            if (totalBill > accumulatedPayment)
+        {			
+            if (totalBill.toFixed(2) != accumulatedPayment.toFixed(2))
             {
-                alert('Los pagos registrados no son suficientes para cancelar la factura');
+                alert('El monto total de los pagos registrados (Bs.S ' + accumulatedPayment.toFixed(2) + ') es diferente al monto total de la factura Bs.S (' + totalBill.toFixed(2) + '). Por favor corrija...');
                 return false;
-            }    
+            }   	
             var r= confirm('¿Está seguro de que desea guardar la facturar? Después no podrá hacer cambios');
             if (r == false)
             {
@@ -1971,8 +2115,74 @@
             payments.fiscalAddress = $('#fiscal-address').val();
             payments.taxPhone = $('#tax-phone').val();
             payments.invoiceAmount = totalBill;
+			payments.discount = discount;
+			if ($('#type-invoice').val() == 'Servicio educativo')
+			{
+				payments.fiscal = 0;
+			}
+			else
+			{
+				payments.fiscal = 1;
+			}
             uploadTransactions();
             loadPayments();
+        });
+		
+        $('.select-discount').change(function(e) 
+        {
+            e.preventDefault();
+			
+			discount = 0;
+			discountMode = '';
+			discountAmount = 0;
+					
+			if ($('.select-discount').val() == 2)
+			{
+				totalGeneral = totalBalance;
+				$('#total-general').html(totalGeneral.toFixed(2));
+			}
+			else if ($('.select-discount').val() > 2)
+			{
+				$.post('<?php echo Router::url(["controller" => "Discounts", "action" => "searchDiscount"]); ?>', 
+					{"id" : $('.select-discount').val() }, null, "json")          
+
+				.done(function(response) 
+				{
+					if (response.success) 
+					{
+						discountMode = response.data.mode;
+						discountAmount = response.data.amount;						
+						if (response.data.mode == 'Porcentaje')
+						{
+							if (response.data.amount > 0)
+							{
+								discountDecimal = totalBalance * response.data.amount;
+								discount = Math.round(discountDecimal);
+							}
+							else
+							{
+								positiveDiscount = response.data.amount * -1;
+								discountDecimal = totalBalance * positiveDiscount;
+								discount = (Math.round(discountDecimal)) * -1;
+							}
+						}
+						else
+						{
+							discount = response.data.amount		
+						}
+						totalGeneral = totalBalance + discount; 
+						$('#total-general').html(totalGeneral.toFixed(2));
+					} 
+					else 
+					{
+						alert('No se encontró el descuento');
+					}
+				})
+				.fail(function(jqXHR, textStatus, errorThrown) 
+				{
+					alert('Algo falló en la búsqueda. Código de error: ' + textStatus);
+				});
+			}
         });
 
 // fin funciones Jquery

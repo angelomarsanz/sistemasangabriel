@@ -98,27 +98,14 @@ class TurnsController extends AppController
             
             if ($dateTurni == $currentDatei)
             {
-                if ($menuOption == 'Mensualidades')
-                {
-                    return $this->redirect(['controller' => 'bills', 'action' => 'createInvoice', $result[0]['id'], $result[0]['turn']]);
-                }
-                elseif ($menuOption == 'Anular')
+                if ($menuOption == 'Anular')
                 {
                     return $this->redirect(['controller' => 'bills', 'action' => 'annulInvoice', $result[0]['id'], $result[0]['turn']]);
                 }
-                elseif ($menuOption == "Inscripción regulares")
+				else
                 {
-                    return $this->redirect(['controller' => 'bills', 'action' => 'createInvoiceRegistration', $result[0]['id'], $result[0]['turn']]);
+                    return $this->redirect(['controller' => 'bills', 'action' => 'createInvoice', $menuOption, $result[0]['id'], $result[0]['turn']]);
                 }
-                elseif ($menuOption == "Inscripción nuevos")
-                {
-                    return $this->redirect(['controller' => 'bills', 'action' => 'createInvoiceRegistrationNew', $result[0]['id'], $result[0]['turn']]);
-                }
-                elseif ($menuOption == "Servicio educativo")
-                {
-                    return $this->redirect(['controller' => 'bills', 'action' => 'createInvoiceReceipt', $result[0]['id'], $result[0]['turn']]);
-                }
-
             }
             else
             {
@@ -127,7 +114,7 @@ class TurnsController extends AppController
         }
         else
         {
-            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder facturar'));    
+            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder facturar o anular facturas'));    
         }
     }
 

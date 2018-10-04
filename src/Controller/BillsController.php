@@ -156,7 +156,15 @@ class BillsController extends AppController
             $bill->client = $this->headboard['client'];
             $bill->tax_phone = $this->headboard['taxPhone'];
             $bill->fiscal_address = $this->headboard['fiscalAddress'];
-            $bill->amount = $this->headboard['invoiceAmount'];
+			
+			if (isset($this->headboard['discount']))
+			{
+				$bill->amount = $this->headboard['discount'];
+			}
+			else
+			{
+				$bill->amount = 0;
+			}
             $bill->amount_paid = $this->headboard['invoiceAmount'];
             $bill->annulled = 0;
             $bill->date_annulled = 0;
@@ -205,14 +213,24 @@ class BillsController extends AppController
         return $this->redirect(['action' => 'index']);
     }
     
-    public function createInvoice($idTurn = null, $turn = null)
+    public function createInvoice($menuOption = null, $idTurn = null, $turn = null)
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
         
         $dateTurn = Time::now();
-        
-        $this->set(compact('idTurn', 'turn', 'dateTurn'));
+		
+		$this->loadModel('Discounts');
+		
+		$discounts = $this->Discounts->find('list', ['limit' => 200, 
+			'order' => ["description_discount" => "ASC"],
+			'keyField' => 'id', 
+			'valueField' => function ($discount) 
+				{
+					return $discount->get('label');
+				}]);
+				
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)
@@ -425,28 +443,7 @@ class BillsController extends AppController
                 }
                 elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
                 {				
-					if ($currentDate->month < 8)
-					{
-						if ($aConcept->concept == "Matrícula " . $yearAncestor)
-						{
-							$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono a inscripción";
-						}
-					}
-					else
-					{
-						if ($aConcept->concept == "Matrícula " . $currentDate->year)
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono a inscripción";
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";							
-						}
-					}
+					$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
                     $amountConcept = $aConcept->amount;
                     $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
                     $loadIndicator = 1;
@@ -538,28 +535,7 @@ class BillsController extends AppController
                         $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
                         $loadIndicator = 1;
                     }
-					if ($currentDate->month < 8)
-					{
-						if ($aConcept->concept == "Matrícula " . $yearAncestor)
-						{
-							$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono a inscripción";
-						}
-					}
-					else
-					{
-						if ($aConcept->concept == "Matrícula " . $currentDate->year)
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono a inscripción";
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";							
-						}
-					}
+					$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
                     $amountConcept = $aConcept->amount;
                     $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
                     $LoadIndicator = 1;
@@ -875,8 +851,8 @@ class BillsController extends AppController
                 die("Solicitud no válida");    
             }
             
-            $query = $this->Bills->find('all', ['conditions' => [['bill_number >=' => $_POST['invoiceFrom']]],
-                'order' => ['Bills.created' => 'ASC'] ]);
+            $query = $this->Bills->find('all', ['conditions' => [['bill_number >=' => $_POST['invoiceFrom']], ['fiscal' => 1]],
+                'order' => ['Bills.created' => 'ASC']]);
 
             $bills = $query->toArray();
 

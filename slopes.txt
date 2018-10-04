@@ -48,3 +48,11 @@ En Student/listMonthltyPayment.ctp Matrícula 2017
 Balance - nro. de hermanos
 
 Students/family_students
+
+-- 
+Arreglo factura septiembre 2018
+1ra. Factura 06/09/2018 - 98278 (80519)
+Factura servicio educativo - 25/09/2018 98506 (Se le colocó el indicador de recibo)
+Siguiente factura 98507 se le asignó (80747)
+
+

@@ -1428,12 +1428,13 @@ class StudentsController extends AppController
             $this->autoRender = false;
             $name = $this->request->query['term'];
             $results = $this->Students->find('all', [
-                'conditions' => [['surname LIKE' => $name . '%'], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]]);
+                'conditions' => [['surname LIKE' => $name . '%'], ['Students.student_condition' => 'Regular']],
+				'order' => ['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]]);
             $resultsArr = [];
             foreach ($results as $result) {
                  $resultsArr[] = ['label' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'value' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'id' => $result['id']];
             }
-            echo json_encode($resultsArr);
+			exit(json_encode($resultsArr, JSON_FORCE_OBJECT));
         }
     }
     public function findStudentDelete()
@@ -1442,12 +1443,13 @@ class StudentsController extends AppController
 		if ($this->request->is('ajax')) {
             $name = $this->request->query['term'];
             $results = $this->Students->find('all', [
-                'conditions' => [['surname LIKE' => $name . '%'], ['Students.student_condition !=' => 'Regular']]]);
+                'conditions' => [['surname LIKE' => $name . '%'], ['Students.student_condition !=' => 'Regular']],
+				'order' => ['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]]);
             $resultsArr = [];
             foreach ($results as $result) {
                  $resultsArr[] = ['label' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'value' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'id' => $result['id']];
             }
-            echo json_encode($resultsArr);
+			exit(json_encode($resultsArr, JSON_FORCE_OBJECT));
         }
     }
     public function reportGraduateStudents()
@@ -1493,7 +1495,7 @@ class StudentsController extends AppController
                 ->contain(['Parentsandguardians', 'Sections'])
                 ->where([['Students.new_student' => 0],
                     ['Students.id >' => 1]])
-                ->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
+                ->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
           
             setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
             date_default_timezone_set('America/Caracas');
@@ -1595,18 +1597,14 @@ class StudentsController extends AppController
 		
 		$currentYear = $currentDate->year;
 		$currentMonth = $currentDate->month;
-				
-		if ($currentMonth < 9)
-		{
-			$yearFrom = $currentYear - 1;
-			$yearUntil = $currentYear;
-		}
-		else
-		{
-			$yearFrom = $currentYear;
-			$yearUntil = $currentYear + 1;
-		}
 		
+		$this->loadModel('Schools');
+
+		$school = $this->Schools->get(2);
+		
+		$yearFrom = $school->current_year_registration;
+		$yearUntil = $school->next_year_registration;
+				
 		$yearMonthFrom = $yearFrom . '09';
 		
         if ($currentDate->month < 10)
@@ -1618,36 +1616,12 @@ class StudentsController extends AppController
             $monthUntil = $currentDate->month;
         }
 		
-		$yearMonthUntil = $yearUntil . $monthUntil;
+		$yearMonthUntil = $currentYear . $monthUntil;
 					
 		$yearMonthEnd = $yearUntil . '07';
 				
 		$totalDebt = 0;
-		
-		$this->loadModel('Schools');
-
-		$school = $this->Schools->get(2);
-
-		$this->loadModel('Rates');
-					
-		$concept = 'Matrícula';
-					
-		$lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-		   'order' => ['Rates.created' => 'DESC'] ]);
-
-		$row = $lastRecord->first();
-					
-		if ($row)
-		{
-			$amountRegistration = $row->amount;
-		}
-		else
-		{
-			$this->Flash->error(__('No se encontró el monto de la matrícula'));
 			
-			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);		
-		}
-	
         $students = TableRegistry::get('Students');
         
         $arrayResult = $students->find('regular');
@@ -1721,7 +1695,7 @@ class StudentsController extends AppController
 					{
 						if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
 						{
-							if ($studentTransaction->amount < $amountRegistration)
+							if ($studentTransaction->amount < $studentTransaction->original_amount)
 							{
 								$swSignedUp = 1;
 							}
@@ -1950,7 +1924,7 @@ class StudentsController extends AppController
 				'Sections.sublevel'])
 			->contain(['Parentsandguardians', 'Sections'])
 			->where([['Students.id >' => 1]])
-			->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
+			->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 				
 		$studentObservations = [];
         

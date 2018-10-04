@@ -1753,6 +1753,8 @@ class StudenttransactionsController extends AppController
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
 
+        $currentDate = time::now();
+		
         $idParent = 0;
         $accountRecords = 0;
         $accountChildren = 0;
@@ -1764,31 +1766,20 @@ class StudenttransactionsController extends AppController
         $accountDiscounts = 0;
         $arrayDiscarded = [];
         $accountDiscarded = 0;
+		
+        $this->loadModel('Schools');
 
-        $currentDate = time::now();
+        $school = $this->Schools->get(2);
 
-        $currentYear = $currentDate->year;
+        $currentYear = $school->current_year_registration;
         
-        $lastYear = $currentDate->year - 1;
+        $lastYear = $school->previous_year_registration;
         
-        $nextYear = $currentDate->year + 1;
+        $nextYear = $school->next_year_registration;
         
-        $currentMonth = $currentDate->month;
-        
-        $currentYearMonth = $currentDate->year . $currentDate->month;
-
-        if ($currentMonth > 8)
-        {
-            $startingYear = $currentYear;
+        $startingYear = $currentYear;
             
-            $finalYear = $nextYear;  
-        }
-        else
-        {
-            $startingYear = $lastYear;
-            
-            $finalYear = $currentYear;  
-        }
+        $finalYear = $nextYear;  
 
 		$students20 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.discount' => 20]]);
 		
@@ -1796,7 +1787,7 @@ class StudenttransactionsController extends AppController
 		{
 			foreach ($students20 as $students20s)
 			{
-				$student = $this->Studenttransactions->Students->get($student20s->id);
+				$student = $this->Studenttransactions->Students->get($students20s->id);
 				
 				$student->discount = 0;
 				
@@ -1807,203 +1798,189 @@ class StudenttransactionsController extends AppController
             }
 		}
 		
-        $this->loadModel('Schools');
+		$registration = 'Matrícula ' . $startingYear;
+		
+		$studentTransactions = TableRegistry::get('Studenttransactions');
 
-        $school = $this->Schools->get(2);
-
+		$studentsFor = $studentTransactions->find()
+			->select(
+				['Studenttransactions.id',
+				'Studenttransactions.transaction_type',
+				'Studenttransactions.transaction_description',
+				'Studenttransactions.amount',
+				'Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.level_of_study',
+				'Students.scholarship',
+				'Parentsandguardians.id',
+				'Parentsandguardians.family'])
+			->contain(['Students' => ['Parentsandguardians']])
+			->where([['Studenttransactions.transaction_description' => $registration],
+				['Studenttransactions.amount < Studenttransactions.original_amount']])
+			->order(['Parentsandguardians.id' => 'ASC']);
+			
+		$account = $studentsFor->count();
+		
+		$conceptM = 'Mensualidad';
+		
         $this->loadModel('Rates');
-        
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-           'order' => ['Rates.created' => 'DESC'] ]);
+		
+		$lastRecordM = $this->Rates->find('all', ['conditions' => ['concept' => $conceptM], 
+		   'order' => ['Rates.created' => 'DESC'] ]);
 
-        $row = $lastRecord->first();
+		$rowM = $lastRecordM->first();
 
-        if($row)
-        {
-            $registration = 'Matrícula ' . $startingYear;
-            
-            $studentTransactions = TableRegistry::get('Studenttransactions');
+		if ($rowM)
+		{
+			$schoolPeriod = ['Sep ' . $startingYear,
+							'Oct ' . $startingYear,
+							'Nov ' . $startingYear,
+							'Dic ' . $startingYear,
+							'Ene ' . $finalYear,
+							'Feb ' . $finalYear,
+							'Mar ' . $finalYear,
+							'Abr ' . $finalYear,
+							'May ' . $finalYear,
+							'Jun ' . $finalYear,
+							'Jul ' . $finalYear];
 
-            $studentsFor = $studentTransactions->find()
-                ->select(
-                    ['Studenttransactions.id',
-                    'Studenttransactions.transaction_type',
-                    'Studenttransactions.transaction_description',
-                    'Studenttransactions.amount',
-                    'Students.id',
-                    'Students.surname',
-                    'Students.second_surname',
-                    'Students.first_name',
-                    'Students.second_name',
-                    'Students.level_of_study',
-                    'Students.scholarship',
-                    'Parentsandguardians.id',
-                    'Parentsandguardians.family'])
-                ->contain(['Students' => ['Parentsandguardians']])
-                ->where([['Studenttransactions.transaction_description' => $registration],
-                    ['Studenttransactions.amount <' => $row->amount]])
-                ->order(['Parentsandguardians.id' => 'ASC']);
-                
-            $account = $studentsFor->count();
-            
-            $conceptM = 'Mensualidad';
-            
-            $lastRecordM = $this->Rates->find('all', ['conditions' => ['concept' => $conceptM], 
-               'order' => ['Rates.created' => 'DESC'] ]);
-    
-            $rowM = $lastRecordM->first();
+			$studentsDiscounts = $studentTransactions->find()
+				->select(
+					['Studenttransactions.id',
+					'Studenttransactions.student_id',
+					'Studenttransactions.transaction_type',
+					'Studenttransactions.transaction_description',
+					'Studenttransactions.paid_out',
+					'Studenttransactions.original_amount',
+					'Studenttransactions.amount'])
+				->where([['Studenttransactions.transaction_type' => 'Mensualidad'],
+				['Studenttransactions.transaction_description IN' => $schoolPeriod]])
+				->order(['Studenttransactions.student_id' => 'ASC']);
+				
+			$accountFee = $studentsDiscounts->count();
+			
+			foreach ($studentsFor as $studentsFors)
+			{
+				if ($accountRecords == 0)
+				{
+					$idParent = $studentsFors->student->parentsandguardian->id;
+					
+					$level = $studentsFors->student->level_of_study;
+					
+					$order = $this->orderLevel($level);
+					
+					if ($order == 0)
+					{
+						$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
+						$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
+						$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
+						$accountDiscarded++;
+					}
+					
+					$arrayStudents[$accountStudents]['order'] =  $order;
+					$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
+					$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
+					$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
+					$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
+					$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
+					$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
+					
+					$accountStudents++;
+					$accountRecords++;
+					$accountChildren++;
+					
+				}
+				else
+				{
+					if ($idParent != $studentsFors->student->parentsandguardian->id)
+					{
+						if ($accountChildren == 3)
+						{
+							$accountTresHijos++;
+							$arrayGeneral = $this->discount80($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
+							$arrayDiscounts = $arrayGeneral[0];
+							$accountDiscounts = $arrayGeneral[1];
+							$arrayDiscarded = $arrayGeneral[2];
+							$accountDiscarded = $arrayGeneral[3];
+						}
+						$accountStudents = 0;
+						$accountChildren = 0;
+						$arrayStudents = [];
 
-            if ($rowM)
-            {
-                $schoolPeriod = ['Sep ' . $startingYear,
-                                'Oct ' . $startingYear,
-                                'Nov ' . $startingYear,
-                                'Dic ' . $startingYear,
-                                'Ene ' . $finalYear,
-                                'Feb ' . $finalYear,
-                                'Mar ' . $finalYear,
-                                'Abr ' . $finalYear,
-                                'May ' . $finalYear,
-                                'Jun ' . $finalYear,
-                                'Jul ' . $finalYear];
- 
-                $studentsDiscounts = $studentTransactions->find()
-                    ->select(
-                        ['Studenttransactions.id',
-                        'Studenttransactions.student_id',
-                        'Studenttransactions.transaction_type',
-                        'Studenttransactions.transaction_description',
-                        'Studenttransactions.paid_out',
-                        'Studenttransactions.original_amount',
-                        'Studenttransactions.amount'])
-                    ->where([['Studenttransactions.transaction_type' => 'Mensualidad'],
-                    ['Studenttransactions.transaction_description IN' => $schoolPeriod]])
-                    ->order(['Studenttransactions.student_id' => 'ASC']);
-                    
-                $accountFee = $studentsDiscounts->count();
-                
-                foreach ($studentsFor as $studentsFors)
-                {
-                    if ($accountRecords == 0)
-                    {
-                        $idParent = $studentsFors->student->parentsandguardian->id;
-                        
-                        $level = $studentsFors->student->level_of_study;
-                        
-                        $order = $this->orderLevel($level);
-                        
-                        if ($order == 0)
-                        {
-                            $arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-                            $arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-                            $arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-                            $accountDiscarded++;
-                        }
-                        
-                        $arrayStudents[$accountStudents]['order'] =  $order;
-                        $arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-                        $arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-                        $arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-                        $arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-                        $arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-                        $arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
-                        
-                        $accountStudents++;
-                        $accountRecords++;
-                        $accountChildren++;
-                        
-                    }
-                    else
-                    {
-                        if ($idParent != $studentsFors->student->parentsandguardian->id)
-                        {
-                            if ($accountChildren == 3)
-                            {
-                                $accountTresHijos++;
-                                $arrayGeneral = $this->discount80($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
-                                $arrayDiscounts = $arrayGeneral[0];
-                                $accountDiscounts = $arrayGeneral[1];
-                                $arrayDiscarded = $arrayGeneral[2];
-                                $accountDiscarded = $arrayGeneral[3];
-                            }
-                            $accountStudents = 0;
-                            $accountChildren = 0;
-                            $arrayStudents = [];
+						$idParent = $studentsFors->student->parentsandguardian->id;
+						
+						$level = $studentsFors->student->level_of_study;
+						
+						$order = $this->orderLevel($level);
+						
+						if ($order == 0)
+						{
+							$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
+							$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
+							$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
+							$accountDiscarded++;
+						}
+						
+						$arrayStudents[$accountStudents]['order'] =  $order;
+						$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
+						$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
+						$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
+						$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
+						$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
+						$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
 
-                            $idParent = $studentsFors->student->parentsandguardian->id;
-                            
-                            $level = $studentsFors->student->level_of_study;
-                            
-                            $order = $this->orderLevel($level);
-                            
-                            if ($order == 0)
-                            {
-                                $arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-                                $arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-                                $arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-                                $accountDiscarded++;
-                            }
-                            
-                            $arrayStudents[$accountStudents]['order'] =  $order;
-                            $arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-                            $arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-                            $arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-                            $arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-                            $arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-                            $arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
+						$accountStudents++;
+						$accountRecords++;
+						$accountChildren++;
+						
+					}
+					else
+					{
+						$level = $studentsFors->student->level_of_study;
+						
+						$order = $this->orderLevel($level);
+						
+						if ($order == 0)
+						{
+							$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
+							$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
+							$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
+							$accountDiscarded++;
+						}
+						
+						$arrayStudents[$accountStudents]['order'] =  $order;
+						$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
+						$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
+						$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
+						$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
+						$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
+						$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
+						
+						$accountStudents++;
+						$accountRecords++;
+						$accountChildren++;
+					}
+				}
+			}
+			if ($accountChildren == 3)
+			{
+				$accountTresHijos++;
+				$arrayGeneral = $this->discount80($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
+				$arrayDiscounts = $arrayGeneral[0];
+				$accountDiscounts = $arrayGeneral[1];
+				$arrayDiscarded = $arrayGeneral[2];
+				$accountDiscarded = $arrayGeneral[3];
+			}
 
-                            $accountStudents++;
-                            $accountRecords++;
-                            $accountChildren++;
-                            
-                        }
-                        else
-                        {
-                            $level = $studentsFors->student->level_of_study;
-                            
-                            $order = $this->orderLevel($level);
-                            
-                            if ($order == 0)
-                            {
-                                $arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-                                $arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-                                $arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-                                $accountDiscarded++;
-                            }
-                            
-                            $arrayStudents[$accountStudents]['order'] =  $order;
-                            $arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-                            $arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-                            $arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-                            $arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-                            $arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-                            $arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
-                            
-                            $accountStudents++;
-                            $accountRecords++;
-                            $accountChildren++;
-                        }
-                    }
-                }
-                if ($accountChildren == 3)
-                {
-                    $accountTresHijos++;
-                    $arrayGeneral = $this->discount80($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
-                    $arrayDiscounts = $arrayGeneral[0];
-                    $accountDiscounts = $arrayGeneral[1];
-                    $arrayDiscarded = $arrayGeneral[2];
-                    $accountDiscarded = $arrayGeneral[3];
-                }
+			sort($arrayDiscounts);
+			sort($arrayDiscarded);
 
-                sort($arrayDiscounts);
-                sort($arrayDiscarded);
-
-                $this->set(compact('school', 'currentDate', 'arrayDiscounts', 'account', 'accountTresHijos', 'arrayDiscarded'));
-                $this->set('_serialize', ['school', 'currentDate', 'arrayDiscounts', 'account', 'accountTresHijos', 'arrayDiscarded']);
-            }
-        }
+			$this->set(compact('school', 'currentDate', 'arrayDiscounts', 'account', 'accountTresHijos', 'arrayDiscarded'));
+			$this->set('_serialize', ['school', 'currentDate', 'arrayDiscounts', 'account', 'accountTresHijos', 'arrayDiscarded']);
+		}
     }
     
     public function discount80($arrayStudents = null, $studentsDiscounts = null, $amount = null, $arrayDiscounts = null, $accountDiscounts = null, $arrayDiscarded = null, $accountDiscarded = null)
@@ -2024,7 +2001,7 @@ class StudenttransactionsController extends AppController
                 {
                     if ($studentsDiscount->student_id == $arrayStudent['id'])
                     {
-						if ($swDiscountStudent == 0)
+						if ($swDiscounts == 0)
 						{
 							$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
 				
@@ -2139,6 +2116,8 @@ class StudenttransactionsController extends AppController
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
 
+        $currentDate = time::now();
+		
         $idParent = 0;
         $accountRecords = 0;
         $accountChildren = 0;
@@ -2151,30 +2130,19 @@ class StudenttransactionsController extends AppController
         $arrayDiscarded = [];
         $accountDiscarded = 0;
 
-        $currentDate = time::now();
+        $this->loadModel('Schools');
 
-        $currentYear = $currentDate->year;
-        
-        $lastYear = $currentDate->year - 1;
-        
-        $nextYear = $currentDate->year + 1;
-        
-        $currentMonth = $currentDate->month;
-        
-        $currentYearMonth = $currentDate->year . $currentDate->month;
+        $school = $this->Schools->get(2);
 
-        if ($currentMonth > 8)
-        {
-            $startingYear = $currentYear;
+        $currentYear = $school->current_year_registration;
+        
+        $lastYear = $school->previous_year_registration;
+        
+        $nextYear = $school->next_year_registration;
+        
+        $startingYear = $currentYear;
             
-            $finalYear = $nextYear;  
-        }
-        else
-        {
-            $startingYear = $lastYear;
-            
-            $finalYear = $currentYear;  
-        }
+        $finalYear = $nextYear;  
 
 		$students50 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.discount' => 50]]);
 
@@ -2189,207 +2157,193 @@ class StudenttransactionsController extends AppController
 				if (!($this->Studenttransactions->Students->save($student)))
 				{
 					$this->Flash->error(__('No se pudo inicializar la columna discount en el registro Nro. ' . $student50s->id));
-				}
+				} 
             }
 		}
 		
-        $this->loadModel('Schools');
+		$registration = 'Matrícula ' . $startingYear;
+		
+		$studentTransactions = TableRegistry::get('Studenttransactions');
 
-        $school = $this->Schools->get(2);
+		$studentsFor = $studentTransactions->find()
+			->select(
+				['Studenttransactions.id',
+				'Studenttransactions.transaction_type',
+				'Studenttransactions.transaction_description',
+				'Studenttransactions.amount',
+				'Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.level_of_study',
+				'Students.scholarship',
+				'Parentsandguardians.id',
+				'Parentsandguardians.family'])
+			->contain(['Students' => ['Parentsandguardians']])
+			->where([['Studenttransactions.transaction_description' => $registration],
+				['Studenttransactions.amount < Studenttransactions.original_amount']])
+			->order(['Parentsandguardians.id' => 'ASC']);
+			
+		$account = $studentsFor->count();
+		
+		$conceptM = 'Mensualidad';
+		
+		$this->loadModel('Rates');
+		
+		$lastRecordM = $this->Rates->find('all', ['conditions' => ['concept' => $conceptM], 
+		   'order' => ['Rates.created' => 'DESC'] ]);
 
-        $this->loadModel('Rates');
-        
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-           'order' => ['Rates.created' => 'DESC'] ]);
+		$rowM = $lastRecordM->first();
 
-        $row = $lastRecord->first();
+		if ($rowM)
+		{
+			$schoolPeriod = ['Sep ' . $startingYear,
+							'Oct ' . $startingYear,
+							'Nov ' . $startingYear,
+							'Dic ' . $startingYear,
+							'Ene ' . $finalYear,
+							'Feb ' . $finalYear,
+							'Mar ' . $finalYear,
+							'Abr ' . $finalYear,
+							'May ' . $finalYear,
+							'Jun ' . $finalYear,
+							'Jul ' . $finalYear];
 
-        if($row)
-        {
-            $registration = 'Matrícula ' . $startingYear;
-            
-            $studentTransactions = TableRegistry::get('Studenttransactions');
+			$studentsDiscounts = $studentTransactions->find()
+				->select(
+					['Studenttransactions.id',
+					'Studenttransactions.student_id',
+					'Studenttransactions.transaction_type',
+					'Studenttransactions.transaction_description',
+					'Studenttransactions.paid_out',
+					'Studenttransactions.original_amount',
+					'Studenttransactions.amount'])
+				->where([['Studenttransactions.transaction_type' => 'Mensualidad'],
+				['Studenttransactions.transaction_description IN' => $schoolPeriod]])
+				->order(['Studenttransactions.student_id' => 'ASC']);
+				
+			$accountFee = $studentsDiscounts->count();
+			
+			foreach ($studentsFor as $studentsFors)
+			{
+				if ($accountRecords == 0)
+				{
+					$idParent = $studentsFors->student->parentsandguardian->id;
+					
+					$level = $studentsFors->student->level_of_study;
+					
+					$order = $this->orderLevel($level);
+					
+					if ($order == 0)
+					{
+						$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
+						$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
+						$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
+						$accountDiscarded++;
+					}
+					
+					$arrayStudents[$accountStudents]['order'] =  $order;
+					$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
+					$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
+					$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
+					$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
+					$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
+					$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
+					
+					$accountStudents++;
+					$accountRecords++;
+					$accountChildren++;
+					
+				}
+				else
+				{
+					if ($idParent != $studentsFors->student->parentsandguardian->id)
+					{
+						if ($accountChildren > 3)
+						{
+							$accountCuatroOmas++;
+							$arrayGeneral = $this->discount50($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
+							$arrayDiscounts = $arrayGeneral[0];
+							$accountDiscounts = $arrayGeneral[1];
+							$arrayDiscarded = $arrayGeneral[2];
+							$accountDiscarded = $arrayGeneral[3];
+						}
+						$accountStudents = 0;
+						$accountChildren = 0;
+						$arrayStudents = [];
 
-            $studentsFor = $studentTransactions->find()
-                ->select(
-                    ['Studenttransactions.id',
-                    'Studenttransactions.transaction_type',
-                    'Studenttransactions.transaction_description',
-                    'Studenttransactions.amount',
-                    'Students.id',
-                    'Students.surname',
-                    'Students.second_surname',
-                    'Students.first_name',
-                    'Students.second_name',
-                    'Students.level_of_study',
-                    'Students.scholarship',
-                    'Parentsandguardians.id',
-                    'Parentsandguardians.family'])
-                ->contain(['Students' => ['Parentsandguardians']])
-                ->where([['Studenttransactions.transaction_description' => $registration],
-                    ['Studenttransactions.amount <' => $row->amount]])
-                ->order(['Parentsandguardians.id' => 'ASC']);
-                
-            $account = $studentsFor->count();
-            
-            $conceptM = 'Mensualidad';
-            
-            $lastRecordM = $this->Rates->find('all', ['conditions' => ['concept' => $conceptM], 
-               'order' => ['Rates.created' => 'DESC'] ]);
-    
-            $rowM = $lastRecordM->first();
+						$idParent = $studentsFors->student->parentsandguardian->id;
+						
+						$level = $studentsFors->student->level_of_study;
+						
+						$order = $this->orderLevel($level);
+						
+						if ($order == 0)
+						{
+							$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
+							$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
+							$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
+							$accountDiscarded++;
+						}
+						
+						$arrayStudents[$accountStudents]['order'] =  $order;
+						$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
+						$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
+						$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
+						$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
+						$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
+						$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
 
-            if ($rowM)
-            {
-                $schoolPeriod = ['Sep ' . $startingYear,
-                                'Oct ' . $startingYear,
-                                'Nov ' . $startingYear,
-                                'Dic ' . $startingYear,
-                                'Ene ' . $finalYear,
-                                'Feb ' . $finalYear,
-                                'Mar ' . $finalYear,
-                                'Abr ' . $finalYear,
-                                'May ' . $finalYear,
-                                'Jun ' . $finalYear,
-                                'Jul ' . $finalYear];
- 
-                $studentsDiscounts = $studentTransactions->find()
-                    ->select(
-                        ['Studenttransactions.id',
-                        'Studenttransactions.student_id',
-                        'Studenttransactions.transaction_type',
-                        'Studenttransactions.transaction_description',
-                        'Studenttransactions.paid_out',
-                        'Studenttransactions.original_amount',
-                        'Studenttransactions.amount'])
-                    ->where([['Studenttransactions.transaction_type' => 'Mensualidad'],
-                    ['Studenttransactions.transaction_description IN' => $schoolPeriod]])
-                    ->order(['Studenttransactions.student_id' => 'ASC']);
-                    
-                $accountFee = $studentsDiscounts->count();
-                
-                foreach ($studentsFor as $studentsFors)
-                {
-                    if ($accountRecords == 0)
-                    {
-                        $idParent = $studentsFors->student->parentsandguardian->id;
-                        
-                        $level = $studentsFors->student->level_of_study;
-                        
-                        $order = $this->orderLevel($level);
-                        
-                        if ($order == 0)
-                        {
-                            $arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-                            $arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-                            $arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-                            $accountDiscarded++;
-                        }
-                        
-                        $arrayStudents[$accountStudents]['order'] =  $order;
-                        $arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-                        $arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-                        $arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-                        $arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-                        $arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-                        $arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
-                        
-                        $accountStudents++;
-                        $accountRecords++;
-                        $accountChildren++;
-                        
-                    }
-                    else
-                    {
-                        if ($idParent != $studentsFors->student->parentsandguardian->id)
-                        {
-                            if ($accountChildren > 3)
-                            {
-                                $accountCuatroOmas++;
-                                $arrayGeneral = $this->discount50($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
-                                $arrayDiscounts = $arrayGeneral[0];
-                                $accountDiscounts = $arrayGeneral[1];
-                                $arrayDiscarded = $arrayGeneral[2];
-                                $accountDiscarded = $arrayGeneral[3];
-                            }
-                            $accountStudents = 0;
-                            $accountChildren = 0;
-                            $arrayStudents = [];
+						$accountStudents++;
+						$accountRecords++;
+						$accountChildren++;
+						
+					}
+					else
+					{
+						$level = $studentsFors->student->level_of_study;
+						
+						$order = $this->orderLevel($level);
+						
+						if ($order == 0)
+						{
+							$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
+							$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
+							$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
+							$accountDiscarded++;
+						}
+						
+						$arrayStudents[$accountStudents]['order'] =  $order;
+						$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
+						$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
+						$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
+						$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
+						$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
+						$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
+						
+						$accountStudents++;
+						$accountRecords++;
+						$accountChildren++;
+					}
+				}
+			}
+			if ($accountChildren > 3)
+			{
+				$accountCuatroOmas++;
+				$arrayGeneral = $this->discount50($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
+				$arrayDiscounts = $arrayGeneral[0];
+				$accountDiscounts = $arrayGeneral[1];
+				$arrayDiscarded = $arrayGeneral[2];
+				$accountDiscarded = $arrayGeneral[3];
+			}
 
-                            $idParent = $studentsFors->student->parentsandguardian->id;
-                            
-                            $level = $studentsFors->student->level_of_study;
-                            
-                            $order = $this->orderLevel($level);
-                            
-                            if ($order == 0)
-                            {
-                                $arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-                                $arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-                                $arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-                                $accountDiscarded++;
-                            }
-                            
-                            $arrayStudents[$accountStudents]['order'] =  $order;
-                            $arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-                            $arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-                            $arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-                            $arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-                            $arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-                            $arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
+			sort($arrayDiscounts);
+			sort($arrayDiscarded);
 
-                            $accountStudents++;
-                            $accountRecords++;
-                            $accountChildren++;
-                            
-                        }
-                        else
-                        {
-                            $level = $studentsFors->student->level_of_study;
-                            
-                            $order = $this->orderLevel($level);
-                            
-                            if ($order == 0)
-                            {
-                                $arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-                                $arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-                                $arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-                                $accountDiscarded++;
-                            }
-                            
-                            $arrayStudents[$accountStudents]['order'] =  $order;
-                            $arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-                            $arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-                            $arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-                            $arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-                            $arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-                            $arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
-                            
-                            $accountStudents++;
-                            $accountRecords++;
-                            $accountChildren++;
-                        }
-                    }
-                }
-                if ($accountChildren > 3)
-                {
-                    $accountCuatroOmas++;
-                    $arrayGeneral = $this->discount50($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
-                    $arrayDiscounts = $arrayGeneral[0];
-                    $accountDiscounts = $arrayGeneral[1];
-                    $arrayDiscarded = $arrayGeneral[2];
-                    $accountDiscarded = $arrayGeneral[3];
-                }
-
-                sort($arrayDiscounts);
-                sort($arrayDiscarded);
-
-                $this->set(compact('school', 'currentDate', 'arrayDiscounts', 'account', 'accountCuatroOmas', 'arrayDiscarded'));
-                $this->set('_serialize', ['school', 'currentDate', 'arrayDiscounts', 'account', 'accountCuatroOmas', 'arrayDiscarded']);
-            }
-        }
+			$this->set(compact('school', 'currentDate', 'arrayDiscounts', 'account', 'accountCuatroOmas', 'arrayDiscarded'));
+			$this->set('_serialize', ['school', 'currentDate', 'arrayDiscounts', 'account', 'accountCuatroOmas', 'arrayDiscarded']);
+		}  
     }
     
     public function discount50($arrayStudents = null, $studentsDiscounts = null, $amount = null, $arrayDiscounts = null, $accountDiscounts = null, $arrayDiscarded = null, $accountDiscarded = null)
@@ -2409,7 +2363,7 @@ class StudenttransactionsController extends AppController
                 {
                     if ($studentsDiscount->student_id == $arrayStudent['id'])
                     {
-						if ($swDiscountStudent == 0)
+						if ($swDiscounts == 0)
 						{
 							$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
 				
@@ -2525,130 +2479,97 @@ class StudenttransactionsController extends AppController
         date_default_timezone_set('America/Caracas');
 
         $currentDate = time::now();
-
-        $currentYear = $currentDate->year;
-        
-        $lastYear = $currentDate->year - 1;
-        
-        $nextYear = $currentDate->year + 1;
-        
-        $currentMonth = $currentDate->month;
-        
-        $currentYearMonth = $currentDate->year . $currentDate->month;
-
-        if ($currentMonth > 8)
-        {
-            $startingYear = $currentYear;
-            
-            $finalYear = $nextYear;  
-        }
-        else
-        {
-            $startingYear = $lastYear;
-            
-            $finalYear = $currentYear;  
-        }
-        
+	
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
+		
+        $currentYear = $school->current_year_registration;
+               
+		$registration = 'Matrícula ' . $currentYear;
+		
+		$studentTransactions = TableRegistry::get('Studenttransactions');
 
-        $this->loadModel('Rates');
-        
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-           'order' => ['Rates.created' => 'DESC'] ]);
+		$studentsFor = $studentTransactions->find()
+			->select(
+				['Studenttransactions.id',
+				'Studenttransactions.transaction_type',
+				'Studenttransactions.transaction_description',
+				'Studenttransactions.amount',
+				'Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.level_of_study',
+				'Students.scholarship',
+				'Parentsandguardians.id',
+				'Parentsandguardians.family'])
+			->contain(['Students' => ['Parentsandguardians']])
+			->where([['Studenttransactions.transaction_description' => $registration],
+				['Studenttransactions.amount < Studenttransactions.original_amount'], ['Students.student_condition' => 'Regular']])
+			->order(['Parentsandguardians.id' => 'ASC']);
+			
+		$account = $studentsFor->count();
+		
+		$idParent = 0;
+		$accountRecords = 0;
+		$accountChildren = 0;
+		$accountTresHijos = 0;
+		$arrayFamily80 = [];
+		$accountFamily80 = 0;
 
-        $row = $lastRecord->first();
+		foreach ($studentsFor as $studentsFors)
+		{
+			if ($accountRecords == 0)
+			{
+				$idParent = $studentsFors->student->parentsandguardian->id;
+				
+				$currentFamily = $studentsFors->student->parentsandguardian->family;
+				$currentFamilyId = $studentsFors->student->parentsandguardian->id;
+				$accountChildren++;
+				$accountRecords++;
 
-        if($row)
-        {
-            $registration = 'Matrícula ' . $startingYear;
-            
-            $studentTransactions = TableRegistry::get('Studenttransactions');
+			}
+			else
+			{
+				if ($idParent != $studentsFors->student->parentsandguardian->id)
+				{
+					if ($accountChildren == 3)
+					{
+						$arrayFamily80[$accountFamily80]['family'] = $currentFamily;
+						$arrayFamily80[$accountFamily80]['id'] = $currentFamilyId;
+						$accountFamily80++;
+						$accountTresHijos++;
+					}
+					$idParent = $studentsFors->student->parentsandguardian->id;
+					
+					$currentFamily = $studentsFors->student->parentsandguardian->family;
+					$currentFamilyId = $studentsFors->student->parentsandguardian->id;
+					
+					$accountChildren = 1;
+					$accountRecords++;
 
-            $studentsFor = $studentTransactions->find()
-                ->select(
-                    ['Studenttransactions.id',
-                    'Studenttransactions.transaction_type',
-                    'Studenttransactions.transaction_description',
-                    'Studenttransactions.amount',
-                    'Students.id',
-                    'Students.surname',
-                    'Students.second_surname',
-                    'Students.first_name',
-                    'Students.second_name',
-                    'Students.level_of_study',
-                    'Students.scholarship',
-                    'Parentsandguardians.id',
-                    'Parentsandguardians.family'])
-                ->contain(['Students' => ['Parentsandguardians']])
-                ->where([['Studenttransactions.transaction_description' => $registration],
-                    ['Studenttransactions.amount <' => $row->amount], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
-                ->order(['Parentsandguardians.id' => 'ASC']);
-                
-            $account = $studentsFor->count();
-            
+				}
+				else
+				{
+					$accountChildren++;
+					$accountRecords++;
+				}
+			}
+		}
+		if ($accountChildren == 3)
+		{
+			$arrayFamily80[$accountFamily80]['family'] = $currentFamily;
+			$arrayFamily80[$accountFamily80]['id'] = $currentFamilyId;
+			$accountFamily80++;
+			$accountTresHijos++;
+		}
+		sort($arrayFamily80);
 
-            $idParent = 0;
-            $accountRecords = 0;
-            $accountChildren = 0;
-            $accountTresHijos = 0;
-            $arrayFamily80 = [];
-            $accountFamily80 = 0;
+		$this->set(compact('school', 'currentDate', 'arrayFamily80', 'account', 'accountTresHijos'));
+		$this->set('_serialize', ['school', 'currentDate', 'arrayFamily80', 'account', 'accountTresHijos']);
 
-            foreach ($studentsFor as $studentsFors)
-            {
-                if ($accountRecords == 0)
-                {
-                    $idParent = $studentsFors->student->parentsandguardian->id;
-                    
-                    $currentFamily = $studentsFors->student->parentsandguardian->family;
-                    $currentFamilyId = $studentsFors->student->parentsandguardian->id;
-                    $accountChildren++;
-                    $accountRecords++;
-
-                }
-                else
-                {
-                    if ($idParent != $studentsFors->student->parentsandguardian->id)
-                    {
-                        if ($accountChildren == 3)
-                        {
-                            $arrayFamily80[$accountFamily80]['family'] = $currentFamily;
-                            $arrayFamily80[$accountFamily80]['id'] = $currentFamilyId;
-                            $accountFamily80++;
-                            $accountTresHijos++;
-                        }
-                        $idParent = $studentsFors->student->parentsandguardian->id;
-                        
-                        $currentFamily = $studentsFors->student->parentsandguardian->family;
-                        $currentFamilyId = $studentsFors->student->parentsandguardian->id;
-                        
-                        $accountChildren = 1;
-                        $accountRecords++;
-
-                    }
-                    else
-                    {
-                        $accountChildren++;
-                        $accountRecords++;
-                    }
-                }
-            }
-            if ($accountChildren == 3)
-            {
-                $arrayFamily80[$accountFamily80]['family'] = $currentFamily;
-                $arrayFamily80[$accountFamily80]['id'] = $currentFamilyId;
-                $accountFamily80++;
-                $accountTresHijos++;
-            }
-            sort($arrayFamily80);
-
-            $this->set(compact('school', 'currentDate', 'arrayFamily80', 'account', 'accountTresHijos'));
-            $this->set('_serialize', ['school', 'currentDate', 'arrayFamily80', 'account', 'accountTresHijos']);
-        }
     }
 
     public function discountFamily50()
@@ -2658,131 +2579,96 @@ class StudenttransactionsController extends AppController
 
         $currentDate = time::now();
 
-        $currentYear = $currentDate->year;
-        
-        $lastYear = $currentDate->year - 1;
-        
-        $nextYear = $currentDate->year + 1;
-        
-        $currentMonth = $currentDate->month;
-        
-        $currentYearMonth = $currentDate->year . $currentDate->month;
-
-        if ($currentMonth > 8)
-        {
-            $startingYear = $currentYear;
-            
-            $finalYear = $nextYear;  
-        }
-        else
-        {
-            $startingYear = $lastYear;
-            
-            $finalYear = $currentYear;  
-        }
-        
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
+		
+        $currentYear = $school->current_year_registration;
 
-        $this->loadModel('Rates');
-        
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-           'order' => ['Rates.created' => 'DESC'] ]);
+		$registration = 'Matrícula ' . $currentYear;
+		
+		$studentTransactions = TableRegistry::get('Studenttransactions');
 
-        $row = $lastRecord->first();
+		$studentsFor = $studentTransactions->find()
+			->select(
+				['Studenttransactions.id',
+				'Studenttransactions.transaction_type',
+				'Studenttransactions.transaction_description',
+				'Studenttransactions.amount',
+				'Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.level_of_study',
+				'Students.scholarship',
+				'Parentsandguardians.id',
+				'Parentsandguardians.family'])
+			->contain(['Students' => ['Parentsandguardians']])
+			->where([['Studenttransactions.transaction_description' => $registration],
+				['Studenttransactions.amount < Studenttransactions.original_amount'], ['Students.student_condition' => 'Regular']])
+			->order(['Parentsandguardians.id' => 'ASC']);
+			
+		$account = $studentsFor->count();
+		
+		$idParent = 0;
+		$accountRecords = 0;
+		$accountChildren = 0;
+		$accountCuatroOmas = 0;
+		$arrayFamily50 = [];
+		$accountFamily50 = 0;
 
-        if($row)
-        {
-            $registration = 'Matrícula ' . $startingYear;
-            
-            $studentTransactions = TableRegistry::get('Studenttransactions');
+		foreach ($studentsFor as $studentsFors)
+		{
+			if ($accountRecords == 0)
+			{
+				$idParent = $studentsFors->student->parentsandguardian->id;
+				
+				$currentFamily = $studentsFors->student->parentsandguardian->family;
+				$currentFamilyId = $studentsFors->student->parentsandguardian->id;
+				$accountChildren++;
+				$accountRecords++;
 
-            $studentsFor = $studentTransactions->find()
-                ->select(
-                    ['Studenttransactions.id',
-                    'Studenttransactions.transaction_type',
-                    'Studenttransactions.transaction_description',
-                    'Studenttransactions.amount',
-                    'Students.id',
-                    'Students.surname',
-                    'Students.second_surname',
-                    'Students.first_name',
-                    'Students.second_name',
-                    'Students.level_of_study',
-                    'Students.scholarship',
-                    'Parentsandguardians.id',
-                    'Parentsandguardians.family'])
-                ->contain(['Students' => ['Parentsandguardians']])
-                ->where([['Studenttransactions.transaction_description' => $registration],
-                    ['Studenttransactions.amount <' => $row->amount], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
-                ->order(['Parentsandguardians.id' => 'ASC']);
-                
-            $account = $studentsFor->count();
-            
+			}
+			else
+			{
+				if ($idParent != $studentsFors->student->parentsandguardian->id)
+				{
+					if ($accountChildren > 3)
+					{
+						$arrayFamily50[$accountFamily50]['family'] = $currentFamily;
+						$arrayFamily50[$accountFamily50]['id'] = $currentFamilyId;
+						$accountFamily50++;
+						$accountCuatroOmas++;
+					}
+					$idParent = $studentsFors->student->parentsandguardian->id;
+					
+					$currentFamily = $studentsFors->student->parentsandguardian->family;
+					$currentFamilyId = $studentsFors->student->parentsandguardian->id;
+					
+					$accountChildren = 1;
+					$accountRecords++;
 
-            $idParent = 0;
-            $accountRecords = 0;
-            $accountChildren = 0;
-            $accountCuatroOmas = 0;
-            $arrayFamily50 = [];
-            $accountFamily50 = 0;
+				}
+				else
+				{
+					$accountChildren++;
+					$accountRecords++;
+				}
+			}
+		}
+		if ($accountChildren > 3)
+		{
+			$arrayFamily50[$accountFamily50]['family'] = $currentFamily;
+			$arrayFamily50[$accountFamily50]['id'] = $currentFamilyId;
+			$accountFamily50++;
+			$accountCuatroOmas++;
+		}
+		sort($arrayFamily50);
 
-            foreach ($studentsFor as $studentsFors)
-            {
-                if ($accountRecords == 0)
-                {
-                    $idParent = $studentsFors->student->parentsandguardian->id;
-                    
-                    $currentFamily = $studentsFors->student->parentsandguardian->family;
-                    $currentFamilyId = $studentsFors->student->parentsandguardian->id;
-                    $accountChildren++;
-                    $accountRecords++;
-
-                }
-                else
-                {
-                    if ($idParent != $studentsFors->student->parentsandguardian->id)
-                    {
-                        if ($accountChildren > 3)
-                        {
-                            $arrayFamily50[$accountFamily50]['family'] = $currentFamily;
-                            $arrayFamily50[$accountFamily50]['id'] = $currentFamilyId;
-                            $accountFamily50++;
-                            $accountCuatroOmas++;
-                        }
-                        $idParent = $studentsFors->student->parentsandguardian->id;
-                        
-                        $currentFamily = $studentsFors->student->parentsandguardian->family;
-                        $currentFamilyId = $studentsFors->student->parentsandguardian->id;
-                        
-                        $accountChildren = 1;
-                        $accountRecords++;
-
-                    }
-                    else
-                    {
-                        $accountChildren++;
-                        $accountRecords++;
-                    }
-                }
-            }
-            if ($accountChildren > 3)
-            {
-                $arrayFamily50[$accountFamily50]['family'] = $currentFamily;
-                $arrayFamily50[$accountFamily50]['id'] = $currentFamilyId;
-                $accountFamily50++;
-                $accountCuatroOmas++;
-            }
-            sort($arrayFamily50);
-
-            $this->set(compact('school', 'currentDate', 'arrayFamily50', 'account', 'accountCuatroOmas'));
-            $this->set('_serialize', ['school', 'currentDate', 'arrayFamily50', 'account', 'accountCuatroOmas']);
-        }
+		$this->set(compact('school', 'currentDate', 'arrayFamily50', 'account', 'accountCuatroOmas'));
+		$this->set('_serialize', ['school', 'currentDate', 'arrayFamily50', 'account', 'accountCuatroOmas']);
     }
-
 
     public function orderLevel($level = null)
     {
@@ -3616,7 +3502,7 @@ class StudenttransactionsController extends AppController
 		}
 		else
 		{
-			$binnacles->add('controller', 'Studenttransactions', 'resetStudents', 'No se encontraron alumnos inscritos para el año pasado');
+			$binnacles->add('controller', 'Studenttransactions', 'resetStudents', 'No se encontraron alumnos inscritos en años anteriores');
 			$swError = 1;				
 		}
 		$arrayResult['indicator'] = $swError;
@@ -3740,5 +3626,156 @@ class StudenttransactionsController extends AppController
 		$binnacles->add('controller', 'Studenttransactions', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
 		$binnacles->add('controller', 'Studenttransactions', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
 		
-		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);	}
+		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);	
+	}
+    public function differenceRegistration($newAmount = null, $yearDifference = null)
+    {
+		$this->autoRender = false;
+		
+		$binnacles = new BinnaclesController;
+
+		$binnacles->add('controller', 'Studenttransactions', 'differenceRegistration', '$newAmount: ' . $newAmount . ' $yearDifference: ' . $yearDifference);
+		
+		$accountRecords = 0;
+		
+		$swError = 0;
+						
+		$arrayResult = [];	
+		$arrayResult['indicator'] = 0;
+		$arrayResult['message'] = '';
+		$arrayResult['adjust'] = 0;
+		
+		$studentTransactions = $this->Studenttransactions->find('all', [
+			'contain' => ['Students'],
+			'conditions' => 
+			[['Studenttransactions.transaction_description' => "Matrícula " . $yearDifference], 
+			['Students.new_student' => 0]], 
+			]);
+						
+		if ($studentTransactions)
+		{			
+			foreach ($studentTransactions as $studentTransaction)
+			{									
+				$arrayResult = $this->updateRegistration($studentTransaction, $newAmount);
+									
+				if ($arrayResult['indicator'] == 0)
+				{
+					$accountRecords++;
+				}
+				else
+				{
+					$swError = 1;
+					break;
+				}
+			}
+		}
+		else
+		{
+			$binnacles->add('controller', 'Studenttransactions', 'differenceRegistration', 'No se encontraron transacciones de matrícula de alumnos regulares ' . $yearDifference);
+			$swError = 1;					
+		}
+		
+		$arrayResult['indicator'] = $swError;
+		
+		if ($swError == 0)
+		{
+			$binnacles->add('controller', 'Studenttransactions', 'differenceRegistration', 'Registros actualizados: ' . $accountRecords);
+			$arrayResult['message'] = 'Se actualizó exitosamente la diferencia de Matrícula';
+			$arrayResult['adjust'] = $accountRecords; 
+		}
+		else
+		{
+			$binnacles->add('controller', 'Studenttransactions', 'differenceRegistrationRegular', 'Programa con error, solo se actualizaron ' . $accountRecords . ' transacciones');
+			$arrayResult['message'] = 'No se actualizó exitosamente la diferencia de inscripción';
+			$arrayResult['adjust'] = $accountRecords;
+		}		
+		return $arrayResult;
+    }
+	public function updateRegistration($studentTransaction = null, $newAmount = null)
+	{
+		$this->autoRender = false;
+		
+		$binnacles = new BinnaclesController;
+								
+		$arrayResult = [];	
+		$arrayResult['indicator'] = 0;
+		$arrayResult['message'] = '';
+		
+		$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
+				
+		if ($studentTransactionGet->original_amount == $studentTransactionGet->amount)
+		{
+			$studentTransactionGet->original_amount = $newAmount;
+			$studentTransactionGet->amount = $newAmount;
+			$studentTransactionGet->paid_out = 0;
+			$studentTransactionGet->partial_payment = 0;
+		}
+		elseif ($studentTransactionGet->original_amount > $studentTransactionGet->amount)
+		{
+			$differenceAmount = $newAmount - $studentTransactionGet->original_amount;
+			$studentTransactionGet->amount = $studentTransactionGet->amount + $differenceAmount;
+			$studentTransactionGet->original_amount = $newAmount;
+			$studentTransactionGet->paid_out = 0;
+			$studentTransactionGet->partial_payment = 1;
+		}
+		
+		if ($this->Studenttransactions->save($studentTransactionGet))
+		{ 
+			$arrayResult['message'] = 'La transacción identificada con el id: ' . $studentTransactionGet->id . ' se actualizó exitosamente';			
+		}
+		else
+		{ 
+			$binnacles->add('controller', 'Studenttransactions', 'updateRegistrationRegular', 'No se pudo actualizar la transacción con el id ' . $studentTransactionGet->id);
+			$arrayResult['indicator'] = 1;
+			$arrayResult['message'] = 'No se pudo actualizar la transacción con el id ' . $studentTransactionGet->id;
+		}		
+		return $arrayResult;
+	}
+
+// Función creada para corregir cualquier error en la tabla Studenttransactions
+
+	public function correctTransaction()
+	{
+		$account1 = 0;
+		$account2 = 0;
+		
+		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => 
+			[['transaction_description' => 'Seguro escolar 2018'],
+			['amount' => 0]]]);
+	
+		$account1 = $studentTransactions->count();
+		
+		$this->Flash->success(__('Total transacciones seleccionadas: ' . $account1));
+	
+		foreach ($studentTransactions as $studentTransaction)
+        {		
+			$correctTransaction = $this->Studenttransactions->find('all', ['conditions' => 
+				[['student_id' => $studentTransaction->student_id],
+				['transaction_description' => 'Matrícula 2018']],
+				'order' => ['created' => 'DESC']]);
+
+				$row = $correctTransaction->first();
+				
+				if ($row)
+				{
+					$studentTransactionGet = $this->Studenttransactions->get($row->id);
+									
+					$studentTransactionGet->original_amount = 1600;
+					
+					if ($this->Studenttransactions->save($studentTransactionGet))
+					{
+						$account2++;
+					}
+					else
+					{
+						$this->Flash->error(__('No pudo ser grabado el registro correspondiente al alumno cuyo ID es: ' . $studentTransactionGet->student_id));
+					} 
+				}
+				else
+				{
+					$this->Flash->error(__('No pudo se encontró el registro correspondiente al ID: ' . $studentTransaction->student_id));
+				}
+		}
+		$this->Flash->success(__('Total transacciones corregidas: ' . $account2));		
+	}
 }

@@ -30,8 +30,10 @@
 }
 </style>
 <div class="container">
-    <div class="page-header">   
-        <?php if ($parentsandguardian->family != " "): ?>
+    <div class="page-header"> 
+		<?php if (isset($controller) && isset($action)): ?>
+            <p><?= $this->Html->link(__('Volver'), ['controller' => $controller, 'action' => $action], ['class' => 'btn btn-sm btn-default']) ?></li>
+        <?php elseif ($parentsandguardian->family != " "): ?>
             <p><?= $this->Html->link(__('Volver'), ['action' => 'viewData', $parentsandguardian->id, $parentsandguardian->family ], ['class' => 'btn btn-sm btn-default']) ?></li>
         <?php else: ?>
             <p><?= $this->Html->link(__('Volver'), ['action' => 'viewData', $parentsandguardian->id, $parentsandguardian->surname . ' ' . $parentsandguardian->first_name], ['class' => 'btn btn-sm btn-default']) ?></li>    

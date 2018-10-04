@@ -7,6 +7,8 @@ use App\Controller\ParentsandguardiansController;
 
 use App\Controller\StudenttransactionsController;
 
+use App\Controller\BinnaclesController;
+
 use Cake\I18n\Time;
 
 use Cake\ORM\TableRegistry;
@@ -37,8 +39,70 @@ class StudentsController extends AppController
     
     public function testFunction()
     {
+		$binnacles = new BinnaclesController;
+		
+		$accountSelect = 0;
+		
+        $students = $this->Students->find('all')
+            ->where([['id >' => 1], ['student_condition' => 'Regular'], ['section_id >' => 1], ['new_student !=' => 1]]);
 
+		foreach ($students as $student)
+		{
+			$arrayExtra = [$student->id, $student->section_id];
+			
+			$binnacles->add('controller', 'Students', 'testFunction', $student->full_name, $arrayExtra);
+			
+			$accountSelect++;
+		}
+
+		$binnacles->add('controller', 'Students', 'testFunction', 'Total registros seleccionados: ' . $accountSelect);
     }
+	
+    public function testFunction2()
+    {
+		$binnacles = new BinnaclesController;
+		
+		$this->loadModel('Binnacles');
+		
+		$accountUpdate = 0;
+		
+        $binnacles = $this->Binnacles->find('all')
+            ->where([['method_name' => 'testFunction'], ['extra_column1 is NOT NULL']]);
+
+		foreach ($binnacles as $binnacle)
+		{
+			$student = $this->Students->get($binnacle->extra_column1);
+			
+			if ($student->section_id != $binnacle->extra_column2)
+			{
+				$binnacleR = $this->Binnacles->get($binnacle->id);
+				
+				$binnacleR->extra_column3 = "Sección diferente";
+				
+				$binnacleR->extra_column4 = $student->section_id;
+				
+				if ($this->Binnacles->save($binnacleR))
+				{
+					$student->section_id = $binnacle->extra_column2;
+					
+					if (!($this->Students->save($student)))
+					{
+						$this->Flash->error(__("No se pudo actualizar el alumno: " . $student->full_name));
+					}
+					else
+					{
+						$accountUpdate++;
+					}
+				}
+				else	
+				{
+					$this->Flash->error(__("No se pudo actualizar el binnacle->id: " . $binnacleR->id));
+				}
+			}	
+		}
+		$this->Flash->success(__("Total alumnos actualizados: " . $accountUpdate));
+    }
+	
     /**
      * Index method
      *
@@ -57,7 +121,7 @@ class StudentsController extends AppController
 
             if ($resultParentsandguardians) 
             {
-                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]);
+                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['Students.student_condition' => 'Regular']]);
                 $this->set('students', $this->paginate($query));
             }           
         }
@@ -489,18 +553,21 @@ class StudentsController extends AppController
         $student = $this->Students->get($id);
         
         $parentsandguardian = $this->Students->Parentsandguardians->get($student->parentsandguardian_id);
+		
+        $sections = $this->Students->Sections->find('list', ['limit' => 200]);
 
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
             $student = $this->Students->patchEntity($student, $this->request->data);
             
             $student->brothers_in_school = 0;
+			$student->balance = $currentYear; // Año escolar para el que se inscribió la última vez				
 		            
             if ($this->Students->save($student)) 
             {
 				if ($student->new_student == 0)
 				{	
-					$studentTransaction = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => 'Matrícula 2017']);
+					$studentTransaction = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => 'Matrícula 2018']);
 
 					$results = $studentTransaction->toArray();
 
@@ -526,8 +593,8 @@ class StudentsController extends AppController
                 $this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
             }
         }    
-        $this->set(compact('student', 'parentsandguardian', 'currentYear', 'lastYear', 'nextYear'));
-        $this->set('_serialize', ['student', 'parentsandguardian']);
+        $this->set(compact('student', 'parentsandguardian', 'currentYear', 'lastYear', 'nextYear', 'sections'));
+        $this->set('_serialize', ['student', 'parentsandguardian', 'sections']);
     }
     
     public function editPhoto($id = null)
@@ -1002,7 +1069,7 @@ class StudentsController extends AppController
         $level = $this->sublevelLevel($nameSection->sublevel);
 
         $students = $this->Students->find('all')
-            ->where([['id >' => 1], ['section_id' => $section], ['level_of_study' => $level], ['Students.student_condition' => 'Regular']])
+            ->where([['id >' => 1], ['section_id' => $section], ['new_student !=' => 1], ['Students.student_condition' => 'Regular']])
             ->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
 
         $monthlyPayments = [];
@@ -1339,6 +1406,16 @@ class StudentsController extends AppController
     {
         
     }
+	
+    public function consultStudentDelete()
+    {
+        $this->loadModel('Schools');
+
+        $school = $this->Schools->get(2);
+	
+		$this->set(compact('school'));
+		$this->set('_serialize', ['school']);		
+    }
     
     public function modifyTransactions()
     {
@@ -1351,12 +1428,28 @@ class StudentsController extends AppController
             $this->autoRender = false;
             $name = $this->request->query['term'];
             $results = $this->Students->find('all', [
-                'conditions' => [['surname LIKE' => $name . '%'], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]]]);
+                'conditions' => [['surname LIKE' => $name . '%'], ['Students.student_condition' => 'Regular']],
+				'order' => ['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]]);
             $resultsArr = [];
             foreach ($results as $result) {
                  $resultsArr[] = ['label' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'value' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'id' => $result['id']];
             }
-            echo json_encode($resultsArr);
+			exit(json_encode($resultsArr, JSON_FORCE_OBJECT));
+        }
+    }
+    public function findStudentDelete()
+    {
+        $this->autoRender = false;
+		if ($this->request->is('ajax')) {
+            $name = $this->request->query['term'];
+            $results = $this->Students->find('all', [
+                'conditions' => [['surname LIKE' => $name . '%'], ['Students.student_condition !=' => 'Regular']],
+				'order' => ['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]]);
+            $resultsArr = [];
+            foreach ($results as $result) {
+                 $resultsArr[] = ['label' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'value' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'id' => $result['id']];
+            }
+			exit(json_encode($resultsArr, JSON_FORCE_OBJECT));
         }
     }
     public function reportGraduateStudents()
@@ -1402,7 +1495,7 @@ class StudentsController extends AppController
                 ->contain(['Parentsandguardians', 'Sections'])
                 ->where([['Students.new_student' => 0],
                     ['Students.id >' => 1]])
-                ->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
+                ->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
           
             setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
             date_default_timezone_set('America/Caracas');
@@ -1859,7 +1952,7 @@ class StudentsController extends AppController
 				'Sections.sublevel'])
 			->contain(['Parentsandguardians', 'Sections'])
 			->where([['Students.id >' => 1]])
-			->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
+			->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 				
 		$studentObservations = [];
         
@@ -1916,7 +2009,11 @@ class StudentsController extends AppController
         date_default_timezone_set('America/Caracas');
 		
         $currentDate = Time::now();
+		
+		$binnacles = new BinnaclesController;
 
+		$arrayExtra = [];
+		
 	    if ($this->request->is('post')) 
         {					
 			if (isset($_POST['columnsReport']))
@@ -1929,35 +2026,149 @@ class StudentsController extends AppController
 			}
 			
 			$arrayMark = $this->markColumns($columnsReport);
-						
-			$students = TableRegistry::get('Students');
-
-			$arrayResult = $students->find('family');
 			
-			if ($arrayResult['indicator'] == 1)
+			$jsonArrayMark = json_encode($arrayMark, JSON_FORCE_OBJECT);	
+
+			if (isset($_POST['filters_report']))
 			{
-				$this->Flash->error(___('No se encontraron alumnos'));
-				
-				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+				$arrayExtra[0] = $_POST['filters_report'];
+				$arrayExtra[1] = $_POST['order_report'];
+			}
+		
+			$arrayResult = $binnacles->add('controller', 'Students', 'familyStudents', $jsonArrayMark, $arrayExtra);
+			
+			if ($arrayResult['indicator'] == 0)
+			{
+				return $this->redirect(['controller' => 'Students', 'action' => 'reportFamilyStudents', $arrayResult['id']]);
 			}
 			else
 			{
-				$familyStudents = $arrayResult['searchRequired'];
+				$this->Flash->error(___('No se encontraron alumnos'));
 			}
+		}
+	}
 	
-			$swImpresion = 1;
-						
-			$this->set(compact('swImpresion', 'familyStudents', 'arrayMark', 'currentDate'));
-			$this->set('_serialize', ['swImpresion', 'familyStudents', 'arrayMark', 'currenDate']); 
+	public function reportFamilyStudents($id = null)
+	{	
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
 		
+        $currentDate = Time::now();
+		
+		$this->loadModel('Binnacles');
+		
+		$accountStudents = [];
+		
+		$accountStudents['Regular'] = 0; 
+		$accountStudents['New'] = 0; 
+		$accountStudents['Graduated'] = 0; 
+		$accountStudents['Retired'] = 0; 
+		$accountStudents['Expelled'] = 0;
+		$accountStudents['Discontinued'] = 0;
+		$accountNewRegistration = 0;
+		$accountRegularRegistration = 0;
+					
+		$binnacle = $this->Binnacles->get($id);
+		
+		$objetColumnsReport = json_decode($binnacle->novelty);
+						
+		$arrayColumnsReport = (array) $objetColumnsReport;
+		
+		$arrayMark = $this->markColumns($arrayColumnsReport);
+		
+		$filtersReport = $binnacle->extra_column1;
+		
+		$orderReport = $binnacle->extra_column2;
+			
+		$arraySignedUp = [];
+					
+		$this->loadModel('Schools');
+
+		$school = $this->Schools->get(2);
+		
+		$currentYearRegistration = $school->current_year_registration;
+					
+		$concept = 'Matrícula ' . $currentYearRegistration;
+										
+		$students = TableRegistry::get('Students');
+
+		$arrayResult = $students->find('family', ['filtersReport' => $filtersReport, 'orderReport' => $orderReport]);
+		
+		if ($arrayResult['indicator'] == 1)
+		{
+			$this->Flash->error(___('No se encontraron alumnos'));
+			
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 		}
 		else
 		{
-			$swImpresion = 0;
-			$this->set(compact('swImpresion'));
-			$this->set('_serialize', ['swImpresion']);
+			$familyStudents = $arrayResult['searchRequired'];
 		}
+		
+		foreach ($familyStudents as $familyStudent)
+		{
+			if ($familyStudent->student_condition == "Regular")
+			{
+				if ($familyStudent->new_student == 0)
+				{
+					$accountStudents['Regular']++;
+				}
+				else
+				{
+					$accountStudents['New']++;
+				}
+				$signedUp = $this->Students->Studenttransactions->find('all')
+					->select(['Studenttransactions.student_id', 
+						'Studenttransactions.transaction_description', 
+						'Studenttransactions.amount', 
+						'Studenttransactions.original_amount'])
+					->where([['Studenttransactions.student_id' => $familyStudent->id],
+						['Studenttransactions.transaction_description' => $concept]])
+					->order(['Studenttransactions.created' => 'DESC']);
+
+				$row = $signedUp->first();	
+
+				if ($row)
+				{
+					if ($row->amount < $row->original_amount)
+					{
+						$arraySignedUp[$familyStudent->id] = 'Pagado';
+						if ($familyStudent->new_student == 1)
+						{
+							$accountNewRegistration++;
+						}
+						else
+						{
+							$accountRegularRegistration++;
+						}							
+					}
+					else
+					{
+						$arraySignedUp[$familyStudent->id] = 'No pagado';							
+					}
+				}
+			}
+			elseif ($familyStudent->student_condition == "Egresado")
+			{
+				$accountStudents['Graduated']++;
+			}
+			elseif ($familyStudent->student_condition == "Retirado")
+			{
+				$accountStudents['Retired']++;
+			}				
+			elseif ($familyStudent->student_condition == "Expulsado")
+			{
+				$accountStudents['Expelled']++;
+			}
+			elseif ($familyStudent->student_condition == "Suspendido")
+			{
+				$accountStudents['Discontinued']++;
+			}
+		}			
+		$this->set(compact('familyStudents', 'arrayMark', 'currentDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration', 'filtersReport', 'accountNewRegistration', 'accountRegularRegistration'));
+		$this->set('_serialize', ['familyStudents', 'arrayMark', 'currenDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration', 'filtersReport', 'accountNewRegistration', 'accountRegularRegistration']); 		
 	}
+	
 	public function markColumns($columnsReport = null)
 	{
 		$arrayMark = [];
@@ -1979,9 +2190,83 @@ class StudentsController extends AppController
 		isset($columnsReport['Students.nationality']) ? $arrayMark['Students.nationality'] = 'siExl' : $arrayMark['Students.nationality'] = 'noExl';
 		
 		isset($columnsReport['Students.identity_card']) ? $arrayMark['Students.identity_card'] = 'siExl' : $arrayMark['Students.identity_card'] = 'noExl';
-		
+				
 		isset($columnsReport['Students.section_id']) ? $arrayMark['Students.section_id'] = 'siExl' : $arrayMark['Students.section_id'] = 'noExl';
-		
+				
 		return $arrayMark;
 	}
+    public function editStatus($id = null, $controller = null, $action = null)
+    {
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		
+        $currentDate = Time::now();
+		
+        $student = $this->Students->get($id);
+        
+        if ($this->request->is(['patch', 'post', 'put'])) 
+        {
+            $student = $this->Students->patchEntity($student, $this->request->data);
+            
+            $student->brothers_in_school = 0;
+		            
+            if ($this->Students->save($student)) 
+            {			
+				$this->Flash->success(__('El estatus del alumno se actualizó correctamente'));
+				
+                if (isset($controller))
+                {
+                    return $this->redirect(['controller' => $controller, 'action' => $action, $id]);
+                }
+                else
+                {
+                    return $this->redirect(['controller' => 'users', 'action' => 'wait']);
+                }
+            }
+            else 
+            {
+                $this->Flash->error(__('El estatus del alumno no se pudo actualizar'));
+            }
+        }    
+        $this->set(compact('student'));
+        $this->set('_serialize', ['student']);
+    }
+    public function editSection($id = null, $controller = null, $action = null)
+    {
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		
+        $currentDate = Time::now();
+		
+		$sections = $this->Students->Sections->find('list', ['limit' => 200]);
+		
+        $student = $this->Students->get($id);
+        
+        if ($this->request->is(['patch', 'post', 'put'])) 
+        {
+            $student = $this->Students->patchEntity($student, $this->request->data);
+            
+            $student->brothers_in_school = 0;
+		            
+            if ($this->Students->save($student)) 
+            {			
+				$this->Flash->success(__('El alumno fue asignado correctamente a la sección'));
+				
+                if (isset($controller))
+                {
+                    return $this->redirect(['controller' => $controller, 'action' => $action, $id]);
+                }
+                else
+                {
+                    return $this->redirect(['controller' => 'users', 'action' => 'wait']);
+                }
+            }
+            else 
+            {
+                $this->Flash->error(__('No se pudo asignar el alumno a la sección'));
+            }
+        }    
+        $this->set(compact('student', 'sections'));
+        $this->set('_serialize', ['student', 'sections']);
+    }
 }

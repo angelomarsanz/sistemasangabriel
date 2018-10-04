@@ -72,7 +72,7 @@
 
             $("#messages").html("Por favor espere...");
 
-            $.post('/sistemasangabriel/bills/searchInvoice', 
+            $.post('<?php echo Router::url(["controller" => "Bills", "action" => "searchInvoice"]); ?>', 
                 { "invoiceFrom" : $('#invoice-from').val() }, null, "json")          
 
             .done(function(response) 
@@ -160,7 +160,7 @@
             
             var stringBills = JSON.stringify(tbBills);
                                 
-            $.redirect('/sistemasangabriel/bills/adjustInvoice', {controlNumber : stringBills}); 
+            $.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "adjustInvoice"]); ?>', {controlNumber : stringBills}); 
     
         });
 		
@@ -183,7 +183,7 @@
 				
 				var stringBills = JSON.stringify(tbBills);
 									
-				$.redirect('/desarrollosistemasangabriel/bills/adjustInvoice', {controlNumber : stringBills});
+				$.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "adjustInvoice"]); ?>', {controlNumber : stringBills});
 			}
 		});
 			
