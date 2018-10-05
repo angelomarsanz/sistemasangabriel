@@ -2241,4 +2241,49 @@ class StudentsController extends AppController
         $this->set(compact('student', 'sections'));
         $this->set('_serialize', ['student', 'sections']);
     }
+	public function repairColumn()
+	{
+		$accountRecords = 0;
+		
+		$query = $this->Students->find('all')->where(['id >' => 1]);
+		
+		foreach ($query as $querys)
+		{
+			$student = $this->Students->get($querys->id);
+			
+			$student->first_name = trim($student->first_name);			
+			$student->second_name = trim($student->second_name);
+			$student->surname = trim($student->surname);
+			$student->second_surname = trim($student->second_surname);
+
+			$student->place_of_birth = trim($student->place_of_birth);
+			$student->country_of_birth = trim($student->country_of_birth);
+			$student->email = trim($student->email);	
+			$student->address = trim($student->address);
+			
+			$student->first_name_father = trim($student->first_name_father);
+			$student->second_name_father = trim($student->second_name_father);
+			$student->surname_father = trim($student->surname_father);
+			$student->second_surname_father = trim($student->second_surname_father);
+
+			$student->first_name_mother = trim($student->first_name_mother);
+			$student->second_name_mother = trim($student->second_name_mother);		
+			$student->surname_mother = trim($student->surname_mother);			
+			$student->second_surname_mother = trim($student->second_surname_mother);
+			
+			$student->previous_school = trim($student->previous_school);
+			$student->student_illnesses = trim($student->student_illnesses);
+			$student->observations = trim($student->observations);
+			
+            if (!($this->Students->save($student))) 
+            {
+                $this->Flash->error(__('No pudo ser actualizado el registro Nro. ' . $student->id . ' Nombre: ' . $student->full_name));
+			}
+			else
+			{
+				$accountRecords++;
+			}
+		}
+		$this->Flash->success(__('Total registros actualizados: ' . $accountRecords));
+	}
 }

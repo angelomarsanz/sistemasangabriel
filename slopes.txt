@@ -55,4 +55,12 @@ Arreglo factura septiembre 2018
 Factura servicio educativo - 25/09/2018 98506 (Se le colocó el indicador de recibo)
 Siguiente factura 98507 se le asignó (80747)
 
+Facturas impresas incorrectamente:
 
+Factura 98676 - Control 80916 (Stuve)
+Factura 98676 - Control 80917 (Stuve)
+Factura 98677 - Control 80918 (Alemany) Anulada
+Factura 98677 - Control 80919 (Alemany) Anulada
+Factura 98678 - Control 80921 (Lamuño)
+Factura 98679 - Control 80920 (Hidalgo)
+Factura 98680 - Control 80922 (Alemany) 
