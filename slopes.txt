@@ -64,3 +64,15 @@ Factura 98677 - Control 80919 (Alemany) Anulada
 Factura 98678 - Control 80921 (Lamuño)
 Factura 98679 - Control 80920 (Hidalgo)
 Factura 98680 - Control 80922 (Alemany) 
+
+--- Salto factura
+
+Con solo Bs.S se dejan 20 líneas antes de imprimir la copia
+Con ambas monedas (Bs.F y Bs.S) se dejan 16 líneas 
+Con solo Bs.S y Descuento/Recargo se dejan 18 líneas
+
+--- Verificación alumno nuevo -
+StudentsController
+Students/addAdminb.ctp
+Students/viewConsult.ctp
+Parentsandguardians/addb.ctp

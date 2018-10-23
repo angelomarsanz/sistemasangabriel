@@ -1561,46 +1561,37 @@ class StudenttransactionsController extends AppController
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
+		
+		$concept = 'Matrícula ' . $school->current_year_registration;
 
-        $this->loadModel('Rates');
-        
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-           'order' => ['Rates.created' => 'DESC'] ]);
+		$studentTransactions = TableRegistry::get('Studenttransactions');
 
-        $row = $lastRecord->first();
-
-        if($row)
-        {
-            $studentTransactions = TableRegistry::get('Studenttransactions');
-
-            $studentsFor = $studentTransactions->find()
-                ->select(
-                    ['Studenttransactions.id',
-                    'Studenttransactions.transaction_description',
-                    'Studenttransactions.amount',
-                    'Students.id',
-                    'Students.surname',
-                    'Students.second_surname',
-                    'Students.first_name',
-                    'Students.second_name',
-                    'Students.level_of_study',
-                    'Students.type_of_identification',
-                    'Students.identity_card',
-                    'Students.section_id',
-                    'Students.sex',
-                    'Students.birthdate',
-                    'Parentsandguardians.type_of_identification',
-                    'Parentsandguardians.identidy_card',
-                    'Parentsandguardians.surname',
-                    'Parentsandguardians.second_surname',
-                    'Parentsandguardians.first_name',
-                    'Parentsandguardians.second_name'])
-                ->contain(['Students' => ['Parentsandguardians']])
-                ->where([['Studenttransactions.transaction_description' => 'Matrícula 2017'],
-                    ['Studenttransactions.amount <' => $row->amount], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
-                ->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
+		$studentsFor = $studentTransactions->find()
+			->select(
+				['Studenttransactions.id',
+				'Studenttransactions.transaction_description',
+				'Studenttransactions.amount',
+				'Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.level_of_study',
+				'Students.type_of_identification',
+				'Students.identity_card',
+				'Students.section_id',
+				'Students.sex',
+				'Students.birthdate',
+				'Parentsandguardians.type_of_identification',
+				'Parentsandguardians.identidy_card',
+				'Parentsandguardians.surname',
+				'Parentsandguardians.second_surname',
+				'Parentsandguardians.first_name',
+				'Parentsandguardians.second_name'])
+			->contain(['Students' => ['Parentsandguardians']])
+			->where([['Studenttransactions.transaction_description' => $concept],
+				['Studenttransactions.amount < Studenttransactions.original_amount'], ['Students.student_condition' => 'Regular']])
+			->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 
             $account = $studentsFor->count();
             
@@ -1613,7 +1604,7 @@ class StudenttransactionsController extends AppController
 
             $this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate'));
             $this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate']);
-        }
+
     }
     
     public function reportFamilyStudents()

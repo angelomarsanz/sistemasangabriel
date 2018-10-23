@@ -32,7 +32,7 @@
 <div class="container">
     <div class="page-header"> 
 		<?php if (isset($controller) && isset($action)): ?>
-            <p><?= $this->Html->link(__('Volver'), ['controller' => $controller, 'action' => $action], ['class' => 'btn btn-sm btn-default']) ?></li>
+            <p><?= $this->Html->link(__('Volver'), ['controller' => $controller, 'action' => $action], ['class' => 'btn btn-sm btn-default']) ?></p>
         <?php elseif ($parentsandguardian->family != " "): ?>
             <p><?= $this->Html->link(__('Volver'), ['action' => 'viewData', $parentsandguardian->id, $parentsandguardian->family ], ['class' => 'btn btn-sm btn-default']) ?></li>
         <?php else: ?>

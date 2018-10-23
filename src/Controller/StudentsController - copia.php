@@ -435,36 +435,36 @@ class StudentsController extends AppController
 
             $student->user_id = 4;
             $student->parentsandguardian_id = $idParentsandguardians;
-            $student->second_surname = " ";
-            $student->second_name = " ";
-            $student->sex = " ";
-            $student->nationality = " ";
-            $student->type_of_identification = " "; 
-            $student->identity_card = " ";
-            $student->place_of_birth = " ";
-            $student->country_of_birth = " ";
+            $student->second_surname = "";
+            $student->second_name = "";
+            $student->sex = "";
+            $student->nationality = "";
+            $student->type_of_identification = ""; 
+            $student->identity_card = "";
+            $student->place_of_birth = "";
+            $student->country_of_birth = "";
             $student->birthdate = Time::now();
-            $student->cell_phone = " ";
-            $student->email = " ";
-            $student->address = " ";
-            $student->level_of_study = " ";
-            $student->family_bond_guardian_student = " ";
-            $student->first_name_father = " ";
-            $student->second_name_father = " ";
-            $student->surname_father = " ";
-            $student->second_surname_father = " ";
-            $student->first_name_mother = " ";
-            $student->second_name_mother = " ";
-            $student->surname_mother = " ";
-            $student->second_surname_mother = " ";
+            $student->cell_phone = "";
+            $student->email = "";
+            $student->address = "";
+            $student->level_of_study = "";
+            $student->family_bond_guardian_student = "";
+            $student->first_name_father = "";
+            $student->second_name_father = "";
+            $student->surname_father = "";
+            $student->second_surname_father = "";
+            $student->first_name_mother = "";
+            $student->second_name_mother = "";
+            $student->surname_mother = "";
+            $student->second_surname_mother = "";
             $student->brothers_in_school = false;
-            $student->previous_school = " ";
-            $student->student_illnesses = " ";
-            $student->observations = " ";
-            $student->code_for_user = " ";
-            $student->school_card = " ";
-            $student->profile_photo = " ";
-            $student->profile_photo_dir = " ";
+            $student->previous_school = "";
+            $student->student_illnesses = "";
+            $student->observations = "";
+            $student->code_for_user = "";
+            $student->school_card = "";
+            $student->profile_photo = "";
+            $student->profile_photo_dir = "";
             $student->section_id = 1;
             $student->student_condition = "Regular";
             $student->scholarship = 0;
@@ -1457,102 +1457,96 @@ class StudentsController extends AppController
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
+		
+		$concept = 'Matrícula ' . $school->current_year_registration;
+		
+		$previousYearRegistration = $school->previous_year_registration;
+		
+		$students = TableRegistry::get('Students');
 
-        $this->loadModel('Rates');
-        
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-           'order' => ['Rates.created' => 'DESC'] ]);
+		$studentsFor = $students->find()
+			->select(
+				['Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.level_of_study',
+				'Students.type_of_identification',
+				'Students.identity_card',
+				'Students.section_id',
+				'Students.sex',
+				'Students.birthdate',
+				'Parentsandguardians.type_of_identification',
+				'Parentsandguardians.identidy_card',
+				'Parentsandguardians.surname',
+				'Parentsandguardians.second_surname',
+				'Parentsandguardians.first_name',
+				'Parentsandguardians.second_name',
+				'Sections.id',
+				'Sections.sublevel'])
+			->contain(['Parentsandguardians', 'Sections'])
+			->where([['Students.new_student' => 0],
+				['Students.id >' => 1],
+				['Students.balance >=' => $previousYearRegistration]])
+			->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
+	  
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
 
-        $row = $lastRecord->first();
+		$currentDate = Time::now();
 
-        if($row)
-        {
-            $students = TableRegistry::get('Students');
+		$complement = [];  
 
-            $studentsFor = $students->find()
-                ->select(
-                    ['Students.id',
-                    'Students.surname',
-                    'Students.second_surname',
-                    'Students.first_name',
-                    'Students.second_name',
-                    'Students.level_of_study',
-                    'Students.type_of_identification',
-                    'Students.identity_card',
-                    'Students.section_id',
-                    'Students.sex',
-                    'Students.birthdate',
-                    'Parentsandguardians.type_of_identification',
-                    'Parentsandguardians.identidy_card',
-                    'Parentsandguardians.surname',
-                    'Parentsandguardians.second_surname',
-                    'Parentsandguardians.first_name',
-                    'Parentsandguardians.second_name',
-                    'Sections.id',
-                    'Sections.sublevel'])
-                ->contain(['Parentsandguardians', 'Sections'])
-                ->where([['Students.new_student' => 0],
-                    ['Students.id >' => 1]])
-                ->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
-          
-            setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-            date_default_timezone_set('America/Caracas');
+		$accountRecord = 0;
 
-            $currentDate = Time::now();
+		foreach ($studentsFor as $studentsFors)
+		{
+			$complement[$studentsFors->id]['swGraduate'] = 0;
 
-            $complement = [];  
+			$studenttransactions = $this->Students->Studenttransactions->find('all')
+			->where([['Studenttransactions.student_id' => $studentsFors->id], ['Studenttransactions.transaction_description' => $concept]]);
 
-            $accountRecord = 0;
+			$account = $studenttransactions->count();
 
-            foreach ($studentsFor as $studentsFors)
-            {
-                $complement[$studentsFors->id]['swGraduate'] = 0;
+			if ($account == 0)
+			{
+				$complement[$studentsFors->id]['swGraduate'] = 1;
+				$accountRecord++;
+			}
+			elseif ($account == 1) 
+			{
+				foreach ($studenttransactions as $studenttransaction)
+				{
+					if ($studenttransaction->amount == $studenttransaction->original_amount)
+					{
+						$complement[$studentsFors->id]['swGraduate'] = 1;
+						$accountRecord++;
+					}
+					elseif ($studenttransaction->amount < $studenttransaction->original_amount)
+					{
+						$complement[$studentsFors->id]['swGraduate'] = 2;
+					}
+					else
+					{
+						$this->Flash->error(__('Alumno con abono a matrícula mayor a: ' . $row->amount . ' ' . $studentsFors->id . ' ' . $studentsFors->full_name));
+						$complement[$studentsFors->id]['swGraduate'] = 3;
+					}                      
+				}
+			}
+			else
+			{
+				$this->Flash->error(__('Alumno con más de un registro de matrícula: ' . $studentsFors->id . ' ' . $studentsFors->full_name));
 
-                $studenttransactions = $this->Students->Studenttransactions->find('all')
-                ->where([['Studenttransactions.student_id' => $studentsFors->id], ['Studenttransactions.transaction_description' => 'Matrícula 2017']]);
+				$complement[$studentsFors->id]['swGraduate'] = 4;                   
+			}
 
-                $account = $studenttransactions->count();
+			$totalPages = ceil($accountRecord / 20);
+		}
 
-                if ($account == 0)
-                {
-                    $complement[$studentsFors->id]['swGraduate'] = 1;
-                    $accountRecord++;
-                }
-                elseif ($account == 1) 
-                {
-                    foreach ($studenttransactions as $studenttransaction)
-                    {
-                        if ($studenttransaction->amount == $row->amount)
-                        {
-                            $complement[$studentsFors->id]['swGraduate'] = 1;
-                            $accountRecord++;
-                        }
-                        elseif ($studenttransaction->amount < $row->amount)
-                        {
-                            $complement[$studentsFors->id]['swGraduate'] = 2;
-                        }
-                        else
-                        {
-                            $this->Flash->error(__('Alumno con abono a matrícula mayor a: ' . $row->amount . ' ' . $studentsFors->id . ' ' . $studentsFors->full_name));
-                            $complement[$studentsFors->id]['swGraduate'] = 3;
-                        }                      
-                    }
-                }
-                else
-                {
-                    $this->Flash->error(__('Alumno con más de un registro de matrícula: ' . $studentsFors->id . ' ' . $studentsFors->full_name));
+		$this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate', 'complement'));
+		$this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate', 'complement']);
 
-                    $complement[$studentsFors->id]['swGraduate'] = 4;                   
-                }
-
-                $totalPages = ceil($accountRecord / 20);
-            }
-
-            $this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate', 'complement'));
-            $this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate', 'complement']);
-        }
     }
     public function SublevelLevel($sublevel = null)
     {
@@ -1597,18 +1591,14 @@ class StudentsController extends AppController
 		
 		$currentYear = $currentDate->year;
 		$currentMonth = $currentDate->month;
-				
-		if ($currentMonth < 9)
-		{
-			$yearFrom = $currentYear - 1;
-			$yearUntil = $currentYear;
-		}
-		else
-		{
-			$yearFrom = $currentYear;
-			$yearUntil = $currentYear + 1;
-		}
 		
+		$this->loadModel('Schools');
+
+		$school = $this->Schools->get(2);
+		
+		$yearFrom = $school->current_year_registration;
+		$yearUntil = $school->next_year_registration;
+				
 		$yearMonthFrom = $yearFrom . '09';
 		
         if ($currentDate->month < 10)
@@ -1620,36 +1610,12 @@ class StudentsController extends AppController
             $monthUntil = $currentDate->month;
         }
 		
-		$yearMonthUntil = $yearUntil . $monthUntil;
+		$yearMonthUntil = $currentYear . $monthUntil;
 					
 		$yearMonthEnd = $yearUntil . '07';
 				
 		$totalDebt = 0;
-		
-		$this->loadModel('Schools');
-
-		$school = $this->Schools->get(2);
-
-		$this->loadModel('Rates');
-					
-		$concept = 'Matrícula';
-					
-		$lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-		   'order' => ['Rates.created' => 'DESC'] ]);
-
-		$row = $lastRecord->first();
-					
-		if ($row)
-		{
-			$amountRegistration = $row->amount;
-		}
-		else
-		{
-			$this->Flash->error(__('No se encontró el monto de la matrícula'));
 			
-			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);		
-		}
-	
         $students = TableRegistry::get('Students');
         
         $arrayResult = $students->find('regular');
@@ -1723,7 +1689,7 @@ class StudentsController extends AppController
 					{
 						if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
 						{
-							if ($studentTransaction->amount < $amountRegistration)
+							if ($studentTransaction->amount < $studentTransaction->original_amount)
 							{
 								$swSignedUp = 1;
 							}
@@ -2268,5 +2234,95 @@ class StudentsController extends AppController
         }    
         $this->set(compact('student', 'sections'));
         $this->set('_serialize', ['student', 'sections']);
+    }
+	public function repairColumn()
+	{
+		$accountRecords = 0;
+		
+		$query = $this->Students->find('all')->where(['id >' => 1]);
+		
+		foreach ($query as $querys)
+		{
+			$student = $this->Students->get($querys->id);
+			
+			$student->first_name = trim($student->first_name);			
+			$student->second_name = trim($student->second_name);
+			$student->surname = trim($student->surname);
+			$student->second_surname = trim($student->second_surname);
+
+			$student->place_of_birth = trim($student->place_of_birth);
+			$student->country_of_birth = trim($student->country_of_birth);
+			$student->email = trim($student->email);	
+			$student->address = trim($student->address);
+			
+			$student->first_name_father = trim($student->first_name_father);
+			$student->second_name_father = trim($student->second_name_father);
+			$student->surname_father = trim($student->surname_father);
+			$student->second_surname_father = trim($student->second_surname_father);
+
+			$student->first_name_mother = trim($student->first_name_mother);
+			$student->second_name_mother = trim($student->second_name_mother);		
+			$student->surname_mother = trim($student->surname_mother);			
+			$student->second_surname_mother = trim($student->second_surname_mother);
+			
+			$student->previous_school = trim($student->previous_school);
+			$student->student_illnesses = trim($student->student_illnesses);
+			$student->observations = trim($student->observations);
+			
+            if (!($this->Students->save($student))) 
+            {
+                $this->Flash->error(__('No pudo ser actualizado el registro Nro. ' . $student->id . ' Nombre: ' . $student->full_name));
+			}
+			else
+			{
+				$accountRecords++;
+			}
+		}
+		$this->Flash->success(__('Total registros actualizados: ' . $accountRecords));
+	}
+    public function sameNames()
+    {		
+        $this->autoRender = false; 
+        
+		$jsondata = [];
+
+        if ($this->request->is('json')) 
+        { 
+            if (isset($_POST['surname']) && isset($_POST['firstName']))
+            {
+				$surname = $_POST['surname'];
+				$firstName = $_POST['firstName']; 
+								
+				$sameStudents = $this->Students->find('all')->where([['Students.surname' => $surname], ['Students.first_name' => $firstName]])
+					->contain(['Parentsandguardians'])
+					->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
+
+				$count = $sameStudents->count();
+				
+				if ($count > 0)
+				{
+					$jsondata['success'] = true;
+					$jsondata['data']['message'] = 'Se encontraron estudiantes con nombres similares';
+					$jsondata['data']['students'] = [];
+					
+					foreach ($sameStudents as $sameStudent)
+					{
+						$jsondata['data']['students'][]['family'] = 'Angel';
+						$jsondata['data']['students'][]['student'] = $sameStudent->full_name;
+						$jsondata['data']['students'][]['id'] = $sameStudent->id;
+					}
+				}
+				else
+				{
+					$jsondata["success"] = false;
+					$jsondata["data"]["message"] = 'No se encontraron estudiantes';
+				}
+				exit(json_encode($jsondata, JSON_FORCE_OBJECT));
+            }
+            else 
+            {
+                die("Solicitud no válida.");
+            }           
+        } 
     }
 }

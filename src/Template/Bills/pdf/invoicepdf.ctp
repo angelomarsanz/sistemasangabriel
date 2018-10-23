@@ -127,7 +127,7 @@
     </div>
 </div>
 <?php
-$countSubtraction = 20 - $counter;
+$countSubtraction = 18 - $counter;
 for ($i = 1; $i <= $countSubtraction; $i++): ?>
     <br />
 <?php

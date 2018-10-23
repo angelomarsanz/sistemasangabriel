@@ -60,7 +60,7 @@
     $(document).ready(function() 
     {
 	
-        $('#type-of-identification').click(function(e) 
+        $('#type-of-identification').change(function(e) 
         {
 			e.preventDefault();
 		
@@ -73,6 +73,7 @@
 					$('#same-names').removeClass('noverScreen');
 					
 					parents = '';
+					accountArray = 0;
 					
                     $.each(response.data.parents, function(key, value) 
                     {					
@@ -80,7 +81,15 @@
                         {					
 							if (parentKey == 'parent')
 							{
-								parents = '<tr><td>' + parentValue + '</td>';
+								if (accountArray == 0)
+								{
+									parents = '<tr><td>' + parentValue + '</td>';									
+								}
+								else 
+								{
+									parents += '<tr><td>' + parentValue + '</td>';
+								}
+								accountArray++;
 							}
 							else if (parentKey == 'family')
 							{
@@ -97,7 +106,7 @@
             })
             .fail(function(jqXHR, textStatus, errorThrown) 
             {
-                $("#header-messages").html("Algo ha fallado: " + textStatus);
+                $("#tbody-same-names").html("Algo ha fallado: " + textStatus);
             });  
         });			
 

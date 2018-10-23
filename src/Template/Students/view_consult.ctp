@@ -1,7 +1,11 @@
 <div class="container">
     <div class="page-header">    
-        <p><?= $this->Html->link(__('Volver'), ['controller' => 'Students', 'action' => 'indexConsult', $idFamily, $family ], ['class' => 'btn btn-sm btn-default']) ?></li>
-        <h1>Alumno:&nbsp;<?= h($student->full_name) ?></h1>
+		<?php if (isset($controller) && isset($action)): ?>
+			<p><?= $this->Html->link(__('Volver'), ['controller' => $controller, 'action' => $action], ['class' => 'btn btn-sm btn-default']) ?></p>
+		<?php else: ?>
+			<p><?= $this->Html->link(__('Volver'), ['controller' => 'Students', 'action' => 'indexConsult', $idFamily, $family ], ['class' => 'btn btn-sm btn-default']) ?></li>
+		<?php endif; ?>
+		<h1>Alumno:&nbsp;<?= h($student->full_name) ?></h1>
     </div>
     <div class="row">
         <div class="col col-sm-4">

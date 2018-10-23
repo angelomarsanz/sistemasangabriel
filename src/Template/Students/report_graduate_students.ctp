@@ -122,7 +122,7 @@
                             <div style="float: left; width: 90%;">
                                 <h5><b><?= $school->name ?></b></h5>
                                 <p>RIF: <?= $school->rif ?></p>
-                                <h3 style="text-align: center;">Reporte de Alumnos Inscritos al: <?= $currentDate->format('d-m-Y') ?></h3>
+                                <h3 style="text-align: center;">Reporte de Alumnos Egresados al: <?= $currentDate->format('d-m-Y') ?></h3>
                             </div>
                         </div>
                         <table class="table">
