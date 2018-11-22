@@ -53,7 +53,8 @@
     }
 }
 </style>
-<!-- Reporte principal -->
+<!--
+
 <div>
     <?php $accountItem = 1; ?>
     <?php $accountLine = 1; ?>
@@ -170,7 +171,7 @@
     <p><b><?= 'Total alumnos a los que se les aplicó el descuento en las mensualidades: ' . ($accountItem - 1) ?></b></p>
     <p><b><?= 'Total familias con tres hijos: ' . ($accountTresHijos) ?></b></p>
 </div>
-<!-- Archivo EXCEL -->
+
 <div class='noverScreen'>
     <?php $accountItem = 1; ?>
     <table id='descuentos' class="table">
@@ -199,7 +200,7 @@
         </tbody>
     </table>
 </div>
-<!-- Reporte de registos descartados -->
+
 <div class="saltopagina">
     <?php $accountItem = 1; ?>
     <?php $accountLine = 1; ?>
@@ -317,7 +318,7 @@
         <a href='#' onclick='myFunction()' id="imprimir" title="Imprimir" class='glyphicon glyphicon-print btn btn-danger'></a>
         <a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
     </p>
-</div>
+</div> -->
 <script>
 function myFunction() 
 {

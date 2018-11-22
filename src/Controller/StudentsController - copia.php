@@ -248,7 +248,7 @@ class StudentsController extends AppController
         $this->set('_serialize', ['student', 'assignedSection', 'idFamilyP']);
     }
 
-    public function viewConsult($id = null, $idFamily = null, $family = null)
+    public function viewConsult($id = null, $idFamily = null, $family = null, $controller = null, $action = null)
     {
         $student = $this->Students->get($id, [
             'contain' => ['Users', 'Parentsandguardians']
@@ -258,8 +258,8 @@ class StudentsController extends AppController
         
         $assignedSection = $section->sublevel . ' ' . $section->section;
 
-        $this->set(compact('student', 'idFamily', 'family', 'assignedSection'));
-        $this->set('_serialize', ['student', 'idFamily', 'family', 'assignedSection']);
+        $this->set(compact('student', 'idFamily', 'family', 'assignedSection', 'controller', 'action'));
+        $this->set('_serialize', ['student', 'idFamily', 'family', 'assignedSection', 'controller', 'action']);
     }
 
     public function viewStudent($id = null)
@@ -525,7 +525,7 @@ class StudentsController extends AppController
         
         $parentsandguardian = $this->Students->Parentsandguardians->get($idParentsandguardians);
 
-        $this->set(compact('student', 'currentYear', 'nextYear', 'lastYear'));
+        $this->set(compact('student', 'currentYear', 'nextYear', 'lastYear', 'idParentsandguardians'));
         $this->set('_serialize', ['student']);
     }
 
@@ -547,6 +547,10 @@ class StudentsController extends AppController
 		$currentYear = $currentDate->year;
 		$lastYear = $currentDate->year - 1;
 		$nextYear = $currentDate->year + 1;
+		
+		$this->loadModel('Schools');
+
+        $school = $this->Schools->get(2);
 	
         $studentTransactions = new StudenttransactionsController();
 
@@ -561,13 +565,15 @@ class StudentsController extends AppController
             $student = $this->Students->patchEntity($student, $this->request->data);
             
             $student->brothers_in_school = 0;
-			$student->balance = $currentYear; // Año escolar para el que se inscribió la última vez				
+			$student->balance = $school->current_year_registration; // Año escolar para el que se inscribió la última vez				
 		            
             if ($this->Students->save($student)) 
             {
 				if ($student->new_student == 0)
 				{	
-					$studentTransaction = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => 'Matrícula 2018']);
+					$transactionDescription = 'Matrícula ' . $school->current_year_registration;
+			
+					$studentTransaction = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => $transactionDescription]);
 
 					$results = $studentTransaction->toArray();
 
@@ -880,6 +886,26 @@ class StudentsController extends AppController
         $this->autoRender = false;
         
         $studenttransactions = new StudenttransactionsController();
+		
+		$this->loadModel('Rates');
+		
+		$rate = $this->Rates->get(58);
+		
+		$dollarExchangeRate = $rate->amount; 
+		
+        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'],
+            'order' => ['Rates.created' => 'DESC'] ]);
+			
+		$row = $lastRecord->first();
+			
+		if ($row)
+		{
+			$amountMonthly = round($row->amount * $dollarExchangeRate);	
+		}
+		else
+		{
+			$amountMonthly = 0;
+		}
 
         if ($this->request->is('json')) 
         {
@@ -937,22 +963,24 @@ class StudentsController extends AppController
             $jsondata["data"]['fiscal_address'] = $parentsandguardians->fiscal_address;
             $jsondata["data"]['tax_phone'] = $parentsandguardians->tax_phone;
             $jsondata["data"]['email'] = $parentsandguardians->email;
-            
+			$jsondata["data"]['dollar_exchange_rate'] = $dollarExchangeRate;
+			$jsondata["data"]['amount_monthly'] = $amountMonthly;
+			
             $jsondata["data"]["students"] = [];
             
             if ($new == 0)
             {
-                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['new_student' => 0], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
+                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['new_student' => 0], ['Students.student_condition' => 'Regular']])
                 ->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
             }
             elseif ($new == 1)
             {
-                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['new_student' => 1], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
+                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['new_student' => 1], ['Students.student_condition' => 'Regular']])
                 ->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
             }
             else
             {
-                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['OR' => [['Students.student_condition' => 'Regular'], ['Students.student_condition like' => 'Alumno nuevo%']]]])
+                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['Students.student_condition' => 'Regular']])
                 ->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
             }
 
@@ -976,6 +1004,7 @@ class StudentsController extends AppController
                     
                     $jsondata["data"]["students"][]['scholarship'] = $result->scholarship;
 					$jsondata["data"]["students"][]['schoolYearFrom'] = $result->balance;
+					$jsondata["data"]["students"][]['discount_family'] = $result->discount;
                     
                     $variable = $studenttransactions->responsejson($result->id);
                     
@@ -1040,8 +1069,7 @@ class StudentsController extends AppController
     {
         if ($this->request->is('post')) 
         {
-            return $this->redirect(['action' => 'relationpdf', $_POST['school_period'], $_POST['section_id'], '_ext' => 'pdf']);
-//          return $this->redirect(['action' => 'relationPayments', $_POST['school_period'], $_POST['section_id']]);
+            return $this->redirect(['action' => 'relationpdf', $_POST['section_id'], '_ext' => 'pdf']);
         }
 
         $sections = $this->Students->Sections->find('list', ['limit' => 200]);
@@ -1049,7 +1077,7 @@ class StudentsController extends AppController
         $this->set(compact('sections'));
     }
 
-    public function relationpdf($schoolperiod = null, $section = null)
+    public function relationpdf($section = null)
     {
         $this->viewBuilder()
             ->className('Dompdf.Pdf')
@@ -1058,97 +1086,87 @@ class StudentsController extends AppController
                 'filename' => $section,
                 'render' => 'browser',
             ]]);
-        $yearFrom = substr($schoolperiod, 0, 4);
+			
+		$this->loadModel('Schools');
 
-        $yearMonthFrom = substr($schoolperiod, 0, 4) . '08';
+		$school = $this->Schools->get(2);
+				
+		$yearFrom = $school->current_year_registration;
+		$yearUntil = $school->next_year_registration;
+			
+        $yearMonthFrom = $yearFrom . '08';
         
-        $yearMonthUp = substr($schoolperiod, 5, 4) . '08';
+        $yearMonthUp = $yearUntil . '08';
 
         $nameSection = $this->Students->Sections->get($section);
         
         $level = $this->sublevelLevel($nameSection->sublevel);
 
         $students = $this->Students->find('all')
-            ->where([['id >' => 1], ['section_id' => $section], ['new_student !=' => 1], ['Students.student_condition' => 'Regular']])
+            ->where([['id >' => 1], ['section_id' => $section], ['balance' => $yearFrom], ['Students.student_condition' => 'Regular']])
             ->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
 
         $monthlyPayments = [];
         
         $accountantManager = 0;
 
-        $this->loadModel('Schools');
+		foreach ($students as $student) 
+		{
+			$studentTransactions = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id]);
 
-        $school = $this->Schools->get(2);
+			$swSignedUp = 0;
 
-        $this->loadModel('Rates');
-        
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-           'order' => ['Rates.created' => 'DESC'] ]);
+			foreach ($studentTransactions as $studentTransaction) 
+			{
+				if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
+				{
+					if ($studentTransaction->amount > 0)
+					{
+						$swSignedUp = 1;
+					}
+				}
+			}                    
 
-        $row = $lastRecord->first();
+			if ($swSignedUp == 1)
+			{
+				$monthlyPayments[$accountantManager]['student'] = $student->full_name;
+			
+				$monthlyPayments[$accountantManager]['studentTransactions'] = [];
 
-        if($row)
-        {
-            foreach ($students as $student) 
-            {
-                $studentTransactions = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id]);
-
-                $swSignedUp = 0;
-
-                foreach ($studentTransactions as $studentTransaction) 
-                {
-                    if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
-                    {
-                        if ($studentTransaction->amount < $row->amount)
-                        {
-                            $swSignedUp = 1;
-                        }
-                    }
-                }                    
-
-                if ($swSignedUp == 1)
-                {
-                    $monthlyPayments[$accountantManager]['student'] = $student->full_name;
-                
-                    $monthlyPayments[$accountantManager]['studentTransactions'] = [];
-
-                    foreach ($studentTransactions as $studentTransaction) 
-                    {
-                        if ($studentTransaction->transaction_type == "Mensualidad")
-                        {
-                            $month = substr($studentTransaction->transaction_description, 0, 3);
-                            
-                            $year = substr($studentTransaction->transaction_description, 4, 4);
-                            
-                            $numberOfTheMonth = $this->nameMonth($month);
-                            
-                            $yearMonth = $year . $numberOfTheMonth;
-                            
-                            if ($yearMonth > $yearMonthFrom && $yearMonth < $yearMonthUp)
-                            {
-                                if ($student->scholarship == 1)
-                                {
-                                    $monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = 'B';
-                                }
-                                else
-                                {
-                                    if ($studentTransaction->paid_out == 1)
-                                    {
-                                        $monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = '*';    
-                                    }
-                                    else
-                                    {
-                                        $monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = 'P'; 
-                                    }
-                                }
-                            }
-                        }
-                    }  
-                }
-                $accountantManager++;
-            }
+				foreach ($studentTransactions as $studentTransaction) 
+				{
+					if ($studentTransaction->transaction_type == "Mensualidad")
+					{
+						$month = substr($studentTransaction->transaction_description, 0, 3);
+						
+						$year = substr($studentTransaction->transaction_description, 4, 4);
+						
+						$numberOfTheMonth = $this->nameMonth($month);
+						
+						$yearMonth = $year . $numberOfTheMonth;
+						
+						if ($yearMonth > $yearMonthFrom && $yearMonth < $yearMonthUp)
+						{
+							if ($student->scholarship == 1)
+							{
+								$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = 'B';
+							}
+							else
+							{
+								if ($studentTransaction->paid_out == 1)
+								{
+									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = '*';    
+								}
+								else
+								{
+									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = 'P'; 
+								}
+							}
+						}
+					}
+				}  
+			}
+			$accountantManager++;
         }
 
         $this->set(compact('nameSection', 'monthlyPayments', 'yearFrom', 'yearMonthFrom', 'yearMonthUp'));
@@ -1268,7 +1286,7 @@ class StudentsController extends AppController
 
     public function registerNewStudents()
     {
-        
+		
     }
 
     public function newstudentpdf()
@@ -1596,6 +1614,26 @@ class StudentsController extends AppController
 
 		$school = $this->Schools->get(2);
 		
+		$this->loadModel('Rates');
+		
+		$rate = $this->Rates->get(58);
+		
+		$dollarExchangeRate = $rate->amount; 
+		
+        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'],
+            'order' => ['Rates.created' => 'DESC'] ]);
+			
+		$row = $lastRecord->first();
+			
+		if ($row)
+		{
+			$amountMonthly = round($row->amount * $dollarExchangeRate);	
+		}
+		else
+		{
+			$amountMonthly = 0;
+		}
+		
 		$yearFrom = $school->current_year_registration;
 		$yearUntil = $school->next_year_registration;
 				
@@ -1689,7 +1727,7 @@ class StudentsController extends AppController
 					{
 						if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
 						{
-							if ($studentTransaction->amount < $studentTransaction->original_amount)
+							if ($studentTransaction->amount > 0)
 							{
 								$swSignedUp = 1;
 							}
@@ -1719,7 +1757,7 @@ class StudentsController extends AppController
 										if ($yearMonth <= $yearMonthUntil)
 										{
 											$delinquentMonths++;
-											$totalDebt = $totalDebt + $studentTransaction->amount;
+											$totalDebt = $totalDebt + $amountMonthly;
 										}
 									}
 								}	
@@ -2283,6 +2321,8 @@ class StudentsController extends AppController
     public function sameNames()
     {		
         $this->autoRender = false; 
+
+		$binnacles = new BinnaclesController;
         
 		$jsondata = [];
 
@@ -2307,9 +2347,10 @@ class StudentsController extends AppController
 					
 					foreach ($sameStudents as $sameStudent)
 					{
-						$jsondata['data']['students'][]['family'] = 'Angel';
 						$jsondata['data']['students'][]['student'] = $sameStudent->full_name;
+						$jsondata['data']['students'][]['family'] = $sameStudent->parentsandguardian->family;
 						$jsondata['data']['students'][]['id'] = $sameStudent->id;
+						$binnacles->add('controller', 'Students', 'sameNames', $sameStudent->full_name);
 					}
 				}
 				else
@@ -2324,5 +2365,33 @@ class StudentsController extends AppController
                 die("Solicitud no válida.");
             }           
         } 
+    }
+    public function searchFamily($id = null, $nameStudent = null, $controller = null, $action = null)
+    {		
+        $this->set(compact('id', 'nameStudent', 'controller', 'action'));
+        $this->set('_serialize', ['id', 'nameStudent', 'controller', 'action']);
+    }
+	
+    public function editFamily()
+    {		
+		$this->autoRender = false;
+		
+		if ($this->request->is('json')) 
+        {
+			$student = $this->Students->get($_POST['idStudent']);
+
+			$student->parentsandguardian_id = $_POST['idFamily'];
+
+            if ($this->Students->save($student)) 
+            {
+                $this->Flash->success(__('La familia fue reasignada exitosamente'));
+
+                return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+            }
+            else 
+            {
+                $this->Flash->error(__('La familia no pudo ser reasignada'));
+            }
+        }    
     }
 }

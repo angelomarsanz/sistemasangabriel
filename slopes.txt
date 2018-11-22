@@ -38,12 +38,6 @@ Alumnos Retirados: Son aquellos que en el transcurso de su vida escolar se van d
 
 Eliminar memoria de selección en reportes maestros (Listo)
 
----
-
-En Stutudenttransactions/assignSection quitar la constante Matrícula 2017
-En Students/createQuotaRegular quitar la constante Matrícula 2018
-En Student/listMonthltyPayment.ctp Matrícula 2017
-
 -- 
 Balance - nro. de hermanos
 
@@ -65,7 +59,7 @@ Factura 98678 - Control 80921 (Lamuño)
 Factura 98679 - Control 80920 (Hidalgo)
 Factura 98680 - Control 80922 (Alemany) 
 
---- Salto factura
+--- Salto lìneas factura
 
 Con solo Bs.S se dejan 20 líneas antes de imprimir la copia
 Con ambas monedas (Bs.F y Bs.S) se dejan 16 líneas 
@@ -76,3 +70,27 @@ StudentsController
 Students/addAdminb.ctp
 Students/viewConsult.ctp
 Parentsandguardians/addb.ctp
+
+--- Cambiar familia estudiante
+StudentsController
+ParentsandguardiansController
+Students/view_student.ctp
+Students/search_family.ctp 
+
+-- Mensualidad en dólares -- (Falta instalarlo en desarrollo)
+BillsController - ok
+RatesController - ok
+StudentsController - ok
+StudenttransactionsController - ok
+Bills/create_invoice.ctp - ok
+Bills/pdf/invoicepdf
+Element/menu.ctp
+Rates/index.ctp - ok
+Rates/add_dollar.ctp - ok
+Students/modify_transactions.ctp
+Students/register_new_students
+Students/list_monthly_payment.ctp
+Studenttransactions/index.ctp
+Studenttransactions/discount_quota80.ctp
+Studenttransactions/discount_quota50.ctp
+Studenttransactions/scholarship_index.ctp

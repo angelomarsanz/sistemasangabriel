@@ -1,6 +1,15 @@
 <?php
-    use Cake\Routing\Router; 
+    use Cake\Routing\Router;
 ?>
+<style>
+@media screen
+{
+    .noverScreen
+    {
+      display:none
+    }
+}
+</style>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -21,7 +30,18 @@
             </div>
             <div class="row panel panel-default">
                 <div class="col-md-4">
-                    <br />
+					<br />
+					<div class="row">
+						<div class="col-md-6">
+							<?= $this->Form->input('dollar_exchange_rate', ['label' => 'Tasa de cambio:', 'class' => 'alternative-decimal-separator', 'value' => number_format(($dollarExchangeRate), 2, ",", ".")]) ?>
+							<button id="update-dollar" class="btn btn-success">Actualizar</button>
+						</div>
+						<div class="col-md-6">
+							<br />
+							<p id="dollar-messages"></p>
+						</div>
+					</div>
+					<br>
                     <label for="family">Por favor escriba los apellidos de la familia:</label>
                     <br />
                     <input type="text" class="form-control" id="family-search">
@@ -36,7 +56,7 @@
                     <button id="everyfamily" class="btn btn-success">Listar familias del año escolar actual</button>
                     <br />
                     <br />
-                    <div class="panel panel-default pre-scrollable" style="height:220px;">
+                    <div class="panel panel-default pre-scrollable" style="height:120px;">
                         <div class="panel-body">
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover">
@@ -77,7 +97,7 @@
             </div>
             <br />
             <div class="row panel panel-default">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <br />
                     <p><b>Alumnos relacionados:</b></p>
                     <div class="panel panel-default pre-scrollable" style="height:260px;">
@@ -99,18 +119,21 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <br />
-                    <p><b>Cuotas del alumno:</b></p>
+                    <p><b>Cuotas pendientes:</b></p>
                     <div class="panel panel-default pre-scrollable" style="height:210px;">
                         <div class="panel-body">
                             <div class="table-responsive">          
                                 <table class="table table-striped table-hover" >
                                     <thead>
                                         <tr>
+											<th scope="col"></th>
                                             <th scope="col">Concepto</th>
-                                            <th scope="col">Monto</th>
-                                            <th scope="col">Estado</th>
+											<th scope="col">Cuota</th>
+                                            <th scope="col">Abonado</th>
+											<th scope="col">Pendiente</th>
+											<th scope="col" class="noverScreen"></th>
                                         </tr>
                                     </thead>
                                     <tbody id="monthly-payment"></tbody>
@@ -120,11 +143,12 @@
                     </div> 
                     <div>
                         <button id="mark-quotas" class="btn btn-success" disabled>Cobrar</button>
-                        <button id="uncheck-quotas" class="btn btn-success" disabled>Reversar</button>            
+                        <button id="uncheck-quotas" class="btn btn-success" disabled>Reversar</button>  
+						<button id="adjust-fee" class="btn btn-success" disabled>Ajustar</button>						
                         <button id="save-payments" class="btn btn-success" disabled>Facturar</button>
                     </div>  
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <br />
                     <p><b>Totales:</b></p>
                     <div class="panel panel-default" style="height:260px; padding: 0% 3% 0% 3%;">
@@ -501,17 +525,24 @@
     var transactionIdentifier = 0;
     var monthlyPayment = " ";
     var transactionAmount = 0;
+	var tempAmount = 0;
     var originalAmount = 0;
     var invoiced = 0;
     var partialPayment = 0;
     var paidOut = 0;
+	var dollarExchangeRate = 0;
+	var amountMonthly = 0;
+	var discountFamily = 0;
+	var transactionType = "";
     var firstName = " ";
     var secondName = " ";
     var surname = " ";
     var secondSurname = " ";
     var concept = " ";
     var idStudentTransactions = " ";
+	var idAmountTransactions = "";
     var amountPayable = 0;
+	var amountPaid = 0;
     var selectedPayment = -1;
     var grade = " ";
     var section = " ";
@@ -562,6 +593,7 @@
         $("#mark-quotas").text("cobrar");
         $("#mark-quotas").attr('disabled', true);
         $("#uncheck-quotas").attr('disabled', true);
+		$("#adjust-fee").attr('disabled', true);
         $("#save-payments").attr('disabled', true);
         $("#automatic-adjustment").attr('disabled', true);
         $("#adjust-invoice").attr('disabled', true);
@@ -612,11 +644,12 @@
         dropTable();
         dropPayments();
 
-        $('#family-search').val(" ");
+		$('#family-search').val(" ");
         $('#family').val(" ");
         $("#date-and-time").val(" ");
         $('#client').val(" ");
-        $('#identification').val(" ");
+        $('#type-of-identification-client').val("");
+		$('#identification-number-client').val("");		
         $('#fiscal-address').val(" ");
         $('#tax-phone').val(" ");
         $('#email').val(" ");
@@ -827,6 +860,7 @@
         dbTransactionAmount FLOAT, \
         dbOriginalAmount FLOAT, \
         dbAmountPayable FLOAT, \
+		dbAmountPaid FLOAT, \
         dbInvoiced INTEGER, \
         dbPartialPayment INTEGER, \
         dbPaidOut INTEGER, \
@@ -860,11 +894,12 @@
         dbTransactionAmount, \
         dbOriginalAmount, \
         dbAmountPayable, \
+		dbAmountPaid, \
         dbInvoiced, \
         dbPartialPayment, \
         dbPaidOut, \
 		dbSchoolYearFrom, \
-        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = transactionIdentifier;
         var tpIdStudent = idStudent;
@@ -874,6 +909,7 @@
         var tpTransactionAmount = transactionAmount;
         var tpOriginalAmount = originalAmount;
         var tpAmountPayable = amountPayable;
+		var tpAmountPaid = amountPaid;
         var tpInvoiced = invoiced;
         var tpPartialPayment = partialPayment;
         var tpPaidOut = paidOut;
@@ -891,6 +927,7 @@
             tpTransactionAmount,
             tpOriginalAmount,
             tpAmountPayable,
+			tpAmountPaid,
             tpInvoiced,
             tpPartialPayment,
             tpPaidOut,
@@ -944,7 +981,13 @@
         db.transaction(function (tx) { tx.executeSql(updateStatement, [invoiced, Number(amountPayable), observation, Number(id)], null, onError); });
     }
     
-    
+    function updateInstallment(id, transactionAmount, originalAmount, amountPayable) 
+    {
+        var updateStatement = "UPDATE studentTransactions SET dbTransactionAmount = ?, dbOriginalAmount = ?, dbAmountPayable = ? WHERE dbId=?";
+        
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(transactionAmount), Number(originalAmount), Number(amountPayable), Number(id)], null, onError); });
+    }
+	
     function showRecords() // Function For Retrive data from Database Display records as list
     {
         var selectWithCondition = "SELECT * FROM studentTransactions WHERE dbIdStudent = ?";
@@ -986,9 +1029,13 @@
                         {
                             studentBalance = studentBalance + item['dbTransactionAmount'];
                             detailLine += "<tr id=tra" + item['dbId'] + ">  \
+								<td style='background-color:#c2c2d6;'><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbTransactionAmount'] + " checked='checked' disabled></td> \
                                 <td style='background-color:#c2c2d6;'>" + item['dbMonthlyPayment'] + "</td> \
+								<td style='background-color:#c2c2d6;'><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbOriginalAmount'] + " disabled></td> \
+								<td style='background-color:#c2c2d6;'><input type='number' class='form-control amount-paid' value=" + item['dbAmountPaid'] + " disabled></td> \
                                 <td style='background-color:#c2c2d6;'>" + item['dbTransactionAmount'] + "</td> \
-                                <td style='background-color:#c2c2d6;'><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbTransactionAmount'] + " checked='checked' disabled></td></tr>";
+								<td style='background-color:#c2c2d6;'><input type='number' class='form-control original-amount noverScreen' value=" + item['dbOriginalAmount'] + "></td></tr>";
+
                                 $('#uncheck-quotas').attr('disabled', false);
                                 $('#save-payments').attr('disabled', false);
                                 if (firstInstallment == " ")
@@ -1004,18 +1051,24 @@
                                 nextPayment = monthlyPayment;
                                 indicatorPaid = 1;                            
                             }
-                            detailLine += "<tr id=tra" + item['dbId'] + ">  \
+                            detailLine += "<tr id=tra" + item['dbId'] + "> \
+								<td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbTransactionAmount'] + " disabled></td> \
                                 <td>" + item['dbMonthlyPayment'] + "</td> \
+								<td><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbOriginalAmount'] + "></td> \
+								<td><input type='number' class='form-control amount-paid' value=" + item['dbAmountPaid'] + " disabled></td> \
                                 <td>" + item['dbTransactionAmount'] + "</td> \
-                                <td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbTransactionAmount'] + " disabled></td></tr>";
+								<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbOriginalAmount'] + "></td></tr>";								
                         }
                     }
                     else 
                     {
-                            detailLine += "<tr id=tra" + item['dbId'] + ">  \
+                            detailLine += "<tr id=tra" + item['dbId'] + "> \
+								<td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value='Pagada' checked='checked' disabled> (Pagada)</td> \
                                 <td>" + item['dbMonthlyPayment'] + "</td> \
+								<td><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbOriginalAmount'] + "></td> \
+								<td><input type='number' class='form-control amount-paid' value=" + item['dbAmountPaid'] + " disabled></td> \
                                 <td>" + item['dbTransactionAmount'] + "</td> \
-                                <td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value='Pagada' checked='checked' disabled> (Pagada)</td></tr>";
+								<td><input type='number' class='form-control original-amount' value=" + item['dbOriginalAmount'] + "></td></tr>";                 
                     }
                 }
                 $("#monthly-payment").html(detailLine);
@@ -1032,6 +1085,7 @@
                     $("#student-balance").html(studentBalance.toFixed(2));
                     $("#mark-quotas").html(nextPayment);  
                     $("#mark-quotas").attr('disabled', false);
+					$("#adjust-fee").attr('disabled', false);
                 }
             });
         });
@@ -1066,6 +1120,8 @@
                     + item['dbOriginalAmount']
                     + " "
                     + item['dbAmountPayable']
+                    + " "
+                    + item['dbAmountPaid']
                     + " "
                     + item['dbInvoiced']
                     + " "
@@ -1275,7 +1331,7 @@
 
                 cleanPager();
 				
-                $.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "recordInvoiceData"]); ?>', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
+                $.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "recordInvoiceData"]); ?>', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade, quotaAdjustment : $('#quota-adjustment').val() }); 
             });
         });
     }
@@ -1323,6 +1379,8 @@
 
     $(document).ready(function() 
     {
+		$(".alternative-decimal-separator").numeric({ altDecimal: "," });
+		
         $("#mostrar-registros").click(showDatabase);
         
         $("#mostrar-pagos").click(showPayments);
@@ -1430,7 +1488,7 @@
             .done(function(response) 
             {
                 if (response.success) 
-                {
+                {					
                     nameFamily = response.data.family;
 
                     nameRepresentative = response.data.first_name + ' ' + response.data.surname;
@@ -1454,7 +1512,11 @@
                     taxPhone = response.data.tax_phone;
                         
                     customerEmail = response.data.email;
-                        
+					
+					dollarExchangeRate = response.data.dollar_exchange_rate;
+					
+					amountMonthly = response.data.amount_monthly;
+					                        
                     $('#family').val(nameFamily + " (" + nameRepresentative + ")");
                     $('#client').val(client);
                     $('#type-of-identification-client').val(typeOfIdentificationClient);
@@ -1473,17 +1535,22 @@
                                 {
                                     $.each(uservalue2, function(userkey3, uservalue3)
                                     {
-                                        if (userkey3 == 'id')
+										if (userkey3 == 'id')
                                         {
                                             transactionIdentifier = uservalue3;
                                         }
-                                        else if (userkey3 == 'transaction_description')
+										else if (userkey3 == 'transaction_type')
+										{
+											transactionType = uservalue3;
+                                        }
+										else if (userkey3 == 'transaction_description')
                                         {
                                             monthlyPayment = uservalue3;
                                         }
-                                        else if (userkey3 == 'amount')
+                                        if (userkey3 == 'amount')
                                         {
                                             transactionAmount = uservalue3;
+											amountPaid = uservalue3;
                                         }
                                         else if (userkey3 == 'original_amount')
                                         {
@@ -1500,8 +1567,42 @@
                                         else if (userkey3 == 'paid_out')
                                         {
                                             paidOut = uservalue3;
+											
                                             studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
-                                            amountPayable = transactionAmount;
+											
+											if (paidOut == true)
+											{													
+												transactionAmount = 0;
+												amountPayable = 0;
+											}
+											else if (transactionType != 'Mensualidad')
+											{												
+												tempAmount = originalAmount - transactionAmount;
+												transactionAmount = tempAmount;
+												amountPayable = tempAmount;		
+											}
+											else if (monthlyPayment.substring(0, 3) == "Ago")
+											{
+												tempAmount = originalAmount - transactionAmount;
+												transactionAmount = tempAmount;
+												amountPayable = tempAmount;												
+											}
+											else
+											{
+												if ($('#quota-adjustment').val() > 0)
+												{
+													originalAmount = ($('#quota-adjustment').val() * discountFamily);
+													tempAmount = ($('#quota-adjustment').val() * discountFamily) - transactionAmount;
+												}
+												else
+												{
+													originalAmount = (amountMonthly * discountFamily);
+													tempAmount = (amountMonthly * discountFamily) - transactionAmount;
+												}
+												transactionAmount = tempAmount;
+												amountPayable = tempAmount;												
+											}
+											
 											if ($('#type-invoice').val() == 'Inscripción regulares')
 											{
 												if (monthlyPayment.substring(0, 3) == "Ago" ||
@@ -1530,7 +1631,9 @@
 											{
 												insertRecord();
 											}
-                                        }
+											
+											
+										}
                                     });
                                 });
                             }
@@ -1586,6 +1689,17 @@
                             {
                                 schoolYearFrom = uservalue;
                             }
+							else if (userkey == 'discount_family')
+							{
+								if (uservalue === null)
+								{
+									discountFamily = 1;
+								}
+								else
+								{	
+									discountFamily = (100 - uservalue) / 100;
+								}
+							}
                         });
                     });
                     $("#header-messages").html(" ");
@@ -1662,54 +1776,81 @@
             var firstInstallment = " ";
             var lastInstallment = " ";
             var flaggedFlag = 0;
+			var blocked_amount = 0;
 			discount = 0;
 			discountMode = '';
 			discountAmount = 0;
+			inputCounter = 0;
 			$('.select-discount').val(1);
 			$('#total-general').html('');
-            
+			            
             $("#monthly-payment input").each(function (index) 
-            { 
-                if($(this).attr('value') != "Pagada")
-                {
-                    if(!($(this).is(':checked'))) 
-                    {
-                        if (flaggedFlag == 0)
-                        {
-                            flaggedFlag = 1;
-                            $(this).attr('checked', true);
-                            idStudentTransactions = $(this).attr('id'); 
-                            markTransaction(idStudentTransactions.substring(2));
-                            updateRecord(idStudentTransactions.substring(2), 'true', parseFloat($(this).attr('value')), " "); 
-                            $('#uncheck-quotas').attr('disabled', false);
-                            $('#save-payments').attr('disabled', false);
-                            $('#charge').attr('disabled', false);
-                            if (firstInstallment == " ")
-                            {
-                                firstInstallment = $(this).attr('name');
-                            }
-                            lastInstallment = $(this).attr('name');
-                            $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
-                            concept = firstInstallment + ' - ' + lastInstallment;
-                            studentBalance = studentBalance + parseFloat($(this).attr('value'));
-                            $("#student-balance").html(studentBalance.toFixed(2));
-                            totalBalance = totalBalance + parseFloat($(this).attr('value'));
-                            $("#total-balance").html(totalBalance.toFixed(2));
-                        }
-                        else
-                        {
-                            $("#mark-quotas").html($(this).attr('name'));
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        if (firstInstallment == " ")
-                        {
-                            firstInstallment = $(this).attr('name');
-                        }
-                    }
-                }
+            {
+				if (inputCounter == 0)
+				{
+					if($(this).attr('value') != "Pagada")
+					{
+						if(!($(this).is(':checked'))) 
+						{
+							if (flaggedFlag == 0)
+							{
+								flaggedFlag = 1;
+								$(this).attr('checked', true);
+								idStudentTransactions = $(this).attr('id'); 
+								markTransaction(idStudentTransactions.substring(2));
+								updateRecord(idStudentTransactions.substring(2), 'true', parseFloat($(this).attr('value')), " "); 
+								$('#uncheck-quotas').attr('disabled', false);
+								$('#save-payments').attr('disabled', false);
+								$('#charge').attr('disabled', false);
+								if (firstInstallment == " ")
+								{
+									firstInstallment = $(this).attr('name');
+								}
+								lastInstallment = $(this).attr('name');
+								$("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
+								concept = firstInstallment + ' - ' + lastInstallment;
+								studentBalance = studentBalance + parseFloat($(this).attr('value'));
+								$("#student-balance").html(studentBalance.toFixed(2));
+								totalBalance = totalBalance + parseFloat($(this).attr('value'));
+								$("#total-balance").html(totalBalance.toFixed(2));
+							}
+							else
+							{
+								$("#mark-quotas").html($(this).attr('name'));
+								return false;
+							}
+						}
+						else
+						{
+							if (firstInstallment == " ")
+							{
+								firstInstallment = $(this).attr('name');
+							}
+						}
+					}
+					inputCounter++;
+				}
+				else if (inputCounter == 1)
+				{
+					if (flaggedFlag == 1 && blocked_amount == 0)
+					{
+						$(this).attr('disabled', true);
+						blocked_amount = 1;	
+						inputCounter++;
+					}
+					else
+					{
+						inputCounter++;
+					}
+				}
+				else if (inputCounter == 3)
+				{
+					inputCounter = 0;
+				}
+				else
+				{
+					inputCounter++;
+				}
             }); 
         });
 
@@ -1721,69 +1862,89 @@
             var markedQuotaCounter = 0;
             var indicatorUnmark = 0;
             idStudentTransactions = " ";
+			idAmountTransactions = "";
             transactionDescription = " ";
 			discount = 0;
 			discountMode = '';
 			discountAmount = 0;
+			inputCounter = 0;
 			$('.select-discount').val(1);
 			$('#total-general').html('');
 
             $("#monthly-payment input").each(function (index) 
-            { 
-                if($(this).attr('value') != "Pagada")
-                {
-                    if($(this).is(':checked'))
-                    {
-                        if (firstInstallment == " ")
-                        {
-                            firstInstallment = $(this).attr('name');
-                        }
-                        if (lastInstallment == " ")
-                        {
-                            lastInstallment = $(this).attr('name');
-                        }
-                        else
-                        {
-                            lastInstallment = transactionDescription;
-                        }
-                        markedQuotaCounter++;
-                
-                        idStudentTransactions = $(this).attr('id');
-                        transactionDescription = $(this).attr('name');
-                        transactionAmount = parseFloat($(this).attr('value'));
-                    }
-                    else 
-                    {
-                        if (idStudentTransactions != " ")
-                        {
-                            if (indicatorUnmark == 0)
-                            {
-                                indicatorUnmark = 1;
-                            }
-                            $('#' + idStudentTransactions).attr('checked', false);
-                            uncheckTransaction(idStudentTransactions.substring(2));
-                            updateRecord(idStudentTransactions.substring(2), 'false', transactionAmount, " "); 
-                            
-                            $("#mark-quotas").html(transactionDescription);
-                            if (markedQuotaCounter == 1)
-                            {
-                                firstInstallment = " ";
-                                lastInstallment = " ";
-                                $("#student-concept").text(" ");
-                            }
-                            else
-                            {
-                                $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
-                                concept = firstInstallment + ' - ' + lastInstallment;
-                            }
-                            studentBalance = studentBalance - transactionAmount;
-                            $("#student-balance").html(studentBalance.toFixed(2));
-                            totalBalance = totalBalance - transactionAmount;
-                            $("#total-balance").html(totalBalance.toFixed(2));
-                            return false;
-                        }
-                    }
-                }
+            {
+				if (inputCounter == 0)
+				{				
+					if($(this).attr('value') != "Pagada")
+					{
+						if($(this).is(':checked'))
+						{
+							if (firstInstallment == " ")
+							{
+								firstInstallment = $(this).attr('name');
+							}
+							if (lastInstallment == " ")
+							{
+								lastInstallment = $(this).attr('name');
+							}
+							else
+							{
+								lastInstallment = transactionDescription;
+							}
+							markedQuotaCounter++;
+					
+							idStudentTransactions = $(this).attr('id');
+							transactionDescription = $(this).attr('name');
+							transactionAmount = parseFloat($(this).attr('value'));
+						}
+						else 
+						{
+							if (idStudentTransactions != " ")
+							{
+								if (indicatorUnmark == 0)
+								{
+									indicatorUnmark = 1;
+								}
+								$('#' + idStudentTransactions).attr('checked', false);
+								$('#' + idAmountTransactions).attr('disabled', false);								
+								uncheckTransaction(idStudentTransactions.substring(2));
+								updateRecord(idStudentTransactions.substring(2), 'false', transactionAmount, " "); 
+								
+								$("#mark-quotas").html(transactionDescription);
+								if (markedQuotaCounter == 1)
+								{
+									firstInstallment = " ";
+									lastInstallment = " ";
+									$("#student-concept").text(" ");
+								}
+								else
+								{
+									$("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
+									concept = firstInstallment + ' - ' + lastInstallment;
+								}
+								studentBalance = studentBalance - transactionAmount;
+								$("#student-balance").html(studentBalance.toFixed(2));
+								totalBalance = totalBalance - transactionAmount;
+								$("#total-balance").html(totalBalance.toFixed(2));
+								return false;
+							}
+						}
+					}
+					inputCounter++;
+				}
+				else if (inputCounter == 1)
+				{
+					idAmountTransactions = $(this).attr('id');
+					inputCounter++;
+				}
+				else if (inputCounter == 3)
+				{
+					inputCounter = 0;
+				}
+				else
+				{
+					inputCounter++;
+				}
             });
             if (idStudentTransactions == " ")
             {
@@ -2182,6 +2343,110 @@
 				{
 					alert('Algo falló en la búsqueda. Código de error: ' + textStatus);
 				});
+			}
+        });
+		
+        $('#update-dollar').click(function(e) 
+        {
+            e.preventDefault();
+			
+			if (totalBalance > 0)
+			{    
+				var r = confirm("Si actualiza la tasa de cambio, perderá los datos de la cobranza a la familia: " + nameFamily );
+				if (r == false)
+				{
+					return false;
+				}
+			}
+
+			$('#quota-adjustment').val("");
+			cleanPager();
+			$("#response-container").html("");
+			disableButtons();
+		
+            $.post('<?php echo Router::url(["controller" => "Rates", "action" => "updateDollar"]); ?>', 
+                {"amount" : $('#dollar-exchange-rate').val() }, null, "json")          
+
+            .done(function(response) 
+            {
+                if (response.success) 
+                {
+                    $("#dollar-messages").html("La tasa de cambio fue actualizada correctamente");
+                } 
+                else 
+                {
+                    $("#dollar-messages").html("La tasa de cambio no pudo ser actualizada");
+                }
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) 
+            {
+                $("#dollar-messages").html("Algo ha fallado, la tasa de cambio no pudo ser actualizada: " + textStatus);
+            });  
+        });
+		
+        $('#adjust-fee').click(function(e) 
+        {
+            e.preventDefault();
+
+			var adjInputCounter = 0;
+			var adjModifiableFee = 0;
+			var adjOriginalAmount = 0;
+			var adjAmountPaid = 0;
+			var adjIdAmountTransaction = '';
+			var adjAmountPayable = 0;
+			var adjError = 0;
+			
+            $("#monthly-payment input").each(function (index) 
+            {
+				if (adjInputCounter == 1)
+				{
+					adjModifiableFee = parseFloat($(this).val());
+					adjIdAmountTransaction = $(this).attr('id');
+					adjInputCounter++;
+				}
+				else if (adjInputCounter == 2)
+				{
+					adjAmountPaid = parseFloat($(this).val());
+					adjInputCounter++;					
+				}
+				else if (adjInputCounter == 3)
+				{
+					adjOriginalAmount = parseFloat($(this).val());					
+					if (adjModifiableFee != adjOriginalAmount)
+					{
+						console.log('adjModifiableFee: ' + adjModifiableFee + ' adjOriginalAmount: ' + adjOriginalAmount + ' adjAmountPaid: ' + adjAmountPaid);
+						
+						if (adjModifiableFee < adjAmountPaid)
+						{
+							alert('Error: El monto de la cuota ajustada no debe ser menor al monto abonado');
+							$('#' + adjIdAmountTransaction).css('background-color', '#ff5050');
+							adjError = 1;
+							return false;
+						}
+						else
+						{
+							console.log(adjModifiableFee);
+							adjAmountPayable = adjModifiableFee - adjAmountPaid;
+							updateInstallment(adjIdAmountTransaction.substring(2), adjAmountPayable, adjModifiableFee, adjAmountPayable);
+							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
+						}
+					}
+					
+					adjInputCounter = 0;
+					adjModifiableFee = 0;
+					adjOriginalAmount = 0;
+					adjAmountPaid = 0;
+					adjAmountPayable = 0;
+					adjIdAmountTransaction = '';
+				}
+				else
+				{
+					adjInputCounter++;
+				}
+            });
+			if (adjError == 0)
+			{
+				showRecords();
 			}
         });
 

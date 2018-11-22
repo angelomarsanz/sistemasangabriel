@@ -68,7 +68,7 @@
                 echo $this->Form->input('concept', ['required' => 'required', 'label' => 'Tarifa', 'options' => 
                     [null => '',
 					'Agosto' => 'Agosto',
-					'Diferencia de agosto' => 'Diferencia de agosto',
+					'Diferencia de matrícula' => 'Diferencia de matrícula',
                     'Matrícula' => 'Matrícula',
                     'Mensualidad' => 'Mensualidad',
                     'Seguro escolar' => 'Seguro escolar',
@@ -158,7 +158,7 @@
 	{	
 		if ($("#concept").val() == "Diferencia de agosto")
 		{
-			$.post('/desarrollosistemasangabriel/rates/consultFee', {"yearAugust" : $("#rate-year").val() }, null, "json")
+			$.post('/sistemasangabriel/rates/consultFee', {"yearAugust" : $("#rate-year").val() }, null, "json")
             
 			.done(function(response) 
 			{
@@ -219,7 +219,7 @@
 				else
 				{
 					e.preventDefault();
-					$.redirect('/desarrollosistemasangabriel/rates/index');
+					$.redirect('/sistemasangabriel/rates/index');
 				}
 			}
 			else if ($("#concept").val() == "Diferencia de agosto")
@@ -233,7 +233,7 @@
 				else
 				{
 					e.preventDefault();
-					$.redirect('/desarrollosistemasangabriel/rates/index');
+					$.redirect('/sistemasangabriel/rates/index');
 				}
 			}
 			else
@@ -243,7 +243,7 @@
 				if (rateOther == false)
 				{
 					e.preventDefault();
-					$.redirect('/desarrollosistemasangabriel/rates/index');
+					$.redirect('/sistemasangabriel/rates/index');
 				}			
 			}
 		}); 

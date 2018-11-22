@@ -404,7 +404,7 @@ class ParentsandguardiansController extends AppController
             foreach ($results as $result) {
                  $resultsArr[] =['label' => $result['family'] . ' (' . $result['surname'] . ' ' . $result['first_name'] . ')', 'value' => $result['family'] . ' (' . $result['surname'] . ' ' . $result['first_name'] . ')', 'id' => $result['id']];
             }
-            echo json_encode($resultsArr);
+			exit(json_encode($resultsArr, JSON_FORCE_OBJECT));
         }
     }
 

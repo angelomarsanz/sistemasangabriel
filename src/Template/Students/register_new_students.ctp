@@ -58,7 +58,7 @@
     
     function listFamilies(newFamily)
     {
-        $.post('../students/everyfamily', {"newFamily" : newFamily}, null, "json")
+        $.post('<?php echo Router::url(array("controller" => "Students", "action" => "everyFamily")); ?>', {"newFamily" : newFamily}, null, "json")
             
         .done(function(response) 
         {
@@ -147,8 +147,7 @@
             
             $("#header-messages").html("Por favor espere...");
                        
-            $.redirect('../students/addAdminpb', {idFamily : idFamily}); 
-
+            $.redirect('<?php echo Router::url(array("controller" => "Students", "action" => "addAdminpb")); ?>', {idFamily : idFamily}); 
         });
 
 // Final funciones Jquery

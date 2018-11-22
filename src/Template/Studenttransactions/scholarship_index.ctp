@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="page-header">
-            <p><?= $this->Html->link(__('Becar otro alumno'), ['action' => 'searchScholarship'], ['class' => 'btn btn-sm btn-default']) ?></p>
+            <p><?= $this->Html->link(__('Becar otro alumno'), ['controller' => 'Students', 'action' => 'searchScholarship'], ['class' => 'btn btn-sm btn-default']) ?></p>
         </div>
         <div class="table-responsive">
             <table class="table table-striped table-hover">
@@ -12,11 +12,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($students as $student): ?>
+                    <?php foreach ($studenttransactions as $studenttransaction): ?>
                     <tr>
-                        <td><?= h($student->full_name) ?></td>
+                        <td><?= h($studenttransaction->student->full_name) ?></td>
                         <td class="actions">
-                            <?= $this->Html->link('Eliminar beca', ['action' => 'deleteScholarship', $student->id], ['class' => 'btn btn-sm btn-info', 'id' => $student->id]) ?>
+                            <?= $this->Html->link('Eliminar beca', ['controller' => 'Students', 'action' => 'deleteScholarship', $studenttransaction->student->id], ['class' => 'btn btn-sm btn-info', 'id' => $studenttransaction->student->id]) ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

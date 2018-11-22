@@ -13,6 +13,8 @@ use App\Controller\ConsecutiveinvoicesController;
 
 use App\Controller\ConsecutivereceiptsController;
 
+use App\Controller\BinnaclesController;
+
 use Cake\I18n\Time;
 
 class BillsController extends AppController
@@ -154,7 +156,15 @@ class BillsController extends AppController
             $bill->client = $this->headboard['client'];
             $bill->tax_phone = $this->headboard['taxPhone'];
             $bill->fiscal_address = $this->headboard['fiscalAddress'];
-            $bill->amount = $this->headboard['invoiceAmount'];
+			
+			if (isset($this->headboard['discount']))
+			{
+				$bill->amount = $this->headboard['discount'];
+			}
+			else
+			{
+				$bill->amount = 0;
+			}
             $bill->amount_paid = $this->headboard['invoiceAmount'];
             $bill->annulled = 0;
             $bill->date_annulled = 0;
@@ -167,12 +177,12 @@ class BillsController extends AppController
             }
             else    
             {
-                $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente.'));
+                $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente (add-save).'));
             }
         }
         else
         {
-            $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente.'));            
+            $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente (add-headboard).'));            
         }
     }
 
@@ -203,14 +213,30 @@ class BillsController extends AppController
         return $this->redirect(['action' => 'index']);
     }
     
-    public function createInvoice($idTurn = null, $turn = null)
+    public function createInvoice($menuOption = null, $idTurn = null, $turn = null)
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
         
         $dateTurn = Time::now();
-        
-        $this->set(compact('idTurn', 'turn', 'dateTurn'));
+		
+		$this->loadModel('Discounts');
+		
+		$discounts = $this->Discounts->find('list', ['limit' => 200, 
+			'order' => ["description_discount" => "ASC"],
+			'keyField' => 'id', 
+			'valueField' => function ($discount) 
+				{
+					return $discount->get('label');
+				}]);
+				
+		$this->loadModel('Rates');
+		
+		$rate = $this->Rates->get(58);
+		
+		$dollarExchangeRate = $rate->amount; 
+				
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'amountMonthly'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)
@@ -252,12 +278,33 @@ class BillsController extends AppController
         $Concepts = new ConceptsController();
 
         $Payments = new PaymentsController();
+		
+		$this->loadModel('Rates');
+		
+		$rate = $this->Rates->get(58);
+		
+		$dollarExchangeRate = $rate->amount; 
+		
+        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'],
+            'order' => ['Rates.created' => 'DESC'] ]);
+			
+		$row = $lastRecord->first();
+			
+		if ($row)
+		{
+			$amountMonthly = round($row->amount * $dollarExchangeRate);			
+		}
+		else
+		{
+			$amountMonthly = 0;
+		}
 
         if ($this->request->is('post')) 
         {
             $this->headboard = $_POST['headboard']; 
             $transactions = json_decode($_POST['studentTransactions']);
             $payments = json_decode($_POST['paymentsMade']);
+			$quotaAdjustment = $_POST['quotaAdjustment'];
             $_POST = [];
 
             $billNumber = $this->add();
@@ -275,7 +322,7 @@ class BillsController extends AppController
 
                     foreach ($transactions as $transaction) 
                     {
-                        $Studenttransactions->edit($transaction->transactionIdentifier, $billNumber, $transaction->amountPayable);
+                        $Studenttransactions->edit($transaction->transactionIdentifier, $billNumber, $transaction->amountPayable, $amountMonthly, $dollarExchangeRate, $quotaAdjustment);
 
                         $Concepts->add($billId, $transaction->studentName, $transaction->transactionIdentifier, 
                             $transaction->monthlyPayment, $transaction->amountPayable, $transaction->observation);
@@ -295,7 +342,7 @@ class BillsController extends AppController
         }
         else
         {
-            $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente.'));            
+            $this->Flash->error(__('La factura no pudo ser grabada, intente nuevamente (recordInvoiceData)'));            
         }
     }
 
@@ -423,28 +470,7 @@ class BillsController extends AppController
                 }
                 elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
                 {				
-					if ($currentDate->month < 8)
-					{
-						if ($aConcept->concept == "Matrícula " . $yearAncestor)
-						{
-							$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono a inscripción";
-						}
-					}
-					else
-					{
-						if ($aConcept->concept == "Matrícula " . $currentDate->year)
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono a inscripción";
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";							
-						}
-					}
+					$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
                     $amountConcept = $aConcept->amount;
                     $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
                     $loadIndicator = 1;
@@ -454,28 +480,14 @@ class BillsController extends AppController
                 }
                 elseif (substr($aConcept->concept, 0, 3) == "Ago")
                 {	
-					if ($currentDate->month < 8)
+					if ($aConcept->concept == "Ago " . $currentDate->year)
 					{
-						if ($aConcept->concept == "Ago " . $yearAncestor)
-						{
-							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
-						}
+						$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
 					}
 					else
 					{
-						if ($aConcept->concept == "Ago " . $nextYear)
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;						
-						}
-					}				
+						$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+					}
                     $amountConcept = $aConcept->amount;
                     $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
                     $loadIndicator = 1;
@@ -550,28 +562,7 @@ class BillsController extends AppController
                         $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
                         $loadIndicator = 1;
                     }
-					if ($currentDate->month < 8)
-					{
-						if ($aConcept->concept == "Matrícula " . $yearAncestor)
-						{
-							$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono a inscripción";
-						}
-					}
-					else
-					{
-						if ($aConcept->concept == "Matrícula " . $currentDate->year)
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono a inscripción";
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";							
-						}
-					}
+					$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
                     $amountConcept = $aConcept->amount;
                     $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
                     $LoadIndicator = 1;
@@ -586,27 +577,13 @@ class BillsController extends AppController
                         $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
                         $loadIndicator = 1;
                     }
-					if ($currentDate->month < 8)
+					if ($aConcept->concept == "Ago " . $currentDate->year)
 					{
-						if ($aConcept->concept == "Ago " . $yearAncestor)
-						{
-							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
-						}
+						$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
 					}
 					else
 					{
-						if ($aConcept->concept == "Ago " . $nextYear)
-						{
-							$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;						
-						}
+						$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
 					}
                     $amountConcept = $aConcept->amount;
                     $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
@@ -901,8 +878,8 @@ class BillsController extends AppController
                 die("Solicitud no válida");    
             }
             
-            $query = $this->Bills->find('all', ['conditions' => [['bill_number >=' => $_POST['invoiceFrom']]],
-                'order' => ['Bills.created' => 'ASC'] ]);
+            $query = $this->Bills->find('all', ['conditions' => [['bill_number >=' => $_POST['invoiceFrom']], ['fiscal' => 1]],
+                'order' => ['Bills.created' => 'ASC']]);
 
             $bills = $query->toArray();
 
@@ -1080,5 +1057,42 @@ class BillsController extends AppController
     public function pruebaIntercambioDatos()
     {
 
-    } 
+    }
+    public function monetaryReconversion()
+    {				
+		$binnacles = new BinnaclesController;
+	
+		$bills = $this->Bills->find('all', ['conditions' => ['id >' => 0]]);
+	
+		$account1 = $bills->count();
+			
+		$account2 = 0;
+		
+		foreach ($bills as $bill)
+        {		
+			$billGet = $this->Bills->get($bill->id);
+			
+			$previousAmount = $billGet->amount;
+										
+			$billGet->amount = $previousAmount / 100000;
+			
+			$previousAmount = $billGet->amount_paid;
+										
+			$billGet->amount_paid = $previousAmount / 100000;
+			
+			if ($this->Bills->save($billGet))
+			{
+				$account2++;
+			}
+			else
+			{
+				$binnacles->add('controller', 'Bills', 'monetaryReconversion', 'No se actualizó registro con id: ' . $billGet->id);
+			}
+		}
+
+		$binnacles->add('controller', 'Bills', 'monetaryReconversion', 'Total registros seleccionados: ' . $account1);
+		$binnacles->add('controller', 'Bills', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
+
+		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+	}	
 }

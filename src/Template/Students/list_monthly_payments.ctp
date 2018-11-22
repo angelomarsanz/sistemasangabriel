@@ -6,7 +6,6 @@
 	    <?= $this->Form->create() ?>
 	        <fieldset>
 		    	<?php
-		    	    echo $this->Form->input('school_period', ['label' => 'Período escolar: *', 'type' => 'hidden', 'value' => '2017-2018']);
 		        	echo $this->Form->input('section_id', ['label' => 'Sección:*', 'options' => $sections]);
 		    	?>
 		    </fieldset>

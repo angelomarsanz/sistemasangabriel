@@ -91,7 +91,7 @@ class ConceptsController extends AppController
         $concepts = $this->Concepts->find('all')->where(['bill_id' => $idBill]);
     
         $aConcepts = $concepts->toArray();
-        
+			    
         foreach ($aConcepts as $aConcept) 
         {    
             $concept = $this->Concepts->get($aConcept->id);

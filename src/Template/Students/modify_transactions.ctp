@@ -79,7 +79,7 @@
             
             $("#header-messages").html("Por favor espere...");
                        
-            $.redirect('../studenttransactions/index', {idStudent : idStudent, student : student}); 
+            $.redirect('<?php echo Router::url(array("controller" => "Studenttransactions", "action" => "index")); ?>', {idStudent : idStudent, student : student}); 
 
         });
 

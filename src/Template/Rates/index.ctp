@@ -2,7 +2,7 @@
     <div class="col-md-8">
     	<div class="page-header">
     	    <h3><?= __('Tarifas') ?></h3>
-     	    <p><?= $this->Html->link(__(''), ['action' => 'add'], ['class' => 'glyphicon glyphicon-plus btn btn-sm btn-default', 'title' => 'Agregar tarifa']) ?></p>
+     	    <p><?= $this->Html->link(__(''), ['action' => 'addDollar'], ['class' => 'glyphicon glyphicon-plus btn btn-sm btn-default', 'title' => 'Agregar tarifa']) ?></p>
     	</div>
     	<div class="table-responsive">
     		<table class="table table-striped table-hover">

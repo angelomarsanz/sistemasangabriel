@@ -230,7 +230,13 @@ class BillsController extends AppController
 					return $discount->get('label');
 				}]);
 				
-        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts'));
+		$this->loadModel('Rates');
+		
+		$rate = $this->Rates->get(58);
+		
+		$dollarExchangeRate = $rate->amount; 
+				
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'amountMonthly'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)
@@ -272,6 +278,26 @@ class BillsController extends AppController
         $Concepts = new ConceptsController();
 
         $Payments = new PaymentsController();
+		
+		$this->loadModel('Rates');
+		
+		$rate = $this->Rates->get(58);
+		
+		$dollarExchangeRate = $rate->amount; 
+		
+        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'],
+            'order' => ['Rates.created' => 'DESC'] ]);
+			
+		$row = $lastRecord->first();
+			
+		if ($row)
+		{
+			$amountMonthly = round($row->amount * $dollarExchangeRate);			
+		}
+		else
+		{
+			$amountMonthly = 0;
+		}
 
         if ($this->request->is('post')) 
         {
@@ -295,7 +321,7 @@ class BillsController extends AppController
 
                     foreach ($transactions as $transaction) 
                     {
-                        $Studenttransactions->edit($transaction->transactionIdentifier, $billNumber, $transaction->amountPayable);
+                        $Studenttransactions->edit($transaction->transactionIdentifier, $billNumber, $transaction->originalAmount, $transaction->amountPayable);
 
                         $Concepts->add($billId, $transaction->studentName, $transaction->transactionIdentifier, 
                             $transaction->monthlyPayment, $transaction->amountPayable, $transaction->observation);

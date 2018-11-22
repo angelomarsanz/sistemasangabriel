@@ -66,7 +66,7 @@
             <tr>
                 <th style="width:10%; text-align:left;">Código</th>
                 <th style="width:70%; text-align:left;">Descripción</th>
-                <th style="width:20%; text-align:right;">Precio Bs.F</th>
+                <th style="width:20%; text-align:right;">Precio Bs.S</th>
             </tr>
         </thead>
         <tbody>
@@ -160,7 +160,7 @@ endfor; ?>
             <tr>
                 <th style="width:10%; text-align:left;">Código</th>
                 <th style="width:70%; text-align:left;">Descripción</th>
-                <th style="width:20%; text-align:right;">Precio Bs.F</th>
+                <th style="width:20%; text-align:right;">Precio Bs.S</th>
             </tr>
         </thead>
         <tbody>
