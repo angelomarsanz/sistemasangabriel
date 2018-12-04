@@ -2581,7 +2581,7 @@ class StudenttransactionsController extends AppController
 				'Parentsandguardians.family'])
 			->contain(['Students' => ['Parentsandguardians']])
 			->where([['Studenttransactions.transaction_description' => $registration],
-				['Studenttransactions.amount < Studenttransactions.original_amount'], ['Students.student_condition' => 'Regular']])
+				['Studenttransactions.amount >' => 0], ['Students.student_condition' => 'Regular']])
 			->order(['Parentsandguardians.id' => 'ASC']);
 			
 		$account = $studentsFor->count();
@@ -2680,7 +2680,7 @@ class StudenttransactionsController extends AppController
 				'Parentsandguardians.family'])
 			->contain(['Students' => ['Parentsandguardians']])
 			->where([['Studenttransactions.transaction_description' => $registration],
-				['Studenttransactions.amount < Studenttransactions.original_amount'], ['Students.student_condition' => 'Regular']])
+				['Studenttransactions.amount >' => 0], ['Students.student_condition' => 'Regular']])
 			->order(['Parentsandguardians.id' => 'ASC']);
 			
 		$account = $studentsFor->count();
@@ -3806,19 +3806,65 @@ class StudenttransactionsController extends AppController
 		return $arrayResult;
 	}
 
-// Función creada para corregir cualquier error en la tabla Studenttransactions
+    public function scholarshipIndex()
+    {
+		$this->loadModel('Schools');
 
+		$school = $this->Schools->get(2);
+				
+		$yearFrom = $school->current_year_registration;
+		$yearUntil = $school->next_year_registration;
+
+		$enrollment = 'Matrícula ' . $yearFrom;
+		
+        $query = $this->Studenttransactions->find('all')
+			->contain(['Students'])
+            ->where([['Studenttransactions.transaction_description' => $enrollment],
+				['Studenttransactions.amount >' => 0],
+				['Students.id >' => 1],
+				['Students.section_id >' => 1],
+				['Students.balance' => $yearFrom],
+				['Students.student_condition' => 'Regular'],
+				['Students.scholarship' => 1]])				
+            ->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
+
+        $this->set('studenttransactions', $this->paginate($query));
+
+        $this->set(compact('studenttransactions'));
+        $this->set('_serialize', ['studenttransactions']);
+    }
+
+// Función creada para corregir cualquier error en la tabla Studenttransactions
+	
 	public function correctTransaction()
 	{
 		$account1 = 0;
 		$account2 = 0;
 		
-		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => 
-                ['OR' => 
-					[['transaction_type' => 'Matrícula'], 
-					['transaction_type' => 'Seguro escolar'],
-					['transaction_type' => 'Servicio educativo'],
-					['SUBSTRING(transaction_description, 1, 3) =' => 'Ago']]]]); 
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+		
+		$initialDate = new Time();
+				
+		$initialDate
+			->year(2018)
+			->month(8)
+			->day(31)
+			->hour(0)
+			->minute(0)
+			->second(0);
+					
+		$studentTransactions = $this->Studenttransactions->find('all', 
+			['contain' => ['Students'],
+			'conditions' => 
+                [['Studenttransactions.transaction_type' => 'Mensualidad'], 
+				['SUBSTRING(Studenttransactions.transaction_description, 1, 3) !=' => 'Ago'],
+				['Studenttransactions.payment_date >' => $initialDate]
+				['Studenttransactions.amount >' => 0],
+				['Studenttransactions.paid_out' => 0],
+				['Students.student_condition' => 'Regular'],
+				['Students.balance' => '2018'],
+				['Students.discount' => '20']]]); 
 	
 		$account1 = $studentTransactions->count();
 		
@@ -3827,20 +3873,26 @@ class StudenttransactionsController extends AppController
 		foreach ($studentTransactions as $studentTransaction)
         {		
 			$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
+								
+			$studentTransactionGet->amount_original = $studentTransactionGet->amount;
 			
-			$subscriber = $studentTransactionGet->original_amount - $studentTransactionGet->amount;
-					
-			$studentTransactionGet->amount = $subscriber; 
+			$studentTransactionGet->paid_out = 1;
+			
+			$studentTransactionGet->partial_payment;
 												
-			if ($this->Studenttransactions->save($studentTransactionGet))
+			/* if ($this->Studenttransactions->save($studentTransactionGet))
 			{ 
 				$account2++;
 			}
 			else
 			{
 				$this->Flash->error(__('No pudo ser grabado el registro correspondiente al alumno cuyo ID es: ' . $studentTransactionGet->student_id));
-			}
+			} */
+						
 		}
-		$this->Flash->success(__('Total transacciones corregidas: ' . $account2));		
-	}
+		$this->Flash->success(__('Total transacciones corregidas: ' . $account2));
+		
+        $this->set(compact('studentTransactions'));
+        $this->set('_serialize', ['studentTransactions']);
+	}	
 }

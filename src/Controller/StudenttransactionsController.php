@@ -3806,43 +3806,6 @@ class StudenttransactionsController extends AppController
 		return $arrayResult;
 	}
 
-// Función creada para corregir cualquier error en la tabla Studenttransactions
-
-	public function correctTransaction()
-	{
-		$account1 = 0;
-		$account2 = 0;
-		
-		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => 
-                ['OR' => 
-					[['transaction_type' => 'Matrícula'], 
-					['transaction_type' => 'Seguro escolar'],
-					['transaction_type' => 'Servicio educativo'],
-					['SUBSTRING(transaction_description, 1, 3) =' => 'Ago']]]]); 
-	
-		$account1 = $studentTransactions->count();
-		
-		$this->Flash->success(__('Total transacciones seleccionadas: ' . $account1));
-	
-		foreach ($studentTransactions as $studentTransaction)
-        {		
-			$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
-			
-			$subscriber = $studentTransactionGet->original_amount - $studentTransactionGet->amount;
-					
-			$studentTransactionGet->amount = $subscriber; 
-												
-			if ($this->Studenttransactions->save($studentTransactionGet))
-			{ 
-				$account2++;
-			}
-			else
-			{
-				$this->Flash->error(__('No pudo ser grabado el registro correspondiente al alumno cuyo ID es: ' . $studentTransactionGet->student_id));
-			}
-		}
-		$this->Flash->success(__('Total transacciones corregidas: ' . $account2));		
-	}
     public function scholarshipIndex()
     {
 		$this->loadModel('Schools');
@@ -3870,4 +3833,60 @@ class StudenttransactionsController extends AppController
         $this->set(compact('studenttransactions'));
         $this->set('_serialize', ['studenttransactions']);
     }
+
+// Función creada para corregir cualquier error en la tabla Studenttransactions
+	
+	public function correctTransaction()
+	{
+		$account1 = 0;
+		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+		
+		$initialDate = new Time();
+				
+		$initialDate
+			->year(2018)
+			->month(8)
+			->day(31)
+			->hour(0)
+			->minute(0)
+			->second(0);
+					
+		$studentTransactions = $this->Studenttransactions->find('all', 
+			['contain' => ['Students'],
+			'conditions' => 
+                [['Studenttransactions.transaction_type' => 'Mensualidad'], 
+				['SUBSTRING(Studenttransactions.transaction_description, 1, 3) !=' => 'Ago'],
+				['Studenttransactions.payment_date >' => $initialDate],
+				['Studenttransactions.amount >' => 0],
+				['Studenttransactions.paid_out' => 0],
+				['Students.student_condition' => 'Regular'],
+				['Students.balance' => '2018'],
+				['Students.discount' => '20']],
+			'order' => ['Students.surname' => 'ASC',
+				'Students.second_surname' => 'ASC',
+				'Students.first_name' => 'ASC',
+				'Students.second_name' => 'ASC',
+				'Studenttransactions.payment_date' => 'ASC']]); 
+				
+		foreach ($studentTransactions as $studentTransaction)
+        {		
+			$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
+								
+			$studentTransactionGet->original_amount = $studentTransactionGet->amount;
+			
+			$studentTransactionGet->paid_out = 1;
+			
+			$studentTransactionGet->partial_payment = 0;
+												
+			if (!($this->Studenttransactions->save($studentTransactionGet)))
+			{
+				$this->Flash->error(__('No se pudo actualizar la transacción identificada con el ID: ' . $studentTransactionGet->id . ' Correspondiente al estudiante: ' . $studentTransaction->student->full_name));
+			}  
+		}
+				
+        $this->set(compact('studentTransactions'));
+        $this->set('_serialize', ['studentTransactions']);
+	}	
 }

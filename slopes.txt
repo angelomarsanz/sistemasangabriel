@@ -94,3 +94,4 @@ Studenttransactions/index.ctp
 Studenttransactions/discount_quota80.ctp
 Studenttransactions/discount_quota50.ctp
 Studenttransactions/scholarship_index.ctp
+Studenttransactions/correct_transaction.ctp

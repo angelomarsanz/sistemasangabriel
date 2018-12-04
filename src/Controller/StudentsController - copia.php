@@ -802,17 +802,7 @@ class StudentsController extends AppController
             $this->Flash->error(__('El alumno no pudo ser becado, por favor intente nuevamente'));
         }
     }    
-    public function scholarshipIndex()
-    {
-        $query = $this->Students->find('all')
-            ->where(['scholarship' => 1])
-            ->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
 
-        $this->set('students', $this->paginate($query));
-
-        $this->set(compact('students'));
-        $this->set('_serialize', ['students']);
-    }
     public function deleteScholarship($studentId = null, $parentId = null)
     {
         $this->autoRender = false;
@@ -828,13 +818,13 @@ class StudentsController extends AppController
             $this->Flash->success(__('La beca fue eliminada exitosamente'));
             
             if ($parentId == null)
-                return $this->redirect(['action' => 'scholarshipIndex']);
+                return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']);
             else    
-                return $this->redirect(['action' => 'enableScholarship', $parentId]);
+                return $this->redirect(['controller' => 'Students', 'action' => 'enableScholarship', $parentId]);
         }
         else 
         {
-            $this->Flash->error(__('El alumno no pudo ser becado, por favor intente nuevamente'));
+            $this->Flash->error(__('La beca no pudo ser eliminada, por favor intente nuevamente'));
         }
     } 
 
