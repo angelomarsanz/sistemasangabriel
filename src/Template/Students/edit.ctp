@@ -1,5 +1,5 @@
 <?php
-    use Cake\I18n\Time;
+    use Cake\I18n\Time;	
 ?>
 <div class="row">
     <div class="col-md-6 col-md-offset-3">
@@ -85,8 +85,8 @@
                                 'Tía' => 'Tía', 
                                 'Otro vínculo familiar' => 'Otro vínculo familiar',
                                 'Ningún vínculo familiar' => 'Ningún vínculo familiar'], 'label' => 'Vínculo familiar del representante con el alumno: *']);
-                        ?>
-                        <br />
+						?>
+						<br />
                         <p><b>Datos del padre (modifique si no son los correctos):</b></p>
                         <br />
                         <div class="row">

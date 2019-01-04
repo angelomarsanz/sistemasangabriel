@@ -65,33 +65,22 @@ Con solo Bs.S se dejan 20 líneas antes de imprimir la copia
 Con ambas monedas (Bs.F y Bs.S) se dejan 16 líneas 
 Con solo Bs.S y Descuento/Recargo se dejan 18 líneas
 
---- Verificación alumno nuevo -
-StudentsController
-Students/addAdminb.ctp
-Students/viewConsult.ctp
-Parentsandguardians/addb.ctp
+-- Corrección Número de control --
+En enero 2019 se deben corregir los nùmeros
+de control de noviembre y diciembre 2018.
+Se saltaron 2 nùmeros.
+Tambièn a la factura 100191 de Ron Garcìa se
+le debe modificar el control a 82.431 porque
+la de Suarez Hernandes 100190 no la imprimieron
 
---- Cambiar familia estudiante
-StudentsController
-ParentsandguardiansController
-Students/view_student.ctp
-Students/search_family.ctp 
+1ra. Factura noviembre 99.353 - 81.595
+Última factura noviembre 100.024 - 82.265
+---
 
--- Mensualidad en dólares -- (Falta instalarlo en desarrollo)
-BillsController - ok
-RatesController - ok
-StudentsController - ok
-StudenttransactionsController - ok
-Bills/create_invoice.ctp - ok
-Bills/pdf/invoicepdf
-Element/menu.ctp
-Rates/index.ctp - ok
-Rates/add_dollar.ctp - ok
-Students/modify_transactions.ctp
-Students/register_new_students
-Students/list_monthly_payment.ctp
-Studenttransactions/index.ctp
-Studenttransactions/discount_quota80.ctp
-Studenttransactions/discount_quota50.ctp
-Studenttransactions/scholarship_index.ctp
-Studenttransactions/correct_transaction.ctp
+
+
+
+
+
+
+
