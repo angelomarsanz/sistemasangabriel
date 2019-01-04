@@ -248,16 +248,20 @@ class StudentsTable extends Table
     }
     
     public function beforeMarshal(Event $event, ArrayObject $data, ArrayObject $options)
-    {
-        if (isset($data['parentsandguardian_id'])) {
-            $family = explode(" ", $data['parentsandguardian_id']);
-            $parentsandguardians = TableRegistry::get('Parentsandguardians');
-            $query = $parentsandguardians->find()
-                ->select(['id'])
-                ->where(['family' => $family[0] . ' ' . $family[1]])
-                ->first();
-            if (isset($query['id']))
-                $data['parentsandguardian_id'] = $query['id']; 
+    {	
+        if (isset($data['parentsandguardian_id'])) 
+		{
+			if (!(is_numeric($data['parentsandguardian_id']))) 
+			{
+				$family = explode(" ", $data['parentsandguardian_id']);
+				$parentsandguardians = TableRegistry::get('Parentsandguardians');
+				$query = $parentsandguardians->find()
+					->select(['id'])
+					->where(['family' => $family[0] . ' ' . $family[1]])
+					->first();
+				if (isset($query['id']))
+					$data['parentsandguardian_id'] = $query['id'];
+			}
         }
     }    
 
@@ -282,9 +286,22 @@ class StudentsTable extends Table
     }
     public function findFamily(Query $query, array $options)
     {
-        $query->where([['Students.id >' => 1], ['Students.student_condition !=' => 'Eliminado']])
-			->contain(['Parentsandguardians', 'Sections'])
-			->order(['Parentsandguardians.family' => 'ASC',
+		if ($options['filtersReport'] == 'Regular') 
+		{
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 0]];
+		}
+		elseif ($options['filtersReport'] == 'Nuevo')
+		{
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 1]];
+		}
+		else
+		{
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition !=' => 'Eliminado']];
+		}
+		
+		if ($options['orderReport'] == 'Familia') 
+		{
+			$orderQuery = ['Parentsandguardians.family' => 'ASC',
 				'Parentsandguardians.surname' => 'ASC',
 				'Parentsandguardians.second_surname' => 'ASC',
 				'Parentsandguardians.first_name' => 'ASC',
@@ -292,7 +309,19 @@ class StudentsTable extends Table
 				'Students.surname' => 'ASC',
 				'Students.second_surname' => 'ASC',
 				'Students.first_name' => 'ASC',
-				'Students.second_name' => 'ASC']); 
+				'Students.second_name' => 'ASC'];
+		}
+		else
+		{
+			$orderQuery = ['Students.surname' => 'ASC',
+				'Students.second_surname' => 'ASC',
+				'Students.first_name' => 'ASC',
+				'Students.second_name' => 'ASC'];	
+		}
+		
+        $query->where($conditionQuery)
+			->contain(['Parentsandguardians', 'Sections'])
+			->order($orderQuery); 
 		
         $arrayResult = [];
         

@@ -29,17 +29,19 @@
 	}
     $(document).ready(function() 
     {
-        $('#parentsandguardian-id').autocomplete({
-        source:'<?php echo Router::url(array('controller' => 'Parentsandguardians', 'action' => 'findFamily')); ?>',
-        minLength: 3,
-		select: function( event, ui ) {
+        $('#parentsandguardian-id').autocomplete(
+		{
+			source:'<?php echo Router::url(array('controller' => 'Parentsandguardians', 'action' => 'findFamily')); ?>',
+			minLength: 3,
+			select: function( event, ui ) 
+			{
 				asignacion(ui.item.id, ui.item.value);
-		}	
+			}	
 		});
 		$('#guardar').click(function(e) 
         {
 			$('#parentsandguardian-id').css('color', 'white');
 			$("#parentsandguardian-id").val(idFamily);
-			}); 
+		}); 
     });
 </script>		
