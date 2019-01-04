@@ -249,7 +249,20 @@ class StudentsTable extends Table
     
     public function beforeMarshal(Event $event, ArrayObject $data, ArrayObject $options)
     {	
-
+        if (isset($data['parentsandguardian_id'])) 
+		{
+			if (!(is_numeric($data['parentsandguardian_id']))) 
+			{
+				$family = explode(" ", $data['parentsandguardian_id']);
+				$parentsandguardians = TableRegistry::get('Parentsandguardians');
+				$query = $parentsandguardians->find()
+					->select(['id'])
+					->where(['family' => $family[0] . ' ' . $family[1]])
+					->first();
+				if (isset($query['id']))
+					$data['parentsandguardian_id'] = $query['id'];
+			}
+        }
     }    
 
     public function findRegular(Query $query, array $options)
