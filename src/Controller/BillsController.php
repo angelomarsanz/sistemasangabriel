@@ -949,8 +949,15 @@ class BillsController extends AppController
                 {                   
                     $invoiceIndicator = 1; 
                 }
-				$accountControl++;
-				$newControl++;
+				if ($newControl == 0)
+				{
+					break;
+				}
+				else
+				{
+					$accountControl++;
+					$newControl++;					
+				}
             }        
     
             if ($invoiceIndicator == 0)
@@ -973,7 +980,6 @@ class BillsController extends AppController
 
             return $this->redirect(['controller' => 'Bills', 'action' => 'editControl']);
         }
-
     }
 
     public function adjustInvoiceTurn()

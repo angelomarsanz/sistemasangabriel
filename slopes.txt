@@ -66,21 +66,29 @@ Con ambas monedas (Bs.F y Bs.S) se dejan 16 líneas
 Con solo Bs.S y Descuento/Recargo se dejan 18 líneas
 
 -- Corrección Número de control --
-En enero 2019 se deben corregir los nùmeros
-de control de noviembre y diciembre 2018.
-Se saltaron 2 nùmeros.
-Tambièn a la factura 100191 de Ron Garcìa se
-le debe modificar el control a 82.431 porque
-la de Suarez Hernandes 100190 no la imprimieron
 
-1ra. Factura noviembre 99.353 - 81.595
-Última factura noviembre 100.024 - 82.265
+01/11/2018, No se imprimió la factura 
+99.359, se debe anular y refacturar
+
+99.358 - 81.600
+99.359 - 0
+99.360 - 81.601
+
+11/12/2018, no se imprimió la factura
+100.190, ya se anuló y refacturó
+el 14/12/2018
+
+100.189 - 82.430
+100.190 - 0
+100.191 - 82.431
+
+13/12/2018, No se imprimió la factura 
+100322, se debe anular y refacturar
+
+100.321 - 82.561
+100.322 - 0
+100.323 - 82.562
+
+Al 09/01/2019 estan los números
+de control correctamente en producción
 ---
-
-
-
-
-
-
-
-
