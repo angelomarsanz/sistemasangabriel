@@ -183,8 +183,12 @@ class StudenttransactionsController extends AppController
 
         $row = $lastRecord->first();
 
-        $quotaYear = date('Y') - 1;
-        
+		$this->loadModel('Schools');
+		
+		$school = $this->Schools->get(2);
+			
+		$quotaYear = $school->previous_year_registration;
+		       
         $nextYear = $quotaYear + 1;
         
         $studenttransaction = $this->Studenttransactions->newEntity();
@@ -338,8 +342,12 @@ class StudenttransactionsController extends AppController
 
         $row = $lastRecord->first();
 
-        $quotaYear = date('Y');
-        
+		$this->loadModel('Schools');
+		
+		$school = $this->Schools->get(2);
+			
+		$quotaYear = $school->current_year_registration;
+		        
         $nextYear = $quotaYear + 1;
         
         $studenttransaction = $this->Studenttransactions->newEntity();

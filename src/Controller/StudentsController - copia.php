@@ -551,6 +551,10 @@ class StudentsController extends AppController
 		$this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
+		
+	    $families = $this->Students->Parentsandguardians->find('list', ['keyField' => 'id', 'valueField' => 'family'])
+						->where(['id' > 1, 'family !=' => ''])
+						->order(['family' => 'ASC']);
 	
         $studentTransactions = new StudenttransactionsController();
 
@@ -599,10 +603,68 @@ class StudentsController extends AppController
                 $this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
             }
         }    
-        $this->set(compact('student', 'parentsandguardian', 'currentYear', 'lastYear', 'nextYear', 'sections'));
-        $this->set('_serialize', ['student', 'parentsandguardian', 'sections']);
+        $this->set(compact('student', 'parentsandguardian', 'currentYear', 'lastYear', 'nextYear', 'sections', 'families'));
+        $this->set('_serialize', ['student', 'parentsandguardian', 'sections', 'families']);
     }
     
+    public function reasignFamily($id = null, $controller = null, $action = null)
+    {		
+	    $families = $this->Students->Parentsandguardians->find('list', ['keyField' => 'id', 'valueField' => 'family'])
+						->where(['id' > 1, 'family !=' => ''])
+						->order(['family' => 'ASC']);
+	
+        $student = $this->Students->get($id);
+        
+        if ($this->request->is(['patch', 'post', 'put'])) 
+        {
+            $student = $this->Students->patchEntity($student, $this->request->data);
+            	            
+            if ($this->Students->save($student)) 
+            {		
+				$this->Flash->success(__('Los datos se actualizaron exitosamente'));
+				
+                if (isset($controller))
+                {
+                    return $this->redirect(['controller' => $controller, 'action' => $action, $id]);
+                }
+            }
+            else 
+            {
+                $this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
+            }
+        }    
+        $this->set(compact('student', 'families'));
+        $this->set('_serialize', ['student', 'families']);
+    }
+	
+    public function reasignFamilyInt($id = null, $controller = null, $action = null)
+    {				
+		$student = $this->Students->get($id);
+		
+		$parentsandguardian = $this->Students->Parentsandguardians->get($student->parentsandguardian_id);
+		
+		if ($this->request->is(['patch', 'post', 'put'])) 
+        {
+            $student = $this->Students->patchEntity($student, $this->request->data);
+            	            
+            if ($this->Students->save($student)) 
+            {		
+				$this->Flash->success(__('Los datos se actualizaron exitosamente'));
+				
+                if (isset($controller))
+                {
+                    return $this->redirect(['controller' => $controller, 'action' => $action, $id]);
+                }
+            }
+            else 
+            {
+                $this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
+            }
+        }    
+        $this->set(compact('student', 'parentsandguardian'));
+        $this->set('_serialize', ['student', 'parentsandguardian']);
+    }
+	
     public function editPhoto($id = null)
     {
         $student = $this->Students->get($id);

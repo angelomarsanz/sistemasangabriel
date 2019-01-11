@@ -92,3 +92,22 @@ el 14/12/2018
 Al 09/01/2019 estan los números
 de control correctamente en producción
 ---
+Renovación inscripción
+
+Cuando vaya a iniciar la renovación de inscripción de alumnos 
+regulares en junio o julio, se debe crear un campo
+adicional en la tabla school que se llamará
+"regular_renewal_year" con el valor "2019"
+y las acciones de StudenttransactionsController
+"createQuotasRegular" y "createQuotasRegularPrevious"
+deben tomar como referencia para la creación
+de las cuotas ese campo.
+
+---
+Nuevo período escolar
+
+En septiembre cuando inicie el nuevo año 
+escolar se deben actualizar los campos:
+current_year_registration - 2019
+previous_year_registration - 2018
+next_year_registration - 2020

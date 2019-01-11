@@ -121,7 +121,8 @@ class StudentsController extends AppController
 
             if ($resultParentsandguardians) 
             {
-                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['Students.student_condition' => 'Regular']]);
+                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['Students.student_condition' => 'Regular'],
+					['Students.section_id <' => 41]]);
                 $this->set('students', $this->paginate($query));
             }           
         }
@@ -2385,7 +2386,7 @@ class StudentsController extends AppController
 				$surname = $_POST['surname'];
 				$firstName = $_POST['firstName']; 
 								
-				$sameStudents = $this->Students->find('all')->where([['Students.surname' => $surname], ['Students.first_name' => $firstName]])
+				$sameStudents = $this->Students->find('all')->where([['Students.surname LIKE' => $surname . '%'], ['Students.first_name LIKE' => $firstName . '%']])
 					->contain(['Parentsandguardians'])
 					->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
 
