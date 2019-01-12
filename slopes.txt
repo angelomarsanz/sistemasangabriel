@@ -1,8 +1,13 @@
 Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar descuento
 
 ---
-
 Para los estatus recordar que hay un boolean - new_student en la tabla student
+Ese status se debe cambiar a "0" al iniciar el proceso de renovación a aquellos
+alumnos regulares que se inscribieron para el período escolar actual. Se debe
+exceptuar los regulares que se inscribieron a partir de febrero para el
+próximo período.
+Es decir un alumno regular tiene el status de new_student en "1" durante todo
+su primer año en el colegio.
 
 ---
 
@@ -39,11 +44,7 @@ Alumnos Retirados: Son aquellos que en el transcurso de su vida escolar se van d
 Eliminar memoria de selección en reportes maestros (Listo)
 
 -- 
-Balance - nro. de hermanos
 
-Students/family_students
-
--- 
 Arreglo factura septiembre 2018
 1ra. Factura 06/09/2018 - 98278 (80519)
 Factura servicio educativo - 25/09/2018 98506 (Se le colocó el indicador de recibo)
@@ -58,14 +59,6 @@ Factura 98677 - Control 80919 (Alemany) Anulada
 Factura 98678 - Control 80921 (Lamuño)
 Factura 98679 - Control 80920 (Hidalgo)
 Factura 98680 - Control 80922 (Alemany) 
-
---- Salto lìneas factura
-
-Con solo Bs.S se dejan 20 líneas antes de imprimir la copia
-Con ambas monedas (Bs.F y Bs.S) se dejan 16 líneas 
-Con solo Bs.S y Descuento/Recargo se dejan 18 líneas
-
--- Corrección Número de control --
 
 01/11/2018, No se imprimió la factura 
 99.359, se debe anular y refacturar
@@ -91,23 +84,98 @@ el 14/12/2018
 
 Al 09/01/2019 estan los números
 de control correctamente en producción
+
+--- Salto lìneas factura
+
+Con solo Bs.S se dejan 20 líneas antes de imprimir la copia
+Con ambas monedas (Bs.F y Bs.S) se dejan 16 líneas 
+Con solo Bs.S y Descuento/Recargo se dejan 18 líneas
+
 ---
 Renovación inscripción
 
 Cuando vaya a iniciar la renovación de inscripción de alumnos 
-regulares en junio o julio, se debe crear un campo
+regulares en junio o julio 2019, se debe crear un campo
 adicional en la tabla school que se llamará
 "regular_renewal_year" con el valor "2019"
-y las acciones de StudenttransactionsController
-"createQuotasRegular" y "createQuotasRegularPrevious"
-deben tomar como referencia para la creación
-de las cuotas ese campo.
+y se deben modificar las siguientes acciones para que
+la creación de las cuotas tomen como referencia 
+de "año" el valor de ese campo y no el de "current_year_registration":
 
+De StudentController:
+edit
+
+De StudenttransactionsController:
+"createQuotasRegular" y "createQuotasRegularPrevious"
+
+Además la acción "assignSection" se debe modificar para
+comparar el campo "current_year_registration" con 
+"regular_renewal_year" y si son iguales dar acceso
+a asignar secciones, de lo contrario enviar mensaje
+que se debe ejecutar al inicio del año escolar */
 ---
 Nuevo período escolar
 
 En septiembre cuando inicie el nuevo año 
-escolar se deben actualizar los campos:
+escolar, antes de ejecutar "Asignar sección" se deben
+actualizar los campos:
 current_year_registration - 2019
 previous_year_registration - 2018
 next_year_registration - 2020
+
+- Se debe modificar el sistema para que el campo "balance" se actualice
+unicamente cuando se haga la cobranza de la matrìcula de ese año, no
+cuando el padre actualice los datos
+
+-------
+Arreglo campo "balance" en Students
+Estadísticas iniciales:
+
+1449 regs Students
+number_of_brothers
+- 2016 - 1210
+- 2017 - 160
+- 2018 - 79
+
+1208 regs Studenttransactions Matrícula 2016
+- 1207 regs abonado == 0
+- 1 reg abonado > 0
+
+1291 regs Studenttransactions Matrícula 2017
+- 153 regs abonado == 0
+- 1138 regs abonado > 0
+
+939 regs Studenttransactions Matrícula 2018
+- 39 regs abonado == 0
+- 900 reg abonado > 0
+
+Fase 1:
+1 - Quitar actualización campos "number_of_brothers" y "balance" en la
+acción "edit" de StudentController
+2 - Actualizar "balance" con el año que corresponda, cada vez que se haga un abono a cualquier transacción
+de tipo Matrícula
+3 - Después de actualizar "balance" en el paso 2, Si "number_of_brothers" == 0 entonces
+actualizar "number_of_brothers" con el valor de "balance" de lo contrario no actualizar.
+
+Fase 2:
+1 - Leer Students y asignar 0 a "balance" en todos los registros
+2 - Leer Studenttransactions, seleccionar Matrícula 2017 y abonado > 0 y
+actualizar y asignar 2017 a balance
+3 - Leer Studenttransactions, seleccionar Matrícula 2018 y abonado > 0 y
+actualizar y asignar 2018 a balance
+4 - Verificar si hay algún registro en Students que number_of_brothers sea mayor
+a "balance" (no debería haber)
+5 - Verificar si quedó algún registro de Students con valor "0" en el campo
+"balance" (Si deben haber, deberían ser: 153 + 39 = 198)
+6 - Asignar "0" a "number_of_brothers" a aquellos registro que tengan "0"
+en "balance"
+7 - Emitir un reporte con los alumnos con condición "Regular" cuyo valor en
+el campo balance sea distinto de "2018" esos serán los que Lorelys
+debe hacerle seguimiento que deberían ser: 153 + 39 = 198
+8 - Arreglar o reciclar el reporte "Alumnos egresados"
+
+--- 
+
+En Students.defaulters.ctp revisar como se hace la
+selecciòn porque hay una diferencia de 4 alumnos
+en comparaciòn con "asignar secciòn" y "familias con tres hijos"

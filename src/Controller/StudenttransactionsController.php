@@ -1271,6 +1271,11 @@ class StudenttransactionsController extends AppController
     }
     public function assignSection()
     {
+		/* Antes de iniciar el proceso de renovación de matrícula 2019-2020 se debe crear
+		en Students el campo "regular_renewal_year" y comparar contra "current_year_registration"
+		si son iguales dar acceso a asignar secciones, de lo contrario enviar mensaje que se debe ejecutar al
+		inicio del año escolar */
+		
         if ($this->request->is('post'))
         {
             if (isset($_POST['level']))
@@ -1341,7 +1346,7 @@ class StudenttransactionsController extends AppController
 					'Students.level_of_study'])
 				->contain(['Students'])
 				->where([['Studenttransactions.transaction_description' => $transactionDescription],
-					['Studenttransactions.amount < Studenttransactions.original_amount'],
+					['Studenttransactions.amount >' => 0],
 					['Students.level_of_study IS NOT NULL'], 
 					['Students.student_condition' => 'Regular']]);
 	
@@ -1365,7 +1370,7 @@ class StudenttransactionsController extends AppController
 					'Sections.section'])
 				->contain(['Students' => ['Sections']])
 				->where([['Studenttransactions.transaction_description' => $transactionDescription],
-					['Studenttransactions.amount < Studenttransactions.original_amount'],
+					['Studenttransactions.amount >' => 0],
 					['Students.level_of_study' => $level],
 					['Students.student_condition' => 'Regular']])
 				->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
