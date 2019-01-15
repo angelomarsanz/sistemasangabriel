@@ -131,23 +131,22 @@ cuando el padre actualice los datos
 Arreglo campo "balance" en Students
 Estadísticas iniciales:
 
-1449 regs Students
-number_of_brothers
+1449 regs Students number_of_brothers
 - 2016 - 1210
 - 2017 - 160
 - 2018 - 79
 
 1208 regs Studenttransactions Matrícula 2016
-- 1207 regs abonado == 0
 - 1 reg abonado > 0
+- 1207 regs abonado == 0
 
 1291 regs Studenttransactions Matrícula 2017
-- 153 regs abonado == 0
 - 1138 regs abonado > 0
+- 153 regs abonado == 0
 
 939 regs Studenttransactions Matrícula 2018
-- 39 regs abonado == 0
 - 900 reg abonado > 0
+- 39 regs abonado == 0
 
 Fase 1:
 1 - Quitar actualización campos "number_of_brothers" y "balance" en la
@@ -158,21 +157,22 @@ de tipo Matrícula
 actualizar "number_of_brothers" con el valor de "balance" de lo contrario no actualizar.
 
 Fase 2:
-1 - Leer Students y asignar 0 a "balance" en todos los registros
+1 - Leer Students y asignar 0 a "balance" en todos los registros - 1449 regs - 1449 regs
 2 - Leer Studenttransactions, seleccionar Matrícula 2017 y abonado > 0 y
-actualizar y asignar 2017 a balance
+actualizar y asignar 2017 a balance - 1138 regs - 1138 regs
 3 - Leer Studenttransactions, seleccionar Matrícula 2018 y abonado > 0 y
-actualizar y asignar 2018 a balance
-4 - Verificar si hay algún registro en Students que number_of_brothers sea mayor
-a "balance" (no debería haber)
-5 - Verificar si quedó algún registro de Students con valor "0" en el campo
-"balance" (Si deben haber, deberían ser: 153 + 39 = 198)
-6 - Asignar "0" a "number_of_brothers" a aquellos registro que tengan "0"
-en "balance"
-7 - Emitir un reporte con los alumnos con condición "Regular" cuyo valor en
+actualizar y asignar 2018 a balance - 900 regs - 900 regs
+4 - De los registros con balance mayor a cero, verificar si hay alguno donde
+number_of_brothers sea mayor a "balance" (no debería haber) - 0 regs - 0 regs
+5 - Verificar cuantos registros quedaron con cero en balance que
+corresponden a:
+2016 - 203 regs - 203 regs
+2017 - 27 regs - 27 regs 
+2018 - 18 regs - 18 regs 
+6 - Emitir un reporte con los alumnos con condición "Regular" cuyo valor en
 el campo balance sea distinto de "2018" esos serán los que Lorelys
-debe hacerle seguimiento que deberían ser: 153 + 39 = 198
-8 - Arreglar o reciclar el reporte "Alumnos egresados"
+debe hacerle seguimiento que deberían ser: 179 regs
+8 - Arreglar, reciclar o desincorporar el reporte "Alumnos egresados"
 
 --- 
 

@@ -124,6 +124,25 @@ class StudenttransactionsController extends AppController
         {
             $this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
         }
+
+		if ($studenttransaction->transaction_type == 'Matrícula')
+		{
+			$year = substr($studenttransaction->transaction_description, 11, 4);
+			
+			$student = $this->Studenttransactions->Students->get($studenttransaction->student_id);
+
+			if ($student->number_of_brothers == 0)
+			{
+				$student->number_of_brothers = $year;
+			}
+			
+			$student->balance = $year;
+			
+			if (!($this->Studenttransactions->Students->save($student)))
+			{
+				$this->Flash->error(__('Los datos del alumno no pudieron ser actualizados, vuelva a intentar.'));
+			}	
+		}
         return;
     }
 
@@ -2843,7 +2862,7 @@ class StudenttransactionsController extends AppController
 	}
     public function modifyTransactions()
     {
-		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => [['transaction_type' => 'Mensualidad']]]);
+		$studentTransactions = $this->Studenttransactions->find('all', ['conditions' => [['transaction_description' => 'Matrícula 2018']]]);
 	
 		$account1 = $studentTransactions->count();
 		
@@ -2851,23 +2870,18 @@ class StudenttransactionsController extends AppController
 	
 		foreach ($studentTransactions as $studentTransaction)
         {		
-			$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
-						
-			$month = substr($studentTransactionGet->transaction_description, 0, 3);
-				
-			$year = substr($studentTransactionGet->transaction_description, 4, 4);
-				
-			$numberOfTheMonth = $this->numberMonth($month);
-		
-			$studentTransactionGet->payment_date = $year . '-' . $numberOfTheMonth . '-01'; 
-			
-			if ($this->Studenttransactions->save($studentTransactionGet))
+			if ($studentTransaction->amount > 0)
 			{
-				$account2++;
-			}
-			else
-			{
-				$this->Flash->error(__('No pudo ser grabada la matrícula correspondiente al alumno cuyo ID es: ' . $studentTransactionGet->student_id));
+				$student = $this->Studenttransactions->Students->get($studentTransaction->student_id);
+				$student->balance = substr($studentTransaction->transaction_description, 11, 4);
+				if ($this->Studenttransactions->Students->save($student))
+				{
+					$account2++;
+				}
+				else
+				{
+					$this->Flash->error(__('No pudo ser grabada la matrícula correspondiente al alumno cuyo ID es: ' . $studentTransactionGet->student_id));
+				}
 			}
 		}
 

@@ -121,7 +121,8 @@ class StudentsController extends AppController
 
             if ($resultParentsandguardians) 
             {
-                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['Students.student_condition' => 'Regular']]);
+                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['Students.student_condition' => 'Regular'],
+					['Students.section_id <' => 41]]);
                 $this->set('students', $this->paginate($query));
             }           
         }
@@ -471,26 +472,19 @@ class StudentsController extends AppController
             $student->creative_user = $this->Auth->user('username');
             $student->student_migration = 0;
             $student->mi_id = 0;
-			
+
+			$student->number_of_brothers = 0;
+			$student->balance = 0;			
+
 			$incomeType = $student->number_of_brothers;
 			
-			if ($incomeType == 0)
+			if ($incomeType < 2)
 			{
 				$student->new_student = 1;
-				$student->number_of_brothers = $lastYear; // Año escolar para el que se inscribió la primera vez
-				$student->balance = $lastYear; // Año escolar para el que se inscribió la última vez
-			}
-			elseif ($incomeType == 1)
-			{
-				$student->new_student = 1;
-				$student->number_of_brothers = $currentYear; // Año escolar para el que se inscribió la primera vez
-				$student->balance = $currentYear; // Año escolar para el que se inscribió la última vez				
 			}
 			else
 			{
-				$student->new_student = 0;
-				$student->number_of_brothers = $lastYear; // Año escolar para el que se inscribió la primera vez
-				$student->balance = $lastYear; // Año escolar para el que se inscribió la última vez			
+				$student->new_student = 0;		
 			}
 				
             if ($this->Students->save($student)) 
@@ -569,7 +563,6 @@ class StudentsController extends AppController
             $student = $this->Students->patchEntity($student, $this->request->data);
             
             $student->brothers_in_school = 0;
-			$student->balance = $school->current_year_registration; // Año escolar para el que se inscribió la última vez				
 		            
             if ($this->Students->save($student)) 
             {
@@ -2329,36 +2322,14 @@ class StudentsController extends AppController
 	{
 		$accountRecords = 0;
 		
-		$query = $this->Students->find('all')->where(['id >' => 1]);
+		$query = $this->Students->find('all');
 		
 		foreach ($query as $querys)
 		{
 			$student = $this->Students->get($querys->id);
 			
-			$student->first_name = trim($student->first_name);			
-			$student->second_name = trim($student->second_name);
-			$student->surname = trim($student->surname);
-			$student->second_surname = trim($student->second_surname);
+			$student->balance = 0;			
 
-			$student->place_of_birth = trim($student->place_of_birth);
-			$student->country_of_birth = trim($student->country_of_birth);
-			$student->email = trim($student->email);	
-			$student->address = trim($student->address);
-			
-			$student->first_name_father = trim($student->first_name_father);
-			$student->second_name_father = trim($student->second_name_father);
-			$student->surname_father = trim($student->surname_father);
-			$student->second_surname_father = trim($student->second_surname_father);
-
-			$student->first_name_mother = trim($student->first_name_mother);
-			$student->second_name_mother = trim($student->second_name_mother);		
-			$student->surname_mother = trim($student->surname_mother);			
-			$student->second_surname_mother = trim($student->second_surname_mother);
-			
-			$student->previous_school = trim($student->previous_school);
-			$student->student_illnesses = trim($student->student_illnesses);
-			$student->observations = trim($student->observations);
-			
             if (!($this->Students->save($student))) 
             {
                 $this->Flash->error(__('No pudo ser actualizado el registro Nro. ' . $student->id . ' Nombre: ' . $student->full_name));
@@ -2385,7 +2356,7 @@ class StudentsController extends AppController
 				$surname = $_POST['surname'];
 				$firstName = $_POST['firstName']; 
 								
-				$sameStudents = $this->Students->find('all')->where([['Students.surname' => $surname], ['Students.first_name' => $firstName]])
+				$sameStudents = $this->Students->find('all')->where([['Students.surname LIKE' => $surname . '%'], ['Students.first_name LIKE' => $firstName . '%']])
 					->contain(['Parentsandguardians'])
 					->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
 
@@ -2446,4 +2417,53 @@ class StudentsController extends AppController
             }
         }    
     }
+	public function verifyColumn()
+	{
+		$accountRecords = 0;
+		
+		$students = $this->Students->find('all')->where(['id >' => 1]);
+		
+		foreach ($students as $student)
+		{
+			if ($student->balance > 0)
+			{
+				if ($student->number_of_brothers > $student->balance)
+				{
+					$this->Flash->error(__('En el estudiante: ' . $student->full_name . ' el campo number_of_brothers es mayor a balance'));
+					$accountRecords++;
+				}
+			}
+		}
+		$this->Flash->success(__('Total registros con columna number_of_brothers mayor a balance: ' . $accountRecords));
+	}
+	public function verifyColumn2()
+	{
+		$account2016 = 0;
+		$account2017 = 0;
+		$account2018 = 0;
+		
+		$students = $this->Students->find('all')->where(['id >' => 1]);
+		
+		foreach ($students as $student)
+		{
+			if ($student->balance == 0)
+			{
+				if ($student->number_of_brothers == 2016)
+				{
+					$account2016++;
+				}
+				elseif ($student->number_of_brothers == 2017)
+				{
+					$account2017++;
+				}
+				else
+				{
+					$account2018++;
+				}
+			}
+		}
+		$this->Flash->success(__('Total registros año 2016: ' . $account2016));
+		$this->Flash->success(__('Total registros año 2017: ' . $account2017));
+		$this->Flash->success(__('Total registros año 2018: ' . $account2018));
+	}
 }

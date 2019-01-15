@@ -304,7 +304,6 @@ class BillsController extends AppController
             $this->headboard = $_POST['headboard']; 
             $transactions = json_decode($_POST['studentTransactions']);
             $payments = json_decode($_POST['paymentsMade']);
-			$quotaAdjustment = $_POST['quotaAdjustment'];
             $_POST = [];
 
             $billNumber = $this->add();
@@ -322,7 +321,7 @@ class BillsController extends AppController
 
                     foreach ($transactions as $transaction) 
                     {
-                        $Studenttransactions->edit($transaction->transactionIdentifier, $billNumber, $transaction->amountPayable, $amountMonthly, $dollarExchangeRate, $quotaAdjustment);
+                        $Studenttransactions->edit($transaction->transactionIdentifier, $billNumber, $transaction->originalAmount, $transaction->amountPayable);
 
                         $Concepts->add($billId, $transaction->studentName, $transaction->transactionIdentifier, 
                             $transaction->monthlyPayment, $transaction->amountPayable, $transaction->observation);
@@ -950,8 +949,15 @@ class BillsController extends AppController
                 {                   
                     $invoiceIndicator = 1; 
                 }
-				$accountControl++;
-				$newControl++;
+				if ($newControl == 0)
+				{
+					break;
+				}
+				else
+				{
+					$accountControl++;
+					$newControl++;					
+				}
             }        
     
             if ($invoiceIndicator == 0)
@@ -974,7 +980,6 @@ class BillsController extends AppController
 
             return $this->redirect(['controller' => 'Bills', 'action' => 'editControl']);
         }
-
     }
 
     public function adjustInvoiceTurn()

@@ -183,8 +183,12 @@ class StudenttransactionsController extends AppController
 
         $row = $lastRecord->first();
 
-        $quotaYear = date('Y') - 1;
-        
+		$this->loadModel('Schools');
+		
+		$school = $this->Schools->get(2);
+			
+		$quotaYear = $school->previous_year_registration;
+		       
         $nextYear = $quotaYear + 1;
         
         $studenttransaction = $this->Studenttransactions->newEntity();
@@ -338,8 +342,12 @@ class StudenttransactionsController extends AppController
 
         $row = $lastRecord->first();
 
-        $quotaYear = date('Y');
-        
+		$this->loadModel('Schools');
+		
+		$school = $this->Schools->get(2);
+			
+		$quotaYear = $school->current_year_registration;
+		        
         $nextYear = $quotaYear + 1;
         
         $studenttransaction = $this->Studenttransactions->newEntity();
@@ -1263,6 +1271,11 @@ class StudenttransactionsController extends AppController
     }
     public function assignSection()
     {
+		/* Antes de iniciar el proceso de renovación de matrícula 2019-2020 se debe crear
+		en Students el campo "regular_renewal_year" y comparar contra "current_year_registration"
+		si son iguales dar acceso a asignar secciones, de lo contrario enviar mensaje que se debe ejecutar al
+		inicio del año escolar */
+		
         if ($this->request->is('post'))
         {
             if (isset($_POST['level']))
@@ -1333,7 +1346,7 @@ class StudenttransactionsController extends AppController
 					'Students.level_of_study'])
 				->contain(['Students'])
 				->where([['Studenttransactions.transaction_description' => $transactionDescription],
-					['Studenttransactions.amount < Studenttransactions.original_amount'],
+					['Studenttransactions.amount >' => 0],
 					['Students.level_of_study IS NOT NULL'], 
 					['Students.student_condition' => 'Regular']]);
 	
@@ -1357,7 +1370,7 @@ class StudenttransactionsController extends AppController
 					'Sections.section'])
 				->contain(['Students' => ['Sections']])
 				->where([['Studenttransactions.transaction_description' => $transactionDescription],
-					['Studenttransactions.amount < Studenttransactions.original_amount'],
+					['Studenttransactions.amount >' => 0],
 					['Students.level_of_study' => $level],
 					['Students.student_condition' => 'Regular']])
 				->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
@@ -3839,7 +3852,6 @@ class StudenttransactionsController extends AppController
 	public function correctTransaction()
 	{
 		$account1 = 0;
-		$account2 = 0;
 		
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
 		date_default_timezone_set('America/Caracas');
@@ -3859,39 +3871,34 @@ class StudenttransactionsController extends AppController
 			'conditions' => 
                 [['Studenttransactions.transaction_type' => 'Mensualidad'], 
 				['SUBSTRING(Studenttransactions.transaction_description, 1, 3) !=' => 'Ago'],
-				['Studenttransactions.payment_date >' => $initialDate]
+				['Studenttransactions.payment_date >' => $initialDate],
 				['Studenttransactions.amount >' => 0],
 				['Studenttransactions.paid_out' => 0],
 				['Students.student_condition' => 'Regular'],
 				['Students.balance' => '2018'],
-				['Students.discount' => '20']]]); 
-	
-		$account1 = $studentTransactions->count();
-		
-		$this->Flash->success(__('Total transacciones seleccionadas: ' . $account1));
-	
+				['Students.discount' => '20']],
+			'order' => ['Students.surname' => 'ASC',
+				'Students.second_surname' => 'ASC',
+				'Students.first_name' => 'ASC',
+				'Students.second_name' => 'ASC',
+				'Studenttransactions.payment_date' => 'ASC']]); 
+				
 		foreach ($studentTransactions as $studentTransaction)
         {		
 			$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
 								
-			$studentTransactionGet->amount_original = $studentTransactionGet->amount;
+			$studentTransactionGet->original_amount = $studentTransactionGet->amount;
 			
 			$studentTransactionGet->paid_out = 1;
 			
-			$studentTransactionGet->partial_payment;
+			$studentTransactionGet->partial_payment = 0;
 												
-			/* if ($this->Studenttransactions->save($studentTransactionGet))
-			{ 
-				$account2++;
-			}
-			else
+			if (!($this->Studenttransactions->save($studentTransactionGet)))
 			{
-				$this->Flash->error(__('No pudo ser grabado el registro correspondiente al alumno cuyo ID es: ' . $studentTransactionGet->student_id));
-			} */
-						
+				$this->Flash->error(__('No se pudo actualizar la transacción identificada con el ID: ' . $studentTransactionGet->id . ' Correspondiente al estudiante: ' . $studentTransaction->student->full_name));
+			}  
 		}
-		$this->Flash->success(__('Total transacciones corregidas: ' . $account2));
-		
+				
         $this->set(compact('studentTransactions'));
         $this->set('_serialize', ['studentTransactions']);
 	}	
