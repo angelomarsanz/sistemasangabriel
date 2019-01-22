@@ -858,7 +858,24 @@ class BillsController extends AppController
 
     public function editControl()
     {
-        
+		$billNumber = 0;
+		
+        if ($this->request->is('post')) 
+        {
+			if (isset($_POST['turn']))
+			{
+				$firstRecord = $this->Bills->find('all', ['conditions' => ['turn' => $_POST['turn']],
+                'order' => ['created' => 'ASC'] ]);
+
+				$row = $firstRecord->first();	
+
+				$billNumber = $row->bill_number;
+				
+				$this->Flash->error(__('Estimado usuario, se saltó uno o más números de control en las facturas. Por favor compare las facturas contra las impresas en papel fiscal, identifique en cual de ellas se saltó el número y haga los correctivos necesarios'));
+			}
+		}
+        $this->set(compact('billNumber'));
+        $this->set('_serialize', ['billNumber']);
     }
     
     public function editControlTurn()

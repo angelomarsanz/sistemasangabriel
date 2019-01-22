@@ -102,11 +102,10 @@ class TurnsController extends AppController
                 {
                     return $this->redirect(['controller' => 'bills', 'action' => 'annulInvoice', $result[0]['id'], $result[0]['turn']]);
                 }
-                else
+				else
                 {
                     return $this->redirect(['controller' => 'bills', 'action' => 'createInvoice', $menuOption, $result[0]['id'], $result[0]['turn']]);
                 }
-
             }
             else
             {

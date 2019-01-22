@@ -46,7 +46,7 @@
                                     </table>
                                 </div>
                                 <br />
-                                <button id="save-invoices" class="btn btn-success" disabled>Guardar</button>
+                                <button id="save-invoices" class="btn btn-success" disabled>Modificar</button>
                             </div>
                         </div>
                     </div>
@@ -72,7 +72,7 @@
 
             $("#messages").html("Por favor espere...");
 
-            $.post('/sistemasangabriel/bills/searchInvoice', 
+            $.post('<?php echo Router::url(["controller" => "Bills", "action" => "searchInvoice"]); ?>', 
                 { "invoiceFrom" : $('#invoice-from').val() }, null, "json")          
 
             .done(function(response) 
@@ -109,11 +109,11 @@
                         else if (userkey == 'control_number')
 							if (swFrom == 0)
 							{
-								output += "<td><input type='number' disabled id=in" + idBill + " name='" + idBill + "' value=" + uservalue + "></td>";								
+								output += "<td><input type='number' disabled class='control-number' id=in" + idBill + " name='" + idBill + "' value=" + uservalue + "></td>";								
 							}
 							else
 							{
-								output += "<td><input type='number' id=in" + idBill + " name='" + idBill + "' value=" + uservalue + "></td>";
+								output += "<td><input type='number' class='control-number' id=in" + idBill + " name='" + idBill + "' value=" + uservalue + "></td>";
 							}
                         else if (userkey == 'amount_paid')
                         {
@@ -160,10 +160,33 @@
             
             var stringBills = JSON.stringify(tbBills);
                                 
-            $.redirect('/sistemasangabriel/bills/adjustInvoice', {controlNumber : stringBills}); 
+            $.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "adjustInvoice"]); ?>', {controlNumber : stringBills}); 
     
         });
+		
+        $('#invoice-lines').on("keydown", ".control-number", function(e) 
+        {
+            if (e.which == 13)
+			{
+				var transactionCounter = 0;
 
+				e.preventDefault();
+				
+				$("#invoice-lines input").each(function (index) 
+				{
+					tbBills[transactionCounter] = new Object();
+					tbBills[transactionCounter].idBill = $(this).attr('id').substring(2);
+					tbBills[transactionCounter].controlNumber = $(this).val();
+				
+					transactionCounter++;
+				});
+				
+				var stringBills = JSON.stringify(tbBills);
+									
+				$.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "adjustInvoice"]); ?>', {controlNumber : stringBills});
+			}
+		});
+			
 // fin funciones Jquery
 
     }); 

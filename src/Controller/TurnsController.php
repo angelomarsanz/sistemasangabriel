@@ -197,6 +197,9 @@ class TurnsController extends AppController
 
     public function edit($id = null)
     {
+		$lastNumber = 0;
+		$lastControl = 0;
+
         $payment = new PaymentsController();
         
         $turn = $this->Turns->get($id);
@@ -206,9 +209,9 @@ class TurnsController extends AppController
         $totalAmounts = $turn->initial_cash;
         
         $receipt = 0;
-        
+		        
         foreach ($paymentsTurn as $paymentsTurns) 
-        {
+        {			
             if ($paymentsTurns->fiscal == 0)
             {
                 $receipt = 1;
@@ -249,8 +252,25 @@ class TurnsController extends AppController
             }
         }
 
-        $this->set(compact('turn', 'paymentsTurn', 'totalAmounts', 'receipt'));
-        $this->set('_serialize', ['turn', 'paymentsTurn', 'totalAmounts', 'receipt']);
+		$accountPayment = $paymentsTurn->count();
+		
+		if ($accountPayment > 0)
+		{
+			$this->loadModel('Bills');
+		
+            $lastRecord = $this->Bills->find('all', ['conditions' => ['turn' => $id],
+                'order' => ['created' => 'DESC'] ]);
+
+            $row = $lastRecord->first();
+
+			$lastNumber = $row->bill_number;
+			$lastControl = $row->control_number;
+			
+//			$this->Flash->success(__('Última factura: Turno ' . $id . ' idBill ' . $row->id . ' Nro. Factura ' . $row->bill_number . ' Control ' . $row->control_number));
+			}
+			
+        $this->set(compact('turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl'));
+        $this->set('_serialize', ['turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl']);
     }
     
     function closeTurn()

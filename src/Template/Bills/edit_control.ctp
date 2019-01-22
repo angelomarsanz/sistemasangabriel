@@ -6,13 +6,17 @@
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><b>Modificar número de control a la(s) factura(s): </b></h3>
+					<?php if ($billNumber == 0): ?>
+						<h3><b>Modificar número de control a la(s) factura(s): </b></h3>
+					<?php endif; ?>
                 </div>
             </div>
             <div class="row panel panel-default" style="padding: 0% 1% 0% 1%;">
                 <br />
-                <p><b>Por favor escriba el número de la factura a partir de la cual se modificará el número de control: </b></p>
-                <div class="col-md-2">
+				<?php if ($billNumber == 0): ?>
+					<p><b>Por favor escriba el número de la factura a partir de la cual se modificará el número de control: </b></p>
+                <?php endif; ?>
+				<div class="col-md-2">
                     <br />
                     <label for="invoice-from">Primera factura: </label>
                     <br />
@@ -59,88 +63,103 @@
 //  Declaración de variables
 
     var tbBills = new Array();
+	
+// Funciones Javascript
 
+	function searchInvoices()
+	{
+		var decAmount = 0.00;
+		
+		if ('<?= $billNumber ?>' == 0)
+		{
+			$("#messages").html("Por favor espere...");
+		}
+		
+		$.post('<?php echo Router::url(["controller" => "Bills", "action" => "searchInvoice"]); ?>', 
+			{ "invoiceFrom" : $('#invoice-from').val() }, null, "json")          
+
+		.done(function(response) 
+		{
+			if (response.success) 
+			{
+				if ('<?= $billNumber ?>' == 0)
+				{
+					$("#messages").html(response.data.message);
+				}
+				var output = ''; 
+				var idBill = '';
+				var swFrom = 0;
+
+				$.each(response.data.invoices, function(key, value) 
+				{
+					$.each(value, function(userkey, uservalue) 
+					{
+					if (userkey == 'id')
+					{
+						output += "<tr id=inv" + uservalue + " class='invoice'>";
+						idBill = uservalue;     
+					}
+					else if (userkey == 'bill_number')
+					{
+						if (uservalue == $('#invoice-from').val())
+						{
+							swFrom = 1;
+						}
+						else
+						{
+							swFrom = 0;
+						}
+						output += "<td>" + uservalue + "</td>";
+					}
+					else if (userkey == 'control_number')
+						if (swFrom == 0)
+						{
+							output += "<td><input type='number' disabled class='control-number' id=in" + idBill + " name='" + idBill + "' value=" + uservalue + "></td>";								
+						}
+						else
+						{
+							output += "<td><input type='number' class='control-number' id=in" + idBill + " name='" + idBill + "' value=" + uservalue + "></td>";
+						}
+					else if (userkey == 'amount_paid')
+					{
+						decAmount = parseFloat(uservalue).toFixed(2);
+					
+						output += "<td style='text-align: right;'>" + decAmount + "</td></tr>";
+					}
+					else
+					{
+						output += "<td>" + uservalue + "</td>";
+					}
+					});
+				});
+				$("#invoice-lines").html(" ");
+				$("#invoice-lines").html(output);
+				$('#save-invoices').attr('disabled', false);
+			} 
+			else 
+			{
+				$("#messages").html(response.data.message);
+				$("#invoice-lines").html(" ");
+			}
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) 
+		{
+			$("#messages").html("Algo ha fallado, los números de factura no fueron encontrados: " + textStatus);
+		});
+	}
 // Funciones Jquery
 
     $(document).ready(function() 
     {       
+		if ('<?= $billNumber ?>' > 0)
+		{
+			$('#invoice-from').val('<?= $billNumber ?>');
+			searchInvoices();
+		}
         $('#search-invoices').click(function(e) 
         {
-            var decAmount = 0.00;
-            
-            e.preventDefault();
-
-            $("#messages").html("Por favor espere...");
-
-            $.post('<?php echo Router::url(["controller" => "Bills", "action" => "searchInvoice"]); ?>', 
-                { "invoiceFrom" : $('#invoice-from').val() }, null, "json")          
-
-            .done(function(response) 
-            {
-                if (response.success) 
-                {
-                    $("#messages").html(response.data.message);
-
-                    var output = ''; 
-                    var idBill = '';
-					var swFrom = 0;
-
-                    $.each(response.data.invoices, function(key, value) 
-                    {
-                        $.each(value, function(userkey, uservalue) 
-                        {
-                        if (userkey == 'id')
-                        {
-                            output += "<tr id=inv" + uservalue + " class='invoice'>";
-                            idBill = uservalue;     
-                        }
-                        else if (userkey == 'bill_number')
-						{
-							if (uservalue == $('#invoice-from').val())
-							{
-								swFrom = 1;
-							}
-							else
-							{
-								swFrom = 0;
-							}
-							output += "<td>" + uservalue + "</td>";
-						}
-                        else if (userkey == 'control_number')
-							if (swFrom == 0)
-							{
-								output += "<td><input type='number' disabled class='control-number' id=in" + idBill + " name='" + idBill + "' value=" + uservalue + "></td>";								
-							}
-							else
-							{
-								output += "<td><input type='number' class='control-number' id=in" + idBill + " name='" + idBill + "' value=" + uservalue + "></td>";
-							}
-                        else if (userkey == 'amount_paid')
-                        {
-                            decAmount = parseFloat(uservalue).toFixed(2);
-                        
-                            output += "<td style='text-align: right;'>" + decAmount + "</td></tr>";
-                        }
-						else
-						{
-                            output += "<td>" + uservalue + "</td>";
-						}
-                        });
-                    });
-                    $("#invoice-lines").html(" ");
-                    $("#invoice-lines").html(output);
-                    $('#save-invoices').attr('disabled', false);
-                } 
-                else 
-                {
-                    $("#messages").html(response.data.message);
-                    $("#invoice-lines").html(" ");
-                }
-            })
-            .fail(function(jqXHR, textStatus, errorThrown) 
-            {
-                $("#messages").html("Algo ha fallado, los números de factura no fueron encontrados: " + textStatus);
-            });  
+            e.preventDefault();			
+			searchInvoices()
         });			
 			
         $("#save-invoices").click(function(e) 
