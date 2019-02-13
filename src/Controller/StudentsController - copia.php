@@ -1520,10 +1520,8 @@ class StudentsController extends AppController
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
-		
-		$concept = 'Matrícula ' . $school->current_year_registration;
-		
-		$previousYearRegistration = $school->previous_year_registration;
+			
+		$currentYearRegistration = $school->current_year_registration;
 		
 		$students = TableRegistry::get('Students');
 
@@ -1540,6 +1538,7 @@ class StudentsController extends AppController
 				'Students.section_id',
 				'Students.sex',
 				'Students.birthdate',
+				'Students.student_condition',
 				'Parentsandguardians.type_of_identification',
 				'Parentsandguardians.identidy_card',
 				'Parentsandguardians.surname',
@@ -1549,67 +1548,22 @@ class StudentsController extends AppController
 				'Sections.id',
 				'Sections.sublevel'])
 			->contain(['Parentsandguardians', 'Sections'])
-			->where([['Students.new_student' => 0],
-				['Students.id >' => 1],
-				['Students.balance >=' => $previousYearRegistration]])
+			->where([['Students.id >' => 1],
+				['Students.student_condition' => 'Regular'],
+				['Students.balance !=' => $currentYearRegistration]])
 			->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 	  
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
 		date_default_timezone_set('America/Caracas');
 
 		$currentDate = Time::now();
+		
+		$accountRecord = $studentsFor->count();
 
-		$complement = [];  
-
-		$accountRecord = 0;
-
-		foreach ($studentsFor as $studentsFors)
-		{
-			$complement[$studentsFors->id]['swGraduate'] = 0;
-
-			$studenttransactions = $this->Students->Studenttransactions->find('all')
-			->where([['Studenttransactions.student_id' => $studentsFors->id], ['Studenttransactions.transaction_description' => $concept]]);
-
-			$account = $studenttransactions->count();
-
-			if ($account == 0)
-			{
-				$complement[$studentsFors->id]['swGraduate'] = 1;
-				$accountRecord++;
-			}
-			elseif ($account == 1) 
-			{
-				foreach ($studenttransactions as $studenttransaction)
-				{
-					if ($studenttransaction->amount == $studenttransaction->original_amount)
-					{
-						$complement[$studentsFors->id]['swGraduate'] = 1;
-						$accountRecord++;
-					}
-					elseif ($studenttransaction->amount < $studenttransaction->original_amount)
-					{
-						$complement[$studentsFors->id]['swGraduate'] = 2;
-					}
-					else
-					{
-						$this->Flash->error(__('Alumno con abono a matrícula mayor a: ' . $row->amount . ' ' . $studentsFors->id . ' ' . $studentsFors->full_name));
-						$complement[$studentsFors->id]['swGraduate'] = 3;
-					}                      
-				}
-			}
-			else
-			{
-				$this->Flash->error(__('Alumno con más de un registro de matrícula: ' . $studentsFors->id . ' ' . $studentsFors->full_name));
-
-				$complement[$studentsFors->id]['swGraduate'] = 4;                   
-			}
-
-			$totalPages = ceil($accountRecord / 20);
-		}
-
-		$this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate', 'complement'));
-		$this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate', 'complement']);
-
+		$totalPages = ceil($accountRecord / 20);
+		
+		$this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate', 'currentYearRegistration'));
+		$this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate', 'currentYearRegistration']);
     }
     public function SublevelLevel($sublevel = null)
     {

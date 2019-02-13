@@ -1283,6 +1283,7 @@
                     tbStudentTransactions[transactionCounter].studentName = item['dbStudentName'];
                     tbStudentTransactions[transactionCounter].transactionIdentifier = item['dbId'];
                     tbStudentTransactions[transactionCounter].monthlyPayment = item['dbMonthlyPayment'];
+					tbStudentTransactions[transactionCounter].originalAmount = item['dbOriginalAmount'];
                     tbStudentTransactions[transactionCounter].amountPayable = item['dbAmountPayable'];
                     tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 
                     transactionCounter++;
@@ -1331,7 +1332,7 @@
 
                 cleanPager();
 				
-                $.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "recordInvoiceData"]); ?>', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade, quotaAdjustment : $('#quota-adjustment').val() }); 
+                $.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "recordInvoiceData"]); ?>', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
             });
         });
     }
@@ -2394,6 +2395,7 @@
 			var adjAmountPaid = 0;
 			var adjIdAmountTransaction = '';
 			var adjAmountPayable = 0;
+			var stringAmount = '';
 			var adjError = 0;
 			
             $("#monthly-payment input").each(function (index) 
@@ -2413,22 +2415,20 @@
 				{
 					adjOriginalAmount = parseFloat($(this).val());					
 					if (adjModifiableFee != adjOriginalAmount)
-					{
-						console.log('adjModifiableFee: ' + adjModifiableFee + ' adjOriginalAmount: ' + adjOriginalAmount + ' adjAmountPaid: ' + adjAmountPaid);
-						
-						if (adjModifiableFee < adjAmountPaid)
+					{					
+						if (adjModifiableFee > adjAmountPaid)
 						{
-							alert('Error: El monto de la cuota ajustada no debe ser menor al monto abonado');
-							$('#' + adjIdAmountTransaction).css('background-color', '#ff5050');
-							adjError = 1;
-							return false;
+							stringAmount = (adjModifiableFee - adjAmountPaid).toFixed(2);
+							adjAmountPayable = parseFloat(stringAmount);
+							updateInstallment(adjIdAmountTransaction.substring(2), adjAmountPayable, adjModifiableFee, adjAmountPayable);
+							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
 						}
 						else
 						{
-							console.log(adjModifiableFee);
-							adjAmountPayable = adjModifiableFee - adjAmountPaid;
-							updateInstallment(adjIdAmountTransaction.substring(2), adjAmountPayable, adjModifiableFee, adjAmountPayable);
-							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
+							alert('Error: El monto de la cuota ajustada debe ser mayor al monto abonado');
+							$('#' + adjIdAmountTransaction).css('background-color', '#ff5050');
+							adjError = 1;
+							return false;
 						}
 					}
 					

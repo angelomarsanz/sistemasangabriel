@@ -88,7 +88,19 @@ class SchoolsTable extends Table
 
         $validator
             ->allowEmpty('profile_photo_dir');
-
+			
+        $validator
+            ->allowEmpty('current_year_registration');
+			
+        $validator
+            ->allowEmpty('previous_year_registration');
+			
+        $validator
+            ->allowEmpty('next_year_registration');
+			
+        $validator
+            ->allowEmpty('current_school_year');
+			
         $validator
             ->allowEmpty('responsible_user');
 

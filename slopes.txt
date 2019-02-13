@@ -1,6 +1,12 @@
 Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar descuento
 
 ---
+En Julio cuando comienza el período de renovación de inscripción, se debe actualizar
+el campo current_year_registration de la tabla Shools con el año del nuevo período de inscripción
+
+En septiembre cuando comienza el período escolar se debe actualizar el campo
+current_school_year de la tabla Shools con el año del nuevo perìodo escolar
+
 Para los estatus recordar que hay un boolean - new_student en la tabla student
 Ese status se debe cambiar a "0" al iniciar el proceso de renovación a aquellos
 alumnos regulares que se inscribieron para el período escolar actual. Se debe
@@ -82,8 +88,9 @@ el 14/12/2018
 100.322 - 0
 100.323 - 82.562
 
-Al 09/01/2019 estan los números
-de control correctamente en producción
+Se anulò la factura 100594
+al 21/01/2019 estàn correctos los numeros
+de control en produccion
 
 --- Salto lìneas factura
 

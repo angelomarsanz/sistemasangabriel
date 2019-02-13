@@ -1266,7 +1266,7 @@
 
     function uploadTransactions()
     {
-		biggestYearFrom = 0;
+		biggestYearFrom = schoolYearFrom;
 		
         var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbInvoiced = 'true'";
 
@@ -1287,9 +1287,9 @@
                     tbStudentTransactions[transactionCounter].amountPayable = item['dbAmountPayable'];
                     tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 
                     transactionCounter++;
-					if (biggestYearFrom < item['dbSchoolYearFrom'])
+					if (item['dbMonthlyPayment'].substring(0, 9) == "Matrícula")
 					{
-						biggestYearFrom = item['dbSchoolYearFrom'];
+						biggestYearFrom = parseInt(item['dbMonthlyPayment'].substring(10, 14));
 					}
                 }
 				biggestYearUntil = biggestYearFrom + 1;

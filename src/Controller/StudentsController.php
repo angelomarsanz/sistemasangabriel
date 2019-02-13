@@ -1413,6 +1413,12 @@ class StudentsController extends AppController
     
     public function filepdf($id = null)
     {
+		$this->loadModel('Schools');
+
+        $school = $this->Schools->get(2);
+		
+		$currentYearRegistration = $school->current_year_registration;
+		
         $student = $this->Students->get($id);
         
         $brothers = $this->Students->find('all')->where(['parentsandguardian_id' => $student->parentsandguardian_id, 'id !=' => $id]);
@@ -1440,8 +1446,8 @@ class StudentsController extends AppController
                 'render' => 'download'
             ]]);
 
-        $this->set(compact('student', 'brothersPdf', 'parentsandguardian'));
-        $this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian']);
+        $this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration'));
+        $this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration']);
     }
     
     public function cardboardpdf($id = null)
