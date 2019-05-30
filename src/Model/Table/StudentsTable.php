@@ -334,7 +334,7 @@ class StudentsTable extends Table
         {
             $arrayResult['indicator'] = 1;
         }
-        
+		        
         return $arrayResult;
     }
 }

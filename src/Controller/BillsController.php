@@ -150,7 +150,8 @@ class BillsController extends AppController
             else
             {
                 $bill->fiscal = 0;
-            }
+				$bill->control_number = $billNumber;
+			}
             $bill->school_year = $this->headboard['schoolYear'];
             $bill->identification = $this->headboard['typeOfIdentificationClient'] . ' - ' . $this->headboard['identificationNumberClient'];
             $bill->client = $this->headboard['client'];

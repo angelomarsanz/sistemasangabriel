@@ -25,8 +25,12 @@ class TurnsController extends AppController
      */
     public function index()
     {
-        $turns = $this->paginate($this->Turns);
-
+		$query = $this->Turns->find('all')
+			->where(['user_id' => $this->Auth->user('id')])
+			->order(['start_date' => 'DESC']);
+   
+		$this->set('turns', $this->paginate($query));
+		
         $this->set(compact('turns'));
         $this->set('_serialize', ['turns']);
     }
@@ -258,7 +262,7 @@ class TurnsController extends AppController
 		{
 			$this->loadModel('Bills');
 		
-            $lastRecord = $this->Bills->find('all', ['conditions' => ['turn' => $id],
+            $lastRecord = $this->Bills->find('all', ['conditions' => ['turn' => $id, 'fiscal' => 1],
                 'order' => ['created' => 'DESC'] ]);
 
             $row = $lastRecord->first();

@@ -2088,7 +2088,7 @@ class StudentsController extends AppController
 		$filtersReport = $binnacle->extra_column1;
 		
 		$orderReport = $binnacle->extra_column2;
-			
+				
 		$arraySignedUp = [];
 					
 		$this->loadModel('Schools');
@@ -2139,7 +2139,7 @@ class StudentsController extends AppController
 
 				if ($row)
 				{
-					if ($row->amount < $row->original_amount)
+					if ($row->amount > 0)
 					{
 						$arraySignedUp[$familyStudent->id] = 'Pagado';
 						if ($familyStudent->new_student == 1)
@@ -2174,6 +2174,7 @@ class StudentsController extends AppController
 				$accountStudents['Discontinued']++;
 			}
 		}			
+				
 		$this->set(compact('familyStudents', 'arrayMark', 'currentDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration', 'filtersReport', 'accountNewRegistration', 'accountRegularRegistration'));
 		$this->set('_serialize', ['familyStudents', 'arrayMark', 'currenDate', 'accountStudents', 'arraySignedUp', 'currentYearRegistration', 'filtersReport', 'accountNewRegistration', 'accountRegularRegistration']); 		
 	}

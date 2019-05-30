@@ -35,6 +35,7 @@
                                 <ul class="dropdown-menu" role="menu">
                                     <li><?= $this->Html->link('Abrir turno', ['controller' => 'Turns', 'action' => 'checkTurnOpen']) ?></li>
                                     <li><?= $this->Html->link('Cerrar turno', ['controller' => 'Turns', 'action' => 'checkTurnClose']) ?></li>
+									<li><?= $this->Html->link('Histórico de turnos', ['controller' => 'Turns', 'action' => 'index']) ?></li>
                                     <li><?= $this->Html->link('Cobrar inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Inscripción regulares']) ?></li> 
                                     <li><?= $this->Html->link('Cobrar inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Inscripción nuevos']) ?></li> 
                                     <li><?= $this->Html->link('Cobrar servicio educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Servicio educativo']) ?></li> 
