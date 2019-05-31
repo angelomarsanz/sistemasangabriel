@@ -39,68 +39,149 @@ class StudentsController extends AppController
     
     public function testFunction()
     {
-		$binnacles = new BinnaclesController;
+		$this->loadModel('Rates');
 		
-		$accountSelect = 0;
-		
-        $students = $this->Students->find('all')
-            ->where([['id >' => 1], ['student_condition' => 'Regular'], ['section_id >' => 1], ['new_student !=' => 1]]);
+		$tablaMensualidades = 
+			[
+				201707,
+				201708,
+				201709,
+				201710,
+				201711,
+				201712,
+				201801,
+				201802,
+				201803,
+				201804,
+				201805,
+				201806,
+				201807,
+				201808,
+				201809,
+				201810,
+				201811,
+				201812,
+				201901,
+				201902,
+				201903,
+				201904,
+				201905,
+				201906,
+				201907,
+				201908,
+				201909,
+				201910,
+				201911,
+				201912,
+				202001,
+				202002,
+				202003,
+				202004,
+				202005,
+				202006,
+				202007,
+				202008,
+				202009,
+				202010,
+				202011,
+				202012,
+				202101,
+				202102,
+				202103,
+				202104,
+				202105,
+				202106,
+				202107,
+				202108,
+				202109,
+				202110,
+				202111,
+				202112
+			];
 
-		foreach ($students as $student)
+		$rate = $this->Rates->get(58);
+	
+		$dollarExchangeRate = $rate->amount; 
+		
+		$mensualidades = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'], 
+			'order' => ['Rates.rate_year' => 'ASC', 'Rates.rate_month' => 'ASC', 'Rates.created' => 'DESC']]);
+		
+		$contadorRegistros = $mensualidades->count();
+		
+		if ($contadorRegistros > 0)
 		{
-			$arrayExtra = [$student->id, $student->section_id];
+			$mesesTarifas = [];
+			$tarifaDolarAnterior = 0;
+			$tarifaBolivarAnterior = 0;
+			$anoMesAnterior = "";
 			
-			$binnacles->add('controller', 'Students', 'testFunction', $student->full_name, $arrayExtra);
+			$tarifaDolarActual = 0;
+			$tarifaBolivarActual = 0;
+			$anoMesActual = "";
 			
-			$accountSelect++;
+			foreach ($tablaMensualidades as $tablaMensualidad)
+			{
+				$indicadorEncontrado = 0;
+				
+				foreach ($mensualidades as $mensualidad)
+				{
+					$anoMesAnterior = $anoMesActual;
+					$anoMesActual = $mensualidad->rate_year . $mensualidad->rate_month;
+					
+					$tarifaDolarAnterior = $tarifaDolarActual;
+					$tarifaBolivarAnterior = $tarifaBolivarActual;
+					
+					$tarifaDolarActual = $mensualidad->amount;
+					$tarifaBolivarActual = $tarifaDolarActual * $dollarExchangeRate;
+					
+					if ($anoMesActual == $tablaMensualidad)
+					{							
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarActual, 'tarifaBolivar' => $tarifaBolivarActual];
+						$indicadorEncontrado = 1;
+						break;
+					}
+					elseif ($anoMesActual > $tablaMensualidad)
+					{
+						break;
+					}
+				}
+				if ($indicadorEncontrado == 0)
+				{
+					if ($tablaMensualidad < $anoMesActual)
+					{
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarAnterior, 'tarifaBolivar' => $tarifaBolivarAnterior];
+					}
+					else
+					{
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarActual, 'tarifaBolivar' => $tarifaBolivarActual];
+					}
+				}					
+			}
 		}
-
-		$binnacles->add('controller', 'Students', 'testFunction', 'Total registros seleccionados: ' . $accountSelect);
+		
+		echo "<br /><br />";
+		
+		foreach ($mesesTarifas as $mesTarifa)
+		{
+			echo $mesTarifa["anoMes"] . " " . $mesTarifa["tarifaDolar"] . " " . $mesTarifa['tarifaBolivar'] . "<br /><br />";
+		}
     }
 	
     public function testFunction2()
     {
-		$binnacles = new BinnaclesController;
+		$studentTransactions = $this->Students->Studenttransactions->find('all')->where(['transaction_type' => "Mensualidad", 'paid_out' => 1]);
 		
-		$this->loadModel('Binnacles');
+		$contador = 0;
 		
-		$accountUpdate = 0;
-		
-        $binnacles = $this->Binnacles->find('all')
-            ->where([['method_name' => 'testFunction'], ['extra_column1 is NOT NULL']]);
-
-		foreach ($binnacles as $binnacle)
+		foreach ($studentTransactions as $studentTransaction)
 		{
-			$student = $this->Students->get($binnacle->extra_column1);
-			
-			if ($student->section_id != $binnacle->extra_column2)
+			$mensualidadEstudiante = $this->Students->Studenttransactions->get($studentTransaction->id);
+			$mensualidadEstudiante->amount_dollar = 20;
+			if (!($this->Students->Studenttransactions->save($mensualidadEstudiante))) 
 			{
-				$binnacleR = $this->Binnacles->get($binnacle->id);
-				
-				$binnacleR->extra_column3 = "Sección diferente";
-				
-				$binnacleR->extra_column4 = $student->section_id;
-				
-				if ($this->Binnacles->save($binnacleR))
-				{
-					$student->section_id = $binnacle->extra_column2;
-					
-					if (!($this->Students->save($student)))
-					{
-						$this->Flash->error(__("No se pudo actualizar el alumno: " . $student->full_name));
-					}
-					else
-					{
-						$accountUpdate++;
-					}
-				}
-				else	
-				{
-					$this->Flash->error(__("No se pudo actualizar el binnacle->id: " . $binnacleR->id));
-				}
-			}	
+				$this->Flash->error(__('No se pudo actualizar el registro ' . $studenttransaction->id));
+			}
 		}
-		$this->Flash->success(__("Total alumnos actualizados: " . $accountUpdate));
     }
 	
     /**
@@ -931,25 +1012,143 @@ class StudentsController extends AppController
         $this->autoRender = false;
         
         $studenttransactions = new StudenttransactionsController();
+
+		$tablaMensualidades = 
+			[
+				201609,
+				201610,
+				201611,
+				201612,
+				201701,
+				201702,
+				201703,
+				201704,
+				201705,
+				201706,
+				201707,
+				201708,
+				201709,
+				201710,
+				201711,
+				201712,
+				201801,
+				201802,
+				201803,
+				201804,
+				201805,
+				201806,
+				201807,
+				201808,
+				201809,
+				201810,
+				201811,
+				201812,
+				201901,
+				201902,
+				201903,
+				201904,
+				201905,
+				201906,
+				201907,
+				201908,
+				201909,
+				201910,
+				201911,
+				201912,
+				202001,
+				202002,
+				202003,
+				202004,
+				202005,
+				202006,
+				202007,
+				202008,
+				202009,
+				202010,
+				202011,
+				202012,
+				202101,
+				202102,
+				202103,
+				202104,
+				202105,
+				202106,
+				202107,
+				202108,
+				202109,
+				202110,
+				202111,
+				202112
+			];
 		
 		$this->loadModel('Rates');
 		
 		$rate = $this->Rates->get(58);
 		
 		$dollarExchangeRate = $rate->amount; 
+				
+		$mensualidades = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'], 
+			'order' => ['Rates.rate_year' => 'ASC', 'Rates.rate_month' => 'ASC', 'Rates.created' => 'DESC']]);
 		
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'],
-            'order' => ['Rates.created' => 'DESC'] ]);
-			
-		$row = $lastRecord->first();
-			
-		if ($row)
+		$contadorRegistros = $mensualidades->count();
+		
+		if ($contadorRegistros > 0)
 		{
-			$amountMonthly = round($row->amount * $dollarExchangeRate);	
-		}
-		else
-		{
-			$amountMonthly = 0;
+			$mesesTarifas = [];
+			$tarifaDolarAnterior = 0;
+			$tarifaBolivarAnterior = 0;
+			$anoMesAnterior = "";
+			
+			$tarifaDolarActual = 0;
+			$tarifaBolivarActual = 0;
+			$anoMesActual = "";
+			
+			foreach ($tablaMensualidades as $tablaMensualidad)
+			{
+				$indicadorEncontrado = 0;
+				
+				foreach ($mensualidades as $mensualidad)
+				{
+					$anoMesAnterior = $anoMesActual;
+					$anoMesActual = $mensualidad->rate_year . $mensualidad->rate_month;
+					
+					$tarifaDolarAnterior = $tarifaDolarActual;
+					$tarifaBolivarAnterior = $tarifaBolivarActual;
+					
+					if ($anoMesActual < 201811)
+					{
+						$tarifaDolarActual = $mensualidad->amount/$dollarExchangeRate;
+					}
+					else
+					{
+						$tarifaDolarActual = $mensualidad->amount;
+					}
+					
+					$tarifaBolivarActual = round($tarifaDolarActual * $dollarExchangeRate);	
+					
+					if ($anoMesActual == $tablaMensualidad)
+					{							
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarActual, 'tarifaBolivar' => $tarifaBolivarActual];
+						$indicadorEncontrado = 1;
+						break;
+					}
+					elseif ($anoMesActual > $tablaMensualidad)
+					{
+						break;
+					}
+				}
+				if ($indicadorEncontrado == 0)
+				{
+					if ($tablaMensualidad < $anoMesActual)
+					{
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarAnterior, 'tarifaBolivar' => $tarifaBolivarAnterior];
+					}
+					else
+					{
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarActual, 'tarifaBolivar' => $tarifaBolivarActual];
+					}
+				}					
+			}
 		}
 
         if ($this->request->is('json')) 
@@ -1009,7 +1208,7 @@ class StudentsController extends AppController
             $jsondata["data"]['tax_phone'] = $parentsandguardians->tax_phone;
             $jsondata["data"]['email'] = $parentsandguardians->email;
 			$jsondata["data"]['dollar_exchange_rate'] = $dollarExchangeRate;
-			$jsondata["data"]['amount_monthly'] = $amountMonthly;
+			$jsondata["data"]['meses_tarifas'] = $mesesTarifas;
 			
             $jsondata["data"]["students"] = [];
             
@@ -1035,28 +1234,24 @@ class StudentsController extends AppController
             {
                 foreach ($results as $result)
                 {
-                    $jsondata["data"]["students"][]['id'] = $result->id;
-                    $jsondata["data"]["students"][]['surname'] = $result->surname;
-                    $jsondata["data"]["students"][]['second_surname'] = $result->second_surname;
-                    $jsondata["data"]["students"][]['first_name'] = $result->first_name;
-                    $jsondata["data"]["students"][]['second_name'] = $result->second_name;
-                    $jsondata["data"]["students"][]['level_of_study'] = $result->level_of_study;
-                
-                    $sections = $this->Students->Sections->get($result->section_id);
-                    
-                    $jsondata["data"]["students"][]['sublevel'] = $sections->sublevel;
-                    $jsondata["data"]["students"][]['section'] = $sections->section;
-                    
-                    $jsondata["data"]["students"][]['scholarship'] = $result->scholarship;
-					$jsondata["data"]["students"][]['schoolYearFrom'] = $result->balance;
-					$jsondata["data"]["students"][]['discount_family'] = $result->discount;
-                    
-                    $variable = $studenttransactions->responsejson($result->id);
-                    
-                    $jsondata["data"]["students"][]['studentTransactions'] = []; 
-            
-                    $jsondata["data"]["students"][]['studentTransactions'] = json_decode($variable); 
-
+					$sections = $this->Students->Sections->get($result->section_id);
+                    $transacciones = $studenttransactions->responsejson($result->id);
+					
+                    $jsondata["data"]["students"][] = 
+						[
+							'id' => $result->id,
+							'surname' => $result->surname,
+							'second_surname' => $result->second_surname,
+							'first_name' => $result->first_name,
+							'second_name' => $result->second_name,
+							'level_of_study' => $result->level_of_study,
+							'scholarship' => $result->scholarship,
+							'schoolYearFrom' => $result->balance,
+							'discount_family' => $result->discount,
+							'sublevel' => $sections->sublevel,
+							'section' => $sections->section,
+							'studentTransactions' => json_decode($transacciones) 
+						];
                 }
             }
             

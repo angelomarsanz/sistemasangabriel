@@ -1498,8 +1498,8 @@
             .done(function(response) 
             {
                 if (response.success) 
-                {				                    
-					nameFamily = response.data.family;
+                {					
+                    nameFamily = response.data.family;
 
                     nameRepresentative = response.data.first_name + ' ' + response.data.surname;
 
@@ -1526,7 +1526,7 @@
 					dollarExchangeRate = response.data.dollar_exchange_rate;
 					
 					mesesTarifas = response.data.meses_tarifas;
-													                        
+									                        
                     $('#family').val(nameFamily + " (" + nameRepresentative + ")");
                     $('#client').val(client);
                     $('#type-of-identification-client').val(typeOfIdentificationClient);
@@ -1534,11 +1534,24 @@
                     $('#fiscal-address').val(fiscalAddress);
                     $('#tax-phone').val(taxPhone);
                     $('#email').val(customerEmail);
-                        						
+                        
+					console.log(response.data.students);
+						
                     $.each(response.data.students, function(key, value) 
                     {
                         students += "<tr id=st" + value.id + " class='students'>";
                         idStudent = value.id;
+
+						if (value.scholarship == 0)
+						{
+							students += "<td>Regular</td></tr>";
+							scholarship = 0;
+						}
+						else
+						{
+							students += "<td>Becado</td></tr>";
+							scholarship = 1;
+						}
 						
 						students += "<td>" + value.surname + " ";
 						surname = value.surname;
@@ -1558,17 +1571,6 @@
 						students += "<td>" + value.section + "</td>";
 						section = value.section;
 						
-						if (value.scholarship == 0)
-						{
-							students += "<td>Regular</td></tr>";
-							scholarship = 0;
-						}
-						else
-						{
-							students += "<td>Becado</td></tr>";
-							scholarship = 1;
-						}
-						
 						schoolYearFrom = value.schoolYearFrom;
 						
 						if (value.discount_family === null)
@@ -1582,8 +1584,6 @@
 						
                         $.each(value.studentTransactions, function(key2, value2) 
                         {
-							indicadorImpresion = 0;
-							
 							transactionIdentifier = value2.id;
 							
 							paymentDate = value2.payment_date;
@@ -1595,7 +1595,7 @@
 								if (anoMes == value3.anoMes)
 								{
 									amountMonthly = value3.tarifaBolivar;
-									tarifaDolar = value3.tarifaDolar;									
+									tarifaDolar = value3.tarifaDolar;
 								}
 							});
 
@@ -1621,45 +1621,42 @@
 							
 							if (paidOut == true)
 							{						
-								if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
+								if (transactionType == "Mensualidad")
 								{
 									if (tarifaDolar > montoDolar)
-									{												
+									{													
 										diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
 										
-										originalAmount = Math.round((diferenciaMensualidad + amountPaid) * discountFamily);
-										transactionAmount = originalAmount - amountPaid;
-										amountPayable = transactionAmount;	
-										paidOut = false;
+										originalAmount = diferenciaMensualidad * discountFamily;
+										transactionAmount = originalAmount;
+										amountPayable = originalAmount;												
 									}
 									else
 									{
 										transactionAmount = 0;
 										amountPayable = 0;
-										indicadorImpresion = 1;
 									}
 								}
 								else
 								{
 									transactionAmount = 0;
 									amountPayable = 0;
-									indicadorImpresion = 1;
 								}
 							}
 							else if (transactionType != 'Mensualidad')
 							{												
-								transactionAmount = originalAmount - amountPaid;
+								transactionAmount = originalAmount - transactionAmount;
 								amountPayable = transactionAmount;		
 							}
 							else if (monthlyPayment.substring(0, 3) == "Ago")
 							{
-								transactionAmount = originalAmount - amountPaid;
+								transactionAmount = originalAmount - transactionAmount;
 								amountPayable = transactionAmount												
 							}
 							else
 							{
-								originalAmount = Math.round(amountMonthly * discountFamily);
-								transactionAmount = originalAmount - amountPaid;
+								originalAmount = amountMonthly * discountFamily;
+								transactionAmount = originalAmount - transactionAmount;
 								amountPayable = transactionAmount;												
 							}
 							
@@ -1669,7 +1666,7 @@
 									monthlyPayment.substring(0, 9) == "Matrícula" ||
 									monthlyPayment.substring(0, 14) == "Seguro escolar")
 								{
-									if (indicadorImpresion == 0)
+									if (transactionAmount > 0)
 									{
 										insertRecord();
 									}
@@ -1680,7 +1677,7 @@
 								if (monthlyPayment.substring(0, 3) == "Ago" || 
 								monthlyPayment.substring(0, 9) == "Matrícula")
 								{
-									if (indicadorImpresion == 0)
+									if (transactionAmount > 0)
 									{
 										insertRecord();
 									}
@@ -1690,7 +1687,7 @@
 							{
 								if (monthlyPayment.substring(0, 18) == 'Servicio educativo')
 								{
-									if (indicadorImpresion == 0)
+									if (transactionAmount > 0)
 									{
 										insertRecord();
 									}
@@ -1698,7 +1695,7 @@
 							}
 							else
 							{
-								if (indicadorImpresion == 0)
+								if (transactionAmount > 0)
 								{
 									insertRecord();
 								}

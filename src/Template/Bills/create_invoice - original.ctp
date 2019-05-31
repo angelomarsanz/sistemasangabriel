@@ -524,8 +524,6 @@
     var studentTransactions = "";
     var transactionIdentifier = 0;
     var monthlyPayment = " ";
-	var tarifaDolar = 0;
-	var montoDolar = 0;
     var transactionAmount = 0;
 	var tempAmount = 0;
     var originalAmount = 0;
@@ -859,7 +857,6 @@
         dbStudentName VARCHAR(500), \
         dbMonthlyPayment VARCHAR(100), \
         dbScholarship INTEGER, \
-		dbTarifaDolar FLOAT, \
         dbTransactionAmount FLOAT, \
         dbOriginalAmount FLOAT, \
         dbAmountPayable FLOAT, \
@@ -894,7 +891,6 @@
         dbStudentName, \
         dbMonthlyPayment, \
         dbScholarship, \
-		dbTarifaDolar, \
         dbTransactionAmount, \
         dbOriginalAmount, \
         dbAmountPayable, \
@@ -903,14 +899,13 @@
         dbPartialPayment, \
         dbPaidOut, \
 		dbSchoolYearFrom, \
-        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = transactionIdentifier;
         var tpIdStudent = idStudent;
         var tpStudentName = studentName + " - " + grade;
         var tpMonthlyPayment = monthlyPayment;
         var tpScholarship = scholarship;
-		var tpTarifaDolar = tarifaDolar;
         var tpTransactionAmount = transactionAmount;
         var tpOriginalAmount = originalAmount;
         var tpAmountPayable = amountPayable;
@@ -929,7 +924,6 @@
             tpStudentName,
             tpMonthlyPayment,
             tpScholarship,
-			tpTarifaDolar,
             tpTransactionAmount,
             tpOriginalAmount,
             tpAmountPayable,
@@ -1121,8 +1115,6 @@
                     + " "
                     + item['dbScholarship'] 
                     + " "
-                    + item['dbTarifaDolar'] 
-                    + " "
                     + item['dbTransactionAmount']
                     + " "
                     + item['dbOriginalAmount']
@@ -1290,7 +1282,6 @@
                     tbStudentTransactions[transactionCounter] = new Object();
                     tbStudentTransactions[transactionCounter].studentName = item['dbStudentName'];
                     tbStudentTransactions[transactionCounter].transactionIdentifier = item['dbId'];
-					tbStudentTransactions[transactionCounter].tarifaDolar = item['dbTarifaDolar'];
                     tbStudentTransactions[transactionCounter].monthlyPayment = item['dbMonthlyPayment'];
 					tbStudentTransactions[transactionCounter].originalAmount = item['dbOriginalAmount'];
                     tbStudentTransactions[transactionCounter].amountPayable = item['dbAmountPayable'];
@@ -1498,8 +1489,8 @@
             .done(function(response) 
             {
                 if (response.success) 
-                {				                    
-					nameFamily = response.data.family;
+                {					
+                    nameFamily = response.data.family;
 
                     nameRepresentative = response.data.first_name + ' ' + response.data.surname;
 
@@ -1525,8 +1516,8 @@
 					
 					dollarExchangeRate = response.data.dollar_exchange_rate;
 					
-					mesesTarifas = response.data.meses_tarifas;
-													                        
+					amountMonthly = response.data.amount_monthly;
+					                        
                     $('#family').val(nameFamily + " (" + nameRepresentative + ")");
                     $('#client').val(client);
                     $('#type-of-identification-client').val(typeOfIdentificationClient);
@@ -1534,188 +1525,195 @@
                     $('#fiscal-address').val(fiscalAddress);
                     $('#tax-phone').val(taxPhone);
                     $('#email').val(customerEmail);
-                        						
+                        
                     $.each(response.data.students, function(key, value) 
                     {
-                        students += "<tr id=st" + value.id + " class='students'>";
-                        idStudent = value.id;
-						
-						students += "<td>" + value.surname + " ";
-						surname = value.surname;
-						
-						students += value.second_surname + "</td>";
-						secondSurname = value.second_surname;
-
-						students += "<td>" + value.first_name + " ";
-						firstName = value.first_name;
-
-						students += value.second_name + "</td>";
-						secondName = value.second_name;
-						
-						students += "<td>" + value.sublevel + "</td>";
-						grade = value.sublevel;
-
-						students += "<td>" + value.section + "</td>";
-						section = value.section;
-						
-						if (value.scholarship == 0)
-						{
-							students += "<td>Regular</td></tr>";
-							scholarship = 0;
-						}
-						else
-						{
-							students += "<td>Becado</td></tr>";
-							scholarship = 1;
-						}
-						
-						schoolYearFrom = value.schoolYearFrom;
-						
-						if (value.discount_family === null)
-						{
-							discountFamily = 1;
-						}
-						else
-						{	
-							discountFamily = (100 - value.discount_family) / 100;
-						}
-						
-                        $.each(value.studentTransactions, function(key2, value2) 
+                        $.each(value, function(userkey, uservalue) 
                         {
-							indicadorImpresion = 0;
-							
-							transactionIdentifier = value2.id;
-							
-							paymentDate = value2.payment_date;
-							
-							anoMes = paymentDate.substring(0, 4) + paymentDate.substring(5, 7);
-
-							$.each(mesesTarifas, function(key3, value3)											
+                            if (userkey == 'studentTransactions')
+                            {
+                                $.each(uservalue, function(userkey2, uservalue2) 
+                                {
+                                    $.each(uservalue2, function(userkey3, uservalue3)
+                                    {
+										if (userkey3 == 'id')
+                                        {
+                                            transactionIdentifier = uservalue3;
+                                        }
+										else if (userkey3 == 'transaction_type')
+										{
+											transactionType = uservalue3;
+                                        }
+										else if (userkey3 == 'transaction_description')
+                                        {
+                                            monthlyPayment = uservalue3;
+                                        }
+                                        if (userkey3 == 'amount')
+                                        {
+                                            transactionAmount = uservalue3;
+											amountPaid = uservalue3;
+                                        }
+                                        else if (userkey3 == 'original_amount')
+                                        {
+                                            originalAmount = uservalue3;
+                                        }
+                                        else if (userkey3 == 'invoiced')
+                                        {
+                                            invoiced = uservalue3;
+                                        }
+                                        else if (userkey3 == 'partial_payment')
+                                        {
+                                            partialPayment = uservalue3;
+                                        }
+                                        else if (userkey3 == 'paid_out')
+                                        {
+                                            paidOut = uservalue3;
+											
+                                            studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
+											
+											if (paidOut == true)
+											{													
+												transactionAmount = 0;
+												amountPayable = 0;
+											}
+											else if (transactionType != 'Mensualidad')
+											{												
+												tempAmount = originalAmount - transactionAmount;
+												transactionAmount = tempAmount;
+												amountPayable = tempAmount;		
+											}
+											else if (monthlyPayment.substring(0, 3) == "Ago")
+											{
+												tempAmount = originalAmount - transactionAmount;
+												transactionAmount = tempAmount;
+												amountPayable = tempAmount;												
+											}
+											else
+											{
+												if ($('#quota-adjustment').val() > 0)
+												{
+													originalAmount = ($('#quota-adjustment').val() * discountFamily);
+													tempAmount = ($('#quota-adjustment').val() * discountFamily) - transactionAmount;
+												}
+												else
+												{
+													originalAmount = (amountMonthly * discountFamily);
+													tempAmount = (amountMonthly * discountFamily) - transactionAmount;
+												}
+												transactionAmount = tempAmount;
+												amountPayable = tempAmount;												
+											}
+											
+											if ($('#type-invoice').val() == 'Inscripción regulares')
+											{
+												if (monthlyPayment.substring(0, 3) == "Ago" ||
+													monthlyPayment.substring(0, 9) == "Matrícula" ||
+													monthlyPayment.substring(0, 14) == "Seguro escolar")
+												{
+													insertRecord();
+												}
+											}
+											else if ($('#type-invoice').val() == 'Inscripción nuevos')
+											{
+												if (monthlyPayment.substring(0, 3) == "Ago" || 
+												monthlyPayment.substring(0, 9) == "Matrícula")
+												{
+													insertRecord();
+												}												
+											}
+											else if ($('#type-invoice').val() == 'Servicio educativo')
+											{
+												if (monthlyPayment.substring(0, 18) == 'Servicio educativo')
+												{
+													insertRecord();
+												}
+											}
+											else
+											{
+												insertRecord();
+											}
+											
+											
+										}
+                                    });
+                                });
+                            }
+                            else if (userkey == 'id')
+                            {
+                                students += "<tr id=st" + uservalue + " class='students'>";
+                                idStudent = uservalue;
+                            }
+                            else if (userkey == 'scholarship')
+                            {
+                                if (uservalue == 0)
+                                {
+                                    students += "<td>Regular</td></tr>";
+                                    scholarship = 0;
+                                }
+                                else
+                                {
+                                    students += "<td>Becado</td></tr>";
+                                    scholarship = 1;
+                                }
+                            }
+                            else if (userkey == 'surname')
+                            {
+                                students += "<td>" + uservalue + " ";
+                                surname = uservalue;
+                            }
+                            else if (userkey == 'second_surname')
+                            {
+                                students += uservalue + "</td>";
+                                secondSurname = uservalue;
+                            }
+                            else if (userkey == 'first_name')
+                            {
+                                students += "<td>" + uservalue + " ";
+                                firstName = uservalue;
+                            }
+                            else if (userkey == 'second_name')
+                            {
+                                students += uservalue + "</td>";
+                                secondName = uservalue;
+                            }
+                            else if (userkey == 'sublevel')
+                            {
+                                students += "<td>" + uservalue + "</td>";
+                                grade = uservalue;
+                            }
+                            else if (userkey == 'section')
+                            {
+                                students += "<td>" + uservalue + "</td>";
+                                section = uservalue;
+                            }
+                            else if (userkey == 'schoolYearFrom')
+                            {
+                                schoolYearFrom = uservalue;
+                            }
+							else if (userkey == 'discount_family')
 							{
-								if (anoMes == value3.anoMes)
+								if (uservalue === null)
 								{
-									amountMonthly = value3.tarifaBolivar;
-									tarifaDolar = value3.tarifaDolar;									
-								}
-							});
-
-							transactionType = value2.transaction_type;
-
-							monthlyPayment = value2.transaction_description;
-
-							transactionAmount = value2.amount;
-							
-							amountPaid = value2.amount;
-						
-							originalAmount = value2.original_amount;
-							
-							invoiced = value2.invoiced;
-
-							partialPayment = value.partial_payment;
-
-							paidOut = value2.paid_out;
-							
-							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
-
-							montoDolar = value2.amount_dollar;
-							
-							if (paidOut == true)
-							{						
-								if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
-								{
-									if (tarifaDolar > montoDolar)
-									{												
-										diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
-										
-										originalAmount = Math.round((diferenciaMensualidad + amountPaid) * discountFamily);
-										transactionAmount = originalAmount - amountPaid;
-										amountPayable = transactionAmount;	
-										paidOut = false;
-									}
-									else
-									{
-										transactionAmount = 0;
-										amountPayable = 0;
-										indicadorImpresion = 1;
-									}
+									discountFamily = 1;
 								}
 								else
-								{
-									transactionAmount = 0;
-									amountPayable = 0;
-									indicadorImpresion = 1;
+								{	
+									discountFamily = (100 - uservalue) / 100;
 								}
 							}
-							else if (transactionType != 'Mensualidad')
-							{												
-								transactionAmount = originalAmount - amountPaid;
-								amountPayable = transactionAmount;		
-							}
-							else if (monthlyPayment.substring(0, 3) == "Ago")
-							{
-								transactionAmount = originalAmount - amountPaid;
-								amountPayable = transactionAmount												
-							}
-							else
-							{
-								originalAmount = Math.round(amountMonthly * discountFamily);
-								transactionAmount = originalAmount - amountPaid;
-								amountPayable = transactionAmount;												
-							}
-							
-							if ($('#type-invoice').val() == 'Inscripción regulares')
-							{
-								if (monthlyPayment.substring(0, 3) == "Ago" ||
-									monthlyPayment.substring(0, 9) == "Matrícula" ||
-									monthlyPayment.substring(0, 14) == "Seguro escolar")
-								{
-									if (indicadorImpresion == 0)
-									{
-										insertRecord();
-									}
-								}
-							}
-							else if ($('#type-invoice').val() == 'Inscripción nuevos')
-							{
-								if (monthlyPayment.substring(0, 3) == "Ago" || 
-								monthlyPayment.substring(0, 9) == "Matrícula")
-								{
-									if (indicadorImpresion == 0)
-									{
-										insertRecord();
-									}
-								}												
-							}
-							else if ($('#type-invoice').val() == 'Servicio educativo')
-							{
-								if (monthlyPayment.substring(0, 18) == 'Servicio educativo')
-								{
-									if (indicadorImpresion == 0)
-									{
-										insertRecord();
-									}
-								}
-							}
-							else
-							{
-								if (indicadorImpresion == 0)
-								{
-									insertRecord();
-								}
-							}
-						});				
-					});	
+                        });
+                    });
                     $("#header-messages").html(" ");
                     $("#related-students").html(students);
                 } 
                 else 
                 {
-                    $("#header-messages").html('No se pudieron obtener los datos de los alumnos: ' + response.message);
+                    $("#header-messages").html('No ha habido suerte: ' + response.message);
                 }
             })
             .fail(function(jqXHR, textStatus, errorThrown) 
             {
-                $("#header-messages").html("Algo ha fallado en el servidor: " + textStatus);
+                $("#header-messages").html("Algo ha fallado: " + textStatus);
             });  
         });
 

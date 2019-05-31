@@ -96,12 +96,12 @@
 					'2021' => '2021']]);
                 echo $this->Form->input('amount', ['label' => 'Monto']);
 					
-				echo $this->Form->input('defaulters', ['type' => 'checkbox', 'id' => 'defaulters',
+				/* echo $this->Form->input('defaulters', ['type' => 'checkbox', 'id' => 'defaulters',
                     'label' => 'Ajustar la mensualidad a alumnos morosos', 'disabled' => 'disabled']);
 										
                 echo $this->Form->input('exception', ['type' => 'checkbox', 'id' => 'exception',
                     'label' => 'Exceptuar alumnos que han pagado el año escolar completo', 'disabled' => 'disabled']);
-					
+				*/
 				setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
                 date_default_timezone_set('America/Caracas');
 
@@ -212,11 +212,7 @@
 				
 				var rateUpdate = confirm('Por favor confirme que desea ajustar la ' + $('#concept').val() + ' a ' + $('#amount').val() + ' a partir del ' + dateFrom + topDate);
 
-				if (rateUpdate == true)
-				{
-					alert('Estimado usuario la ejecución de este programa durará unos minutos, por favor pulse el botón aceptar y espere a que se le envíe un correo electrónico informándole sobre los resultados del proceso');
-				}
-				else
+				if (rateUpdate == false)
 				{
 					e.preventDefault();
 					$.redirect('/sistemasangabriel/rates/index');

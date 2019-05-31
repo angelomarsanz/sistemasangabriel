@@ -748,7 +748,7 @@ class StudenttransactionsController extends AppController
 
     public function responsejson($studentId = null)
     {
-        $studenttransactions = $this->Studenttransactions->find('all')->where([['student_id' => $studentId], ['paid_out' => 0]]);
+        $studenttransactions = $this->Studenttransactions->find('all')->where(['student_id' => $studentId]);
     
         $results = $studenttransactions->toArray();
         

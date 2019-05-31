@@ -186,3 +186,12 @@ debe hacerle seguimiento que deberían ser: 179 regs
 En Students.defaulters.ctp revisar como se hace la
 selecciòn porque hay una diferencia de 4 alumnos
 en comparaciòn con "asignar secciòn" y "familias con tres hijos"
+
+---
+
+Cambios diferencia mensualidad:
+
+StudentController
+StudenttransactionsController
+create_Invoiced
+add_dollar
