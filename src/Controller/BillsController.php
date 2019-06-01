@@ -322,7 +322,7 @@ class BillsController extends AppController
 
                     foreach ($transactions as $transaction) 
                     {
-                        $Studenttransactions->edit($transaction->transactionIdentifier, $billNumber, $transaction->originalAmount, $transaction->amountPayable);
+                        $Studenttransactions->edit($transaction->transactionIdentifier, $billNumber, $transaction->originalAmount, $transaction->amountPayable, $transaction->tarifaDolar);
 
                         $Concepts->add($billId, $transaction->studentName, $transaction->transactionIdentifier, 
                             $transaction->monthlyPayment, $transaction->amountPayable, $transaction->observation);

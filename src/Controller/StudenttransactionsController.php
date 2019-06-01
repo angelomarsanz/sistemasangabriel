@@ -101,12 +101,13 @@ class StudenttransactionsController extends AppController
         $this->set('_serialize', ['studenttransaction']);
     }
 
-    public function edit($id = null, $billNumber = null, $originalAmount = null, $amountPayable = null)
+    public function edit($id = null, $billNumber = null, $originalAmount = null, $amountPayable = null, $tarifaDolar = null)
     {
         $studenttransaction = $this->Studenttransactions->get($id);
 		
 		$studenttransaction->original_amount = $originalAmount; 
 		$studenttransaction->amount = $studenttransaction->amount + $amountPayable;
+		$studenttransaction->amount_dollar = $tarifaDolar;
 	
 		if ($studenttransaction->amount == $studenttransaction->original_amount)
 		{
