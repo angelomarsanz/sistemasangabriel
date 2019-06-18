@@ -280,26 +280,6 @@ class BillsController extends AppController
 
         $Payments = new PaymentsController();
 		
-		$this->loadModel('Rates');
-		
-		$rate = $this->Rates->get(58);
-		
-		$dollarExchangeRate = $rate->amount; 
-		
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'],
-            'order' => ['Rates.created' => 'DESC'] ]);
-			
-		$row = $lastRecord->first();
-			
-		if ($row)
-		{
-			$amountMonthly = round($row->amount * $dollarExchangeRate);			
-		}
-		else
-		{
-			$amountMonthly = 0;
-		}
-
         if ($this->request->is('post')) 
         {
             $this->headboard = $_POST['headboard']; 
@@ -511,6 +491,16 @@ class BillsController extends AppController
                     $lastInstallment = " ";
                     $amountConcept = 0;
                 }
+                elseif (substr($aConcept->concept, 0, 6) == "Thales")
+                {
+                    $invoiceLine = $aConcept->student_name . " - " . $aConcept->concept;
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $loadIndicator = 1;
+                    $firstMonthly= " ";
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
                 else    
                 {
                     $invoiceLine = $aConcept->student_name . " - " . "Mensualidad: " . substr($aConcept->concept, 0, 3) . " - ";
@@ -606,6 +596,21 @@ class BillsController extends AppController
                         $loadIndicator = 1;
                     }
                     $invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $LoadIndicator = 1;
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                elseif (substr($aConcept->concept, 0, 6) == "Thales")
+                {
+                    if ($lastInstallment != " ")
+                    {
+                        $invoiceLine .= $lastInstallment;
+                        $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
+                        $loadIndicator = 1;
+                    }
+                    $invoiceLine = $aConcept->student_name . " - " . $aConcept->concept;
                     $amountConcept = $aConcept->amount;
                     $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
                     $LoadIndicator = 1;

@@ -34,8 +34,7 @@
 </div>
 <div style="clear:both; width: 100%;">
     <?php if ($student->new_student == 0): ?>
-        <p style="font-size: 25px;">Abono a matrícula: 12.500.000,00 Bs. - Abono a agosto 2019: 12.500.000,00 Bs. - Abono seguro escolar: 4.000.000,00 Bs.</p>  
-        <p style="font-size: 25px;">Diferencia agosto 2018: 12.366.000,00 - Total Bs. 41.366.000,00</p>
+        <p style="font-size: 25px;">Conceptos de pagos: Abono a matrícula 2019, abono a agosto 2020, seguro escolar, diferencia agosto 2019 y convenio Thales.</p>
     <?php endif; ?>    
     <p><b>Alumno:&nbsp;<?= $student->full_name ?></b></p>
 </div>
@@ -178,36 +177,24 @@
             <p>a) Fotocopia de la partida de nacimiento.</p>
             <p>b) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
             del alumno o la foto de perfil no sea visualice correctamente</p>
-            <p>c) Recibo de pago del consejo educativo año escolar 2017-2018</p>
-			<p>d) Factura del mes de julio 2018</p>
+			<p>c) Factura del mes de julio 2019</p>
         <?php elseif (substr($student->level_of_study, 0, 8) == "Primaria"): ?>
             <p>a) Fotocopia de la partida de nacimiento.</p>
             <p>b) Fotocopia de la cédula de identidad (de 5to. grado en adelante es indispensable por orden del M.P.P.E.).</p>
             <p>c) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
             del alumno o la foto de perfil no sea visualice correctamente</p>
-            <p>d) Recibo de pago del consejo educativo año escolar 2017-2018</p>
-			<p>e) Factura del mes de julio 2018</p>
+			<p>d) Factura del mes de julio 2019</p>
         <?php else: ?>
             <p>a) Fotocopia de la cédula de identidad del alumno vigente.</p>
             <p>b) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
             del alumno o la foto de perfil no sea visualice correctamente</p>
-            <p>c) Recibo de pago del consejo educativo año escolar 2017-2018</p>
-			<p>d) Factura del mes de julio 2018</p>
+			<p>c) Factura del mes de julio 2019</p>
         <?php endif; ?>
         <p><b>Horario de inscripción:</b></p>
-        <p>7:00 am - 12:00 m</p>
+        <p>8:00 am - 12:00 m</p>
         <p><b>Sin excepción:</b></p>
         <p>El alumno no se considera inscrito si no abona los derechos de renovación de matrícula</p>
         <p>En el mes de septiembre no habrá inscripciones</p>
-        <p><b>Información Administrativa</b></p>
-        <p style="text-align: justify;">1) Los costos de renovación de matrícula se harán con los montos de las matrículas actuales debido a que el Ministerio del
-        Poder Popular Para la Educación no han emitido la resolución donde autorizan el porcentaje en el cual se puede incrementar
-        las mensualidades; por lo tanto no se ha podido efectuar la Asamble de Padres y Representantes para aprobar dicho aumento.</p>
-        <p style="text-align: justify;">2) Quedará pendiente una diferencia en el pago de la matrícula y mes de agosto, según incremento
-        que permita la resolución ministerial y la aprobación de la Asamblea de Padres y Representantes; la cual será cancelada
-        después de la asamblea de padres y representantes.</p>
-        <p><b>Importante:</b></p>
-        <p style="text-align: justify;"><b>- Cada mensualidad se hará efectiva a los cinco (5) días calendarios del mes en curso.</b></p>
         <p>- Actualizar en la página web del colegio los cambios de residencia o números telefónicos durante el año escolar.</p>
         <p style="text-align: justify;"><b>- <u>Si decide no continuar en el colegio no tendrá derecho a que se le reintegre lo cancelado.</u></b></p>
     </div>

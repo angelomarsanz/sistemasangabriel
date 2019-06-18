@@ -38,150 +38,77 @@ class StudentsController extends AppController
     }
     
     public function testFunction()
-    {
-		$this->loadModel('Rates');
-		
-		$tablaMensualidades = 
-			[
-				201707,
-				201708,
-				201709,
-				201710,
-				201711,
-				201712,
-				201801,
-				201802,
-				201803,
-				201804,
-				201805,
-				201806,
-				201807,
-				201808,
-				201809,
-				201810,
-				201811,
-				201812,
-				201901,
-				201902,
-				201903,
-				201904,
-				201905,
-				201906,
-				201907,
-				201908,
-				201909,
-				201910,
-				201911,
-				201912,
-				202001,
-				202002,
-				202003,
-				202004,
-				202005,
-				202006,
-				202007,
-				202008,
-				202009,
-				202010,
-				202011,
-				202012,
-				202101,
-				202102,
-				202103,
-				202104,
-				202105,
-				202106,
-				202107,
-				202108,
-				202109,
-				202110,
-				202111,
-				202112
-			];
+    { 
+		/*
+		$contador = 0;
 
-		$rate = $this->Rates->get(58);
-	
-		$dollarExchangeRate = $rate->amount; 
-		
-		$mensualidades = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'], 
-			'order' => ['Rates.rate_year' => 'ASC', 'Rates.rate_month' => 'ASC', 'Rates.created' => 'DESC']]);
-		
-		$contadorRegistros = $mensualidades->count();
+		$students = $this->Students->find('all')->where([['number_of_brothers' => '2018'], ['new_student' => 1]]);
+			
+		$contadorRegistros = $students->count();
 		
 		if ($contadorRegistros > 0)
-		{
-			$mesesTarifas = [];
-			$tarifaDolarAnterior = 0;
-			$tarifaBolivarAnterior = 0;
-			$anoMesAnterior = "";
-			
-			$tarifaDolarActual = 0;
-			$tarifaBolivarActual = 0;
-			$anoMesActual = "";
-			
-			foreach ($tablaMensualidades as $tablaMensualidad)
+		{		
+			foreach ($students as $student)
 			{
-				$indicadorEncontrado = 0;
+				$studentGet = $this->Students->get($student->id);
 				
-				foreach ($mensualidades as $mensualidad)
+				$studentGet->new_student = 0;
+				
+				if ($this->Students->save($studentGet)) 
 				{
-					$anoMesAnterior = $anoMesActual;
-					$anoMesActual = $mensualidad->rate_year . $mensualidad->rate_month;
-					
-					$tarifaDolarAnterior = $tarifaDolarActual;
-					$tarifaBolivarAnterior = $tarifaBolivarActual;
-					
-					$tarifaDolarActual = $mensualidad->amount;
-					$tarifaBolivarActual = $tarifaDolarActual * $dollarExchangeRate;
-					
-					if ($anoMesActual == $tablaMensualidad)
-					{							
-						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarActual, 'tarifaBolivar' => $tarifaBolivarActual];
-						$indicadorEncontrado = 1;
-						break;
-					}
-					elseif ($anoMesActual > $tablaMensualidad)
-					{
-						break;
-					}
+					$contador++;
+				} 
+				else 
+				{
+					$this->Flash->error(__('El alumno no pudo ser actualizado'));
 				}
-				if ($indicadorEncontrado == 0)
-				{
-					if ($tablaMensualidad < $anoMesActual)
-					{
-						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarAnterior, 'tarifaBolivar' => $tarifaBolivarAnterior];
-					}
-					else
-					{
-						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarActual, 'tarifaBolivar' => $tarifaBolivarActual];
-					}
-				}					
 			}
-		}
+		}	
 		
-		echo "<br /><br />";
-		
-		foreach ($mesesTarifas as $mesTarifa)
-		{
-			echo $mesTarifa["anoMes"] . " " . $mesTarifa["tarifaDolar"] . " " . $mesTarifa['tarifaBolivar'] . "<br /><br />";
-		}
+		$this->Flash->success(__('Registros actualizados ' . $contador));
+		*/
     }
 	
     public function testFunction2()
     {
-		$studentTransactions = $this->Students->Studenttransactions->find('all')->where(['transaction_type' => "Mensualidad", 'paid_out' => 1]);
-		
+		$contadorInscritos = 0;
 		$contador = 0;
+
+		$students = $this->Students->find('all')->where(['balance' => '2018']);
 		
-		foreach ($studentTransactions as $studentTransaction)
+		foreach ($students as $student)
 		{
-			$mensualidadEstudiante = $this->Students->Studenttransactions->get($studentTransaction->id);
-			$mensualidadEstudiante->amount_dollar = 20;
-			if (!($this->Students->Studenttransactions->save($mensualidadEstudiante))) 
+			$matricula2019 = $this->Students->Studenttransactions->find('all')
+				->where(['student_id' => $student->id, 'transaction_description' => 'Matrícula 2019'])
+				->order(['created' => "DESC"]);
+				
+			$row = $matricula2019->first();
+				
+			if ($row)
 			{
-				$this->Flash->error(__('No se pudo actualizar el registro ' . $studenttransaction->id));
+				$seccion = $this->Students->Sections->get($student->section_id);
+				
+				$this->Flash->success(__($student->surname . ' ' . $student->first_name . ' ' . $seccion->level . ' ' . $seccion->sublevel . ' ' .$seccion->section . ' - ' . $student->level_of_study));
+				$contadorInscritos++;
+			}
+			else
+			{
+				$estudiante = $this->Students->get($student->id);
+				
+				$estudiante->level_of_study = "";
+				
+				if ($this->Students->save($estudiante)) 
+				{
+					$contador++;
+				} 
+				else 
+				{
+					$this->Flash->error(__('El alumno no pudo ser actualizado ' . $student->id));
+				}
 			}
 		}
+		$this->Flash->success(__('Alumnos ya actualizados ' . $contadorInscritos));
+		$this->Flash->success(__('Alumnos actualizados ' . $contador));
     }
 	
     /**
@@ -451,6 +378,7 @@ class StudentsController extends AppController
     public function addAdmin($idParentsandguardians = null)
     {
         $studentTransactions = new StudenttransactionsController();
+		$indicadorError = 0;
         
         $student = $this->Students->newEntity();
         if ($this->request->is('post')) 
@@ -481,9 +409,16 @@ class StudentsController extends AppController
                 
                 $this->Flash->success(__('El alumno fue guardado exitosamente'));
                 
-                $studentTransactions->createQuotasNew($row->id);
-    
-                return $this->redirect(['action' => 'indexAdmin', $idParentsandguardians]);
+                $indicadorError = $studentTransactions->createQuotasNew($row->id);
+				
+				if ($indicadorError == 0)
+				{
+					return $this->redirect(['action' => 'indexAdmin', $idParentsandguardians]);
+				}
+				else
+				{
+					$this->Flash->error(__('No se pudieron generar las cuotas del estudiante'));
+				}
             } 
             else 
             {
@@ -501,6 +436,8 @@ class StudentsController extends AppController
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
+		
+		$indicadorError = 0;
 		
         $currentDate = Time::now();
 		
@@ -554,10 +491,12 @@ class StudentsController extends AppController
             $student->student_migration = 0;
             $student->mi_id = 0;
 
+			$incomeType = $student->number_of_brothers;
+
 			$student->number_of_brothers = 0;
+
 			$student->balance = 0;			
 
-			$incomeType = $student->number_of_brothers;
 			
 			if ($incomeType < 2)
 			{
@@ -578,21 +517,29 @@ class StudentsController extends AppController
                 if ($row)
                 {
                     $this->Flash->success(__('El alumno fue guardado exitosamente'));
+
 					
 					if ($incomeType == 0)
 					{
-						$studentTransactions->createQuotasNew($row->id, $lastYear);
+						$indicadorError = $studentTransactions->createQuotasNew($row->id, $lastYear);
 					}
 					elseif ($incomeType == 1)
 					{
-						$studentTransactions->createQuotasNew($row->id, $currentYear);
+						$indicadorError = $studentTransactions->createQuotasNew($row->id, $currentYear);
 					}
 					else
 					{
-						$studentTransactions->createQuotasRegularPrevious($row->id);	
+						$indicadorError = $studentTransactions->createQuotasRegularPrevious($row->id);	
 					}					
-       
-                    return $this->redirect(['action' => 'indexAdminb', $idParentsandguardians]);
+					
+					if ($indicadorError == 0)
+					{
+						return $this->redirect(['action' => 'indexAdminb', $idParentsandguardians]);
+					}
+					else
+					{
+						$this->Flash->error(__('No se pudieron generar las cuotas del estudiante'));
+					}
                 }
             } 
             $this->Flash->error(__('El alumno no fue guardado, por favor verifique los datos e intente nuevamente'));
@@ -616,6 +563,8 @@ class StudentsController extends AppController
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
+		
+		$indicadorError = 0;
 		
         $currentDate = Time::now();
 		
@@ -657,20 +606,27 @@ class StudentsController extends AppController
 
 					if (!($results))
 					{
-						$studentTransactions->createQuotasRegular($student->id);
+						$indicadorError = $studentTransactions->createQuotasRegular($student->id);
 					}
 				}
 				
-				$this->Flash->success(__('Los datos se actualizaron exitosamente'));
+				if ($indicadorError == 0)
+				{
+					$this->Flash->success(__('Los datos se actualizaron exitosamente'));
 				
-                if (isset($controller))
-                {
-                    return $this->redirect(['controller' => $controller, 'action' => $action, $id]);
-                }
-                else
-                {
-                    return $this->redirect(['action' => 'profilePhoto', $id]);
-                }
+					if (isset($controller))
+					{
+						return $this->redirect(['controller' => $controller, 'action' => $action, $id]);
+					}
+					else
+					{
+						return $this->redirect(['action' => 'profilePhoto', $id]);
+					}
+				}
+				else
+				{
+					$this->Flash->error(__('No se pudieron generar las cuotas del estudiante'));
+				}
             }
             else 
             {
@@ -1150,6 +1106,40 @@ class StudentsController extends AppController
 				}					
 			}
 		}
+		
+		$tarifas = $this->Rates->find('all', ['conditions' => ['concept !=' => 'Mensualidad'], 
+			'order' => ['Rates.concept' => 'ASC', 'Rates.rate_year' => 'ASC', 'Rates.created' => 'DESC']]);
+		
+		$contadorRegistros = $tarifas->count();
+		
+		if ($contadorRegistros > 0)
+		{
+			$otrasTarifas = [];
+			$otrasConceptoAnoAnterior = "";		
+			$otrasConceptoAnoActual = "";
+			
+			foreach ($tarifas as $tarifa)
+			{
+				$otrasConceptoAnoAnterior = $otrasConceptoAnoActual;
+				
+				if ($tarifa->concept == "Agosto")
+				{	
+					$otrasConceptoAnoActual = "Ago " . $tarifa->rate_year;
+				}
+				else
+				{
+					$otrasConceptoAnoActual = $tarifa->concept . " " . $tarifa->rate_year;
+				}
+									
+				$otrasDolarActual = $tarifa->amount;				
+				$otrasBolivarActual = round($otrasDolarActual * $dollarExchangeRate);
+				
+				if ($otrasConceptoAnoActual != $otrasConceptoAnoAnterior)
+				{							
+					$otrasTarifas[] = ['conceptoAno' => $otrasConceptoAnoActual, 'tarifaDolar' => $otrasDolarActual, 'tarifaBolivar' => $otrasBolivarActual];
+				}
+			}					
+		}
 
         if ($this->request->is('json')) 
         {
@@ -1209,6 +1199,7 @@ class StudentsController extends AppController
             $jsondata["data"]['email'] = $parentsandguardians->email;
 			$jsondata["data"]['dollar_exchange_rate'] = $dollarExchangeRate;
 			$jsondata["data"]['meses_tarifas'] = $mesesTarifas;
+			$jsondata["data"]['otras_tarifas'] = $otrasTarifas;
 			
             $jsondata["data"]["students"] = [];
             
@@ -1331,8 +1322,8 @@ class StudentsController extends AppController
 
 		$school = $this->Schools->get(2);
 				
-		$yearFrom = $school->current_year_registration;
-		$yearUntil = $school->next_year_registration;
+		$yearFrom = $school->current_school_year;
+		$yearUntil = $yearFrom + 1;
 			
         $yearMonthFrom = $yearFrom . '08';
         
@@ -2622,4 +2613,20 @@ class StudentsController extends AppController
 		$this->Flash->success(__('Total registros año 2017: ' . $account2017));
 		$this->Flash->success(__('Total registros año 2018: ' . $account2018));
 	}
+
+    public function uniqueMultidimArray($array, $key) 
+    { 
+        $temp_array = array(); 
+        $key_array = array(); 
+        
+        foreach($array as $val) 
+        { 
+            if (!in_array($val[$key], $key_array)) 
+            { 
+                $key_array[] = $val[$key]; 
+                $temp_array[] = $val; 
+            } 
+        } 
+        return $temp_array; 
+    } 
 }

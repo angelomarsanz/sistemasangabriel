@@ -68,11 +68,11 @@
                 echo $this->Form->input('concept', ['required' => 'required', 'label' => 'Tarifa', 'options' => 
                     [null => '',
 					'Agosto' => 'Agosto',
-					'Diferencia de matrícula' => 'Diferencia de matrícula',
                     'Matrícula' => 'Matrícula',
                     'Mensualidad' => 'Mensualidad',
                     'Seguro escolar' => 'Seguro escolar',
-                    'Servicio educativo' => 'Servicio educativo']]); 
+                    'Servicio educativo' => 'Servicio educativo',
+		    'Thales' => 'Thales']]); 
                 echo $this->Form->input('rate_month', ['label' => 'A partir del mes: ', 'options' => 
                     [null => '',
                     '01' => 'Enero',

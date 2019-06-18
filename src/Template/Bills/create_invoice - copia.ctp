@@ -1498,9 +1498,7 @@
             .done(function(response) 
             {
                 if (response.success) 
-                {				
-					console.log(response.data);
-                    
+                {				                    
 					nameFamily = response.data.family;
 
                     nameRepresentative = response.data.first_name + ' ' + response.data.surname;
@@ -1528,7 +1526,7 @@
 					dollarExchangeRate = response.data.dollar_exchange_rate;
 					
 					mesesTarifas = response.data.meses_tarifas;
-									                        
+													                        
                     $('#family').val(nameFamily + " (" + nameRepresentative + ")");
                     $('#client').val(client);
                     $('#type-of-identification-client').val(typeOfIdentificationClient);
@@ -1581,6 +1579,131 @@
 						{	
 							discountFamily = (100 - value.discount_family) / 100;
 						}
+						
+                        $.each(value.studentTransactions, function(key2, value2) 
+                        {
+							indicadorImpresion = 0;
+							
+							transactionIdentifier = value2.id;
+							
+							paymentDate = value2.payment_date;
+							
+							anoMes = paymentDate.substring(0, 4) + paymentDate.substring(5, 7);
+
+							$.each(mesesTarifas, function(key3, value3)											
+							{
+								if (anoMes == value3.anoMes)
+								{
+									amountMonthly = value3.tarifaBolivar;
+									tarifaDolar = value3.tarifaDolar;									
+								}
+							});
+
+							transactionType = value2.transaction_type;
+
+							monthlyPayment = value2.transaction_description;
+
+							transactionAmount = value2.amount;
+							
+							amountPaid = value2.amount;
+						
+							originalAmount = value2.original_amount;
+							
+							invoiced = value2.invoiced;
+
+							partialPayment = value.partial_payment;
+
+							paidOut = value2.paid_out;
+							
+							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
+
+							montoDolar = value2.amount_dollar;
+							
+							if (paidOut == true)
+							{						
+								if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
+								{
+									if (tarifaDolar > montoDolar)
+									{												
+										diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
+										
+										originalAmount = Math.round((diferenciaMensualidad + amountPaid) * discountFamily);
+										transactionAmount = originalAmount - amountPaid;
+										amountPayable = transactionAmount;	
+										paidOut = false;
+									}
+									else
+									{
+										transactionAmount = 0;
+										amountPayable = 0;
+										indicadorImpresion = 1;
+									}
+								}
+								else
+								{
+									transactionAmount = 0;
+									amountPayable = 0;
+									indicadorImpresion = 1;
+								}
+							}
+							else if (transactionType != 'Mensualidad')
+							{												
+								transactionAmount = originalAmount - amountPaid;
+								amountPayable = transactionAmount;		
+							}
+							else if (monthlyPayment.substring(0, 3) == "Ago")
+							{
+								transactionAmount = originalAmount - amountPaid;
+								amountPayable = transactionAmount												
+							}
+							else
+							{
+								originalAmount = Math.round(amountMonthly * discountFamily);
+								transactionAmount = originalAmount - amountPaid;
+								amountPayable = transactionAmount;												
+							}
+							
+							if ($('#type-invoice').val() == 'Inscripción regulares')
+							{
+								if (monthlyPayment.substring(0, 3) == "Ago" ||
+									monthlyPayment.substring(0, 9) == "Matrícula" ||
+									monthlyPayment.substring(0, 14) == "Seguro escolar")
+								{
+									if (indicadorImpresion == 0)
+									{
+										insertRecord();
+									}
+								}
+							}
+							else if ($('#type-invoice').val() == 'Inscripción nuevos')
+							{
+								if (monthlyPayment.substring(0, 3) == "Ago" || 
+								monthlyPayment.substring(0, 9) == "Matrícula")
+								{
+									if (indicadorImpresion == 0)
+									{
+										insertRecord();
+									}
+								}												
+							}
+							else if ($('#type-invoice').val() == 'Servicio educativo')
+							{
+								if (monthlyPayment.substring(0, 18) == 'Servicio educativo')
+								{
+									if (indicadorImpresion == 0)
+									{
+										insertRecord();
+									}
+								}
+							}
+							else
+							{
+								if (indicadorImpresion == 0)
+								{
+									insertRecord();
+								}
+							}
+						});				
 					});	
                     $("#header-messages").html(" ");
                     $("#related-students").html(students);

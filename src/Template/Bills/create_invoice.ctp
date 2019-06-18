@@ -151,14 +151,16 @@
                 <div class="col-md-3">
                     <br />
                     <p><b>Totales:</b></p>
-                    <div class="panel panel-default" style="height:260px; padding: 0% 3% 0% 3%;">
+                    <div class="panel panel-default" style="height:290px; padding: 0% 3% 0% 3%;">
                         <br />
                         <p><b>Alumno: </b><spam id="student-name"></spam></p>
                         <p><b>Cuotas: </b><spam id="student-concept"></spam></p>
                         <p><b>Sub-total alumno: Bs.S </b><spam id="student-balance">0</spam></b></p>
                         <p><b>Sub-total familia: Bs.S </b><spam id="total-balance"></spam></p>   
                         <p><?= $this->Form->input('select_discount', ['label' => 'Descuento/Recargo:', 'class' => 'select-discount', 'options' => $discounts]); ?></p>
-						<p><b>Total a pagar: Bs.S </b><spam id="total-general"></spam></p>     
+						<p><b>Total a pagar: Bs.S </b><spam id="total-general"></spam></p>
+						<p><b>Total a pagar: $ </b><spam id="total-general-dolar"></spam></p>	
+						<br />
                     </div>
 					<p id="student-messages"></p>  
                 </div>
@@ -569,7 +571,7 @@
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
     var tbPaymentsMade = new Array();
-
+	
 // Funciones
 
     function log(message) 
@@ -667,6 +669,7 @@
         $("#student-balance").html("");
         $("#total-balance").html("");
 		$("#total-general").html("");
+		$("#total-general-dolar").html("");
 		$("#invoice-descuento").html("");
         $("#invoice-subtotal").html(" ");
         $("#total-bill").html(" ");
@@ -1369,17 +1372,19 @@
                             output += uservalue + ")</td></tr>";
                     });
                 });
-                $("#response-container").html(" ");
+                $("#header-messages").html("");
                 $("#response-container").html(output);
             } 
             else 
             {
+				$("#header-messages").html("");
                 $("#response-container").html('No ha habido suerte: ' + response.data.message);
             }
                 
         })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-                
+        .fail(function(jqXHR, textStatus, errorThrown) 
+		{
+			$("#header-messages").html("");        
             $("#response-container").html("Algo ha fallado: " + textStatus);
                 
         });
@@ -1498,7 +1503,9 @@
             .done(function(response) 
             {
                 if (response.success) 
-                {				                    
+                {			
+					$("#header-messages").html("");
+					
 					nameFamily = response.data.family;
 
                     nameRepresentative = response.data.first_name + ' ' + response.data.surname;
@@ -1526,6 +1533,7 @@
 					dollarExchangeRate = response.data.dollar_exchange_rate;
 					
 					mesesTarifas = response.data.meses_tarifas;
+					otrasTarifas = response.data.otras_tarifas;
 													                        
                     $('#family').val(nameFamily + " (" + nameRepresentative + ")");
                     $('#client').val(client);
@@ -1552,11 +1560,22 @@
 						students += value.second_name + "</td>";
 						secondName = value.second_name;
 						
-						students += "<td>" + value.sublevel + "</td>";
-						grade = value.sublevel;
+						if ($('#type-invoice').val() == 'Mensualidades')
+						{ 
+							students += "<td>" + value.sublevel + "</td>";
+							grade = value.sublevel;
 
-						students += "<td>" + value.section + "</td>";
-						section = value.section;
+							students += "<td>" + value.section + "</td>";
+							section = value.section;							
+						}
+						else
+						{
+							students += "<td>" + value.level_of_study + "</td>";
+							grade = value.level_of_study;
+
+							students += "<td>No asignado</td>";
+							section = "No asignado";
+						}
 						
 						if (value.scholarship == 0)
 						{
@@ -1590,18 +1609,37 @@
 							
 							anoMes = paymentDate.substring(0, 4) + paymentDate.substring(5, 7);
 
-							$.each(mesesTarifas, function(key3, value3)											
-							{
-								if (anoMes == value3.anoMes)
-								{
-									amountMonthly = value3.tarifaBolivar;
-									tarifaDolar = value3.tarifaDolar;									
-								}
-							});
-
 							transactionType = value2.transaction_type;
-
+							
 							monthlyPayment = value2.transaction_description;
+							
+							amountMonthly = 0;
+							tarifaDolar = 0;
+							
+							if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
+							{
+								$.each(mesesTarifas, function(key3, value3)											
+								{
+									if (anoMes == value3.anoMes)
+									{
+										amountMonthly = value3.tarifaBolivar;
+										tarifaDolar = value3.tarifaDolar;
+										return false;
+									}
+								});
+							}
+							else
+							{
+								$.each(otrasTarifas, function(key3, value3)											
+								{
+									if (monthlyPayment == value3.conceptoAno)
+									{
+										amountMonthly = value3.tarifaBolivar;
+										tarifaDolar = value3.tarifaDolar;
+										return false;
+									}
+								});
+							}
 
 							transactionAmount = value2.amount;
 							
@@ -1620,39 +1658,68 @@
 							montoDolar = value2.amount_dollar;
 							
 							if (paidOut == true)
-							{						
-								if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
-								{
-									if (tarifaDolar > montoDolar)
-									{												
-										diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
-										
-										originalAmount = Math.round((diferenciaMensualidad + amountPaid) * discountFamily);
-										transactionAmount = originalAmount - amountPaid;
-										amountPayable = transactionAmount;	
-										paidOut = false;
-									}
-									else
-									{
-										transactionAmount = 0;
-										amountPayable = 0;
-										indicadorImpresion = 1;
-									}
-								}
-								else
+							{
+								if (montoDolar === null)
 								{
 									transactionAmount = 0;
 									amountPayable = 0;
 									indicadorImpresion = 1;
 								}
+								else
+								{						
+									if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
+									{
+										if (tarifaDolar > montoDolar)
+										{												
+											diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
+											
+											originalAmount = Math.round((diferenciaMensualidad + amountPaid) * discountFamily);
+											transactionAmount = originalAmount - amountPaid;
+											amountPayable = transactionAmount;	
+											paidOut = false;
+										}
+										else
+										{
+											transactionAmount = 0;
+											amountPayable = 0;
+											indicadorImpresion = 1;
+										}
+									}
+									else
+									{
+										if (tarifaDolar > montoDolar)
+										{												
+											diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
+											
+											originalAmount = Math.round(diferenciaMensualidad + amountPaid);
+											transactionAmount = originalAmount - amountPaid;
+											amountPayable = transactionAmount;	
+											paidOut = false;
+										}
+										else
+										{
+											transactionAmount = 0;
+											amountPayable = 0;
+											indicadorImpresion = 1;
+										}									
+									}
+								}
 							}
 							else if (transactionType != 'Mensualidad')
-							{												
+							{
+								originalAmount = amountMonthly;
 								transactionAmount = originalAmount - amountPaid;
 								amountPayable = transactionAmount;		
 							}
+							else if (monthlyPayment == "Ago 2019")
+							{
+								originalAmount = amountMonthly + amountPaid;
+								transactionAmount = originalAmount - amountPaid;
+								amountPayable = transactionAmount												
+							}
 							else if (monthlyPayment.substring(0, 3) == "Ago")
 							{
+								originalAmount = amountMonthly;
 								transactionAmount = originalAmount - amountPaid;
 								amountPayable = transactionAmount												
 							}
@@ -1667,7 +1734,8 @@
 							{
 								if (monthlyPayment.substring(0, 3) == "Ago" ||
 									monthlyPayment.substring(0, 9) == "Matrícula" ||
-									monthlyPayment.substring(0, 14) == "Seguro escolar")
+									monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+									monthlyPayment.substring(0, 6) == "Thales")
 								{
 									if (indicadorImpresion == 0)
 									{
@@ -1771,6 +1839,8 @@
                 $("#student-balance").html("");
                 
                 showRecords();
+				
+				$("#student-messages").html("");
             }
         });
         
@@ -1786,6 +1856,7 @@
 			inputCounter = 0;
 			$('.select-discount').val(1);
 			$('#total-general').html('');
+			$('#total-general-dolar').html('');
 			            
             $("#monthly-payment input").each(function (index) 
             {
@@ -1873,6 +1944,7 @@
 			inputCounter = 0;
 			$('.select-discount').val(1);
 			$('#total-general').html('');
+			$('#total-general-dolar').html('');
 
             $("#monthly-payment input").each(function (index) 
             {
@@ -2304,6 +2376,8 @@
 			{
 				totalGeneral = totalBalance;
 				$('#total-general').html(totalGeneral.toFixed(2));
+				totalGeneralDolar = Math.round(totalGeneral / dollarExchangeRate);
+				$('#total-general-dolar').html(totalGeneralDolar.toFixed(2));	
 			}
 			else if ($('.select-discount').val() > 2)
 			{
@@ -2336,6 +2410,8 @@
 						}
 						totalGeneral = totalBalance + discount; 
 						$('#total-general').html(totalGeneral.toFixed(2));
+						totalGeneralDolar = Math.round(totalGeneral / dollarExchangeRate);
+						$('#total-general-dolar').html(totalGeneralDolar.toFixed(2));
 					} 
 					else 
 					{
