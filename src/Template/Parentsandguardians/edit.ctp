@@ -190,22 +190,26 @@
                     <button id="father-data" class="btn btn-success">Datos del padre</button>            
                     <button id="mother-data" class="btn btn-success">Datos de la madre</button>
                     <br />
-                    <br />
-                    <?php
-                        echo $this->Form->input('client', ['label' => 'Nombre o razón social: *']);
-                        echo $this->Form->input('type_of_identification_client', 
-                                    ['options' => 
-                                    [null => " ",
-                                    'V' => 'Cédula venezolano',
-                                    'E' => 'Cédula extranjero',
-                                    'P' => 'Pasaporte',
-                                    'J' => 'Rif Jurídico',
-                                    'G' => 'Rif Gubernamental'],
-                                    'label' => 'Tipo de documento de identificación: *']);
-                        echo $this->Form->input('identification_number_client', ['label' => 'Nro. documento de identidad: *', 'type' => 'number']);
-                        echo $this->Form->input('fiscal_address', ['label' => 'Dirección fiscal: *']);
-                        echo $this->Form->input('tax_phone', ['label' => 'Teléfono: *']);
-                    ?>
+                    <br />						
+                    <?= $this->Form->input('client', ['label' => 'Cliente:', 'class' => 'campo-resaltado']) ?>
+					<div id="mensaje-cliente" class="mensajes-usuario"></div>
+                    <?= $this->Form->input('type_of_identification_client', 
+                        ['options' => 
+                        [null => "",
+                        'V' => 'Cédula venezolano',
+                        'E' => 'Cédula extranjero',
+                        'P' => 'Pasaporte',
+                        'J' => 'Rif Jurídico',
+                        'G' => 'Rif Gubernamental'],
+                        'label' => 'Tipo de documento de identificación:',
+						'class' => 'campo-resaltado']) ?>
+					<div id="mensaje-tipo-de-identificacion" class="mensajes-usuario"></div>
+                    <?= $this->Form->input('identification_number_client', ['label' => 'Número de cédula o RIF:', 'class' => 'entero campo-resaltado']) ?>
+					<div id="mensaje-numero-identificacion-cliente" class="mensajes-usuario"></div>
+                    <?= $this->Form->input('fiscal_address', ['label' => 'Dirección:', 'class' => 'campo-resaltado']) ?>
+					<div id="mensaje-direccion-fiscal" class="mensajes-usuario"></div>
+                    <?= $this->Form->input('tax_phone', ['label' => 'Teléfono:', 'class' => 'entero campo-resaltado']) ?>
+					<div id="mensaje-telefono" class="mensajes-usuario"></div>
                 </div>
             </div>
         </fieldset>
@@ -229,7 +233,65 @@
             $("#item-not-specified").attr('disabled', true);
             $("#item-not-specified").attr('required', false);
         }
-    }    
+    }
+    
+	function validarDatosFiscales()
+	{
+		var resultado = 0;
+		
+		$('.mensajes-usuario').html("");
+		$('.campo-resaltado').css('background-color', "white");
+		
+		if ($("#client").val().length < 5) 
+		{  		
+			$('#client').css('background-color', "#ffffe6");
+			$('#mensaje-cliente').html("El nombre o razón social está incompleto").css('color', 'red');
+			resultado = 1;
+		}
+
+		if ($("#type-of-identification-client").val().length == 0) 
+		{  		
+			$('#type-of-identification-client').css('background-color', "#ffffe6");
+			$('#mensaje-tipo-de-identificacion').html("El tipo de identificacion no puede ser blancos").css('color', 'red');
+			resultado = 1;
+		}
+		else
+		{
+			if ($("#type-of-identification-client").val() == "J" || $("#type-of-identification-client").val() == "G") 
+			{
+				if ($("#identification-number-client").val().length < 9) 
+				{	
+					$('#identification-number-client').css('background-color', "#ffffe6");
+					$('#mensaje-numero-identificacion-cliente').html("El número del RIF está incompleto").css('color', 'red');
+					resultado = 1;
+				}
+			}
+			else
+			{
+				if ($("#identification-number-client").val().length < 7) 
+				{	
+					$('#identification-number-client').css('background-color', "#ffffe6");
+					$('#mensaje-numero-identificacion-cliente').html("El número de cédula o pasaporte está incompleto").css('color', 'red');
+					resultado = 1;
+				}				
+			}	
+		}
+		if ($("#fiscal-address").val().length < 10) 
+		{	
+			$('#fiscal-address').css('background-color', "#ffffe6");
+			$('#mensaje-direccion-fiscal').html("La dirección está incompleta").css('color', 'red');
+			resultado = 1;
+		}	
+
+		if ($("#tax-phone").val().length < 10) 
+		{	
+			$('#tax-phone').css('background-color', "#ffffe6");
+			$('#mensaje-telefono').html("El número de teléfono está incompleto").css('color', 'red');
+			resultado = 1;
+		}
+
+		return resultado;
+	}
     
     $(document).ready(function() 
     {
@@ -389,6 +451,8 @@
             }
             $("#tax-phone").css('background-color', '#ffff99');
         };
+		
+		$('.entero').numeric();
 
         $('#surname-father').click(function(e) 
         {
@@ -441,39 +505,50 @@
 
         $('#save-parentsandguardians').click(function(e) 
         {
-            $('#surname').val($.trim($('#surname').val().toUpperCase()));
-            $('#second-surname').val($.trim($('#second-surname').val().toUpperCase()));
-            $('#first-name').val($.trim($('#first-name').val().toUpperCase()));
-            $('#second-name').val($.trim($('#second-name').val().toUpperCase()));
-            $('#email').val($.trim($('#email').val().toLowerCase()));
-            $('#address').val($.trim($('#address').val().toUpperCase()));
-            $('#profession').val($.trim($('#profession').val().toUpperCase()));
-            $('#workplace').val($.trim($('#workplace').val().toUpperCase()));
-            $('#professional-position').val($.trim($('#professional-position').val().toUpperCase()));
-            $('#work-phone').val($.trim($('#work-phone').val().toUpperCase()));
-            $('#work-address').val($.trim($('#work-address').val().toUpperCase()));
-
-            $('#family').val($.trim($('#family').val().toUpperCase()));
-
-            $('#surname-father').val($.trim($('#surname-father').val().toUpperCase()));
-            $('#second-surname-father').val($.trim($('#second-surname-father').val().toUpperCase()));
-            $('#first-name-father').val($.trim($('#first-name-father').val().toUpperCase()));
-            $('#second-name-father').val($.trim($('#second-name-father').val().toUpperCase()));
-            $('#email-father').val($.trim($('#email-father').val().toLowerCase()));
-            $('#address-father').val($.trim($('#address-father').val().toUpperCase()));
-			$('#profession-father').val($.trim($('#profession-father').val().toUpperCase()));
-            
-            $('#surname-mother').val($.trim($('#surname-mother').val().toUpperCase()));
-            $('#second-surname-mother').val($.trim($('#second-surname-mother').val().toUpperCase()));
-            $('#first-name-mother').val($.trim($('#first-name-mother').val().toUpperCase()));
-            $('#second-name-mother').val($.trim($('#second-name-mother').val().toUpperCase()));
-            $('#email-mother').val($.trim($('#email-mother').val().toLowerCase()));
-            $('#address-mother').val($.trim($('#address-mother').val().toUpperCase()));
-			$('#profession-mother').val($.trim($('#profession-mother').val().toUpperCase()));
+			resultado = validarDatosFiscales();
 			
-            $('#client').val($.trim($('#client').val().toUpperCase()));
-            $('#fiscal-address').val($.trim($('#fiscal-address').val().toUpperCase()));
+			if (resultado > 0)
+			{
+				alert("Estimado representante uno o más datos fiscales presentan errores. Por favor revise");
+				return false;
+			}
+			else
+			{		
+				$('#surname').val($.trim($('#surname').val().toUpperCase()));
+				$('#second-surname').val($.trim($('#second-surname').val().toUpperCase()));
+				$('#first-name').val($.trim($('#first-name').val().toUpperCase()));
+				$('#second-name').val($.trim($('#second-name').val().toUpperCase()));
+				$('#email').val($.trim($('#email').val().toLowerCase()));
+				$('#address').val($.trim($('#address').val().toUpperCase()));
+				$('#profession').val($.trim($('#profession').val().toUpperCase()));
+				$('#workplace').val($.trim($('#workplace').val().toUpperCase()));
+				$('#professional-position').val($.trim($('#professional-position').val().toUpperCase()));
+				$('#work-phone').val($.trim($('#work-phone').val().toUpperCase()));
+				$('#work-address').val($.trim($('#work-address').val().toUpperCase()));
+
+				$('#family').val($.trim($('#family').val().toUpperCase()));
+
+				$('#surname-father').val($.trim($('#surname-father').val().toUpperCase()));
+				$('#second-surname-father').val($.trim($('#second-surname-father').val().toUpperCase()));
+				$('#first-name-father').val($.trim($('#first-name-father').val().toUpperCase()));
+				$('#second-name-father').val($.trim($('#second-name-father').val().toUpperCase()));
+				$('#email-father').val($.trim($('#email-father').val().toLowerCase()));
+				$('#address-father').val($.trim($('#address-father').val().toUpperCase()));
+				$('#profession-father').val($.trim($('#profession-father').val().toUpperCase()));
+				
+				$('#surname-mother').val($.trim($('#surname-mother').val().toUpperCase()));
+				$('#second-surname-mother').val($.trim($('#second-surname-mother').val().toUpperCase()));
+				$('#first-name-mother').val($.trim($('#first-name-mother').val().toUpperCase()));
+				$('#second-name-mother').val($.trim($('#second-name-mother').val().toUpperCase()));
+				$('#email-mother').val($.trim($('#email-mother').val().toLowerCase()));
+				$('#address-mother').val($.trim($('#address-mother').val().toUpperCase()));
+				$('#profession-mother').val($.trim($('#profession-mother').val().toUpperCase()));
+				
+				$('#client').val($.trim($('#client').val().toUpperCase()));
+				$('#fiscal-address').val($.trim($('#fiscal-address').val().toUpperCase()));
+			}
         });
+		
         $("#item").change(displayVals);
     });    
 </script>

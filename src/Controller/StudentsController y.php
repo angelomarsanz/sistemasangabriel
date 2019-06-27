@@ -38,7 +38,8 @@ class StudentsController extends AppController
     }
     
     public function testFunction()
-    {
+    { 
+		/*
 		$contador = 0;
 
 		$students = $this->Students->find('all')->where([['number_of_brothers' => '2018'], ['new_student' => 1]]);
@@ -65,23 +66,49 @@ class StudentsController extends AppController
 		}	
 		
 		$this->Flash->success(__('Registros actualizados ' . $contador));
+		*/
     }
 	
     public function testFunction2()
     {
-		$studentTransactions = $this->Students->Studenttransactions->find('all')->where(['transaction_type' => "Mensualidad", 'paid_out' => 1]);
-		
+		$contadorInscritos = 0;
 		$contador = 0;
+
+		$students = $this->Students->find('all')->where(['balance' => '2018']);
 		
-		foreach ($studentTransactions as $studentTransaction)
+		foreach ($students as $student)
 		{
-			$mensualidadEstudiante = $this->Students->Studenttransactions->get($studentTransaction->id);
-			$mensualidadEstudiante->amount_dollar = 20;
-			if (!($this->Students->Studenttransactions->save($mensualidadEstudiante))) 
+			$matricula2019 = $this->Students->Studenttransactions->find('all')
+				->where(['student_id' => $student->id, 'transaction_description' => 'Matrícula 2019'])
+				->order(['created' => "DESC"]);
+				
+			$row = $matricula2019->first();
+				
+			if ($row)
 			{
-				$this->Flash->error(__('No se pudo actualizar el registro ' . $studenttransaction->id));
+				$seccion = $this->Students->Sections->get($student->section_id);
+				
+				$this->Flash->success(__($student->surname . ' ' . $student->first_name . ' ' . $seccion->level . ' ' . $seccion->sublevel . ' ' .$seccion->section . ' - ' . $student->level_of_study));
+				$contadorInscritos++;
+			}
+			else
+			{
+				$estudiante = $this->Students->get($student->id);
+				
+				$estudiante->level_of_study = "";
+				
+				if ($this->Students->save($estudiante)) 
+				{
+					$contador++;
+				} 
+				else 
+				{
+					$this->Flash->error(__('El alumno no pudo ser actualizado ' . $student->id));
+				}
 			}
 		}
+		$this->Flash->success(__('Alumnos ya actualizados ' . $contadorInscritos));
+		$this->Flash->success(__('Alumnos actualizados ' . $contador));
     }
 	
     /**
@@ -1295,8 +1322,8 @@ class StudentsController extends AppController
 
 		$school = $this->Schools->get(2);
 				
-		$yearFrom = $school->current_year_registration;
-		$yearUntil = $school->next_year_registration;
+		$yearFrom = $school->current_school_year;
+		$yearUntil = $yearFrom + 1;
 			
         $yearMonthFrom = $yearFrom . '08';
         
@@ -1784,6 +1811,146 @@ class StudentsController extends AppController
 		
 		$dollarExchangeRate = $rate->amount; 
 		
+		$pepito = $this->mesesTarifas();
+				
+		$tablaMensualidades = 
+			[
+				201609,
+				201610,
+				201611,
+				201612,
+				201701,
+				201702,
+				201703,
+				201704,
+				201705,
+				201706,
+				201707,
+				201708,
+				201709,
+				201710,
+				201711,
+				201712,
+				201801,
+				201802,
+				201803,
+				201804,
+				201805,
+				201806,
+				201807,
+				201808,
+				201809,
+				201810,
+				201811,
+				201812,
+				201901,
+				201902,
+				201903,
+				201904,
+				201905,
+				201906,
+				201907,
+				201908,
+				201909,
+				201910,
+				201911,
+				201912,
+				202001,
+				202002,
+				202003,
+				202004,
+				202005,
+				202006,
+				202007,
+				202008,
+				202009,
+				202010,
+				202011,
+				202012,
+				202101,
+				202102,
+				202103,
+				202104,
+				202105,
+				202106,
+				202107,
+				202108,
+				202109,
+				202110,
+				202111,
+				202112
+			];
+		
+		$this->loadModel('Rates');
+		
+		$rate = $this->Rates->get(58);
+		
+		$dollarExchangeRate = $rate->amount; 
+				
+		$mensualidades = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'], 
+			'order' => ['Rates.rate_year' => 'ASC', 'Rates.rate_month' => 'ASC', 'Rates.created' => 'DESC']]);
+		
+		$contadorRegistros = $mensualidades->count();
+		
+		if ($contadorRegistros > 0)
+		{
+			$mesesTarifas = [];
+			$tarifaDolarAnterior = 0;
+			$tarifaBolivarAnterior = 0;
+			$anoMesAnterior = "";
+			
+			$tarifaDolarActual = 0;
+			$tarifaBolivarActual = 0;
+			$anoMesActual = "";
+			
+			foreach ($tablaMensualidades as $tablaMensualidad)
+			{
+				$indicadorEncontrado = 0;
+				
+				foreach ($mensualidades as $mensualidad)
+				{
+					$anoMesAnterior = $anoMesActual;
+					$anoMesActual = $mensualidad->rate_year . $mensualidad->rate_month;
+					
+					$tarifaDolarAnterior = $tarifaDolarActual;
+					$tarifaBolivarAnterior = $tarifaBolivarActual;
+					
+					if ($anoMesActual < 201811)
+					{
+						$tarifaDolarActual = $mensualidad->amount/$dollarExchangeRate;
+					}
+					else
+					{
+						$tarifaDolarActual = $mensualidad->amount;
+					}
+					
+					$tarifaBolivarActual = round($tarifaDolarActual * $dollarExchangeRate);	
+					
+					if ($anoMesActual == $tablaMensualidad)
+					{							
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarActual, 'tarifaBolivar' => $tarifaBolivarActual];
+						$indicadorEncontrado = 1;
+						break;
+					}
+					elseif ($anoMesActual > $tablaMensualidad)
+					{
+						break;
+					}
+				}
+				if ($indicadorEncontrado == 0)
+				{
+					if ($tablaMensualidad < $anoMesActual)
+					{
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarAnterior, 'tarifaBolivar' => $tarifaBolivarAnterior];
+					}
+					else
+					{
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarActual, 'tarifaBolivar' => $tarifaBolivarActual];
+					}
+				}					
+			}
+		}
+				
         $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'],
             'order' => ['Rates.created' => 'DESC'] ]);
 			
@@ -1797,10 +1964,10 @@ class StudentsController extends AppController
 		{
 			$amountMonthly = 0;
 		}
-		
-		$yearFrom = $school->current_year_registration;
-		$yearUntil = $school->next_year_registration;
 				
+		$yearFrom = $school->current_school_year;
+		$yearUntil = $yearFrom + 1;
+						
 		$yearMonthFrom = $yearFrom . '09';
 		
         if ($currentDate->month < 10)
@@ -1866,10 +2033,8 @@ class StudentsController extends AppController
 		foreach ($studentsFor as $studentsFors)
 		{
 			$nameSection = $this->Students->Sections->get($studentsFors->section_id);
-				
-			$level = $this->sublevelLevel($nameSection->sublevel);
-				
-			if ($level == $studentsFors->level_of_study)
+								
+			if ($studentsFors->section_id > 1)
 			{
 				$delinquentMonths = 0;
 				
@@ -2601,5 +2766,147 @@ class StudentsController extends AppController
             } 
         } 
         return $temp_array; 
-    } 
+    }
+	
+	public function mesesTarifas()
+	{		
+		$tablaMensualidades = 
+			[
+				201609,
+				201610,
+				201611,
+				201612,
+				201701,
+				201702,
+				201703,
+				201704,
+				201705,
+				201706,
+				201707,
+				201708,
+				201709,
+				201710,
+				201711,
+				201712,
+				201801,
+				201802,
+				201803,
+				201804,
+				201805,
+				201806,
+				201807,
+				201808,
+				201809,
+				201810,
+				201811,
+				201812,
+				201901,
+				201902,
+				201903,
+				201904,
+				201905,
+				201906,
+				201907,
+				201908,
+				201909,
+				201910,
+				201911,
+				201912,
+				202001,
+				202002,
+				202003,
+				202004,
+				202005,
+				202006,
+				202007,
+				202008,
+				202009,
+				202010,
+				202011,
+				202012,
+				202101,
+				202102,
+				202103,
+				202104,
+				202105,
+				202106,
+				202107,
+				202108,
+				202109,
+				202110,
+				202111,
+				202112
+			];
+		
+		$this->loadModel('Rates');
+		
+		$rate = $this->Rates->get(58);
+		
+		$dollarExchangeRate = $rate->amount; 
+				
+		$mensualidades = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'], 
+			'order' => ['Rates.rate_year' => 'ASC', 'Rates.rate_month' => 'ASC', 'Rates.created' => 'DESC']]);
+		
+		$contadorRegistros = $mensualidades->count();
+		
+		if ($contadorRegistros > 0)
+		{
+			$mesesTarifas = [];
+			$tarifaDolarAnterior = 0;
+			$tarifaBolivarAnterior = 0;
+			$anoMesAnterior = "";
+			
+			$tarifaDolarActual = 0;
+			$tarifaBolivarActual = 0;
+			$anoMesActual = "";
+			
+			foreach ($tablaMensualidades as $tablaMensualidad)
+			{
+				$indicadorEncontrado = 0;
+				
+				foreach ($mensualidades as $mensualidad)
+				{
+					$anoMesAnterior = $anoMesActual;
+					$anoMesActual = $mensualidad->rate_year . $mensualidad->rate_month;
+					
+					$tarifaDolarAnterior = $tarifaDolarActual;
+					$tarifaBolivarAnterior = $tarifaBolivarActual;
+					
+					if ($anoMesActual < 201811)
+					{
+						$tarifaDolarActual = $mensualidad->amount/$dollarExchangeRate;
+					}
+					else
+					{
+						$tarifaDolarActual = $mensualidad->amount;
+					}
+					
+					$tarifaBolivarActual = round($tarifaDolarActual * $dollarExchangeRate);	
+					
+					if ($anoMesActual == $tablaMensualidad)
+					{							
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarActual, 'tarifaBolivar' => $tarifaBolivarActual];
+						$indicadorEncontrado = 1;
+						break;
+					}
+					elseif ($anoMesActual > $tablaMensualidad)
+					{
+						break;
+					}
+				}
+				if ($indicadorEncontrado == 0)
+				{
+					if ($tablaMensualidad < $anoMesActual)
+					{
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarAnterior, 'tarifaBolivar' => $tarifaBolivarAnterior];
+					}
+					else
+					{
+						$mesesTarifas[] = ['anoMes' => $tablaMensualidad, 'tarifaDolar' => $tarifaDolarActual, 'tarifaBolivar' => $tarifaBolivarActual];
+					}
+				}					
+			}
+		}	
+		return $mesesTarifas;
+	}	
 }

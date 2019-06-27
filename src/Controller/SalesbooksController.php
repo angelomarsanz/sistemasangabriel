@@ -193,7 +193,7 @@ class SalesbooksController extends AppController
 					$salesbook->ventas_exoneradas = 0;
 				}        
 				$salesbook->base = "";
-				$salesbook->alicuota = "9%";
+				$salesbook->alicuota = "16%";
 				$salesbook->iva = 0;
 				$salesbook->right_bill_number = $invoicesBill->right_bill_number;
 				$salesbook->previous_control_number = $invoicesBill->previous_control_number;

@@ -61,6 +61,7 @@
 				<p><?= $this->html->image('../files/schools/profile_photo/' . $school->get('profile_photo_dir') . '/'. $school->get('profile_photo'), ['width' => 200, 'height' => 200, 'class' => 'img-thumbnail img-responsive']) ?></p>
 			</div>
 			<div style="float: left; width: 90%;">
+				<p style="text-align: right;">Página 1</p>
 				<h5><b><?= $school->name ?></b></h5>
 				<p>RIF: <?= $school->rif ?></p>
 				<h3 style="text-align: center;"><?= 'Resumen de Alumnos con Mensualidades Pendientes de Pago al: ' . $currentDate->format('d-m-Y') ?> </h3>
@@ -119,10 +120,27 @@
 				</tbody>
 			</table>
 		</div>
-		<br />
-		<div>
-			<p><b><?= 'Total morosidad a la fecha Bs. ' . number_format($totalDebt, 2, ",", ".") ?><b></p>
+		<div class="saltopagina">
+			<div style="float: left; width:10%;">
+				<p><?= $this->html->image('../files/schools/profile_photo/' . $school->get('profile_photo_dir') . '/'. $school->get('profile_photo'), ['width' => 200, 'height' => 200, 'class' => 'img-thumbnail img-responsive']) ?></p>
+			</div>
+			<div style="float: left; width: 90%;">
+				<p style="text-align: right;">Página 2</p>
+				<h5><b><?= $school->name ?></b></h5>
+				<p>RIF: <?= $school->rif ?></p>
+				<h3 style="text-align: center;"><?= 'Resumen de Alumnos con Mensualidades Pendientes de Pago al: ' . $currentDate->format('d-m-Y') ?> </h3>
+			</div>
 		</div>
+		<div style="clear: both;">
+			<br />
+			<br />
+			<p><b><?= 'Total morosidad a la fecha Bs. ' . number_format($totalDebt, 2, ",", ".") ?><b></p>
+			<p><b><?= 'Porcentaje de alumnos morosos: ' . number_format((($tDefaulters[0]['defaulters']/$tDefaulters[0]['totalStudents'])*100), 2, ",", ".") . '%' ?><b></p>
+			<p><b><?= 'Porcentaje de alumnos solventes: ' . number_format((($tDefaulters[0]['solvents']/$tDefaulters[0]['totalStudents'])*100), 2, ",", ".") . '%' ?><b></p>
+			<p><b><?= 'Porcentaje de alumnos becados: ' . number_format((($tDefaulters[0]['scholarship']/$tDefaulters[0]['totalStudents'])*100), 2, ",", ".") . '%' ?><b></p>
+			<br />
+			<br />
+			</div>
 		<br />
 	</div>
 </div>

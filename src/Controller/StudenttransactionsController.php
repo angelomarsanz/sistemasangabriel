@@ -3847,8 +3847,8 @@ class StudenttransactionsController extends AppController
 
 		$school = $this->Schools->get(2);
 				
-		$yearFrom = $school->current_year_registration;
-		$yearUntil = $school->next_year_registration;
+		$yearFrom = $school->current_school_year;
+		$yearUntil = $yearFrom + 1;
 
 		$enrollment = 'Matrícula ' . $yearFrom;
 		

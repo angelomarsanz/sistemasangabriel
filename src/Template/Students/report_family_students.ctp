@@ -59,134 +59,211 @@
 	<?php $accountRecords = 0; ?>
 	<?php foreach ($familyStudents as $familyStudent): ?>
 		<?php if (isset($arraySignedUp[$familyStudent->id])): ?>
-		<?php if ($arraySignedUp[$familyStudent->id] == "Pagado"): ?>
-		<?php 
-			$lastYearRegistration = $familyStudent->balance;		
-			if ($familyStudent->student_condition == "Regular"):
-				if ($familyStudent->new_student == 0):
-					$studentCondition = $familyStudent->student_condition;
-				else:
-					$studentCondition = "Nuevo";
-				endif;
-				if ($familyStudent->balance == $currentYearRegistration && isset($arraySignedUp[$familyStudent->id])):
-					$lastYearRegistration .= '-' . $arraySignedUp[$familyStudent->id];
-				endif;
-			else:
-				$studentCondition = $familyStudent->student_condition;
-			endif;
-		?>
-		<?php if ($accountRecords == 0): ?>
-			<?php $accountRecords++; ?>
-			<table id="family-students" name="family_students" class="table noverScreen">
-				<thead>
-					<tr>
-						<th></th>
-						<th><?= 'Fecha: ' . $currentDate->format('d-m-Y') ?></th>
-					</tr>
-					<tr>
-						<th></th>
-						<th><b>Colegio San Gabriel Arcángel</b></th>
-					</tr>
-					<tr>
-						<th></th>
-						<th><b>Resumen de familias - estudiantes</b></th>
-					</tr>			
-					<tr>
-						<th></th>
-						<th></th>
-					</tr>	
-					<?php if ($filtersReport == 'Regular' || $filtersReport == '*'): ?>
-						<tr>
-							<th></th>
-							<th><?= 'Alumnos regulares inscritos para este período: ' . $accountRegularRegistration ?></th>
-						</tr>
-					<?php endif; ?>
-					<?php if ($filtersReport == 'Nuevo' || $filtersReport == '*'): ?>
-						<tr>
-							<th></th>
-							<th><?= 'Alumnos nuevos inscritos para este período: ' . $accountNewRegistration ?></th>
-						</tr>
-					<?php endif; ?>
-					<?php if ($filtersReport == '*'): ?>
-						<tr>
-							<th></th>
-							<th><?= 'Alumnos egresados: ' . $accountStudents['Graduated'] ?></th>
-						</tr>
-						<tr>
-							<th></th>
-							<th><?= 'Alumnos retirados: ' . $accountStudents['Retired'] ?></th>
-						</tr>
-						<tr>
-							<th></th>
-							<th><?= 'Alumnos expulsados: ' . $accountStudents['Expelled'] ?></th>
-						</tr>
-						<tr>
-							<th></th>
-							<th><?= 'Alumnos suspendidos: ' . $accountStudents['Discontinued'] ?></th>
-						</tr>		
-					<?php endif; ?>
-					<tr>
-						<th></th>
-						<th></th>
-					</tr>
-					<tr>
-						<th></th>
-						<th><b>Detalle de familias - estudiantes</b></th>
-					</tr>			
-					<tr>
-						<th></th>
-						<th></th>
-					</tr>
-					<tr>
-						<th scope="col"><b>Nro.</b></th>
-						<th scope="col"><b>Familia</b></th>
-						<th scope="col"><b>Estatus</b></th>
-						<th scope="col"><b>Alumno</b></th>
-						<th scope="col" class=<?= $arrayMark['Students.sex'] ?>><b>Sexo</b></th>
-						<th scope="col" class=<?= $arrayMark['Students.nationality'] ?>><b>Nacionalidad alumno</b></th>
-						<th scope="col" class=<?= $arrayMark['Students.identity_card'] ?>><b>Cédula o pasaporte alumno</b></th>	
-						<th scope="col"><b>Año Inscripción</b></th>							
-						<th scope="col" class=<?= $arrayMark['Students.section_id'] ?>><b>Grado y sección</b></th>	
-						
-						<th scope="col" class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><b>Nombre Representante</b></th>
-						<th scope="col" class=<?= $arrayMark['Parentsandguardians.sex'] ?>><b>Sexo</b></th>
-						<th scope="col" class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><b>Cédula o pasaporte representante</b></th>
-						<th scope="col" class=<?= $arrayMark['Parentsandguardians.work_phone'] ?>><b>Teléfono trabajo representante</b></th>
-						<th scope="col" class=<?= $arrayMark['Parentsandguardians.cell_phone'] ?>><b>Celular representante</b></th>
-						<th scope="col" class=<?= $arrayMark['Parentsandguardians.email'] ?>><b>Email representante</b></th>
-						
-						<th scope="col"><b>Nombre del padre</b></th>
-						<th scope="col"><b>Cédula o pasaporte del padre</b></th>
-						<th scope="col"><b>Teléfono trabajo del padre</b></th>
-						<th scope="col"><b>Celular del padre</b></th>
-						<th scope="col"><b>Email del padre</b></th>
-						
-						<th scope="col"><b>Nombre de la madre</b></th>
-						<th scope="col"><b>Cédula o pasaporte de la madre</b></th>
-						<th scope="col"><b>Teléfono trabajo de la madre</b></th>
-						<th scope="col"><b>Celular de la madre</b></th>
-						<th scope="col"><b>Email de la madre</b></th>
-					</tr>
-				</thead>
-				<tbody>
+			<?php if ($arraySignedUp[$familyStudent->id] == "Pagado"): ?>
+				<?php 
+					$lastYearRegistration = $familyStudent->balance;		
+					if ($familyStudent->student_condition == "Regular"):
+						if ($familyStudent->new_student == 0):
+							$studentCondition = $familyStudent->student_condition;
+							if ($familyStudent->balance == $anoEscolarActual && isset($arraySignedUp[$familyStudent->id])):
+								$lastYearRegistration .= '-' . $arraySignedUp[$familyStudent->id];
+							endif;
+						else:
+							$studentCondition = "Nuevo";
+							if ($familyStudent->balance == $proximoAnoEscolar && isset($arraySignedUp[$familyStudent->id])):
+								$lastYearRegistration .= '-' . $arraySignedUp[$familyStudent->id];
+							endif;
+						endif;
+
+					else:
+						$studentCondition = $familyStudent->student_condition;
+					endif;
+				?>
+				<?php if ($accountRecords == 0): ?>
+					<?php $accountRecords++; ?>
+					<table id="family-students" name="family_students" class="table noverScreen">
+						<thead>
+							<tr>
+								<th></th>
+								<th><?= 'Fecha: ' . $currentDate->format('d-m-Y') ?></th>
+							</tr>
+							<tr>
+								<th></th>
+								<th><b>Colegio San Gabriel Arcángel</b></th>
+							</tr>
+							<tr>
+								<th></th>
+								<th><b>Resumen de familias - alumnos</b></th>
+							</tr>			
+							<tr>
+								<th></th>
+								<th></th>
+							</tr>
+							<?php if ($filtersReport == 'Regular' || $filtersReport == '*'): ?>
+								<?php if ($orderReport == "Familia"): ?>
+									<tr>
+										<th></th>
+										<th><?= 'Total familias en este período: ' . $contadorFamilias ?></th>
+									</tr>
+								<?php endif; ?>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos regulares inscritos para este período: ' . $accountRegularRegistration ?></th>
+								</tr>
+							<?php endif; ?>
+							<?php if ($filtersReport == 'Nuevo' || $filtersReport == '*'): ?>
+								<?php if ($orderReport == "Familia"): ?>
+									<tr>
+										<th></th>
+										<th><?= 'Total familias nuevas en este período: ' . $contadorFamilias ?></th>
+									</tr>
+								<?php endif; ?>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos nuevos inscritos para este período: ' . $accountNewRegistration ?></th>
+								</tr>
+							<?php endif; ?>
+							<?php if ($filtersReport == '*'): ?>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos egresados: ' . $accountStudents['Graduated'] ?></th>
+								</tr>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos retirados: ' . $accountStudents['Retired'] ?></th>
+								</tr>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos expulsados: ' . $accountStudents['Expelled'] ?></th>
+								</tr>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos suspendidos: ' . $accountStudents['Discontinued'] ?></th>
+								</tr>		
+							<?php endif; ?>
+							<tr>
+								<th></th>
+								<th></th>
+							</tr>
+							
+							<?php if ($orderReport == "Familia"): ?>
+								<tr>
+									<th></th>
+									<th><b>Detalle de familias - alumnos</b></th>
+								</tr>	
+							<?php else: ?>
+								<tr>
+									<th></th>
+									<th><b>Detalle de alumnos</b></th>
+								</tr>	
+							<?php endif; ?>
+							
+							<tr>
+								<th></th>
+								<th></th>
+							</tr>
+							<tr>
+								<th scope="col"><b>Nro.</b></th>
+								
+								<?php if ($orderReport == "Familia"): ?>
+									<th scope="col"><b>Familia</b></th>
+									<th scope="col"><b>Alumno</b></th>
+								<?php else: ?>
+									<th scope="col"><b>Alumno</b></th>
+									<th scope="col"><b>Familia</b></th>
+								<?php endif; ?>
+								
+								<th scope="col"><b>Estatus</b></th>
+								<th scope="col" class=<?= $arrayMark['Students.sex'] ?>><b>Sexo</b></th>
+								<th scope="col" class=<?= $arrayMark['Students.nationality'] ?>><b>Nacionalidad alumno</b></th>
+								<th scope="col" class=<?= $arrayMark['Students.identity_card'] ?>><b>Cédula o pasaporte alumno</b></th>	
+								<th scope="col"><b>Año Inscripción</b></th>							
+								<th scope="col" class=<?= $arrayMark['Students.section_id'] ?>><b>Grado y sección</b></th>	
+								
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><b>Nombre Representante</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.sex'] ?>><b>Sexo</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><b>Cédula o pasaporte representante</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.work_phone'] ?>><b>Teléfono trabajo representante</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.cell_phone'] ?>><b>Celular representante</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.email'] ?>><b>Email representante</b></th>
+								
+								<th scope="col"><b>Nombre del padre</b></th>
+								<th scope="col"><b>Cédula o pasaporte del padre</b></th>
+								<th scope="col"><b>Teléfono trabajo del padre</b></th>
+								<th scope="col"><b>Celular del padre</b></th>
+								<th scope="col"><b>Email del padre</b></th>
+								
+								<th scope="col"><b>Nombre de la madre</b></th>
+								<th scope="col"><b>Cédula o pasaporte de la madre</b></th>
+								<th scope="col"><b>Teléfono trabajo de la madre</b></th>
+								<th scope="col"><b>Celular de la madre</b></th>
+								<th scope="col"><b>Email de la madre</b></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><?= $accountRecords ?></td>
+								
+								<?php if ($orderReport == "Familia"): ?>
+									<td><?= $familyStudent->parentsandguardian->family ?></td>                        
+									<td><?= $familyStudent->full_name ?></td>
+								<?php else: ?>
+									<td><?= $familyStudent->full_name ?></td>								
+									<td><?= $familyStudent->parentsandguardian->family ?></td>                        
+								<?php endif; ?>
+								
+								<td><?= $studentCondition ?></td>
+								<td class=<?= $arrayMark['Students.sex'] ?>><?= $familyStudent->sex ?></td>
+								<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
+								<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
+								<td><?= $lastYearRegistration ?></td>
+								<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
+
+								<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>							
+								<td class=<?= $arrayMark['Parentsandguardians.sex'] ?>><?= $familyStudent->parentsandguardian->sex ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><?= $familyStudent->parentsandguardian->type_of_identification . '-' . $familyStudent->parentsandguardian->identidy_card ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.work_phone'] ?>><?= $familyStudent->parentsandguardian->work_phone ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.cell_phone'] ?>><?= $familyStudent->parentsandguardian->cell_phone ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.email'] ?>><?= $familyStudent->parentsandguardian->email ?></td>
+							
+								<td><?= $familyStudent->parentsandguardian->second_surname_father . ' ' . $familyStudent->parentsandguardian->surname_father . ' ' . $familyStudent->parentsandguardian->first_name_father . ' ' . $familyStudent->parentsandguardian->second_name_father ?></td>							
+								<td><?= $familyStudent->parentsandguardian->type_of_identification_father . '-' . $familyStudent->parentsandguardian->identidy_card_father ?></td>
+								<td><?= $familyStudent->parentsandguardian->work_phone_father ?></td>
+								<td><?= $familyStudent->parentsandguardian->cell_phone_father ?></td>
+								<td><?= $familyStudent->parentsandguardian->email_father ?></td>
+								
+								<td><?= $familyStudent->parentsandguardian->second_surname_mother . ' ' . $familyStudent->parentsandguardian->surname_mother . ' ' . $familyStudent->parentsandguardian->first_name_mother . ' ' . $familyStudent->parentsandguardian->second_name_mother ?></td>							
+								<td><?= $familyStudent->parentsandguardian->type_of_identification_mother . '-' . $familyStudent->parentsandguardian->identidy_card_mother ?></td>
+								<td><?= $familyStudent->parentsandguardian->work_phone_mother ?></td>
+								<td><?= $familyStudent->parentsandguardian->cell_phone_mother ?></td>
+								<td><?= $familyStudent->parentsandguardian->email_mother ?></td>
+							</tr>
+				<?php else: ?>
+					<?php $accountRecords++; ?>
 					<tr>
 						<td><?= $accountRecords ?></td>
-						<td><?= $familyStudent->parentsandguardian->family ?></td>                        
-						<td><?= $studentCondition ?></td>
-						<td><?= $familyStudent->full_name ?></td>
+							<?php if ($orderReport == "Familia"): ?>
+								<td><?= $familyStudent->parentsandguardian->family ?></td>                        								
+								<td><?= $familyStudent->full_name ?></td>
+							<?php else: ?>
+								<td><?= $familyStudent->full_name ?></td>								
+								<td><?= $familyStudent->parentsandguardian->family ?></td>                        
+							<?php endif; ?>
+							
+						<td><?= $studentCondition ?></td>	
 						<td class=<?= $arrayMark['Students.sex'] ?>><?= $familyStudent->sex ?></td>
 						<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 						<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
 						<td><?= $lastYearRegistration ?></td>
 						<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
 
-						<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>							
+						<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>
 						<td class=<?= $arrayMark['Parentsandguardians.sex'] ?>><?= $familyStudent->parentsandguardian->sex ?></td>
 						<td class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><?= $familyStudent->parentsandguardian->type_of_identification . '-' . $familyStudent->parentsandguardian->identidy_card ?></td>
 						<td class=<?= $arrayMark['Parentsandguardians.work_phone'] ?>><?= $familyStudent->parentsandguardian->work_phone ?></td>
 						<td class=<?= $arrayMark['Parentsandguardians.cell_phone'] ?>><?= $familyStudent->parentsandguardian->cell_phone ?></td>
 						<td class=<?= $arrayMark['Parentsandguardians.email'] ?>><?= $familyStudent->parentsandguardian->email ?></td>
-					
+
 						<td><?= $familyStudent->parentsandguardian->second_surname_father . ' ' . $familyStudent->parentsandguardian->surname_father . ' ' . $familyStudent->parentsandguardian->first_name_father . ' ' . $familyStudent->parentsandguardian->second_name_father ?></td>							
 						<td><?= $familyStudent->parentsandguardian->type_of_identification_father . '-' . $familyStudent->parentsandguardian->identidy_card_father ?></td>
 						<td><?= $familyStudent->parentsandguardian->work_phone_father ?></td>
@@ -198,42 +275,10 @@
 						<td><?= $familyStudent->parentsandguardian->work_phone_mother ?></td>
 						<td><?= $familyStudent->parentsandguardian->cell_phone_mother ?></td>
 						<td><?= $familyStudent->parentsandguardian->email_mother ?></td>
+
 					</tr>
-		<?php else: ?>
-			<?php $accountRecords++; ?>
-			<tr>
-				<td><?= $accountRecords ?></td>
-				<td><?= $familyStudent->parentsandguardian->family ?></td>
-				<td><?= $studentCondition ?></td>
-				<td><?= $familyStudent->full_name ?></td>
-				<td class=<?= $arrayMark['Students.sex'] ?>><?= $familyStudent->sex ?></td>
-				<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
-				<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
-				<td><?= $lastYearRegistration ?></td>
-				<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
-
-				<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>
-				<td class=<?= $arrayMark['Parentsandguardians.sex'] ?>><?= $familyStudent->parentsandguardian->sex ?></td>
-				<td class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><?= $familyStudent->parentsandguardian->type_of_identification . '-' . $familyStudent->parentsandguardian->identidy_card ?></td>
-				<td class=<?= $arrayMark['Parentsandguardians.work_phone'] ?>><?= $familyStudent->parentsandguardian->work_phone ?></td>
-				<td class=<?= $arrayMark['Parentsandguardians.cell_phone'] ?>><?= $familyStudent->parentsandguardian->cell_phone ?></td>
-				<td class=<?= $arrayMark['Parentsandguardians.email'] ?>><?= $familyStudent->parentsandguardian->email ?></td>
-
-				<td><?= $familyStudent->parentsandguardian->second_surname_father . ' ' . $familyStudent->parentsandguardian->surname_father . ' ' . $familyStudent->parentsandguardian->first_name_father . ' ' . $familyStudent->parentsandguardian->second_name_father ?></td>							
-				<td><?= $familyStudent->parentsandguardian->type_of_identification_father . '-' . $familyStudent->parentsandguardian->identidy_card_father ?></td>
-				<td><?= $familyStudent->parentsandguardian->work_phone_father ?></td>
-				<td><?= $familyStudent->parentsandguardian->cell_phone_father ?></td>
-				<td><?= $familyStudent->parentsandguardian->email_father ?></td>
-				
-				<td><?= $familyStudent->parentsandguardian->second_surname_mother . ' ' . $familyStudent->parentsandguardian->surname_mother . ' ' . $familyStudent->parentsandguardian->first_name_mother . ' ' . $familyStudent->parentsandguardian->second_name_mother ?></td>							
-				<td><?= $familyStudent->parentsandguardian->type_of_identification_mother . '-' . $familyStudent->parentsandguardian->identidy_card_mother ?></td>
-				<td><?= $familyStudent->parentsandguardian->work_phone_mother ?></td>
-				<td><?= $familyStudent->parentsandguardian->cell_phone_mother ?></td>
-				<td><?= $familyStudent->parentsandguardian->email_mother ?></td>
-
-			</tr>
-		<?php endif; ?>
-		<?php endif; ?>
+				<?php endif; ?>
+			<?php endif; ?>
 		<?php endif; ?>
 	<?php endforeach ?>
 	</tbody>

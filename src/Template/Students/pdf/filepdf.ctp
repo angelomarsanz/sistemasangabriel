@@ -133,7 +133,7 @@
         excepción.</p>
         <p style="text-align: justify;">6. Asistir a clases con <b>puntualidad</b> y no salir de ella hasta su finalización, durante el desarrollo de las mismas
         deben tener una postura correcta.</p>
-        <p style="text-align: justify;">7. Por normas de higiene y de conservación no se premite traer <b>chicles</b>, pero si una buena <b>merienda.</b></p>
+        <p style="text-align: justify;">7. Por normas de higiene y de conservación no se permite traer <b>chicles</b>, pero si una buena <b>merienda.</b></p>
         <p style="text-align: justify;">8. Todo equipo electrónico utilizado dentro del colegio en su horario escolar, su finalidad debe ser educativa. El colegio no se hará responsable
         por su pérdida o desaparición.</p>
         <p style="text-align: justify;">9. <b>Traer el uniforme completo:</b> Camisa con la insignia respectiva (con franelilla blanca debajo de la misma),
@@ -141,11 +141,12 @@
         <p style="text-align: justify;">10. Cumplir con el uniforme de Educación Física.</p>
         <p  style="text-align: justify;"> 11. Una vez que usted representante, realice el proceso de Matriculación de su representado, 
         está haciendo uso del cupo que le corresponde, por lo cual este cupo no puede ser concedido a otro aspirante a ingresar. Así que una vez
-        efectuado este procesoy posteriormente usted decide <b>no continuar</b> en el colegio <b>no tendrá derecho a que se le reintegre lo cancelado</b> por 
+        efectuado este proceso y posteriormente usted decide <b>no continuar</b> en el colegio <b>no tendrá derecho a que se le reintegre lo cancelado</b> por 
         este concepto.</p>
         <p style="text-align: justify;">12. <b>Se acuerda que si durante el presente año escolar el Ministerio del Poder Popular Para la Educación o el 
         Ejecutivo Nacional a través de decreto, establezca un aumento salarial que obligue al colegio ante su personal docente, administrativo y obrero, dicho 
         aumento será trasladado en forma directa a las mensualidades que cancela cada uno por sus representados.</b></p>
+		<p style="text-align: justify;">13. Informarse de las actividades y circulares de forma digital.</p>
     </div>
     <br />
     <br />

@@ -70,22 +70,28 @@
                     <br />
                     <?= $this->Form->input('date_and_time', ['label' => 'Fecha:']) ?>
                     <?= $this->Form->input('family', ['label' => 'Familia:']) ?>
-                    <?= $this->Form->input('client', ['label' => 'Cliente:']) ?>
+                    <?= $this->Form->input('client', ['label' => 'Cliente:', 'class' => 'campo-resaltado']) ?>
+					<div id="mensaje-cliente" class="mensajes-usuario"></div>
                     <?= $this->Form->input('type_of_identification_client', 
                         ['options' => 
-                        [null => " ",
+                        [null => "",
                         'V' => 'Cédula venezolano',
                         'E' => 'Cédula extranjero',
                         'P' => 'Pasaporte',
                         'J' => 'Rif Jurídico',
                         'G' => 'Rif Gubernamental'],
-                        'label' => 'Tipo de documento de identificación:']) ?>
-                    <?= $this->Form->input('identification_number_client', ['label' => 'Número de cédula o RIF:']) ?>
+                        'label' => 'Tipo de documento de identificación:',
+						'class' => 'campo-resaltado']) ?>
+					<div id="mensaje-tipo-de-identificacion" class="mensajes-usuario"></div>
+                    <?= $this->Form->input('identification_number_client', ['label' => 'Número de cédula o RIF:', 'class' => 'entero campo-resaltado']) ?>
+					<div id="mensaje-numero-identificacion-cliente" class="mensajes-usuario"></div>
                 </div>
                 <div class="col-md-4">
                     <br />
-                    <?= $this->Form->input('fiscal_address', ['label' => 'Dirección:']) ?>
-                    <?= $this->Form->input('tax_phone', ['label' => 'Teléfono:']) ?>
+                    <?= $this->Form->input('fiscal_address', ['label' => 'Dirección:', 'class' => 'campo-resaltado']) ?>
+					<div id="mensaje-direccion-fiscal" class="mensajes-usuario"></div>
+                    <?= $this->Form->input('tax_phone', ['label' => 'Teléfono:', 'class' => 'entero campo-resaltado']) ?>
+					<div id="mensaje-telefono" class="mensajes-usuario"></div>
                     <?= $this->Form->input('email', ['label' => 'Correo electrónico:']) ?>
                     <br />
                     <button id="update-data" class="btn btn-success">Actualizar datos del cliente</button>
@@ -676,11 +682,12 @@
         $('#paid-out').text(" ");
         $('#to-pay').text(" ");
         $('#change').text(" ");
+		$('.mensajes-usuario').html("");
+		$('.campo-resaltado').css('background-color', "white");
 		$(".select-discount").attr('disabled', false);
 		$('.select-discount').css('background-color', 'white');
 		$('.select-discount').val(1);
 		
-        
         for (var i = 0, item = 0; i < 7; i++)
         {
             item = i + 1;
@@ -1389,11 +1396,71 @@
                 
         });
     }
+	
+	function validarDatosFiscales()
+	{
+		var resultado = 0;
+		
+		$('.mensajes-usuario').html("");
+		$('.campo-resaltado').css('background-color', "white");
+		
+		if ($("#client").val().length < 5) 
+		{  		
+			$('#client').css('background-color', "#ffffe6");
+			$('#mensaje-cliente').html("El nombre o razón social está incompleto").css('color', 'red');
+			resultado = 1;
+		}
+
+		if ($("#type-of-identification-client").val().length == 0) 
+		{  		
+			$('#type-of-identification-client').css('background-color', "#ffffe6");
+			$('#mensaje-tipo-de-identificacion').html("El tipo de identificacion no puede ser blancos").css('color', 'red');
+			resultado = 1;
+		}
+		else
+		{
+			if ($("#type-of-identification-client").val() == "J" || $("#type-of-identification-client").val() == "G") 
+			{
+				if ($("#identification-number-client").val().length < 9) 
+				{	
+					$('#identification-number-client').css('background-color', "#ffffe6");
+					$('#mensaje-numero-identificacion-cliente').html("El número del RIF está incompleto").css('color', 'red');
+					resultado = 1;
+				}
+			}
+			else
+			{
+				if ($("#identification-number-client").val().length < 7) 
+				{	
+					$('#identification-number-client').css('background-color', "#ffffe6");
+					$('#mensaje-numero-identificacion-cliente').html("El número de cédula o pasaporte está incompleto").css('color', 'red');
+					resultado = 1;
+				}				
+			}	
+		}
+		if ($("#fiscal-address").val().length < 10) 
+		{	
+			$('#fiscal-address').css('background-color', "#ffffe6");
+			$('#mensaje-direccion-fiscal').html("La dirección está incompleta").css('color', 'red');
+			resultado = 1;
+		}	
+
+		if ($("#tax-phone").val().length < 10) 
+		{	
+			$('#tax-phone').css('background-color', "#ffffe6");
+			$('#mensaje-telefono').html("El número de teléfono está incompleto").css('color', 'red');
+			resultado = 1;
+		}
+
+		return resultado;
+	}
 
 // Funciones Jquery
 
     $(document).ready(function() 
     {
+		$('.entero').numeric();
+		
 		$(".alternative-decimal-separator").numeric({ altDecimal: "," });
 		
         $("#mostrar-registros").click(showDatabase);
@@ -1789,33 +1856,46 @@
 
         $('#update-data').click(function(e) 
         {
+			var resultado = 0;
+			
             e.preventDefault();
+		
+			resultado = validarDatosFiscales();
+			
+			if (resultado > 0)
+			{
+				alert("Estimado usuario uno o más datos fiscales presentan errores. Por favor revise");
+				window.scrollTo(0, 0);
+				return false;
+			}
+			else
+			{
+				$("#header-messages").html("Por favor espere...");
 
-            $("#header-messages").html("Por favor espere...");
+				$.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "updateClientData"]); ?>', 
+					{"id" : idParentsandguardians, 
+					"client" : $('#client').val(),
+					"typeOfIdentificationClient" : $('#type-of-identification-client').val(),
+					"identificationNumberClient" : $('#identification-number-client').val(),
+					"fiscalAddress" : $('#fiscal-address').val(),
+					"taxPhone" : $('#tax-phone').val()}, null, "json")          
 
-            $.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "updateClientData"]); ?>', 
-                {"id" : idParentsandguardians, 
-                "client" : $('#client').val(),
-                "typeOfIdentificationClient" : $('#type-of-identification-client').val(),
-                "identificationNumberClient" : $('#identification-number-client').val(),
-                "fiscalAddress" : $('#fiscal-address').val(),
-                "taxPhone" : $('#tax-phone').val()}, null, "json")          
-
-            .done(function(response) 
-            {
-                if (response.success) 
-                {
-                    $("#header-messages").html("Los datos fiscales fueron actualizados correctamente...");
-                } 
-                else 
-                {
-                    $("#header-messages").html("Los datos fiscales no pudieron ser actualizados, intente nuevamente");
-                }
-            })
-            .fail(function(jqXHR, textStatus, errorThrown) 
-            {
-                $("#header-messages").html("Algo ha fallado, los datos fiscales no pudieron ser actualizados: " + textStatus);
-            });  
+				.done(function(response) 
+				{
+					if (response.success) 
+					{
+						$("#header-messages").html("Los datos fiscales fueron actualizados correctamente...");
+					} 
+					else 
+					{
+						$("#header-messages").html("Los datos fiscales no pudieron ser actualizados, intente nuevamente");
+					}
+				})
+				.fail(function(jqXHR, textStatus, errorThrown) 
+				{
+					$("#header-messages").html("Algo ha fallado, los datos fiscales no pudieron ser actualizados: " + textStatus);
+				});  
+			}
         });
 
         $("#related-students").on("click", ".students", function()
@@ -2055,32 +2135,45 @@
 
         $("#save-payments").click(function(e)
         {
+			var resultado = 0;
+			
             e.preventDefault();
-						
-			if ($('.select-discount').val() == 1)
+			
+			resultado = validarDatosFiscales();
+			
+			if (resultado > 0)
 			{
-				alert("Por favor indique si se aplicará algún descuento o recargo");
-				$('.select-discount').css('background-color', "#ffffe6");
+				alert("Estimado usuario uno o más datos fiscales presentan errores. Por favor revise");
+				window.scrollTo(0, 0);
+				return false;
 			}
 			else
-			{         
-				$("#mark-quotas").attr('disabled', true);
-				$("#uncheck-quotas").attr('disabled', true);
-				$("#save-payments").attr('disabled', true);
-				$(".select-discount").attr('disabled', true);
+			{			
+				if ($('.select-discount').val() == 1)
+				{
+					alert("Por favor indique si se aplicará algún descuento o recargo");
+					$('.select-discount').css('background-color', "#ffffe6");
+				}
+				else
+				{         
+					$("#mark-quotas").attr('disabled', true);
+					$("#uncheck-quotas").attr('disabled', true);
+					$("#save-payments").attr('disabled', true);
+					$(".select-discount").attr('disabled', true);
 
-				showInvoiceLines();
-				
-				totalBill = totalBalance;
-				$("#invoice-subtotal").html(totalBill.toFixed(2));
-				$("#invoice-descuento").html(discount.toFixed(2));
-				totalBill = totalBill + discount;
-				$("#total-bill").html(totalBill.toFixed(2));
-				balance = totalBalance + discount - accumulatedPayment;
-				indicatorUpdateAmount = 1;
-				updateAmount();
-				indicatorUpdateAmount = 0;
-				activateInvoiceButtons();
+					showInvoiceLines();
+					
+					totalBill = totalBalance;
+					$("#invoice-subtotal").html(totalBill.toFixed(2));
+					$("#invoice-descuento").html(discount.toFixed(2));
+					totalBill = totalBill + discount;
+					$("#total-bill").html(totalBill.toFixed(2));
+					balance = totalBalance + discount - accumulatedPayment;
+					indicatorUpdateAmount = 1;
+					updateAmount();
+					indicatorUpdateAmount = 0;
+					activateInvoiceButtons();
+				}
 			}
         });     
         

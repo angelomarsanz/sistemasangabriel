@@ -2,23 +2,23 @@ Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar desc
 
 ---
 Para los estatus recordar que hay un boolean - new_student en la tabla student
-Ese status se debe cambiar a "0" al iniciar el proceso de renovación a aquellos
+Ese status se debe cambiar a "0" al iniciar el proceso de renovación de inscripción a aquellos
 alumnos regulares que se inscribieron para el período escolar actual. Se debe
 exceptuar los regulares que se inscribieron a partir de febrero para el
 próximo período.
 Es decir un alumno regular tiene el status de new_student en "1" durante todo
 su primer año en el colegio.
 
-También el campo level_of_study se debe blanquear al iniciar el período de inscripción
-de alumnos regulares en junio.
+También al iniciar el proceso de renovación de inscripción (en junio), el campo level_of_study
+se debe blanquear únicamente a los alumnos que están inscritos en el año escolar actual.
 
 En Junio cuando comienza el período de renovación de inscripción, se debe actualizar
 el campo current_year_registration de la tabla Shools con el año del nuevo período de inscripción
 
+Esto se debe hacer cuando se cree por primera vez la tarifa de agosto del año siguiente
+
 En septiembre cuando comienza el período escolar se debe actualizar el campo
 current_school_year de la tabla Shools con el año del nuevo perìodo escolar
-
-Esto se debe hacer cuando se cree por primera vez la tarifa de agosto del año siguiente
 
 ---
 
@@ -194,13 +194,7 @@ en comparaciòn con "asignar secciòn" y "familias con tres hijos"
 
 ---
 
-Cambios diferencia mensualidad:
+Para las diferencias en dólares se inició el campo amount_dollar con 20 para todas aquellas
+mensualidades que tenían paid_out = 1 sin filtrar años ni meses.
 
-StudentController
-StudenttransactionsController
-bills controller
-StudentTable
-create_Invoiced
-add_dollar
-
-En desarrollo 138.186.179.63 aun no se ha actualizado y tampoco se ha agregado la columna amount_dollar
+---
