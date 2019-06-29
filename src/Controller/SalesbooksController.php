@@ -164,14 +164,28 @@ class SalesbooksController extends AppController
 			{
 				$salesbook = $this->Salesbooks->newEntity();
 				
-				$salesbook->fecha = $invoicesBill->date_and_time;
+				if ($invoicesBill->date_and_time->day < 10)
+				{
+					$dia = "0" . $invoicesBill->date_and_time->day;
+				}
+				else
+				{
+					$dia = $invoicesBill->date_and_time->day;
+				}
+						
+				if ($invoicesBill->date_and_time->month < 10)
+				{
+					$mes = "0" . $invoicesBill->date_and_time->month;
+				}
+				else
+				{
+					$mes = $invoicesBill->date_and_time->month;
+				}		
+						
+				$salesbook->fecha = $dia . '/' . $mes . '/' . $invoicesBill->date_and_time->year . ' ';
 				
 				$salesbook->tipo_documento = "Fact";
 				
-				$salesbook->cedula_rif = $invoicesBill->identification;
-				
-				$salesbook->nombre_razon_social = $invoicesBill->client;
-
 				$salesbook->numero_factura = $invoicesBill->bill_number;
 				
 				$salesbook->numero_control = $invoicesBill->control_number;
@@ -184,11 +198,15 @@ class SalesbooksController extends AppController
 				
 				if ($invoicesBill->annulled == false )
 				{
+					$salesbook->cedula_rif = $invoicesBill->identification;
+					$salesbook->nombre_razon_social = $invoicesBill->client;
 					$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid;
 					$salesbook->ventas_exoneradas = $invoicesBill->amount_paid;
 				}
 				else
 				{
+					$salesbook->cedula_rif = "";
+					$salesbook->nombre_razon_social = "ANULADA";
 					$salesbook->total_ventas_mas_impuesto = 0;
 					$salesbook->ventas_exoneradas = 0;
 				}        
@@ -204,6 +222,8 @@ class SalesbooksController extends AppController
 					$errorBill = 1;
 					break;
 				}
+							
+				$contador++;
 			}
 
             if ($errorBill == 0)  
