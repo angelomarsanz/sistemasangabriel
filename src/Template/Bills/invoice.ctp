@@ -100,7 +100,7 @@
         </table>
     </div>
     <div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
-		<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?></p>
+		<p>Cajero: <?= $usuarioResponsable ?></p>
     </div>
     <div id="total" style="font-size: 13px; line-height: 15px;">
         <table style="width:100%;">
@@ -187,7 +187,7 @@ endfor; ?>
                 <?php endforeach; ?>
             </tbody>
         </table>
-		<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?>
+		<p>Cajero: <?= $usuarioResponsable ?>
     </div>
     <div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
 		<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?></p>

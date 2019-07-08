@@ -703,12 +703,18 @@ class BillsController extends AppController
     public function invoice($billNumber = null)
     {
         $this->loadModel('Controlnumbers');
+		
+		$this->loadModel('Users');
 
         $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $billNumber],
             'order' => ['Bills.created' => 'DESC']]);
-    
+					    
         $bill = $lastRecord->first();
                 
+		$usuario = $this->Users->get($bill->user_id);
+		
+		$usuarioResponsable = $usuario->first_name . " " . $usuario->surname;
+				
         $billId = $bill->id;
 		
 		$idFacturaAnterior = $bill->id - 1;
@@ -1043,8 +1049,8 @@ class BillsController extends AppController
 		
 		$vista = "invoice";
 				
-        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa'));
-        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa']);
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable'));
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable']);
     }
 	
     public function invoiceConcept($accountingCode, $invoiceLine = null, $amountConcept = null)
