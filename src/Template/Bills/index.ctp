@@ -29,7 +29,7 @@
                         </td>
                         <td><?= number_format($bill->amount_paid, 2, ",", ".") ?></td>
                         <td class="actions">
-                            <?= $this->Html->link('Ver factura', ['action' => 'invoicepdf', $bill->bill_number, '_ext' => 'pdf'], ['class' => 'btn btn-success']); ?>
+                            <?= $this->Html->link('Ver factura', ['action' => 'invoice', $bill->bill_number], ['class' => 'btn btn-success']); ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

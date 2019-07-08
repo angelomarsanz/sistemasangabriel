@@ -14,15 +14,96 @@ use Cake\I18n\Time;
 class StudenttransactionsController extends AppController
 {
     public function testFunction()
-    {
-		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-		date_default_timezone_set('America/Caracas');
-				
-		$currentDate = time::now();
+    {			
+        $transaccionesEstudiantes = $this->Studenttransactions->find('all')
+			->where(['transaction_type' => 'Servicio educativo', 'created >' => '2019-01-31 00:00:00']);
 		
-		$lastYear = $currentDate->year - 1;
+		$contador = $transaccionesEstudiantes->count();
+				
+		foreach($transaccionesEstudiantes as $transaccionesEstudiante)
+		{
+			$nuevoEstudiante = $this->Studenttransactions->Students->get($transaccionesEstudiante->student_id);
 
-		$this->Flash->success(__('$lastYear: ' . $lastYear));		
+			$febrero2019 = $this->Studenttransactions->find('all')
+				->where(['student_id' => $transaccionesEstudiante->student_id, 'transaction_description' => 'Feb 2019'])
+				->order(['created' => "DESC"]);
+			
+			$row = $febrero2019->first();
+				
+			if ($row)
+			{
+				if ($row->paid_out == 1)
+				{
+					$this->Flash->error(__('2018 - ' . $transaccionesEstudiante->student_id . ' ' . $nuevoEstudiante->surname . " " . $nuevoEstudiante->first_name));
+				}	
+				else
+				{
+					$this->Flash->success(__('2019 - ' . $transaccionesEstudiante->student_id . ' ' . $nuevoEstudiante->surname . " " . $nuevoEstudiante->first_name));					
+
+					$nuevoEstudiante->number_of_brothers = 2019;
+					$nuevoEstudiante->balance = 2019;
+					$nuevoEstudiante->new_student = 1;
+					
+					if (!($this->Studenttransactions->Students->save($nuevoEstudiante))) 
+					{
+						$this->Flash->error(__('Error actualizando - ' . $transaccionesEstudiante->student_id . ' ' . $nuevoEstudiante->surname . " " . $nuevoEstudiante->first_name));
+					}
+					else
+					{
+						$cuotas = $this->Studenttransactions->find('all')
+							->where(['student_id' => $transaccionesEstudiante->student_id]);
+						
+						foreach ($cuotas as $cuota)
+						{
+							$transaccion = $this->Studenttransactions->get($cuota->id);
+							
+							if ($transaccion->transaction_type == "Matrícula")
+							{
+								$transaccion->transaction_description = "Matrícula 2019";
+								$transaccion->amount_dollar = 40;
+							}
+							elseif ($transaccion->transaction_type == "Servicio educativo")
+							{
+								$transaccion->transaction_description = "Servicio educativo 2019";
+								$transaccion->amount_dollar = 450;
+							}
+							elseif ($transaccion->transaction_type == "Mensualidad")
+							{
+								$mesTransaccion = substr($transaccion->transaction_description, 0, 4);
+								$anoTransaccion = substr($transaccion->transaction_description, 4, 4);
+								$nuevoAno = $anoTransaccion + 1;
+								$mesAnoArreglado = $mesTransaccion . $nuevoAno;
+							
+								$transaccion->transaction_description = $mesAnoArreglado;
+															
+								$ano = $transaccion->payment_date->year;
+								$anoMasUno = $ano + 1;
+								
+								$mes = $transaccion->payment_date->month;
+																						
+								if ($mes < 10)
+								{
+									$mesCadena = "0" . $mes;
+								}
+								else
+								{
+									$mesCadena = (string) $mes;
+								}
+
+								$nuevoPaymentDate = $anoMasUno . '-' . $mesCadena . '-01';
+																
+								$transaccion->payment_date = $nuevoPaymentDate;
+							}
+							if (!($this->Studenttransactions->save($transaccion))) 
+							{ 
+								$this->Flash->error(__('No se pudo modificar la cuota con ID ' . $cuota->id));
+							}
+						}
+					}
+				}
+			}
+		}
+		$this->Flash->success(__('Total alumnos nuevos ' . $contador));
 	}
 
     public function index()
@@ -194,15 +275,8 @@ class StudenttransactionsController extends AppController
     
     public function createQuotasRegularPrevious($studentId = null)
     {
-        $this->loadModel('Rates');
-
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-                               'order' => ['Rates.created' => 'DESC'] ]);
-
-        $row = $lastRecord->first();
-
+		$indicadorError = 0;
+		
 		$this->loadModel('Schools');
 		
 		$school = $this->Schools->get(2);
@@ -214,154 +288,140 @@ class StudenttransactionsController extends AppController
         $studenttransaction = $this->Studenttransactions->newEntity();
         
         $studenttransaction->student_id = $studentId;
-        
         $studenttransaction->transaction_type = 'Matrícula';
         $studenttransaction->transaction_description = 'Matrícula' . ' ' . $quotaYear;
         $studenttransaction->amount = 0;
-        $studenttransaction->original_amount = $row['amount'];
+        $studenttransaction->original_amount = 0;
         $studenttransaction->invoiced = 0;
         $studenttransaction->paid_out = 0;
         $studenttransaction->partial_payment = 0;
         $studenttransaction->bill_number = 0;
         $studenttransaction->payment_date = 0;
         $studenttransaction->transaction_migration = 0;
+		$studenttransaction->amount_dollar = 0;
         
-        if ($this->Studenttransactions->save($studenttransaction)) 
+        if (!($this->Studenttransactions->save($studenttransaction))) 
         {
-            $concept = 'Seguro escolar';
-            
-            $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 'order' => ['Rates.created' => 'DESC'] ]);
-            
-            $row = $lastRecord->first();
+			$indicadorError = 1;
+		}
+		
+		if ($indicadorError == 0)
+		{
 
-            $studenttransaction = $this->Studenttransactions->newEntity();
-                
-            $studenttransaction->student_id = $studentId;
-                
+		$studenttransaction = $this->Studenttransactions->newEntity();
+		
+		$studenttransaction->student_id = $studentId;
+		$studenttransaction->amount = 0;
+		$studenttransaction->original_amount = 0;
+		$studenttransaction->invoiced = 0;
+		$studenttransaction->paid_out = 0;
+		$studenttransaction->partial_payment = 0;
+		$studenttransaction->bill_number = 0;
+		$studenttransaction->payment_date = 0;
+		$studenttransaction->transaction_migration = 0;
+		$studenttransaction->amount_dollar = 0;
+
             $studenttransaction->transaction_type = 'Seguro escolar';
             $studenttransaction->transaction_description = 'Seguro escolar' . ' ' . $quotaYear;
-            $studenttransaction->amount = 0;
-            $studenttransaction->original_amount = $row['amount'];
-            $studenttransaction->invoiced = 0;
-            $studenttransaction->paid_out = 0;
-            $studenttransaction->partial_payment = 0;
-            $studenttransaction->bill_number = 0;
-            $studenttransaction->payment_date = 0;
-            $studenttransaction->transaction_migration = 0;
 
             if (!($this->Studenttransactions->save($studenttransaction)))
             {
-                $this->Flash->error(__('No se pudo grabar la cuota de seguro escolar'));
+                $indicadorError = 1;
             }
-            else
-            {
-				$concept = 'Mensualidad';
-					
-				$rate = $this->Rates->get(58);
-				
-				$dollarExchangeRate = $rate->amount; 
-				
-				$lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept],
-					'order' => ['Rates.created' => 'DESC'] ]);
-					
-				$row = $lastRecord->first();
-					
-				if ($row)
+		}
+		
+		if ($quotaYear > 2018)
+		{
+			if ($indicadorError == 0)
+			{
+				$studenttransaction = $this->Studenttransactions->newEntity();
+		
+				$studenttransaction->student_id = $studentId;
+				$studenttransaction->amount = 0;
+				$studenttransaction->original_amount = 0;
+				$studenttransaction->invoiced = 0;
+				$studenttransaction->paid_out = 0;
+				$studenttransaction->partial_payment = 0;
+				$studenttransaction->bill_number = 0;
+				$studenttransaction->payment_date = 0;
+				$studenttransaction->transaction_migration = 0;
+				$studenttransaction->amount_dollar = 0;
+
+				$studenttransaction->transaction_type = 'Thales';
+				$studenttransaction->transaction_description = 'Thales' . ' ' . $quotaYear;
+
+				if (!($this->Studenttransactions->save($studenttransaction)))
 				{
-					$amountMonthly = round($row->amount * $dollarExchangeRate);	
+					$indicadorError = 1;
+				}
+			}
+		}
+			
+		if ($indicadorError == 0)
+        {				
+			for ($i = 1; $i <= 12; $i++) 
+			{
+				$studenttransaction = $this->Studenttransactions->newEntity();
+		
+				$studenttransaction->student_id = $studentId;
+				$studenttransaction->amount = 0;
+				$studenttransaction->original_amount = 0;
+				$studenttransaction->invoiced = 0;
+				$studenttransaction->paid_out = 0;
+				$studenttransaction->partial_payment = 0;
+				$studenttransaction->bill_number = 0;
+				$studenttransaction->transaction_migration = 0;
+				$studenttransaction->amount_dollar = 0;                                    
+				
+				if ($i < 5)
+				{
+					$monthNumber = $i + 8;
 				}
 				else
 				{
-					$amountMonthly = 0;
+					$monthNumber = $i - 4;
 				}
-
-                for ($i = 1; $i <= 12; $i++) 
-                {
-                    $studenttransaction = $this->Studenttransactions->newEntity();
-                    
-                    $studenttransaction->student_id = $studentId;
-                
-                    if ($i < 5)
-                    {
-                        $monthNumber = $i + 8;
-                    }
-                    else
-                    {
-                        $monthNumber = $i - 4;
-                    }
-                    
-                    $nameOfTheMonth = $this->nameMonth($monthNumber);
-        
-                    $studenttransaction->transaction_type = 'Mensualidad';
+				
+				$nameOfTheMonth = $this->nameMonth($monthNumber);
+	
+				$studenttransaction->transaction_type = 'Mensualidad';
+				
+				if ($monthNumber < 10)
+				{
+					$monthString = "0" . $monthNumber;
+				}
+				else
+				{
+					$monthString = (string) $monthNumber;
+				}
 					
-			        if ($monthNumber < 10)
-					{
-						$monthString = "0" . $monthNumber;
-					}
-					else
-					{
-						$monthString = (string) $monthNumber;
-					}
-                        
-                    if ($monthNumber < 9)
-					{
-                        $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;						
-						$studenttransaction->payment_date = $nextYear . '-' . $monthString . '-01';						
-                    }
-					else
-					{		
-						$studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
-						$studenttransaction->payment_date = $quotaYear . '-' . $monthString . '-01';
-                    }        
-										
-					$studenttransaction->amount = 0;		
-					
-                    if ($monthNumber == 8)
-					{
-						$concept = 'Agosto';
-            
-						$lastRecordAgo = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 'order' => ['Rates.created' => 'DESC'] ]);
-            
-						$rowAgo = $lastRecordAgo->first();		
-						
-						$studenttransaction->original_amount = $rowAgo['amount'];						
-					}
-					else
-					{
-						$studenttransaction->original_amount = $amountMonthly;
-					}
-					
-                    $studenttransaction->invoiced = 0;
-                    $studenttransaction->paid_out = 0;
-					$studenttransaction->partial_payment = 0;
-                    $studenttransaction->bill_number = 0;
-                    $studenttransaction->transaction_migration = 0;
-
-                    if (!($this->Studenttransactions->save($studenttransaction))) 
-                    {
-                        $this->Flash->error(__('The studenttransaction could not be saved. Please, try again.'));
-                        break;
-                    }
-                }
-            } 
+				if ($monthNumber < 9)
+				{
+					$studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;						
+					$studenttransaction->payment_date = $nextYear . '-' . $monthString . '-01';						
+				}
+				else
+				{		
+					$studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
+					$studenttransaction->payment_date = $quotaYear . '-' . $monthString . '-01';
+				}        
+								
+				if (!($this->Studenttransactions->save($studenttransaction))) 
+				{
+					$indicadorError = 1;
+					break;
+				}
+			}
+             
         }
-        else 
-        {
-            $this->Flash->error(__('The studenttransaction could not be saved. Please, try again.'));
-        }
-    }
+		
+		return $indicadorError;
+	}
 
     public function createQuotasRegular($studentId = null)
     {
-        $this->loadModel('Rates');
-
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-                               'order' => ['Rates.created' => 'DESC'] ]);
-
-        $row = $lastRecord->first();
-
+		$indicadorError = 0;
+		
 		$this->loadModel('Schools');
 		
 		$school = $this->Schools->get(2);
@@ -373,154 +433,136 @@ class StudenttransactionsController extends AppController
         $studenttransaction = $this->Studenttransactions->newEntity();
         
         $studenttransaction->student_id = $studentId;
-        
         $studenttransaction->transaction_type = 'Matrícula';
         $studenttransaction->transaction_description = 'Matrícula' . ' ' . $quotaYear;
         $studenttransaction->amount = 0;
-        $studenttransaction->original_amount = $row['amount'];
+        $studenttransaction->original_amount = 0;
         $studenttransaction->invoiced = 0;
         $studenttransaction->paid_out = 0;
         $studenttransaction->partial_payment = 0;
         $studenttransaction->bill_number = 0;
         $studenttransaction->payment_date = 0;
         $studenttransaction->transaction_migration = 0;
-        
-        if ($this->Studenttransactions->save($studenttransaction)) 
+		$studenttransaction->amount_dollar = 0;
+		
+        if (!($this->Studenttransactions->save($studenttransaction))) 
         {
-            $concept = 'Seguro escolar';
-            
-            $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 'order' => ['Rates.created' => 'DESC'] ]);
-            
-            $row = $lastRecord->first();
+			$indicadorError = 1;
+		}
+		
+		if ($indicadorError == 0)
+		{
+		$studenttransaction = $this->Studenttransactions->newEntity();
+		
+		$studenttransaction->student_id = $studentId;
+		$studenttransaction->amount = 0;
+		$studenttransaction->original_amount = 0;
+		$studenttransaction->invoiced = 0;
+		$studenttransaction->paid_out = 0;
+		$studenttransaction->partial_payment = 0;
+		$studenttransaction->bill_number = 0;
+		$studenttransaction->payment_date = 0;
+		$studenttransaction->transaction_migration = 0;
+		$studenttransaction->amount_dollar = 0;
 
-            $studenttransaction = $this->Studenttransactions->newEntity();
-                
-            $studenttransaction->student_id = $studentId;
-                
             $studenttransaction->transaction_type = 'Seguro escolar';
             $studenttransaction->transaction_description = 'Seguro escolar' . ' ' . $quotaYear;
-            $studenttransaction->amount = 0;
-            $studenttransaction->original_amount = $row['amount'];
-            $studenttransaction->invoiced = 0;
-            $studenttransaction->paid_out = 0;
-            $studenttransaction->partial_payment = 0;
-            $studenttransaction->bill_number = 0;
-            $studenttransaction->payment_date = 0;
-            $studenttransaction->transaction_migration = 0;
 
             if (!($this->Studenttransactions->save($studenttransaction)))
             {
-                $this->Flash->error(__('No se pudo grabar la cuota de seguro escolar'));
+                $indicadorError = 1;
             }
-            else
-            {				
-				$concept = 'Mensualidad';
-					
-				$rate = $this->Rates->get(58);
-				
-				$dollarExchangeRate = $rate->amount; 
-				
-				$lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept],
-					'order' => ['Rates.created' => 'DESC'] ]);
-					
-				$row = $lastRecord->first();
-					
-				if ($row)
+		}
+
+		if ($indicadorError == 0)
+		{
+		$studenttransaction = $this->Studenttransactions->newEntity();
+		
+		$studenttransaction->student_id = $studentId;
+		$studenttransaction->amount = 0;
+		$studenttransaction->original_amount = 0;
+		$studenttransaction->invoiced = 0;
+		$studenttransaction->paid_out = 0;
+		$studenttransaction->partial_payment = 0;
+		$studenttransaction->bill_number = 0;
+		$studenttransaction->payment_date = 0;
+		$studenttransaction->transaction_migration = 0;
+			$studenttransaction->amount_dollar = 0;
+
+            $studenttransaction->transaction_type = 'Thales';
+            $studenttransaction->transaction_description = 'Thales' . ' ' . $quotaYear;
+
+            if (!($this->Studenttransactions->save($studenttransaction)))
+            {
+                $indicadorError = 1;
+            }
+		}
+
+		if ($indicadorError == 0)
+		{				
+			for ($i = 1; $i <= 12; $i++) 
+			{    
+			$studenttransaction = $this->Studenttransactions->newEntity();
+	
+			$studenttransaction->student_id = $studentId;
+			$studenttransaction->amount = 0;
+			$studenttransaction->original_amount = 0;
+			$studenttransaction->invoiced = 0;
+			$studenttransaction->paid_out = 0;
+			$studenttransaction->partial_payment = 0;
+			$studenttransaction->bill_number = 0;
+			$studenttransaction->transaction_migration = 0;
+				$studenttransaction->amount_dollar = 0;
+           
+				if ($i < 5)
 				{
-					$amountMonthly = round($row->amount * $dollarExchangeRate);	
+					$monthNumber = $i + 8;
 				}
 				else
 				{
-					$amountMonthly = 0;
+					$monthNumber = $i - 4;
 				}
 				
-                for ($i = 1; $i <= 12; $i++) 
-                {
-                    $studenttransaction = $this->Studenttransactions->newEntity();
-                    
-                    $studenttransaction->student_id = $studentId;
-                
-                    if ($i < 5)
-                    {
-                        $monthNumber = $i + 8;
-                    }
-                    else
-                    {
-                        $monthNumber = $i - 4;
-                    }
-                    
-                    $nameOfTheMonth = $this->nameMonth($monthNumber);
-        
-                    $studenttransaction->transaction_type = 'Mensualidad';
-                        
-			        if ($monthNumber < 10)
-					{
-						$monthString = "0" . $monthNumber;
-					}
-					else
-					{
-						$monthString = (string) $monthNumber;
-					}
-                        
-                    if ($monthNumber < 9)
-					{
-                        $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;				
-						$studenttransaction->payment_date = $nextYear . '-' . $monthString . '-01';						
-                    }
-					else
-					{		
-						$studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
-						$studenttransaction->payment_date = $quotaYear . '-' . $monthString . '-01';
-                    }        
+				$nameOfTheMonth = $this->nameMonth($monthNumber);
+	
+				$studenttransaction->transaction_type = 'Mensualidad';
 					
-					$studenttransaction->amount = 0;
+				if ($monthNumber < 10)
+				{
+					$monthString = "0" . $monthNumber;
+				}
+				else
+				{
+					$monthString = (string) $monthNumber;
+				}
 					
-                    if ($monthNumber == 8)
-					{
-						$concept = 'Agosto';
+				if ($monthNumber < 9)
+				{
+					$studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;				
+					$studenttransaction->payment_date = $nextYear . '-' . $monthString . '-01';						
+				}
+				else
+				{		
+					$studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
+					$studenttransaction->payment_date = $quotaYear . '-' . $monthString . '-01';
+				}        
+				
+				if (!($this->Studenttransactions->save($studenttransaction))) 
+				{
+					$indicadorError = 1;
+					break;
+				}
+			}
             
-						$lastRecordAgo = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 'order' => ['Rates.created' => 'DESC'] ]);
-            
-						$rowAgo = $lastRecordAgo->first();		
-						
-						$studenttransaction->original_amount = $rowAgo['amount'];						
-					}
-					else
-					{
-						$studenttransaction->original_amount = $amountMonthly;
-					}
-					
-                    $studenttransaction->invoiced = 0;
-                    $studenttransaction->paid_out = 0;
-					$studenttransaction->partial_payment = 0;
-                    $studenttransaction->bill_number = 0;
-                    $studenttransaction->transaction_migration = 0;
+        }
 
-                    if (!($this->Studenttransactions->save($studenttransaction))) 
-                    {
-                        $this->Flash->error(__('The studenttransaction could not be saved. Please, try again.'));
-                        break;
-                    }
-                }
-            } 
-        }
-        else 
-        {
-            $this->Flash->error(__('The studenttransaction could not be saved. Please, try again.'));
-        }
+		return $indicadorError;
     }
 
     public function createQuotasNew($studentId = null, $startYear = null)
     {
-        $this->loadModel('Rates');
-
-        $concept = 'Matrícula';
-        
-        $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
-                               'order' => ['Rates.created' => 'DESC'] ]);
-
-        $row = $lastRecord->first();
-
+		$indicadorError = 0;
+		
         $quotaYear = $startYear;
         
         $nextYear = $quotaYear + 1;
@@ -532,68 +574,63 @@ class StudenttransactionsController extends AppController
         $studenttransaction->transaction_type = 'Matrícula';
         $studenttransaction->transaction_description = 'Matrícula' . ' ' . $quotaYear;
         $studenttransaction->amount = 0;
-        $studenttransaction->original_amount = $row['amount'];
+        $studenttransaction->original_amount = 0;
         $studenttransaction->invoiced = 0;
         $studenttransaction->paid_out = 0;
         $studenttransaction->partial_payment = 0;
         $studenttransaction->bill_number = 0;
         $studenttransaction->payment_date = 0;
         $studenttransaction->transaction_migration = 0;
+		$studenttransaction->amount_dollar = 0;
         
-        if ($this->Studenttransactions->save($studenttransaction)) 
+        if (!($this->Studenttransactions->save($studenttransaction))) 
         {
-            $concept = 'Servicio educativo';
-            
-            $lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 'order' => ['Rates.created' => 'DESC'] ]);
-            
-            $row = $lastRecord->first();
+			$indicadorError = 1;
+		}
 
-            $studenttransaction = $this->Studenttransactions->newEntity();
-                
-            $studenttransaction->student_id = $studentId;
-                
+		if ($indicadorError == 0)
+		{
+
+		$studenttransaction = $this->Studenttransactions->newEntity();
+		
+		$studenttransaction->student_id = $studentId;	
+		$studenttransaction->amount = 0;
+		$studenttransaction->original_amount = 0;
+		$studenttransaction->invoiced = 0;
+		$studenttransaction->paid_out = 0;
+		$studenttransaction->partial_payment = 0;
+		$studenttransaction->bill_number = 0;
+		$studenttransaction->payment_date = 0;
+		$studenttransaction->transaction_migration = 0;
+		$studenttransaction->amount_dollar = 0;
+               
             $studenttransaction->transaction_type = 'Servicio educativo';
             $studenttransaction->transaction_description = 'Servicio educativo' . ' ' . $quotaYear;
-            $studenttransaction->amount = 0;
-            $studenttransaction->original_amount = $row['amount'];
-            $studenttransaction->invoiced = 0;
-            $studenttransaction->paid_out = 0;
-            $studenttransaction->partial_payment = 0;
-            $studenttransaction->bill_number = 0;
-            $studenttransaction->payment_date = 0;
-            $studenttransaction->transaction_migration = 0;
 
             if (!($this->Studenttransactions->save($studenttransaction)))
             {
-                $this->Flash->error(__('No se pudo grabar la cuota de servicio educativo'));
+                $indicadorError = 1;
             }
-
-            $concept = 'Mensualidad';
-            	
-			$rate = $this->Rates->get(58);
-			
-			$dollarExchangeRate = $rate->amount; 
-			
-			$lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => $concept],
-				'order' => ['Rates.created' => 'DESC'] ]);
-				
-			$row = $lastRecord->first();
-				
-			if ($row)
-			{
-				$amountMonthly = round($row->amount * $dollarExchangeRate);	
-			}
-			else
-			{
-				$amountMonthly = 0;
-			}
+		}
+		
+		if ($indicadorError == 0)
+		{
 
             for ($i = 1; $i <= 12; $i++) 
-            {
-                $studenttransaction = $this->Studenttransactions->newEntity();
-                    
-                $studenttransaction->student_id = $studentId;
-                
+            {                
+		$studenttransaction = $this->Studenttransactions->newEntity();
+		
+		$studenttransaction->student_id = $studentId;	
+		$studenttransaction->amount = 0;
+		$studenttransaction->original_amount = 0;
+		$studenttransaction->invoiced = 0;
+		$studenttransaction->paid_out = 0;
+		$studenttransaction->partial_payment = 0;
+		$studenttransaction->bill_number = 0;
+		$studenttransaction->transaction_migration = 0;
+		$studenttransaction->amount_dollar = 0;
+
+
                 if ($i < 5)
                 {
                     $monthNumber = $i + 8;
@@ -607,11 +644,6 @@ class StudenttransactionsController extends AppController
         
                 $studenttransaction->transaction_type = 'Mensualidad';
                         
-                if ($monthNumber < 9)
-                    $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $nextYear;
-                else
-                    $studenttransaction->transaction_description = $nameOfTheMonth . ' ' . $quotaYear;
-
 				if ($monthNumber < 10)
 				{
 					$monthString = "0" . $monthNumber;
@@ -632,40 +664,15 @@ class StudenttransactionsController extends AppController
 					$studenttransaction->payment_date = $quotaYear . '-' . $monthString . '-01';
 				}
 					
-				$studenttransaction->amount = 0;
-					
-				if ($monthNumber == 8)
-				{
-					$concept = 'Agosto';
-		
-					$lastRecordAgo = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 'order' => ['Rates.created' => 'DESC'] ]);
-		
-					$rowAgo = $lastRecordAgo->first();		
-					
-					$studenttransaction->original_amount = $rowAgo['amount'];						
-				}
-				else
-				{
-					$studenttransaction->original_amount = $amountMonthly;
-				}
-				
-                $studenttransaction->invoiced = 0;
-                $studenttransaction->paid_out = 0;
-				$studenttransaction->partial_payment = 0;
-                $studenttransaction->bill_number = 0;
-                $studenttransaction->transaction_migration = 0;
-
                 if (!($this->Studenttransactions->save($studenttransaction))) 
                 {
-                    $this->Flash->error(__('The studenttransaction could not be saved. Please, try again.'));
+                    $indicadorError = 1;
                     break;
                 }
             }
-        } 
-        else 
-        {
-            $this->Flash->error(__('The studenttransaction could not be saved. Please, try again.'));
-        }
+		}
+		
+		return $indicadorError;
     }
 
     function nameMonth($monthNumber = null)
@@ -1866,14 +1873,16 @@ class StudenttransactionsController extends AppController
 		$discountUpdate80 = 0;
 		
         $this->loadModel('Schools');
+		
+		$this->loadModel('Sections');
 
         $school = $this->Schools->get(2);
 
-        $currentYear = $school->current_year_registration;
+        $currentYear = $school->current_school_year;
         
-        $lastYear = $school->previous_year_registration;
+        $lastYear = $currentYear - 1;
         
-        $nextYear = $school->next_year_registration;
+        $nextYear = $currentYear + 1;
         
         $startingYear = $currentYear;
             
@@ -1966,10 +1975,17 @@ class StudenttransactionsController extends AppController
 				{
 					$idParent = $studentsFors->student->parentsandguardian->id;
 					
-					$level = $studentsFors->student->level_of_study;
-					
-					$order = $this->orderLevel($level);
-					
+					if ($school->current_school_year < current_year_registration)
+					{
+						$seccion = $this->Sections->get($studentsFors->student->section_id);
+						$order = $this->gradoPosicion($seccion->sublevel);
+					}
+					else
+					{
+						$level = $studentsFors->student->level_of_study;
+						$order = $this->orderLevel($level);	
+					}
+										
 					if ($order == 0)
 					{
 						$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
@@ -2237,11 +2253,11 @@ class StudenttransactionsController extends AppController
 
         $school = $this->Schools->get(2);
 
-        $currentYear = $school->current_year_registration;
+        $currentYear = $school->current_school_year;
         
-        $lastYear = $school->previous_year_registration;
+        $lastYear = $currentYear - 1;
         
-        $nextYear = $school->next_year_registration;
+        $nextYear = $currentYear + 1;
         
         $startingYear = $currentYear;
             
@@ -2812,6 +2828,43 @@ class StudenttransactionsController extends AppController
         $order = str_replace($levelOfStudy, $position, $level);
         return $order;
     }
+	
+    public function gradoPosicion($grado = null)
+    {
+        $levelOfStudy = ['No asignado',
+                        'Pre-kinder',                                
+                        'Kinder',
+                        'Preparatorio',
+                        '1er. Grado',
+                        '2do. Grado',
+                        '3er. Grado',
+                        '4to. Grado',
+                        '5to. Grado',
+                        '6to. Grado',
+                        '1er. Año',
+                        '2do. Año',
+                        '3er. Año',
+                        '4to. Año',
+                        '5to. Año'];
+        $position = [0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14];
+        $order = str_replace($levelOfStudy, $position, $grado);
+        return $order;
+    }
+	
 	public function verifyPayment($dateFrom = null, $dateException = null,  $idStudent = null)
 	{
 		$this->autoRender = false;
@@ -3840,8 +3893,8 @@ class StudenttransactionsController extends AppController
 
 		$school = $this->Schools->get(2);
 				
-		$yearFrom = $school->current_year_registration;
-		$yearUntil = $school->next_year_registration;
+		$yearFrom = $school->current_school_year;
+		$yearUntil = $yearFrom + 1;
 
 		$enrollment = 'Matrícula ' . $yearFrom;
 		
@@ -3866,55 +3919,27 @@ class StudenttransactionsController extends AppController
 	
 	public function correctTransaction()
 	{
-		$account1 = 0;
-		
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
 		date_default_timezone_set('America/Caracas');
-		
-		$initialDate = new Time();
-				
-		$initialDate
-			->year(2018)
-			->month(8)
-			->day(31)
-			->hour(0)
-			->minute(0)
-			->second(0);
-					
+							
 		$studentTransactions = $this->Studenttransactions->find('all', 
-			['contain' => ['Students'],
-			'conditions' => 
-                [['Studenttransactions.transaction_type' => 'Mensualidad'], 
-				['SUBSTRING(Studenttransactions.transaction_description, 1, 3) !=' => 'Ago'],
-				['Studenttransactions.payment_date >' => $initialDate],
-				['Studenttransactions.amount >' => 0],
-				['Studenttransactions.paid_out' => 0],
-				['Students.student_condition' => 'Regular'],
-				['Students.balance' => '2018'],
-				['Students.discount' => '20']],
-			'order' => ['Students.surname' => 'ASC',
-				'Students.second_surname' => 'ASC',
-				'Students.first_name' => 'ASC',
-				'Students.second_name' => 'ASC',
-				'Studenttransactions.payment_date' => 'ASC']]); 
+			['conditions' => ['Studenttransactions.transaction_description' => 'Ago 2019']]); 
 				
+		$contador = 0;
 		foreach ($studentTransactions as $studentTransaction)
         {		
 			$studentTransactionGet = $this->Studenttransactions->get($studentTransaction->id);
 								
-			$studentTransactionGet->original_amount = $studentTransactionGet->amount;
-			
-			$studentTransactionGet->paid_out = 1;
-			
-			$studentTransactionGet->partial_payment = 0;
-												
+			$studentTransactionGet->amount_dollar = 0;
+															
 			if (!($this->Studenttransactions->save($studentTransactionGet)))
 			{
 				$this->Flash->error(__('No se pudo actualizar la transacción identificada con el ID: ' . $studentTransactionGet->id . ' Correspondiente al estudiante: ' . $studentTransaction->student->full_name));
-			}  
+			}   
+			$contador++;	
 		}
 				
-        $this->set(compact('studentTransactions'));
-        $this->set('_serialize', ['studentTransactions']);
+        $this->set(compact('studentTransactions', 'contador'));
+        $this->set('_serialize', ['studentTransactions', 'contador']);
 	}	
 }

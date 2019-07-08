@@ -1,0 +1,1 @@
+<p>Descuento del 20%</p>

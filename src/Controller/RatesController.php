@@ -139,6 +139,8 @@ class RatesController extends AppController
 			elseif ($rate->concept == "Diferencia de agosto")
 			{                        
 				$this->loadModel('Schools');
+				
+				$this->loadModel('Students');
 
 				$school = $this->Schools->get(2);
 				
@@ -278,14 +280,43 @@ class RatesController extends AppController
 				
 					$school->next_year_registration = $rate->rate_year;
 				
-					if ($this->Schools->save($school)) 
-					{
-						$binnacles->add('controller', 'Rates', 'add', 'Se actualizaron correctamente los años de período de inscripción');
-					}
-					else
+					if (!($this->Schools->save($school))) 
 					{
 						$binnacles->add('controller', 'Rates', 'add', 'No se pudieron actualizar los años de inscripción');	
 						$indicadorError = 1;
+					}
+					else
+					{
+						$binnacles->add('controller', 'Rates', 'add', 'Se actualizaron correctamente los años de período de inscripción');
+
+						$this->loadModel('Students');
+						
+						$contador = 0;
+
+						$students = $this->Students->find('all')->where([['balance' => $school->previous_year_registration], ['student_condition' => 'Regular']]);
+							
+						$contadorRegistros = $students->count();
+						
+						if ($contadorRegistros > 0)
+						{		
+							foreach ($students as $student)
+							{
+								$studentGet = $this->Students->get($student->id);
+								
+								$studentGet->new_student = 0;
+								$studentGet->level_of_study = "";
+								
+								if ($this->Students->save($studentGet)) 
+								{
+									$contador++;
+								} 
+								else 
+								{
+									$binnacles->add('controller', 'Rates', 'add', 'El alumno con el ID ' . $student->id . ' no pudo ser actualizado');
+									$indicadorError = 1;
+								}
+							}
+						}							
 					}
 				}
 			}

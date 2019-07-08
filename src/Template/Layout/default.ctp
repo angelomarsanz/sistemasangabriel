@@ -32,7 +32,7 @@ $cakeDescription = 'San Gabriel Arcángel';
     <?= $this->fetch('css') ?>
     <?= $this->fetch('script') ?>
 </head>
-<body style="padding-top: 50px;">
+<body style="padding-top: 50px;" onafterprint="imprimir()">
     <?= $this->element('menu') ?>
     
     <?= $this->Flash->render() ?>

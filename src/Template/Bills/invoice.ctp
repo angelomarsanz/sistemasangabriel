@@ -1,8 +1,4 @@
 <style>
-    body
-    {
-        font-size: 30px;
-    }
     .alignRight
     {
     	text-align: right;
@@ -10,6 +6,9 @@
     hr
     {
     	color: #47476b;
+		height: 1px;
+		background-color: black;
+		margin: 5px 0px 5px 0px;
     }
     #payments
     {
@@ -36,9 +35,7 @@
 <br />
 <br />
 <br />
-<br />
-<br />
-<div style="font-size: 25px; line-height: 25px;">
+<div style="font-size: 13px; line-height: 15px;">
     <table style="width:100%">
         <tbody>
             <tr>
@@ -54,14 +51,14 @@
                 <td style="text-align: right;"><?= $bill->school_year ?></td>
             </tr>
             <tr>
-                <td>Dirección: <spam style="font-size: 20px;"><?= $bill->fiscal_address ?></spam></td>
+                <td>Dirección: <spam style="font-size: 10px; line-height: 12px;"><?= $bill->fiscal_address ?></spam></td>
             </tr>
         </tbody>
     </table>
 </div>
-<hr size="3" />
+<hr>
 <div>
-    <table style="width:100%; font-size: 25px; line-height: 25px;">
+    <table style="width:100%; font-size: 13px; line-height: 15px;">
         <thead>
             <tr>
                 <th style="width:10%; text-align:left;">Código</th>
@@ -85,9 +82,9 @@
         </tbody>
     </table>
 </div>
-<hr size="3" />
+<hr>
 <div style="width:100%;">
-    <div id="payments" style="font-size: 15px;  line-height: 15px;">
+    <div id="payments" style="font-size: 10px;  line-height: 12px;">
         <b>Formas de pago:</b>
         <table style="width:100%;">
             <tbody>
@@ -102,10 +99,10 @@
             </tbody>
         </table>
     </div>
-    <div id="emptyColumn">
-    &nbsp;
+    <div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
+		<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?></p>
     </div>
-    <div id="total" style="font-size: 25px; line-height: 25px;">
+    <div id="total" style="font-size: 13px; line-height: 15px;">
         <table style="width:100%;">
             <tr>
                 <td style="width: 50%;"><b>Sub-total:</b></td>
@@ -132,7 +129,7 @@ for ($i = 1; $i <= $countSubtraction; $i++): ?>
     <br />
 <?php
 endfor; ?>
-<div style="font-size: 25px; line-height: 25px;">
+<div style="font-size: 13px; line-height: 15px;">
     <table style="width:100%">
         <tbody>
             <tr>
@@ -148,14 +145,14 @@ endfor; ?>
                 <td style="text-align: right;"><?= $bill->school_year ?></td>
             </tr>
             <tr>
-                <td>Dirección: <spam style="font-size: 20px;"><?= $bill->fiscal_address ?></spam></td>
+                <td>Dirección: <spam style="font-size: 10px; line-height: 12px;"><?= $bill->fiscal_address ?></spam></td>
             </tr>
         </tbody>
     </table>
 </div>
-<hr size="3" />
+<hr>
 <div>
-    <table style="width:100%; font-size: 25px; line-height: 25px;">
+    <table style="width:100%; font-size: 13px; line-height: 15px;">
         <thead>
             <tr>
                 <th style="width:10%; text-align:left;">Código</th>
@@ -174,9 +171,9 @@ endfor; ?>
         </tbody>
     </table>
 </div>
-<hr size="3" />
+<hr>
 <div style="width:100%;">
-    <div id="payments" style="font-size: 15px;  line-height: 15px;">
+    <div id="payments" style="font-size: 10px;  line-height: 12px;">
         <b>Formas de pago:</b>
         <table style="width:100%;">
             <tbody>
@@ -190,11 +187,12 @@ endfor; ?>
                 <?php endforeach; ?>
             </tbody>
         </table>
+		<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?>
     </div>
-    <div id="emptyColumn">
-    &nbsp;
+    <div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
+		<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?></p>
     </div>
-    <div id="total" style="font-size: 25px; line-height: 25px;">
+    <div id="total" style="font-size: 13px; line-height: 15px;">
         <table style="width:100%;">
             <tr>
                 <td style="width: 50%;"><b>Sub-total:</b></td>

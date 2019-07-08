@@ -17,8 +17,11 @@ el campo current_year_registration de la tabla Shools con el año del nuevo per�
 
 Esto se debe hacer cuando se cree por primera vez la tarifa de agosto del año siguiente
 
+Nota: 02/07/2019 - Ya se hicieron estos cambios y se instalaron en producción
+
 En septiembre cuando comienza el período escolar se debe actualizar el campo
-current_school_year de la tabla Shools con el año del nuevo perìodo escolar
+current_school_year de la tabla Shools con el año del nuevo perìodo escolar. Se
+debe hacer en el proceso de asignar seccion (Pendiente)
 
 ---
 

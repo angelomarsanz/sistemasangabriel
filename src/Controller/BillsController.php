@@ -23,6 +23,28 @@ class BillsController extends AppController
     public $tbConcepts = [];
     public $conceptCounter = 0;
 
+    public function testFunction()
+    {
+		$contadorFacturas = 0;
+		
+        $facturas = $this->Bills->find('all');
+
+		foreach ($facturas as $factura)
+		{
+			$factura->impresa = true;
+			
+			if ($this->Bills->save($factura))
+			{
+				$contadorFacturas++;
+			}
+			else
+			{
+				$this->Flash->error(__('No se pudo actualizar la factura con ID ' . $factura->id));
+			}
+		}
+		$this->Flash->success(__('Total facturas actualizadas ' . $contadorFacturas));
+    }
+	
     public function index($idFamily = null, $family = null)
     {
         $query = $this->Bills->find('all', ['conditions' => ['parentsandguardian_id' => $idFamily],
@@ -171,6 +193,7 @@ class BillsController extends AppController
             $bill->date_annulled = 0;
             $bill->invoice_migration = 0;
             $bill->new_family = 0;
+			$bill->impresa = 0;
 
             if ($this->Bills->save($bill)) 
             {
@@ -316,7 +339,7 @@ class BillsController extends AppController
                     
                     $idParentsandguardian = $this->headboard['idParentsandguardians'];
 
-                    return $this->redirect(['action' => 'printInvoice', $billNumber, $idParentsandguardian]);
+                    return $this->redirect(['action' => 'imprimirFactura', $billNumber, $idParentsandguardian]);
                 }
             }
         }
@@ -664,7 +687,366 @@ class BillsController extends AppController
         $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService'));
         $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService']);
     }
+	
+    public function imprimirFactura($billNumber = null, $idParentsandguardian = null)
+    {
+        $parentandguardian = $this->Bills->Parentsandguardians->get($idParentsandguardian);
 
+        $family = $parentandguardian->family;
+
+        $this->Flash->success(__('Factura guardada con el número: ' . $billNumber));
+
+        $this->set(compact('billNumber', 'idParentsandguardian', 'family'));
+        $this->set('_serialize', ['billNumber', 'idParentsandguardian', 'family']);
+    }
+
+    public function invoice($billNumber = null)
+    {
+        $this->loadModel('Controlnumbers');
+
+        $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $billNumber],
+            'order' => ['Bills.created' => 'DESC']]);
+    
+        $bill = $lastRecord->first();
+                
+        $billId = $bill->id;
+		
+		$idFacturaAnterior = $bill->id - 1;
+		
+		$numeroFacturaAnterior = $bill->bill_number - 1; 
+			
+		$facturaAnterior = $this->Bills->get($idFacturaAnterior);
+		
+		if ($facturaAnterior->impresa == 0)
+		{
+			$this->Flash->error(__('Estimado usuario la factura anterior con el Nro. ' . $facturaAnterior->bill_number . ' aún no ha sido impresa, por favor verifique y después continúe con la cobranza'));
+			return $this->redirect(['controller' => 'Bills', 'action' => 'consultBill']);
+		}
+		        
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+
+        $dateBill = $bill->created;
+        $dateBilli = $dateBill->year . $dateBill->month . $dateBill->day;
+        $currentDate = Time::now();
+        $currentDatei = $currentDate->year . $currentDate->month . $currentDate->day;
+		
+		$nextYear = $currentDate->year + 1;
+		$lastYear = $currentDate->year - 1;
+		$yearAncestor = $currentDate->year - 2;
+		
+		$numeroControl = "";
+		$indicadorImpresa = 0;
+				
+        if ($bill->control_number == null && $dateBilli == $currentDatei)
+        {
+            $lastRecord = $this->Controlnumbers->find('all', ['conditions' => ['username' => 'adminsg'],
+                'order' => ['Controlnumbers.created' => 'DESC'] ]);
+
+            $row = $lastRecord->first();
+        
+            if ($row->invoice_lot == 0)
+            {
+                $this->Flash->error(__('Se agotó el lote de factura, por favor registre otro'));
+
+                return $this->redirect(['controller' => 'Controlnumbers', 'action' => 'edit']);
+            }                
+            else
+            {
+                $invoiceSeries = $row->invoice_series;
+                
+                $controlnumber = $this->Controlnumbers->get($row->id);
+
+                $controlnumber->invoice_series++;   
+            
+                $controlnumber->invoice_lot--;
+
+                if (!($this->Controlnumbers->save($controlnumber)))
+                {
+                    $this->Flash->error(__('No se pudo actualizar el número de control de la factura, por favor verifique si coincide el número de control
+                    con el de la primera factura en blanco del lote que se encuentra en la impresora y actualice si es necesario'));
+                    
+                    return $this->redirect(['controller' => 'Controlnumbers', 'action' => 'edit']);
+                }
+                else
+                {
+                    $billGet = $this->Bills->get($billId);
+
+                    $billGet->control_number = $invoiceSeries;
+					
+					$numeroControl = $invoiceSeries;
+                
+                    if (!($this->Bills->save($billGet)))
+                    {
+                        $this->Flash->error(__('No se pudo actualizar la factura con el número de control, por favor cuando cierre el turno verifique
+                        los números de control de las facturas que aparecen en el reporte'));
+                    }
+                }
+            }
+        }
+		elseif ($bill->control_number != null)
+		{
+			$numeroControl = $bill->control_number;
+			if ($bill->impresa == 1)
+			{
+				$indicadorImpresa = 1;
+			}
+		}
+						
+        $previousStudentName = " ";
+        $firstMonthly= " ";
+        $lastInstallment = " ";
+        $invoiceLine = " ";
+        $studentReceipt = [];
+        $accountReceipt = 0;
+        $accountService = 0;
+        $amountConcept = 0;
+        $previousAcccountingCode = " ";
+ 
+        $loadIndicator = 0;
+
+        $concepts = $this->Bills->Concepts->find('all')->where(['bill_id' => $billId]);
+
+        $aConcepts = $concepts->toArray();
+
+        foreach ($aConcepts as $aConcept) 
+        {                  
+            if ($previousStudentName != $aConcept->student_name)
+            {				
+                if ($lastInstallment != " ")
+                {
+                    if ($firstMonthly == $lastInstallment)
+                    {
+                        $invoiceLine .= substr($firstMonthly, 4, 4);
+                    }
+                    else
+                    {
+                        $invoiceLine .= $lastInstallment;
+                    }
+                    $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
+                    $locLoadIndicator = 1;
+                }
+                if ($aConcept->observation == "Abono" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
+                {
+                    $invoiceLine = $aConcept->student_name . " - Abono: " . $aConcept->concept;
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $loadIndicator = 1;
+                    $firstMonthly= " ";
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
+                {				
+					$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $loadIndicator = 1;
+                    $firstMonthly= " ";
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                elseif (substr($aConcept->concept, 0, 3) == "Ago")
+                {	
+					if ($aConcept->concept == "Ago " . $currentDate->year)
+					{
+						$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
+					}
+					else
+					{
+						$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+					}
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $loadIndicator = 1;
+                    $firstMonthly= " ";
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                elseif (substr($aConcept->concept, 0, 18) == "Servicio educativo")
+                {
+                    $studentReceipt[$accountReceipt]['studentName'] = $aConcept->student_name;
+                    $accountService = $accountService + $aConcept->amount;
+                    $accountReceipt++;
+                }
+                elseif (substr($aConcept->concept, 0, 14) == "Seguro escolar")
+                {
+                    $invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $loadIndicator = 1;
+                    $firstMonthly= " ";
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                elseif (substr($aConcept->concept, 0, 6) == "Thales")
+                {
+                    $invoiceLine = $aConcept->student_name . " - " . $aConcept->concept;
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $loadIndicator = 1;
+                    $firstMonthly= " ";
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                else    
+                {
+                    $invoiceLine = $aConcept->student_name . " - " . "Mensualidad: " . substr($aConcept->concept, 0, 3) . " - ";
+                    $amountConcept = $aConcept->amount;
+                    $firstMonthly = $aConcept->concept;
+                    $lastInstallment = $aConcept->concept;
+                    $loadIndicator = 0;
+                }
+                $previousStudentName = $aConcept->student_name;
+                $previousAcccountingCode = $aConcept->accounting_code;
+            }
+            else
+            {
+                if ($aConcept->observation == "Migración")
+                {
+                    if ($lastInstallment != " ")
+                    {
+                        $invoiceLine .= $lastInstallment;
+                        $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
+                        $loadIndicator = 1;
+                    }
+                    $invoiceLine = $aConcept->concept;
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $LoadIndicator = 1;
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                elseif ($aConcept->observation == "Abono" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
+                {
+                    if ($lastInstallment != " ")
+                    {
+                        $invoiceLine .= $lastInstallment;
+                        $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
+                        $loadIndicator = 1;
+                    }
+                    $invoiceLine = $aConcept->student_name . " - Abono: " . $aConcept->concept;
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $LoadIndicator = 1;
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
+                {
+                    if ($lastInstallment != " ")
+                    {
+                        $invoiceLine .= $lastInstallment;
+                        $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
+                        $loadIndicator = 1;
+                    }
+					$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $LoadIndicator = 1;
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }							
+                elseif (substr($aConcept->concept, 0, 3) == "Ago")
+                {	
+                    if ($lastInstallment != " ")
+                    {
+                        $invoiceLine .= $lastInstallment;
+                        $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
+                        $loadIndicator = 1;
+                    }
+					if ($aConcept->concept == "Ago " . $currentDate->year)
+					{
+						$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
+					}
+					else
+					{
+						$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+					}
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $LoadIndicator = 1;
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                elseif (substr($aConcept->concept, 0, 18) == "Servicio educativo")
+                {
+                    $studentReceipt[$accountReceipt]['studentName'] = $aConcept->student_name;
+                    $accountService = $accountService + $aConcept->amount;
+                    $accountReceipt++;
+                }
+                elseif (substr($aConcept->concept, 0, 14) == "Seguro escolar")
+                {
+                    if ($lastInstallment != " ")
+                    {
+                        $invoiceLine .= $lastInstallment;
+                        $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
+                        $loadIndicator = 1;
+                    }
+                    $invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $LoadIndicator = 1;
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                elseif (substr($aConcept->concept, 0, 6) == "Thales")
+                {
+                    if ($lastInstallment != " ")
+                    {
+                        $invoiceLine .= $lastInstallment;
+                        $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
+                        $loadIndicator = 1;
+                    }
+                    $invoiceLine = $aConcept->student_name . " - " . $aConcept->concept;
+                    $amountConcept = $aConcept->amount;
+                    $this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+                    $LoadIndicator = 1;
+                    $lastInstallment = " ";
+                    $amountConcept = 0;
+                }
+                elseif ($lastInstallment == " ")
+                {
+                    $invoiceLine = $aConcept->student_name . " - " . "Mensualidad: " . substr($aConcept->concept, 0, 3) . " - ";
+                    $amountConcept = $aConcept->amount;
+                    $firstMonthly = $aConcept->concept;
+                    $lastInstallment = $aConcept->concept;
+                    $loadIndicator = 0;
+                }
+                else                
+                {
+                    $amountConcept = $amountConcept + $aConcept->amount;
+                    $lastInstallment = $aConcept->concept;
+                }
+            }
+        }
+
+        if ($loadIndicator == 0 and $lastInstallment != " ")
+        {
+            if ($firstMonthly== $lastInstallment)
+            {
+                $invoiceLine .= substr($firstMonthly, 4, 4);
+            }
+            else
+            {
+                $invoiceLine .= $lastInstallment;
+            }
+
+            $this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
+        }
+
+        $payments = $this->Bills->Payments->find('all')->where(['bill_id' => $billId]);
+
+        $aPayments = $payments->toArray();
+
+        $vConcepts = $this->tbConcepts; 
+		
+		$vista = "invoice";
+				
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa'));
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa']);
+    }
+	
     public function invoiceConcept($accountingCode, $invoiceLine = null, $amountConcept = null)
     {
         $this->tbConcepts[$this->conceptCounter] = [];
@@ -1067,7 +1449,7 @@ class BillsController extends AppController
             
                 if ($row)
                 {
-                    return $this->redirect(['controller' => 'Bills', 'action' => 'invoicepdf', $_POST['billNumber'], '_ext' => 'pdf']);
+                    return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $_POST['billNumber']]);
                 }
                 else
                 {
@@ -1123,4 +1505,32 @@ class BillsController extends AppController
 
 		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
 	}	
+    public function retornoImpresion()
+    {
+
+    }
+	
+    public function actualizarIndicadorImpresion()
+    {
+        $this->autoRender = false;
+
+        if ($this->request->is('json')) 
+        {
+            $jsondata = [];
+			
+			$bill = $this->Bills->get($_POST['idFactura']);
+
+			$bill->impresa = true;
+			
+			if ($this->Bills->save($bill))
+			{
+				$jsondata["satisfactorio"] = true;
+			}
+			else
+			{
+				$jsondata["satisfactorio"] = false;
+			}
+            exit(json_encode($jsondata, JSON_FORCE_OBJECT));
+        }
+    }
 }

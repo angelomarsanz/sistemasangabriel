@@ -116,6 +116,9 @@ class BillsTable extends Table
 
         $validator
             ->allowEmpty('previous_control_number');
+			
+        $validator
+            ->allowEmpty('impresa');
 
         return $validator;
     }
