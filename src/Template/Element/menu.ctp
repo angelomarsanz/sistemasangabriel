@@ -17,6 +17,10 @@
 		$indicadorImpresa = 0;
 	endif;
 	
+	if (!(isset($reimpresion))):
+		$reimpresion = 0;
+	endif;
+	
 ?>
 <style>
     .iconoMenu
@@ -48,7 +52,7 @@
             <?php if(isset($current_user)): ?>
                 <ul class="nav navbar-nav">
                     <li><?=  $this->Html->link('', ['controller' => 'Users', 'action' => 'home'], ['class' => "glyphicon glyphicon-home iconoMenu", 'title' => 'Inicio']) ?></li>
-                    <li><?=  $this->Html->link('', [''], ['id' => 'imprimir-pantalla', 'class' => "glyphicon glyphicon-print iconoMenu", 'title' => 'Imprimir pantalla']) ?></li>
+                    <li><a href="#" id="imprimir-pantalla" class="glyphicon glyphicon-print iconoMenu" title="Imprimir pantalla"></a></li>
 					<?php if($current_user['role'] == 'Administrador'): ?>
                         <?php if ($current_user['username'] != 'emiguerrero'): ?>
                             <li class="dropdown">
@@ -93,7 +97,7 @@
                                     <li><?= $this->Html->link('Modificar las cuotas del alumno', ['controller' => 'Students', 'action' => 'modifyTransactions']) ?></li> 
                                     <li><?= $this->Html->link('Relación de mensualidades', ['controller' => 'Students', 'action' => 'listMonthlyPayments']) ?></li> 
                                     <li><?= $this->Html->link('Alumnos con mensualidades pendientes', ['controller' => 'Students', 'action' => 'defaulters']) ?></li> 
-									<li><?= $this->Html->link('Reporte de Morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li> 
+									<!-- <li><?= $this->Html->link('Reporte de Morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li> -->
                                     <!-- <li><?= $this->Html->link('Pagos de nuevos alumnos', ['controller' => 'Students', 'action' => 'newstudentpdf', "nuevos", '_ext' => 'pdf']) ?></li> --> 
                                     <!-- <li><?= $this->Html->link('Alumnos inscritos', ['controller' => 'Studenttransactions', 'action' => 'reportStudentGeneral']) ?></li> -->
                                     <li><?= $this->Html->link('Alumnos que no completaron en el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
@@ -209,6 +213,7 @@
 	gIdFactura = "<?= $billId ?>";
 	gNumeroControl = "<?= $numeroControl ?>";
 	gIndicadorImpresa = "<?= $indicadorImpresa ?>";
+	gReimpresion = "<?= $reimpresion ?>";
 	
 	// Funciones
 	
@@ -249,27 +254,32 @@
     $(document).ready(function()
     {							
 		$('#imprimir-pantalla').click(function(e){
-		
+			
 			e.preventDefault();
-				
+					
 			if (gVista == "invoice")
 			{
 				if (gIndicadorImpresa == 1)
 				{
-					alert("Estimado usuario esta factura fue impresa anteriormente");
-					window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
-				}
-				else
-				{
-					window.print();
-					return false;				
+					if (gReimpresion == 1)
+					{
+						var r = confirm("Estimado usuario esta factura ya está impresa en papel fiscal con el Nro. de control *** " + gNumeroControl + " ***. Por favor verifique antes de continuar. Si está seguro de reimprimir pulse el botón ACEPTAR de lo contrario CANCELAR");
+						if (r == false)
+						{
+							window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
+							return false;
+						}
+					}
+					else
+					{
+						alert("Estimado usuario esta factura ya está impresa en papel fiscal con el Nro. de control *** " + gNumeroControl + " ***.");
+						window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
+						return false;
+					}
 				}
 			}
-			else
-			{
-				window.print();
-				return false;
-			}
+			window.print();
+			return false;
 		});
 	});
 </script>     

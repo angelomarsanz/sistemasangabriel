@@ -1801,8 +1801,7 @@
 							{
 								if (monthlyPayment.substring(0, 3) == "Ago" ||
 									monthlyPayment.substring(0, 9) == "Matrícula" ||
-									monthlyPayment.substring(0, 14) == "Seguro escolar" ||
-									monthlyPayment.substring(0, 6) == "Thales")
+									monthlyPayment.substring(0, 14) == "Seguro escolar")
 								{
 									if (indicadorImpresion == 0)
 									{

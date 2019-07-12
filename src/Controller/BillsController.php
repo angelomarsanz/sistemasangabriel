@@ -146,7 +146,7 @@ class BillsController extends AppController
         $consecutiveInvoice = new ConsecutiveinvoicesController();
         
         $consecutiveReceipt = new ConsecutivereceiptsController();
-        
+      
         if ($this->headboard)
         {
             if ($this->headboard['fiscal'] == 1)
@@ -700,7 +700,7 @@ class BillsController extends AppController
         $this->set('_serialize', ['billNumber', 'idParentsandguardian', 'family']);
     }
 
-    public function invoice($billNumber = null)
+    public function invoice($billNumber = null, $reimpresion = null)
     {
         $this->loadModel('Controlnumbers');
 		
@@ -1048,9 +1048,9 @@ class BillsController extends AppController
         $vConcepts = $this->tbConcepts; 
 		
 		$vista = "invoice";
-				
-        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable'));
-        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable']);
+					
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion'));
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion']);
     }
 	
     public function invoiceConcept($accountingCode, $invoiceLine = null, $amountConcept = null)
@@ -1455,7 +1455,7 @@ class BillsController extends AppController
             
                 if ($row)
                 {
-                    return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $_POST['billNumber']]);
+                    return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $_POST['billNumber'], 1]);
                 }
                 else
                 {

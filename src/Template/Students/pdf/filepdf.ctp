@@ -34,7 +34,7 @@
 </div>
 <div style="clear:both; width: 100%;">
     <?php if ($student->new_student == 0): ?>
-        <p style="font-size: 25px;">Conceptos de pagos: Abono a matrícula 2019, abono a agosto 2020, seguro escolar, diferencia agosto 2019 y convenio Thales.</p>
+        <p style="font-size: 25px;">Conceptos de pagos: Abono a matrícula 2019, abono a agosto 2020, seguro escolar y diferencia agosto 2019.</p>
     <?php endif; ?>    
     <p><b>Alumno:&nbsp;<?= $student->full_name ?></b></p>
 </div>

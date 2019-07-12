@@ -1204,7 +1204,7 @@ class StudentsController extends AppController
         $level = $this->sublevelLevel($nameSection->sublevel);
 
         $students = $this->Students->find('all')
-            ->where([['id >' => 1], ['section_id' => $section], ['balance' => $yearFrom], ['Students.student_condition' => 'Regular']])
+            ->where([['id >' => 1], ['section_id' => $section], ['balance >=' => $yearFrom], ['Students.student_condition' => 'Regular']])
             ->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
 
         $monthlyPayments = [];

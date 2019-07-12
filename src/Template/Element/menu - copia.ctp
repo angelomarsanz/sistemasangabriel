@@ -1,3 +1,27 @@
+<?php 
+    use Cake\Routing\Router;
+
+	if (!(isset($billId))):
+		$billId = "";
+	endif;
+	
+	if (!(isset($vista))):
+		$vista = "";
+	endif;
+
+	if (!(isset($numeroControl))):
+		$numeroControl = "";
+	endif;
+	
+	if (!(isset($indicadorImpresa))):
+		$indicadorImpresa = 0;
+	endif;
+	
+	if (!(isset($reimpresion))):
+		$reimpresion = 0;
+	endif;
+	
+?>
 <style>
     .iconoMenu
     {
@@ -28,20 +52,21 @@
             <?php if(isset($current_user)): ?>
                 <ul class="nav navbar-nav">
                     <li><?=  $this->Html->link('', ['controller' => 'Users', 'action' => 'home'], ['class' => "glyphicon glyphicon-home iconoMenu", 'title' => 'Inicio']) ?></li>
-                    <?php if($current_user['role'] == 'Administrador'): ?>
+                    <li><a href="#" id="imprimir-pantalla" class="glyphicon glyphicon-print iconoMenu" title="Imprimir pantalla"></a></li>
+					<?php if($current_user['role'] == 'Administrador'): ?>
                         <?php if ($current_user['username'] != 'emiguerrero'): ?>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Administrativo <span class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">
                                     <li><?= $this->Html->link('Abrir turno', ['controller' => 'Turns', 'action' => 'checkTurnOpen']) ?></li>
                                     <li><?= $this->Html->link('Cerrar turno', ['controller' => 'Turns', 'action' => 'checkTurnClose']) ?></li>
+									<li><?= $this->Html->link('Histórico de turnos', ['controller' => 'Turns', 'action' => 'index']) ?></li>
                                     <li><?= $this->Html->link('Cobrar inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Inscripción regulares']) ?></li> 
                                     <li><?= $this->Html->link('Cobrar inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Inscripción nuevos']) ?></li> 
                                     <li><?= $this->Html->link('Cobrar servicio educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Servicio educativo']) ?></li> 
                                     <li><?= $this->Html->link('Cobrar mensualidades', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
                                     <li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
                                     <li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
-									<li><?= $this->Html->link('Tarifas morosos', ['controller' => 'Studenttransactions', 'action' => 'newMonthlyDefaulters']) ?></li>
                                     <li><?= $this->Html->link('Anular factura', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Anular']) ?></li>
                                     <li><?= $this->Html->link('Modificar lote de facturas', ['controller' => 'Controlnumbers', 'action' => 'edit']) ?></li>
                                     <li><?= $this->Html->link('Modificar el número control de facturas', ['controller' => 'Bills', 'action' => 'editControl']) ?></li>
@@ -55,10 +80,10 @@
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Representantes <span class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">    
                                     <li><?= $this->Html->link('Datos de familia', ['controller' => 'Parentsandguardians', 'action' => 'consultFamily']) ?></li>
-                                    <li><?= $this->Html->link('Excel familias - alumno', ['controller' => 'Students', 'action' => 'familyStudents']) ?></li>
-                                    <li><?= $this->Html->link('Familias con tres hijos', ['controller' => 'Studenttransactions', 'action' => 'discountFamily80']) ?></li>
-                                    <li><?= $this->Html->link('Familias con cuatro o más hijos', ['controller' => 'Studenttransactions', 'action' => 'discountFamily50']) ?></li>
-                                    <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li>
+                                    <li><?= $this->Html->link('Familias - alumnos', ['controller' => 'Students', 'action' => 'familyStudents']) ?></li>
+                                    <li><?= $this->Html->link('Familias con tres hijos', ['controller' => 'Students', 'action' => 'familiasDescuento20']) ?></li>
+                                    <li><?= $this->Html->link('Familias con cuatro o más hijos', ['controller' => 'Students', 'action' => 'familiasDescuento50']) ?></li> 
+                                    <!-- <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li> -->
                                     <li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>									
 									</ul>
                             </li>
@@ -67,17 +92,19 @@
                                 <ul class="dropdown-menu" role="menu">    
                                     <li><?= $this->Html->link('Registro básico de nuevos alumnos', ['controller' => 'Students', 'action' => 'registerNewStudents']) ?></li>
                                     <li><?= $this->Html->link('Datos de alumnos', ['controller' => 'Students', 'action' => 'consultStudent']) ?></li>
-                                    <li><?= $this->Html->link('Asignar sección', ['controller' => 'Studenttransactions', 'action' => 'assignSection']) ?></li>
-                                    <li><?= $this->Html->link('Modificar las cuotas del alumno', ['controller' => 'Students', 'action' => 'modifyTransactions']) ?></li>
-                                    <li><?= $this->Html->link('Relación de mensualidades', ['controller' => 'Students', 'action' => 'listMonthlyPayments']) ?></li>
-                                    <li><?= $this->Html->link('Alumnos con mensualidades pendientes', ['controller' => 'Students', 'action' => 'defaulters']) ?></li>
-                                    <li><?= $this->Html->link('Pagos de nuevos alumnos', ['controller' => 'Students', 'action' => 'newstudentpdf', "nuevos", '_ext' => 'pdf']) ?>
-                                    <li><?= $this->Html->link('Alumnos inscritos', ['controller' => 'Studenttransactions', 'action' => 'reportStudentGeneral']) ?></li>
-                                    <li><?= $this->Html->link('Alumnos egresados', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
-                                    <li><?= $this->Html->link('Aplicar descuento a alumnos (familias con tres hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota80']) ?></li>
+									<li><?= $this->Html->link('Alumnos con condición distinta a regular', ['controller' => 'Students', 'action' => 'consultStudentDelete']) ?></li>
+                                    <!-- <li><?= $this->Html->link('Asignar sección', ['controller' => 'Studenttransactions', 'action' => 'assignSection']) ?></li> -->
+                                    <li><?= $this->Html->link('Modificar las cuotas del alumno', ['controller' => 'Students', 'action' => 'modifyTransactions']) ?></li> 
+                                    <li><?= $this->Html->link('Relación de mensualidades', ['controller' => 'Students', 'action' => 'listMonthlyPayments']) ?></li> 
+                                    <li><?= $this->Html->link('Alumnos con mensualidades pendientes', ['controller' => 'Students', 'action' => 'defaulters']) ?></li> 
+									<!-- <li><?= $this->Html->link('Reporte de Morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li> -->
+                                    <!-- <li><?= $this->Html->link('Pagos de nuevos alumnos', ['controller' => 'Students', 'action' => 'newstudentpdf', "nuevos", '_ext' => 'pdf']) ?></li> --> 
+                                    <!-- <li><?= $this->Html->link('Alumnos inscritos', ['controller' => 'Studenttransactions', 'action' => 'reportStudentGeneral']) ?></li> -->
+                                    <li><?= $this->Html->link('Alumnos que no completaron en el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
+                                    <li><?= $this->Html->link('Aplicar descuento a alumnos (familias con tres hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota20']) ?></li>
                                     <li><?= $this->Html->link('Aplicar descuento a alumnos (familias con cuatro o más hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota50']) ?></li>
                                     <li><?= $this->Html->link('Becar alumno', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
-                                    <li><?= $this->Html->link('Alumnos Becados', ['controller' => 'Students', 'action' => 'scholarshipIndex']) ?></li>
+                                    <li><?= $this->Html->link('Alumnos Becados', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
 									<!-- <li><?= $this->Html->link('Reporte contacto alumnos', ['controller' => 'Students', 'action' => 'reportStudentsGeneral']) ?></li> -->
                                 </ul>
                             </li>
@@ -89,6 +116,8 @@
                                         <li><?= $this->Html->link('Materias', ['controller' => 'Teachingareas', 'action' => 'index']) ?></li>
                                 </ul>
                             </li>
+							<li><?= $this->Html->link('Descuentos', ['controller' => 'Discounts', 'action' => 'index']) ?></li>
+													
 <!--
                                     <li><?= $this->Html->link('Registro completo de nuevos alumnos', ['controller' => 'Students', 'action' => 'newRegistration']) ?></li>
                                     <li><?= $this->Html->link('Matrícula', ['controller' => 'Students', 'action' => 'guardian']) ?></li> 
@@ -107,7 +136,7 @@
                                 <ul class="dropdown-menu" role="menu">
                                     <li><?= $this->Html->link('Puestos de trabajo', ['controller' => 'Positions', 'action' => 'index']) ?></li>
                                     <li><?= $this->Html->link('Empleados', ['controller' => 'Employees', 'action' => 'index']) ?></li>
-                                    <li><?= $this->Html->link('Nómina', ['controller' => 'Paysheets', 'action' => 'edit']) ?></li>
+                                    <li><?= $this->Html->link('Nómina', ['controller' => 'Paysheets', 'action' => 'directPayroll']) ?></li>
 <!--
                                     <li><?= $this->Html->link('Crear nómina', ['controller' => 'Paysheets', 'action' => 'createPayrollFortnight']) ?></li>
                                     <li><?= $this->Html->link('Ver datos nómina', ['controller' => 'Paysheets', 'action' => 'viewFortnight']) ?></li>
@@ -115,49 +144,6 @@
 -->
                                 </ul>
                             </li>
-                            <?php if (isset($currentView)): ?>
-                                <?php if ($currentView == 'employeepaymentsCompleteData'): ?>
-                                    <form class="navbar-form navbar-left" role="search">
-                                        <div class="form-group">
-                                            
-                                            <select id='classification' class='form-control'>
-                                                <option value='01'>Bachillerato y deporte</option>
-                                                <option value='02'>Primaria</option>
-                                                <option value='03'>Pre-escolar</option>
-                                                <option value='04'>Administrativo y obrero</option>
-                                                <option value='05'>Directivo</option>
-                                            </select>
-    
-                                            <select id='fortnight' class='form-control'>
-                            	                <option value='1'>1ra. Quincena</option>
-                            	                <option value='2'>2da. Quincena</option>
-                                            </select>
-    
-                                            <select id='month' class='form-control'>
-                        	                    <option value='01'>Enero</option>
-                        	                    <option value='02'>Febrero</option>
-                        	                    <option value='03'>Marzo</option>
-                        	                    <option value='04'>Abril</option>
-                        	                    <option value='05'>Mayo</option>
-                        	                    <option value='06'>Junio</option>
-                        	                    <option value='07'>Julio</option>
-                        	                    <option value='08'>Agosto</option>
-                        	                    <option value='09'>Septiembre</option>
-                        	                    <option value='10'>Octubre</option>
-                        	                    <option value='11'>Noviembre</option>
-                        	                    <option value='12'>Diciembre</option>
-                                            </select>
-    
-                                            <select id='year' class='form-control'>
-                        	                    <option value='2017'>2017</option>
-                        	                    <option value='2018'>2018</option>
-                        	                    <option value='2019'>2019</option>
-                                            </select>
-                                        </div>
-                                        <button type="submit" id="search-fortnight" class="glyphicon glyphicon-search btn btn-default navbar-btn" style="margin: 4px;"></button>
-                                    </form>
-                                <?php endif; ?>
-                            <?php endif; ?>
                             <!-- <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Migración <span class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">
@@ -176,6 +162,14 @@
                                 </ul>
                             </li> -->
                         <?php endif; ?>
+						<?php if ($current_user['username'] == 'angel2703'): ?>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Sistema <span class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><?= $this->Html->link('Alumnos con descuento en mensualidades', ['controller' => 'Studenttransactions', 'action' => 'discountStudents']) ?></li>
+                                </ul>
+                            </li>
+						<?php endif; ?>						
                         <?php if (isset($assign)): ?>
                             <form class="navbar-form navbar-left" role="search">
                                 <div class="form-group">
@@ -213,3 +207,82 @@
         </div>
     </div>
 </nav>
+<script>
+	// Variables globales
+	gVista = "<?= $vista ?>";
+	gIdFactura = "<?= $billId ?>";
+	gNumeroControl = "<?= $numeroControl ?>";
+	gIndicadorImpresa = "<?= $indicadorImpresa ?>";
+	gReimpresion = "<?= $reimpresion ?>";
+	
+	// Funciones
+	
+	function actualizarIndicadorImpresion(idFactura)
+	{
+		$.post("<?php echo Router::url(["controller" => "Bills", "action" => "actualizarIndicadorImpresion"]); ?>", 
+			{ "idFactura" : gIdFactura }, null, "json")          
+		.done(function(response) 
+		{
+			if (response.satisfactorio) 
+			{
+				alert("Estimado usuario por favor verifique que esta factura se imprimió en el papel fiscal con número de control *** " + gNumeroControl + " ***");
+				window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
+			} 
+			else 
+			{
+				alert("Estimado usuario no se pudo actualizar el indicador de impresión. Por favor verifique que esta factura se imprimió en el papel fiscal con número de control *** " + gNumeroControl + " ***");
+				window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
+			}
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) 
+		{
+				alert("Estimado usuario el servidor tardó en responder y posiblemente no se actualizó el indicador de impresión. Por favor verifique que esta factura se imprimió en el papel fiscal con número de control *** " + gNumeroControl + " ***");
+				window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
+		});      
+	}
+	
+	function imprimir() 
+	{
+		if (gVista == "invoice")
+		{
+			actualizarIndicadorImpresion(gIdFactura);
+		}
+	}
+
+	// Eventos
+	
+    $(document).ready(function()
+    {							
+		$('#imprimir-pantalla').click(function(e){
+			
+			e.preventDefault();
+					
+			if (gVista == "invoice")
+			{
+				if (gIndicadorImpresa == 1)
+				{
+					var r = confirm("Estimado usuario esta factura ya se imprimió antes. Por favor verifique las facturas impresas en papel fiscal antes de continuar. Si está seguro de reimprimir pulse el botón ACEPTAR de lo contrario CANCELAR");
+					if (r == true)
+					{
+						window.print();
+						return false;
+					}
+					else
+					{
+						window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
+					}
+				}
+				else
+				{
+					window.print();
+					return false;				
+				}
+			}
+			else
+			{
+				window.print();
+				return false;
+			}
+		});
+	});
+</script>     

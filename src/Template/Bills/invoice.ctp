@@ -33,8 +33,6 @@
 </style>
 <?php if ($accountService == 0): ?>
 <br />
-<br />
-<br />
 <div style="font-size: 13px; line-height: 15px;">
     <table style="width:100%">
         <tbody>
@@ -124,7 +122,7 @@
     </div>
 </div>
 <?php
-$countSubtraction = 18 - $counter;
+$countSubtraction = 17 - $counter;
 for ($i = 1; $i <= $countSubtraction; $i++): ?>
     <br />
 <?php
@@ -187,7 +185,6 @@ endfor; ?>
                 <?php endforeach; ?>
             </tbody>
         </table>
-		<p>Cajero: <?= $usuarioResponsable ?>
     </div>
     <div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
 		<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?></p>
