@@ -1337,13 +1337,14 @@ class StudenttransactionsController extends AppController
                             $student->section_id = $section->id;
                         }
                     }
-    
+					/*
                     if (!($this->Studenttransactions->Students->save($student)))
                     {
                         $result = 1;
                         
                         $this->Flash->error(__('No pudo ser actualizado el alumno identificado con el id: ' . $valor['id']));            
                     }
+					*/
                     $accountStudent++;
                 }
                 if ($result == 0)
@@ -1374,7 +1375,7 @@ class StudenttransactionsController extends AppController
 				->contain(['Students'])
 				->where([['Studenttransactions.transaction_description' => $transactionDescription],
 					['Studenttransactions.amount >' => 0],
-					['Students.level_of_study IS NOT NULL'], 
+					['Students.level_of_study !=' => ""], 
 					['Students.student_condition' => 'Regular']]);
 	
 			$totalEnrolled = $inscribed->count();
@@ -1438,7 +1439,7 @@ class StudenttransactionsController extends AppController
 							$swSection = 1;
 						}
 					}
-
+					/*
 					if ($swSection == 0)
 					{
 						$student = $this->Studenttransactions->Students->get($studentsLevels->student->id);
@@ -1450,6 +1451,7 @@ class StudenttransactionsController extends AppController
 							$this->Flash->error(__('No pudo ser actualizado el alumno identificado con el id: ' . $student->id));            
 						}
 					}
+					*/
 				}
 
 				if ($studentsLevels->student->section->section == 'A')
@@ -3499,4 +3501,55 @@ class StudenttransactionsController extends AppController
         $this->set(compact('studentTransactions', 'contador'));
         $this->set('_serialize', ['studentTransactions', 'contador']);
 	}	
+	public function reportePagos()
+	{
+		if ($this->request->is('post'))
+		{
+			if (isset($_POST["concepto"]) && isset($_POST["ano_concepto"]))
+			{
+				return $this->redirect(['action' => 'reportePagosConcepto', $_POST["concepto"], $_POST["ano_concepto"]]);
+			}
+
+		}	
+	}
+	public function reportePagosConcepto($concepto = null, $anoConcepto = null)
+	{
+		$conceptoReporte = $concepto . " " . $anoConcepto;
+		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		
+        $fechaHoy = Time::now();
+		
+		$studentTransactions = TableRegistry::get('Studenttransactions');
+		
+		$pagosRecibidos = $studentTransactions->find()
+			->select(
+				['Studenttransactions.id',
+				'Studenttransactions.transaction_description',
+				'Studenttransactions.amount',
+				'Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.student_condition',
+				'Parentsandguardians.family'])
+			->contain(['Students' => ['Parentsandguardians']])
+			->where([['Studenttransactions.transaction_description' => $conceptoReporte],
+				['Studenttransactions.amount > 0'], ['Students.student_condition' => 'Regular']])
+			->order(['Parentsandguardians.family', 'Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);			
+
+		$contadorRegistros = $pagosRecibidos->count();
+					
+		$totalConcepto = 0;
+			
+		foreach ($pagosRecibidos as $pagosRecibido)
+		{
+			$totalConcepto = $totalConcepto + $pagosRecibido->amount;
+		}
+			
+        $this->set(compact('pagosRecibidos', 'conceptoReporte', 'totalConcepto', 'fechaHoy'));
+        $this->set('_serialize', ['pagosRecibidos', 'conceptoReporte', 'totalConcepto', 'fechaHoy']);
+	}
 }

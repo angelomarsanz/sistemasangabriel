@@ -37,19 +37,20 @@
     <table style="width:100%">
         <tbody>
             <tr>
-                <td>Cliente: <?= $bill->client ?></td>
-                <td style="text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+                <td style='width:80%;'>Cliente: <?= $bill->client ?></td>
+                <td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
             </tr>
             <tr>
-                <td>C.I./RIF: <?= $bill->identification ?></td>
-                <td style="text-align: right;">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
+                <td style='width:80%;'>C.I./RIF: <?= $bill->identification ?></td>
+                <td style="width:20%; text-align: right;">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
             </tr>
             <tr>
-                <td>Teléfono: <?= $bill->tax_phone ?></td>
-                <td style="text-align: right;"><?= $bill->school_year ?></td>
+                <td style='width:80%;'>Teléfono: <?= $bill->tax_phone ?></td>
+                <td style="width:20%; text-align: right;"><?= $bill->school_year ?></td>
             </tr>
             <tr>
-                <td>Dirección: <spam style="font-size: 10px; line-height: 12px;"><?= $bill->fiscal_address ?></spam></td>
+                <td style='width:80%;'>Dirección: <spam style="font-size: 9px; line-height: 11px;"><?= $bill->fiscal_address ?></spam></td>
+				<td style='width:20%;'></td>
             </tr>
         </tbody>
     </table>
@@ -122,7 +123,7 @@
     </div>
 </div>
 <?php
-$countSubtraction = 17 - $counter;
+$countSubtraction = 14 - $counter;
 for ($i = 1; $i <= $countSubtraction; $i++): ?>
     <br />
 <?php
@@ -131,19 +132,20 @@ endfor; ?>
     <table style="width:100%">
         <tbody>
             <tr>
-                <td>Cliente: <?= $bill->client ?> </td>
-                <td style="text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+                <td style='width:80%;'>Cliente: <?= $bill->client ?></td>
+                <td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
             </tr>
             <tr>
-                <td>C.I./RIF: <?= $bill->identification ?></td>
-                <td style="text-align: right;">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
+                <td style='width:80%;'>C.I./RIF: <?= $bill->identification ?></td>
+                <td style="width:20%; text-align: right;">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
             </tr>
             <tr>
-                <td>Teléfono: <?= $bill->tax_phone ?></td>
-                <td style="text-align: right;"><?= $bill->school_year ?></td>
+                <td style='width:80%;'>Teléfono: <?= $bill->tax_phone ?></td>
+                <td style="width:20%; text-align: right;"><?= $bill->school_year ?></td>
             </tr>
             <tr>
-                <td>Dirección: <spam style="font-size: 10px; line-height: 12px;"><?= $bill->fiscal_address ?></spam></td>
+                <td style='width:80%;'>Dirección: <spam style="font-size: 9px; line-height: 11px;"><?= $bill->fiscal_address ?></spam></td>
+				<td style='width:20%;'></td>
             </tr>
         </tbody>
     </table>
