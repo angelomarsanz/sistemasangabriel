@@ -2457,6 +2457,7 @@
             payments.taxPhone = $('#tax-phone').val();
             payments.invoiceAmount = totalBill;
 			payments.discount = discount;
+			if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos')
 			{
 				payments.fiscal = 0;
 			}

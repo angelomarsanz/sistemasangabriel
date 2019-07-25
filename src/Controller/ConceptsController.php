@@ -20,6 +20,7 @@ class ConceptsController extends AppController
 
 		$conceptos = $this->Concepts->find('all');
 			
+		$contadorRegistros = $conceptos->count();
 		
 		if ($contadorRegistros > 0)
 		{		
@@ -29,6 +30,7 @@ class ConceptsController extends AppController
 				
 				$conceptoGet->concept_migration = 1;
 				
+				if ($this->Concepts->save($conceptoGet)) 
 				{
 					$contador++;
 				} 
