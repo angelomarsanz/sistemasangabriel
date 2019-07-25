@@ -16,12 +16,14 @@
 			<input type="hidden" id="type-invoice" value="<?= $menuOption ?>">
             <div class="row">
                 <div class="col-md-12">
-					<?php if ($menuOption == 'Inscripción regulares'): ?>
-						<h3><b>Inscripción alumnos regulares</b></h3>
-					<?php elseif ($menuOption == 'Inscripción nuevos'): ?>
-						<h3><b>Inscripción alumnos nuevos</b></h3>
-					<?php elseif ($menuOption == 'Servicio educativo'): ?>
-						<h3><b>Servicio educativo</b></h3>
+					<?php if ($menuOption == 'Factura inscripción regulares'): ?>
+						<h3><b>Factura inscripción alumnos regulares</b></h3>
+					<?php elseif ($menuOption == 'Factura inscripción nuevos'): ?>
+						<h3><b>Factura inscripción alumnos nuevos</b></h3>
+					<?php elseif ($menuOption == 'Recibo inscripción regulares'): ?>
+						<h3><b>Recibo inscripción alumnos regulares</b></h3>
+					<?php elseif ($menuOption == 'Recibo inscripción nuevos'): ?>
+						<h3><b>Recibo inscripción alumnos nuevos</b></h3>
 					<?php else: ?>
 						<h3><b>Cobro de mensualidades</b></h3>
 					<?php endif; ?>
@@ -46,7 +48,7 @@
                     <br />
                     <input type="text" class="form-control" id="family-search">
                     <br />
-					<?php if ($menuOption == 'Inscripción regulares' || $menuOption == 'Mensualidades'): ?>
+					<?php if ($menuOption == 'Factura inscripción regulares' || $menuOption == 'Recibo inscripción regulares' || $menuOption == 'Mensualidades'): ?>
 						<button id="newfamily" class="btn btn-success" disabled>Listar familias nuevas</button>
 					<?php else: ?>
 						<button id="newfamily" class="btn btn-success">Listar familias nuevas</button>
@@ -1552,11 +1554,11 @@
                 
             $("#header-messages").html("Por favor espere...");
 			
-			if ($('#type-invoice').val() == 'Inscripción regulares')
+			if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción regulares')
 			{
 				typeStudent = 0;
 			}
-			else if ($('#type-invoice').val() == 'Inscripción nuevos' || $('#type-invoice').val() == 'Servicio educativo')
+			else if ($('#type-invoice').val() == 'Factura inscripción nuevos' || $('#type-invoice').val() == 'Recibo inscripción nuevos')
 			{
 				typeStudent = 1;
 			}
@@ -1797,11 +1799,9 @@
 								amountPayable = transactionAmount;												
 							}
 							
-							if ($('#type-invoice').val() == 'Inscripción regulares')
+							if ($('#type-invoice').val() == 'Factura inscripción regulares')
 							{
-								if (monthlyPayment.substring(0, 3) == "Ago" ||
-									monthlyPayment.substring(0, 9) == "Matrícula" ||
-									monthlyPayment.substring(0, 14) == "Seguro escolar")
+								if (monthlyPayment.substring(0, 8) == "Ago 2019")
 								{
 									if (indicadorImpresion == 0)
 									{
@@ -1809,10 +1809,9 @@
 									}
 								}
 							}
-							else if ($('#type-invoice').val() == 'Inscripción nuevos')
+							else if ($('#type-invoice').val() == 'Factura inscripción nuevos')
 							{
-								if (monthlyPayment.substring(0, 3) == "Ago" || 
-								monthlyPayment.substring(0, 9) == "Matrícula")
+								if (monthlyPayment.substring(0, 8) == "Ago 2019")
 								{
 									if (indicadorImpresion == 0)
 									{
@@ -1820,15 +1819,29 @@
 									}
 								}												
 							}
-							else if ($('#type-invoice').val() == 'Servicio educativo')
+							else if ($('#type-invoice').val() == 'Recibo inscripción regulares')
 							{
-								if (monthlyPayment.substring(0, 18) == 'Servicio educativo')
-								{
-									if (indicadorImpresion == 0)
+								if (monthlyPayment.substring(0, 9) == "Matrícula" ||
+									monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+									monthlyPayment.substring(0, 8) == "Ago 2020")
 									{
-										insertRecord();
+										if (indicadorImpresion == 0)
+										{
+											insertRecord();
+										}
 									}
-								}
+							}
+							else if ($('#type-invoice').val() == 'Recibo inscripción nuevos')
+							{
+								if (monthlyPayment.substring(0, 18) == 'Servicio educativo' || 
+									monthlyPayment.substring(0, 9) == "Matrícula" ||
+									monthlyPayment.substring(0, 8) == "Ago 2020")
+									{
+										if (indicadorImpresion == 0)
+										{
+											insertRecord();
+										}
+									}
 							}
 							else
 							{
@@ -2444,7 +2457,6 @@
             payments.taxPhone = $('#tax-phone').val();
             payments.invoiceAmount = totalBill;
 			payments.discount = discount;
-			if ($('#type-invoice').val() == 'Servicio educativo')
 			{
 				payments.fiscal = 0;
 			}

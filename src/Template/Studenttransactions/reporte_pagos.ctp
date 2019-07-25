@@ -67,8 +67,19 @@
             <?php
                 echo $this->Form->input('concepto', ['required' => 'required', 'label' => 'Concepto', 'options' => 
                     [null => '',
-					'Ago' => 'Agosto',
                     'Matrícula' => 'Matrícula',
+					'Ene' => 'Mes Enero',
+					'Feb' => 'Mes Febrero',
+					'Mar' => 'Mes Marzo',
+					'Abr' => 'Mes Abril',
+					'May' => 'Mes Mayo',
+					'Jun' => 'Mes Junio',
+					'Jul' => 'Mes Julio',
+					'Ago' => 'Mes Agosto',
+					'Sep' => 'Mes Septiembre',
+					'Oct' => 'Mes Octubre',
+					'Nov' => 'Mes Noviembre',
+					'Dic' => 'Mes Diciembre',
                     'Seguro escolar' => 'Seguro escolar',
                     'Servicio educativo' => 'Servicio educativo',
 					'Thales' => 'Thales']]); 

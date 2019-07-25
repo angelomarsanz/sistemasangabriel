@@ -64,7 +64,7 @@
 				<thead>
 					<tr>
 						<th></th>
-						<th><?= 'Fecha: ' . $fechaHoy->format('d-m-Y') ?></th>
+						<th><b><?= 'Fecha: ' . $fechaHoy->format('d-m-Y') ?></b></th>
 					</tr>
 					<tr>
 						<th></th>
@@ -73,7 +73,11 @@
 					<tr>
 						<th></th>
 						<th><b><?= "Pagos recibidos por concepto de: " . $conceptoReporte ?></b></th>
-					</tr>			
+					</tr>
+					<tr>
+						<th></th>
+						<th></th>
+					</tr>
 					<tr>
 						<th></th>
 						<th><b><?= "Total recibido : " . number_format($totalConcepto, 2, ",", ".") ?></b></th>

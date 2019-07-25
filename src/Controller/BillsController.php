@@ -808,6 +808,7 @@ class BillsController extends AppController
         $accountService = 0;
         $amountConcept = 0;
         $previousAcccountingCode = " ";
+		$indicadorAnticipo = 0;
  
         $loadIndicator = 0;
 
@@ -851,6 +852,7 @@ class BillsController extends AppController
                     $firstMonthly= " ";
                     $lastInstallment = " ";
                     $amountConcept = 0;
+					$indicadorAnticipo = 1;
                 }
                 elseif (substr($aConcept->concept, 0, 3) == "Ago")
                 {	
@@ -868,6 +870,7 @@ class BillsController extends AppController
                     $firstMonthly= " ";
                     $lastInstallment = " ";
                     $amountConcept = 0;
+					$indicadorAnticipo = 1;
                 }
                 elseif (substr($aConcept->concept, 0, 18) == "Servicio educativo")
                 {
@@ -884,6 +887,7 @@ class BillsController extends AppController
                     $firstMonthly= " ";
                     $lastInstallment = " ";
                     $amountConcept = 0;
+					$indicadorAnticipo = 1;
                 }
                 elseif (substr($aConcept->concept, 0, 6) == "Thales")
                 {
@@ -952,6 +956,7 @@ class BillsController extends AppController
                     $LoadIndicator = 1;
                     $lastInstallment = " ";
                     $amountConcept = 0;
+					$indicadorAnticipo = 1;
                 }							
                 elseif (substr($aConcept->concept, 0, 3) == "Ago")
                 {	
@@ -974,6 +979,7 @@ class BillsController extends AppController
                     $LoadIndicator = 1;
                     $lastInstallment = " ";
                     $amountConcept = 0;
+					$indicadorAnticipo = 1;
                 }
                 elseif (substr($aConcept->concept, 0, 18) == "Servicio educativo")
                 {
@@ -995,6 +1001,7 @@ class BillsController extends AppController
                     $LoadIndicator = 1;
                     $lastInstallment = " ";
                     $amountConcept = 0;
+					$indicadorAnticipo = 1;
                 }
                 elseif (substr($aConcept->concept, 0, 6) == "Thales")
                 {
@@ -1049,8 +1056,8 @@ class BillsController extends AppController
 		
 		$vista = "invoice";
 					
-        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion'));
-        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion']);
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo'));
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo']);
     }
 	
     public function invoiceConcept($accountingCode, $invoiceLine = null, $amountConcept = null)

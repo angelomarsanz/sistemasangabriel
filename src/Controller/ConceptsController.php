@@ -14,6 +14,33 @@ use App\Controller\BinnaclesController;
  */
 class ConceptsController extends AppController
 {
+    public function testFunction()
+    { 
+		$contador = 0;
+
+		$conceptos = $this->Concepts->find('all');
+			
+		
+		if ($contadorRegistros > 0)
+		{		
+			foreach ($conceptos as $concepto)
+			{
+				$conceptoGet = $this->Concepts->get($concepto->id);
+				
+				$conceptoGet->concept_migration = 1;
+				
+				{
+					$contador++;
+				} 
+				else 
+				{
+					$this->Flash->error(__('El concepto no pudo ser actualizado'));
+				}
+			}
+		}	
+		
+		$this->Flash->success(__('Registros actualizados ' . $contador));	
+    }
 
     /**
      * Index method
@@ -63,7 +90,15 @@ class ConceptsController extends AppController
         $concept->amount = $amountPayable;
         $concept->observation = $observation;
         $concept->annulled = 0;
-        $concept->concept_migration = 0;
+		
+		if ($monthlyPayment == "Matrícula 2019" || $monthlyPayment == "Seguro escolar 2019" || $monthlyPayment == "Ago 2020")
+		{
+			$concept->concept_migration = 0;
+		}
+		else
+		{
+			$concept->concept_migration = 1;			
+		}
 
         if (!($this->Concepts->save($concept)))
         {
