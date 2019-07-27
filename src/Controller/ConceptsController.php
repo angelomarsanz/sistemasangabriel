@@ -93,7 +93,8 @@ class ConceptsController extends AppController
         $concept->observation = $observation;
         $concept->annulled = 0;
 		
-		if ($monthlyPayment == "Matrícula 2019" || $monthlyPayment == "Seguro escolar 2019" || $monthlyPayment == "Ago 2020")
+		if ($monthlyPayment == "Matrícula 2019" || $monthlyPayment == "Seguro escolar 2019" || $monthlyPayment == "Ago 2019" 
+			 || $monthlyPayment == "Ago 2020"  || $monthlyPayment == "Servicio educativo 2019")
 		{
 			$concept->concept_migration = 0;
 		}
