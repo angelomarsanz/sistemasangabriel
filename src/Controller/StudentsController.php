@@ -2660,7 +2660,7 @@ class StudentsController extends AppController
 					
 					if ($anoMesActual < 201811)
 					{
-						$tarifaDolarActual = $mensualidad->amount/1000000;
+						$tarifaDolarActual = round($mensualidad->amount/1000000);
 						$tarifaBolivarActual = $mensualidad->amount;
 					}
 					else
