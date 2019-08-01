@@ -1801,11 +1801,26 @@
 							
 							if ($('#type-invoice').val() == 'Factura inscripción regulares')
 							{
-								// Por definir en septiembre 2019
+								if (monthlyPayment.substring(0, 9) == "Matrícula" ||
+									monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+									monthlyPayment.substring(0, 3) == "Ago")
+									{
+										if (indicadorImpresion == 0)
+										{
+											insertRecord();
+										}
+									}
 							}
 							else if ($('#type-invoice').val() == 'Factura inscripción nuevos')
 							{
-								// Por definir en septiembre 2019										
+								if (monthlyPayment.substring(0, 9) == "Matrícula" ||
+									monthlyPayment.substring(0, 3) == "Ago")
+									{
+										if (indicadorImpresion == 0)
+										{
+											insertRecord();
+										}
+									}								
 							}
 							else if ($('#type-invoice').val() == 'Recibo inscripción regulares')
 							{

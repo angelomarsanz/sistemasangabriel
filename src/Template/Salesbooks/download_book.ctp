@@ -1,6 +1,6 @@
 <br />
 <br />
-<?= $this->Html->link(__('Descargar libro de ventas'), ['controller' => 'Salesbooks', 'action' => 'indexexcel', '_ext'=>'xlsx'], ['id' => 'download_book', 'class' => 'btn btn-success']); ?>
+<?= $this->Html->link(__('Descargar libro'), ['controller' => 'Salesbooks', 'action' => 'indexexcel', '_ext'=>'xlsx'], ['id' => 'download_book', 'class' => 'btn btn-success']); ?>
 <br />
 <br />
 <p id="messages"></p>

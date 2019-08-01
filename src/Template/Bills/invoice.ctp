@@ -359,7 +359,7 @@
 		<div>
 			<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
 			<h4>Rif J-07573084-4</h4>
-			<h2 style="text-align: center;">Recibo Nro. <?= $bill->bill_number ?> por Bs.S <?= number_format($bill->amount_paid, 2, ",", ".") ?></h2>
+			<h2 style="text-align: center;">Recibo Nro. <?= $bill->bill_number ?> por Bs.S <?= number_format(($bill->amount_paid - $accountService), 2, ",", ".") ?></h2>
 			<br />
 			<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.S <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b>
 			como anticipo de:</p>
@@ -407,7 +407,7 @@
 					<table style="width:100%;">
 						<tr>
 							<td style="width: 50%;"><b>Sub-total:</b></td>
-							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $bill->amount), 2, ",", ".") ?></b></td>
+							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $bill->amount - $accountService), 2, ",", ".") ?></b></td>
 						</tr>
 						<tr>
 							<td style="width: 50%;"><b>Descuento/Recargo:</b></td>
@@ -432,7 +432,7 @@
 		<div>
 			<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
 			<h4>Rif J-07573084-4</h4>
-			<h2 style="text-align: center;">Recibo Nro. <?= $bill->bill_number ?> por Bs.S <?= number_format($bill->amount_paid, 2, ",", ".") ?></h2>
+			<h2 style="text-align: center;">Recibo Nro. <?= $bill->bill_number ?> por Bs.S <?= number_format(($bill->amount_paid - $accountService), 2, ",", ".") ?></h2>
 			<br />
 			<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.S <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b>
 			como anticipo de:</p>
@@ -480,7 +480,7 @@
 					<table style="width:100%;">
 						<tr>
 							<td style="width: 50%;"><b>Sub-total:</b></td>
-							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $bill->amount), 2, ",", ".") ?></b></td>
+							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $bill->amount - $accountService), 2, ",", ".") ?></b></td>
 						</tr>
 						<tr>
 							<td style="width: 50%;"><b>Descuento/Recargo:</b></td>

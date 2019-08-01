@@ -190,7 +190,7 @@ class UsersController extends AppController
                 $user = $this->Users->patchEntity($user, $this->request->data);
                 if ($this->Users->save($user)) 
                 {
-                    if ($this->request->data['role'] == 'Representante') 
+                    if ($user->role == 'Representante') 
                     {
                         
                         $parentsandguardians = $this->Users->Parentsandguardians->find('all')
@@ -210,7 +210,7 @@ class UsersController extends AppController
                                 return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'edit', $id]);
                             }
                     }
-                    elseif ($this->request->data['role'] == 'Alumno')
+                    elseif ($user->role == 'Alumno')
                     {
                         $students = $this->Users->Students->find('all')
                         ->where(['Students.user_id =' => $id]);

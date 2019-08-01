@@ -328,7 +328,7 @@ class BillsController extends AppController
                         $Studenttransactions->edit($transaction->transactionIdentifier, $billNumber, $transaction->originalAmount, $transaction->amountPayable, $transaction->tarifaDolar);
 
                         $Concepts->add($billId, $transaction->studentName, $transaction->transactionIdentifier, 
-                            $transaction->monthlyPayment, $transaction->amountPayable, $transaction->observation);
+                            $transaction->monthlyPayment, $transaction->amountPayable, $transaction->observation, $this->headboard['fiscal']);
                     }
 
                     foreach ($payments as $payment) 
@@ -1545,5 +1545,17 @@ class BillsController extends AppController
 			}
             exit(json_encode($jsondata, JSON_FORCE_OBJECT));
         }
+    }
+    public function indiceRecibos($month = null, $year = null)
+    {
+        $this->autoRender = false;
+        
+        $invoicesBills = $this->Bills->find('all', ['conditions' => 
+            [['MONTH(date_and_time)' => $month], 
+            ['YEAR(date_and_time)' => $year],
+            ['Bills.fiscal' => false]],
+            'order' => ['Bills.created' => 'ASC'] ]);
+            
+        return $invoicesBills;
     }
 }

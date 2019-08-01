@@ -26,7 +26,7 @@ class TurnsController extends AppController
     public function index()
     {
 		$query = $this->Turns->find('all')
-			->where(['user_id' => $this->Auth->user('id')])
+			->where(['user_id' => $this->Auth->user('id'), 'status' => 0])
 			->order(['start_date' => 'DESC']);
    
 		$this->set('turns', $this->paginate($query));

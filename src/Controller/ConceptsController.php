@@ -15,32 +15,32 @@ use App\Controller\BinnaclesController;
 class ConceptsController extends AppController
 {
     public function testFunction()
-    { 
+    {
 		$contador = 0;
-
-		$conceptos = $this->Concepts->find('all');
+		$contadorRegistros = 0;
+		
+		$month = '07';
+		$year = '2019';
+		
+		$conceptos = $this->Concepts->find('all', ['conditions' => 
+			[['concept' => 'Servicio educativo 2019'],
+			['MONTH(created)' => $month], 
+			['YEAR(created)' => $year],
+			['annulled' => false]],
+			'order' => ['id' => 'ASC'] ]);
 			
 		$contadorRegistros = $conceptos->count();
 		
+		$this->Flash->success(__('Total registros encontrados: ' . $contadorRegistros));
+				
 		if ($contadorRegistros > 0)
 		{		
 			foreach ($conceptos as $concepto)
 			{
-				$conceptoGet = $this->Concepts->get($concepto->id);
-				
-				$conceptoGet->concept_migration = 1;
-				
-				if ($this->Concepts->save($conceptoGet)) 
-				{
-					$contador++;
-				} 
-				else 
-				{
-					$this->Flash->error(__('El concepto no pudo ser actualizado'));
-				}
+				$this->Flash->success(__('Concepto: ' . $concepto->concept));
 			}
-		}	
-		
+		}
+				
 		$this->Flash->success(__('Registros actualizados ' . $contador));	
     }
 
@@ -80,7 +80,7 @@ class ConceptsController extends AppController
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
     public function add($billId = null, $studentName = null, $transactionIdentifier = null, 
-        $monthlyPayment = null, $amountPayable = null, $observation = null)
+        $monthlyPayment = null, $amountPayable = null, $observation = null, $fiscal = null)
     {
         $concept = $this->Concepts->newEntity();
         $concept->bill_id = $billId;
@@ -92,15 +92,14 @@ class ConceptsController extends AppController
         $concept->amount = $amountPayable;
         $concept->observation = $observation;
         $concept->annulled = 0;
+		$concept->concept_migration = 1;
 		
-		if ($monthlyPayment == "Matrícula 2019" || $monthlyPayment == "Seguro escolar 2019" || $monthlyPayment == "Ago 2019" 
-			 || $monthlyPayment == "Ago 2020"  || $monthlyPayment == "Servicio educativo 2019")
+		if ($fiscal == 0)
 		{
-			$concept->concept_migration = 0;
-		}
-		else
-		{
-			$concept->concept_migration = 1;			
+			if (substr($monthlyPayment, 0, 10) == "Matrícula" || substr($monthlyPayment, 0, 14) == "Seguro escolar" || substr($monthlyPayment, 0, 3) == "Ago")
+			{
+				$concept->concept_migration = 0;
+			}
 		}
 
         if (!($this->Concepts->save($concept)))
