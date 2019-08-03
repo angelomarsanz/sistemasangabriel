@@ -12,6 +12,47 @@ use App\Controller\BinnaclesController;
  */
 class PaymentsController extends AppController
 {
+	public function pruebaFuncion()
+	{
+		$this->loadModel('Turns');
+		$this->loadModel('Concepts');
+		
+		$conceptoServicioEducativo = [];
+		$conceptoServicioEducativo[]['idFactura'] = 0;
+		$conceptoServicioEducativo[]['monto'] = 0;
+		$conceptoServicioEducativo[]['saldo'] = 0;
+		
+		$turn = $this->Turns->get(799);
+		$fechaTurnoFormateada = date_format($turn->start_date, "Y-m-d");
+		$fechaTurno = $turn->start_date;
+		$fechaProximoDia = $fechaTurno->addDay(1);
+		$fechaProximoDiaFormateada = date_format($fechaProximoDia, "Y-m-d");
+		echo "<br />fechaTurnoFormateada: " . $fechaTurnoFormateada;
+		echo "<br />fechaProximoDiaFormateada: " . $fechaProximoDiaFormateada;
+		
+		$servicioEducativo = $this->Concepts->find('all')
+			->where(['SUBSTRING(concept, 1, 18) =' => 'Servicio educativo', 'annulled' => 0, 'created >=' => $fechaTurnoFormateada, 'created <' => $fechaProximoDiaFormateada])
+			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
+			
+		$contadorRegistros = $servicioEducativo->count();
+		
+		if ($contadorRegistros > 0)
+		{
+			foreach ($servicioEducativo as $servicio)
+			{
+				$conceptoServicioEducativo[]['idFactura'] = $servicio->bill_id;
+				$conceptoServicioEducativo[]['monto'] = $servicio->amount;
+				$conceptoServicioEducativo[]['saldo'] = $servicio->amount;
+			}
+			
+			echo "<br />";
+			var_dump($conceptoServicioEducativo);
+		}
+		else
+		{
+			$this->Flash->error(__('No se encontraron registros'));
+		}
+	}
 
     /**
      * Index method
@@ -124,15 +165,56 @@ class PaymentsController extends AppController
         return $this->redirect(['action' => 'index']);
     }
     
-    public function searchPayments($turn = null)
+    public function searchPayments($turn = null, $fechaTurnoFormateada = null, $fechaProximoDiaFormateada = null)
     {
         $this->autoRender = false;
-        
+		
+		$conceptoServicioEducativo = [];
+		$conceptoServicioEducativo[] = ['idFactura' => 0, 'monto' => 0, 'saldo' => 0];
+		
+		$pagosServicioEducativo = [];
+		$pagosServicioEducativo[] = ['id' => 0,
+									'tipoPago' => '',
+									'fecha' => 0,
+									'nroFactura' => 0,
+									'nroControl' => 0,
+									'familia' => '',
+									'monto' => 0,
+									'banco' => '',
+									'serial' => ''];
+									
+		$montoServicioEducativo = 0;
+		
+		$indicadorServicioEducativo = 0;
+		
+		$resultado = [];
+		
+		$this->loadModel('Concepts');
+	
+		$servicioEducativo = $this->Concepts->find('all')
+			->where(['SUBSTRING(concept, 1, 18) =' => 'Servicio educativo', 'annulled' => 0, 'created >=' => $fechaTurnoFormateada, 'created <' => $fechaProximoDiaFormateada])
+			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
+			
+		$contadorRegistros = $servicioEducativo->count();
+			
+		if ($contadorRegistros > 0)
+		{
+			$indicadorServicioEducativo = 1;
+			
+			foreach ($servicioEducativo as $servicio)
+			{
+				foreach ($servicioEducativo as $servicio)
+				{
+					$conceptoServicioEducativo[] = ['idFactura' => $servicio->bill_id, 'monto' => $servicio->amount, 'saldo' => $servicio->amount];
+				}
+			}
+		}
+							
         $paymentsTurn = $this->Payments->find('all')->where(['turn' => $turn, 'annulled' => 0])
             ->order(['Payments.payment_type' => 'ASC', 'Payments.created' => 'ASC']);
             
         $billId = 0;
-
+		
         foreach ($paymentsTurn as $paymentsTurns) 
         {    
             if ($billId == 0)
@@ -140,26 +222,62 @@ class PaymentsController extends AppController
                 $billId = $paymentsTurns->bill_id;
                 
                 $bill = $this->Payments->Bills->get($billId);
+				
+				$idFactura = $paymentsTurns->bill_id;
             }
+			
             if ($billId != $paymentsTurns->bill_id)
             {
                 $billId = $paymentsTurns->bill_id;
 
                 $bill = $this->Payments->Bills->get($billId);
-                
-                $paymentsTurns->bill_id = $bill->control_number;
+				
+				$idFactura = $paymentsTurns->bill_id;
             }
-            else
-            {
-                $paymentsTurns->bill_id = $bill->control_number;
-            }
+			            
+			$paymentsTurns->bill_id = $bill->control_number;
+			
             if ($paymentsTurns->payment_type == "Tarjeta de débito" || $paymentsTurns->payment_type == "Tarjeta de crédito")
             {
                 $paymentsTurns->serial = $paymentsTurns->account_or_card;
             }
+			
+			foreach ($conceptoServicioEducativo as $concepto)
+			{				
+				if ($concepto['idFactura'] == $idFactura)
+				{
+					if ($concepto['saldo'] > 0)
+					{
+						if ($concepto['saldo'] >= $paymentsTurns->amount)
+						{
+							$concepto['saldo'] -= $paymentsTurns->amount;
+							$montoServicioEducativo = $paymentTurns->amount;
+							$paymentTurns->amount = 0;
+						}
+						else
+						{
+							$paymentsTurns->amount -= $concepto['saldo'];
+							$montoServicioEducativo = $concepto['saldo'];
+							$concept['saldo'] = 0;
+						}
+						
+						$pagosServicioEducativo[] = ['id' => $paymentsTurns->id,
+													'tipoPago' => $paymentsTurns->payment_type,
+													'fecha' => $paymentsTurns->created->format('d-m-Y H:i:s'),
+													'nroFactura' => $paymentsTurns->bill_number,
+													'nroControl' => $paymentsTurns->bill_id,
+													'familia' => $paymentsTurns->name_family,
+													'monto' => $montoServicioEducativo,
+													'banco' => $paymentsTurns->bank,
+													'serial' => $paymentsTurns->serial];
+					}
+				}
+			}
         }
+		
+		$resultado = [$paymentsTurn, $indicadorServicioEducativo, $pagosServicioEducativo];
 
-        return $paymentsTurn;
+        return $resultado;
     }
 	
     public function monetaryReconversion()

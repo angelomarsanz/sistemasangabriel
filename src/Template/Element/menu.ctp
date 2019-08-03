@@ -71,7 +71,7 @@
 								<li><?= $this->Html->link('Anular factura', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Anular']) ?></li>
 								<li><?= $this->Html->link('Modificar lote de facturas', ['controller' => 'Controlnumbers', 'action' => 'edit']) ?></li>
 								<li><?= $this->Html->link('Modificar el número control de facturas', ['controller' => 'Bills', 'action' => 'editControl']) ?></li>
-								<li><?= $this->Html->link('Consultar factura', ['controller' => 'Bills', 'action' => 'consultBill']) ?></li>
+								<li><?= $this->Html->link('Consultar factura o recibo', ['controller' => 'Bills', 'action' => 'consultBill']) ?></li>
 								<li><?= $this->Html->link('Crear libro de ventas EXCEL', ['controller' => 'Salesbooks', 'action' => 'createBookExcel']) ?></li>
 								<li><?= $this->Html->link('Crear libro de recibos EXCEL', ['controller' => 'Salesbooks', 'action' => 'crearLibroRecibos']) ?></li>
 							</ul>

@@ -218,6 +218,7 @@
 		<div>
 			<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
 			<h4>Rif J-07573084-4</h4>
+			<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
 			<h2 style="text-align: center;">Recibo Nro. <?= $bill->bill_number ?> por Bs.S <?= number_format($bill->amount_paid, 2, ",", ".") ?></h2>
 			<br />
 			<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.S <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b>
@@ -291,6 +292,7 @@
 		<div>
 			<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
 			<h4>Rif J-07573084-4</h4>
+			<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
 			<h2 style="text-align: center;">Recibo Nro. <?= $bill->bill_number ?> por Bs.S <?= number_format($bill->amount_paid, 2, ",", ".") ?></h2>
 			<br />
 			<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.S <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b>
@@ -359,6 +361,7 @@
 		<div>
 			<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
 			<h4>Rif J-07573084-4</h4>
+			<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
 			<h2 style="text-align: center;">Recibo Nro. <?= $bill->bill_number ?> por Bs.S <?= number_format(($bill->amount_paid - $accountService), 2, ",", ".") ?></h2>
 			<br />
 			<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.S <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b>
@@ -432,6 +435,7 @@
 		<div>
 			<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
 			<h4>Rif J-07573084-4</h4>
+			<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
 			<h2 style="text-align: center;">Recibo Nro. <?= $bill->bill_number ?> por Bs.S <?= number_format(($bill->amount_paid - $accountService), 2, ",", ".") ?></h2>
 			<br />
 			<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.S <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b>
@@ -500,6 +504,7 @@
 		<br />
 	<?php endif; ?>
 	<div class="saltopagina">
+		<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
 		<h3 style="text-align: right;">Recibo Nro. <?= $bill->bill_number . '-2' ?></h3>
 		<h2 style="text-align: center;">Por Bs.S <?= number_format($accountService, 2, ",", ".") ?></h2>
 		<br />

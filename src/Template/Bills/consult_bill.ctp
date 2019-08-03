@@ -2,7 +2,7 @@
     <div class="col-md-3">
     	<div class="page-header">
             <p><?= $this->Html->link(__('Cerrar'), ['controller' => 'Users', 'action' => 'wait'], ['class' => 'btn btn-sm btn-default']) ?></p>
-    		<h3>Consulta de factura</h3>
+    		<h3>Consulta de factura o recibo</h3>
         </div>
     	<div>
             <?= $this->Form->create() ?>

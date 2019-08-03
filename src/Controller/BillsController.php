@@ -1455,7 +1455,7 @@ class BillsController extends AppController
         {
             if (isset($_POST['billNumber']))
             {
-                $lastRecord = $this->Bills->find('all', ['conditions' => [['bill_number' => $_POST['billNumber']],['fiscal' => 1]],
+                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['billNumber']],
                     'order' => ['Bills.created' => 'DESC'] ]);
     
                 $row = $lastRecord->first();

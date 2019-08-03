@@ -3468,7 +3468,8 @@ class StudenttransactionsController extends AppController
 				['Students.scholarship' => 1]])				
             ->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
 
-        $this->set('studenttransactions', $this->paginate($query));
+        // $this->set('studenttransactions', $this->paginate($query));
+		$studenttransactions = $query;
 
         $this->set(compact('studenttransactions'));
         $this->set('_serialize', ['studenttransactions']);

@@ -390,3 +390,96 @@ tr:nth-child(even) {
         </div>
     </div>
 <?php endif; ?>
+<?php if ($indicadorServicioEducativo == 1): ?>
+    <div class="saltopagina">
+        <div>
+            <table style="width:100%">
+                <tbody>
+                    <tr>
+                        <td>Unidad Educativa Colegio</td>
+                    </tr>
+                    <tr>
+                        <td><b>"San Gabriel Arcángel"</b></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <br />
+        <div style="width: 100%; text-align: center;">
+            <h4>Cierre del turno <?= $turn->turn ?>, de fecha: <?= $turn->start_date->format('d-m-Y') ?>, correspondiente al cajero <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h4>
+        </div>
+        <div>
+            <h3><b>Detalle de los pagos de servicio educativo:</b></h3>
+            <?php 
+            $paymentType = " ";
+            $totalType = 0;
+            $grandTotal = 0;
+            foreach ($pagosServicioEducativo as $servicio): 
+                if ($servicio['tipoPago'] != ''):
+                    if ($paymentType == " "):
+                        $paymentType = $servicio['tipoPago']; ?>
+                        <h4><b>Pagos en: <?= $paymentType ?></b></h4> 
+                        <div style="font-size: 20px;">
+                            <table style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                    <th scope="col" style="width: 15%;">Fecha y hora</th>
+                                    <th scope="col" style="width: 10%;">Factura</th>
+                                    <th scope="col" style="width: 10%;">Nro. Control</th>
+                                    <th scope="col" style="width: 10%;">Familia</th>
+                                    <th scope="col" style="width: 10%;">Monto Bs.</th>
+                                    <th scope="col" style="width: 10%;">Banco</th>
+                                    <th scope="col" style="width: 10%;">Tarjeta o serial</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payments-turn">
+                    <?php
+                    elseif ($paymentType != $servicio['tipoPago']): ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p style="border-top: 1px solid #c2c2d6;"></p> 
+                        <p style="text-align: right; "><b>Total <?= $paymentType . " Bs. " . (number_format($totalType, 2, ",", ".")) ?></b></p>
+                        <br />
+                        <?php $paymentType = $servicio['tipoPago']; ?>
+                        <h4><b>Pagos en: <?= $paymentType ?></b></h4> 
+                        <div style="font-size: 20px;">
+                            <table style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                    <th scope="col" style="width: 15%;">Fecha y hora</th>
+                                    <th scope="col" style="width: 10%;">Factura</th>
+                                    <th scope="col" style="width: 10%;">Nro. Control</th>
+                                    <th scope="col" style="width: 10%;">Familia</th>
+                                    <th scope="col" style="width: 10%;">Monto Bs.</th>
+                                    <th scope="col" style="width: 10%;">Banco</th>
+                                    <th scope="col" style="width: 10%;">Tarjeta o serial</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payments-turn">
+                        <?php 
+                        $totalType = 0; 
+                    endif; 
+                    $totalType = $totalType + $servicio['monto'];
+                    $grandTotal = $grandTotal + $servicio['monto']; ?>                            
+					<tr id=<?= $servicio['id'] ?>>
+						<td style="width: 15%;"><?= h($servicio['fecha']) ?></td>
+						<td style="width: 10%;"><?= h($servicio['nroFactura']) ?></td>
+						<td style="width: 10%;"><?= h($servicio['nroControl']) ?></td>
+						<td style="width: 10%;"><?= h($servicio['familia']) ?></td>
+						<td style="width: 10%;"><?= h(number_format($servicio['monto'], 2, ",", ".")) ?></td>
+						<td style="width: 10%;"><?= h($servicio['banco']) ?></td>
+						<td style="width: 10%;"><?= h($servicio['serial']) ?></td>
+					</tr>
+                <?php
+                endif;
+            endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="border-top: 1px solid #c2c2d6;"></p> 
+                    <p style="text-align: right;"><b>Total <?= $paymentType . " Bs. " . (number_format($totalType, 2, ",", ".")) ?></b></p>
+                    <h4 style="text-align: right;"><b>Total General Bs. <?= (number_format($grandTotal, 2, ",", ".")) ?></b></h4>
+        </div>
+    </div>
+<?php endif; ?>

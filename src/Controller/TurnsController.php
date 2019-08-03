@@ -17,6 +17,22 @@ use Cake\I18n\Time;
  */
 class TurnsController extends AppController
 {
+	public function pruebaFuncion()
+	{
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+			
+        $fechaObjeto = Time::now();
+		
+		$fechaFormateada = date_format($fechaObjeto, "Y-m-d");
+		echo "<br />fecha formateada: " . $fechaFormateada;
+	
+		/*
+		$turn = $this->Turns->get(799);
+		$fecha = date_format($turn->start_date,"Y-m-d");
+		echo "<br />fecha: " . $fecha;
+		*/
+	}
 
     /**
      * Index method
@@ -207,9 +223,18 @@ class TurnsController extends AppController
         $payment = new PaymentsController();
         
         $turn = $this->Turns->get($id);
+		
+		$fechaTurnoFormateada = date_format($turn->start_date, "Y-m-d");
+		$fechaTurno = $turn->start_date;
+		$fechaProximoDia = $fechaTurno->addDay(1);
+		$fechaProximoDiaFormateada = date_format($fechaProximoDia, "Y-m-d");
+				
+        $resultado = $payment->searchPayments($id, $fechaTurnoFormateada, $fechaProximoDiaFormateada);
         
-        $paymentsTurn = $payment->searchPayments($id);
-        
+		$paymentsTurn = $resultado[0];
+		$indicadorServicioEducativo = $resultado[1];
+		$pagosServicioEducativo = $resultado[2];
+		
         $totalAmounts = $turn->initial_cash;
         
         $receipt = 0;
@@ -268,13 +293,11 @@ class TurnsController extends AppController
             $row = $lastRecord->first();
 
 			$lastNumber = $row->bill_number;
-			$lastControl = $row->control_number;
+			$lastControl = $row->control_number;		
+		}
 			
-//			$this->Flash->success(__('Última factura: Turno ' . $id . ' idBill ' . $row->id . ' Nro. Factura ' . $row->bill_number . ' Control ' . $row->control_number));
-			}
-			
-        $this->set(compact('turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl'));
-        $this->set('_serialize', ['turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl']);
+        $this->set(compact('turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'indicadorServicioEducativo', 'pagosServicioEducativo'));
+        $this->set('_serialize', ['turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'indicadorServicioEducativo', 'pagosServicioEducativo']);
     }
     
     function closeTurn()
@@ -342,9 +365,18 @@ class TurnsController extends AppController
         $payment = new PaymentsController();
         
         $turn = $this->Turns->get($idTurn); 
+				
+		$fechaTurnoFormateada = date_format($turn->start_date, "Y-m-d");
+		$fechaTurno = $turn->start_date;
+		$fechaProximoDia = $fechaTurno->addDay(1);
+		$fechaProximoDiaFormateada = date_format($fechaProximoDia, "Y-m-d");
+				
+        $resultado = $payment->searchPayments($idTurn, $fechaTurnoFormateada, $fechaProximoDiaFormateada);
         
-        $paymentsTurn = $payment->searchPayments($idTurn);
-
+		$paymentsTurn = $resultado[0];
+		$indicadorServicioEducativo = $resultado[1];
+		$pagosServicioEducativo = $resultado[2];
+		
         $receipt = 0;
         
         foreach ($paymentsTurn as $paymentsTurns) 
@@ -363,8 +395,8 @@ class TurnsController extends AppController
                 'render' => 'browser',
             ]]);
 
-        $this->set(compact('turn', 'paymentsTurn', 'receipt'));
-        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt']);
+        $this->set(compact('turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo'));
+        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo']);
     }
 
     /**
