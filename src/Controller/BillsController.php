@@ -3,6 +3,8 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 
+use App\Controller\StudentsController;
+
 use App\Controller\StudenttransactionsController;
 
 use App\Controller\ConceptsController;
@@ -12,6 +14,10 @@ use App\Controller\PaymentsController;
 use App\Controller\ConsecutiveinvoicesController;
 
 use App\Controller\ConsecutivereceiptsController;
+
+use App\Controller\ConsecutivocreditosController;
+
+use App\Controller\ConsecutivodebitosController;
 
 use App\Controller\BinnaclesController;
 
@@ -25,13 +31,22 @@ class BillsController extends AppController
 
     public function testFunction()
     {
-		$contadorFacturas = 0;
+		/* $contadorFacturas = 0;
 		
         $facturas = $this->Bills->find('all');
 
 		foreach ($facturas as $factura)
 		{
-			$factura->impresa = true;
+			if ($factura->fiscal == 1)
+			{	
+				$factura->tipo_documento = "Factura";
+			}
+			else
+			{
+				$factura->tipo_documento = "Recibo";
+			}
+			
+			$factura->id_documento_padre = 0;
 			
 			if ($this->Bills->save($factura))
 			{
@@ -42,7 +57,7 @@ class BillsController extends AppController
 				$this->Flash->error(__('No se pudo actualizar la factura con ID ' . $factura->id));
 			}
 		}
-		$this->Flash->success(__('Total facturas actualizadas ' . $contadorFacturas));
+		$this->Flash->success(__('Total facturas actualizadas ' . $contadorFacturas)); */
     }
 	
     public function index($idFamily = null, $family = null)
@@ -168,11 +183,13 @@ class BillsController extends AppController
             if ($this->headboard['fiscal'] == 1)
             {
                 $bill->fiscal = 1;
+				$bill->tipo_documento = "Factura";
             }
             else
             {
                 $bill->fiscal = 0;
 				$bill->control_number = $billNumber;
+				$bill->tipo_documento = "Recibo";
 			}
             $bill->school_year = $this->headboard['schoolYear'];
             $bill->identification = $this->headboard['typeOfIdentificationClient'] . ' - ' . $this->headboard['identificationNumberClient'];
@@ -194,6 +211,7 @@ class BillsController extends AppController
             $bill->invoice_migration = 0;
             $bill->new_family = 0;
 			$bill->impresa = 0;
+			$bill->id_documento_padre = 0;
 
             if ($this->Bills->save($bill)) 
             {
@@ -339,7 +357,7 @@ class BillsController extends AppController
                     
                     $idParentsandguardian = $this->headboard['idParentsandguardians'];
 
-                    return $this->redirect(['action' => 'imprimirFactura', $billNumber, $idParentsandguardian]);
+                    return $this->redirect(['action' => 'imprimirFactura', $billNumber, $idParentsandguardian, $billId]);
                 }
             }
         }
@@ -688,7 +706,7 @@ class BillsController extends AppController
         $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService']);
     }
 	
-    public function imprimirFactura($billNumber = null, $idParentsandguardian = null)
+    public function imprimirFactura($billNumber = null, $idParentsandguardian = null, $idFactura = null)
     {
         $parentandguardian = $this->Bills->Parentsandguardians->get($idParentsandguardian);
 
@@ -696,37 +714,68 @@ class BillsController extends AppController
 
         $this->Flash->success(__('Factura guardada con el número: ' . $billNumber));
 
-        $this->set(compact('billNumber', 'idParentsandguardian', 'family'));
-        $this->set('_serialize', ['billNumber', 'idParentsandguardian', 'family']);
+        $this->set(compact('billNumber', 'idParentsandguardian', 'family', 'idFactura'));
+        $this->set('_serialize', ['billNumber', 'idParentsandguardian', 'family', 'idFactura']);
     }
 
-    public function invoice($billNumber = null, $reimpresion = null)
+    public function invoice($idFactura = null, $reimpresion = null)
     {
         $this->loadModel('Controlnumbers');
 		
 		$this->loadModel('Users');
 
-        $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $billNumber],
+        $lastRecord = $this->Bills->find('all', ['conditions' => ['id' => $idFactura],
             'order' => ['Bills.created' => 'DESC']]);
 					    
         $bill = $lastRecord->first();
                 
 		$usuario = $this->Users->get($bill->user_id);
 		
+		if ($bill->id_documento_padre > 0)
+		{
+			$facturaAfectada = $this->Bills->get($bill->id_documento_padre);
+			$numeroFacturaAfectada = $facturaAfectada->bill_number;
+			$controlFacturaAfectada = $facturaAfectada->control_number;
+		}
+		else
+		{
+			$numeroFacturaAfectada = 0;
+			$controlFacturaAfectada = 0;
+		}
+		
 		$usuarioResponsable = $usuario->first_name . " " . $usuario->surname;
 				
         $billId = $bill->id;
 		
 		$idFacturaAnterior = $bill->id - 1;
-		
-		$numeroFacturaAnterior = $bill->bill_number - 1; 
-			
+				
 		$facturaAnterior = $this->Bills->get($idFacturaAnterior);
 		
 		if ($facturaAnterior->impresa == 0)
 		{
-			$this->Flash->error(__('Estimado usuario la factura anterior con el Nro. ' . $facturaAnterior->bill_number . ' aún no ha sido impresa, por favor verifique y después continúe con la cobranza'));
-			return $this->redirect(['controller' => 'Bills', 'action' => 'consultBill']);
+			if ($facturaAnterior->tipo_documento == "Factura")
+			{
+				$documento = "la factura";
+				$accion = "consultBill";
+			}
+			elseif ($facturaAnterior->tipo_documento == "Recibo")
+			{
+				$documento = "el recibo";
+				$accion = "consultarRecibo";				
+			}
+			elseif ($facturaAnterior->tipo_documento == "Nota de crédito")
+			{
+				$documento = "la nota de crédito";
+				$accion = "consultarNotaCredito";								
+			}
+			else
+			{
+				$documento = "la nota de débito";
+				$accion = "consultarNotaDebito";				
+			}
+			
+			$this->Flash->error(__('Estimado usuario ' . $documento . ' con el Nro. ' . $facturaAnterior->bill_number . ' aún no ha sido impresa, por favor verifique y después continúe con la cobranza'));	
+			return $this->redirect(['controller' => 'Bills', 'action' => $accion]);
 		}
 		        
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
@@ -1056,8 +1105,8 @@ class BillsController extends AppController
 		
 		$vista = "invoice";
 					
-        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo'));
-        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo']);
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada'));
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada']);
     }
 	
     public function invoiceConcept($accountingCode, $invoiceLine = null, $amountConcept = null)
@@ -1133,45 +1182,65 @@ class BillsController extends AppController
         date_default_timezone_set('America/Caracas');
         
         $dateTurn = Time::now();
-        
+		
+		$anoMesActual = $dateTurn->year . $dateTurn->month;
+		        
         if ($this->request->is('post')) 
-        {
-            $bill = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['bill_number']]]);
+        {	
+			$ultimoRegistro = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['bill_number'], 'OR' => [['tipo_documento' => 'Factura'], ['tipo_documento' => 'Recibo']]], 
+				'order' => ['Bills.created' => 'DESC']]); 
+								
+			$contadorRegistros = $ultimoRegistro->count();
+			   
+			if ($contadorRegistros > 0)
+			{
+				$factura = $ultimoRegistro->first();			
 
-            $aBill = $bill->toArray();
-            
-            if ($aBill[0]['annulled'])
-            {
-                $this->Flash->error(__('Esta factura ya está anulada, intente con otra factura'));
-            }
-            else
-            {
-                $idBill = $aBill[0]['id']; 
-    
-                $bill = $this->Bills->get($idBill);
-                
-                $bill->annulled = 1;
+				if ($factura->annulled == 1)
+				{
+					$this->Flash->error(__('Esta factura ya está anulada, intente con otra factura'));
+				}
+				else
+				{
+					$idBill = $factura->id; 
+					
+					$anoMesFactura = $factura->date_and_time->year . $factura->date_and_time->month;
+		
+					if ($anoMesActual == $anoMesFactura)
+					{
+						$bill = $this->Bills->get($idBill);
+						
+						$bill->annulled = 1;
 
-                setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-                date_default_timezone_set('America/Caracas');
-                
-                $bill->date_annulled = Time::now();
-                
-                if (!($this->Bills->save($bill))) 
-                {
-                    $this->Flash->error(__('La factura no pudo ser anulada'));
-                }
-                else 
-                {
-                    $concepts->edit($idBill, $_POST['bill_number']);
-                    
-                    $payments->edit($idBill);
-                    
-                    return $this->redirect(['action' => 'annulledInvoice', $idBill]);
-                }
-            }
+						setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+						date_default_timezone_set('America/Caracas');
+						
+						$bill->date_annulled = Time::now();
+						
+						if (!($this->Bills->save($bill))) 
+						{
+							$this->Flash->error(__('La factura no pudo ser anulada'));
+						}
+						else 
+						{
+							$concepts->edit($idBill, $_POST['bill_number']);
+							
+							$payments->edit($idBill);
+							
+							return $this->redirect(['action' => 'annulledInvoice', $idBill]);
+						} 
+					}
+					else
+					{
+						$this->Flash->error(__('La factura Nro. ' . $_POST['bill_number'] . ' no es de este mes'));
+					}
+				}
+			}
+			else
+			{
+				$this->Flash->error(__('No se encontró la factura o recibo'));
+			}
         }
-//                return $this->redirect(['action' => 'annulledpdf', $_POST['bill_number'], '_ext' => 'pdf']);
         $this->set(compact('idTurn', 'turn', 'dateTurn'));
     }
     
@@ -1455,19 +1524,22 @@ class BillsController extends AppController
         {
             if (isset($_POST['billNumber']))
             {
-                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['billNumber']],
-                    'order' => ['Bills.created' => 'DESC'] ]);
-    
-                $row = $lastRecord->first();
-            
-                if ($row)
-                {
-                    return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $_POST['billNumber'], 1]);
-                }
-                else
-                {
-                    $this->Flash->error(__('La factura Nro. ' . $_POST['billNumber'] . ' no está registrada en el sistema'));
-                }
+				$contadorRegistros = 0;
+				
+                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['billNumber'], 'tipo_documento' => 'Factura'],
+                    'order' => ['Bills.created' => 'DESC']]);
+					
+				$contadorRegistros = $lastRecord->count();
+				   
+				if ($contadorRegistros > 0)
+				{
+					$row = $lastRecord->first();			
+					return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $row->id, 1]);
+				}
+				else
+				{
+					$this->Flash->error(__('La factura Nro. ' . $_POST['billNumber'] . ' no está registrada en el sistema'));
+				}
             }
         }
     }
@@ -1557,5 +1629,293 @@ class BillsController extends AppController
             'order' => ['Bills.created' => 'ASC'] ]);
             
         return $invoicesBills;
+    }
+	
+	public function notaContable()
+	{
+	    if ($this->request->is('post')) 
+        {
+			if (isset($_POST['factura']))
+			{
+				$facturas = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['factura']],
+                        'order' => ['created' => 'DESC'] ]);
+
+				$contadorRegistros = $facturas->count();
+						
+                if ($contadorRegistros > 0)
+                {
+                    $facturaSolicitada = $facturas->first();
+					if ($facturaSolicitada->fiscal == 0)
+					{
+						$this->Flash->error(__('La factura Nro. ' . $_POST['factura'] . ' no es fiscal. Por favor intente con otra factura'));
+					}
+					elseif ($facturaSolicitada->annulled == 1)
+					{
+						$this->Flash->error(__('La factura Nro. ' . $_POST['factura'] . ' ya está anulada. Por favor intente con otra factura'));
+					}
+					else
+					{
+						return $this->redirect(['controller' => 'Bills', 
+												'action' => 'conceptosNotaContable', 
+												'Bills',
+												'notaContable',
+												$facturaSolicitada->id]);
+					}
+				}
+				else
+				{
+					$this->Flash->error(__('No se encontró la factura Nro. ' . $_POST['factura'], ' Por favor intente con otro número'));
+				}
+			}
+		}
+	}
+	
+	public function listaFacturasFamilia($idFamilia = null, $familia = null)
+    {	
+		$busqueda = $this->Bills->find('all', ['conditions' => ['parentsandguardian_id' => $idFamilia, 'annulled' => 0, 'fiscal' => 1],
+            'order' => ['Bills.created' => 'DESC'] ]);				
+
+        $this->set('facturasFamilia', $this->paginate($busqueda));
+
+        $this->set(compact('facturas', 'idFamilia', 'familia'));
+        $this->set('_serialize', ['bills', 'idFamilia', 'familia']);
+    }
+	
+	public function conceptosNotaContable($retornoControlador = null, $retornoAccion = null, $idFactura = null, $idFamilia = null, $familia = null)
+	{	
+	    setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+        
+        $fechaHoy = Time::now();
+		$mesActual = $fechaHoy->month;
+			
+		$facturaConceptos = $this->Bills->get($idFactura, ['contain' => ['Concepts']]);
+		
+		$notasAnteriores = $this->Bills->find('all', ['conditions' => ['id_documento_padre' => $idFactura],
+			'order' => ['created' => 'ASC'] ]);
+		
+		$mesFactura = $facturaConceptos->date_and_time->month;
+			
+		if ($this->request->is('post')) 
+        {	
+			$tipoNota = $_POST['tipo_nota'];
+			
+			$montosNotaContable = $_POST['montosNotaContable'];
+			
+			$_POST = [];
+			$acumuladoNota = 0;
+			
+			foreach ($montosNotaContable as $clave => $valor)
+			{				
+				if (substr($valor, -3, 1) == ',')
+				{
+					$valorTemporal= str_replace('.', '', $valor);
+					$montosNotaContable[$clave] = str_replace(',', '.', $valorTemporal);
+				}
+				$acumuladoNota += $montosNotaContable[$clave];
+			}
+			
+            $numeroNotaContable = $this->agregaNotaContable($facturaConceptos, $tipoNota, $acumuladoNota);
+			
+            if ($numeroNotaContable > 0)
+            {
+                $documentosUsuario = $this->Bills->find('all', ['conditions' => ['bill_number' => $numeroNotaContable, 'user_id' => $this->Auth->user('id')],
+                        'order' => ['Bills.created' => 'DESC'] ]);
+
+				$contadorRegistros = $documentosUsuario->count();
+						
+                if ($contadorRegistros > 0)
+                {
+                    $notaContable = $documentosUsuario->first();
+                    
+                    $idNota = $notaContable->id;
+
+                    foreach ($montosNotaContable as $clave => $valor) 
+                    {
+						if ($valor > 0)
+						{
+							$this->loadModel('Concepts');
+							$concepto = $this->Concepts->get($clave);
+							
+							$transaccionEstudiante = new StudenttransactionsController();
+							
+							$codigoRetornoTransaccion = $transaccionEstudiante->notaTransaccion($concepto->transaction_identifier, $numeroNotaContable, $valor, $tipoNota);
+
+							if ($codigoRetornoTransaccion == 0)
+							{
+								$conceptosFacturas = new ConceptsController();							
+								$codigoRetornoConcepto = $conceptosFacturas->agregarConceptosNota($clave, $valor, $numeroNotaContable, $tipoNota, $idNota);
+								if ($codigoRetornoConcepto > 0)
+								{
+									break;
+								}
+							}
+							else
+							{
+								break;
+							}
+						}
+                    }
+					$billNumber = $numeroNotaContable;
+                    $idParentsandguardian = $facturaConceptos->parentsandguardian_id;
+                    return $this->redirect(['action' => 'imprimirFactura', $billNumber, $idParentsandguardian, $idNota]);
+                }
+            }
+		}		
+		
+		$this->set(compact('facturaConceptos', 'retornoControlador', 'retornoAccion', 'idFamilia', 'familia', 'mesActual', 'mesFactura', 'notasAnteriores'));
+		$this->set('_serialize', ['facturaConceptos', 'retornoControlador', 'retornoAccion', 'idFamilia', 'familia', 'mesActual', 'mesFactura', 'notasAnteriores']);
+	}
+	
+    public function agregaNotaContable($facturaConceptos = null, $tipoNota = null, $acumuladoNota = null)
+    {			
+		if ($tipoNota == "Crédito")
+		{
+			$consecutivoCredito = new ConsecutivocreditosController();
+			$numeroNotaContable = $consecutivoCredito->add();
+		}
+		else
+		{
+			$consecutivoDebito = new ConsecutivodebitosController();
+			$numeroNotaContable = $consecutivoDebito->add();			
+		}
+		          
+        $notaContable = $this->Bills->newEntity();
+		
+        $notaContable->parentsandguardian_id = $facturaConceptos->parentsandguardian_id;
+		$notaContable->user_id = $this->Auth->user('id');
+		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+        
+        $fechaHoy = Time::now();
+		
+        $notaContable->date_and_time = date_format($fechaHoy, "Y-m-d");
+		
+		$this->loadModel('Turns');
+		
+		$turnos = $this->Turns->find('all')->where(['user_id' => $this->Auth->user('id'), 'status' => true])->order(['created' => 'DESC']);
+					
+		$contadorRegistros = $turnos->count();
+			
+		if ($contadorRegistros > 0)
+		{
+			$ultimoTurno = $turnos->first();
+		}
+		
+        $notaContable->turn = $ultimoTurno->id;
+            
+        $notaContable->bill_number = $numeroNotaContable;
+		
+        $notaContable->fiscal = 1;
+
+        $notaContable->school_year = $facturaConceptos->school_year;
+        $notaContable->identification = $facturaConceptos->identification;
+        $notaContable->client = $facturaConceptos->client;
+        $notaContable->tax_phone = $facturaConceptos->tax_phone;
+        $notaContable->fiscal_address = $facturaConceptos->fiscal_address;
+		$notaContable->amount = 0;
+				
+		$notaContable->amount_paid = $acumuladoNota;
+		$notaContable->annulled = 0;
+		$notaContable->date_annulled = 0;
+		$notaContable->invoice_migration = 0;
+		$notaContable->new_family = 0;
+		$notaContable->impresa = 0;
+		
+		if ($tipoNota == "Crédito")
+		{
+			$notaContable->tipo_documento = "Nota de crédito";
+		}
+		else
+		{
+			$notaContable->tipo_documento = "Nota de débito";
+		}
+				
+		$notaContable->id_documento_padre = $facturaConceptos->id;
+		
+        if ($this->Bills->save($notaContable)) 
+        {
+            return $numeroNotaContable;
+        }
+        else    
+        {
+            $this->Flash->error(__('La nota de crédito no pudo ser grabada, intente nuevamente'));
+        }
+    }
+    public function consultarRecibo()
+    {
+        if ($this->request->is('post')) 
+        {
+            if (isset($_POST['billNumber']))
+            {
+				$contadorRegistros = 0;
+				
+                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['billNumber'], 'tipo_documento' => 'Recibo'],
+                    'order' => ['Bills.created' => 'DESC']]);
+					
+				$contadorRegistros = $lastRecord->count();
+				   
+				if ($contadorRegistros > 0)
+				{
+					$row = $lastRecord->first();			
+					return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $row->id, 1]);
+				}
+				else
+				{
+					$this->Flash->error(__('El recibo Nro. ' . $_POST['billNumber'] . ' no está registrado en el sistema'));
+				}
+            }
+        }
+    }
+    public function consultarNotaCredito()
+    {
+        if ($this->request->is('post')) 
+        {
+            if (isset($_POST['billNumber']))
+            {
+				$contadorRegistros = 0;
+				
+                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['billNumber'], 'tipo_documento' => 'Nota de crédito'],
+                    'order' => ['Bills.created' => 'DESC']]);
+					
+				$contadorRegistros = $lastRecord->count();
+				   
+				if ($contadorRegistros > 0)
+				{
+					$row = $lastRecord->first();			
+					return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $row->id, 1]);
+				}
+				else
+				{
+					$this->Flash->error(__('La nota de crédito Nro. ' . $_POST['billNumber'] . ' no está registrada en el sistema'));
+				}
+            }
+        }
+    }
+    public function consultarNotaDebito()
+    {
+        if ($this->request->is('post')) 
+        {
+            if (isset($_POST['billNumber']))
+            {
+				$contadorRegistros = 0;
+				
+                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['billNumber'], 'tipo_documento' => 'Nota de débito'],
+                    'order' => ['Bills.created' => 'DESC']]);
+					
+				$contadorRegistros = $lastRecord->count();
+				   
+				if ($contadorRegistros > 0)
+				{
+					$row = $lastRecord->first();			
+					return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $row->id, 1]);
+				}
+				else
+				{
+					$this->Flash->error(__('La nota de débito Nro. ' . $_POST['billNumber'] . ' no está registrada en el sistema'));
+				}
+            }
+        }
     }
 }

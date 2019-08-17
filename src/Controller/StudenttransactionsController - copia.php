@@ -13,98 +13,123 @@ use Cake\I18n\Time;
 
 class StudenttransactionsController extends AppController
 {
-    public function testFunction()
-    {			
-        $transaccionesEstudiantes = $this->Studenttransactions->find('all')
-			->where(['transaction_type' => 'Servicio educativo', 'created >' => '2019-01-31 00:00:00']);
+    public function testFunction($idTransaccion = 57776, $numeroNotaContable = "1", $valor = 479378, $tipoNota = "Crédito")
+    {
+		/*
+        $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
 		
-		$contador = $transaccionesEstudiantes->count();
-				
-		foreach($transaccionesEstudiantes as $transaccionesEstudiante)
+		if ($tipoNota == "Crédito")
 		{
-			$nuevoEstudiante = $this->Studenttransactions->Students->get($transaccionesEstudiante->student_id);
-
-			$febrero2019 = $this->Studenttransactions->find('all')
-				->where(['student_id' => $transaccionesEstudiante->student_id, 'transaction_description' => 'Feb 2019'])
-				->order(['created' => "DESC"]);
-			
-			$row = $febrero2019->first();
-				
-			if ($row)
-			{
-				if ($row->paid_out == 1)
-				{
-					$this->Flash->error(__('2018 - ' . $transaccionesEstudiante->student_id . ' ' . $nuevoEstudiante->surname . " " . $nuevoEstudiante->first_name));
-				}	
-				else
-				{
-					$this->Flash->success(__('2019 - ' . $transaccionesEstudiante->student_id . ' ' . $nuevoEstudiante->surname . " " . $nuevoEstudiante->first_name));					
-
-					$nuevoEstudiante->number_of_brothers = 2019;
-					$nuevoEstudiante->balance = 2019;
-					$nuevoEstudiante->new_student = 1;
-					
-					if (!($this->Studenttransactions->Students->save($nuevoEstudiante))) 
-					{
-						$this->Flash->error(__('Error actualizando - ' . $transaccionesEstudiante->student_id . ' ' . $nuevoEstudiante->surname . " " . $nuevoEstudiante->first_name));
-					}
-					else
-					{
-						$cuotas = $this->Studenttransactions->find('all')
-							->where(['student_id' => $transaccionesEstudiante->student_id]);
-						
-						foreach ($cuotas as $cuota)
-						{
-							$transaccion = $this->Studenttransactions->get($cuota->id);
-							
-							if ($transaccion->transaction_type == "Matrícula")
-							{
-								$transaccion->transaction_description = "Matrícula 2019";
-								$transaccion->amount_dollar = 40;
-							}
-							elseif ($transaccion->transaction_type == "Servicio educativo")
-							{
-								$transaccion->transaction_description = "Servicio educativo 2019";
-								$transaccion->amount_dollar = 450;
-							}
-							elseif ($transaccion->transaction_type == "Mensualidad")
-							{
-								$mesTransaccion = substr($transaccion->transaction_description, 0, 4);
-								$anoTransaccion = substr($transaccion->transaction_description, 4, 4);
-								$nuevoAno = $anoTransaccion + 1;
-								$mesAnoArreglado = $mesTransaccion . $nuevoAno;
-							
-								$transaccion->transaction_description = $mesAnoArreglado;
-															
-								$ano = $transaccion->payment_date->year;
-								$anoMasUno = $ano + 1;
+			$transaccionEstudiante->original_amount -= $valor;
+			$transaccionEstudiante->amount -= $valor; 			
+		}
+		else
+		{
+			$transaccionEstudiante->original_amount += $valor;
+			$transaccionEstudiante->amount += $valor; 				
+		}
+		
+		$estudianteController = new StudentsController();
+		$mesesTarifas = $estudianteController->mesesTarifas();
+		$otrasTarifas = $estudianteController->otrasTarifas();
+		
+		$tarifaDolar = 0;
+		
+		if ($transaccionEstudiante->transaction_type == "Mensualidad" && substr($transaccionEstudiante->transaccion_description, 0, 3) != "Ago")
+		{														
+			$ano = $transaccion->payment_date->year;
 								
-								$mes = $transaccion->payment_date->month;
+			$mes = $transaccion->payment_date->month;
 																						
-								if ($mes < 10)
-								{
-									$mesCadena = "0" . $mes;
-								}
-								else
-								{
-									$mesCadena = (string) $mes;
-								}
-
-								$nuevoPaymentDate = $anoMasUno . '-' . $mesCadena . '-01';
-																
-								$transaccion->payment_date = $nuevoPaymentDate;
-							}
-							if (!($this->Studenttransactions->save($transaccion))) 
-							{ 
-								$this->Flash->error(__('No se pudo modificar la cuota con ID ' . $cuota->id));
-							}
-						}
-					}
+			if ($mes < 10)
+			{
+				$mesCadena = "0" . $mes;
+			}
+			else
+			{
+				$mesCadena = (string) $mes;
+			}
+			$anoMes = $ano + $mesCadena;
+						
+			foreach ($mesesTarifas as $mesTarifa)
+			{
+				if ($mesTarifa['anoMes'] == $anoMes)
+				{
+					$tarifaDolar = $mesTarifa['tarifaDolar'];
+					break;
 				}
 			}
 		}
-		$this->Flash->success(__('Total alumnos nuevos ' . $contador));
-	}
+		else
+		{
+			foreach ($otrasTarifas as $otras)
+			{
+				echo "<br />otras " . $otras['conceptoAno'] . " transaction_description " . $transaccionEstudiante->transaction_description;
+				
+				if ($otras['conceptoAno'] == $transaccionEstudiante->transaction_description)
+				{
+					$tarifaDolar = $otras['tarifaDolar'];
+					break;
+				}
+			}
+		}
+
+		$this->Flash->success(__('tarifaDolar ' . $tarifaDolar));		
+		
+		$transaccionEstudiante->amount_dollar = $tarifaDolar;
+	
+		if ($transaccionEstudiante->amount == $transaccionEstudiante->original_amount)
+		{
+			if ($transaccionEstudiante->amount == 0)
+			{
+				$transaccionEstudiante->partial_payment = 0;
+				$transaccionEstudiante->paid_out = 0;
+				$transaccionEstudiante->amount_dollar = 0;
+			}
+			else
+			{
+				$transaccionEstudiante->partial_payment = 0;
+				$transaccionEstudiante->paid_out = 1;
+			}
+		} 
+		elseif ($transaccionEstudiante->amount < $transaccionEstudiante->original_amount)
+		{
+			$transaccionEstudiante->partial_payment = 1;
+			$transaccionEstudiante->paid_out = 0;
+		}
+			
+        $transaccionEstudiante->bill_number = $numeroNotaContable;
+
+        if (!($this->Studenttransactions->save($transaccionEstudiante)))
+        {
+            $this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
+        }
+					
+		if ($transaccionEstudiante->transaction_type == 'Matrícula')
+		{
+			if ($transaccionEstudiante->amount == 0)
+			{
+				$estudiante = $this->Studenttransactions->Students->get($transaccionEstudiante->student_id);
+				
+				if ($estudiante->number_of_brothers == $estudiante->balance)
+				{
+					$estudiante->number_of_brothers = 0;
+					$estudiante->balance = 0;
+				}
+				else
+				{
+					$estudiante->balance -= 1; 
+				}
+				
+				if (!($this->Studenttransactions->Students->save($estudiante)))
+				{
+					$this->Flash->error(__('Los datos del alumno no pudieron ser actualizados, vuelva a intentar.'));
+				}
+			}
+		}
+        return;
+		*/
+    }
 
     public function index()
     {
@@ -1337,13 +1362,14 @@ class StudenttransactionsController extends AppController
                             $student->section_id = $section->id;
                         }
                     }
-    
+					/*
                     if (!($this->Studenttransactions->Students->save($student)))
                     {
                         $result = 1;
                         
                         $this->Flash->error(__('No pudo ser actualizado el alumno identificado con el id: ' . $valor['id']));            
                     }
+					*/
                     $accountStudent++;
                 }
                 if ($result == 0)
@@ -1374,7 +1400,7 @@ class StudenttransactionsController extends AppController
 				->contain(['Students'])
 				->where([['Studenttransactions.transaction_description' => $transactionDescription],
 					['Studenttransactions.amount >' => 0],
-					['Students.level_of_study IS NOT NULL'], 
+					['Students.level_of_study !=' => ""], 
 					['Students.student_condition' => 'Regular']]);
 	
 			$totalEnrolled = $inscribed->count();
@@ -1438,7 +1464,7 @@ class StudenttransactionsController extends AppController
 							$swSection = 1;
 						}
 					}
-
+					/*
 					if ($swSection == 0)
 					{
 						$student = $this->Studenttransactions->Students->get($studentsLevels->student->id);
@@ -1450,6 +1476,7 @@ class StudenttransactionsController extends AppController
 							$this->Flash->error(__('No pudo ser actualizado el alumno identificado con el id: ' . $student->id));            
 						}
 					}
+					*/
 				}
 
 				if ($studentsLevels->student->section->section == 'A')
@@ -1852,25 +1879,20 @@ class StudenttransactionsController extends AppController
 		$this->set(compact('school', 'studentsFor', 'currentDate', 'account', 'accountUnHijo', 'accountDosHijos', 'accountTresHijos', 'accountCuatroHijos', 'accountCincoOMas', 'accountFamily'));
 		$this->set('_serialize', ['school', 'studentsFor', 'currentDate', 'account', 'accountUnHijo', 'accountDosHijos', 'accountTresHijos', 'accountCuatroHijos', 'accountCincoOMas', 'accountFamily']);
     }
-    public function discountQuota80()
+
+    public function discountQuota20()
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
 
         $currentDate = time::now();
-		
-        $idParent = 0;
+
+		$idParent = 0;
         $accountRecords = 0;
         $accountChildren = 0;
-        $accountTresHijos = 0;
         $arrayStudents = [];
-        $accountStudents = 0;
-        $arrayDiscounts = [];
-        $swDiscounts = 0;
-        $accountDiscounts = 0;
-        $arrayDiscarded = [];
-        $accountDiscarded = 0;
-		$discountUpdate80 = 0;
+		$discountUpdate20 = 0;
+		$accountStudents = 0;
 		
         $this->loadModel('Schools');
 		
@@ -1920,313 +1942,92 @@ class StudenttransactionsController extends AppController
 				'Students.second_surname',
 				'Students.first_name',
 				'Students.second_name',
+				'Students.section_id',
 				'Students.level_of_study',
 				'Students.scholarship',
 				'Parentsandguardians.id',
 				'Parentsandguardians.family'])
 			->contain(['Students' => ['Parentsandguardians']])
 			->where([['Studenttransactions.transaction_description' => $registration],
-				['Studenttransactions.amount >' => 0]])
+				['Studenttransactions.amount >' => 0], ['Students.student_condition' => 'Regular']])
 			->order(['Parentsandguardians.id' => 'ASC']);
 			
 		$account = $studentsFor->count();
-		
-		$conceptM = 'Mensualidad';
-		
-        $this->loadModel('Rates');
-		
-		$lastRecordM = $this->Rates->find('all', ['conditions' => ['concept' => $conceptM], 
-		   'order' => ['Rates.created' => 'DESC'] ]);
-
-		$rowM = $lastRecordM->first();
-
-		if ($rowM)
-		{
-			$schoolPeriod = ['Sep ' . $startingYear,
-							'Oct ' . $startingYear,
-							'Nov ' . $startingYear,
-							'Dic ' . $startingYear,
-							'Ene ' . $finalYear,
-							'Feb ' . $finalYear,
-							'Mar ' . $finalYear,
-							'Abr ' . $finalYear,
-							'May ' . $finalYear,
-							'Jun ' . $finalYear,
-							'Jul ' . $finalYear];
-
-			$studentsDiscounts = $studentTransactions->find()
-				->select(
-					['Studenttransactions.id',
-					'Studenttransactions.student_id',
-					'Studenttransactions.transaction_type',
-					'Studenttransactions.transaction_description',
-					'Studenttransactions.paid_out',
-					'Studenttransactions.original_amount',
-					'Studenttransactions.amount'])
-				->where([['Studenttransactions.transaction_type' => 'Mensualidad'],
-				['Studenttransactions.transaction_description IN' => $schoolPeriod]])
-				->order(['Studenttransactions.student_id' => 'ASC']);
 				
-			$accountFee = $studentsDiscounts->count();
-			
-			foreach ($studentsFor as $studentsFors)
+		foreach ($studentsFor as $studentsFors)
+		{
+			if ($accountRecords == 0)
 			{
-				if ($accountRecords == 0)
+				$idParent = $studentsFors->student->parentsandguardian->id;
+			}
+			
+			if ($idParent != $studentsFors->student->parentsandguardian->id)
+			{
+				if ($accountChildren == 3)
 				{
-					$idParent = $studentsFors->student->parentsandguardian->id;
-					
-					if ($school->current_school_year < current_year_registration)
-					{
-						$seccion = $this->Sections->get($studentsFors->student->section_id);
-						$order = $this->gradoPosicion($seccion->sublevel);
-					}
-					else
-					{
-						$level = $studentsFors->student->level_of_study;
-						$order = $this->orderLevel($level);	
-					}
-										
-					if ($order == 0)
-					{
-						$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-						$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-						$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-						$accountDiscarded++;
-					}
-					
-					$arrayStudents[$accountStudents]['order'] =  $order;
-					$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-					$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-					$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-					$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-					$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-					$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
-					
-					$accountStudents++;
-					$accountRecords++;
-					$accountChildren++;
-					
+					$this->discount20($arrayStudents);
+					$discountUpdate20++;
+				}
+				$accountStudents = 0;
+				$accountChildren = 0;
+				$arrayStudents = [];
+
+				$idParent = $studentsFors->student->parentsandguardian->id;
+			}
+			
+			if ($school->current_school_year < $school->current_year_registration)
+			{
+				if ($studentsFors->student->section_id === null)
+				{
+					$this->Flash->success(__('Id Alumno ' . $studentsFors->student->id . ' section_id ' . $studentsFors->student->section_id));
+					$level = "No asignado";
 				}
 				else
 				{
-					if ($idParent != $studentsFors->student->parentsandguardian->id)
-					{
-						if ($accountChildren == 3)
-						{
-							$accountTresHijos++;
-							$arrayGeneral = $this->discount80($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
-							$arrayDiscounts = $arrayGeneral[0];
-							$accountDiscounts = $arrayGeneral[1];
-							$arrayDiscarded = $arrayGeneral[2];
-							$accountDiscarded = $arrayGeneral[3];
-							$discountUpdate80++;
-						}
-						$accountStudents = 0;
-						$accountChildren = 0;
-						$arrayStudents = [];
-
-						$idParent = $studentsFors->student->parentsandguardian->id;
-						
-						$level = $studentsFors->student->level_of_study;
-						
-						$order = $this->orderLevel($level);
-						
-						if ($order == 0)
-						{
-							$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-							$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-							$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-							$accountDiscarded++;
-						}
-						
-						$arrayStudents[$accountStudents]['order'] =  $order;
-						$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-						$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-						$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-						$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-						$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-						$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
-
-						$accountStudents++;
-						$accountRecords++;
-						$accountChildren++;
-						
-					}
-					else
-					{
-						$level = $studentsFors->student->level_of_study;
-						
-						$order = $this->orderLevel($level);
-						
-						if ($order == 0)
-						{
-							$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-							$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-							$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-							$accountDiscarded++;
-						}
-						
-						$arrayStudents[$accountStudents]['order'] =  $order;
-						$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-						$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-						$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-						$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-						$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-						$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
-						
-						$accountStudents++;
-						$accountRecords++;
-						$accountChildren++;
-					}
+					$seccion = $this->Sections->get($studentsFors->student->section_id);
+					$level = $seccion->sublevel;
 				}
+				$order = $this->gradoPosicion($level);
 			}
-			if ($accountChildren == 3)
+			else
 			{
-				$accountTresHijos++;
-				$arrayGeneral = $this->discount80($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
-				$arrayDiscounts = $arrayGeneral[0];
-				$accountDiscounts = $arrayGeneral[1];
-				$arrayDiscarded = $arrayGeneral[2];
-				$accountDiscarded = $arrayGeneral[3];
-				$discountUpdate80++;
+				$level = $studentsFors->student->level_of_study;
+				$order = $this->orderLevel($level);	
 			}
-			
-			$this->Flash->success(__('Total alumnos a los que se les aplicó el descuento del 20%: ' . $discountUpdate80));
+													
+			$arrayStudents[$accountStudents]['order'] = $order;
+			$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
 
-			sort($arrayDiscounts);
-			sort($arrayDiscarded);
+			$accountStudents++;
+			$accountRecords++;
+			$accountChildren++;	
+		}			
 
-			$this->set(compact('school', 'currentDate', 'arrayDiscounts', 'account', 'accountTresHijos', 'arrayDiscarded'));
-			$this->set('_serialize', ['school', 'currentDate', 'arrayDiscounts', 'account', 'accountTresHijos', 'arrayDiscarded']);
+		if ($accountChildren == 3)
+		{
+			$this->discount20($arrayStudents);
+			$discountUpdate20++;
 		}
+				
+		$this->Flash->success(__('Total alumnos a los que se les aplicó el descuento del 20%: ' . $discountUpdate20));
     }
     
-    public function discount80($arrayStudents = null, $studentsDiscounts = null, $amount = null, $arrayDiscounts = null, $accountDiscounts = null, $arrayDiscarded = null, $accountDiscarded = null)
+    public function discount20($arrayStudents)
     {
-        $fee80 = $amount * 0.8;
-
         arsort($arrayStudents);
-        $accountHigher = 1;
 
         foreach ($arrayStudents as $arrayStudent)
         {
-
-            if ($accountHigher == 1)
-            {
-                $swDiscounts = 0;
-				$swUpdateStudent = 0;
-                foreach ($studentsDiscounts as $studentsDiscount)
-                {
-                    if ($studentsDiscount->student_id == $arrayStudent['id'])
-                    {
-						if ($swDiscounts == 0)
-						{
-							$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
+			$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
 				
-							$student->discount = 20;
-				
-							if (!($this->Studenttransactions->Students->save($student)))
-							{
-								$this->Flash->error(__('No se pudo actualizar la columna discount en el registro Nro. ' . $arrayStudent['id']));
-							}
-							$swUpdateStudent = 1;
-						}
-						if ($studentsDiscount->original_amount == $fee80)
-                        {
-                            $arrayDiscarded[$accountDiscarded]['reason'] = 'Descuento 20% aplicado anteriormente';
-                            $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                            $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                            $accountDiscarded++;
-                        }
-                        elseif ($studentsDiscount->original_amount == $amount)
-                        {
-                            if ($arrayStudent['scholarship'] == true)
-                            {
-                                $arrayDiscarded[$accountDiscarded]['reason'] = 'Alumno becado';
-                                $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                                $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                                $accountDiscarded++;
-                            }
-                            else
-                            {
-                                if ($studentsDiscount->paid_out == 0)
-                                {
-                                    $studenttransaction = $this->Studenttransactions->get($studentsDiscount->id);
+			$student->discount = 20;
 
-                                    $subscriber = $studenttransaction->original_amount - $studenttransaction->amount;
-                                    
-                                    $studenttransaction->original_amount = $fee80;
-                                    
-                                    $studenttransaction->amount = $fee80 - $subscriber;
-                                    
-                                    if ($studenttransaction->amount == 0)
-                                    {
-                                        $studenttransaction->paid_out = 1;
-                                    }
-                                    else
-                                    {
-                                        $studenttransaction->paid_out = 0;
-                                    }
-                                                            
-                                    /* if (!($this->Studenttransactions->save($studenttransaction)))
-                                    {
-                                        $arrayDiscarded[$accountDiscarded]['reason'] = 'No se pudo hacer descuento en cuota ' . $studenttransaction->id;
-                                        $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                                        $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                                        $accountDiscarded++;
-                                    } */
-
-                                    if ($swDiscounts == 0)
-                                    {
-
-                                        $arrayDiscounts[$accountDiscounts]['family'] = $arrayStudent['family'];
-                                        $arrayDiscounts[$accountDiscounts]['discount'] = '20%';
-                                        $arrayDiscounts[$accountDiscounts]['student'] = $arrayStudent['student'];
-                                        $arrayDiscounts[$accountDiscounts]['grade'] = $arrayStudent['grade'];
-                                        $arrayDiscounts[$accountDiscounts]['id'] = $arrayStudent['id'];
-                                        $accountDiscounts++;
-                                        $swDiscounts = 1;                                                            
-                                    }
-                                }
-                                else
-                                {
-                                    $arrayDiscarded[$accountDiscarded]['reason'] = 'Mensualidad ya pagada';
-                                    $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                                    $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                                    $accountDiscarded++;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            $arrayDiscarded[$accountDiscarded]['reason'] = 'El monto de la cuota no coincide';
-                            $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                            $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                            $accountDiscarded++;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                foreach ($studentsDiscounts as $studentsDiscount)
-                {
-                    if ($studentsDiscount->student_id == $arrayStudent['id'])
-                    {
-                        if ($studentsDiscount->original_amount != $amount)
-                        {
-                            $arrayDiscarded[$accountDiscarded]['reason'] = 'El monto de la cuota no coincide';
-                            $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                            $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                            $accountDiscarded++;
-                        }
-                    }
-                }
-            }
-            $accountHigher++;
-        }
-        
-        return [$arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded];
+			if (!($this->Studenttransactions->Students->save($student)))
+			{
+				$this->Flash->error(__('No se pudo actualizar la columna discount en el registro Nro. ' . $arrayStudent['id']));
+			}
+			break;
+		}
     }
 
     public function discountQuota50()
@@ -2235,21 +2036,17 @@ class StudenttransactionsController extends AppController
         date_default_timezone_set('America/Caracas');
 
         $currentDate = time::now();
-		
-        $idParent = 0;
+
+		$idParent = 0;
         $accountRecords = 0;
         $accountChildren = 0;
-        $accountCuatroOmas = 0;
         $arrayStudents = [];
-        $accountStudents = 0;
-        $arrayDiscounts = [];
-        $swDiscounts = 0;
-        $accountDiscounts = 0;
-        $arrayDiscarded = [];
-        $accountDiscarded = 0;
 		$discountUpdate50 = 0;
-
+		$accountStudents = 0;
+		
         $this->loadModel('Schools');
+		
+		$this->loadModel('Sections');
 
         $school = $this->Schools->get(2);
 
@@ -2264,7 +2061,7 @@ class StudenttransactionsController extends AppController
         $finalYear = $nextYear;  
 
 		$students50 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.discount' => 50]]);
-
+		
         if ($students50)
 		{
 			foreach ($students50 as $students50s)
@@ -2276,7 +2073,7 @@ class StudenttransactionsController extends AppController
 				if (!($this->Studenttransactions->Students->save($student)))
 				{
 					$this->Flash->error(__('No se pudo inicializar la columna discount en el registro Nro. ' . $student50s->id));
-				} 
+				}
             }
 		}
 		
@@ -2295,307 +2092,94 @@ class StudenttransactionsController extends AppController
 				'Students.second_surname',
 				'Students.first_name',
 				'Students.second_name',
+				'Students.section_id',
 				'Students.level_of_study',
 				'Students.scholarship',
 				'Parentsandguardians.id',
 				'Parentsandguardians.family'])
 			->contain(['Students' => ['Parentsandguardians']])
 			->where([['Studenttransactions.transaction_description' => $registration],
-				['Studenttransactions.amount >' => 0]])
+				['Studenttransactions.amount >' => 0], ['Students.student_condition' => 'Regular']])
 			->order(['Parentsandguardians.id' => 'ASC']);
 			
 		$account = $studentsFor->count();
-		
-		$conceptM = 'Mensualidad';
-		
-		$this->loadModel('Rates');
-		
-		$lastRecordM = $this->Rates->find('all', ['conditions' => ['concept' => $conceptM], 
-		   'order' => ['Rates.created' => 'DESC'] ]);
-
-		$rowM = $lastRecordM->first();
-
-		if ($rowM)
-		{
-			$schoolPeriod = ['Sep ' . $startingYear,
-							'Oct ' . $startingYear,
-							'Nov ' . $startingYear,
-							'Dic ' . $startingYear,
-							'Ene ' . $finalYear,
-							'Feb ' . $finalYear,
-							'Mar ' . $finalYear,
-							'Abr ' . $finalYear,
-							'May ' . $finalYear,
-							'Jun ' . $finalYear,
-							'Jul ' . $finalYear];
-
-			$studentsDiscounts = $studentTransactions->find()
-				->select(
-					['Studenttransactions.id',
-					'Studenttransactions.student_id',
-					'Studenttransactions.transaction_type',
-					'Studenttransactions.transaction_description',
-					'Studenttransactions.paid_out',
-					'Studenttransactions.original_amount',
-					'Studenttransactions.amount'])
-				->where([['Studenttransactions.transaction_type' => 'Mensualidad'],
-				['Studenttransactions.transaction_description IN' => $schoolPeriod]])
-				->order(['Studenttransactions.student_id' => 'ASC']);
 				
-			$accountFee = $studentsDiscounts->count();
-			
-			foreach ($studentsFor as $studentsFors)
+		foreach ($studentsFor as $studentsFors)
+		{
+			if ($accountRecords == 0)
 			{
-				if ($accountRecords == 0)
+				$idParent = $studentsFors->student->parentsandguardian->id;
+			}
+			
+			if ($idParent != $studentsFors->student->parentsandguardian->id)
+			{
+				if ($accountChildren > 3)
 				{
-					$idParent = $studentsFors->student->parentsandguardian->id;
-					
-					$level = $studentsFors->student->level_of_study;
-					
-					$order = $this->orderLevel($level);
-					
-					if ($order == 0)
-					{
-						$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-						$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-						$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-						$accountDiscarded++;
-					}
-					
-					$arrayStudents[$accountStudents]['order'] =  $order;
-					$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-					$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-					$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-					$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-					$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-					$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
-					
-					$accountStudents++;
-					$accountRecords++;
-					$accountChildren++;
-					
+					$this->discount50($arrayStudents);
+					$discountUpdate50++;
+				}
+				$accountStudents = 0;
+				$accountChildren = 0;
+				$arrayStudents = [];
+
+				$idParent = $studentsFors->student->parentsandguardian->id;
+			}
+			
+			if ($school->current_school_year < $school->current_year_registration)
+			{
+				if ($studentsFors->student->section_id === null)
+				{
+					$this->Flash->success(__('Id Alumno ' . $studentsFors->student->id . ' section_id ' . $studentsFors->student->section_id));
+					$level = "No asignado";
 				}
 				else
 				{
-					if ($idParent != $studentsFors->student->parentsandguardian->id)
-					{
-						if ($accountChildren > 3)
-						{
-							$accountCuatroOmas++;
-							$arrayGeneral = $this->discount50($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
-							$arrayDiscounts = $arrayGeneral[0];
-							$accountDiscounts = $arrayGeneral[1];
-							$arrayDiscarded = $arrayGeneral[2];
-							$accountDiscarded = $arrayGeneral[3];
-							$discountUpdate50++;
-						}
-						$accountStudents = 0;
-						$accountChildren = 0;
-						$arrayStudents = [];
-
-						$idParent = $studentsFors->student->parentsandguardian->id;
-						
-						$level = $studentsFors->student->level_of_study;
-						
-						$order = $this->orderLevel($level);
-						
-						if ($order == 0)
-						{
-							$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-							$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-							$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-							$accountDiscarded++;
-						}
-						
-						$arrayStudents[$accountStudents]['order'] =  $order;
-						$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-						$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-						$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-						$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-						$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-						$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
-
-						$accountStudents++;
-						$accountRecords++;
-						$accountChildren++;
-						
-					}
-					else
-					{
-						$level = $studentsFors->student->level_of_study;
-						
-						$order = $this->orderLevel($level);
-						
-						if ($order == 0)
-						{
-							$arrayDiscarded[$accountDiscarded]['reason'] = 'Datos sin actualizar';
-							$arrayDiscarded[$accountDiscarded]['student'] = $studentsFors->student->full_name;
-							$arrayDiscarded[$accountDiscarded]['id'] = $studentsFors->student->id;
-							$accountDiscarded++;
-						}
-						
-						$arrayStudents[$accountStudents]['order'] =  $order;
-						$arrayStudents[$accountStudents]['student'] = $studentsFors->student->full_name;
-						$arrayStudents[$accountStudents]['grade'] = $studentsFors->student->level_of_study;
-						$arrayStudents[$accountStudents]['scholarship'] = $studentsFors->student->scholarship;
-						$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
-						$arrayStudents[$accountStudents]['family'] = $studentsFors->student->parentsandguardian->family;
-						$arrayStudents[$accountStudents]['idFamily'] = $studentsFors->student->parentsandguardian->id;
-						
-						$accountStudents++;
-						$accountRecords++;
-						$accountChildren++;
-					}
+					$seccion = $this->Sections->get($studentsFors->student->section_id);
+					$level = $seccion->sublevel;
 				}
+				$order = $this->gradoPosicion($level);
 			}
-			if ($accountChildren > 3)
+			else
 			{
-				$accountCuatroOmas++;
-				$arrayGeneral = $this->discount50($arrayStudents, $studentsDiscounts, $rowM->amount, $arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded);
-				$arrayDiscounts = $arrayGeneral[0];
-				$accountDiscounts = $arrayGeneral[1];
-				$arrayDiscarded = $arrayGeneral[2];
-				$accountDiscarded = $arrayGeneral[3];
-				$discountUpdate50++;
+				$level = $studentsFors->student->level_of_study;
+				$order = $this->orderLevel($level);	
 			}
-			
-			$this->Flash->success(__('Total alumnos a los que se les aplicó el descuento del 50%: ' . $discountUpdate50));
+													
+			$arrayStudents[$accountStudents]['order'] =  $order;
+			$arrayStudents[$accountStudents]['id'] = $studentsFors->student->id;
 
-			sort($arrayDiscounts);
-			sort($arrayDiscarded);
+			$accountStudents++;
+			$accountRecords++;
+			$accountChildren++;	
+		}			
 
-			$this->set(compact('school', 'currentDate', 'arrayDiscounts', 'account', 'accountCuatroOmas', 'arrayDiscarded'));
-			$this->set('_serialize', ['school', 'currentDate', 'arrayDiscounts', 'account', 'accountCuatroOmas', 'arrayDiscarded']);
-		}  
+		if ($accountChildren > 3)
+		{
+			$this->discount50($arrayStudents);
+			$discountUpdate50++;
+		}
+				
+		$this->Flash->success(__('Total alumnos a los que se les aplicó el descuento del 50%: ' . $discountUpdate50));
     }
     
-    public function discount50($arrayStudents = null, $studentsDiscounts = null, $amount = null, $arrayDiscounts = null, $accountDiscounts = null, $arrayDiscarded = null, $accountDiscarded = null)
-    {        
-        $fee50 = $amount * 0.5;
-
+    public function discount50($arrayStudents)
+    {
         arsort($arrayStudents);
-        $accountHigher = 1;
 
         foreach ($arrayStudents as $arrayStudent)
         {
-            if ($accountHigher == 1)
-            {
-                $swDiscounts = 0;
-				$swUpdateStudent = 0;
-                foreach ($studentsDiscounts as $studentsDiscount)
-                {
-                    if ($studentsDiscount->student_id == $arrayStudent['id'])
-                    {
-						if ($swDiscounts == 0)
-						{
-							$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
+			$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
 				
-							$student->discount = 50;
-				
-							if (!($this->Studenttransactions->Students->save($student)))
-							{
-								$this->Flash->error(__('No se pudo actualizar la columna discount en el registro Nro. ' . $arrayStudent['id']));
-							}
-							$swUpdateStudent = 1;
-						}
-                        if ($studentsDiscount->original_amount == $fee50)
-                        {
-                            $arrayDiscarded[$accountDiscarded]['reason'] = 'Descuento 50% aplicado anteriormente';
-                            $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                            $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                            $accountDiscarded++;
-                        }
-                        elseif ($studentsDiscount->original_amount == $amount)
-                        {
-                            if ($arrayStudent['scholarship'] == true)
-                            {
-                                $arrayDiscarded[$accountDiscarded]['reason'] = 'Alumno becado';
-                                $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                                $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                                $accountDiscarded++;
-                            }
-                            else
-                            {
-                                if ($studentsDiscount->paid_out == 0)
-                                {
-                                    $studenttransaction = $this->Studenttransactions->get($studentsDiscount->id);
+			$student->discount = 50;
 
-                                    $subscriber = $studenttransaction->original_amount - $studenttransaction->amount;
-                                    
-                                    $studenttransaction->original_amount = $fee50;
-                                    
-                                    $studenttransaction->amount = $fee50 - $subscriber;
-                                    
-                                    if ($studenttransaction->amount == 0)
-                                    {
-                                        $studenttransaction->paid_out = 1;
-                                    }
-                                    else
-                                    {
-                                        $studenttransaction->paid_out = 0;
-                                    }
-                                    
-                                    /* if (!($this->Studenttransactions->save($studenttransaction)))
-                                    {
-                                        $arrayDiscarded[$accountDiscarded]['reason'] = 'No se pudo hacer descuento en cuota ' . $studenttransaction->id;
-                                        $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                                        $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                                        $accountDiscarded++;
-                                    } */
-
-                                    if ($swDiscounts == 0)
-                                    {
-
-                                        $arrayDiscounts[$accountDiscounts]['family'] = $arrayStudent['family'];
-                                        $arrayDiscounts[$accountDiscounts]['discount'] = '50%';
-                                        $arrayDiscounts[$accountDiscounts]['student'] = $arrayStudent['student'];
-                                        $arrayDiscounts[$accountDiscounts]['grade'] = $arrayStudent['grade'];
-                                        $arrayDiscounts[$accountDiscounts]['id'] = $arrayStudent['id'];
-                                        $accountDiscounts++;
-                                        $swDiscounts = 1;                                                            
-                                    }
-                                }
-                                else
-                                {
-                                    $arrayDiscarded[$accountDiscarded]['reason'] = 'Mensualidad ya pagada';
-                                    $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                                    $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                                    $accountDiscarded++;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            $arrayDiscarded[$accountDiscarded]['reason'] = 'El monto de la cuota no coincide';
-                            $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                            $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                            $accountDiscarded++;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                foreach ($studentsDiscounts as $studentsDiscount)
-                {
-                    if ($studentsDiscount->student_id == $arrayStudent['id'])
-                    {
-                        if ($studentsDiscount->original_amount != $amount)
-                        {
-                            $arrayDiscarded[$accountDiscarded]['reason'] = 'El monto de la cuota no coincide';
-                            $arrayDiscarded[$accountDiscarded]['student'] = $arrayStudent['student'];
-                            $arrayDiscarded[$accountDiscarded]['id'] =  $arrayStudent['id'];
-                            $accountDiscarded++;
-                        }
-                    }
-                }
-            }
-            $accountHigher++;
-        }
-        
-        return [$arrayDiscounts, $accountDiscounts, $arrayDiscarded, $accountDiscarded];
+			if (!($this->Studenttransactions->Students->save($student)))
+			{
+				$this->Flash->error(__('No se pudo actualizar la columna discount en el registro Nro. ' . $arrayStudent['id']));
+			}
+			break;
+		}
     }
-
+	
     public function discountFamily80()
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
@@ -2829,7 +2413,7 @@ class StudenttransactionsController extends AppController
         return $order;
     }
 	
-    public function gradoPosicion($grado = null)
+    public function gradoPosicion($level = null)
     {
         $levelOfStudy = ['No asignado',
                         'Pre-kinder',                                
@@ -2861,7 +2445,7 @@ class StudenttransactionsController extends AppController
                     12,
                     13,
                     14];
-        $order = str_replace($levelOfStudy, $position, $grado);
+        $order = str_replace($levelOfStudy, $position, $level);
         return $order;
     }
 	
@@ -3909,7 +3493,8 @@ class StudenttransactionsController extends AppController
 				['Students.scholarship' => 1]])				
             ->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
 
-        $this->set('studenttransactions', $this->paginate($query));
+        // $this->set('studenttransactions', $this->paginate($query));
+		$studenttransactions = $query;
 
         $this->set(compact('studenttransactions'));
         $this->set('_serialize', ['studenttransactions']);
@@ -3942,4 +3527,310 @@ class StudenttransactionsController extends AppController
         $this->set(compact('studentTransactions', 'contador'));
         $this->set('_serialize', ['studentTransactions', 'contador']);
 	}	
+	public function reportePagos()
+	{
+		if ($this->request->is('post'))
+		{
+			if (isset($_POST["concepto"]) && isset($_POST["ano_concepto"]))
+			{
+				return $this->redirect(['action' => 'reportePagosConcepto', $_POST["concepto"], $_POST["ano_concepto"]]);
+			}
+
+		}	
+	}
+	public function reportePagosConcepto($concepto = null, $anoConcepto = null)
+	{
+		$conceptoReporte = $concepto . " " . $anoConcepto;
+		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		
+        $fechaHoy = Time::now();
+		
+		$studentTransactions = TableRegistry::get('Studenttransactions');
+		
+		$pagosRecibidos = $studentTransactions->find()
+			->select(
+				['Studenttransactions.id',
+				'Studenttransactions.transaction_description',
+				'Studenttransactions.amount',
+				'Students.id',
+				'Students.surname',
+				'Students.second_surname',
+				'Students.first_name',
+				'Students.second_name',
+				'Students.student_condition',
+				'Parentsandguardians.family'])
+			->contain(['Students' => ['Parentsandguardians']])
+			->where([['Studenttransactions.transaction_description' => $conceptoReporte],
+				['Studenttransactions.amount > 0'], ['Students.student_condition' => 'Regular']])
+			->order(['Parentsandguardians.family', 'Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);			
+
+		$contadorRegistros = $pagosRecibidos->count();
+					
+		$totalConcepto = 0;
+			
+		foreach ($pagosRecibidos as $pagosRecibido)
+		{
+			$totalConcepto = $totalConcepto + $pagosRecibido->amount;
+		}
+			
+        $this->set(compact('pagosRecibidos', 'conceptoReporte', 'totalConcepto', 'fechaHoy'));
+        $this->set('_serialize', ['pagosRecibidos', 'conceptoReporte', 'totalConcepto', 'fechaHoy']);
+	}
+	
+    public function notaTransaccion($idTransaccion = null, $numeroNotaContable = null, $valor = null, $tipoNota = null)
+    {        
+		$codigoRetornoTransaccion = 0;
+		
+        $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
+		
+		if ($tipoNota == "Crédito")
+		{
+			$transaccionEstudiante->original_amount -= $valor;
+			$transaccionEstudiante->amount -= $valor; 			
+		}
+		else
+		{
+			$transaccionEstudiante->original_amount += $valor;
+			$transaccionEstudiante->amount += $valor; 				
+		}
+		
+		$estudianteController = new StudentsController();
+		$mesesTarifas = $estudianteController->mesesTarifas();
+		$otrasTarifas = $estudianteController->otrasTarifas();
+		
+		$tarifaDolar = 0;
+		
+		if ($transaccionEstudiante->transaction_type == "Mensualidad" && substr($transaccionEstudiante->transaccion_description, 0, 3) != "Ago")
+		{														
+			$ano = $transaccion->payment_date->year;
+								
+			$mes = $transaccion->payment_date->month;
+																						
+			if ($mes < 10)
+			{
+				$mesCadena = "0" . $mes;
+			}
+			else
+			{
+				$mesCadena = (string) $mes;
+			}
+			$anoMes = $ano + $mesCadena;
+						
+			foreach ($mesesTarifas as $mesTarifa)
+			{
+				if ($mesTarifa['anoMes'] == $anoMes)
+				{
+					$tarifaDolar = $mesTarifa['tarifaDolar'];
+					break;
+				}
+			}
+		}
+		else
+		{
+			foreach ($otrasTarifas as $otras)
+			{
+				echo "<br />otras " . $otras['conceptoAno'] . " transaction_description " . $transaccionEstudiante->transaction_description;
+				
+				if ($otras['conceptoAno'] == $transaccionEstudiante->transaction_description)
+				{
+					$tarifaDolar = $otras['tarifaDolar'];
+					break;
+				}
+			}
+		}
+
+		$this->Flash->success(__('tarifaDolar ' . $tarifaDolar));		
+		
+		$transaccionEstudiante->amount_dollar = $tarifaDolar;
+	
+		if ($transaccionEstudiante->amount == $transaccionEstudiante->original_amount)
+		{
+			if ($transaccionEstudiante->amount == 0)
+			{
+				$transaccionEstudiante->partial_payment = 0;
+				$transaccionEstudiante->paid_out = 0;
+				$transaccionEstudiante->amount_dollar = 0;
+			}
+			else
+			{
+				$transaccionEstudiante->partial_payment = 0;
+				$transaccionEstudiante->paid_out = 1;
+			}
+		} 
+		elseif ($transaccionEstudiante->amount < $transaccionEstudiante->original_amount)
+		{
+			$transaccionEstudiante->partial_payment = 1;
+			$transaccionEstudiante->paid_out = 0;
+		}
+		else
+		{
+			$codigoRetornoTransaccion = 1;
+			$this->Flash->error(__('Error ! El monto abonado es mayor al monto original de la transacción con ID ' . $transaccionEstudiante->id));
+		}			
+
+		if ($codigoRetornoTransaccion == 0)
+		{
+			$transaccionEstudiante->bill_number = $numeroNotaContable;
+
+			if (!($this->Studenttransactions->save($transaccionEstudiante)))
+			{
+				$codigoRetornoTransaccion = 1;
+				$this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
+			}
+			else
+			{						
+				if ($transaccionEstudiante->transaction_type == 'Matrícula')
+				{
+					if ($transaccionEstudiante->amount == 0)
+					{
+						$estudiante = $this->Studenttransactions->Students->get($transaccionEstudiante->student_id);
+						
+						if ($estudiante->number_of_brothers == $estudiante->balance)
+						{
+							$estudiante->number_of_brothers = 0;
+							$estudiante->balance = 0;
+						}
+						else
+						{
+							$estudiante->balance -= 1; 
+						}
+						
+						if (!($this->Studenttransactions->Students->save($estudiante)))
+						{
+							$codigoRetornoTransaccion = 1;
+							$this->Flash->error(__('Los datos del alumno no pudieron ser actualizados, vuelva a intentar.'));
+						}
+					}
+				}
+			}
+		}
+        return $codigoRetornoTransaccion;
+    }
+	/*
+	$codigoRetornoTransaccion = 0;
+	
+	$transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
+	
+	if ($tipoNota == "Crédito")
+	{
+		$transaccionEstudiante->original_amount -= $valor;
+		$transaccionEstudiante->amount -= $valor; 			
+	}
+	else
+	{
+		$transaccionEstudiante->original_amount += $valor;
+		$transaccionEstudiante->amount += $valor; 				
+	}
+	
+	$estudianteController = new StudentsController();
+	$mesesTarifas = $estudianteController->mesesTarifas();
+	$otrasTarifas = $estudianteController->otrasTarifas();
+	
+	$tarifaDolar = 0;
+	
+	if ($transaccionEstudiante->transaction_type == "Mensualidad" && substr($transaccionEstudiante->transaccion_description, 0, 3) != "Ago")
+	{														
+		$ano = $transaccionEstudiante->payment_date->year;
+							
+		$mes = $transaccionEstudiante->payment_date->month;
+																					
+		if ($mes < 10)
+		{
+			$mesCadena = "0" . $mes;
+		}
+		else
+		{
+			$mesCadena = (string) $mes;
+		}
+		
+		$anoMes = $ano . $mesCadena;
+					
+		foreach ($mesesTarifas as $mesTarifa)
+		{
+			if ($mesTarifa['anoMes'] == $anoMes)
+			{
+				$tarifaDolar = $mesTarifa['tarifaDolar'];
+				break;
+			}
+		}
+	}
+	else
+	{
+		foreach ($otrasTarifas as $otras)
+		{
+			if ($otras['conceptoAno'] == $transaccionEstudiante->transaccion_description)
+			{
+				$tarifaDolar = $mesTarifa['tarifaDolar'];
+				break;
+			}
+		}
+	}
+	
+	$this->Flash->success(__('tarifaDolar : ' . $tarifaDolar));
+
+	$transaccionEstudiante->amount_dollar = $tarifaDolar;
+
+	if ($transaccionEstudiante->amount == $transaccionEstudiante->original_amount)
+	{
+		if ($transaccionEstudiante->original_amount > 0)
+		{
+			$transaccionEstudiante->partial_payment = 0;
+			$transaccionEstudiante->paid_out = 1;
+		}
+		else
+		{
+			$transaccionEstudiante->partial_payment = 0;
+			$transaccionEstudiante->paid_out = 1;
+		}
+	} 
+	elseif ($transaccionEstudiante->amount < $transaccionEstudiante->original_amount)
+	{
+		$transaccionEstudiante->partial_payment = 1;
+		$transaccionEstudiante->paid_out = 0;
+	}
+	else
+	{
+		$this->Flash->error(__('Error ! El monto abonado es mayor al monto original de la transacción con ID ' . $transaccionEstudiante));
+		$codigoRetornoTransaccion = 1;
+	}
+		
+	if ($codigoRetornoTransaccion == 0)
+	{
+		$transaccionEstudiante->bill_number = $numeroNotaContable;
+
+		if (!($this->Studenttransactions->save($transaccionEstudiante)))
+		{
+			$this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
+			$codigoRetornoTransaccion = 1;
+		}
+					
+		if ($transaccionEstudiante->transaction_type == 'Matrícula')
+		{
+			if ($transaccionEstudiante->amount == 0)
+			{
+				$estudiante = $this->Studenttransactions->Students->get($transaccionEstudiante->student_id);
+				
+				if ($estudiante->number_of_brothers == $estudiante->balance)
+				{
+					$estudiante->number_of_brothers = 0;
+					$estudiante->balance = 0;
+				}
+				else
+				{
+					$estudiante->balance -= 1; 
+				}
+				
+				if (!($this->Studenttransactions->Students->save($student)))
+				{
+					$this->Flash->error(__('El registro del estudiante con ID ' . $transaccionEstudiante->student_id . ' no pudo ser actualizado'));
+					$codigoRetornoTransaccion = 1;
+				}
+			}
+		}
+	}
+	
+	return $codigoRetornoTransaccion;
+	*/
 }

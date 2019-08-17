@@ -19,7 +19,7 @@ class TurnsController extends AppController
 {
 	public function pruebaFuncion()
 	{
-        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        /* setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
 			
         $fechaObjeto = Time::now();
@@ -27,11 +27,9 @@ class TurnsController extends AppController
 		$fechaFormateada = date_format($fechaObjeto, "Y-m-d");
 		echo "<br />fecha formateada: " . $fechaFormateada;
 	
-		/*
 		$turn = $this->Turns->get(799);
 		$fecha = date_format($turn->start_date,"Y-m-d");
-		echo "<br />fecha: " . $fecha;
-		*/
+		echo "<br />fecha: " . $fecha; */
 	}
 
     /**
@@ -122,6 +120,10 @@ class TurnsController extends AppController
                 {
                     return $this->redirect(['controller' => 'bills', 'action' => 'annulInvoice', $result[0]['id'], $result[0]['turn']]);
                 }
+				elseif ($menuOption == 'NC')
+				{
+					return $this->redirect(['controller' => 'bills', 'action' => 'notaContable']);
+				}
 				else
                 {
                     return $this->redirect(['controller' => 'bills', 'action' => 'createInvoice', $menuOption, $result[0]['id'], $result[0]['turn']]);
@@ -281,21 +283,21 @@ class TurnsController extends AppController
             }
         }
 
-		$accountPayment = $paymentsTurn->count();
-		
-		if ($accountPayment > 0)
-		{
-			$this->loadModel('Bills');
-		
-            $lastRecord = $this->Bills->find('all', ['conditions' => ['turn' => $id, 'fiscal' => 1],
-                'order' => ['created' => 'DESC'] ]);
+		$this->loadModel('Bills');
+	
+		$ultimoRegistro = $this->Bills->find('all', ['conditions' => ['turn' => $id, 'fiscal' => 1],
+			'order' => ['created' => 'DESC'] ]);
 
-            $row = $lastRecord->first();
-
-			$lastNumber = $row->bill_number;
-			$lastControl = $row->control_number;		
-		}
+		$contadorRegistro = $ultimoRegistro->count();
 			
+		if ($contadorRegistro > 0)
+		{	
+			$factura = $ultimoRegistro->first();
+
+			$lastNumber = $factura->bill_number;
+			$lastControl = $factura->control_number;
+		}
+		
         $this->set(compact('turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'indicadorServicioEducativo', 'pagosServicioEducativo'));
         $this->set('_serialize', ['turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'indicadorServicioEducativo', 'pagosServicioEducativo']);
     }
@@ -384,8 +386,38 @@ class TurnsController extends AppController
             if ($paymentsTurns->fiscal == 0)
             {
                 $receipt = 1;
-            }
+				break;
+            }			
         }
+		
+		$this->loadModel('Bills');
+		
+		$notasContables = $this->Bills->find('all', ['conditions' => ['turn' => $idTurn, 'OR' => [['tipo_documento' => 'Nota de crédito'], ['tipo_documento' => 'Nota de débito']]],
+			'order' => ['Bills.created' => 'DESC'],
+			'contain' => ['Parentsandguardians']]);
+			
+		$contadorNotas = $notasContables->count();
+		$indicadorNotasCredito = 0;
+		$totalNotasCredito = 0;
+		$indicadorNotasDebito = 0;
+		$totalNotasDebito = 0;
+		
+		if ($contadorNotas > 0)
+		{
+			foreach ($notasContables as $notas)
+			{
+				if ($notas->tipo_documento == "Nota de crédito")
+				{
+					$indicadorNotasCredito = 1;
+					$totalNotasCredito += $notas->amount_paid;
+				}
+				else
+				{
+					$indicadorNotasDebito = 1;
+					$totalNotasDebito += $notas->amount_paid;
+				}
+			}
+		}
         
         $this->viewBuilder()
             ->className('Dompdf.Pdf')
@@ -395,8 +427,8 @@ class TurnsController extends AppController
                 'render' => 'browser',
             ]]);
 
-        $this->set(compact('turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo'));
-        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo']);
+        $this->set(compact('turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito'));
+        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito']);
     }
 
     /**

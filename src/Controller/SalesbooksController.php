@@ -14,7 +14,7 @@ class SalesbooksController extends AppController
 {
     public function testFunction()
     {
-        $month = "07";
+        /* $month = "07";
 
         $englishMonth = $this->nameMonthEnglish($month);
 
@@ -22,7 +22,7 @@ class SalesbooksController extends AppController
         
         $spanishMonth = $this->nameMonthSpanish($month);
         
-        echo ' $spanishMonth: ' . $spanishMonth;
+        echo ' $spanishMonth: ' . $spanishMonth; */
     }
 
     /**
@@ -186,22 +186,51 @@ class SalesbooksController extends AppController
 				
 				$salesbook->tipo_documento = "Fact";
 				
-				$salesbook->numero_factura = $invoicesBill->bill_number;
+				$this->loadModel('Bills');
+				
+				if ($invoicesBill->tipo_documento == "Factura")
+				{
+					$salesbook->numero_factura = $invoicesBill->bill_number;
+					$salesbook->nota_debito = "";
+					$salesbook->nota_credito = "";
+					$salesbook->factura_afectada = "";
+				}
+				elseif ($invoicesBill->tipo_documento == "Nota de débito")
+				{
+					$salesbook->numero_factura = "";
+					$salesbook->nota_debito = $invoicesBill->bill_number;
+					$salesbook->nota_credito = "";
+										
+					$facturaAfectada = $this->Bills->get($invoicesBill->id_documento_padre);					
+					$salesbook->factura_afectada = $facturaAfectada->bill_number;
+				}				
+				else
+				{
+					$salesbook->numero_factura = "";
+					$salesbook->nota_debito = "";
+					$salesbook->nota_credito = $invoicesBill->bill_number;
+										
+					$facturaAfectada = $this->Bills->get($invoicesBill->id_documento_padre);					
+					$salesbook->factura_afectada = $facturaAfectada->bill_number;
+				}								
 				
 				$salesbook->numero_control = $invoicesBill->control_number;
-				
-				$salesbook->nota_debito = "";
-				
-				$salesbook->nota_credito = "";
-				
-				$salesbook->factura_afectada = "";
-				
+								
 				if ($invoicesBill->annulled == false )
 				{
 					$salesbook->cedula_rif = $invoicesBill->identification;
 					$salesbook->nombre_razon_social = $invoicesBill->client;
-					$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid;
-					$salesbook->ventas_exoneradas = $invoicesBill->amount_paid;
+					
+					if ($invoicesBill->tipo_documento == "Nota de crédito")
+					{
+						$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid * -1;
+						$salesbook->ventas_exoneradas = $invoicesBill->amount_paid * -1;
+					}
+					else
+					{
+						$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid;
+						$salesbook->ventas_exoneradas = $invoicesBill->amount_paid;
+					}
 				}
 				else
 				{

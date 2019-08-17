@@ -13,98 +13,121 @@ use Cake\I18n\Time;
 
 class StudenttransactionsController extends AppController
 {
-    public function testFunction()
-    {			
-        $transaccionesEstudiantes = $this->Studenttransactions->find('all')
-			->where(['transaction_type' => 'Servicio educativo', 'created >' => '2019-01-31 00:00:00']);
+    public function testFunction($idTransaccion = 57776, $numeroNotaContable = "1", $valor = 479378, $tipoNota = "Crédito")
+    {
+        /* $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
 		
-		$contador = $transaccionesEstudiantes->count();
-				
-		foreach($transaccionesEstudiantes as $transaccionesEstudiante)
+		if ($tipoNota == "Crédito")
 		{
-			$nuevoEstudiante = $this->Studenttransactions->Students->get($transaccionesEstudiante->student_id);
-
-			$febrero2019 = $this->Studenttransactions->find('all')
-				->where(['student_id' => $transaccionesEstudiante->student_id, 'transaction_description' => 'Feb 2019'])
-				->order(['created' => "DESC"]);
-			
-			$row = $febrero2019->first();
-				
-			if ($row)
-			{
-				if ($row->paid_out == 1)
-				{
-					$this->Flash->error(__('2018 - ' . $transaccionesEstudiante->student_id . ' ' . $nuevoEstudiante->surname . " " . $nuevoEstudiante->first_name));
-				}	
-				else
-				{
-					$this->Flash->success(__('2019 - ' . $transaccionesEstudiante->student_id . ' ' . $nuevoEstudiante->surname . " " . $nuevoEstudiante->first_name));					
-
-					$nuevoEstudiante->number_of_brothers = 2019;
-					$nuevoEstudiante->balance = 2019;
-					$nuevoEstudiante->new_student = 1;
-					
-					if (!($this->Studenttransactions->Students->save($nuevoEstudiante))) 
-					{
-						$this->Flash->error(__('Error actualizando - ' . $transaccionesEstudiante->student_id . ' ' . $nuevoEstudiante->surname . " " . $nuevoEstudiante->first_name));
-					}
-					else
-					{
-						$cuotas = $this->Studenttransactions->find('all')
-							->where(['student_id' => $transaccionesEstudiante->student_id]);
-						
-						foreach ($cuotas as $cuota)
-						{
-							$transaccion = $this->Studenttransactions->get($cuota->id);
-							
-							if ($transaccion->transaction_type == "Matrícula")
-							{
-								$transaccion->transaction_description = "Matrícula 2019";
-								$transaccion->amount_dollar = 40;
-							}
-							elseif ($transaccion->transaction_type == "Servicio educativo")
-							{
-								$transaccion->transaction_description = "Servicio educativo 2019";
-								$transaccion->amount_dollar = 450;
-							}
-							elseif ($transaccion->transaction_type == "Mensualidad")
-							{
-								$mesTransaccion = substr($transaccion->transaction_description, 0, 4);
-								$anoTransaccion = substr($transaccion->transaction_description, 4, 4);
-								$nuevoAno = $anoTransaccion + 1;
-								$mesAnoArreglado = $mesTransaccion . $nuevoAno;
-							
-								$transaccion->transaction_description = $mesAnoArreglado;
-															
-								$ano = $transaccion->payment_date->year;
-								$anoMasUno = $ano + 1;
+			$transaccionEstudiante->original_amount -= $valor;
+			$transaccionEstudiante->amount -= $valor; 			
+		}
+		else
+		{
+			$transaccionEstudiante->original_amount += $valor;
+			$transaccionEstudiante->amount += $valor; 				
+		}
+		
+		$estudianteController = new StudentsController();
+		$mesesTarifas = $estudianteController->mesesTarifas();
+		$otrasTarifas = $estudianteController->otrasTarifas();
+		
+		$tarifaDolar = 0;
+		
+		if ($transaccionEstudiante->transaction_type == "Mensualidad" && substr($transaccionEstudiante->transaccion_description, 0, 3) != "Ago")
+		{														
+			$ano = $transaccion->payment_date->year;
 								
-								$mes = $transaccion->payment_date->month;
+			$mes = $transaccion->payment_date->month;
 																						
-								if ($mes < 10)
-								{
-									$mesCadena = "0" . $mes;
-								}
-								else
-								{
-									$mesCadena = (string) $mes;
-								}
-
-								$nuevoPaymentDate = $anoMasUno . '-' . $mesCadena . '-01';
-																
-								$transaccion->payment_date = $nuevoPaymentDate;
-							}
-							if (!($this->Studenttransactions->save($transaccion))) 
-							{ 
-								$this->Flash->error(__('No se pudo modificar la cuota con ID ' . $cuota->id));
-							}
-						}
-					}
+			if ($mes < 10)
+			{
+				$mesCadena = "0" . $mes;
+			}
+			else
+			{
+				$mesCadena = (string) $mes;
+			}
+			$anoMes = $ano + $mesCadena;
+						
+			foreach ($mesesTarifas as $mesTarifa)
+			{
+				if ($mesTarifa['anoMes'] == $anoMes)
+				{
+					$tarifaDolar = $mesTarifa['tarifaDolar'];
+					break;
 				}
 			}
 		}
-		$this->Flash->success(__('Total alumnos nuevos ' . $contador));
-	}
+		else
+		{
+			foreach ($otrasTarifas as $otras)
+			{
+				echo "<br />otras " . $otras['conceptoAno'] . " transaction_description " . $transaccionEstudiante->transaction_description;
+				
+				if ($otras['conceptoAno'] == $transaccionEstudiante->transaction_description)
+				{
+					$tarifaDolar = $otras['tarifaDolar'];
+					break;
+				}
+			}
+		}
+
+		$this->Flash->success(__('tarifaDolar ' . $tarifaDolar));		
+		
+		$transaccionEstudiante->amount_dollar = $tarifaDolar;
+	
+		if ($transaccionEstudiante->amount == $transaccionEstudiante->original_amount)
+		{
+			if ($transaccionEstudiante->amount == 0)
+			{
+				$transaccionEstudiante->partial_payment = 0;
+				$transaccionEstudiante->paid_out = 0;
+				$transaccionEstudiante->amount_dollar = 0;
+			}
+			else
+			{
+				$transaccionEstudiante->partial_payment = 0;
+				$transaccionEstudiante->paid_out = 1;
+			}
+		} 
+		elseif ($transaccionEstudiante->amount < $transaccionEstudiante->original_amount)
+		{
+			$transaccionEstudiante->partial_payment = 1;
+			$transaccionEstudiante->paid_out = 0;
+		}
+			
+        $transaccionEstudiante->bill_number = $numeroNotaContable;
+
+        if (!($this->Studenttransactions->save($transaccionEstudiante)))
+        {
+            $this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
+        }
+					
+		if ($transaccionEstudiante->transaction_type == 'Matrícula')
+		{
+			if ($transaccionEstudiante->amount == 0)
+			{
+				$estudiante = $this->Studenttransactions->Students->get($transaccionEstudiante->student_id);
+				
+				if ($estudiante->number_of_brothers == $estudiante->balance)
+				{
+					$estudiante->number_of_brothers = 0;
+					$estudiante->balance = 0;
+				}
+				else
+				{
+					$estudiante->balance -= 1; 
+				}
+				
+				if (!($this->Studenttransactions->Students->save($estudiante)))
+				{
+					$this->Flash->error(__('Los datos del alumno no pudieron ser actualizados, vuelva a intentar.'));
+				}
+			}
+		}
+        return; */
+    }
 
     public function index()
     {
@@ -3553,4 +3576,130 @@ class StudenttransactionsController extends AppController
         $this->set(compact('pagosRecibidos', 'conceptoReporte', 'totalConcepto', 'fechaHoy'));
         $this->set('_serialize', ['pagosRecibidos', 'conceptoReporte', 'totalConcepto', 'fechaHoy']);
 	}
+	
+    public function notaTransaccion($idTransaccion = null, $numeroNotaContable = null, $valor = null, $tipoNota = null)
+    {        
+		$codigoRetornoTransaccion = 0;
+		
+        $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
+		
+		if ($tipoNota == "Crédito")
+		{
+			$transaccionEstudiante->original_amount -= $valor;
+			$transaccionEstudiante->amount -= $valor; 			
+		}
+		else
+		{
+			$transaccionEstudiante->original_amount += $valor;
+			$transaccionEstudiante->amount += $valor; 				
+		}
+		
+		$estudianteController = new StudentsController();
+		$mesesTarifas = $estudianteController->mesesTarifas();
+		$otrasTarifas = $estudianteController->otrasTarifas();
+		
+		$tarifaDolar = 0;
+		
+		if ($transaccionEstudiante->transaction_type == "Mensualidad" && substr($transaccionEstudiante->transaction_description, 0, 3) != "Ago")
+		{				
+			$ano = $transaccionEstudiante->payment_date->year;
+								
+			$mes = $transaccionEstudiante->payment_date->month;
+																						
+			if ($mes < 10)
+			{
+				$mesCadena = "0" . $mes;
+			}
+			else
+			{
+				$mesCadena = (string) $mes;
+			}
+			$anoMes = $ano . $mesCadena;
+						
+			foreach ($mesesTarifas as $mesTarifa)
+			{
+				if ($mesTarifa['anoMes'] == $anoMes)
+				{
+					$tarifaDolar = $mesTarifa['tarifaDolar'];
+					break;
+				}
+			}
+		}
+		else
+		{
+			foreach ($otrasTarifas as $otras)
+			{				
+				if ($otras['conceptoAno'] == $transaccionEstudiante->transaction_description)
+				{
+					$tarifaDolar = $otras['tarifaDolar'];
+					break;
+				}
+			}
+		}
+		
+		$transaccionEstudiante->amount_dollar = $tarifaDolar;
+	
+		if ($transaccionEstudiante->amount == $transaccionEstudiante->original_amount)
+		{
+			if ($transaccionEstudiante->amount == 0)
+			{
+				$transaccionEstudiante->partial_payment = 0;
+				$transaccionEstudiante->paid_out = 0;
+				$transaccionEstudiante->amount_dollar = 0;
+			}
+			else
+			{
+				$transaccionEstudiante->partial_payment = 0;
+				$transaccionEstudiante->paid_out = 1;
+			}
+		} 
+		elseif ($transaccionEstudiante->amount < $transaccionEstudiante->original_amount)
+		{
+			$transaccionEstudiante->partial_payment = 1;
+			$transaccionEstudiante->paid_out = 0;
+		}
+		else
+		{
+			$codigoRetornoTransaccion = 1;
+			$this->Flash->error(__('Error ! El monto abonado es mayor al monto original de la transacción con ID ' . $transaccionEstudiante->id));
+		}			
+
+		if ($codigoRetornoTransaccion == 0)
+		{
+			$transaccionEstudiante->bill_number = $numeroNotaContable;
+
+			if (!($this->Studenttransactions->save($transaccionEstudiante)))
+			{
+				$codigoRetornoTransaccion = 1;
+				$this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
+			}
+			else
+			{						
+				if ($transaccionEstudiante->transaction_type == 'Matrícula')
+				{
+					if ($transaccionEstudiante->amount == 0)
+					{
+						$estudiante = $this->Studenttransactions->Students->get($transaccionEstudiante->student_id);
+						
+						if ($estudiante->number_of_brothers == $estudiante->balance)
+						{
+							$estudiante->number_of_brothers = 0;
+							$estudiante->balance = 0;
+						}
+						else
+						{
+							$estudiante->balance -= 1; 
+						}
+						
+						if (!($this->Studenttransactions->Students->save($estudiante)))
+						{
+							$codigoRetornoTransaccion = 1;
+							$this->Flash->error(__('Los datos del alumno no pudieron ser actualizados, vuelva a intentar.'));
+						}
+					}
+				}
+			}
+		}
+        return $codigoRetornoTransaccion;
+    }
 }

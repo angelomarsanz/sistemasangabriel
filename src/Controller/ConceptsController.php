@@ -14,35 +14,49 @@ use App\Controller\BinnaclesController;
  */
 class ConceptsController extends AppController
 {
-    public function testFunction()
+    public function testFunction($idConcepto = 45295, $montoNota = 1000, $numeroNotaContable = 3, $tipoNota = "Crédito")
     {
-		$contador = 0;
-		$contadorRegistros = 0;
+		/* $codigoRetornoConcepto = 0;
 		
-		$month = '07';
-		$year = '2019';
+		$conceptoFactura = $this->Concepts->get($idConcepto);
 		
-		$conceptos = $this->Concepts->find('all', ['conditions' => 
-			[['concept' => 'Servicio educativo 2019'],
-			['MONTH(created)' => $month], 
-			['YEAR(created)' => $year],
-			['annulled' => false]],
-			'order' => ['id' => 'ASC'] ]);
+		if ($tipoNota == "Crédito")
+		{
+			$conceptoFactura->saldo -= $montoNota; 
+		}
+		else
+		{
+			$conceptoFactura->saldo += $montoNota;
+		}
+		
+		if (!($this->Concepts->save($conceptoFactura)))
+		{
+			$codigoRetornoConcepto = 1;	
+			$this->Flash->error(__('El concepto con ID ' . $concepto->id . ' no pudo ser actualizado'));
+		}
+		else
+		{			
+			$conceptoNota = $this->Concepts->newEntity();
+			$conceptoNota->bill_id = $numeroNotaContable;
+			$conceptoNota->quantity = 1;
+			$conceptoNota->accounting_code = "001";
+			$conceptoNota->student_name = $conceptoFactura->student_name;
+			$conceptoNota->transaction_identifier = $conceptoFactura->transaction_identifier;
+			$conceptoNota->concept = $conceptoFactura->concept;
+			$conceptoNota->amount = $montoNota;
+			$conceptoNota->observation = $conceptoFactura->observation;
+			$conceptoNota->annulled = 0;
+			$conceptoNota->concept_migration = 1;
+			$conceptoNota->saldo = $montoNota;
 			
-		$contadorRegistros = $conceptos->count();
-		
-		$this->Flash->success(__('Total registros encontrados: ' . $contadorRegistros));
-				
-		if ($contadorRegistros > 0)
-		{		
-			foreach ($conceptos as $concepto)
+			if (!($this->Concepts->save($conceptoNota)))
 			{
-				$this->Flash->success(__('Concepto: ' . $concepto->concept));
+				$codigoRetornoConcepto = 1;
+				$this->Flash->error(__('El concepto de la nota no pudo ser guardado, intente nuevamente'));
 			}
 		}
-				
-		$this->Flash->success(__('Registros actualizados ' . $contador));	
-    }
+        // return $codigoRetornoConcepto; */
+    }		
 
     /**
      * Index method
@@ -101,6 +115,8 @@ class ConceptsController extends AppController
 				$concept->concept_migration = 0;
 			}
 		}
+		
+		$concept->saldo = $amountPayable;
 
         if (!($this->Concepts->save($concept)))
         {
@@ -199,5 +215,49 @@ class ConceptsController extends AppController
 		$binnacles->add('controller', 'Concepts', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
 
 		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
-	}	
+	}
+	
+    public function agregarConceptosNota($idConcepto = null, $montoNota = null, $numeroNotaContable = null, $tipoNota = null, $idNota = null)
+    {
+		$codigoRetornoConcepto = 0;
+		
+		$conceptoFactura = $this->Concepts->get($idConcepto);
+		
+		if ($tipoNota == "Crédito")
+		{
+			$conceptoFactura->saldo -= $montoNota; 
+		}
+		else
+		{
+			$conceptoFactura->saldo += $montoNota;
+		}
+		
+		if (!($this->Concepts->save($conceptoFactura)))
+		{
+			$codigoRetornoConcepto = 1;	
+			$this->Flash->error(__('El concepto con ID ' . $concepto->id . ' no pudo ser actualizado'));
+		}
+		else
+		{			
+			$conceptoNota = $this->Concepts->newEntity();
+			$conceptoNota->bill_id = $idNota;
+			$conceptoNota->quantity = 1;
+			$conceptoNota->accounting_code = "001";
+			$conceptoNota->student_name = $conceptoFactura->student_name;
+			$conceptoNota->transaction_identifier = $conceptoFactura->transaction_identifier;
+			$conceptoNota->concept = $conceptoFactura->concept;
+			$conceptoNota->amount = $montoNota;
+			$conceptoNota->observation = $conceptoFactura->observation;
+			$conceptoNota->annulled = 0;
+			$conceptoNota->concept_migration = 1;
+			$conceptoNota->saldo = $montoNota;
+			
+			if (!($this->Concepts->save($conceptoNota)))
+			{
+				$codigoRetornoConcepto = 1;
+				$this->Flash->error(__('El concepto de la nota no pudo ser guardado, intente nuevamente'));
+			}
+		}
+        return $codigoRetornoConcepto;
+	}
 }

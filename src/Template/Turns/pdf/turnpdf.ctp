@@ -483,3 +483,69 @@ tr:nth-child(even) {
         </div>
     </div>
 <?php endif; ?>
+<?php if ($indicadorNotasCredito == 1): ?>
+	<div class="saltopagina">
+		<h3><b>Detalle de Notas de Crédito:</b></h3>
+        <div style="font-size: 20px;">
+			<table style="width: 100%;">
+				<thead>
+					<tr>
+						<th scope="col" style="width: 10%;">Fecha y hora</th>
+						<th scope="col" style="width: 10%;">Nota</th>
+						<th scope="col" style="width: 10%;">Nro. Control</th>
+						<th scope="col" style="width: 10%;">Familia</th>
+						<th scope="col" style="width: 10%;">Monto Bs.</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($notasContables as $notas): ?>
+						<?php if ($notas->tipo_documento == "Nota de crédito"): ?>
+							<tr>
+								<td style="width: 10%;"><?= $notas->date_and_time->format('d-m-Y') ?></td>
+								<td style="width: 10%;"><?= $notas->bill_number ?></td>
+								<th style="width: 10%;"><?= $notas->control_number ?></th>
+								<th style="width: 10%;"><?= $notas->parentsandguardian->family ?></th>
+								<th style="width: 10%;"><?= number_format($notas->amount_paid, 2, ",", ".") ?></th>
+							</tr>
+						<?php endif; ?>
+					<?php endforeach; ?> 
+				</tbody>
+			</table>
+		</div>
+		<p style="border-top: 1px solid #c2c2d6;"></p> 
+        <p style="text-align: right;"><b><?= 'Total Notas de crédito Bs.S ' . number_format($totalNotasCredito, 2, ",", ".") ?></b></p>
+    </div>
+<?php endif; ?>
+<?php if ($indicadorNotasDebito == 1): ?>
+	<div class="saltopagina">
+		<h3><b>Detalle de Notas de Débito:</b></h3>
+        <div style="font-size: 20px;">
+			<table style="width: 100%;">
+				<thead>
+					<tr>
+						<th scope="col" style="width: 10%;">Fecha y hora</th>
+						<th scope="col" style="width: 10%;">Nota</th>
+						<th scope="col" style="width: 10%;">Nro. Control</th>
+						<th scope="col" style="width: 10%;">Familia</th>
+						<th scope="col" style="width: 10%;">Monto Bs.</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($notasContables as $notas): ?>
+						<?php if ($notas->tipo_documento == "Nota de débito"): ?>
+							<tr>
+								<td style="width: 10%;"><?= $notas->date_and_time->format('d-m-Y') ?></td>
+								<td style="width: 10%;"><?= $notas->bill_number ?></td>
+								<th style="width: 10%;"><?= $notas->control_number ?></th>
+								<th style="width: 10%;"><?= $notas->parentsandguardian->family ?></th>
+								<th style="width: 10%;"><?= number_format($notas->amount_paid, 2, ",", ".") ?></th>
+							</tr>
+						<?php endif; ?>
+					<?php endforeach; ?> 
+				</tbody>
+			</table>
+		</div>
+		<p style="border-top: 1px solid #c2c2d6;"></p> 
+        <p style="text-align: right;"><b><?= 'Total Notas de Débito Bs.S ' . number_format($totalNotasDebito, 2, ",", ".") ?></b></p>
+    </div>
+<?php endif; ?>

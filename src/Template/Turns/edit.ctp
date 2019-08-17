@@ -419,6 +419,7 @@
 		else
 		{
 			$('#contadores').addClass('noverScreen');
+			$('#close-turn').addClass('noverScreen');
 		}
 		$('#verificar').click(function(e) 
         {

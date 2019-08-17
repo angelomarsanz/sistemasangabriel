@@ -40,7 +40,13 @@
 				<tbody>
 					<tr>
 						<td style='width:80%;'>Cliente: <?= $bill->client ?></td>
-						<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+						<?php if ($bill->tipo_documento == "Nota de crédito"): ?>
+							<td style="width:20%; text-align: right;"><b>Nota de crédito Nro. <?= $bill->bill_number ?></b></td>
+						<?php elseif ($bill->tipo_documento == "Nota de débito"): ?>
+							<td style="width:20%; text-align: right;"><b>Nota de débito Nro. <?= $bill->bill_number ?></b></td>
+						<?php else: ?>
+							<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+						<?php endif; ?>
 					</tr>
 					<tr>
 						<td style='width:80%;'>C.I./RIF: <?= $bill->identification ?></td>
@@ -52,7 +58,11 @@
 					</tr>
 					<tr>
 						<td style='width:80%;'>Dirección: <spam style="font-size: 9px; line-height: 11px;"><?= $bill->fiscal_address ?></spam></td>
-						<td style='width:20%;'></td>
+						<?php if($numeroFacturaAfectada > 0): ?>
+							<td style='width:20%; text-align: right;'><spam style="font-size: 9px; line-height: 11px;"><?= "Factura afectada: Nro. " . $numeroFacturaAfectada . " Control " . $controlFacturaAfectada ?></spam></td>
+						<?php else: ?>
+							<td style='width:20%;'></td>
+						<?php endif; ?>
 					</tr>
 				</tbody>
 			</table>
@@ -134,8 +144,14 @@
 			<table style="width:100%">
 				<tbody>
 					<tr>
-						<td style='width:80%;'>Cliente: <?= $bill->client ?></td>
-						<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+						<td style='width:70%;'>Cliente: <?= $bill->client ?></td>
+						<?php if ($bill->tipo_documento == "Nota de crédito"): ?>
+							<td style="width:20%; text-align: right;"><b>Nota de crédito Nro. <?= $bill->bill_number ?></b></td>
+						<?php elseif ($bill->tipo_documento == "Nota de débito"): ?>
+							<td style="width:20%; text-align: right;"><b>Nota de débito Nro. <?= $bill->bill_number ?></b></td>
+						<?php else: ?>
+							<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+						<?php endif; ?>
 					</tr>
 					<tr>
 						<td style='width:80%;'>C.I./RIF: <?= $bill->identification ?></td>
@@ -147,7 +163,11 @@
 					</tr>
 					<tr>
 						<td style='width:80%;'>Dirección: <spam style="font-size: 9px; line-height: 11px;"><?= $bill->fiscal_address ?></spam></td>
-						<td style='width:20%;'></td>
+						<?php if($numeroFacturaAfectada > 0): ?>
+							<td style='width:20%; text-align: right;'><spam style="font-size: 9px; line-height: 11px;"><?= "Factura afectada: Nro. " . $numeroFacturaAfectada . " Control " . $controlFacturaAfectada ?></spam></td>
+						<?php else: ?>
+							<td style='width:20%;'></td>
+						<?php endif; ?>
 					</tr>
 				</tbody>
 			</table>

@@ -975,41 +975,9 @@ class StudentsController extends AppController
 		
 		$dollarExchangeRate = $rate->amount; 
 
-		$mesesTarifas = $this->mesesTarifas();		
+		$mesesTarifas = $this->mesesTarifas();	
 
-		$tarifas = $this->Rates->find('all', ['conditions' => ['concept !=' => 'Mensualidad'], 
-			'order' => ['Rates.concept' => 'ASC', 'Rates.rate_year' => 'ASC', 'Rates.created' => 'DESC']]);
-		
-		$contadorRegistros = $tarifas->count();
-		
-		if ($contadorRegistros > 0)
-		{
-			$otrasTarifas = [];
-			$otrasConceptoAnoAnterior = "";		
-			$otrasConceptoAnoActual = "";
-			
-			foreach ($tarifas as $tarifa)
-			{
-				$otrasConceptoAnoAnterior = $otrasConceptoAnoActual;
-				
-				if ($tarifa->concept == "Agosto")
-				{	
-					$otrasConceptoAnoActual = "Ago " . $tarifa->rate_year;
-				}
-				else
-				{
-					$otrasConceptoAnoActual = $tarifa->concept . " " . $tarifa->rate_year;
-				}
-									
-				$otrasDolarActual = $tarifa->amount;				
-				$otrasBolivarActual = round($otrasDolarActual * $dollarExchangeRate);
-				
-				if ($otrasConceptoAnoActual != $otrasConceptoAnoAnterior)
-				{							
-					$otrasTarifas[] = ['conceptoAno' => $otrasConceptoAnoActual, 'tarifaDolar' => $otrasDolarActual, 'tarifaBolivar' => $otrasBolivarActual];
-				}
-			}					
-		}
+		$otrasTarifas = $this->otrasTarifas();
 
         if ($this->request->is('json')) 
         {
@@ -2695,6 +2663,49 @@ class StudentsController extends AppController
 		}	
 		return $mesesTarifas;
 	}
+	
+	public function otrasTarifas()
+	{
+		$this->loadModel('Rates');
+		$rate = $this->Rates->get(58);
+		$dollarExchangeRate = $rate->amount; 
+		
+		$tarifas = $this->Rates->find('all', ['conditions' => ['concept !=' => 'Mensualidad'], 
+			'order' => ['Rates.concept' => 'ASC', 'Rates.rate_year' => 'ASC', 'Rates.created' => 'DESC']]);
+		
+		$contadorRegistros = $tarifas->count();
+		
+		if ($contadorRegistros > 0)
+		{
+			$otrasTarifas = [];
+			$otrasConceptoAnoAnterior = "";		
+			$otrasConceptoAnoActual = "";
+			
+			foreach ($tarifas as $tarifa)
+			{
+				$otrasConceptoAnoAnterior = $otrasConceptoAnoActual;
+				
+				if ($tarifa->concept == "Agosto")
+				{	
+					$otrasConceptoAnoActual = "Ago " . $tarifa->rate_year;
+				}
+				else
+				{
+					$otrasConceptoAnoActual = $tarifa->concept . " " . $tarifa->rate_year;
+				}
+									
+				$otrasDolarActual = $tarifa->amount;				
+				$otrasBolivarActual = round($otrasDolarActual * $dollarExchangeRate);
+				
+				if ($otrasConceptoAnoActual != $otrasConceptoAnoAnterior)
+				{							
+					$otrasTarifas[] = ['conceptoAno' => $otrasConceptoAnoActual, 'tarifaDolar' => $otrasDolarActual, 'tarifaBolivar' => $otrasBolivarActual];
+				}
+			}					
+		}
+		return $otrasTarifas;
+	}
+	
 	public function familiasDescuento20()
 	{
         $this->loadModel('Schools');

@@ -119,6 +119,12 @@ class BillsTable extends Table
 			
         $validator
             ->allowEmpty('impresa');
+			
+		$validator
+            ->allowEmpty('tipo_documento');
+			
+        $validator
+            ->allowEmpty('id_documento_padre');
 
         return $validator;
     }
@@ -132,7 +138,6 @@ class BillsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->isUnique(['bill_number']));
         $rules->add($rules->existsIn(['parentsandguardian_id'], 'Parentsandguardians'));
         $rules->add($rules->existsIn(['user_id'], 'Users'));
 
