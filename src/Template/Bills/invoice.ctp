@@ -541,3 +541,13 @@
 		</table>
 	</div>
 <?php endif; ?>
+<script>
+    $(document).ready(function()
+    {
+		mensajeUsuario ="<?= $mensajeUsuario ?>";
+		if (mensajeUsuario != "")
+		{
+			alert(mensajeUsuario);
+		}
+	});
+</script>

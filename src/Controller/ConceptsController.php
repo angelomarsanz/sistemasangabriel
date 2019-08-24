@@ -14,49 +14,40 @@ use App\Controller\BinnaclesController;
  */
 class ConceptsController extends AppController
 {
-    public function testFunction($idConcepto = 45295, $montoNota = 1000, $numeroNotaContable = 3, $tipoNota = "Crédito")
+    public function testFunction()
     {
-		/* $codigoRetornoConcepto = 0;
+		/* $conceptos = $this->Concepts->find('all')->where(['concept_migration' => 0])->order(['bill_id' => 'ASC']);
 		
-		$conceptoFactura = $this->Concepts->get($idConcepto);
+		$idFactura = 0;
+		$contador = 0;
 		
-		if ($tipoNota == "Crédito")
-		{
-			$conceptoFactura->saldo -= $montoNota; 
-		}
-		else
-		{
-			$conceptoFactura->saldo += $montoNota;
-		}
-		
-		if (!($this->Concepts->save($conceptoFactura)))
-		{
-			$codigoRetornoConcepto = 1;	
-			$this->Flash->error(__('El concepto con ID ' . $concepto->id . ' no pudo ser actualizado'));
-		}
-		else
-		{			
-			$conceptoNota = $this->Concepts->newEntity();
-			$conceptoNota->bill_id = $numeroNotaContable;
-			$conceptoNota->quantity = 1;
-			$conceptoNota->accounting_code = "001";
-			$conceptoNota->student_name = $conceptoFactura->student_name;
-			$conceptoNota->transaction_identifier = $conceptoFactura->transaction_identifier;
-			$conceptoNota->concept = $conceptoFactura->concept;
-			$conceptoNota->amount = $montoNota;
-			$conceptoNota->observation = $conceptoFactura->observation;
-			$conceptoNota->annulled = 0;
-			$conceptoNota->concept_migration = 1;
-			$conceptoNota->saldo = $montoNota;
-			
-			if (!($this->Concepts->save($conceptoNota)))
+		foreach ($conceptos as $concepto)
+		{		
+			if ($idFactura != $concepto->bill_id)
 			{
-				$codigoRetornoConcepto = 1;
-				$this->Flash->error(__('El concepto de la nota no pudo ser guardado, intente nuevamente'));
+				$idFactura = $concepto->bill_id;
+				$factura = $this->Concepts->Bills->get($idFactura);
+				$factura->factura_pendiente = 1;
+				
+				if ($this->Concepts->Bills->save($factura))
+				{
+					$contador++;
+				}
+				else
+				{
+					$this->Flash->error(__('No se pudo actualizar la factura con ID ' . $concepto->bill_id));
+				}
 			}
 		}
-        // return $codigoRetornoConcepto; */
-    }		
+		$this->Flash->success(__('Total facturas actualizadas ' . $contador)); */
+		
+		$conceptos = $this->Concepts->find('all', ['conditions' => ['bill_id' => 19237, 'SUBSTRING(concept, 1, 18) !=' => 'Servicio educativo'], 'order' => ['created' => 'ASC']]);		
+
+		foreach ($conceptos as $concepto)
+		{
+			$this->Flash->success(__($concepto->concept . ' ' . $concepto->amount));	
+		}
+	}		
 
     /**
      * Index method
@@ -106,16 +97,7 @@ class ConceptsController extends AppController
         $concept->amount = $amountPayable;
         $concept->observation = $observation;
         $concept->annulled = 0;
-		$concept->concept_migration = 1;
-		
-		if ($fiscal == 0)
-		{
-			if (substr($monthlyPayment, 0, 10) == "Matrícula" || substr($monthlyPayment, 0, 14) == "Seguro escolar" || substr($monthlyPayment, 0, 3) == "Ago")
-			{
-				$concept->concept_migration = 0;
-			}
-		}
-		
+		$concept->concept_migration = 0;		
 		$concept->saldo = $amountPayable;
 
         if (!($this->Concepts->save($concept)))
@@ -259,5 +241,40 @@ class ConceptsController extends AppController
 			}
 		}
         return $codigoRetornoConcepto;
+	}
+	
+	public function conceptosReciboFactura($idReciboPendiente = null, $idFacturaNueva = null)
+	{
+		$codigoRetorno = 0;
+		
+		$conceptos = $this->Concepts->find('all', ['conditions' => ['bill_id' => $idReciboPendiente, 'SUBSTRING(concept, 1, 18) !=' => 'Servicio educativo'], 'order' => ['created' => 'ASC']]);
+		
+		foreach ($conceptos as $concepto)
+		{
+			$conceptoNuevo = $this->Concepts->newEntity();
+			$conceptoNuevo->bill_id = $idFacturaNueva;
+			$conceptoNuevo->quantity = 1;
+			$conceptoNuevo->accounting_code = "001";
+			$conceptoNuevo->student_name = $concepto->student_name;
+			$conceptoNuevo->transaction_identifier = $concepto->transaction_identifier;
+			$conceptoNuevo->concept = $concepto->concept;
+			$conceptoNuevo->amount = $concepto->amount;
+			$conceptoNuevo->observation = $concepto->observation;
+			$conceptoNuevo->annulled = 0;
+			$conceptoNuevo->concept_migration = 0;		
+			$conceptoNuevo->saldo = $concepto->saldo;
+
+			if (!($this->Concepts->save($conceptoNuevo)))
+			{
+				$binnacles = new BinnaclesController;
+				
+				$binnacles->add('controller', 'Payments', 'conceptosReciboFactura', 'El concepto correspondiente a la factura con ID ' . $idFacturaNueva . ' no fue guardado');
+				
+				$this->Flash->error(__('El concepto de la factura con ID ' . $idFacturaNueva . ' no pudo ser guardado, intente nuevamente'));
+				$codigoRetorno = 1;
+				break;
+			}
+		}
+		return $codigoRetorno;
 	}
 }

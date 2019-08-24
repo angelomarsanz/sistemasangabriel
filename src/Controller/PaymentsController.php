@@ -313,4 +313,74 @@ class PaymentsController extends AppController
 
 		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
 	}
+	
+    public function pagosReciboFactura($idReciboPendiente = null, $idFacturaNueva = null, $numeroNuevaFactura = null)
+    {
+		$this->loadModel('Concepts');
+			
+		$codigoRetorno = 0;
+			
+		$saldoServicioEducativo = 0;
+			
+		$servicioEducativo = $this->Concepts->find('all', ['conditions' => ['bill_id' => $idReciboPendiente, 'SUBSTRING(concept, 1, 18) =' => 'Servicio educativo']]);
+	
+		$contadorRegistros = $servicioEducativo->count();
+		
+		if ($contadorRegistros > 0)
+		{
+			foreach ($servicioEducativo as $servicio)
+			{
+				$saldoServicioEducativo += $servicio->amount; 
+			}
+		}
+		
+		$pagos = $this->Payments->find('all', ['conditions' => ['bill_id' => $idReciboPendiente], 'order' => ['payment_type' => 'ASC', 'created' => 'ASC']]);
+				
+		foreach ($pagos as $pago)
+		{
+			$nuevoPago = $this->Payments->newEntity();
+			$nuevoPago->bill_id = $idFacturaNueva;
+			$nuevoPago->payment_type = $pago->payment_type;
+			$nuevoPago->bank = $pago->bank;
+			$nuevoPago->account_or_card = $pago->account_or_card;
+			$nuevoPago->serial = $pago->serial;
+			$nuevoPago->bill_number = $numeroNuevaFactura;
+			$nuevoPago->responsible_user = $this->Auth->user('id');
+			$nuevoPago->turn = $pago->turn;
+			$nuevoPago->annulled = 0;
+			$nuevoPago->name_family = $pago->name_family; 
+			$nuevoPago->fiscal = 1;     
+			
+			if ($saldoServicioEducativo > 0)
+			{
+				if ($saldoServicioEducativo >= $pago->amount)
+				{
+					$saldoServicioEducativo -= $pago->amount;
+					$nuevoPago->amount = 0;
+				}
+				else
+				{
+       
+					$nuevoPago->amount = $pago->amount;
+					$nuevoPago->amount -= $saldoServicioEducativo;
+					$saldoServicioEducativo = 0;
+				}	
+			}
+	
+			if ($nuevoPago->amount > 0)
+			{
+				if (!($this->Payments->save($nuevoPago))) 
+				{
+					$binnacles = new BinnaclesController;
+					
+					$binnacles->add('controller', 'Payments', 'pagosReciboFactura', 'El pago correspondiente a la factura con ID ' . $idFacturaNueva . ' no fue guardado');
+					
+					$this->Flash->error(__('El pago correspondiente a la factura con ID ' . $idFacturaNueva . ' no fue guardado, vuelva a intentar por favor.'));
+					$codigoRetorno = 1;
+					break;
+				}
+			}
+		}
+		return $codigoRetorno; 
+    }
 }

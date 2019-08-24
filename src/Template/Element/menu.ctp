@@ -196,8 +196,7 @@
 		{
 			if (response.satisfactorio) 
 			{
-				alert("Estimado usuario por favor verifique que esta factura se imprimió en el papel fiscal con número de control *** " + gNumeroControl + " ***");
-				window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
+				window.location="<?php echo Router::url(["controller" => "Bills", "action" => "verificarFacturas"]); ?>";
 			} 
 			else 
 			{
@@ -247,6 +246,11 @@
 						window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
 						return false;
 					}
+				}
+				var r = confirm("Estimado usuario por favor coloque en la impresora el papel fiscal con el Nro. de control *** " + gNumeroControl + " ***.");
+				if (r == false)
+				{
+					return false;
 				}
 			}
 			window.print();

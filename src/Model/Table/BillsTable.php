@@ -125,6 +125,12 @@ class BillsTable extends Table
 			
         $validator
             ->allowEmpty('id_documento_padre');
+			
+        $validator
+            ->allowEmpty('id_anticipo');
+			
+        $validator
+            ->allowEmpty('factura_pendiente');
 
         return $validator;
     }

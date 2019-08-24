@@ -1780,15 +1780,9 @@
 								transactionAmount = originalAmount - amountPaid;
 								amountPayable = transactionAmount;		
 							}
-							else if (monthlyPayment == "Ago 2019")
-							{
-								originalAmount = amountMonthly + amountPaid;
-								transactionAmount = originalAmount - amountPaid;
-								amountPayable = transactionAmount												
-							}
 							else if (monthlyPayment.substring(0, 3) == "Ago")
 							{
-								originalAmount = amountMonthly;
+								originalAmount = amountMonthly + amountPaid;;
 								transactionAmount = originalAmount - amountPaid;
 								amountPayable = transactionAmount												
 							}
@@ -1850,7 +1844,10 @@
 							{
 								if (indicadorImpresion == 0)
 								{
-									insertRecord();
+									if (monthlyPayment.substring(0, 6) != 'Thales')
+									{
+										insertRecord();
+									}
 								}
 							}
 						});				

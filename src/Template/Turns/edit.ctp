@@ -428,6 +428,7 @@
 				alert('Felicidades ! Los números de control están correctos, puede continuar con el cierre de turno')
 				$('#factura-control').addClass('noverScreen');
 				$('#contadores').removeClass('noverScreen');
+				$('#close-turn').removeClass('noverScreen');
 			}
 			else
 			{

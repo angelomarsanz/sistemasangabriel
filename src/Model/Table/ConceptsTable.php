@@ -75,6 +75,9 @@ class ConceptsTable extends Table
             ->numeric('amount')
             ->requirePresence('amount', 'create')
             ->notEmpty('amount');
+			
+        $validator
+            ->allowEmpty('saldo');
 
         return $validator;
     }

@@ -1,6 +1,6 @@
 <br />
 <br />
-<?= $this->Html->link('Imprimir la factura', ['action' => 'invoice', $idFactura, 0], ['class' => 'btn btn-success']); ?>
+<?= $this->Html->link('Imprimir la factura', ['action' => 'invoice', $idFactura, 0, $idParentsandguardian, 'imprimirFactura'], ['class' => 'btn btn-success']); ?>
 <br />
 <br />
 <?= $this->Html->link('Imprimir cartón de cuotas', ['controller' => 'Students', 'action' => 'indexCardboardInscription', $billNumber, $idParentsandguardian, $family], ['class' => 'btn btn-success']); ?>
