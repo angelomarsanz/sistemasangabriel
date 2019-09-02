@@ -393,7 +393,7 @@ class TurnsController extends AppController
 		$this->loadModel('Bills');
 		
 		$notasContables = $this->Bills->find('all', ['conditions' => ['turn' => $idTurn, 'OR' => [['tipo_documento' => 'Nota de crédito'], ['tipo_documento' => 'Nota de débito']]],
-			'order' => ['Bills.created' => 'DESC'],
+			'order' => ['Bills.created' => 'ASC'],
 			'contain' => ['Parentsandguardians']]);
 			
 		$contadorNotas = $notasContables->count();
@@ -418,6 +418,23 @@ class TurnsController extends AppController
 				}
 			}
 		}
+		
+		$facturasRecibo = $this->Bills->find('all', ['conditions' => ['turn' => $idTurn, 'id_anticipo >' => 0],
+			'order' => ['Bills.created' => 'ASC'],
+			'contain' => ['Parentsandguardians']]);
+			
+		$contadorFacturasRecibo = $facturasRecibo->count();
+		$indicadorFacturasRecibo = 0;
+		$totalFacturasRecibo = 0;
+		
+		if ($contadorFacturasRecibo > 0)
+		{
+			$indicadorFacturasRecibo = 1;
+			foreach ($facturasRecibo as $factura)
+			{
+				$totalFacturasRecibo += $factura->amount_paid;
+			}
+		}		
         
         $this->viewBuilder()
             ->className('Dompdf.Pdf')
@@ -427,8 +444,8 @@ class TurnsController extends AppController
                 'render' => 'browser',
             ]]);
 
-        $this->set(compact('turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito'));
-        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito']);
+        $this->set(compact('turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito', 'facturasRecibo', 'indicadorFacturasRecibo', 'totalFacturasRecibo'));
+        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito', 'facturasRecibo', 'indicadorFacturasRecibo', 'totalFacturasRecibo']);
     }
 
     /**

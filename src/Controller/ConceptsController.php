@@ -16,7 +16,7 @@ class ConceptsController extends AppController
 {
     public function testFunction()
     {
-		/* $conceptos = $this->Concepts->find('all')->where(['concept_migration' => 0])->order(['bill_id' => 'ASC']);
+		$conceptos = $this->Concepts->find('all')->where(['concept_migration' => 0])->order(['bill_id' => 'ASC']);
 		
 		$idFactura = 0;
 		$contador = 0;
@@ -39,14 +39,7 @@ class ConceptsController extends AppController
 				}
 			}
 		}
-		$this->Flash->success(__('Total facturas actualizadas ' . $contador)); */
-		
-		$conceptos = $this->Concepts->find('all', ['conditions' => ['bill_id' => 19237, 'SUBSTRING(concept, 1, 18) !=' => 'Servicio educativo'], 'order' => ['created' => 'ASC']]);		
-
-		foreach ($conceptos as $concepto)
-		{
-			$this->Flash->success(__($concepto->concept . ' ' . $concepto->amount));	
-		}
+		$this->Flash->success(__('Total facturas actualizadas ' . $contador));
 	}		
 
     /**

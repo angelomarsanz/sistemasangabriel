@@ -549,3 +549,34 @@ tr:nth-child(even) {
         <p style="text-align: right;"><b><?= 'Total Notas de Débito Bs.S ' . number_format($totalNotasDebito, 2, ",", ".") ?></b></p>
     </div>
 <?php endif; ?>
+<?php if ($indicadorFacturasRecibo == 1): ?>
+	<div class="saltopagina">
+		<h3><b>Detalle de Facturas Correspondientes a Anticipos:</b></h3>
+        <div style="font-size: 20px;">
+			<table style="width: 100%;">
+				<thead>
+					<tr>
+						<th scope="col" style="width: 10%;">Fecha y hora</th>
+						<th scope="col" style="width: 10%;">Factura</th>
+						<th scope="col" style="width: 10%;">Nro. Control</th>
+						<th scope="col" style="width: 10%;">Familia</th>
+						<th scope="col" style="width: 10%;">Monto Bs.</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($facturasRecibo as $factura): ?>
+						<tr>
+							<td style="width: 10%;"><?= $factura->date_and_time->format('d-m-Y') ?></td>
+							<td style="width: 10%;"><?= $factura->bill_number ?></td>
+							<th style="width: 10%;"><?= $factura->control_number ?></th>
+							<th style="width: 10%;"><?= $factura->parentsandguardian->family ?></th>
+							<th style="width: 10%;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></th>
+						</tr>
+					<?php endforeach; ?> 
+				</tbody>
+			</table>
+		</div>
+		<p style="border-top: 1px solid #c2c2d6;"></p> 
+        <p style="text-align: right;"><b><?= 'Total Correspondientes a anticipos Bs.S ' . number_format($totalFacturasRecibo, 2, ",", ".") ?></b></p>
+    </div>
+<?php endif; ?>
