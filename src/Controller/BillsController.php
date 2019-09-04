@@ -149,6 +149,7 @@ class BillsController extends AppController
 				if ($this->headboard['fiscal'] == 1)
 				{
 					$billNumber = $consecutiveInvoice->add();
+					$this->Flash->error(__('Fiscal factura ' . $billNumber));
 				}
 				else
 				{
@@ -1994,6 +1995,7 @@ class BillsController extends AppController
 						
 						if ($codigoRetorno == 0)
 						{
+							$this->Flash->error(__('Me fuí a grabar los pagos'));
 							$codigoRetorno = $pagos->pagosReciboFactura($reciboPendiente->id, $facturaNueva->id, $numeroNuevaFactura);
 						}
 					}
@@ -2023,6 +2025,7 @@ class BillsController extends AppController
         $consecutiveInvoice = new ConsecutiveinvoicesController();
       
 		$billNumber = $consecutiveInvoice->add();
+		$this->Flash->error(__('Factura Recibo ' . $billNumber));
 				
 		$bill = $this->Bills->newEntity();
 		$bill->parentsandguardian_id = $reciboPendiente->parentsandguardian_id;

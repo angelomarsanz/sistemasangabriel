@@ -334,53 +334,75 @@ class PaymentsController extends AppController
 			}
 		}
 		
+		$this->Flash->error(__('Saldo servicio educativo ' . $saldoServicioEducativo));
+		
+		
 		$pagos = $this->Payments->find('all', ['conditions' => ['bill_id' => $idReciboPendiente], 'order' => ['payment_type' => 'ASC', 'created' => 'ASC']]);
-				
-		foreach ($pagos as $pago)
+		
+		$contadorPagos = $pagos->count();
+		
+		if ($contadorPagos > 0)
 		{
-			$nuevoPago = $this->Payments->newEntity();
-			$nuevoPago->bill_id = $idFacturaNueva;
-			$nuevoPago->payment_type = $pago->payment_type;
-			$nuevoPago->bank = $pago->bank;
-			$nuevoPago->account_or_card = $pago->account_or_card;
-			$nuevoPago->serial = $pago->serial;
-			$nuevoPago->bill_number = $numeroNuevaFactura;
-			$nuevoPago->responsible_user = $this->Auth->user('id');
-			$nuevoPago->turn = $pago->turn;
-			$nuevoPago->annulled = 0;
-			$nuevoPago->name_family = $pago->name_family; 
-			$nuevoPago->fiscal = 1;     
-			
-			if ($saldoServicioEducativo > 0)
+			foreach ($pagos as $pago)
 			{
-				if ($saldoServicioEducativo >= $pago->amount)
+				$nuevoPago = $this->Payments->newEntity();
+				$nuevoPago->bill_id = $idFacturaNueva;
+				$nuevoPago->payment_type = $pago->payment_type;
+				$nuevoPago->bank = $pago->bank;
+				$nuevoPago->account_or_card = $pago->account_or_card;
+				$nuevoPago->serial = $pago->serial;
+				$nuevoPago->bill_number = $numeroNuevaFactura;
+				$nuevoPago->responsible_user = $this->Auth->user('id');
+				$nuevoPago->turn = $pago->turn;
+				$nuevoPago->annulled = 0;
+				$nuevoPago->name_family = $pago->name_family; 
+				$nuevoPago->fiscal = 1;     
+				
+				if ($saldoServicioEducativo > 0)
 				{
-					$saldoServicioEducativo -= $pago->amount;
-					$nuevoPago->amount = 0;
+					if ($saldoServicioEducativo >= $pago->amount)
+					{
+						$saldoServicioEducativo -= $pago->amount;
+						$nuevoPago->amount = 0;
+					}
+					else
+					{
+		   
+						$nuevoPago->amount = $pago->amount;
+						$nuevoPago->amount -= $saldoServicioEducativo;
+						$saldoServicioEducativo = 0;
+					}	
 				}
 				else
 				{
-       
 					$nuevoPago->amount = $pago->amount;
-					$nuevoPago->amount -= $saldoServicioEducativo;
-					$saldoServicioEducativo = 0;
-				}	
-			}
-	
-			if ($nuevoPago->amount > 0)
-			{
-				if (!($this->Payments->save($nuevoPago))) 
+				}
+		
+				if ($nuevoPago->amount > 0)
 				{
-					$binnacles = new BinnaclesController;
-					
-					$binnacles->add('controller', 'Payments', 'pagosReciboFactura', 'El pago correspondiente a la factura con ID ' . $idFacturaNueva . ' no fue guardado');
-					
-					$this->Flash->error(__('El pago correspondiente a la factura con ID ' . $idFacturaNueva . ' no fue guardado, vuelva a intentar por favor.'));
-					$codigoRetorno = 1;
-					break;
+					if (!($this->Payments->save($nuevoPago))) 
+					{
+						$binnacles = new BinnaclesController;
+						
+						$binnacles->add('controller', 'Payments', 'pagosReciboFactura', 'El pago correspondiente a la factura con ID ' . $idFacturaNueva . ' no fue guardado');
+						
+						$this->Flash->error(__('El pago correspondiente a la factura con ID ' . $idFacturaNueva . ' no fue guardado, vuelva a intentar por favor.'));
+						$codigoRetorno = 1;
+						break;
+					}
 				}
 			}
 		}
+		else
+		{
+			$binnacles = new BinnaclesController;
+			
+			$binnacles->add('controller', 'Payments', 'pagosReciboFactura', 'No se encontraron pagos para la factura con ID ' . $idReciboPendiente);
+			
+			$this->Flash->error(__('No se encontraron pagos para la factura con ID ' . $idReciboPendiente));
+			$codigoRetorno = 1;	
+		}
+		
 		return $codigoRetorno; 
     }
 }
