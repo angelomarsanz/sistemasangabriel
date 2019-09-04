@@ -16,7 +16,7 @@ class ConceptsController extends AppController
 {
     public function testFunction()
     {
-		$conceptos = $this->Concepts->find('all')->where(['concept_migration' => 0])->order(['bill_id' => 'ASC']);
+		/* $conceptos = $this->Concepts->find('all')->where(['concept_migration' => 0])->order(['bill_id' => 'ASC']);
 		
 		$idFactura = 0;
 		$contador = 0;
@@ -39,7 +39,7 @@ class ConceptsController extends AppController
 				}
 			}
 		}
-		$this->Flash->success(__('Total facturas actualizadas ' . $contador));
+		$this->Flash->success(__('Total facturas actualizadas ' . $contador)); */
 	}		
 
     /**

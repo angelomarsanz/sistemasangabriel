@@ -154,7 +154,7 @@
 					{
 						indicadorError = 1;					
 						$(this).css('background-color', "#ffffe6");
-						$("#MENSAJE-" + $(this).attr('id').substring(3)).html("El monto de la nota contable no puede ser mayor al de la factura").css('color', 'red');
+						$("#MENSAJE-" + $(this).attr('id').substring(3)).html("El monto del concepto de la nota contable no puede ser mayor al saldo").css('color', 'red');
 
 					}
 				}

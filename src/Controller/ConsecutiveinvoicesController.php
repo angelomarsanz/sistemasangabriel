@@ -56,7 +56,7 @@ class ConsecutiveinvoicesController extends AppController
         if ($this->Consecutiveinvoices->save($consecutiveinvoice)) 
         {
             $lastRecord = $this->Consecutiveinvoices->find('all', ['conditions' => ['requesting_user' => $this->Auth->user('username')],
-                'order' => ['Consecutiveinvoices.created' => 'DESC'] ]);
+                'order' => ['Consecutiveinvoices.id' => 'DESC'] ]);
 
             $row = $lastRecord->first();
                 
