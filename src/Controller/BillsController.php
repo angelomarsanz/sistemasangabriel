@@ -149,7 +149,6 @@ class BillsController extends AppController
 				if ($this->headboard['fiscal'] == 1)
 				{
 					$billNumber = $consecutiveInvoice->add();
-					$this->Flash->error(__('Fiscal factura ' . $billNumber));
 				}
 				else
 				{
@@ -722,53 +721,59 @@ class BillsController extends AppController
 		$this->loadModel('Users');
 		
 		$mensajeUsuario = "";
-				
-		$facturas = $this->Bills->find('all', ['conditions' => ['user_id' => $this->Auth->user('id'), 'impresa' => 0, 'id !=' => $idFactura],
-            'order' => ['Bills.created' => 'ASC']]);
-			
-		$contadorRegistros = $facturas->count();
 		
-		if ($contadorRegistros > 0)
+		if (isset($origen))
 		{
-			$facturaAnterior = $facturas->first();
-			
-			if ($facturaAnterior->tipo_documento == "Factura")
-			{
-				$documento = "esta factura";
+			if ($origen != 'verificarFacturas')
+			{				
+				$facturas = $this->Bills->find('all', ['conditions' => ['user_id' => $this->Auth->user('id'), 'impresa' => 0, 'id !=' => $idFactura],
+					'order' => ['Bills.id' => 'ASC']]);
+					
+				$contadorRegistros = $facturas->count();
+								
+				if ($contadorRegistros > 0)
+				{
+					$facturaAnterior = $facturas->first();
+					
+					if ($facturaAnterior->tipo_documento == "Factura")
+					{
+						$documento = "esta factura";
+					}
+					elseif ($facturaAnterior->tipo_documento == "Recibo")
+					{
+						$documento = "este recibo";
+					}
+					elseif ($facturaAnterior->tipo_documento == "Nota de crédito")
+					{
+						$documento = "esta nota de crédito";
+					}
+					else
+					{
+						$documento = "esta nota de débito";
+					}
+					
+					$mensajeUsuario = "Estimado usuario " . $documento . " con el Nro. " . $facturaAnterior->bill_number . " se debe imprimir primero y luego podrá continuar con la cobranza";	
+					
+					$idFactura = $facturaAnterior->id;
+					$reimpresion = 0;
+					$idParentsandguardian = $facturaAnterior->parentsandguardian_id;
+				}				
 			}
-			elseif ($facturaAnterior->tipo_documento == "Recibo")
-			{
-				$documento = "este recibo";
-			}
-			elseif ($facturaAnterior->tipo_documento == "Nota de crédito")
-			{
-				$documento = "esta nota de crédito";
-			}
-			else
-			{
-				$documento = "esta nota de débito";
-			}
-			
-			$mensajeUsuario = "Estimado usuario " . $documento . " con el Nro. " . $facturaAnterior->bill_number . " se debe imprimir primero y luego podrá continuar con la cobranza";	
-			
-			$idFactura = $facturaAnterior->id;
-			$reimpresion = 0;
-			$idParentsandguardian = $facturaAnterior->parentsandguardian_id;
 		}
 		
         $lastRecord = $this->Bills->find('all', ['conditions' => ['id' => $idFactura],
-            'order' => ['Bills.created' => 'DESC']]);
+            'order' => ['Bills.id' => 'DESC']]);
 					    
         $bill = $lastRecord->first();
 		
 		if (isset($origen))
 		{
 			if ($origen == 'verificarFacturas' && $mensajeUsuario == "")
-			{
+			{				
 				$mensajeUsuario = "Ahora por favor imprima esta factura con el Nro. " . $bill->bill_number;
 			}
 		}
-                
+	               
 		$usuario = $this->Users->get($bill->user_id);
 		
 		if ($bill->id_documento_padre > 0)
@@ -1936,7 +1941,7 @@ class BillsController extends AppController
 		$this->autoRender = false;
 				
 		$facturas = $this->Bills->find('all', ['conditions' => ['user_id' => $this->Auth->user('id'), 'impresa' => 0],
-            'order' => ['Bills.created' => 'ASC']]);
+            'order' => ['Bills.id' => 'ASC']]);
 			
 		$contadorRegistros = $facturas->count();
 				
@@ -1966,48 +1971,54 @@ class BillsController extends AppController
 		$codigoRetorno = 0;
 							
 		$recibos = $this->Bills->find('all', ['conditions' => ['parentsandguardian_id' => $idParentsandguardian, 'fiscal' => 0, 'factura_pendiente' => 1],
-            'order' => ['Bills.created' => 'ASC']]);
+            'order' => ['Bills.id' => 'ASC']]);
 			
 		$contadorRegistros = $recibos->count();
 				
 		if ($contadorRegistros > 0)
 		{
-			$reciboPendiente = $recibos->first();
-						
-			if ($school->current_school_year == substr($reciboPendiente->school_year, 13, 4))
-			{		
-				$resultado = $this->crearFacturaRecibo($reciboPendiente);
+			foreach ($recibos as $recibo)
+			{							
+				if ($school->current_school_year == substr($recibo->school_year, 13, 4))
+				{		
+					$resultado = $this->crearFacturaRecibo($recibo);
 
-				if ($resultado['codigoRetorno'] == 0)
-				{
-					$numeroNuevaFactura = $resultado['numeroNuevaFactura'];
-					
-					$facturas = $this->Bills->find('all', ['conditions' => ['bill_number' => $numeroNuevaFactura, 'user_id' => $this->Auth->user('id')],
-							'order' => ['Bills.created' => 'DESC'] ]);
-
-					$contadorRegistros = $facturas->count();
-							
-					if ($contadorRegistros > 0)
+					if ($resultado['codigoRetorno'] == 0)
 					{
-						$facturaNueva = $facturas->first();
-											
-						$codigoRetorno = $conceptos->conceptosReciboFactura($reciboPendiente->id, $facturaNueva->id);
+						$numeroNuevaFactura = $resultado['numeroNuevaFactura'];
 						
-						if ($codigoRetorno == 0)
+						$facturas = $this->Bills->find('all', ['conditions' => ['bill_number' => $numeroNuevaFactura, 'user_id' => $this->Auth->user('id')],
+								'order' => ['Bills.id' => 'DESC'] ]);
+
+						$contadorRegistros = $facturas->count();
+								
+						if ($contadorRegistros > 0)
 						{
-							$this->Flash->error(__('Me fuí a grabar los pagos'));
-							$codigoRetorno = $pagos->pagosReciboFactura($reciboPendiente->id, $facturaNueva->id, $numeroNuevaFactura);
+							$facturaNueva = $facturas->first();
+												
+							$codigoRetorno = $conceptos->conceptosReciboFactura($recibo->id, $facturaNueva->id);
+							
+							if ($codigoRetorno == 0)
+							{
+								$codigoRetorno = $pagos->pagosReciboFactura($recibo->id, $facturaNueva->id, $numeroNuevaFactura);
+							}
+							else
+							{
+								break;
+							}
+						}
+						else
+						{
+							$this->Flash->error(__('No se encontró la nueva factura ' . $numeroNuevaFactura));
+							$codigoRetorno = 1;
+							break;
 						}
 					}
 					else
 					{
-						$this->Flash->error(__('No se encontró la nueva factura ' . $numeroNuevaFactura));
 						$codigoRetorno = 1;
+						break;
 					}
-				}
-				else
-				{
-					$codigoRetorno = 1;
 				}
 			}
 		}
@@ -2025,7 +2036,6 @@ class BillsController extends AppController
         $consecutiveInvoice = new ConsecutiveinvoicesController();
       
 		$billNumber = $consecutiveInvoice->add();
-		$this->Flash->error(__('Factura Recibo ' . $billNumber));
 				
 		$bill = $this->Bills->newEntity();
 		$bill->parentsandguardian_id = $reciboPendiente->parentsandguardian_id;

@@ -333,10 +333,7 @@ class PaymentsController extends AppController
 				$saldoServicioEducativo += $servicio->amount; 
 			}
 		}
-		
-		$this->Flash->error(__('Saldo servicio educativo ' . $saldoServicioEducativo));
-		
-		
+				
 		$pagos = $this->Payments->find('all', ['conditions' => ['bill_id' => $idReciboPendiente], 'order' => ['payment_type' => 'ASC', 'created' => 'ASC']]);
 		
 		$contadorPagos = $pagos->count();
