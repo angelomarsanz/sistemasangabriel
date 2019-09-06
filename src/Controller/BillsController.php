@@ -1230,7 +1230,7 @@ class BillsController extends AppController
 						date_default_timezone_set('America/Caracas');
 						
 						$bill->date_annulled = Time::now();
-						
+						           										
 						if (!($this->Bills->save($bill))) 
 						{
 							$this->Flash->error(__('La factura no pudo ser anulada'));

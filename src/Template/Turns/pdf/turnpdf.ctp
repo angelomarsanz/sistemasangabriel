@@ -580,3 +580,30 @@ tr:nth-child(even) {
         <p style="text-align: right;"><b><?= 'Total Correspondientes a anticipos Bs.S ' . number_format($totalFacturasRecibo, 2, ",", ".") ?></b></p>
     </div>
 <?php endif; ?>
+<?php if ($indicadorAnuladas == 1): ?>
+	<div class="saltopagina">
+		<h3><b>Detalle de Facturas anuladas:</b></h3>
+        <div style="font-size: 20px;">
+			<table style="width: 100%;">
+				<thead>
+					<tr>
+						<th scope="col" style="width: 10%;">Fecha y hora</th>
+						<th scope="col" style="width: 10%;">Factura</th>
+						<th scope="col" style="width: 10%;">Nro. Control</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($anuladas as $anulada): ?>
+						<tr>
+							<td style="width: 10%;"><?= $anulada->date_and_time->format('d-m-Y') ?></td>
+							<td style="width: 10%;"><?= $anulada->bill_number ?></td>
+							<th style="width: 10%;"><?= $anulada->control_number ?></th>
+						</tr>
+					<?php endforeach; ?> 
+				</tbody>
+			</table>
+		</div>
+		<p style="border-top: 1px solid #c2c2d6;"></p> 
+        <p style="text-align: right;"><b><?= 'Total facturas anuladas ' . $contadorAnuladas ?></b></p>
+    </div>
+<?php endif; ?>

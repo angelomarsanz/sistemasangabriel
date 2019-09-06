@@ -19,17 +19,17 @@ class TurnsController extends AppController
 {
 	public function pruebaFuncion()
 	{
-        /* setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-        date_default_timezone_set('America/Caracas');
-			
-        $fechaObjeto = Time::now();
+		/* $turn = $this->Turns->get(808);
 		
-		$fechaFormateada = date_format($fechaObjeto, "Y-m-d");
-		echo "<br />fecha formateada: " . $fechaFormateada;
-	
-		$turn = $this->Turns->get(799);
-		$fecha = date_format($turn->start_date,"Y-m-d");
-		echo "<br />fecha: " . $fecha; */
+		$this->loadModel('Bills');
+		
+		$anuladas = $this->Bills->find('all', ['conditions' => ['date_annulled >=' => $turn->start_date],
+			'order' => ['Bills.created' => 'ASC']]);
+			
+		foreach ($anuladas as $anulada)
+		{
+			echo "<br /> Factura anulada " . $anulada->bill_number;
+		} */
 	}
 
     /**
@@ -435,7 +435,18 @@ class TurnsController extends AppController
 				$totalFacturasRecibo += $factura->amount_paid;
 			}
 		}		
-        
+		
+		$anuladas = $this->Bills->find('all', ['conditions' => ['date_annulled >=' => $turn->start_date],
+			'order' => ['Bills.created' => 'ASC']]);
+			
+		$contadorAnuladas = $facturasRecibo->count();
+		$indicadorAnuladas = 0;
+		
+		if ($contadorAnuladas > 0)
+		{
+			$indicadorAnuladas = 1;
+		}				
+		
         $this->viewBuilder()
             ->className('Dompdf.Pdf')
             ->layout('default')
@@ -444,8 +455,8 @@ class TurnsController extends AppController
                 'render' => 'browser',
             ]]);
 
-        $this->set(compact('turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito', 'facturasRecibo', 'indicadorFacturasRecibo', 'totalFacturasRecibo'));
-        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito', 'facturasRecibo', 'indicadorFacturasRecibo', 'totalFacturasRecibo']);
+        $this->set(compact('turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito', 'facturasRecibo', 'indicadorFacturasRecibo', 'totalFacturasRecibo', 'anuladas', 'indicadorAnuladas', 'contadorAnuladas'));
+        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito', 'facturasRecibo', 'indicadorFacturasRecibo', 'totalFacturasRecibo', 'anuladas', 'indicadorAnuladas', 'contadorAnuladas']);
     }
 
     /**
