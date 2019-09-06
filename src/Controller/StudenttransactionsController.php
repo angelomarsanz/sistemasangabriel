@@ -29,8 +29,8 @@ class StudenttransactionsController extends AppController
 		}
 		
 		$estudianteController = new StudentsController();
-		$mesesTarifas = $estudianteController->mesesTarifas();
-		$otrasTarifas = $estudianteController->otrasTarifas();
+		$mesesTarifas = $estudianteController->mesesTarifas(0);
+		$otrasTarifas = $estudianteController->otrasTarifas(0);
 		
 		$tarifaDolar = 0;
 		
@@ -135,9 +135,9 @@ class StudenttransactionsController extends AppController
        {			
 			$this->loadModel('Rates');
 			
-			$rate = $this->Rates->get(58);
-			
-			$dollarExchangeRate = $rate->amount; 
+			$this->loadModel('Monedas');	
+			$moneda = $this->Monedas->get(2);
+			$dollarExchangeRate = $moneda->tasa_cambio_dolar; 
 			
 			$lastRecord = $this->Rates->find('all', ['conditions' => ['concept' => 'Mensualidad'],
 				'order' => ['Rates.created' => 'DESC'] ]);
@@ -3595,8 +3595,8 @@ class StudenttransactionsController extends AppController
 		}
 		
 		$estudianteController = new StudentsController();
-		$mesesTarifas = $estudianteController->mesesTarifas();
-		$otrasTarifas = $estudianteController->otrasTarifas();
+		$mesesTarifas = $estudianteController->mesesTarifas(0);
+		$otrasTarifas = $estudianteController->otrasTarifas(0);
 		
 		$tarifaDolar = 0;
 		

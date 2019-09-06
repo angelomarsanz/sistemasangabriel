@@ -68,6 +68,7 @@
 								<li><?= $this->Html->link('Cobrar mensualidades', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
 								<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
 								<li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
+								<li><?= $this->Html->link('Histórico cambio tasa dólar', ['controller' => 'Historicotasas', 'action' => 'index']) ?></li>
 							</ul>
 						</li>
 						<li class="dropdown">

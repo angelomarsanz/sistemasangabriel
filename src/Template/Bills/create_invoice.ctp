@@ -39,7 +39,14 @@
 							<button id="update-dollar" class="btn btn-success">Actualizar</button>
 						</div>
 						<div class="col-md-6">
-							<br />
+							<?= $this->Form->input('tasa_temporal', ['label' => 'Tasa temporal:', 'class' => 'alternative-decimal-separator', 'value' => number_format((0), 2, ",", ".")]) ?>
+							<button id="establecer-tasa-temporal" class="btn btn-success">Establecer</button>
+							<button id="eliminar-tasa-temporal" class="btn btn-success noverScreen">Eliminar</button>
+						</div>
+					</div>
+					<br>
+					<div class="row">
+						<div class="col-md-12">
 							<p id="dollar-messages"></p>
 						</div>
 					</div>
@@ -1567,7 +1574,7 @@
 				typeStudent = 2;
 			}
 						
-			$.post('<?php echo Router::url(["controller" => "Students", "action" => "relatedStudents"]); ?>', {"id" : idFamily, "new" : typeStudent}, null, "json")				
+			$.post('<?php echo Router::url(["controller" => "Students", "action" => "relatedStudents"]); ?>', {"id" : idFamily, "new" : typeStudent, "tasaTemporal" : $("#tasa-temporal").val() }, null, "json")				
                      
             .done(function(response) 
             {
@@ -2548,7 +2555,7 @@
 			$("#response-container").html("");
 			disableButtons();
 		
-            $.post('<?php echo Router::url(["controller" => "Rates", "action" => "updateDollar"]); ?>', 
+            $.post('<?php echo Router::url(["controller" => "Monedas", "action" => "actualizarTasa"]); ?>', 
                 {"amount" : $('#dollar-exchange-rate').val() }, null, "json")          
 
             .done(function(response) 
@@ -2566,6 +2573,56 @@
             {
                 $("#dollar-messages").html("Algo ha fallado, la tasa de cambio no pudo ser actualizada: " + textStatus);
             });  
+        });
+		
+        $('#establecer-tasa-temporal').click(function(e) 
+        {
+			e.preventDefault();
+			if ($("#tasa-temporal").val() > 0)
+			{
+				if (totalBalance > 0)
+				{    
+					var r = confirm("Si establece una tasa temporal, perderá los datos de la cobranza a la familia: " + nameFamily );
+					if (r == false)
+					{
+						return false;
+					}
+				}
+
+				$('#quota-adjustment').val("");
+				cleanPager();
+				$("#response-container").html("");
+				disableButtons();  
+				$('#tasa-temporal').css('background-color', '#ffb3b3');
+				$("#establecer-tasa-temporal").addClass("noverScreen");
+				$("#eliminar-tasa-temporal").removeClass("noverScreen");
+			}
+			else
+			{
+				alert("La tasa temporal debe ser mayor a cero");		
+			}
+        });
+		
+        $('#eliminar-tasa-temporal').click(function(e) 
+        {
+			e.preventDefault();
+			if (totalBalance > 0)
+			{    
+				var r = confirm("Si elimina una tasa temporal, perderá los datos de la cobranza a la familia: " + nameFamily );
+				if (r == false)
+				{
+					return false;
+				}
+			}
+
+			$('#quota-adjustment').val("");
+			cleanPager();
+			$("#response-container").html("");
+			disableButtons();  
+			$('#tasa-temporal').val('0,00');			
+			$('#tasa-temporal').css('background-color', 'white');
+			$("#establecer-tasa-temporal").removeClass("noverScreen");
+			$("#eliminar-tasa-temporal").addClass("noverScreen");
         });
 		
         $('#adjust-fee').click(function(e) 

@@ -256,9 +256,9 @@ class BillsController extends AppController
 				
 		$this->loadModel('Rates');
 		
-		$rate = $this->Rates->get(58);
-		
-		$dollarExchangeRate = $rate->amount; 
+		$this->loadModel('Monedas');	
+		$moneda = $this->Monedas->get(2);
+		$dollarExchangeRate = $moneda->tasa_cambio_dolar; 
 				
         $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'amountMonthly'));
     }
