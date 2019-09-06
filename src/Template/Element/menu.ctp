@@ -118,6 +118,7 @@
 								<li><?= $this->Html->link('Reporte de Morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li>								
 								<li><?= $this->Html->link('Crear libro de ventas EXCEL', ['controller' => 'Salesbooks', 'action' => 'createBookExcel']) ?></li>
 								<li><?= $this->Html->link('Crear libro de recibos EXCEL', ['controller' => 'Salesbooks', 'action' => 'crearLibroRecibos']) ?></li>
+								<li><?= $this->Html->link('Eventos del usuario', ['controller' => 'Eventos', 'action' => 'index']) ?></li>
 							</ul>
 						</li>
     
@@ -192,7 +193,7 @@
 	function actualizarIndicadorImpresion(idFactura)
 	{
 		$.post("<?php echo Router::url(["controller" => "Bills", "action" => "actualizarIndicadorImpresion"]); ?>", 
-			{ "idFactura" : gIdFactura }, null, "json")          
+			{ "idFactura" : gIdFactura , "reimpresion" : gReimpresion}, null, "json")          
 		.done(function(response) 
 		{
 			if (response.satisfactorio) 

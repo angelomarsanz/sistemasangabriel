@@ -10,6 +10,14 @@ use App\Controller\AppController;
  */
 class EventosController extends AppController
 {
+	public function isAuthorized($user)
+    {
+		if(in_array($this->request->action, ['add']))
+		{
+			return true;
+		}
+        return parent::isAuthorized($user);
+    }
 
     /**
      * Index method
@@ -79,6 +87,8 @@ class EventosController extends AppController
 		
         $evento = $this->Eventos->newEntity();
 		
+		$evento->user_id = $this->Auth->user('id');
+		
 		$evento->tipo_modulo = $tipoModulo;
 		
 		$evento->nombre_modulo = $nombreModulo;
@@ -86,7 +96,7 @@ class EventosController extends AppController
 		$evento->nombre_metodo = $nombreMetodo;
 		
 		$evento->descripcion = $descripcion;
-		
+				
 		if (isset($vectorExtra))
 		{
 			$contadorVector = 1;

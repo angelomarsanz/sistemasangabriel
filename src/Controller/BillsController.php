@@ -21,6 +21,8 @@ use App\Controller\ConsecutivodebitosController;
 
 use App\Controller\BinnaclesController;
 
+use App\Controller\EventosController;
+
 use Cake\I18n\Time;
 
 class BillsController extends AppController
@@ -1241,6 +1243,10 @@ class BillsController extends AppController
 							
 							$payments->edit($idBill);
 							
+							$eventos = new EventosController;
+							
+							$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló la factura Nro. ' . $bill->bill_number);
+							
 							return $this->redirect(['action' => 'annulledInvoice', $idBill]);
 						} 
 					}
@@ -1612,6 +1618,11 @@ class BillsController extends AppController
     public function actualizarIndicadorImpresion()
     {
         $this->autoRender = false;
+		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+        
+        $fechaHoy = Time::now();
 
         if ($this->request->is('json')) 
         {
@@ -1620,6 +1631,19 @@ class BillsController extends AppController
 			$bill = $this->Bills->get($_POST['idFactura']);
 
 			$bill->impresa = true;
+			
+			if (isset($_POST['reimpresion']))
+			{
+				if ($_POST['reimpresion'] == 1)
+				{
+					$bill->fecha_reimpresion = $fechaHoy;
+					
+					$eventos = new EventosController;
+							
+					$eventos->add('controller', 'Bills', 'actualizarIndicadorImpresion', 'Se reimprimió la factura Nro. ' . $bill->bill_number);
+					
+				}
+			}
 			
 			if ($this->Bills->save($bill))
 			{
