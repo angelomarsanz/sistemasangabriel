@@ -251,8 +251,8 @@ class PaymentsController extends AppController
 						if ($concepto['saldo'] >= $paymentsTurns->amount)
 						{
 							$concepto['saldo'] -= $paymentsTurns->amount;
-							$montoServicioEducativo = $paymentTurns->amount;
-							$paymentTurns->amount = 0;
+							$montoServicioEducativo = $paymentsTurns->amount;
+							$paymentsTurns->amount = 0;
 						}
 						else
 						{

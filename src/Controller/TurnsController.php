@@ -439,7 +439,7 @@ class TurnsController extends AppController
 		$anuladas = $this->Bills->find('all', ['conditions' => ['date_annulled >=' => $turn->start_date],
 			'order' => ['Bills.created' => 'ASC']]);
 			
-		$contadorAnuladas = $facturasRecibo->count();
+		$contadorAnuladas = $anuladas->count();
 		$indicadorAnuladas = 0;
 		
 		if ($contadorAnuladas > 0)

@@ -298,7 +298,7 @@ class BillsController extends AppController
     public function recordInvoiceData()
     {
         $this->autoRender = false;
-
+		
         $Studenttransactions = new StudenttransactionsController();
 
         $Concepts = new ConceptsController();
@@ -313,7 +313,7 @@ class BillsController extends AppController
             $transactions = json_decode($_POST['studentTransactions']);
             $payments = json_decode($_POST['paymentsMade']);
             $_POST = [];
-
+			
 			if ($this->headboard['fiscal'] == 0)
 			{
 				foreach ($transactions as $transaction) 
@@ -331,7 +331,7 @@ class BillsController extends AppController
             if ($billNumber > 0)
             {
                 $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $billNumber, 'user_id' => $this->Auth->user('id')],
-                        'order' => ['Bills.created' => 'DESC'] ]);
+                        'order' => ['Bills.id' => 'DESC'] ]);
 
                 if ($lastRecord)
                 {
@@ -1994,7 +1994,7 @@ class BillsController extends AppController
 							
 		$codigoRetorno = 0;
 							
-		$recibos = $this->Bills->find('all', ['conditions' => ['parentsandguardian_id' => $idParentsandguardian, 'fiscal' => 0, 'factura_pendiente' => 1],
+		$recibos = $this->Bills->find('all', ['conditions' => ['annulled' => 0, 'parentsandguardian_id' => $idParentsandguardian, 'fiscal' => 0, 'factura_pendiente' => 1],
             'order' => ['Bills.id' => 'ASC']]);
 			
 		$contadorRegistros = $recibos->count();
@@ -2004,7 +2004,7 @@ class BillsController extends AppController
 			foreach ($recibos as $recibo)
 			{							
 				if ($school->current_school_year == substr($recibo->school_year, 13, 4))
-				{		
+				{										
 					$resultado = $this->crearFacturaRecibo($recibo);
 
 					if ($resultado['codigoRetorno'] == 0)

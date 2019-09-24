@@ -211,7 +211,7 @@
 				</table>
 			</div>
 			<div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
-				<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?></p>
+				<p>Cajero: <?= $usuarioResponsable ?></p>
 			</div>
 			<div id="total" style="font-size: 13px; line-height: 15px;">
 				<table style="width:100%;">
@@ -281,7 +281,7 @@
 					</table>
 				</div>
 				<div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
-					<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?></p>
+					<p>Cajero: <?= $usuarioResponsable ?></p>
 				</div>
 				<div id="total" style="font-size: 13px; line-height: 15px;">
 					<table style="width:100%;">
@@ -355,7 +355,7 @@
 					</table>
 				</div>
 				<div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
-					<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?></p>
+					<p>Cajero: <?= $usuarioResponsable ?></p>
 				</div>
 				<div id="total" style="font-size: 13px; line-height: 15px;">
 					<table style="width:100%;">
@@ -424,7 +424,7 @@
 					</table>
 				</div>
 				<div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
-					<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?></p>
+					<p>Cajero: <?= $usuarioResponsable ?></p>
 				</div>
 				<div id="total" style="font-size: 13px; line-height: 15px;">
 					<table style="width:100%;">
@@ -498,7 +498,7 @@
 					</table>
 				</div>
 				<div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
-					<p>Cajero: <?= $current_user['first_name'] . " " . $current_user['surname'] ?></p>
+					<p>Cajero: <?= $usuarioResponsable ?></p>
 				</div>
 				<div id="total" style="font-size: 13px; line-height: 15px;">
 					<table style="width:100%;">
@@ -522,10 +522,14 @@
 		<br />
 		<br />
 		<br />
-	<?php endif; ?>
-	<div class="saltopagina">
-		<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
-		<h3 style="text-align: right;">Recibo Nro. <?= $bill->bill_number . '-2' ?></h3>
+		<div class="saltopagina">
+			<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
+			<h3 style="text-align: right;">Recibo Nro. <?= $bill->bill_number . '-2' ?></h3>
+	<?php else: ?>
+		<div>
+			<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
+			<h3 style="text-align: right;">Recibo Nro. <?= $bill->bill_number ?></h3>		
+	<?php endif; ?>	
 		<h2 style="text-align: center;">Por Bs.S <?= number_format($accountService, 2, ",", ".") ?></h2>
 		<br />
 		<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.S <b><?= number_format($accountService, 2, ",", ".") ?></b>

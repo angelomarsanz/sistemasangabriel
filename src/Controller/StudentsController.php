@@ -2161,12 +2161,15 @@ class StudentsController extends AppController
 		$school = $this->Schools->get(2);
 		
 		$anoEscolarActual = $school->current_school_year;
-		
-		$proximoAnoEscolar = $anoEscolarActual + 1;
 					
 		$conceptoRegulares = 'Matrícula ' . $anoEscolarActual;
+				
+		$conceptoNuevos = 'Matrícula ' . $anoEscolarActual;
+
+		/* Pendiente por hacer los cambios para que existan 3 tipos de reportes: alumnos regulares, nuevos en el presente año escolar y nuevos para el próximo período escolar
 		
-		$conceptoNuevos = 'Matrícula ' . $proximoAnoEscolar;
+		$proximoAnoEscolar = $anoEscolarActual + 1;		
+		$conceptoNuevos = 'Matrícula ' . $proximoAnoEscolar; */
 										
 		$students = TableRegistry::get('Students');
 

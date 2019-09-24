@@ -24,6 +24,8 @@
 						<h3><b>Recibo inscripción alumnos regulares</b></h3>
 					<?php elseif ($menuOption == 'Recibo inscripción nuevos'): ?>
 						<h3><b>Recibo inscripción alumnos nuevos</b></h3>
+					<?php elseif ($menuOption == 'Recibo servicio educativo'): ?>
+						<h3><b>Recibo servicio educativo</b></h3>
 					<?php else: ?>
 						<h3><b>Cobro de mensualidades</b></h3>
 					<?php endif; ?>
@@ -1565,7 +1567,7 @@
 			{
 				typeStudent = 0;
 			}
-			else if ($('#type-invoice').val() == 'Factura inscripción nuevos' || $('#type-invoice').val() == 'Recibo inscripción nuevos')
+			else if ($('#type-invoice').val() == 'Factura inscripción nuevos' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
 			{
 				typeStudent = 1;
 			}
@@ -1840,6 +1842,16 @@
 								if (monthlyPayment.substring(0, 18) == 'Servicio educativo' || 
 									monthlyPayment.substring(0, 9) == "Matrícula" ||
 									monthlyPayment.substring(0, 3) == "Ago")
+									{
+										if (indicadorImpresion == 0)
+										{
+											insertRecord();
+										}
+									}
+							}
+							else if ($('#type-invoice').val() == 'Recibo servicio educativo')
+							{
+								if (monthlyPayment.substring(0, 18) == 'Servicio educativo')
 									{
 										if (indicadorImpresion == 0)
 										{
@@ -2464,7 +2476,7 @@
             payments.taxPhone = $('#tax-phone').val();
             payments.invoiceAmount = totalBill;
 			payments.discount = discount;
-			if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos')
+			if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
 			{
 				payments.fiscal = 0;
 			}

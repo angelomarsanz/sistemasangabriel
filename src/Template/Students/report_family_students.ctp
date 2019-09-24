@@ -70,7 +70,7 @@
 							endif;
 						else:
 							$studentCondition = "Nuevo";
-							if ($familyStudent->balance == $proximoAnoEscolar && isset($arraySignedUp[$familyStudent->id])):
+							if ($familyStudent->balance == $anoEscolarActual && isset($arraySignedUp[$familyStudent->id])):
 								$lastYearRegistration .= '-' . $arraySignedUp[$familyStudent->id];
 							endif;
 						endif;
@@ -177,8 +177,9 @@
 								<th scope="col" class=<?= $arrayMark['Students.sex'] ?>><b>Sexo</b></th>
 								<th scope="col" class=<?= $arrayMark['Students.nationality'] ?>><b>Nacionalidad alumno</b></th>
 								<th scope="col" class=<?= $arrayMark['Students.identity_card'] ?>><b>Cédula o pasaporte alumno</b></th>	
-								<th scope="col"><b>Año Inscripción</b></th>							
-								<th scope="col" class=<?= $arrayMark['Students.section_id'] ?>><b>Grado y sección</b></th>	
+								<th scope="col"><b>Año Inscripción</b></th>		
+								<th scope="col" class=<?= $arrayMark['Students.section_id'] ?>><b>Grado inscripción/renovación</b></th>								
+								<th scope="col" class=<?= $arrayMark['Students.section_id'] ?>><b>Grado y sección asignada</b></th>	
 								
 								<th scope="col" class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><b>Nombre Representante</b></th>
 								<th scope="col" class=<?= $arrayMark['Parentsandguardians.sex'] ?>><b>Sexo</b></th>
@@ -217,6 +218,7 @@
 								<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 								<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
 								<td><?= $lastYearRegistration ?></td>
+								<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->level_of_study ?></td>
 								<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
 
 								<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>							
@@ -255,6 +257,7 @@
 						<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 						<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
 						<td><?= $lastYearRegistration ?></td>
+						<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->level_of_study ?></td>
 						<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
 
 						<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>
