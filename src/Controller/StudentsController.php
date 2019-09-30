@@ -3205,4 +3205,8 @@ class StudentsController extends AppController
             exit(json_encode($jsondata, JSON_FORCE_OBJECT));
         }
     }
+    public function busquedaAlumno()
+    {
+        
+    }
 }
