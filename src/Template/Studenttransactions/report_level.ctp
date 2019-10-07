@@ -169,7 +169,7 @@
     </table>
 </div>
 <!-- Archivo EXCEL -->
-<div class='noverScreen'>
+<div class='noverScreen nover'>
     <?php $accountRecords = 1; ?>
     <?php $accountStudent = 1; ?>
     <?php foreach ($studentsFor as $studentsFors): ?>

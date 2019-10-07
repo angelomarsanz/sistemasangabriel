@@ -15,22 +15,61 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
-        /* $studenttransactions = $this->Studenttransactions->find('all')->where(['student_id' => 1222]);
+		/* $transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
-		foreach ($studenttransactions as $transaction)
-		{
-			if ($transaction->id < 50389 && $transaction->paid_out == 1)
-			{
-				$transaccion = $this->Studenttransactions->get($transaction->id);
-				$transaccion->invoiced = 0;
-				
-				if (!($this->Studenttransactions->save($transaccion))) 
-				{
-					$this->Flash->success(__('La transaccion no pudo ser actualizada'));
-				}
-			}
-		} */	
+		$transacciones = $transaccionesEstudiante->find()
+			->contain(['Students'])
+			     ->where(['or' => [['Studenttransactions.transaction_description' => 'Matrícula 2019'], ['Studenttransactions.transaction_description' => 'Ago 2020']],
+			//   ->where([['Studenttransactions.transaction_description' => 'Matrícula 2019'],
+				'Studenttransactions.amount >' => 0,
+				'Students.new_student' => 1, 
+				'Students.balance' => 2019])
+			->order(['Studenttransactions.id' => 'ASC']);
+
+		$this->loadModel('Bills');
+
+		$vectorFactura = [];
+		
+		foreach ($transacciones as $transaccion)
+		{					
+			$facturas = $this->Bills->find('all', ['conditions' => ['Bills.bill_number' => $transaccion->bill_number]]);
+
+			$factura = $facturas->first();
+			
+			$vectorFactura[$transaccion->id] = $factura->date_and_time; 
+		}
+		
+		echo "<br /><br />";
+						
+		$this->set(compact('transacciones', 'vectorFactura'));
+        $this->set('_serialize', ['transacciones', 'vectorFactura']); */
     }
+	
+	public function testFunction2()
+	{
+		$this->loadModel('Excels');
+	
+		$excels = $this->Excels->find('all');
+		
+		$contador = 0;
+		
+		foreach ($excels as $excel)
+		{
+			$studenttransaction = $this->Studenttransactions->get($excel->report);
+			
+			$studenttransaction->amount_dollar = $excel->start_end;
+			
+			if (!($this->Studenttransactions->save($studenttransaction))) 
+			{
+                $this->Flash->error(__('La transacción no pudo ser guardada'));
+			}
+			else
+			{
+				$contador++;
+			}
+		}
+		$this->Flash->success(__('Total transacciones ' . $contador));
+	}
 
     public function index()
     {
@@ -108,14 +147,24 @@ class StudenttransactionsController extends AppController
         $this->set('_serialize', ['studenttransaction']);
     }
 
-    public function edit($id = null, $billNumber = null, $originalAmount = null, $amountPayable = null, $tarifaDolar = null)
+    public function edit($id = null, $billNumber = null, $originalAmount = null, $amountPayable = null, $tarifaDolar = null, $tasaDolar = null)
     {
         $studenttransaction = $this->Studenttransactions->get($id);
 		
 		$studenttransaction->original_amount = $originalAmount; 
 		$studenttransaction->amount = $studenttransaction->amount + $amountPayable;
-		$studenttransaction->amount_dollar = $tarifaDolar;
-	
+		
+		$montoPagadoDolar = round($studenttransaction->amount / $tasaDolar);
+		
+		if ($montoPagadoDolar < $tarifaDolar)
+		{
+			$studenttransaction->amount_dollar = $montoPagadoDolar; 	
+		}
+		else
+		{
+			$studenttransaction->amount_dollar = $tarifaDolar;
+		}
+		
 		if ($studenttransaction->amount == $studenttransaction->original_amount)
 		{
 			$studenttransaction->partial_payment = 0;
@@ -158,6 +207,8 @@ class StudenttransactionsController extends AppController
     {
         $studenttransaction = $this->Studenttransactions->get($id);
         
+		$tasaDolar = $studenttransaction->amount/$studenttransaction->amount_dollar;
+		
 		$studenttransaction->amount = $studenttransaction->amount - $amount;
 		
 		$studenttransaction->paid_out = 0;
@@ -175,7 +226,9 @@ class StudenttransactionsController extends AppController
         {
             $studenttransaction->bill_number = 0;
         }
-        
+		
+		$studenttransaction->amount_dollar = round($studenttransaction->amount/$tasaDolar);
+		
         if (!($this->Studenttransactions->save($studenttransaction)))
         {
             $this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
@@ -1517,7 +1570,7 @@ class StudenttransactionsController extends AppController
 				'Sections.section'])
 			->contain(['Students' => ['Sections']])
 			->where([['Studenttransactions.transaction_description' => $transactionDescription],
-				['Studenttransactions.amount < Studenttransactions.original_amount'],
+				['Studenttransactions.amount >' => 0],
 				['Students.level_of_study' => $level],
 				['Students.student_condition' => 'Regular']])
 			->order(['Sections.section' => 'ASC', 'Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
@@ -1603,7 +1656,7 @@ class StudenttransactionsController extends AppController
 
         $school = $this->Schools->get(2);
 		
-		$concept = 'Matrícula ' . $school->current_year_registration;
+		$concept = 'Matrícula ' . $school->current_school_year;
 
 		$studentTransactions = TableRegistry::get('Studenttransactions');
 
@@ -1631,7 +1684,7 @@ class StudenttransactionsController extends AppController
 				'Parentsandguardians.second_name'])
 			->contain(['Students' => ['Parentsandguardians']])
 			->where([['Studenttransactions.transaction_description' => $concept],
-				['Studenttransactions.amount < Studenttransactions.original_amount'], ['Students.student_condition' => 'Regular']])
+				['Studenttransactions.amount > ' => 0], ['Students.student_condition' => 'Regular']])
 			->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 
             $account = $studentsFor->count();
@@ -3485,7 +3538,9 @@ class StudenttransactionsController extends AppController
 		$codigoRetornoTransaccion = 0;
 		
         $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
-		
+				
+		$tasaDolar = $transaccionEstudiante->amount/$transaccionEstudiante->amount_dollar;
+				
 		if ($tipoNota == "Crédito")
 		{
 			$transaccionEstudiante->original_amount -= $valor;
@@ -3540,8 +3595,17 @@ class StudenttransactionsController extends AppController
 			}
 		}
 		
-		$transaccionEstudiante->amount_dollar = $tarifaDolar;
-	
+		$montoAbonadoDolar = round($transaccionEstudiante->amount/$tasaDolar);
+		
+		if ($montoAbonadoDolar < $tarifaDolar)
+		{
+			$transaccionEstudiante->amount_dollar = $montoAbonadoDolar;
+		}
+		else
+		{
+			$transaccionEstudiante->amount_dollar = $tarifaDolar;
+		}
+			
 		if ($transaccionEstudiante->amount == $transaccionEstudiante->original_amount)
 		{
 			if ($transaccionEstudiante->amount == 0)

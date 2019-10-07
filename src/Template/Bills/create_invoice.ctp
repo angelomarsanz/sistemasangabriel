@@ -584,6 +584,7 @@
     payments.invoiceAmount = 0;
 	payments.discount = 0;
     payments.fiscal = 0;
+	payments.tasaDolar = 0;
 
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
@@ -2484,6 +2485,7 @@
 			{
 				payments.fiscal = 1;
 			}
+			payments.tasaDolar = dollarExchangeRate;
             uploadTransactions();
             loadPayments();
         });

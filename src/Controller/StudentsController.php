@@ -39,76 +39,33 @@ class StudentsController extends AppController
     
     public function testFunction()
     { 
-		/*
-		$contador = 0;
+		/* $contador = 0;
 
-		$students = $this->Students->find('all')->where([['number_of_brothers' => '2018'], ['new_student' => 1]]);
+		$estudiantes = $this->Students->find('all')
+			->where([['number_of_brothers' => '2019'], ['new_student' => 1]])
+			// ->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
+			->order(['modified' => 'ASC']);
 			
-		$contadorRegistros = $students->count();
+		$contadorEstudiantes = $estudiantes->count();
 		
-		if ($contadorRegistros > 0)
-		{		
-			foreach ($students as $student)
-			{
-				$studentGet = $this->Students->get($student->id);
-				
-				$studentGet->new_student = 0;
-				
-				if ($this->Students->save($studentGet)) 
-				{
-					$contador++;
-				} 
-				else 
-				{
-					$this->Flash->error(__('El alumno no pudo ser actualizado'));
-				}
-			}
-		}	
+		$this->Flash->success(__('Estudiantes encontrados ' . $contadorEstudiantes));
 		
-		$this->Flash->success(__('Registros actualizados ' . $contador));
-		*/
+		$transacciones = $this->Students->Studenttransactions->find('all')
+			// ->where(['paid_out' => 1, 'OR' => [['transaction_description' => 'Matrícula 2019'], ['transaction_description' => 'Ago 2020']]])
+			->where(['transaction_description' => 'Matrícula 2019'])
+			->order(['student_id' => 'ASC', 'transaction_description' => 'DESC']);	
+		
+		$contadorTransacciones = $transacciones->count();
+		
+		$this->Flash->success(__('Transacciones encontrados ' . $contadorTransacciones));
+		
+        $this->set(compact('estudiantes', 'transacciones'));
+        $this->set('_serialize', ['estudiantes', 'transacciones']);	*/	
     }
 	
     public function testFunction2()
     {
-		$contadorInscritos = 0;
-		$contador = 0;
 
-		$students = $this->Students->find('all')->where(['balance' => '2018']);
-		
-		foreach ($students as $student)
-		{
-			$matricula2019 = $this->Students->Studenttransactions->find('all')
-				->where(['student_id' => $student->id, 'transaction_description' => 'Matrícula 2019'])
-				->order(['created' => "DESC"]);
-				
-			$row = $matricula2019->first();
-				
-			if ($row)
-			{
-				$seccion = $this->Students->Sections->get($student->section_id);
-				
-				$this->Flash->success(__($student->surname . ' ' . $student->first_name . ' ' . $seccion->level . ' ' . $seccion->sublevel . ' ' .$seccion->section . ' - ' . $student->level_of_study));
-				$contadorInscritos++;
-			}
-			else
-			{
-				$estudiante = $this->Students->get($student->id);
-				
-				$estudiante->level_of_study = "";
-				
-				if ($this->Students->save($estudiante)) 
-				{
-					$contador++;
-				} 
-				else 
-				{
-					$this->Flash->error(__('El alumno no pudo ser actualizado ' . $student->id));
-				}
-			}
-		}
-		$this->Flash->success(__('Alumnos ya actualizados ' . $contadorInscritos));
-		$this->Flash->success(__('Alumnos actualizados ' . $contador));
     }
 	
     /**
