@@ -51,6 +51,10 @@ class BillsTable extends Table
             'foreignKey' => 'user_id',
             'joinType' => 'INNER'
         ]);
+        $this->belongsTo('Monedas', [
+            'foreignKey' => 'moneda_id',
+            'joinType' => 'INNER'
+        ]);
         $this->hasMany('Concepts', [
             'foreignKey' => 'bill_id'
         ]);

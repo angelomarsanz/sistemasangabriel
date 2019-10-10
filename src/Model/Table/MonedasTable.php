@@ -43,6 +43,10 @@ class MonedasTable extends Table
         $this->hasMany('Historicotasas', [
             'foreignKey' => 'moneda_id'
         ]);
+		
+        $this->hasMany('Bills', [
+            'foreignKey' => 'moneda_id'
+        ]);
     }
 
     /**

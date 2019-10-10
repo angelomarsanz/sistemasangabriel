@@ -198,7 +198,9 @@ class BillsController extends AppController
 				$bill->id_documento_padre = 0;
 				$bill->id_anticipo = 0;
 				$bill->factura_pendiente = $indicadorFacturaPendiente;
-
+				$bill->moneda_id = 2;
+				$bill->tasa_cambio = $this->headboard['tasaDolar'];
+				
 				if (!($this->Bills->save($bill))) 
 				{
 					$this->Flash->error(__('La factura no pudo ser guardada, intente nuevamente'));
@@ -1873,6 +1875,8 @@ class BillsController extends AppController
 		$notaContable->id_documento_padre = $facturaConceptos->id;
 		$notaContable->id_anticipo = 0;
 		$notaContable->factura_pendiente = 0;
+		$notaContable->moneda_id = $facturaConceptos->moneda_id;
+		$notaContable->tasa_cambio = $facturaConceptos->tasa_cambio;
 		
         if ($this->Bills->save($notaContable)) 
         {
@@ -2089,7 +2093,9 @@ class BillsController extends AppController
 		$bill->id_documento_padre = 0;
 		$bill->id_anticipo = $reciboPendiente->id;
 		$bill->factura_pendiente = 0;
-
+		$bill->moneda_id = 2;
+		$bill->tasa_cambio = $reciboPendiente->tasa_cambio;
+		
 		if ($this->Bills->save($bill)) 
 		{
 			$recibo = $this->Bills->get($reciboPendiente->id);
