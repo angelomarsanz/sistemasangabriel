@@ -1222,7 +1222,7 @@ class BillsController extends AppController
 					
 					$anoMesFactura = $factura->date_and_time->year . $factura->date_and_time->month;
 		
-					if ($anoMesActual == $anoMesFactura)
+					if ($anoMesActual == $anoMesFactura || $factura->fiscal == 0)
 					{
 						$bill = $this->Bills->get($idBill);
 						
@@ -1251,7 +1251,7 @@ class BillsController extends AppController
 						} 
 					}
 					else
-					{
+					{ 
 						$this->Flash->error(__('La factura Nro. ' . $_POST['bill_number'] . ' no es de este mes'));
 					}
 				}

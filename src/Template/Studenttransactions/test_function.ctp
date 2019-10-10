@@ -56,36 +56,31 @@
 <br />
 <br />
 <div>
+	<br />
 	<?php $accountRecords = 0; ?>
 		<?php foreach ($transacciones as $transaccion): ?>
 				<?php if ($accountRecords == 0): ?>
-					<table id="alumnos" name="nuevos" class="table noverScreen">
+					<table id="pagos" name="pagos-alumnos" class="noverScreen">
 						<thead>
 							<tr>
-								<th scope="col"><b>Nro</b></th>	
-								<th scope="col"><b>id Alumno</b></th>
-								<th scope="col"><b>Alumno</b></th>
-								<th scope="col"><b>id Transaccion</b></th>
-								<th scope="col"><b>Transacción</b></th>
-								<th scope="col"><b>Monto Bs.S</b></th>
-								<th scope="col"><b>Monto $</b></th>
-								<th scope="col"><b>Fecha factura</b></th>
 								<th scope="col"><b>Nro. factura</b></th>
-							</tr>
+								<th scope="col"><b>Total factura $</b></th>
+								<th scope="col"><b>Alumno</b></th>
+								<th scope="col"><b>Concepto</b></th>
+								<th scope="col"><b>Monto $</b></th>
+								<th scope="col"><b>Monto Bs.S</b></th>
+								</tr>
 						</thead>
 						<tbody>						
 				<?php endif ?>
 				<?php $accountRecords++; ?>				
 				<tr>
-					<td><?= $accountRecords ?></td>
-					<td><?= $transaccion->student->id ?></td>
-					<td><?= $transaccion->student->full_name ?></td>
-					<td><?= $transaccion->id ?></td>
-					<td><?= $transaccion->transaction_description ?></td>
-					<td><?= $transaccion->amount ?></td>
-					<td><?= $transaccion->amount_dollar ?></td>
-					<td><?= $vectorFactura[$transaccion->id]->format('Y-m-d') ?></td>
 					<td><?= $transaccion->bill_number ?></td>
+					<td><?= $vectorPagoInscripcion[$transaccion->student->id] ?></td>
+					<td><?= $transaccion->student->full_name ?></td>
+					<td><?= $transaccion->transaction_description ?></td>
+					<td><?= $transaccion->amount_dollar ?></td>
+					<td><?= $transaccion->amount ?></td>					
 				</tr>
 		<?php endforeach ?>
 		</tbody>
@@ -96,13 +91,13 @@
 $(document).ready(function(){   
     $("#excel").click(function(){
         
-        $("#alumnos").table2excel({
+        $("#pagos").table2excel({
     
             exclude: ".noExl",
         
-            name: "nuevos",
+            name: "pagos",
         
-            filename: $('#alumnos').attr('name') 
+            filename: $('#pagos').attr('name') 
     
         });
     });
