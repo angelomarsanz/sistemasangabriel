@@ -16,30 +16,37 @@ class ConceptsController extends AppController
 {
     public function testFunction()
     {
-		/* $conceptos = $this->Concepts->find('all')->where(['concept_migration' => 0])->order(['bill_id' => 'ASC']);
-		
-		$idFactura = 0;
+		$conceptos = $this->Concepts->find('all')
+			->contain(['Bills' => ['Parentsandguardians']])
+			->where(['Concepts.concept' => "Matrícula 2019", 'Concepts.created >=' => '2019-10-04', 'Concepts.amount <=' => 130000])
+			->order(['Concepts.bill_id' => 'ASC']);
+			
+		$idAnterior = 0;
 		$contador = 0;
-		
+	
 		foreach ($conceptos as $concepto)
-		{		
-			if ($idFactura != $concepto->bill_id)
+		{
+			if ($idAnterior != $concepto->bill_id)
 			{
-				$idFactura = $concepto->bill_id;
-				$factura = $this->Concepts->Bills->get($idFactura);
-				$factura->factura_pendiente = 1;
-				
-				if ($this->Concepts->Bills->save($factura))
+				$tasaDolar = $concepto->amount / 5;
+				$factura = $this->Concepts->Bills->get($concepto->bill_id);
+				$factura->tasa_cambio = $tasaDolar;
+				if (!($this->Concepts->Bills->save($factura)))
 				{
-					$contador++;
+					$this->Flash->error(__('La factura Nro. ' . $factura->bill_number . ' no pudo ser actualizada'));
 				}
 				else
 				{
-					$this->Flash->error(__('No se pudo actualizar la factura con ID ' . $concepto->bill_id));
+					$contador++;
 				}
 			}
+			$idAnterior = $concepto->bill_id;
 		}
-		$this->Flash->success(__('Total facturas actualizadas ' . $contador)); */
+		
+		$this->Flash->success(__('Total facturas actualizadas: ' . $contador));
+					
+        $this->set(compact('conceptos'));
+        $this->set('_serialize', ['conceptos']);
 	}		
 
     /**
