@@ -58,7 +58,7 @@
 <div>
 	<br />
 	<?php $accountRecords = 0; ?>
-		<?php foreach ($conceptos as $concepto): ?>
+		<?php foreach ($vectorPagos as $pagos): ?>
 				<?php if ($accountRecords == 0): ?>
 					<table id="pagos" name="pagos-alumnos" class="noverScreen">
 						<thead>
@@ -77,12 +77,12 @@
 				<?php $accountRecords++; ?>				
 				<tr>
 					<td><?= $accountRecords ?></td>
-					<td><?= $concepto->bill->bill_number ?></td>
-					<td><?= $concepto->bill->date_and_time->format('d-m-Y') ?></td>
-					<td><?= number_format($concepto->bill->amount_paid , 2, ",", ".") ?></td>
-					<td><?= $concepto->bill->parentsandguardian->family ?></td>
-					<td><?= $concepto->concept ?></td>
-					<td><?= number_format($concepto->amount, 2, ",", ".") ?></td>
+					<td><?= $pagos['nroFactura'] ?></td>
+					<td><?= $pagos['fecha']->format('d-m-Y') ?></td>
+					<td><?= number_format($pagos['totalFactura'], 2, ",", ".") ?></td>
+					<td><?= $pagos['familia'] ?></td>
+					<td><?= $pagos['concepto'] ?></td>
+					<td><?= number_format($pagos['montoConcepto'], 2, ",", ".") ?></td>					
 				</tr>
 		<?php endforeach ?>
 		</tbody>

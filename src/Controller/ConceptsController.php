@@ -23,6 +23,8 @@ class ConceptsController extends AppController
 			
 		$idAnterior = 0;
 		$contador = 0;
+		
+		$vectorPagos = [];
 	
 		foreach ($conceptos as $concepto)
 		{
@@ -37,6 +39,12 @@ class ConceptsController extends AppController
 				}
 				else
 				{
+					$vectorPagos[] = ['nroFactura' => $concepto->bill->bill_number, 
+										'fecha' => $concepto->bill->date_and_time, 
+										'totalFactura' => $concepto->bill->amount_paid,
+										'familia' => $concepto->bill->parentsandguardian->family,
+										'concepto' => $concepto->concept,
+										'montoConcepto' => $concepto->amount];  
 					$contador++;
 				}
 			}
@@ -45,8 +53,8 @@ class ConceptsController extends AppController
 		
 		$this->Flash->success(__('Total facturas actualizadas: ' . $contador));
 					
-        $this->set(compact('conceptos'));
-        $this->set('_serialize', ['conceptos']);
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']);
 	}		
 
     /**
