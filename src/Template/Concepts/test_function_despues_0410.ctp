@@ -64,7 +64,6 @@
 						<thead>
 							<tr>
 								<th scope="col"><b>Nro.</b></th>
-								<th scope="col"><b>Id factura</b></th>
 								<th scope="col"><b>Nro. factura</b></th>
 								<th scope="col"><b>Fecha</b></th>
 								<th scope="col"><b>Total factura $</b></th>
@@ -80,7 +79,6 @@
 				<?php $accountRecords++; ?>				
 				<tr>
 					<td><?= $accountRecords ?></td>
-					<td><?= $pagos['idFactura'] ?></td>
 					<td><?= $pagos['nroFactura'] ?></td>
 					<td><?= $pagos['fecha']->format('d-m-Y') ?></td>
 					<td><?= number_format($pagos['totalFactura'], 2, ",", ".") ?></td>

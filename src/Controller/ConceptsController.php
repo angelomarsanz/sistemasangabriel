@@ -18,6 +18,65 @@ class ConceptsController extends AppController
     {
 		$conceptos = $this->Concepts->find('all')
 			->contain(['Bills' => ['Parentsandguardians']])
+			->where(['Concepts.concept' => "Matrícula 2019"])
+			->order(['Concepts.bill_id' => 'ASC']);
+			
+		$idAnterior = 0;
+		$contadorEditables = 0;
+		$contadorDiferentes = 0;
+		$contadorDolarCero = 0;
+		
+		$vectorPagos = [];
+	
+		foreach ($conceptos as $concepto)
+		{
+			if ($idAnterior != $concepto->bill_id)
+			{
+				$this->loadModel('Studenttransactions');
+	
+				$transaccion = $this->Studenttransactions->get($concepto->transaction_identifier);
+				
+				if ($transaccion->amount_dollar != null && $transaccion->amount_dollar > 0)
+				{
+					$montoConceptoRedondeado = round($concepto->amount);
+				
+					if ($transaccion->amount == $montoConceptoRedondeado)
+					{
+						$tasaDolar = $transaccion->amount / $transaccion->amount_dollar;
+									
+						$vectorPagos[] = 
+							['idFactura' => $concepto->bill_id,
+							'nroFactura' => $concepto->bill->bill_number, 
+							'fecha' => $concepto->bill->date_and_time, 
+							'totalFactura' => $concepto->bill->amount_paid,
+							'familia' => $concepto->bill->parentsandguardian->family,
+							'concepto' => $concepto->concept,
+							'montoConcepto' => $concepto->amount,
+							'tasaDolar' => $tasaDolar];  
+							$contadorEditables++;
+					}
+					else
+					{
+						$contadorDiferentes++;
+					}
+				}
+				else
+				{
+					$contadorDolarCero++;
+				}
+			}
+			$idAnterior = $concepto->bill_id;
+		}
+		
+		$this->Flash->success(__('Total facturas editables: ' . $contadorEditables));
+		$this->Flash->error(__('Total montos diferentes: ' . $contadorDiferentes));
+		$this->Flash->error(__('Total dolar cero: ' . $contadorDolarCero));
+					
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']);
+		
+		/* $conceptos = $this->Concepts->find('all')
+			->contain(['Bills' => ['Parentsandguardians']])
 			->where(['Concepts.created >=' => "2018-11-05"])
 			->order(['Concepts.bill_id' => 'ASC']);
 			
@@ -91,7 +150,7 @@ class ConceptsController extends AppController
 		$this->Flash->success(__('Total facturas ya actualizadas: ' . $contadorYaActualizadas));
 					
         $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']);
+        $this->set('_serialize', ['vectorPagos']); */
 	}		
 
     /**

@@ -43,26 +43,7 @@ class ConceptsController extends AppController
 					if ($transaccion->amount == $montoConceptoRedondeado)
 					{
 						$tasaDolar = $transaccion->amount / $transaccion->amount_dollar;
-						
-						/* $factura = $this->Concepts->Bills->get($concepto->bill_id);
-						$factura->tasa_cambio = $tasaDolar;
-						
-						if (!($this->Concepts->Bills->save($factura)))
-						{
-							$this->Flash->error(__('La factura Nro. ' . $factura->bill_number . ' no pudo ser actualizada'));
-						}
-						else
-						{
-							$vectorPagos[] = ['nroFactura' => $concepto->bill->bill_number, 
-												'fecha' => $concepto->bill->date_and_time, 
-												'totalFactura' => $concepto->bill->amount_paid,
-												'familia' => $concepto->bill->parentsandguardian->family,
-												'concepto' => $concepto->concept,
-												'montoConcepto' => $concepto->amount,
-												'tasaDolar' => $tasaDolar];  
-							$contadorActualizadas++;
-						} */
-			
+									
 						$vectorPagos[] = ['nroFactura' => $concepto->bill->bill_number, 
 						'fecha' => $concepto->bill->date_and_time, 
 						'totalFactura' => $concepto->bill->amount_paid,
