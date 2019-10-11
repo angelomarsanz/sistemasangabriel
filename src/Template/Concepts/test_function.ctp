@@ -72,7 +72,7 @@
 				<?php $accountRecords++; ?>				
 				<tr>
 					<td><?= $accountRecords ?></td>
-					<td><?= $pagos['NroFactura'] ?></td>
+					<td><?= $pagos['nroFactura'] ?></td>
 				</tr>
 		<?php endforeach ?>
 		</tbody>
