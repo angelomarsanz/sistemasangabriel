@@ -64,15 +64,8 @@
 						<thead>
 							<tr>
 								<th scope="col"><b>Nro.</b></th>
-								<th scope="col"><b>Id factura</b></th>
-								<th scope="col"><b>Nro. factura</b></th>
-								<th scope="col"><b>Fecha</b></th>
-								<th scope="col"><b>Total factura $</b></th>
-								<th scope="col"><b>Familia</b></th>
-								<th scope="col"><b>Concepto</b></th>
+								<th scope="col"><b>id Factura</b></th>
 								<th scope="col"><b>Tasa dólar</b></th>
-								<th scope="col"><b>Monto $</b></th>
-								<th scope="col"><b>Monto Bs.S</b></th>
 							</tr>
 						</thead>
 						<tbody>						
@@ -81,14 +74,7 @@
 				<tr>
 					<td><?= $accountRecords ?></td>
 					<td><?= $pagos['idFactura'] ?></td>
-					<td><?= $pagos['nroFactura'] ?></td>
-					<td><?= $pagos['fecha']->format('d-m-Y') ?></td>
-					<td><?= number_format($pagos['totalFactura'], 2, ",", ".") ?></td>
-					<td><?= $pagos['familia'] ?></td>
-					<td><?= $pagos['concepto'] ?></td>
 					<td><?= number_format($pagos['tasaDolar'], 2, ",", ".") ?></td>	
-					<td><?= number_format(($pagos['montoConcepto']/$pagos['tasaDolar']), 2, ",", ".") ?></td>
-					<td><?= number_format($pagos['montoConcepto'], 2, ",", ".") ?></td>					
 				</tr>
 		<?php endforeach ?>
 		</tbody>

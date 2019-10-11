@@ -60,10 +60,12 @@ class ExcelsTable extends Table
         $validator
             ->integer('number')
             ->allowEmpty('number');
-
+			
         $validator
+            ->numeric('col1')
+            ->requirePresence('col1', 'create')
             ->allowEmpty('col1');
-
+		
         $validator
             ->allowEmpty('col2');
 
