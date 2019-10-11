@@ -121,7 +121,7 @@ class ConceptsController extends AppController
 		$this->Flash->error(__('Facturas ya actualizadas ' . $contadorYaActualizadas));
 		
         $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']); */
+        $this->set('_serialize', ['vectorPagos']); 
 					
 		$conceptos = $this->Concepts->find('all')
 			->contain(['Bills' => ['Parentsandguardians']])
@@ -153,7 +153,7 @@ class ConceptsController extends AppController
 		$this->Flash->success(__('Total facturas sin actualizar: ' . $facturasSinActualizar));
 					
         $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']); 
+        $this->set('_serialize', ['vectorPagos']); */
 	}		
 
     /**
@@ -224,7 +224,7 @@ class ConceptsController extends AppController
      * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Network\Exception\NotFoundException When record not found.
      */
-    public function edit($idBill = null, $billNumber = null)
+    public function edit($idBill = null, $billNumber = null, $tasaCambio = null)
     {
         $this->autoRender = false;
         
@@ -246,7 +246,7 @@ class ConceptsController extends AppController
             }
             else
             {
-                $studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber);   
+                $studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber, $tasaCambio);   
             }
         }
         return;

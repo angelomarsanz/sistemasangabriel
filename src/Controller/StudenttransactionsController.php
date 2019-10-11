@@ -15,7 +15,7 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
-		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
+		/* $transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
 		$transacciones = $transaccionesEstudiante->find()
 			->contain(['Students' => ['Parentsandguardians']])
@@ -57,7 +57,7 @@ class StudenttransactionsController extends AppController
 			}
 								
 		$this->set(compact('transacciones', 'vectorPagoInscripcion'));
-        $this->set('_serialize', ['transacciones', 'vectorPagoInscripcion']);
+        $this->set('_serialize', ['transacciones', 'vectorPagoInscripcion']); */
     }
 	
 	public function testFunction2()
@@ -218,21 +218,29 @@ class StudenttransactionsController extends AppController
         return;
     }
 
-    public function reverseTransaction($id = null, $amount = null, $billNumber = null)
+    public function reverseTransaction($id = null, $amount = null, $billNumber = null, $tasaCambio = null)
     {
         $studenttransaction = $this->Studenttransactions->get($id);
         		
-		$montoReversoDolar = round(($amount * $studenttransaction->amount_dollar)/$studenttransaction->amount); 
+		$montoReversoDolar = round($amount / $tasaCambio); 
 
-		$studenttransaction->amount_dollar -= $montoReversoDolar;
+		$studenttransaction->amount_dollar = round($studenttransaction->amount_dollar - $montoReversoDolar);
 		
-		$studenttransaction->original_amount = $studenttransaction->original_amount - $amount;
+		$studenttransaction->original_amount = round($studenttransaction->original_amount - $amount);
 		
-		$studenttransaction->amount = $studenttransaction->amount - $amount;
-		
+		$studenttransaction->amount = round($studenttransaction->amount - $amount);
+			
 		if ($studenttransaction->original_amount == $studenttransaction->amount)
 		{
-			$studenttransaction->paid_out = 1;
+			if ($studenttransaction->amount == 0)
+			{
+				$studenttransaction->paid_out = 0;
+				$studenttransaction->partial_payment = 0;
+			}
+			else
+			{
+				$studenttransaction->paid_out = 1;
+			}
 		}
 		else
 		{
@@ -3556,25 +3564,25 @@ class StudenttransactionsController extends AppController
         $this->set('_serialize', ['pagosRecibidos', 'conceptoReporte', 'totalConcepto', 'fechaHoy']);
 	}
 	
-    public function notaTransaccion($idTransaccion = null, $numeroNotaContable = null, $valor = null, $tipoNota = null)
+    public function notaTransaccion($idTransaccion = null, $numeroNotaContable = null, $valor = null, $tipoNota = null, $tasaCambio = null)
     {        
 		$codigoRetornoTransaccion = 0;
 		
         $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
 				
-		$montoNotaDolar = round(($valor * $transaccionEstudiante->amount_dollar)/$transaccionEstudiante->amount); 
+		$montoNotaDolar = round($valor / $tasaCambio); 
 		
 		if ($tipoNota == "Crédito")
 		{
-			$transaccionEstudiante->amount_dollar -= $montoNotaDolar;
-			$transaccionEstudiante->original_amount -= $valor;
-			$transaccionEstudiante->amount -= $valor; 			
+			$transaccionEstudiante->amount_dollar = round($transaccionEstudiante->amount_dollar - $montoNotaDolar);
+			$transaccionEstudiante->original_amount = round($transaccionEstudiante->original_amount - $valor);
+			$transaccionEstudiante->amount = round($transaccionEstudiante->amount - $valor); 			
 		}
 		else
 		{
-			$transaccionEstudiante->amount_dollar += $montoNotaDolar;
-			$transaccionEstudiante->original_amount += $valor;
-			$transaccionEstudiante->amount += $valor; 				
+			$transaccionEstudiante->amount_dollar = round($transaccionEstudiante->amount_dollar + $montoNotaDolar);
+			$transaccionEstudiante->original_amount = round($transaccionEstudiante->original_amount + $valor);
+			$transaccionEstudiante->amount = round($transaccionEstudiante->amount + $valor); 				
 		}
 									
 		if ($transaccionEstudiante->amount == $transaccionEstudiante->original_amount)

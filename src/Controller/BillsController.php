@@ -1226,31 +1226,38 @@ class BillsController extends AppController
 		
 					if ($anoMesActual == $anoMesFactura || $factura->fiscal == 0)
 					{
-						$bill = $this->Bills->get($idBill);
-						
-						$bill->annulled = 1;
+						if ($factura->moneda_id > 1 && $factura->tasa_cambio != 1)
+						{
+							$bill = $this->Bills->get($idBill);
+							
+							$bill->annulled = 1;
 
-						setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-						date_default_timezone_set('America/Caracas');
-						
-						$bill->date_annulled = Time::now();
-						           										
-						if (!($this->Bills->save($bill))) 
-						{
-							$this->Flash->error(__('La factura no pudo ser anulada'));
+							setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+							date_default_timezone_set('America/Caracas');
+							
+							$bill->date_annulled = Time::now();
+																			
+							if (!($this->Bills->save($bill))) 
+							{
+								$this->Flash->error(__('La factura no pudo ser anulada'));
+							}
+							else 
+							{
+								$concepts->edit($idBill, $_POST['bill_number'], $factura->tasa_cambio);
+								
+								$payments->edit($idBill);
+								
+								$eventos = new EventosController;
+								
+								$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló la factura Nro. ' . $bill->bill_number);
+								
+								return $this->redirect(['action' => 'annulledInvoice', $idBill]);
+							}
 						}
-						else 
+						else
 						{
-							$concepts->edit($idBill, $_POST['bill_number']);
-							
-							$payments->edit($idBill);
-							
-							$eventos = new EventosController;
-							
-							$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló la factura Nro. ' . $bill->bill_number);
-							
-							return $this->redirect(['action' => 'annulledInvoice', $idBill]);
-						} 
+							$this->Flash->error(__('Esta factura no tiene una tarifa de dolar registrada. Por favor contacte al Administrador del sistema'));
+						}
 					}
 					else
 					{ 
@@ -1685,21 +1692,29 @@ class BillsController extends AppController
                 if ($contadorRegistros > 0)
                 {
                     $facturaSolicitada = $facturas->first();
-					if ($facturaSolicitada->fiscal == 0)
+					
+					if ($facturaSolicitada->moneda_id > 1 && $facturaSolicitada->tasa_cambio != 1)
 					{
-						$this->Flash->error(__('La factura Nro. ' . $_POST['factura'] . ' no es fiscal. Por favor intente con otra factura'));
-					}
-					elseif ($facturaSolicitada->annulled == 1)
-					{
-						$this->Flash->error(__('La factura Nro. ' . $_POST['factura'] . ' ya está anulada. Por favor intente con otra factura'));
+						if ($facturaSolicitada->fiscal == 0)
+						{
+							$this->Flash->error(__('La factura Nro. ' . $_POST['factura'] . ' no es fiscal. Por favor intente con otra factura'));
+						}
+						elseif ($facturaSolicitada->annulled == 1)
+						{
+							$this->Flash->error(__('La factura Nro. ' . $_POST['factura'] . ' ya está anulada. Por favor intente con otra factura'));
+						}
+						else
+						{
+							return $this->redirect(['controller' => 'Bills', 
+													'action' => 'conceptosNotaContable', 
+													'Bills',
+													'notaContable',
+													$facturaSolicitada->id]);
+						}
 					}
 					else
 					{
-						return $this->redirect(['controller' => 'Bills', 
-												'action' => 'conceptosNotaContable', 
-												'Bills',
-												'notaContable',
-												$facturaSolicitada->id]);
+						$this->Flash->error(__('Esta factura no tiene una tarifa de dolar registrada. Por favor contacte al Administrador del sistema'));
 					}
 				}
 				else
@@ -1779,7 +1794,7 @@ class BillsController extends AppController
 							
 							$transaccionEstudiante = new StudenttransactionsController();
 							
-							$codigoRetornoTransaccion = $transaccionEstudiante->notaTransaccion($concepto->transaction_identifier, $numeroNotaContable, $valor, $tipoNota);
+							$codigoRetornoTransaccion = $transaccionEstudiante->notaTransaccion($concepto->transaction_identifier, $numeroNotaContable, $valor, $tipoNota, $facturaConceptos->tasa_cambio);
 
 							if ($codigoRetornoTransaccion == 0)
 							{
