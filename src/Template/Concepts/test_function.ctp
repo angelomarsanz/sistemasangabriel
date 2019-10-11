@@ -64,6 +64,7 @@
 						<thead>
 							<tr>
 								<th scope="col"><b>Nro.</b></th>
+								<th scope="col"><b>Nro Factura</b></th>
 								<th scope="col"><b>id Factura</b></th>
 							</tr>
 						</thead>
@@ -73,6 +74,7 @@
 				<tr>
 					<td><?= $accountRecords ?></td>
 					<td><?= $pagos['nroFactura'] ?></td>
+					<td><?= $pagos['idFactura'] ?></td>
 				</tr>
 		<?php endforeach ?>
 		</tbody>

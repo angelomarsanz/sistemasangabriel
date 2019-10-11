@@ -125,7 +125,7 @@ class ConceptsController extends AppController
 					
 		$conceptos = $this->Concepts->find('all')
 			->contain(['Bills' => ['Parentsandguardians']])
-			->where(['Concepts.concept' => "Matrícula 2019", 'Concepts.created <=' => '2019-09-01'])
+			->where(['Concepts.concept !=' => "Servicio educativo 2019", 'Concepts.created >=' => '2019-09-01'])
 			->order(['Concepts.bill_id' => 'ASC']);
 			
 		$idAnterior = 0;
@@ -142,7 +142,8 @@ class ConceptsController extends AppController
 				if ($factura->tasa_cambio == 1)
 				{
 					$vectorPagos[] = 
-						['nroFactura' => $factura->bill_number];  
+						['idFactura' => $factura->id,
+						'nroFactura' => $factura->bill_number];  
 					$facturasSinActualizar++;
 				}
 			}
