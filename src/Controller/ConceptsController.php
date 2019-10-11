@@ -16,7 +16,7 @@ class ConceptsController extends AppController
 {		
     public function testFunction()
     {
-		$this->loadModel('Excels');
+		/* $this->loadModel('Excels');
 		$this->loadModel('Studenttransactions');
 				
 		$conceptos = $this->Concepts->find('all')
@@ -81,9 +81,9 @@ class ConceptsController extends AppController
 		$this->Flash->success(__('Total monto cero: ' . $contadorDolarCero));
 					
         $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']);
+        $this->set('_serialize', ['vectorPagos']); */
 		
-		/* $this->loadModel('Excels');
+		$this->loadModel('Excels');
 	
 		$excels = $this->Excels->find('all');
 		
@@ -99,17 +99,17 @@ class ConceptsController extends AppController
 			{
 				$factura->tasa_cambio = $excel->col1;
 				
-				/* if (!($this->Concepts->Bills->save($factura)))
+				if (!($this->Concepts->Bills->save($factura)))
 				{
 					$this->Flash->error(__('La factura Nro. ' . $factura->bill_number . ' no pudo ser actualizada'));
 				}
 				else
-				{ */
+				{
 					$vectorPagos[] = 
 						['nroFactura' => $excel->number, 
 						'tasaDolar' => $excel->col1];  
 					$contadorActualizadas++;
-				/* } */
+				} 
 			}
 			else
 			{
@@ -121,7 +121,74 @@ class ConceptsController extends AppController
 		$this->Flash->error(__('Facturas ya actualizadas ' . $contadorYaActualizadas));
 		
         $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']); */ 
+        $this->set('_serialize', ['vectorPagos']);
+		
+		/* $this->loadModel('Excels');
+		$this->loadModel('Studenttransactions');
+				
+		$conceptos = $this->Concepts->find('all')
+			->contain(['Bills' => ['Parentsandguardians']])
+			->where(['Concepts.concept' => "Matrícula 2019"])
+			->order(['Concepts.bill_id' => 'ASC']);
+			
+		$idAnterior = 0;
+		$contadorGuardadas = 0;
+		$contadorNoGuardadas = 0;
+		$contadorDiferentes = 0;
+		$contadorDolarCero = 0;
+		
+		$vectorPagos = [];
+	
+		foreach ($conceptos as $concepto)
+		{
+			if ($idAnterior != $concepto->bill_id)
+			{
+				$transaccion = $this->Studenttransactions->get($concepto->transaction_identifier);
+				
+				if ($transaccion->amount_dollar != null && $transaccion->amount_dollar > 0)
+				{
+					$montoConceptoRedondeado = round($concepto->amount);
+				
+					if ($transaccion->amount == $montoConceptoRedondeado)
+					{
+						$tasaDolar = $transaccion->amount / $transaccion->amount_dollar;
+						
+						$excel = $this->Excels->newEntity();
+											
+						$excel->number = $concepto->bill_id;
+						$excel->col1 = $tasaDolar;
+						
+						if (!($this->Excels->save($excel)))
+						{
+							$this->Flash->success(__('La Factura no pudo se actualizada'));;
+							$contadorNoGuardadas++;
+						}
+						else
+						{
+							$contadorGuardadas++;								
+							$vectorPagos[] = ['idFactura' => $concepto->bill_id, 'tasaDolar' => $tasaDolar];  
+						}
+					}
+					else
+					{
+						$contadorDiferentes++;
+					}
+				}
+				else
+				{
+					$contadorDolarCero++;
+				}
+			}
+			$idAnterior = $concepto->bill_id;
+		}
+		
+		$this->Flash->success(__('Total facturas guardada: ' . $contadorGuardadas));
+		$this->Flash->success(__('Total facturas no guardada: ' . $contadorNoGuardadas));
+		$this->Flash->error(__('Total montos diferentes: ' . $contadorDiferentes));
+		$this->Flash->success(__('Total monto cero: ' . $contadorDolarCero));
+					
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']); */
 	}		
 
     /**
