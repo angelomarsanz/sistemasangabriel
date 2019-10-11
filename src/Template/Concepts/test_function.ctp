@@ -65,7 +65,6 @@
 							<tr>
 								<th scope="col"><b>Nro.</b></th>
 								<th scope="col"><b>id Factura</b></th>
-								<th scope="col"><b>Tasa dólar</b></th>
 							</tr>
 						</thead>
 						<tbody>						
@@ -73,8 +72,7 @@
 				<?php $accountRecords++; ?>				
 				<tr>
 					<td><?= $accountRecords ?></td>
-					<td><?= $pagos['idFactura'] ?></td>
-					<td><?= number_format($pagos['tasaDolar'], 2, ",", ".") ?></td>	
+					<td><?= $pagos['NroFactura'] ?></td>
 				</tr>
 		<?php endforeach ?>
 		</tbody>
