@@ -18,7 +18,7 @@ class ConceptsController extends AppController
     {
 		$conceptos = $this->Concepts->find('all')
 			->contain(['Bills' => ['Parentsandguardians']])
-			->where(['Concepts.created >=' => "2019-09-01"])
+			->where(['Concepts.created >=' => "2018-11-05"])
 			->order(['Concepts.bill_id' => 'ASC']);
 			
 		$idAnterior = 0;
