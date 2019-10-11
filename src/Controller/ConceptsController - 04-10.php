@@ -18,14 +18,13 @@ class ConceptsController extends AppController
     {
 		$conceptos = $this->Concepts->find('all')
 			->contain(['Bills' => ['Parentsandguardians']])
-			->where(['Concepts.created >=' => "2019-09-01"])
+			->where(['Concepts.concept' => "Matrícula 2019"])
 			->order(['Concepts.bill_id' => 'ASC']);
 			
 		$idAnterior = 0;
 		$contadorActualizadas = 0;
 		$contadorDiferentes = 0;
 		$contadorDolarCero = 0;
-		$contadorYaActualizadas = 0;
 		
 		$vectorPagos = [];
 	
@@ -45,50 +44,51 @@ class ConceptsController extends AppController
 					{
 						$tasaDolar = $transaccion->amount / $transaccion->amount_dollar;
 						
-						$factura = $this->Concepts->Bills->get($concepto->bill_id);
+						/* $factura = $this->Concepts->Bills->get($concepto->bill_id);
+						$factura->tasa_cambio = $tasaDolar;
 						
-						if ($factura->tasa_cambio == 1)
+						if (!($this->Concepts->Bills->save($factura)))
 						{
-							$factura->tasa_cambio = $tasaDolar;
-							
-							if (!($this->Concepts->Bills->save($factura)))
-							{
-								$this->Flash->error(__('La factura Nro. ' . $factura->bill_number . ' no pudo ser actualizada'));
-							}
-							else
-							{
-								$vectorPagos[] = ['nroFactura' => $concepto->bill->bill_number, 
-													'fecha' => $concepto->bill->date_and_time, 
-													'totalFactura' => $concepto->bill->amount_paid,
-													'familia' => $concepto->bill->parentsandguardian->family,
-													'concepto' => $concepto->concept,
-													'montoConcepto' => $concepto->amount,
-													'tasaDolar' => $tasaDolar];  
-								$contadorActualizadas++;
-							}
+							$this->Flash->error(__('La factura Nro. ' . $factura->bill_number . ' no pudo ser actualizada'));
 						}
 						else
 						{
-							$contadorYaActualizadas++;
-						}
+							$vectorPagos[] = ['nroFactura' => $concepto->bill->bill_number, 
+												'fecha' => $concepto->bill->date_and_time, 
+												'totalFactura' => $concepto->bill->amount_paid,
+												'familia' => $concepto->bill->parentsandguardian->family,
+												'concepto' => $concepto->concept,
+												'montoConcepto' => $concepto->amount,
+												'tasaDolar' => $tasaDolar];  
+							$contadorActualizadas++;
+						} */
+			
+						$vectorPagos[] = ['nroFactura' => $concepto->bill->bill_number, 
+						'fecha' => $concepto->bill->date_and_time, 
+						'totalFactura' => $concepto->bill->amount_paid,
+						'familia' => $concepto->bill->parentsandguardian->family,
+						'concepto' => $concepto->concept,
+						'montoConcepto' => $concepto->amount,
+						'tasaDolar' => $tasaDolar];  
+						$contadorActualizadas++;
 					}
 					else
 					{
 						$contadorDiferentes++;
+						$this->Flash->error(__('Id factura con monto diferente ' . $concepto->bill_id));
 					}
 				}
 				else
 				{
 					$contadorDolarCero++;
+					$this->Flash->error(__('Id factura con monto null o cero ' . $concepto->bill_id));
 				}
 			}
 			$idAnterior = $concepto->bill_id;
 		}
 		
 		$this->Flash->success(__('Total facturas actualizadas: ' . $contadorActualizadas));
-		$this->Flash->success(__('Total facturas amount_dollar en cero: ' . $contadorDolarCero));
-		$this->Flash->success(__('Total montos diferentes: ' . $contadorDiferentes));
-		$this->Flash->success(__('Total facturas ya actualizadas: ' . $contadorYaActualizadas));
+		$this->Flash->error(__('Total montos diferentes: ' . $contadorDiferentes));
 					
         $this->set(compact('vectorPagos'));
         $this->set('_serialize', ['vectorPagos']);
