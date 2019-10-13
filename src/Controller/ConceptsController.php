@@ -107,7 +107,7 @@ class ConceptsController extends AppController
 				{
 					$vectorPagos[] = 
 						['nroFactura' => $excel->number, 
-						'tasaDolar' => $excel->col1];  
+						'tasaCambio' => $excel->col1];  
 					$contadorActualizadas++;
 				} 
 			}
@@ -121,13 +121,14 @@ class ConceptsController extends AppController
 		$this->Flash->error(__('Facturas ya actualizadas ' . $contadorYaActualizadas));
 		
         $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']); 
+        $this->set('_serialize', ['vectorPagos']);  
 					
 		$conceptos = $this->Concepts->find('all')
 			->contain(['Bills' => ['Parentsandguardians']])
-			->where(['Concepts.concept' => "Matrícula 2019", 'Concepts.created <=' => '2019-09-01'])
+			->where(['Concepts.created >=' => '2019-09-01', 'Concepts.annulled' => 0])
 			->order(['Concepts.bill_id' => 'ASC']);
 			
+		$contador = 0;
 		$idAnterior = 0;
 		$facturasSinActualizar = 0;
 		
@@ -148,12 +149,100 @@ class ConceptsController extends AppController
 				}
 			}
 			$idAnterior = $concepto->bill_id;
+			if ($contador > 5)
+			{
+				break;
+			}
 		}
 		
 		$this->Flash->success(__('Total facturas sin actualizar: ' . $facturasSinActualizar));
 					
         $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']); */
+        $this->set('_serialize', ['vectorPagos']);
+		
+		$this->loadModel('Studenttransactions');
+		
+		$conceptos = $this->Concepts->find('all')
+			->contain(['Bills' => ['Parentsandguardians']])
+			->where(['Concepts.created >=' => '2019-09-01', 'Concepts.annulled' => 0, 'Bills.tasa_cambio' => 1])
+			->order(['Concepts.bill_id' => 'ASC']);
+			
+		$facturasSinActualizar = 0;
+		
+		$vectorPagos = [];
+		$idAnterior = 0;
+	
+		foreach ($conceptos as $concepto)
+		{
+			$transaccion = $this->Studenttransactions->get($concepto->transaction_identifier);
+			
+			if ($idAnterior != $concepto->bill_id)
+			{
+				$vectorPagos[] = 
+					['nroFactura' => $concepto->bill->bill_number,
+					'idFactura' => $concepto->bill->id,
+					'fechaFactura' => $concepto->bill->date_and_time,
+					'alumno' => $concepto->student_name,
+					'concepto' => $concepto->concept,
+					'montoConcepto' => $concepto->amount,
+					'descripcionTransaccion' => $transaccion->transaction_description,
+					'montoOriginal' => $transaccion->original_amount,
+					'montoAbonado' => $transaccion->amount,
+					'montoDolar' => $transaccion->amount_dollar,
+					'indicadorPagado' => $transaccion->paid_out,
+					'pagoParcial' => $transaccion->partial_payment];  
+				
+				$facturasSinActualizar++;
+			}
+			$idAnterior = $concepto->bill_id;
+		}
+		
+		$this->Flash->success(__('Total facturas sin actualizar: ' . $facturasSinActualizar));
+					
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']); */ 
+
+		$this->loadModel('Studenttransactions');
+		
+		$conceptos = $this->Concepts->find('all')
+			->contain(['Bills' => ['Parentsandguardians']])
+			->where(['Concepts.created >=' => '2019-09-01', 'Concepts.annulled' => 0, 'Bills.tasa_cambio' => 1])
+			->order(['Concepts.bill_id' => 'ASC']);
+			
+		$facturasSinActualizar = 0;
+		
+		$vectorPagos = [];
+		$idAnterior = 0;
+	
+		foreach ($conceptos as $concepto)
+		{
+			$transaccion = $this->Studenttransactions->get($concepto->transaction_identifier);
+			
+			if ($idAnterior != $concepto->bill_id)
+			{
+				$vectorPagos[] = 
+					['nroFactura' => $concepto->bill->bill_number,
+					'idFactura' => $concepto->bill->id,
+					'fechaFactura' => $concepto->bill->date_and_time,
+					'alumno' => $concepto->student_name,
+					'concepto' => $concepto->concept,
+					'montoConcepto' => $concepto->amount,
+					'descripcionTransaccion' => $transaccion->transaction_description,
+					'montoOriginal' => $transaccion->original_amount,
+					'montoAbonado' => $transaccion->amount,
+					'montoDolar' => $transaccion->amount_dollar,
+					'indicadorPagado' => $transaccion->paid_out,
+					'pagoParcial' => $transaccion->partial_payment];  
+				
+				$facturasSinActualizar++;
+			}
+			$idAnterior = $concepto->bill_id;
+		}
+		
+		$this->Flash->success(__('Total facturas sin actualizar: ' . $facturasSinActualizar));
+					
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']);
 	}		
 
     /**
