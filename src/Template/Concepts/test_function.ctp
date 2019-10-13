@@ -66,6 +66,16 @@
 								<th scope="col"><b>Nro.</b></th>
 								<th scope="col"><b>Nro Factura</b></th>
 								<th scope="col"><b>id Factura</b></th>
+								<th scope="col"><b>Fecha</b></th>
+								<th scope="col"><b>Alumno</b></th>
+								<th scope="col"><b>Concepto</b></th>
+								<th scope="col"><b>Monto concepto</b></th>
+								<th scope="col"><b>Descripción transacción</b></th>
+								<th scope="col"><b>Monto original</b></th>
+								<th scope="col"><b>Monto abonado</b></th>
+								<th scope="col"><b>Monto dolar</b></th>
+								<th scope="col"><b>Indicador pagado</b></th>
+								<th scope="col"><b>Pago parcial</b></th>
 							</tr>
 						</thead>
 						<tbody>						
@@ -75,6 +85,16 @@
 					<td><?= $accountRecords ?></td>
 					<td><?= $pagos['nroFactura'] ?></td>
 					<td><?= $pagos['idFactura'] ?></td>
+					<td><?= $pagos['fechaFactura']->format('d-m-Y') ?></td>
+					<td><?= $pagos['alumno'] ?></td>
+					<td><?= $pagos['concepto'] ?></td>
+					<td><?= $pagos['montoConcepto'] ?></td>
+					<td><?= $pagos['descripcionTransaccion'] ?></td>
+					<td><?= $pagos['montoOriginal'] ?></td>
+					<td><?= $pagos['montoAbonado'] ?></td>
+					<td><?= $pagos['montoDolar'] ?></td>
+					<td><?= $pagos['indicadorPagado'] ?></td>
+					<td><?= $pagos['pagoParcial'] ?></td>
 				</tr>
 		<?php endforeach ?>
 		</tbody>
