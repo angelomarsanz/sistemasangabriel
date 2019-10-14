@@ -167,7 +167,7 @@ class StudenttransactionsController extends AppController
         $studenttransaction = $this->Studenttransactions->get($id);
 		
 		$montoPagadoDolar = round($amountPayable / $tasaDolar);
-
+				
 		if ($studenttransaction->amount_dollar === null)
 		{
 			$studenttransaction->amount_dollar = $montoPagadoDolar;	
@@ -180,7 +180,7 @@ class StudenttransactionsController extends AppController
 		$studenttransaction->original_amount = $originalAmount; 
 		$studenttransaction->amount = $studenttransaction->amount + $amountPayable;
 						
-		if ($studenttransaction->amount == $studenttransaction->original_amount)
+		if ($tarifaDolar == $studenttransaction->amount_dollar)
 		{
 			$studenttransaction->partial_payment = 0;
 			$studenttransaction->paid_out = 1;
@@ -222,44 +222,33 @@ class StudenttransactionsController extends AppController
     {
         $studenttransaction = $this->Studenttransactions->get($id);
         		
-		$montoReversoDolar = round($amount / $tasaCambio); 
+		$montoReversoDolar = $amount / $tasaCambio; 
 
 		$studenttransaction->amount_dollar = round($studenttransaction->amount_dollar - $montoReversoDolar);
+				
+		$studenttransaction->amount = $studenttransaction->amount - $amount;
 		
-		$studenttransaction->original_amount = round($studenttransaction->original_amount - $amount);
-		
-		$studenttransaction->amount = round($studenttransaction->amount - $amount);
-			
-		if ($studenttransaction->original_amount == $studenttransaction->amount)
+		if ($studenttransaction->amount < 1)
 		{
-			if ($studenttransaction->amount == 0)
-			{
-				$studenttransaction->paid_out = 0;
-				$studenttransaction->partial_payment = 0;
-			}
-			else
-			{
-				$studenttransaction->paid_out = 1;
-			}
+			$studenttransaction->amount = round($studenttransaction->amount);
 		}
+			
+		$studenttransaction->paid_out = 0;
+		
+		if ($studenttransaction->amount == 0)
+		{
+			$studenttransaction->partial_payment = 0;
+		} 
 		else
 		{
-			$studenttransaction->paid_out = 0;
-			if ($studenttransaction->amount == 0)
-			{
-				$studenttransaction->partial_payment = 0;
-			} 
-			else
-			{
-				$studenttransaction->partial_payment = 1;
-			}
+			$studenttransaction->partial_payment = 1;
 		}
 			
         if ($studenttransaction->bill_number == $billNumber)
         {
             $studenttransaction->bill_number = 0;
         }
-				
+							
         if (!($this->Studenttransactions->save($studenttransaction)))
         {
             $this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
@@ -3570,19 +3559,29 @@ class StudenttransactionsController extends AppController
 		
         $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
 				
-		$montoNotaDolar = round($valor / $tasaCambio); 
+		$montoNotaDolar = $valor / $tasaCambio; 
 		
 		if ($tipoNota == "Crédito")
 		{
 			$transaccionEstudiante->amount_dollar = round($transaccionEstudiante->amount_dollar - $montoNotaDolar);
-			$transaccionEstudiante->original_amount = round($transaccionEstudiante->original_amount - $valor);
-			$transaccionEstudiante->amount = round($transaccionEstudiante->amount - $valor); 			
+			$transaccionEstudiante->original_amount = $transaccionEstudiante->original_amount - $valor;
+			$transaccionEstudiante->amount = $transaccionEstudiante->amount - $valor; 			
 		}
 		else
 		{
 			$transaccionEstudiante->amount_dollar = round($transaccionEstudiante->amount_dollar + $montoNotaDolar);
-			$transaccionEstudiante->original_amount = round($transaccionEstudiante->original_amount + $valor);
-			$transaccionEstudiante->amount = round($transaccionEstudiante->amount + $valor); 				
+			$transaccionEstudiante->original_amount = $transaccionEstudiante->original_amount + $valor;
+			$transaccionEstudiante->amount = $transaccionEstudiante->amount + $valor; 				
+		}
+		
+		if ($transaccionEstudiante->amount < 1)
+		{
+			$transaccionEstudiante->amount = round($transaccionEstudiante->amount);
+		}
+		
+		if ($transaccionEstudiante->original_amount < 1)
+		{
+			$transaccionEstudiante->original_amount = round($transaccionEstudiante->original_amount);
 		}
 									
 		if ($transaccionEstudiante->amount == $transaccionEstudiante->original_amount)

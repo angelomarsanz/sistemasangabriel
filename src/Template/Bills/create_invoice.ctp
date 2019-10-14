@@ -147,9 +147,10 @@
                                         <tr>
 											<th scope="col"></th>
                                             <th scope="col">Concepto</th>
-											<th scope="col">Cuota</th>
-                                            <th scope="col">Abonado</th>
-											<th scope="col">Pendiente</th>
+											<th scope="col">Cuota($)</th>
+                                            <th scope="col">Abonado($)</th>
+											<th scope="col">Saldo($)</th>
+											<th scope="col">Saldo(Bs)</th>
 											<th scope="col" class="noverScreen"></th>
                                         </tr>
                                     </thead>
@@ -168,15 +169,15 @@
                 <div class="col-md-3">
                     <br />
                     <p><b>Totales:</b></p>
-                    <div class="panel panel-default" style="height:290px; padding: 0% 3% 0% 3%;">
+                    <div class="panel panel-default" style="height:320px; padding: 0% 3% 0% 3%;">
                         <br />
                         <p><b>Alumno: </b><spam id="student-name"></spam></p>
                         <p><b>Cuotas: </b><spam id="student-concept"></spam></p>
                         <p><b>Sub-total alumno: Bs.S </b><spam id="student-balance">0</spam></b></p>
                         <p><b>Sub-total familia: Bs.S </b><spam id="total-balance"></spam></p>   
                         <p><?= $this->Form->input('select_discount', ['label' => 'Descuento/Recargo:', 'class' => 'select-discount', 'options' => $discounts]); ?></p>
-						<p><b>Total a pagar: Bs.S </b><spam id="total-general"></spam></p>
-						<p><b>Total a pagar: $ </b><spam id="total-general-dolar"></spam></p>	
+						<p><b>Total a pagar: $ </b><spam id="total-general"></spam></p>
+						<p><b>Total a pagar: Bs. </b><spam id="total-general-bolivar"></spam></p>	
 						<br />
                     </div>
 					<p id="student-messages"></p>  
@@ -544,6 +545,7 @@
     var transactionIdentifier = 0;
     var monthlyPayment = " ";
 	var tarifaDolar = 0;
+	var montoPendienteDolar = 0;
 	var montoDolar = 0;
     var transactionAmount = 0;
 	var tempAmount = 0;
@@ -567,6 +569,7 @@
     var selectedPayment = -1;
     var grade = " ";
     var section = " ";
+	var temporalMontoBolivar = 0;
 
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
@@ -687,7 +690,7 @@
         $("#student-balance").html("");
         $("#total-balance").html("");
 		$("#total-general").html("");
-		$("#total-general-dolar").html("");
+		$("#total-general-bolivar").html("");
 		$("#invoice-descuento").html("");
         $("#invoice-subtotal").html(" ");
         $("#total-bill").html(" ");
@@ -882,6 +885,8 @@
         dbMonthlyPayment VARCHAR(100), \
         dbScholarship INTEGER, \
 		dbTarifaDolar FLOAT, \
+		dbMontoAbonadoDolar FLOAT, \
+		dbMontoPendienteDolar FLOAT, \
         dbTransactionAmount FLOAT, \
         dbOriginalAmount FLOAT, \
         dbAmountPayable FLOAT, \
@@ -917,6 +922,8 @@
         dbMonthlyPayment, \
         dbScholarship, \
 		dbTarifaDolar, \
+		dbMontoAbonadoDolar, \
+		dbMontoPendienteDolar, \
         dbTransactionAmount, \
         dbOriginalAmount, \
         dbAmountPayable, \
@@ -925,7 +932,7 @@
         dbPartialPayment, \
         dbPaidOut, \
 		dbSchoolYearFrom, \
-        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = transactionIdentifier;
         var tpIdStudent = idStudent;
@@ -933,6 +940,8 @@
         var tpMonthlyPayment = monthlyPayment;
         var tpScholarship = scholarship;
 		var tpTarifaDolar = tarifaDolar;
+		var tpAbonadoDolar = montoDolar;
+		var tpPendienteDolar = montoPendienteDolar;
         var tpTransactionAmount = transactionAmount;
         var tpOriginalAmount = originalAmount;
         var tpAmountPayable = amountPayable;
@@ -952,6 +961,8 @@
             tpMonthlyPayment,
             tpScholarship,
 			tpTarifaDolar,
+			tpAbonadoDolar,
+			tpPendienteDolar,
             tpTransactionAmount,
             tpOriginalAmount,
             tpAmountPayable,
@@ -1009,11 +1020,11 @@
         db.transaction(function (tx) { tx.executeSql(updateStatement, [invoiced, Number(amountPayable), observation, Number(id)], null, onError); });
     }
     
-    function updateInstallment(id, transactionAmount, originalAmount, amountPayable) 
+    function updateInstallment(id, updMontoModificadoDolar, updMontoPendienteDolar, transactionAmount, originalAmount, amountPayable) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbTransactionAmount = ?, dbOriginalAmount = ?, dbAmountPayable = ? WHERE dbId=?";
+        var updateStatement = "UPDATE studentTransactions SET dbTarifaDolar = ?, dbMontoPendienteDolar = ?, dbTransactionAmount = ?, dbOriginalAmount = ?, dbAmountPayable = ? WHERE dbId=?";
         
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(transactionAmount), Number(originalAmount), Number(amountPayable), Number(id)], null, onError); });
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(transactionAmount), Number(originalAmount), Number(amountPayable), Number(id)], null, onError); });
     }
 	
     function showRecords() // Function For Retrive data from Database Display records as list
@@ -1057,12 +1068,13 @@
                         {
                             studentBalance = studentBalance + item['dbTransactionAmount'];
                             detailLine += "<tr id=tra" + item['dbId'] + ">  \
-								<td style='background-color:#c2c2d6;'><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbTransactionAmount'] + " checked='checked' disabled></td> \
+								<td style='background-color:#c2c2d6;'><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " checked='checked' disabled></td> \
                                 <td style='background-color:#c2c2d6;'>" + item['dbMonthlyPayment'] + "</td> \
-								<td style='background-color:#c2c2d6;'><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbOriginalAmount'] + " disabled></td> \
-								<td style='background-color:#c2c2d6;'><input type='number' class='form-control amount-paid' value=" + item['dbAmountPaid'] + " disabled></td> \
-                                <td style='background-color:#c2c2d6;'>" + item['dbTransactionAmount'] + "</td> \
-								<td style='background-color:#c2c2d6;'><input type='number' class='form-control original-amount noverScreen' value=" + item['dbOriginalAmount'] + "></td></tr>";
+								<td style='background-color:#c2c2d6;'><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbTarifaDolar'] + " disabled></td> \
+								<td style='background-color:#c2c2d6;'><input type='number' class='form-control amount-paid' value=" + item['dbMontoAbonadoDolar'] + " disabled></td> \
+                                <td style='background-color:#c2c2d6;'>" + item['dbMontoPendienteDolar'] + "</td> \
+								<td style='background-color:#c2c2d6;'>" + item['dbTransactionAmount'] + "</td> \
+								<td style='background-color:#c2c2d6;'><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td></tr>";
 
                                 $('#uncheck-quotas').attr('disabled', false);
                                 $('#save-payments').attr('disabled', false);
@@ -1080,12 +1092,13 @@
                                 indicatorPaid = 1;                            
                             }
                             detailLine += "<tr id=tra" + item['dbId'] + "> \
-								<td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbTransactionAmount'] + " disabled></td> \
+								<td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " disabled></td> \
                                 <td>" + item['dbMonthlyPayment'] + "</td> \
-								<td><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbOriginalAmount'] + "></td> \
-								<td><input type='number' class='form-control amount-paid' value=" + item['dbAmountPaid'] + " disabled></td> \
-                                <td>" + item['dbTransactionAmount'] + "</td> \
-								<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbOriginalAmount'] + "></td></tr>";								
+								<td><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbTarifaDolar'] + "></td> \
+								<td><input type='number' class='form-control amount-paid' value=" + item['dbMontoAbonadoDolar'] + " disabled></td> \
+                                <td>" + item['dbMontoPendienteDolar'] + "</td> \
+								<td>" + item['dbTransactionAmount'] + "</td> \
+								<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td></tr>";								
                         }
                     }
                     else 
@@ -1143,7 +1156,11 @@
                     + " "
                     + item['dbScholarship'] 
                     + " "
-                    + item['dbTarifaDolar'] 
+                    + item['dbTarifaDolar']
+                    + " "
+                    + item['dbMontoAbonadoDolar'] 	
+                    + " "
+                    + item['dbMontoPendienteDolar'] 					
                     + " "
                     + item['dbTransactionAmount']
                     + " "
@@ -1243,8 +1260,8 @@
     
     function activateInvoiceButtons()
     {
-        $("#automatic-adjustment").attr('disabled', false);
-        $("#adjust-invoice").attr('disabled', false);
+        // $("#automatic-adjustment").attr('disabled', false);
+        // $("#adjust-invoice").attr('disabled', false);
         $("#print-invoice").attr('disabled', false);
         $("#bt-01").attr('disabled', false);
         $("#bt-02").attr('disabled', false);
@@ -1613,7 +1630,7 @@
 					
 					mesesTarifas = response.data.meses_tarifas;
 					otrasTarifas = response.data.otras_tarifas;
-													                        
+																		                        
                     $('#family').val(nameFamily + " (" + nameRepresentative + ")");
                     $('#client').val(client);
                     $('#type-of-identification-client').val(typeOfIdentificationClient);
@@ -1728,7 +1745,9 @@
 							
 							invoiced = value2.invoiced;
 
-							partialPayment = value.partial_payment;
+							partialPayment = value2.partial_payment;
+							
+							console.log("partialPayment " + partialPayment);
 
 							paidOut = value2.paid_out;
 							
@@ -1740,6 +1759,8 @@
 							{
 								if (montoDolar === null)
 								{
+									montoDolar = 0;
+									montoPendienteDolar = 0;
 									transactionAmount = 0;
 									amountPayable = 0;
 									indicadorImpresion = 1;
@@ -1748,17 +1769,20 @@
 								{						
 									if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
 									{
+										tarifaDolar = Math.round(tarifaDolar * discountFamily);
+										
 										if (tarifaDolar > montoDolar)
-										{												
-											diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
-											
-											originalAmount = Math.round((diferenciaMensualidad + amountPaid) * discountFamily);
-											transactionAmount = originalAmount - amountPaid;
+										{		
+											montoPendienteDolar = tarifaDolar - montoDolar;
+											originalAmount = Math.round(amountMonthly * discountFamily);
+											transactionAmount = Math.round(montoPendienteDolar * dollarExchangeRate);
 											amountPayable = transactionAmount;	
 											paidOut = false;
 										}
 										else
 										{
+											montoDolar = 0;
+											montoPendienteDolar = 0;
 											transactionAmount = 0;
 											amountPayable = 0;
 											indicadorImpresion = 1;
@@ -1768,15 +1792,16 @@
 									{
 										if (tarifaDolar > montoDolar)
 										{												
-											diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
-											
-											originalAmount = Math.round(diferenciaMensualidad + amountPaid);
-											transactionAmount = originalAmount - amountPaid;
+											montoPendienteDolar = tarifaDolar - montoDolar;
+											originalAmount = amountMonthly;
+											transactionAmount = Math.round(montoPendienteDolar * dollarExchangeRate);
 											amountPayable = transactionAmount;	
 											paidOut = false;
 										}
 										else
 										{
+											montoDolar = 0;
+											montoPendienteDolar = 0;
 											transactionAmount = 0;
 											amountPayable = 0;
 											indicadorImpresion = 1;
@@ -1786,20 +1811,24 @@
 							}
 							else if (transactionType != 'Mensualidad')
 							{
+								montoPendienteDolar = tarifaDolar - montoDolar;
 								originalAmount = amountMonthly;
-								transactionAmount = originalAmount - amountPaid;
+								transactionAmount = Math.round(montoPendienteDolar * dollarExchangeRate);
 								amountPayable = transactionAmount;		
 							}
 							else if (monthlyPayment.substring(0, 3) == "Ago")
 							{
-								originalAmount = amountMonthly + amountPaid;;
-								transactionAmount = originalAmount - amountPaid;
-								amountPayable = transactionAmount												
+								montoPendienteDolar = tarifaDolar - montoDolar;
+								originalAmount = amountMonthly;
+								transactionAmount = Math.round(montoPendienteDolar * dollarExchangeRate);
+								amountPayable = transactionAmount;												
 							}
 							else
 							{
+								tarifaDolar = Math.round(tarifaDolar * discountFamily);
+								montoPendienteDolar = tarifaDolar - montoDolar;
 								originalAmount = Math.round(amountMonthly * discountFamily);
-								transactionAmount = originalAmount - amountPaid;
+								transactionAmount = Math.round(montoPendienteDolar * dollarExchangeRate);
 								amountPayable = transactionAmount;												
 							}
 							
@@ -1968,7 +1997,7 @@
 			inputCounter = 0;
 			$('.select-discount').val(1);
 			$('#total-general').html('');
-			$('#total-general-dolar').html('');
+			$('#total-general-bolivar').html('');
 			            
             $("#monthly-payment input").each(function (index) 
             {
@@ -1984,7 +2013,8 @@
 								$(this).attr('checked', true);
 								idStudentTransactions = $(this).attr('id'); 
 								markTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), 'true', parseFloat($(this).attr('value')), " "); 
+								temporalMontoBolivar = Math.round(parseFloat($(this).attr('value')) * dollarExchangeRate);
+								updateRecord(idStudentTransactions.substring(2), 'true', temporalMontoBolivar, " "); 
 								$('#uncheck-quotas').attr('disabled', false);
 								$('#save-payments').attr('disabled', false);
 								$('#charge').attr('disabled', false);
@@ -2056,7 +2086,7 @@
 			inputCounter = 0;
 			$('.select-discount').val(1);
 			$('#total-general').html('');
-			$('#total-general-dolar').html('');
+			$('#total-general-bolivar').html('');
 
             $("#monthly-payment input").each(function (index) 
             {
@@ -2095,8 +2125,8 @@
 								$('#' + idStudentTransactions).attr('checked', false);
 								$('#' + idAmountTransactions).attr('disabled', false);								
 								uncheckTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), 'false', transactionAmount, " "); 
-								
+								temporalMontoBolivar = Math.round(transactionAmount * dollarExchangeRate);
+								updateRecord(idStudentTransactions.substring(2), 'false', temporalMontoBolivar, " "); 
 								$("#mark-quotas").html(transactionDescription);
 								if (markedQuotaCounter == 1)
 								{
@@ -2195,6 +2225,7 @@
 
 					showInvoiceLines();
 					
+					totalBalance = Math.round(totalBalance * dollarExchangeRate);
 					totalBill = totalBalance;
 					$("#invoice-subtotal").html(totalBill.toFixed(2));
 					$("#invoice-descuento").html(discount.toFixed(2));
@@ -2502,8 +2533,8 @@
 			{
 				totalGeneral = totalBalance;
 				$('#total-general').html(totalGeneral.toFixed(2));
-				totalGeneralDolar = Math.round(totalGeneral / dollarExchangeRate);
-				$('#total-general-dolar').html(totalGeneralDolar.toFixed(2));	
+				totalGeneralBolivar = Math.round(totalGeneral * dollarExchangeRate);
+				$('#total-general-bolivar').html(totalGeneralBolivar.toFixed(2));	
 			}
 			else if ($('.select-discount').val() > 2)
 			{
@@ -2536,8 +2567,8 @@
 						}
 						totalGeneral = totalBalance + discount; 
 						$('#total-general').html(totalGeneral.toFixed(2));
-						totalGeneralDolar = Math.round(totalGeneral / dollarExchangeRate);
-						$('#total-general-dolar').html(totalGeneralDolar.toFixed(2));
+						totalGeneralBolivar = Math.round(totalGeneral * dollarExchangeRate);
+						$('#total-general-bolivar').html(totalGeneralBolivar.toFixed(2));
 					} 
 					else 
 					{
@@ -2644,11 +2675,16 @@
             e.preventDefault();
 
 			var adjInputCounter = 0;
+			var adjMontoModificadoDolar = 0;
 			var adjModifiableFee = 0;
+			var adjOriginalMontoDolar = 0;
 			var adjOriginalAmount = 0;
+			var adjMontoPagadoDolar = 0;
 			var adjAmountPaid = 0;
 			var adjIdAmountTransaction = '';
+			var adjMontoPendienteDolar = 0;
 			var adjAmountPayable = 0;
+			var montoDolarCadena;
 			var stringAmount = '';
 			var adjError = 0;
 			
@@ -2656,25 +2692,30 @@
             {
 				if (adjInputCounter == 1)
 				{
-					adjModifiableFee = parseFloat($(this).val());
+					adjMontoModificadoDolar = parseFloat($(this).val());
+					adjModifiableFee = Math.round(adjMontoModificadoDolar * dollarExchangeRate);
 					adjIdAmountTransaction = $(this).attr('id');
 					adjInputCounter++;
 				}
 				else if (adjInputCounter == 2)
 				{
-					adjAmountPaid = parseFloat($(this).val());
+					adjMontoPagadoDolar = parseFloat($(this).val());
+					adjAmountPaid = Math.round(adjMontoPagadoDolar * dollarExchangeRate);
 					adjInputCounter++;					
 				}
 				else if (adjInputCounter == 3)
 				{
-					adjOriginalAmount = parseFloat($(this).val());					
+					adjOriginalMontoDolar = parseFloat($(this).val());
+					adjOriginalAmount = Math.round(adjOriginalMontoDolar * dollarExchangeRate);					
 					if (adjModifiableFee != adjOriginalAmount)
 					{					
 						if (adjModifiableFee > adjAmountPaid)
 						{
+							montoDolarCadena = (adjMontoModificadoDolar - adjMontoPagadoDolar).toFixed(2);
+							adjMontoPendienteDolar = parseFloat(montoDolarCadena);
 							stringAmount = (adjModifiableFee - adjAmountPaid).toFixed(2);
 							adjAmountPayable = parseFloat(stringAmount);
-							updateInstallment(adjIdAmountTransaction.substring(2), adjAmountPayable, adjModifiableFee, adjAmountPayable);
+							updateInstallment(adjIdAmountTransaction.substring(2), adjMontoModificadoDolar, adjMontoPendienteDolar ,adjAmountPayable, adjModifiableFee, adjAmountPayable);
 							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
 						}
 						else

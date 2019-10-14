@@ -16,12 +16,16 @@
 			<input type="hidden" id="type-invoice" value="<?= $menuOption ?>">
             <div class="row">
                 <div class="col-md-12">
-					<?php if ($menuOption == 'Inscripción regulares'): ?>
-						<h3><b>Inscripción alumnos regulares</b></h3>
-					<?php elseif ($menuOption == 'Inscripción nuevos'): ?>
-						<h3><b>Inscripción alumnos nuevos</b></h3>
-					<?php elseif ($menuOption == 'Servicio educativo'): ?>
-						<h3><b>Servicio educativo</b></h3>
+					<?php if ($menuOption == 'Factura inscripción regulares'): ?>
+						<h3><b>Factura inscripción alumnos regulares</b></h3>
+					<?php elseif ($menuOption == 'Factura inscripción nuevos'): ?>
+						<h3><b>Factura inscripción alumnos nuevos</b></h3>
+					<?php elseif ($menuOption == 'Recibo inscripción regulares'): ?>
+						<h3><b>Recibo inscripción alumnos regulares</b></h3>
+					<?php elseif ($menuOption == 'Recibo inscripción nuevos'): ?>
+						<h3><b>Recibo inscripción alumnos nuevos</b></h3>
+					<?php elseif ($menuOption == 'Recibo servicio educativo'): ?>
+						<h3><b>Recibo servicio educativo</b></h3>
 					<?php else: ?>
 						<h3><b>Cobro de mensualidades</b></h3>
 					<?php endif; ?>
@@ -37,7 +41,14 @@
 							<button id="update-dollar" class="btn btn-success">Actualizar</button>
 						</div>
 						<div class="col-md-6">
-							<br />
+							<?= $this->Form->input('tasa_temporal', ['label' => 'Tasa temporal:', 'class' => 'alternative-decimal-separator', 'value' => number_format((0), 2, ",", ".")]) ?>
+							<button id="establecer-tasa-temporal" class="btn btn-success">Establecer</button>
+							<button id="eliminar-tasa-temporal" class="btn btn-success noverScreen">Eliminar</button>
+						</div>
+					</div>
+					<br>
+					<div class="row">
+						<div class="col-md-12">
 							<p id="dollar-messages"></p>
 						</div>
 					</div>
@@ -46,7 +57,7 @@
                     <br />
                     <input type="text" class="form-control" id="family-search">
                     <br />
-					<?php if ($menuOption == 'Inscripción regulares' || $menuOption == 'Mensualidades'): ?>
+					<?php if ($menuOption == 'Factura inscripción regulares' || $menuOption == 'Recibo inscripción regulares' || $menuOption == 'Mensualidades'): ?>
 						<button id="newfamily" class="btn btn-success" disabled>Listar familias nuevas</button>
 					<?php else: ?>
 						<button id="newfamily" class="btn btn-success">Listar familias nuevas</button>
@@ -70,22 +81,28 @@
                     <br />
                     <?= $this->Form->input('date_and_time', ['label' => 'Fecha:']) ?>
                     <?= $this->Form->input('family', ['label' => 'Familia:']) ?>
-                    <?= $this->Form->input('client', ['label' => 'Cliente:']) ?>
+                    <?= $this->Form->input('client', ['label' => 'Cliente:', 'class' => 'campo-resaltado']) ?>
+					<div id="mensaje-cliente" class="mensajes-usuario"></div>
                     <?= $this->Form->input('type_of_identification_client', 
                         ['options' => 
-                        [null => " ",
+                        [null => "",
                         'V' => 'Cédula venezolano',
                         'E' => 'Cédula extranjero',
                         'P' => 'Pasaporte',
                         'J' => 'Rif Jurídico',
                         'G' => 'Rif Gubernamental'],
-                        'label' => 'Tipo de documento de identificación:']) ?>
-                    <?= $this->Form->input('identification_number_client', ['label' => 'Número de cédula o RIF:']) ?>
+                        'label' => 'Tipo de documento de identificación:',
+						'class' => 'campo-resaltado']) ?>
+					<div id="mensaje-tipo-de-identificacion" class="mensajes-usuario"></div>
+                    <?= $this->Form->input('identification_number_client', ['label' => 'Número de cédula o RIF:', 'class' => 'entero campo-resaltado']) ?>
+					<div id="mensaje-numero-identificacion-cliente" class="mensajes-usuario"></div>
                 </div>
                 <div class="col-md-4">
                     <br />
-                    <?= $this->Form->input('fiscal_address', ['label' => 'Dirección:']) ?>
-                    <?= $this->Form->input('tax_phone', ['label' => 'Teléfono:']) ?>
+                    <?= $this->Form->input('fiscal_address', ['label' => 'Dirección:', 'class' => 'campo-resaltado']) ?>
+					<div id="mensaje-direccion-fiscal" class="mensajes-usuario"></div>
+                    <?= $this->Form->input('tax_phone', ['label' => 'Teléfono:', 'class' => 'entero campo-resaltado']) ?>
+					<div id="mensaje-telefono" class="mensajes-usuario"></div>
                     <?= $this->Form->input('email', ['label' => 'Correo electrónico:']) ?>
                     <br />
                     <button id="update-data" class="btn btn-success">Actualizar datos del cliente</button>
@@ -151,14 +168,16 @@
                 <div class="col-md-3">
                     <br />
                     <p><b>Totales:</b></p>
-                    <div class="panel panel-default" style="height:260px; padding: 0% 3% 0% 3%;">
+                    <div class="panel panel-default" style="height:290px; padding: 0% 3% 0% 3%;">
                         <br />
                         <p><b>Alumno: </b><spam id="student-name"></spam></p>
                         <p><b>Cuotas: </b><spam id="student-concept"></spam></p>
                         <p><b>Sub-total alumno: Bs.S </b><spam id="student-balance">0</spam></b></p>
                         <p><b>Sub-total familia: Bs.S </b><spam id="total-balance"></spam></p>   
                         <p><?= $this->Form->input('select_discount', ['label' => 'Descuento/Recargo:', 'class' => 'select-discount', 'options' => $discounts]); ?></p>
-						<p><b>Total a pagar: Bs.S </b><spam id="total-general"></spam></p>     
+						<p><b>Total a pagar: Bs.S </b><spam id="total-general"></spam></p>
+						<p><b>Total a pagar: $ </b><spam id="total-general-dolar"></spam></p>	
+						<br />
                     </div>
 					<p id="student-messages"></p>  
                 </div>
@@ -565,11 +584,12 @@
     payments.invoiceAmount = 0;
 	payments.discount = 0;
     payments.fiscal = 0;
+	payments.tasaDolar = 0;
 
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
     var tbPaymentsMade = new Array();
-
+	
 // Funciones
 
     function log(message) 
@@ -667,17 +687,19 @@
         $("#student-balance").html("");
         $("#total-balance").html("");
 		$("#total-general").html("");
+		$("#total-general-dolar").html("");
 		$("#invoice-descuento").html("");
         $("#invoice-subtotal").html(" ");
         $("#total-bill").html(" ");
         $('#paid-out').text(" ");
         $('#to-pay').text(" ");
         $('#change').text(" ");
+		$('.mensajes-usuario').html("");
+		$('.campo-resaltado').css('background-color', "white");
 		$(".select-discount").attr('disabled', false);
 		$('.select-discount').css('background-color', 'white');
 		$('.select-discount').val(1);
 		
-        
         for (var i = 0, item = 0; i < 7; i++)
         {
             item = i + 1;
@@ -1369,26 +1391,88 @@
                             output += uservalue + ")</td></tr>";
                     });
                 });
-                $("#response-container").html(" ");
+                $("#header-messages").html("");
                 $("#response-container").html(output);
             } 
             else 
             {
+				$("#header-messages").html("");
                 $("#response-container").html('No ha habido suerte: ' + response.data.message);
             }
                 
         })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-                
+        .fail(function(jqXHR, textStatus, errorThrown) 
+		{
+			$("#header-messages").html("");        
             $("#response-container").html("Algo ha fallado: " + textStatus);
                 
         });
     }
+	
+	function validarDatosFiscales()
+	{
+		var resultado = 0;
+		
+		$('.mensajes-usuario').html("");
+		$('.campo-resaltado').css('background-color', "white");
+		
+		if ($("#client").val().length < 5) 
+		{  		
+			$('#client').css('background-color', "#ffffe6");
+			$('#mensaje-cliente').html("El nombre o razón social está incompleto").css('color', 'red');
+			resultado = 1;
+		}
+
+		if ($("#type-of-identification-client").val().length == 0) 
+		{  		
+			$('#type-of-identification-client').css('background-color', "#ffffe6");
+			$('#mensaje-tipo-de-identificacion').html("El tipo de identificacion no puede ser blancos").css('color', 'red');
+			resultado = 1;
+		}
+		else
+		{
+			if ($("#type-of-identification-client").val() == "J" || $("#type-of-identification-client").val() == "G") 
+			{
+				if ($("#identification-number-client").val().length < 9) 
+				{	
+					$('#identification-number-client').css('background-color', "#ffffe6");
+					$('#mensaje-numero-identificacion-cliente').html("El número del RIF está incompleto").css('color', 'red');
+					resultado = 1;
+				}
+			}
+			else
+			{
+				if ($("#identification-number-client").val().length < 7) 
+				{	
+					$('#identification-number-client').css('background-color', "#ffffe6");
+					$('#mensaje-numero-identificacion-cliente').html("El número de cédula o pasaporte está incompleto").css('color', 'red');
+					resultado = 1;
+				}				
+			}	
+		}
+		if ($("#fiscal-address").val().length < 10) 
+		{	
+			$('#fiscal-address').css('background-color', "#ffffe6");
+			$('#mensaje-direccion-fiscal').html("La dirección está incompleta").css('color', 'red');
+			resultado = 1;
+		}	
+
+		if ($("#tax-phone").val().length < 10) 
+		{	
+			$('#tax-phone').css('background-color', "#ffffe6");
+			$('#mensaje-telefono').html("El número de teléfono está incompleto").css('color', 'red');
+			resultado = 1;
+		}
+
+		return resultado;
+	}
 
 // Funciones Jquery
 
     $(document).ready(function() 
     {
+		$('.entero').numeric();
+		
 		$(".alternative-decimal-separator").numeric({ altDecimal: "," });
 		
         $("#mostrar-registros").click(showDatabase);
@@ -1480,11 +1564,11 @@
                 
             $("#header-messages").html("Por favor espere...");
 			
-			if ($('#type-invoice').val() == 'Inscripción regulares')
+			if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción regulares')
 			{
 				typeStudent = 0;
 			}
-			else if ($('#type-invoice').val() == 'Inscripción nuevos' || $('#type-invoice').val() == 'Servicio educativo')
+			else if ($('#type-invoice').val() == 'Factura inscripción nuevos' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
 			{
 				typeStudent = 1;
 			}
@@ -1493,12 +1577,14 @@
 				typeStudent = 2;
 			}
 						
-			$.post('<?php echo Router::url(["controller" => "Students", "action" => "relatedStudents"]); ?>', {"id" : idFamily, "new" : typeStudent}, null, "json")				
+			$.post('<?php echo Router::url(["controller" => "Students", "action" => "relatedStudents"]); ?>', {"id" : idFamily, "new" : typeStudent, "tasaTemporal" : $("#tasa-temporal").val() }, null, "json")				
                      
             .done(function(response) 
             {
                 if (response.success) 
-                {				                    
+                {			
+					$("#header-messages").html("");
+					
 					nameFamily = response.data.family;
 
                     nameRepresentative = response.data.first_name + ' ' + response.data.surname;
@@ -1526,6 +1612,7 @@
 					dollarExchangeRate = response.data.dollar_exchange_rate;
 					
 					mesesTarifas = response.data.meses_tarifas;
+					otrasTarifas = response.data.otras_tarifas;
 													                        
                     $('#family').val(nameFamily + " (" + nameRepresentative + ")");
                     $('#client').val(client);
@@ -1552,11 +1639,22 @@
 						students += value.second_name + "</td>";
 						secondName = value.second_name;
 						
-						students += "<td>" + value.sublevel + "</td>";
-						grade = value.sublevel;
+						if ($('#type-invoice').val() == 'Mensualidades')
+						{ 
+							students += "<td>" + value.sublevel + "</td>";
+							grade = value.sublevel;
 
-						students += "<td>" + value.section + "</td>";
-						section = value.section;
+							students += "<td>" + value.section + "</td>";
+							section = value.section;							
+						}
+						else
+						{
+							students += "<td>" + value.level_of_study + "</td>";
+							grade = value.level_of_study;
+
+							students += "<td>No asignado</td>";
+							section = "No asignado";
+						}
 						
 						if (value.scholarship == 0)
 						{
@@ -1590,18 +1688,37 @@
 							
 							anoMes = paymentDate.substring(0, 4) + paymentDate.substring(5, 7);
 
-							$.each(mesesTarifas, function(key3, value3)											
-							{
-								if (anoMes == value3.anoMes)
-								{
-									amountMonthly = value3.tarifaBolivar;
-									tarifaDolar = value3.tarifaDolar;									
-								}
-							});
-
 							transactionType = value2.transaction_type;
-
+							
 							monthlyPayment = value2.transaction_description;
+							
+							amountMonthly = 0;
+							tarifaDolar = 0;
+							
+							if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
+							{
+								$.each(mesesTarifas, function(key3, value3)											
+								{
+									if (anoMes == value3.anoMes)
+									{
+										amountMonthly = value3.tarifaBolivar;
+										tarifaDolar = value3.tarifaDolar;
+										return false;
+									}
+								});
+							}
+							else
+							{
+								$.each(otrasTarifas, function(key3, value3)											
+								{
+									if (monthlyPayment == value3.conceptoAno)
+									{
+										amountMonthly = value3.tarifaBolivar;
+										tarifaDolar = value3.tarifaDolar;
+										return false;
+									}
+								});
+							}
 
 							transactionAmount = value2.amount;
 							
@@ -1620,39 +1737,62 @@
 							montoDolar = value2.amount_dollar;
 							
 							if (paidOut == true)
-							{						
-								if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
-								{
-									if (tarifaDolar > montoDolar)
-									{												
-										diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
-										
-										originalAmount = Math.round((diferenciaMensualidad + amountPaid) * discountFamily);
-										transactionAmount = originalAmount - amountPaid;
-										amountPayable = transactionAmount;	
-										paidOut = false;
-									}
-									else
-									{
-										transactionAmount = 0;
-										amountPayable = 0;
-										indicadorImpresion = 1;
-									}
-								}
-								else
+							{
+								if (montoDolar === null)
 								{
 									transactionAmount = 0;
 									amountPayable = 0;
 									indicadorImpresion = 1;
 								}
+								else
+								{						
+									if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
+									{
+										if (tarifaDolar > montoDolar)
+										{												
+											diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
+											
+											originalAmount = Math.round((diferenciaMensualidad + amountPaid) * discountFamily);
+											transactionAmount = originalAmount - amountPaid;
+											amountPayable = transactionAmount;	
+											paidOut = false;
+										}
+										else
+										{
+											transactionAmount = 0;
+											amountPayable = 0;
+											indicadorImpresion = 1;
+										}
+									}
+									else
+									{
+										if (tarifaDolar > montoDolar)
+										{												
+											diferenciaMensualidad = (tarifaDolar - montoDolar) * dollarExchangeRate;
+											
+											originalAmount = Math.round(diferenciaMensualidad + amountPaid);
+											transactionAmount = originalAmount - amountPaid;
+											amountPayable = transactionAmount;	
+											paidOut = false;
+										}
+										else
+										{
+											transactionAmount = 0;
+											amountPayable = 0;
+											indicadorImpresion = 1;
+										}									
+									}
+								}
 							}
 							else if (transactionType != 'Mensualidad')
-							{												
+							{
+								originalAmount = amountMonthly;
 								transactionAmount = originalAmount - amountPaid;
 								amountPayable = transactionAmount;		
 							}
 							else if (monthlyPayment.substring(0, 3) == "Ago")
 							{
+								originalAmount = amountMonthly + amountPaid;;
 								transactionAmount = originalAmount - amountPaid;
 								amountPayable = transactionAmount												
 							}
@@ -1663,44 +1803,71 @@
 								amountPayable = transactionAmount;												
 							}
 							
-							if ($('#type-invoice').val() == 'Inscripción regulares')
+							if ($('#type-invoice').val() == 'Factura inscripción regulares')
 							{
-								if (monthlyPayment.substring(0, 3) == "Ago" ||
+								if (monthlyPayment.substring(0, 9) == "Matrícula" ||
+									monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+									monthlyPayment.substring(0, 3) == "Ago")
+									{
+										if (indicadorImpresion == 0)
+										{
+											insertRecord();
+										}
+									}
+							}
+							else if ($('#type-invoice').val() == 'Factura inscripción nuevos')
+							{
+								if (monthlyPayment.substring(0, 9) == "Matrícula" ||
+									monthlyPayment.substring(0, 3) == "Ago")
+									{
+										if (indicadorImpresion == 0)
+										{
+											insertRecord();
+										}
+									}								
+							}
+							else if ($('#type-invoice').val() == 'Recibo inscripción regulares')
+							{
+								if (monthlyPayment.substring(0, 9) == "Matrícula" ||
+									monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+									monthlyPayment.substring(0, 3) == "Ago")
+									{
+										if (indicadorImpresion == 0)
+										{
+											insertRecord();
+										}
+									}
+							}
+							else if ($('#type-invoice').val() == 'Recibo inscripción nuevos')
+							{
+								if (monthlyPayment.substring(0, 18) == 'Servicio educativo' || 
 									monthlyPayment.substring(0, 9) == "Matrícula" ||
-									monthlyPayment.substring(0, 14) == "Seguro escolar")
-								{
-									if (indicadorImpresion == 0)
+									monthlyPayment.substring(0, 3) == "Ago")
 									{
-										insertRecord();
+										if (indicadorImpresion == 0)
+										{
+											insertRecord();
+										}
 									}
-								}
 							}
-							else if ($('#type-invoice').val() == 'Inscripción nuevos')
-							{
-								if (monthlyPayment.substring(0, 3) == "Ago" || 
-								monthlyPayment.substring(0, 9) == "Matrícula")
-								{
-									if (indicadorImpresion == 0)
-									{
-										insertRecord();
-									}
-								}												
-							}
-							else if ($('#type-invoice').val() == 'Servicio educativo')
+							else if ($('#type-invoice').val() == 'Recibo servicio educativo')
 							{
 								if (monthlyPayment.substring(0, 18) == 'Servicio educativo')
-								{
-									if (indicadorImpresion == 0)
 									{
-										insertRecord();
+										if (indicadorImpresion == 0)
+										{
+											insertRecord();
+										}
 									}
-								}
 							}
 							else
 							{
 								if (indicadorImpresion == 0)
 								{
-									insertRecord();
+									if (monthlyPayment.substring(0, 6) != 'Thales')
+									{
+										insertRecord();
+									}
 								}
 							}
 						});				
@@ -1721,33 +1888,46 @@
 
         $('#update-data').click(function(e) 
         {
+			var resultado = 0;
+			
             e.preventDefault();
+		
+			resultado = validarDatosFiscales();
+			
+			if (resultado > 0)
+			{
+				alert("Estimado usuario uno o más datos fiscales presentan errores. Por favor revise");
+				window.scrollTo(0, 0);
+				return false;
+			}
+			else
+			{
+				$("#header-messages").html("Por favor espere...");
 
-            $("#header-messages").html("Por favor espere...");
+				$.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "updateClientData"]); ?>', 
+					{"id" : idParentsandguardians, 
+					"client" : $('#client').val(),
+					"typeOfIdentificationClient" : $('#type-of-identification-client').val(),
+					"identificationNumberClient" : $('#identification-number-client').val(),
+					"fiscalAddress" : $('#fiscal-address').val(),
+					"taxPhone" : $('#tax-phone').val()}, null, "json")          
 
-            $.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "updateClientData"]); ?>', 
-                {"id" : idParentsandguardians, 
-                "client" : $('#client').val(),
-                "typeOfIdentificationClient" : $('#type-of-identification-client').val(),
-                "identificationNumberClient" : $('#identification-number-client').val(),
-                "fiscalAddress" : $('#fiscal-address').val(),
-                "taxPhone" : $('#tax-phone').val()}, null, "json")          
-
-            .done(function(response) 
-            {
-                if (response.success) 
-                {
-                    $("#header-messages").html("Los datos fiscales fueron actualizados correctamente...");
-                } 
-                else 
-                {
-                    $("#header-messages").html("Los datos fiscales no pudieron ser actualizados, intente nuevamente");
-                }
-            })
-            .fail(function(jqXHR, textStatus, errorThrown) 
-            {
-                $("#header-messages").html("Algo ha fallado, los datos fiscales no pudieron ser actualizados: " + textStatus);
-            });  
+				.done(function(response) 
+				{
+					if (response.success) 
+					{
+						$("#header-messages").html("Los datos fiscales fueron actualizados correctamente...");
+					} 
+					else 
+					{
+						$("#header-messages").html("Los datos fiscales no pudieron ser actualizados, intente nuevamente");
+					}
+				})
+				.fail(function(jqXHR, textStatus, errorThrown) 
+				{
+					$("#header-messages").html("Algo ha fallado, los datos fiscales no pudieron ser actualizados: " + textStatus);
+				});  
+			}
         });
 
         $("#related-students").on("click", ".students", function()
@@ -1771,6 +1951,8 @@
                 $("#student-balance").html("");
                 
                 showRecords();
+				
+				$("#student-messages").html("");
             }
         });
         
@@ -1786,6 +1968,7 @@
 			inputCounter = 0;
 			$('.select-discount').val(1);
 			$('#total-general').html('');
+			$('#total-general-dolar').html('');
 			            
             $("#monthly-payment input").each(function (index) 
             {
@@ -1873,6 +2056,7 @@
 			inputCounter = 0;
 			$('.select-discount').val(1);
 			$('#total-general').html('');
+			$('#total-general-dolar').html('');
 
             $("#monthly-payment input").each(function (index) 
             {
@@ -1983,32 +2167,45 @@
 
         $("#save-payments").click(function(e)
         {
+			var resultado = 0;
+			
             e.preventDefault();
-						
-			if ($('.select-discount').val() == 1)
+			
+			resultado = validarDatosFiscales();
+			
+			if (resultado > 0)
 			{
-				alert("Por favor indique si se aplicará algún descuento o recargo");
-				$('.select-discount').css('background-color', "#ffffe6");
+				alert("Estimado usuario uno o más datos fiscales presentan errores. Por favor revise");
+				window.scrollTo(0, 0);
+				return false;
 			}
 			else
-			{         
-				$("#mark-quotas").attr('disabled', true);
-				$("#uncheck-quotas").attr('disabled', true);
-				$("#save-payments").attr('disabled', true);
-				$(".select-discount").attr('disabled', true);
+			{			
+				if ($('.select-discount').val() == 1)
+				{
+					alert("Por favor indique si se aplicará algún descuento o recargo");
+					$('.select-discount').css('background-color', "#ffffe6");
+				}
+				else
+				{         
+					$("#mark-quotas").attr('disabled', true);
+					$("#uncheck-quotas").attr('disabled', true);
+					$("#save-payments").attr('disabled', true);
+					$(".select-discount").attr('disabled', true);
 
-				showInvoiceLines();
-				
-				totalBill = totalBalance;
-				$("#invoice-subtotal").html(totalBill.toFixed(2));
-				$("#invoice-descuento").html(discount.toFixed(2));
-				totalBill = totalBill + discount;
-				$("#total-bill").html(totalBill.toFixed(2));
-				balance = totalBalance + discount - accumulatedPayment;
-				indicatorUpdateAmount = 1;
-				updateAmount();
-				indicatorUpdateAmount = 0;
-				activateInvoiceButtons();
+					showInvoiceLines();
+					
+					totalBill = totalBalance;
+					$("#invoice-subtotal").html(totalBill.toFixed(2));
+					$("#invoice-descuento").html(discount.toFixed(2));
+					totalBill = totalBill + discount;
+					$("#total-bill").html(totalBill.toFixed(2));
+					balance = totalBalance + discount - accumulatedPayment;
+					indicatorUpdateAmount = 1;
+					updateAmount();
+					indicatorUpdateAmount = 0;
+					activateInvoiceButtons();
+				}
 			}
         });     
         
@@ -2280,7 +2477,7 @@
             payments.taxPhone = $('#tax-phone').val();
             payments.invoiceAmount = totalBill;
 			payments.discount = discount;
-			if ($('#type-invoice').val() == 'Servicio educativo')
+			if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
 			{
 				payments.fiscal = 0;
 			}
@@ -2288,6 +2485,7 @@
 			{
 				payments.fiscal = 1;
 			}
+			payments.tasaDolar = dollarExchangeRate;
             uploadTransactions();
             loadPayments();
         });
@@ -2304,6 +2502,8 @@
 			{
 				totalGeneral = totalBalance;
 				$('#total-general').html(totalGeneral.toFixed(2));
+				totalGeneralDolar = Math.round(totalGeneral / dollarExchangeRate);
+				$('#total-general-dolar').html(totalGeneralDolar.toFixed(2));	
 			}
 			else if ($('.select-discount').val() > 2)
 			{
@@ -2336,6 +2536,8 @@
 						}
 						totalGeneral = totalBalance + discount; 
 						$('#total-general').html(totalGeneral.toFixed(2));
+						totalGeneralDolar = Math.round(totalGeneral / dollarExchangeRate);
+						$('#total-general-dolar').html(totalGeneralDolar.toFixed(2));
 					} 
 					else 
 					{
@@ -2367,7 +2569,7 @@
 			$("#response-container").html("");
 			disableButtons();
 		
-            $.post('<?php echo Router::url(["controller" => "Rates", "action" => "updateDollar"]); ?>', 
+            $.post('<?php echo Router::url(["controller" => "Monedas", "action" => "actualizarTasa"]); ?>', 
                 {"amount" : $('#dollar-exchange-rate').val() }, null, "json")          
 
             .done(function(response) 
@@ -2385,6 +2587,56 @@
             {
                 $("#dollar-messages").html("Algo ha fallado, la tasa de cambio no pudo ser actualizada: " + textStatus);
             });  
+        });
+		
+        $('#establecer-tasa-temporal').click(function(e) 
+        {
+			e.preventDefault();
+			if ($("#tasa-temporal").val() > 0)
+			{
+				if (totalBalance > 0)
+				{    
+					var r = confirm("Si establece una tasa temporal, perderá los datos de la cobranza a la familia: " + nameFamily );
+					if (r == false)
+					{
+						return false;
+					}
+				}
+
+				$('#quota-adjustment').val("");
+				cleanPager();
+				$("#response-container").html("");
+				disableButtons();  
+				$('#tasa-temporal').css('background-color', '#ffb3b3');
+				$("#establecer-tasa-temporal").addClass("noverScreen");
+				$("#eliminar-tasa-temporal").removeClass("noverScreen");
+			}
+			else
+			{
+				alert("La tasa temporal debe ser mayor a cero");		
+			}
+        });
+		
+        $('#eliminar-tasa-temporal').click(function(e) 
+        {
+			e.preventDefault();
+			if (totalBalance > 0)
+			{    
+				var r = confirm("Si elimina una tasa temporal, perderá los datos de la cobranza a la familia: " + nameFamily );
+				if (r == false)
+				{
+					return false;
+				}
+			}
+
+			$('#quota-adjustment').val("");
+			cleanPager();
+			$("#response-container").html("");
+			disableButtons();  
+			$('#tasa-temporal').val('0,00');			
+			$('#tasa-temporal').css('background-color', 'white');
+			$("#establecer-tasa-temporal").removeClass("noverScreen");
+			$("#eliminar-tasa-temporal").addClass("noverScreen");
         });
 		
         $('#adjust-fee').click(function(e) 
