@@ -13,16 +13,20 @@ use App\Controller\BinnaclesController;
  * @property \App\Model\Table\ConceptsTable $Concepts
  */
 class ConceptsController extends AppController
-{
+{		
     public function testFunction()
     {
+		/* $this->loadModel('Excels');
+		$this->loadModel('Studenttransactions');
+				
 		$conceptos = $this->Concepts->find('all')
 			->contain(['Bills' => ['Parentsandguardians']])
 			->where(['Concepts.concept' => "Matrícula 2019"])
 			->order(['Concepts.bill_id' => 'ASC']);
 			
 		$idAnterior = 0;
-		$contadorActualizadas = 0;
+		$contadorGuardadas = 0;
+		$contadorNoGuardadas = 0;
 		$contadorDiferentes = 0;
 		$contadorDolarCero = 0;
 		
@@ -32,8 +36,6 @@ class ConceptsController extends AppController
 		{
 			if ($idAnterior != $concepto->bill_id)
 			{
-				$this->loadModel('Studenttransactions');
-	
 				$transaccion = $this->Studenttransactions->get($concepto->transaction_identifier);
 				
 				if ($transaccion->amount_dollar != null && $transaccion->amount_dollar > 0)
@@ -43,36 +45,262 @@ class ConceptsController extends AppController
 					if ($transaccion->amount == $montoConceptoRedondeado)
 					{
 						$tasaDolar = $transaccion->amount / $transaccion->amount_dollar;
-									
-						$vectorPagos[] = ['nroFactura' => $concepto->bill->bill_number, 
-						'fecha' => $concepto->bill->date_and_time, 
-						'totalFactura' => $concepto->bill->amount_paid,
-						'familia' => $concepto->bill->parentsandguardian->family,
-						'concepto' => $concepto->concept,
-						'montoConcepto' => $concepto->amount,
-						'tasaDolar' => $tasaDolar];  
-						$contadorActualizadas++;
+						
+						$excel = $this->Excels->newEntity();
+											
+						$excel->number = $concepto->bill_id;
+						$excel->col1 = $tasaDolar;
+						
+						if (!($this->Excels->save($excel)))
+						{
+							$this->Flash->success(__('La Factura no pudo se actualizada'));;
+							$contadorNoGuardadas++;
+						}
+						else
+						{
+							$contadorGuardadas++;								
+							$vectorPagos[] = ['idFactura' => $concepto->bill_id, 'tasaDolar' => $tasaDolar];  
+						}
 					}
 					else
 					{
 						$contadorDiferentes++;
-						$this->Flash->error(__('Id factura con monto diferente ' . $concepto->bill_id));
 					}
 				}
 				else
 				{
 					$contadorDolarCero++;
-					$this->Flash->error(__('Id factura con monto null o cero ' . $concepto->bill_id));
 				}
 			}
 			$idAnterior = $concepto->bill_id;
 		}
 		
-		$this->Flash->success(__('Total facturas actualizadas: ' . $contadorActualizadas));
+		$this->Flash->success(__('Total facturas guardada: ' . $contadorGuardadas));
+		$this->Flash->success(__('Total facturas no guardada: ' . $contadorNoGuardadas));
 		$this->Flash->error(__('Total montos diferentes: ' . $contadorDiferentes));
+		$this->Flash->success(__('Total monto cero: ' . $contadorDolarCero));
 					
         $this->set(compact('vectorPagos'));
         $this->set('_serialize', ['vectorPagos']);
+		
+		$this->loadModel('Excels');
+	
+		$excels = $this->Excels->find('all');
+		
+		$contadorActualizadas = 0;
+		$contadorYaActualizadas = 0;
+		$vectorPagos = [];
+		
+		foreach ($excels as $excel)
+		{						
+			$factura = $this->Concepts->Bills->get($excel->number);
+			
+			if ($factura->tasa_cambio == 1)
+			{
+				$factura->tasa_cambio = $excel->col1;
+				
+				if (!($this->Concepts->Bills->save($factura)))
+				{
+					$this->Flash->error(__('La factura Nro. ' . $factura->bill_number . ' no pudo ser actualizada'));
+				}
+				else
+				{
+					$vectorPagos[] = 
+						['nroFactura' => $excel->number, 
+						'tasaCambio' => $excel->col1];  
+					$contadorActualizadas++;
+				} 
+			}
+			else
+			{
+				$contadorYaActualizadas++;
+			}
+		}
+		
+		$this->Flash->success(__('Facturas actualizadas ' . $contadorActualizadas));
+		$this->Flash->error(__('Facturas ya actualizadas ' . $contadorYaActualizadas));
+		
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']);  
+					
+		$conceptos = $this->Concepts->find('all')
+			->contain(['Bills' => ['Parentsandguardians']])
+			->where(['Concepts.created >=' => '2019-09-01', 'Concepts.annulled' => 0])
+			->order(['Concepts.bill_id' => 'ASC']);
+			
+		$contador = 0;
+		$idAnterior = 0;
+		$facturasSinActualizar = 0;
+		
+		$vectorPagos = [];
+	
+		foreach ($conceptos as $concepto)
+		{
+			if ($idAnterior != $concepto->bill_id)
+			{
+				$factura = $this->Concepts->Bills->get($concepto->bill_id);
+			
+				if ($factura->tasa_cambio == 1)
+				{
+					$vectorPagos[] = 
+						['idFactura' => $factura->id,
+						'nroFactura' => $factura->bill_number];  
+					$facturasSinActualizar++;
+				}
+			}
+			$idAnterior = $concepto->bill_id;
+			if ($contador > 5)
+			{
+				break;
+			}
+		}
+		
+		$this->Flash->success(__('Total facturas sin actualizar: ' . $facturasSinActualizar));
+					
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']);
+		
+		$this->loadModel('Studenttransactions');
+		
+		$conceptos = $this->Concepts->find('all')
+			->contain(['Bills' => ['Parentsandguardians']])
+			->where(['Concepts.created >=' => '2019-09-01', 'Concepts.annulled' => 0, 'Bills.tasa_cambio' => 1])
+			->order(['Concepts.bill_id' => 'ASC']);
+			
+		$facturasSinActualizar = 0;
+		
+		$vectorPagos = [];
+		$idAnterior = 0;
+	
+		foreach ($conceptos as $concepto)
+		{
+			$transaccion = $this->Studenttransactions->get($concepto->transaction_identifier);
+			
+			if ($idAnterior != $concepto->bill_id)
+			{
+				$vectorPagos[] = 
+					['nroFactura' => $concepto->bill->bill_number,
+					'idFactura' => $concepto->bill->id,
+					'fechaFactura' => $concepto->bill->date_and_time,
+					'alumno' => $concepto->student_name,
+					'concepto' => $concepto->concept,
+					'montoConcepto' => $concepto->amount,
+					'descripcionTransaccion' => $transaccion->transaction_description,
+					'montoOriginal' => $transaccion->original_amount,
+					'montoAbonado' => $transaccion->amount,
+					'montoDolar' => $transaccion->amount_dollar,
+					'indicadorPagado' => $transaccion->paid_out,
+					'pagoParcial' => $transaccion->partial_payment];  
+				
+				$facturasSinActualizar++;
+			}
+			$idAnterior = $concepto->bill_id;
+		}
+		
+		$this->Flash->success(__('Total facturas sin actualizar: ' . $facturasSinActualizar));
+					
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']); 
+
+		$this->loadModel('Studenttransactions');
+		
+		$conceptos = $this->Concepts->find('all')
+			->contain(['Bills' => ['Parentsandguardians']])
+			->where(['Concepts.created >=' => '2019-09-01', 'Concepts.annulled' => 0, 'Bills.tasa_cambio' => 1])
+			->order(['Concepts.bill_id' => 'ASC']);
+			
+		$facturasSinActualizar = 0;
+		
+		$vectorPagos = [];
+		$idAnterior = 0;
+	
+		foreach ($conceptos as $concepto)
+		{
+			$transaccion = $this->Studenttransactions->get($concepto->transaction_identifier);
+			
+			if ($idAnterior != $concepto->bill_id)
+			{
+				$vectorPagos[] = 
+					['nroFactura' => $concepto->bill->bill_number,
+					'idFactura' => $concepto->bill->id,
+					'fechaFactura' => $concepto->bill->date_and_time,
+					'alumno' => $concepto->student_name,
+					'concepto' => $concepto->concept,
+					'montoConcepto' => $concepto->amount,
+					'descripcionTransaccion' => $transaccion->transaction_description,
+					'montoOriginal' => $transaccion->original_amount,
+					'montoAbonado' => $transaccion->amount,
+					'montoDolar' => $transaccion->amount_dollar,
+					'indicadorPagado' => $transaccion->paid_out,
+					'pagoParcial' => $transaccion->partial_payment];  
+				
+				$facturasSinActualizar++;
+			}
+			$idAnterior = $concepto->bill_id;
+		}
+		
+		$this->Flash->success(__('Total facturas sin actualizar: ' . $facturasSinActualizar));
+					
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']);
+			
+		$conceptos = $this->Concepts->find('all')
+			->contain(['Bills' => ['Parentsandguardians']])
+			->where(['Bills.created >=' => '2019-09-01', 'Bills.annulled' => 0, 'Bills.fiscal' => 1])
+			->order(['Concepts.bill_id' => 'ASC']);
+				
+		$vectorPagos = [];
+		$contador = 0;
+		$contadorDiferentes = 0;
+		$idFacturaAnterior = 0;
+		$numeroFacturaAnterior = 0;
+		$montoFacturaAnterior = 0;
+		$acumuladoConceptos = 0;
+		$acumuladoPorUno = 0;
+	
+		foreach ($conceptos as $concepto)
+		{
+			if ($contador == 0)
+			{
+				$idFacturaAnterior = $concepto->bill->id;
+				$numeroFacturaAnterior = $concepto->bill->bill_number;
+				$montoFacturaAnterior = $concepto->bill->amount_paid * 1;
+			}
+			if ($concepto->bill->id != $idFacturaAnterior)
+			{
+				$acumuladoPorUno = $acumuladoConceptos * 1;
+				
+				if ($montoFacturaAnterior > $acumuladoPorUno)
+				{
+					echo "<br />";
+					var_dump($montoFacturaAnterior);
+					echo "<br />";
+					var_dump($acumuladoPorUno);
+					echo "<br />";
+					
+					$vectorPagos[] = 
+						['nroFactura' => $numeroFacturaAnterior,
+						'idFactura' => $idFacturaAnterior,
+						'montoFactura' => $montoFacturaAnterior,
+						'acumuladoPorUno' => $acumuladoPorUno];	
+					$contadorDiferentes++;
+					
+					if ($contadorDiferentes > 5)
+					{
+						break;
+					}
+				}
+				$idFacturaAnterior = $concepto->bill->id;
+				$numeroFacturaAnterior = $concepto->bill->bill_number;
+				$montoFacturaAnterior = $concepto->bill->amount_paid;
+				$acumuladoConceptos = 0;
+			}
+			$contador++;
+			$acumuladoConceptos += $concepto->amount;
+		}
+		
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']); */
 	}		
 
     /**
@@ -143,7 +371,7 @@ class ConceptsController extends AppController
      * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Network\Exception\NotFoundException When record not found.
      */
-    public function edit($idBill = null, $billNumber = null)
+    public function edit($idBill = null, $billNumber = null, $tasaCambio = null)
     {
         $this->autoRender = false;
         
@@ -165,7 +393,7 @@ class ConceptsController extends AppController
             }
             else
             {
-                $studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber);   
+                $studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber, $tasaCambio);   
             }
         }
         return;

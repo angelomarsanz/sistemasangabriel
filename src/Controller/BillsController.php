@@ -2072,6 +2072,8 @@ class BillsController extends AppController
     {
 		$this->autoRender = false;
 		
+		$acumuladoServicios = 0;
+		
 		$binnacles = new BinnaclesController;
 		
 		$resultado = ['codigoRetorno' => 0, 'numeroNuevaFactura' => 0];
@@ -2096,10 +2098,22 @@ class BillsController extends AppController
 		$bill->client = $this->headboard['client'];
 		$bill->tax_phone = $this->headboard['taxPhone'];
 		$bill->fiscal_address = $this->headboard['fiscalAddress'];
+	
+		$conceptos = $this->Bills->Concepts->find('all', ['conditions' => ['bill_id' => $reciboPendiente->id, 'SUBSTRING(concept, 1, 18) =' => 'Servicio educativo']]);
+		
+		$contadorServicios = $conceptos->count();
+				
+		if ($contadorServicios > 0)
+		{
+			foreach ($conceptos as $concepto)
+			{
+				$acumuladoServicios += $concepto->amount;
+			}
+		}
 		
 		$bill->amount = $reciboPendiente->amount;
+		$bill->amount_paid = $reciboPendiente->amount_paid - $acumuladoServicios;
 
-		$bill->amount_paid = $reciboPendiente->amount_paid;
 		$bill->annulled = 0;
 		$bill->date_annulled = 0;
 		$bill->invoice_migration = 0;

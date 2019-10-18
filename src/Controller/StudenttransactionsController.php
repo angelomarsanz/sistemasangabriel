@@ -3564,29 +3564,78 @@ class StudenttransactionsController extends AppController
 		if ($tipoNota == "Crédito")
 		{
 			$transaccionEstudiante->amount_dollar = round($transaccionEstudiante->amount_dollar - $montoNotaDolar);
-			$transaccionEstudiante->original_amount = $transaccionEstudiante->original_amount - $valor;
 			$transaccionEstudiante->amount = $transaccionEstudiante->amount - $valor; 			
 		}
 		else
 		{
 			$transaccionEstudiante->amount_dollar = round($transaccionEstudiante->amount_dollar + $montoNotaDolar);
-			$transaccionEstudiante->original_amount = $transaccionEstudiante->original_amount + $valor;
 			$transaccionEstudiante->amount = $transaccionEstudiante->amount + $valor; 				
 		}
-		
+
 		if ($transaccionEstudiante->amount < 1)
 		{
 			$transaccionEstudiante->amount = round($transaccionEstudiante->amount);
 		}
+				
+		$estudianteController = new StudentsController();
+		$mesesTarifas = $estudianteController->mesesTarifas(0);
+		$otrasTarifas = $estudianteController->otrasTarifas(0);
 		
-		if ($transaccionEstudiante->original_amount < 1)
-		{
-			$transaccionEstudiante->original_amount = round($transaccionEstudiante->original_amount);
+		$tarifaDolar = 0;
+		
+		if ($transaccionEstudiante->transaction_type == "Mensualidad" && substr($transaccionEstudiante->transaction_description, 0, 3) != "Ago")
+		{				
+			$ano = $transaccionEstudiante->payment_date->year;
+								
+			$mes = $transaccionEstudiante->payment_date->month;
+																						
+			if ($mes < 10)
+			{
+				$mesCadena = "0" . $mes;
+			}
+			else
+			{
+				$mesCadena = (string) $mes;
+			}
+			$anoMes = $ano . $mesCadena;
+						
+			foreach ($mesesTarifas as $mesTarifa)
+			{
+				if ($mesTarifa['anoMes'] == $anoMes)
+				{
+					$tarifaDolar = $mesTarifa['tarifaDolar'];
+
+					$estudiante = $this->Studenttransactions->Students->get($transaccionEstudiante->student_id);
+				   
+					if ($estudiante->discount === null)
+					{
+						$descuentoFamilia = 1;
+					}
+					else
+					{	
+						$descuentoFamilia = (100 - $estudiante->discount) / 100;
+					}
+					
+					$tarifaDolar = round($tarifaDolar * $descuentoFamilia);
+					break;
+				}
+			}
 		}
-									
-		if ($transaccionEstudiante->amount == $transaccionEstudiante->original_amount)
+		else
 		{
-			if ($transaccionEstudiante->amount == 0)
+			foreach ($otrasTarifas as $otras)
+			{				
+				if ($otras['conceptoAno'] == $transaccionEstudiante->transaction_description)
+				{
+					$tarifaDolar = $otras['tarifaDolar'];
+					break;
+				}
+			}
+		}
+										
+		if ($transaccionEstudiante->amount_dollar >= $tarifaDolar)
+		{
+			if ($transaccionEstudiante->amount_dollar == 0)
 			{
 				$transaccionEstudiante->partial_payment = 0;
 				$transaccionEstudiante->paid_out = 0;
@@ -3597,16 +3646,19 @@ class StudenttransactionsController extends AppController
 				$transaccionEstudiante->paid_out = 1;
 			}
 		} 
-		elseif ($transaccionEstudiante->amount < $transaccionEstudiante->original_amount)
-		{
-			$transaccionEstudiante->partial_payment = 1;
-			$transaccionEstudiante->paid_out = 0;
-		}
 		else
 		{
-			$codigoRetornoTransaccion = 1;
-			$this->Flash->error(__('Error ! El monto abonado es mayor al monto original de la transacción con ID ' . $transaccionEstudiante->id));
-		}			
+			if ($transaccionEstudiante->amount_dollar == 0)
+			{
+				$transaccionEstudiante->partial_payment = 0;
+				$transaccionEstudiante->paid_out = 0;
+			}
+			else
+			{
+				$transaccionEstudiante->partial_payment = 1;
+				$transaccionEstudiante->paid_out = 0;
+			}
+		}
 
 		if ($codigoRetornoTransaccion == 0)
 		{

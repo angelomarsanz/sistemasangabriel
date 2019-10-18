@@ -15,234 +15,50 @@ use App\Controller\BinnaclesController;
 class ConceptsController extends AppController
 {		
     public function testFunction()
-    {
-		/* $this->loadModel('Excels');
-		$this->loadModel('Studenttransactions');
-				
+    {	
+		/* $vectorPagos = [];
+		$facturasHijasServicio = 0;
+		$contadorFacturas = 0;
+		$contadorServicios = 0;
+		
+		$facturasHijas = $this->Concepts->Bills->find('all')
+			->where(['id_anticipo >' => 0])
+			->order(['id_anticipo' => 'ASC']);
+			
+		$contadorFacturas = $facturasHijas->count();
+		
+		$this->Flash->success(__('Contador facturas ' . $contadorFacturas));
+		
 		$conceptos = $this->Concepts->find('all')
-			->contain(['Bills' => ['Parentsandguardians']])
-			->where(['Concepts.concept' => "Matrícula 2019"])
+			->where(['Concepts.concept' => 'Servicio educativo 2019'])
 			->order(['Concepts.bill_id' => 'ASC']);
 			
-		$idAnterior = 0;
-		$contadorGuardadas = 0;
-		$contadorNoGuardadas = 0;
-		$contadorDiferentes = 0;
-		$contadorDolarCero = 0;
+		$contadorServicios = $conceptos->count();
 		
-		$vectorPagos = [];
-	
-		foreach ($conceptos as $concepto)
+		$this->Flash->success(__('Contador servicios ' . $contadorServicios));
+			
+		if ($contadorFacturas > 0 && $contadorServicios > 0)
 		{
-			if ($idAnterior != $concepto->bill_id)
+			foreach ($conceptos as $concepto)
 			{
-				$transaccion = $this->Studenttransactions->get($concepto->transaction_identifier);
-				
-				if ($transaccion->amount_dollar != null && $transaccion->amount_dollar > 0)
+				foreach ($facturasHijas as $hija)
 				{
-					$montoConceptoRedondeado = round($concepto->amount);
-				
-					if ($transaccion->amount == $montoConceptoRedondeado)
+					if ($concepto->bill_id == $hija->id_anticipo)
 					{
-						$tasaDolar = $transaccion->amount / $transaccion->amount_dollar;
-						
-						$excel = $this->Excels->newEntity();
-											
-						$excel->number = $concepto->bill_id;
-						$excel->col1 = $tasaDolar;
-						
-						if (!($this->Excels->save($excel)))
-						{
-							$this->Flash->success(__('La Factura no pudo se actualizada'));;
-							$contadorNoGuardadas++;
-						}
-						else
-						{
-							$contadorGuardadas++;								
-							$vectorPagos[] = ['idFactura' => $concepto->bill_id, 'tasaDolar' => $tasaDolar];  
-						}
-					}
-					else
-					{
-						$contadorDiferentes++;
+						$vectorPagos[] = 
+							['nroFacturaHija' => $hija->bill_number,
+							'idFacturaHija' => $hija->id,
+							'idAnticipo' => $hija->id_anticipo];
+						$facturasHijasServicio++;
 					}
 				}
-				else
-				{
-					$contadorDolarCero++;
-				}
-			}
-			$idAnterior = $concepto->bill_id;
-		}
-		
-		$this->Flash->success(__('Total facturas guardada: ' . $contadorGuardadas));
-		$this->Flash->success(__('Total facturas no guardada: ' . $contadorNoGuardadas));
-		$this->Flash->error(__('Total montos diferentes: ' . $contadorDiferentes));
-		$this->Flash->success(__('Total monto cero: ' . $contadorDolarCero));
-					
-        $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']);
-		
-		$this->loadModel('Excels');
-	
-		$excels = $this->Excels->find('all');
-		
-		$contadorActualizadas = 0;
-		$contadorYaActualizadas = 0;
-		$vectorPagos = [];
-		
-		foreach ($excels as $excel)
-		{						
-			$factura = $this->Concepts->Bills->get($excel->number);
-			
-			if ($factura->tasa_cambio == 1)
-			{
-				$factura->tasa_cambio = $excel->col1;
-				
-				if (!($this->Concepts->Bills->save($factura)))
-				{
-					$this->Flash->error(__('La factura Nro. ' . $factura->bill_number . ' no pudo ser actualizada'));
-				}
-				else
-				{
-					$vectorPagos[] = 
-						['nroFactura' => $excel->number, 
-						'tasaCambio' => $excel->col1];  
-					$contadorActualizadas++;
-				} 
-			}
-			else
-			{
-				$contadorYaActualizadas++;
 			}
 		}
-		
-		$this->Flash->success(__('Facturas actualizadas ' . $contadorActualizadas));
-		$this->Flash->error(__('Facturas ya actualizadas ' . $contadorYaActualizadas));
-		
-        $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']);  
-					
-		$conceptos = $this->Concepts->find('all')
-			->contain(['Bills' => ['Parentsandguardians']])
-			->where(['Concepts.created >=' => '2019-09-01', 'Concepts.annulled' => 0])
-			->order(['Concepts.bill_id' => 'ASC']);
-			
-		$contador = 0;
-		$idAnterior = 0;
-		$facturasSinActualizar = 0;
-		
-		$vectorPagos = [];
-	
-		foreach ($conceptos as $concepto)
-		{
-			if ($idAnterior != $concepto->bill_id)
-			{
-				$factura = $this->Concepts->Bills->get($concepto->bill_id);
-			
-				if ($factura->tasa_cambio == 1)
-				{
-					$vectorPagos[] = 
-						['idFactura' => $factura->id,
-						'nroFactura' => $factura->bill_number];  
-					$facturasSinActualizar++;
-				}
-			}
-			$idAnterior = $concepto->bill_id;
-			if ($contador > 5)
-			{
-				break;
-			}
-		}
-		
-		$this->Flash->success(__('Total facturas sin actualizar: ' . $facturasSinActualizar));
-					
-        $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']);
-		
-		$this->loadModel('Studenttransactions');
-		
-		$conceptos = $this->Concepts->find('all')
-			->contain(['Bills' => ['Parentsandguardians']])
-			->where(['Concepts.created >=' => '2019-09-01', 'Concepts.annulled' => 0, 'Bills.tasa_cambio' => 1])
-			->order(['Concepts.bill_id' => 'ASC']);
-			
-		$facturasSinActualizar = 0;
-		
-		$vectorPagos = [];
-		$idAnterior = 0;
-	
-		foreach ($conceptos as $concepto)
-		{
-			$transaccion = $this->Studenttransactions->get($concepto->transaction_identifier);
-			
-			if ($idAnterior != $concepto->bill_id)
-			{
-				$vectorPagos[] = 
-					['nroFactura' => $concepto->bill->bill_number,
-					'idFactura' => $concepto->bill->id,
-					'fechaFactura' => $concepto->bill->date_and_time,
-					'alumno' => $concepto->student_name,
-					'concepto' => $concepto->concept,
-					'montoConcepto' => $concepto->amount,
-					'descripcionTransaccion' => $transaccion->transaction_description,
-					'montoOriginal' => $transaccion->original_amount,
-					'montoAbonado' => $transaccion->amount,
-					'montoDolar' => $transaccion->amount_dollar,
-					'indicadorPagado' => $transaccion->paid_out,
-					'pagoParcial' => $transaccion->partial_payment];  
-				
-				$facturasSinActualizar++;
-			}
-			$idAnterior = $concepto->bill_id;
-		}
-		
-		$this->Flash->success(__('Total facturas sin actualizar: ' . $facturasSinActualizar));
-					
-        $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']); */ 
 
-		$this->loadModel('Studenttransactions');
+		$this->Flash->success(__('Facturas correspondientes a servicios educativos ' . $facturasHijasServicio));
 		
-		$conceptos = $this->Concepts->find('all')
-			->contain(['Bills' => ['Parentsandguardians']])
-			->where(['Concepts.created >=' => '2019-09-01', 'Concepts.annulled' => 0, 'Bills.tasa_cambio' => 1])
-			->order(['Concepts.bill_id' => 'ASC']);
-			
-		$facturasSinActualizar = 0;
-		
-		$vectorPagos = [];
-		$idAnterior = 0;
-	
-		foreach ($conceptos as $concepto)
-		{
-			$transaccion = $this->Studenttransactions->get($concepto->transaction_identifier);
-			
-			if ($idAnterior != $concepto->bill_id)
-			{
-				$vectorPagos[] = 
-					['nroFactura' => $concepto->bill->bill_number,
-					'idFactura' => $concepto->bill->id,
-					'fechaFactura' => $concepto->bill->date_and_time,
-					'alumno' => $concepto->student_name,
-					'concepto' => $concepto->concept,
-					'montoConcepto' => $concepto->amount,
-					'descripcionTransaccion' => $transaccion->transaction_description,
-					'montoOriginal' => $transaccion->original_amount,
-					'montoAbonado' => $transaccion->amount,
-					'montoDolar' => $transaccion->amount_dollar,
-					'indicadorPagado' => $transaccion->paid_out,
-					'pagoParcial' => $transaccion->partial_payment];  
-				
-				$facturasSinActualizar++;
-			}
-			$idAnterior = $concepto->bill_id;
-		}
-		
-		$this->Flash->success(__('Total facturas sin actualizar: ' . $facturasSinActualizar));
-					
         $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']);
+        $this->set('_serialize', ['vectorPagos']); */
 	}		
 
     /**
