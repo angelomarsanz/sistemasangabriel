@@ -34,18 +34,23 @@ class ConceptsController extends AppController
 				
 				if ($concepto->bill->tasa_cambio == 0)
 				{
+					$concepto->saldo = 0;
 				}
 				else
 				{
+					$concepto->saldo = round($concepto->saldo/$concepto->bill->tasa_cambio);
 				}
 				
+				if (!($this->Concepts->save($concepto)))
 				{
 					$this->Flash->error(__('El concepto con ID ' . $concepto->id . ' no pudo ser actualizado'));
 				}
 				
+				/* $contador++;
 				if ($contador > 5)
 				{
 					break;
+				} */
 			}
 		}
 	}		
