@@ -1750,6 +1750,10 @@ class BillsController extends AppController
 			'order' => ['created' => 'ASC'] ]);
 		
 		$mesFactura = $facturaConceptos->date_and_time->month;
+		
+		$this->loadModel('Monedas');	
+		$moneda = $this->Monedas->get(2);
+		$dollarExchangeRate = $moneda->tasa_cambio_dolar;
 			
 		if ($this->request->is('post')) 
         {	
@@ -1770,7 +1774,7 @@ class BillsController extends AppController
 				$acumuladoNota += $montosNotaContable[$clave];
 			}
 			
-            $numeroNotaContable = $this->agregaNotaContable($facturaConceptos, $tipoNota, $acumuladoNota);
+            $numeroNotaContable = $this->agregaNotaContable($facturaConceptos, $tipoNota, $acumuladoNota, $dollarExchangeRate);
 			
             if ($numeroNotaContable > 0)
             {
@@ -1794,12 +1798,12 @@ class BillsController extends AppController
 							
 							$transaccionEstudiante = new StudenttransactionsController();
 							
-							$codigoRetornoTransaccion = $transaccionEstudiante->notaTransaccion($concepto->transaction_identifier, $numeroNotaContable, $valor, $tipoNota, $facturaConceptos->tasa_cambio);
+							$codigoRetornoTransaccion = $transaccionEstudiante->notaTransaccion($concepto->transaction_identifier, $numeroNotaContable, $valor, $tipoNota, $dollarExchangeRate);
 
 							if ($codigoRetornoTransaccion == 0)
 							{
 								$conceptosFacturas = new ConceptsController();							
-								$codigoRetornoConcepto = $conceptosFacturas->agregarConceptosNota($clave, $valor, $numeroNotaContable, $tipoNota, $idNota);
+								$codigoRetornoConcepto = $conceptosFacturas->agregarConceptosNota($clave, $valor, $numeroNotaContable, $tipoNota, $idNota, $dollarExchangeRate);
 								if ($codigoRetornoConcepto > 0)
 								{
 									break;
@@ -1818,11 +1822,11 @@ class BillsController extends AppController
             }
 		}		
 		
-		$this->set(compact('facturaConceptos', 'retornoControlador', 'retornoAccion', 'idFamilia', 'familia', 'mesActual', 'mesFactura', 'notasAnteriores'));
-		$this->set('_serialize', ['facturaConceptos', 'retornoControlador', 'retornoAccion', 'idFamilia', 'familia', 'mesActual', 'mesFactura', 'notasAnteriores']);
+		$this->set(compact('facturaConceptos', 'retornoControlador', 'retornoAccion', 'idFamilia', 'familia', 'mesActual', 'mesFactura', 'notasAnteriores', 'dollarExchangeRate'));
+		$this->set('_serialize', ['facturaConceptos', 'retornoControlador', 'retornoAccion', 'idFamilia', 'familia', 'mesActual', 'mesFactura', 'notasAnteriores', 'dollarExchangeRate']);
 	}
 	
-    public function agregaNotaContable($facturaConceptos = null, $tipoNota = null, $acumuladoNota = null)
+    public function agregaNotaContable($facturaConceptos = null, $tipoNota = null, $acumuladoNota = null, $tasaCambio = null)
     {			
 		if ($tipoNota == "Crédito")
 		{
@@ -1891,7 +1895,7 @@ class BillsController extends AppController
 		$notaContable->id_anticipo = 0;
 		$notaContable->factura_pendiente = 0;
 		$notaContable->moneda_id = $facturaConceptos->moneda_id;
-		$notaContable->tasa_cambio = $facturaConceptos->tasa_cambio;
+		$notaContable->tasa_cambio = $tasaCambio;
 		
         if ($this->Bills->save($notaContable)) 
         {

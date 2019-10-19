@@ -1,3 +1,12 @@
+<style>
+@media screen
+{
+    .noverScreen
+    {
+      display:none
+    }
+}
+</style>
 <div class="row">
     <div class="col-md-12">
         <div class="page-header">
@@ -36,7 +45,7 @@
 		<?= $this->Form->create() ?>
 			<fieldset>
 				<div class="row">
-					<div class="col-md-3">
+					<div class="col-md-4">
 						<?php
 							echo $this->Form->input('tipo_nota', ['required' => 'required', 'label' => 'Tipo de nota', 'options' => 
 								[null => '',
@@ -44,6 +53,12 @@
 								'Débito' => 'Débito']]);
 						?>
 					</div>
+					<div class="col-md-4">
+						<?= 'Tasa de cambio factura original: <b>' . number_format($facturaConceptos->tasa_cambio, 2, ",", ".") . '</b>'?>
+					</div>
+					<div class="col-md-4">
+						<?= 'Tasa de cambio actual: <b>' . number_format($dollarExchangeRate, 2, ",", ".") . '</b>'?>
+					</div>									
 				</div>
 				<div class="row">
 					<div class="col-md-12">								
@@ -51,22 +66,28 @@
 							<table class="table table-striped table-hover">
 								<thead>
 									<tr>
-										<th style="width: 30%;">Alumno</th>
-										<th style="width: 20%;">Concepto</th>
-										<th style="width: 10%;">Monto original</th>
-										<th style="width: 10%;">Saldo</th>
-										<th style="width: 10%;">Monto nota</th>
+										<th style="width: 20%;">Alumno</th>
+										<th style="width: 10%;">Concepto</th>
+										<th style="width: 10%;">Mto. Fact($)</th>
+										<th style="width: 10%;">Mto. Fact(Bs.)</th>
+										<th style="width: 10%;">Saldo($)</th>
+										<th style="width: 10%;">Monto nota($)</th>
+										<th style="width: 10%;">Monto nota(Bs.)</th>
+										<th style="width: 0%;" class="noverScreen">Monto oculto(Bs.)</th>
 										<th style="width: 20%;"></th>
 									</tr>
 								</thead>
 								<tbody>
 									<?php foreach ($facturaConceptos->concepts as $concepto): ?>
 										<tr>
-											<td style="width: 30%;"><input disabled='true' class='form-control' value="<?= $concepto->student_name ?>"></td>
-											<td style="width: 20%;"><input disabled='true' class='form-control' value="<?= $concepto->concept ?>"></td>
+											<td style="width: 20%;"><input disabled='true' class='form-control' value="<?= $concepto->student_name ?>"></td>
+											<td style="width: 10%;"><input disabled='true' class='form-control' value="<?= $concepto->concept ?>"></td>
+											<td style="width: 10%;"><input id=<?= "MD-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format(round($concepto->amount/$facturaConceptos->tasa_cambio), 2, ",", ".") ?>></td>
 											<td style="width: 10%;"><input id=<?= "MF-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format($concepto->amount, 2, ",", ".") ?>></td>
 											<td style="width: 10%;"><input id=<?= "SC-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format($concepto->saldo, 2, ",", ".") ?>></td>
-											<td style="width: 20%;"><input id=<?= "MN-" . $concepto->id ?> name="montosNotaContable[<?= $concepto->id ?>]" class='form-control alternative-decimal-separator monto-nota' value=0></td>
+											<td style="width: 10%;"><input id=<?= "ND-" . $concepto->id ?> name="montosNotaDolar[<?= $concepto->id ?>]" class='form-control alternative-decimal-separator monto-nota' value=0></td>
+											<td style="width: 10%;"><input id=<?= "NV-" . $concepto->id ?> name="montosNotaVisible[<?= $concepto->id ?>]" class='form-control alternative-decimal-separator' value=0 disabled='true'></td>
+											<td style="width: 10%;"><input id=<?= "MN-" . $concepto->id ?> name="montosNotaContable[<?= $concepto->id ?>]" class='form-control alternative-decimal-separator noverScreen' value=0></td>
 											<td style="width: 20%;" id=<?= "MENSAJE-" . $concepto->id ?> class="mensajes-usuario"></td>
 										</tr>
 									<?php endforeach; ?>
@@ -99,7 +120,7 @@
 									<td><?= $anterior->bill_number ?></td>
 									<td><?= $anterior->control_number ?></td>
 									<td><?= $anterior->tipo_documento ?></td>
-									<td><?= $anterior->amount_paid ?></td>
+									<td><?= number_format($anterior->amount_paid, 2, ",", ".") ?></td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
@@ -110,12 +131,35 @@
     </div>
 </div>
 <script>
+	var tasaCambio = <?= $dollarExchangeRate; ?>;
     $(document).ready(function()
-    { 
+    {
     	$(".alternative-decimal-separator").numeric({ altDecimal: "," });
 		
 		mesActual = <?= $mesActual ?>;
 		mesFactura = <?= $mesFactura ?>;
+		
+		$('.monto-nota').change(function(e)
+		{
+			$(".monto-nota").each(function (index) 
+			{			
+				montoNotaCadena = $(this).val();
+				
+				if (montoNotaCadena.substr(-3, 1) == ',')
+				{
+					montoNotaSinPuntos = montoNotaCadena.replace(".", "");
+					montoNotaSinComa = montoNotaSinPuntos.replace(",", ".");
+					montoNotaNumerico = parseFloat(montoNotaSinComa);
+				}
+				else
+				{
+					montoNotaNumerico = parseFloat(montoNotaCadena);			
+				}
+
+				$('#NV-' + $(this).attr('id').substring(3)).val(montoNotaNumerico * tasaCambio);
+				$('#MN-' + $(this).attr('id').substring(3)).val(montoNotaNumerico * tasaCambio);
+			});
+		});
 				
 		$('#crear-nota').click(function(e) 
         {

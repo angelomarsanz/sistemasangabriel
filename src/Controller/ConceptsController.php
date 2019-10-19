@@ -15,50 +15,39 @@ use App\Controller\BinnaclesController;
 class ConceptsController extends AppController
 {		
     public function testFunction()
-    {	
-		/* $vectorPagos = [];
-		$facturasHijasServicio = 0;
-		$contadorFacturas = 0;
-		$contadorServicios = 0;
-		
-		$facturasHijas = $this->Concepts->Bills->find('all')
-			->where(['id_anticipo >' => 0])
-			->order(['id_anticipo' => 'ASC']);
-			
-		$contadorFacturas = $facturasHijas->count();
-		
-		$this->Flash->success(__('Contador facturas ' . $contadorFacturas));
-		
+    {			
+		$contador = 0;
+	
 		$conceptos = $this->Concepts->find('all')
-			->where(['Concepts.concept' => 'Servicio educativo 2019'])
+			->contain(['Bills'])
 			->order(['Concepts.bill_id' => 'ASC']);
 			
-		$contadorServicios = $conceptos->count();
+		$contadorConceptos = $conceptos->count();
 		
-		$this->Flash->success(__('Contador servicios ' . $contadorServicios));
+		$this->Flash->success(__('Contador conceptos ' . $contadorConceptos));
 			
-		if ($contadorFacturas > 0 && $contadorServicios > 0)
+		if ($contadorConceptos > 0)
 		{
 			foreach ($conceptos as $concepto)
-			{
-				foreach ($facturasHijas as $hija)
+			{	
+				$conceptoBuscado = $this->Concepts->get($concepto->id);
+				
+				if ($concepto->bill->tasa_cambio == 0)
 				{
-					if ($concepto->bill_id == $hija->id_anticipo)
-					{
-						$vectorPagos[] = 
-							['nroFacturaHija' => $hija->bill_number,
-							'idFacturaHija' => $hija->id,
-							'idAnticipo' => $hija->id_anticipo];
-						$facturasHijasServicio++;
-					}
 				}
+				else
+				{
+				}
+				
+				{
+					$this->Flash->error(__('El concepto con ID ' . $concepto->id . ' no pudo ser actualizado'));
+				}
+				
+				if ($contador > 5)
+				{
+					break;
 			}
 		}
-
-		$this->Flash->success(__('Facturas correspondientes a servicios educativos ' . $facturasHijasServicio));
-		
-        $this->set(compact('vectorPagos'));
-        $this->set('_serialize', ['vectorPagos']); */
 	}		
 
     /**
@@ -211,7 +200,7 @@ class ConceptsController extends AppController
 		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
 	}
 	
-    public function agregarConceptosNota($idConcepto = null, $montoNota = null, $numeroNotaContable = null, $tipoNota = null, $idNota = null)
+    public function agregarConceptosNota($idConcepto = null, $montoNota = null, $numeroNotaContable = null, $tipoNota = null, $idNota = null, $tasaCambio = null)
     {
 		$codigoRetornoConcepto = 0;
 		
@@ -219,11 +208,11 @@ class ConceptsController extends AppController
 		
 		if ($tipoNota == "Crédito")
 		{
-			$conceptoFactura->saldo -= $montoNota; 
+			$conceptoFactura->saldo -= round($montoNota/$tasaCambio); 
 		}
 		else
 		{
-			$conceptoFactura->saldo += $montoNota;
+			$conceptoFactura->saldo += round($montoNota/$tasaCambio);
 		}
 		
 		if (!($this->Concepts->save($conceptoFactura)))
@@ -244,7 +233,7 @@ class ConceptsController extends AppController
 			$conceptoNota->observation = $conceptoFactura->observation;
 			$conceptoNota->annulled = 0;
 			$conceptoNota->concept_migration = 1;
-			$conceptoNota->saldo = $montoNota;
+			$conceptoNota->saldo = round($montoNota/$tasaCambio);
 			
 			if (!($this->Concepts->save($conceptoNota)))
 			{

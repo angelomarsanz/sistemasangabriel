@@ -301,6 +301,50 @@ class ConceptsController extends AppController
 		
         $this->set(compact('vectorPagos'));
         $this->set('_serialize', ['vectorPagos']); */
+
+		/* $vectorPagos = [];
+		$facturasHijasServicio = 0;
+		$contadorFacturas = 0;
+		$contadorServicios = 0;
+		
+		$facturasHijas = $this->Concepts->Bills->find('all')
+			->where(['id_anticipo >' => 0])
+			->order(['id_anticipo' => 'ASC']);
+			
+		$contadorFacturas = $facturasHijas->count();
+		
+		$this->Flash->success(__('Contador facturas ' . $contadorFacturas));
+		
+		$conceptos = $this->Concepts->find('all')
+			->where(['Concepts.concept' => 'Servicio educativo 2019'])
+			->order(['Concepts.bill_id' => 'ASC']);
+			
+		$contadorServicios = $conceptos->count();
+		
+		$this->Flash->success(__('Contador servicios ' . $contadorServicios));
+			
+		if ($contadorFacturas > 0 && $contadorServicios > 0)
+		{
+			foreach ($conceptos as $concepto)
+			{
+				foreach ($facturasHijas as $hija)
+				{
+					if ($concepto->bill_id == $hija->id_anticipo)
+					{
+						$vectorPagos[] = 
+							['nroFacturaHija' => $hija->bill_number,
+							'idFacturaHija' => $hija->id,
+							'idAnticipo' => $hija->id_anticipo];
+						$facturasHijasServicio++;
+					}
+				}
+			}
+		}
+
+		$this->Flash->success(__('Facturas correspondientes a servicios educativos ' . $facturasHijasServicio));
+		
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']); */
 	}		
 
     /**
