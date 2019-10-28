@@ -33,9 +33,13 @@ class BillsController extends AppController
 
     public function testFunction()
     {
-        $bill = $this->Bills->get(19205);
+        /* $recibos = $this->Bills->find('all')
+			->contain(['Parentsandguardians'])
+			->where(['factura_pendiente' => 1, 'annulled' => 0])
+			->order(['Bills.id' => 'ASC']);
 		
-		echo "<br />" . substr($bill->school_year, 13, 4);
+        $this->set(compact('recibos'));
+        $this->set('_serialize', ['recibos']); */
     }
 	
     public function index($idFamily = null, $family = null)

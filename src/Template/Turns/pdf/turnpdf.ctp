@@ -33,7 +33,11 @@ tr:nth-child(even) {
 </div>
 <br />
 <div style="width: 100%; text-align: center;">
-    <h4>Cierre del turno <?= $turn->turn ?>, de fecha: <?= $turn->start_date->format('d-m-Y') ?>, correspondiente al cajero <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h4>
+	<?php if ($cajero == ""): ?>
+		<h4>Cierre del turno <?= $turn->turn ?>, de fecha: <?= $turn->start_date->format('d-m-Y') ?>, correspondiente al cajero <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h4>
+	<?php else: ?>
+		<h4>Cierre del turno <?= $turn->turn ?>, de fecha: <?= $turn->start_date->format('d-m-Y') ?>, correspondiente al cajero <?= $cajero ?></h4>	
+	<?php endif; ?>		
 </div>
 <b>Efectivo:</b>
 <hr size="4" />

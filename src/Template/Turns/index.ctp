@@ -9,6 +9,8 @@
 					<tr>
 						<th scope="col">Fecha</th>
 						<th scope="col">Turno</th>
+						<th scope="col">Cajero</th>
+						<th scope="col">Estatus</th>
 						<th scope="col" class="actions"></th>
 					</tr>
 				</thead>
@@ -17,8 +19,18 @@
 						<tr>
 							<td><?= h($turn->start_date->format('d-m-Y')) ?></td>
 							<td><?= h($turn->turn) ?></td>
+							<td><?= h($turn->user->first_name . ' ' . $turn->user->surname) ?></td>
+							<?php if ($turn->status == 0): ?>
+								<td>Cerrado</td>
+							<?php else: ?>
+								<td>Abierto</td>
+							<?php endif; ?>
 							<td class="actions">
-								<?= $this->Html->link('Imprimir', ['action' => 'turnpdf', $turn->id, '_ext' => 'pdf'], ['class' => 'btn btn-success']); ?>
+								<?php 
+									if ($turn->status == 0):
+										echo $this->Html->link('Imprimir', ['action' => 'turnpdf', $turn->id, $turn->user->first_name . ' ' . $turn->user->surname, '_ext' => 'pdf'], ['class' => 'btn btn-success']); 
+									endif;
+								?>
 							</td>
 						</tr>
 					<?php endforeach; ?>

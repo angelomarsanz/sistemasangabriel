@@ -39,9 +39,25 @@ class TurnsController extends AppController
      */
     public function index()
     {
-		$query = $this->Turns->find('all')
-			->where(['user_id' => $this->Auth->user('id'), 'status' => 0])
-			->order(['start_date' => 'DESC']);
+		if ($this->Auth->user('id') == 1)
+		{
+			$query = $this->Turns->find('all')
+				->contain(['Users'])
+				->order(['start_date' => 'DESC']);			
+		}
+		elseif ($this->Auth->user('id') == 978)
+		{
+			$query = $this->Turns->find('all')
+				->contain(['Users'])
+				->where(['user_id !=' => 1])
+				->order(['start_date' => 'DESC']);			
+		}
+		else
+		{
+			$query = $this->Turns->find('all')
+				->where(['user_id' => $this->Auth->user('id')])
+				->order(['start_date' => 'DESC']);
+		}
    
 		$this->set('turns', $this->paginate($query));
 		
@@ -362,7 +378,7 @@ class TurnsController extends AppController
         $this->set('_serialize', ['idTurn']);
     }
 
-    public function turnpdf($idTurn = null)
+    public function turnpdf($idTurn = null, $cajero = null)
     {
         $payment = new PaymentsController();
         
@@ -454,9 +470,14 @@ class TurnsController extends AppController
                 'filename' => $idTurn,
                 'render' => 'browser',
             ]]);
+			
+		if (!(isset($cajero)))
+		{
+			$cajero = "";
+		}
 
-        $this->set(compact('turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito', 'facturasRecibo', 'indicadorFacturasRecibo', 'totalFacturasRecibo', 'anuladas', 'indicadorAnuladas', 'contadorAnuladas'));
-        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito', 'facturasRecibo', 'indicadorFacturasRecibo', 'totalFacturasRecibo', 'anuladas', 'indicadorAnuladas', 'contadorAnuladas']);
+        $this->set(compact('turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito', 'facturasRecibo', 'indicadorFacturasRecibo', 'totalFacturasRecibo', 'anuladas', 'indicadorAnuladas', 'contadorAnuladas', 'cajero'));
+        $this->set('_serialize', ['turn', 'paymentsTurn', 'receipt', 'indicadorServicioEducativo', 'pagosServicioEducativo', 'indicadorNotasCredito', 'indicadorNotasDebito', 'notasContables', 'totalNotasCredito', 'totalNotasDebito', 'facturasRecibo', 'indicadorFacturasRecibo', 'totalFacturasRecibo', 'anuladas', 'indicadorAnuladas', 'contadorAnuladas', 'cajero']);
     }
 
     /**

@@ -166,7 +166,7 @@
 			acumuladoFactura = 0;
 			acumuladoNota = 0;
 			indicadorError = 0;
-			
+				
 			$('.mensajes-usuario').html("");
 			
 			$(".monto-nota").each(function (index) 
@@ -209,19 +209,19 @@
 				alert("Estimado usuario uno o más datos contienen errores, por favor verifique");
 				e.preventDefault();
 			}
-			else if (acumuladoNota == acumuladoFactura)
+			/* else if (acumuladoNota == acumuladoFactura)
 			{
 				if (mesActual == mesFactura)
 				{
 					alert('No se puede hacer una nota contable "TOTAL", porque la factura es de este mes');
 					e.preventDefault();
 				}
-			}
+			} */
 			else if (acumuladoNota == 0)
 			{
 				alert('No se puede emitir una nota contable con monto igual a cero');
 				e.preventDefault();
-			}			
+			}	
 		});
 	});
 </script>
