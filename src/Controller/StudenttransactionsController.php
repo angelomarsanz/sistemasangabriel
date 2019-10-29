@@ -15,49 +15,29 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
-		/* $transaccionesEstudiante = TableRegistry::get('Studenttransactions');
+		$contador = 0;
+		
+		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
 		$transacciones = $transaccionesEstudiante->find()
-			->contain(['Students' => ['Parentsandguardians']])
-			->where(['Students.new_student' => 0,
-					'Students.balance' => 2019,
-					'Studenttransactions.paid_out' => 1,
-					'or' => [['Studenttransactions.transaction_description' => 'Ago 2019'],
-							['Studenttransactions.transaction_description' => 'Matrícula 2019'],
-							['Studenttransactions.transaction_description' => 'Seguro escolar 2019'],
-							['Studenttransactions.transaction_description' => 'Thales 2019'],
-							['Studenttransactions.transaction_description' => 'Ago 2020']]])
-			->order(['Parentsandguardians.family' => 'ASC', 'Students.id' => 'ASC']);
-				
-			$idAlumnoActual = 0;
-			$vectorPagoInscripcion = [];
-			$totalPagoInscripcion = 0;
-			$contador = 0;
-			
-			foreach ($transacciones as $transaccion)
+			->where(['transaction_description' => 'Servicio educativo 2019', 'amount <' => 450])
+			->order(['student_id' => 'ASC']);
+							
+		foreach ($transacciones as $transaccion)
+		{
+			$transaccionGet = $this->Studenttransactions->get($transaccion->id);
+			$transaccionGet->amount_dollar = $transaccionGet->amount;
+						
+			if (!($this->Studenttransactions->save($transaccionGet))) 
 			{
-				if ($idAlumnoActual == 0)
-				{
-					$idAlumnoActual = $transaccion->student->id;
-				}
-				if ($idAlumnoActual != $transaccion->student->id)
-				{
-					$vectorPagoInscripcion[$idAlumnoActual] = $totalPagoInscripcion;
-					$idAlumnoActual = $transaccion->student->id;
-					$totalPagoInscripcion = 0;
-					
-				}
-				$totalPagoInscripcion += $transaccion->amount_dollar;
+                $this->Flash->error(__('La transacción no pudo ser actualizada'));
+			}
+			else
+			{
 				$contador++;
-				
 			}
-			if (!(isset($vectorPagoInscripcion[$idAlumnoActual])))
-			{
-				$vectorPagoInscripcion[$idAlumnoActual] = $totalPagoInscripcion;		
-			}
-								
-		$this->set(compact('transacciones', 'vectorPagoInscripcion'));
-        $this->set('_serialize', ['transacciones', 'vectorPagoInscripcion']); */
+		}					
+		$this->Flash->success(__('Total transacciones actualizadas ' . $contador));	
     }
 	
 	public function testFunction2()
