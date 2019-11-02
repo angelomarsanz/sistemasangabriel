@@ -20,14 +20,16 @@ class StudenttransactionsController extends AppController
 		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
 		$transacciones = $transaccionesEstudiante->find()
-			->where(['transaction_description' => 'Servicio educativo 2019', 'amount <' => 450])
-			->order(['student_id' => 'ASC']);
-							
+			->contain(['Students'])
+			->where(['transaction_description' => 'Servicio educativo 2019', 'amount >' => 0, 'amount <' => 450])
+			->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
+	
 		foreach ($transacciones as $transaccion)
 		{
 			$transaccionGet = $this->Studenttransactions->get($transaccion->id);
-			$transaccionGet->amount_dollar = $transaccionGet->amount;
 						
+			$transaccionGet->amount_dollar = 999999;
+			
 			if (!($this->Studenttransactions->save($transaccionGet))) 
 			{
                 $this->Flash->error(__('La transacción no pudo ser actualizada'));
@@ -36,8 +38,11 @@ class StudenttransactionsController extends AppController
 			{
 				$contador++;
 			}
-		}					
-		$this->Flash->success(__('Total transacciones actualizadas ' . $contador));	
+		}
+		$this->Flash->success(__('Total transacciones actualizadas ' . $contador));
+	
+        $this->set(compact('transacciones'));
+        $this->set('_serialize', ['transacciones']);
     }
 	
 	public function testFunction2()

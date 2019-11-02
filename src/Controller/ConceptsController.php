@@ -17,9 +17,11 @@ class ConceptsController extends AppController
     public function testFunction()
     {			
 		$contador = 0;
+		$vectorPagos = [];
 	
 		$conceptos = $this->Concepts->find('all')
 			->contain(['Bills'])
+			->where(['Bills.annulled' => 0, 'Concepts.concept' => 'Ago 2019', 'Bills.date_and_time >=' => '2019-06-15'])
 			->order(['Concepts.bill_id' => 'ASC']);
 			
 		$contadorConceptos = $conceptos->count();
@@ -30,29 +32,19 @@ class ConceptsController extends AppController
 		{
 			foreach ($conceptos as $concepto)
 			{	
-				$conceptoBuscado = $this->Concepts->get($concepto->id);
+				$montoConcepto = round($concepto->amount / $concepto->bill->tasa_cambio);
 				
-				if ($concepto->bill->tasa_cambio == 0)
+				if ($montoConcepto != 25)
 				{
-					$concepto->saldo = 0;
+					$vectorPagos[] = ['factura' => $concepto->bill->bill_number, 'monto' => $montoConcepto];
+					$contador++;
 				}
-				else
-				{
-					$concepto->saldo = round($concepto->saldo/$concepto->bill->tasa_cambio);
-				}
-				
-				if (!($this->Concepts->save($concepto)))
-				{
-					$this->Flash->error(__('El concepto con ID ' . $concepto->id . ' no pudo ser actualizado'));
-				}
-				
-				/* $contador++;
-				if ($contador > 5)
-				{
-					break;
-				} */
 			}
 		}
+		$this->Flash->success(__('Total facturas con error ' . $contador));
+		
+        $this->set(compact('vectorPagos'));
+        $this->set('_serialize', ['vectorPagos']);
 	}		
 
     /**

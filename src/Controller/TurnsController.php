@@ -55,6 +55,7 @@ class TurnsController extends AppController
 		else
 		{
 			$query = $this->Turns->find('all')
+				->contain(['Users'])
 				->where(['user_id' => $this->Auth->user('id')])
 				->order(['start_date' => 'DESC']);
 		}
