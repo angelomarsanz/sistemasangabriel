@@ -20,14 +20,16 @@ class StudenttransactionsController extends AppController
 		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
 		$transacciones = $transaccionesEstudiante->find()
-			->where(['transaction_description' => 'Servicio educativo 2019', 'amount <' => 450])
-			->order(['student_id' => 'ASC']);
-							
+			->contain(['Students'])
+			->where(['transaction_description' => 'Servicio educativo 2019', 'amount >' => 0, 'amount <' => 450])
+			->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
+	
 		foreach ($transacciones as $transaccion)
 		{
 			$transaccionGet = $this->Studenttransactions->get($transaccion->id);
-			$transaccionGet->amount_dollar = $transaccionGet->amount;
 						
+			$transaccionGet->amount_dollar = 999999;
+			
 			if (!($this->Studenttransactions->save($transaccionGet))) 
 			{
                 $this->Flash->error(__('La transacción no pudo ser actualizada'));
@@ -36,8 +38,11 @@ class StudenttransactionsController extends AppController
 			{
 				$contador++;
 			}
-		}					
-		$this->Flash->success(__('Total transacciones actualizadas ' . $contador));	
+		}
+		$this->Flash->success(__('Total transacciones actualizadas ' . $contador));
+	
+        $this->set(compact('transacciones'));
+        $this->set('_serialize', ['transacciones']);
     }
 	
 	public function testFunction2()
@@ -287,18 +292,18 @@ class StudenttransactionsController extends AppController
 		if ($indicadorError == 0)
 		{
 
-		$studenttransaction = $this->Studenttransactions->newEntity();
-		
-		$studenttransaction->student_id = $studentId;
-		$studenttransaction->amount = 0;
-		$studenttransaction->original_amount = 0;
-		$studenttransaction->invoiced = 0;
-		$studenttransaction->paid_out = 0;
-		$studenttransaction->partial_payment = 0;
-		$studenttransaction->bill_number = 0;
-		$studenttransaction->payment_date = 0;
-		$studenttransaction->transaction_migration = 0;
-		$studenttransaction->amount_dollar = 0;
+			$studenttransaction = $this->Studenttransactions->newEntity();
+			
+			$studenttransaction->student_id = $studentId;
+			$studenttransaction->amount = 0;
+			$studenttransaction->original_amount = 0;
+			$studenttransaction->invoiced = 0;
+			$studenttransaction->paid_out = 0;
+			$studenttransaction->partial_payment = 0;
+			$studenttransaction->bill_number = 0;
+			$studenttransaction->payment_date = 0;
+			$studenttransaction->transaction_migration = 0;
+			$studenttransaction->amount_dollar = 0;
 
             $studenttransaction->transaction_type = 'Seguro escolar';
             $studenttransaction->transaction_description = 'Seguro escolar' . ' ' . $quotaYear;
@@ -431,18 +436,18 @@ class StudenttransactionsController extends AppController
 		
 		if ($indicadorError == 0)
 		{
-		$studenttransaction = $this->Studenttransactions->newEntity();
-		
-		$studenttransaction->student_id = $studentId;
-		$studenttransaction->amount = 0;
-		$studenttransaction->original_amount = 0;
-		$studenttransaction->invoiced = 0;
-		$studenttransaction->paid_out = 0;
-		$studenttransaction->partial_payment = 0;
-		$studenttransaction->bill_number = 0;
-		$studenttransaction->payment_date = 0;
-		$studenttransaction->transaction_migration = 0;
-		$studenttransaction->amount_dollar = 0;
+			$studenttransaction = $this->Studenttransactions->newEntity();
+			
+			$studenttransaction->student_id = $studentId;
+			$studenttransaction->amount = 0;
+			$studenttransaction->original_amount = 0;
+			$studenttransaction->invoiced = 0;
+			$studenttransaction->paid_out = 0;
+			$studenttransaction->partial_payment = 0;
+			$studenttransaction->bill_number = 0;
+			$studenttransaction->payment_date = 0;
+			$studenttransaction->transaction_migration = 0;
+			$studenttransaction->amount_dollar = 0;
 
             $studenttransaction->transaction_type = 'Seguro escolar';
             $studenttransaction->transaction_description = 'Seguro escolar' . ' ' . $quotaYear;
@@ -455,17 +460,17 @@ class StudenttransactionsController extends AppController
 
 		if ($indicadorError == 0)
 		{
-		$studenttransaction = $this->Studenttransactions->newEntity();
+			$studenttransaction = $this->Studenttransactions->newEntity();
 		
-		$studenttransaction->student_id = $studentId;
-		$studenttransaction->amount = 0;
-		$studenttransaction->original_amount = 0;
-		$studenttransaction->invoiced = 0;
-		$studenttransaction->paid_out = 0;
-		$studenttransaction->partial_payment = 0;
-		$studenttransaction->bill_number = 0;
-		$studenttransaction->payment_date = 0;
-		$studenttransaction->transaction_migration = 0;
+			$studenttransaction->student_id = $studentId;
+			$studenttransaction->amount = 0;
+			$studenttransaction->original_amount = 0;
+			$studenttransaction->invoiced = 0;
+			$studenttransaction->paid_out = 0;
+			$studenttransaction->partial_payment = 0;
+			$studenttransaction->bill_number = 0;
+			$studenttransaction->payment_date = 0;
+			$studenttransaction->transaction_migration = 0;
 			$studenttransaction->amount_dollar = 0;
 
             $studenttransaction->transaction_type = 'Thales';
@@ -481,16 +486,16 @@ class StudenttransactionsController extends AppController
 		{				
 			for ($i = 1; $i <= 12; $i++) 
 			{    
-			$studenttransaction = $this->Studenttransactions->newEntity();
-	
-			$studenttransaction->student_id = $studentId;
-			$studenttransaction->amount = 0;
-			$studenttransaction->original_amount = 0;
-			$studenttransaction->invoiced = 0;
-			$studenttransaction->paid_out = 0;
-			$studenttransaction->partial_payment = 0;
-			$studenttransaction->bill_number = 0;
-			$studenttransaction->transaction_migration = 0;
+				$studenttransaction = $this->Studenttransactions->newEntity();
+		
+				$studenttransaction->student_id = $studentId;
+				$studenttransaction->amount = 0;
+				$studenttransaction->original_amount = 0;
+				$studenttransaction->invoiced = 0;
+				$studenttransaction->paid_out = 0;
+				$studenttransaction->partial_payment = 0;
+				$studenttransaction->bill_number = 0;
+				$studenttransaction->transaction_migration = 0;
 				$studenttransaction->amount_dollar = 0;
            
 				if ($i < 5)
@@ -569,19 +574,18 @@ class StudenttransactionsController extends AppController
 
 		if ($indicadorError == 0)
 		{
-
-		$studenttransaction = $this->Studenttransactions->newEntity();
-		
-		$studenttransaction->student_id = $studentId;	
-		$studenttransaction->amount = 0;
-		$studenttransaction->original_amount = 0;
-		$studenttransaction->invoiced = 0;
-		$studenttransaction->paid_out = 0;
-		$studenttransaction->partial_payment = 0;
-		$studenttransaction->bill_number = 0;
-		$studenttransaction->payment_date = 0;
-		$studenttransaction->transaction_migration = 0;
-		$studenttransaction->amount_dollar = 0;
+			$studenttransaction = $this->Studenttransactions->newEntity();
+			
+			$studenttransaction->student_id = $studentId;	
+			$studenttransaction->amount = 0;
+			$studenttransaction->original_amount = 0;
+			$studenttransaction->invoiced = 0;
+			$studenttransaction->paid_out = 0;
+			$studenttransaction->partial_payment = 0;
+			$studenttransaction->bill_number = 0;
+			$studenttransaction->payment_date = 0;
+			$studenttransaction->transaction_migration = 0;
+			$studenttransaction->amount_dollar = 0;
                
             $studenttransaction->transaction_type = 'Servicio educativo';
             $studenttransaction->transaction_description = 'Servicio educativo' . ' ' . $quotaYear;
@@ -597,18 +601,17 @@ class StudenttransactionsController extends AppController
 
             for ($i = 1; $i <= 12; $i++) 
             {                
-		$studenttransaction = $this->Studenttransactions->newEntity();
-		
-		$studenttransaction->student_id = $studentId;	
-		$studenttransaction->amount = 0;
-		$studenttransaction->original_amount = 0;
-		$studenttransaction->invoiced = 0;
-		$studenttransaction->paid_out = 0;
-		$studenttransaction->partial_payment = 0;
-		$studenttransaction->bill_number = 0;
-		$studenttransaction->transaction_migration = 0;
-		$studenttransaction->amount_dollar = 0;
-
+				$studenttransaction = $this->Studenttransactions->newEntity();
+				
+				$studenttransaction->student_id = $studentId;	
+				$studenttransaction->amount = 0;
+				$studenttransaction->original_amount = 0;
+				$studenttransaction->invoiced = 0;
+				$studenttransaction->paid_out = 0;
+				$studenttransaction->partial_payment = 0;
+				$studenttransaction->bill_number = 0;
+				$studenttransaction->transaction_migration = 0;
+				$studenttransaction->amount_dollar = 0;
 
                 if ($i < 5)
                 {

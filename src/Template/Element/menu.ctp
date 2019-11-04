@@ -90,7 +90,7 @@
 								<li><?= $this->Html->link('Datos de alumnos', ['controller' => 'Students', 'action' => 'consultStudent']) ?></li>
 								<li><?= $this->Html->link('Alumnos con condición distinta a regular', ['controller' => 'Students', 'action' => 'consultStudentDelete']) ?></li>
 								<li><?= $this->Html->link('Asignar sección', ['controller' => 'Studenttransactions', 'action' => 'assignSection']) ?></li> 
-								<li><?= $this->Html->link('Modificar las cuotas del alumno', ['controller' => 'Students', 'action' => 'modifyTransactions']) ?></li> 
+								<!-- <li><?= $this->Html->link('Modificar las cuotas del alumno', ['controller' => 'Students', 'action' => 'modifyTransactions']) ?></li> -->
 								<li><?= $this->Html->link('Relación de mensualidades', ['controller' => 'Students', 'action' => 'listMonthlyPayments']) ?></li> 
 								<li><?= $this->Html->link('Alumnos con mensualidades pendientes', ['controller' => 'Students', 'action' => 'defaulters']) ?></li> 
 								<!-- <li><?= $this->Html->link('Pagos de nuevos alumnos', ['controller' => 'Students', 'action' => 'newstudentpdf', "nuevos", '_ext' => 'pdf']) ?></li> --> 
