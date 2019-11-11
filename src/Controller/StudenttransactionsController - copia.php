@@ -15,20 +15,23 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
-		$contador = 0;
+		/* $contadorBusqueda = 0;
+		$contadorTransacciones = 0;
 		
 		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
 		$transacciones = $transaccionesEstudiante->find()
-			->contain(['Students'])
-			->where(['transaction_description' => 'Servicio educativo 2019', 'amount >' => 0, 'amount <' => 450])
-			->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
-	
+			->where(['amount_dollar is NULL']);
+			
+		$contadorBusqueda = $transacciones->count();
+		
+		$this->Flash->success(__('Total transacciones busqueda ' . $contadorBusqueda));
+		
 		foreach ($transacciones as $transaccion)
 		{
 			$transaccionGet = $this->Studenttransactions->get($transaccion->id);
 						
-			$transaccionGet->amount_dollar = 999999;
+			$transaccionGet->amount_dollar = 0;
 			
 			if (!($this->Studenttransactions->save($transaccionGet))) 
 			{
@@ -36,13 +39,14 @@ class StudenttransactionsController extends AppController
 			}
 			else
 			{
-				$contador++;
+				$contadorTransacciones++;
 			}
 		}
-		$this->Flash->success(__('Total transacciones actualizadas ' . $contador));
+		
+		$this->Flash->success(__('Total transacciones actualizadas ' . $contadorTransacciones));
 	
         $this->set(compact('transacciones'));
-        $this->set('_serialize', ['transacciones']);
+        $this->set('_serialize', ['transacciones']); */
     }
 	
 	public function testFunction2()
@@ -3681,4 +3685,74 @@ class StudenttransactionsController extends AppController
 		}
         return $codigoRetornoTransaccion;
     }
+	public function marcarEliminado()
+	{
+		$contadorBusqueda = 0;
+		$contadorMensualidades = 0;
+		$contadorMatriculas = 0;
+		$contadorSeguro = 0;
+		$contadorServicio = 0;
+		$contadorActualizadas = 0;
+		
+		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
+		
+		$transacciones = $transaccionesEstudiante->find('all');
+			
+		$contadorBusqueda = $transacciones->count();
+		
+		$this->Flash->success(__('Total transacciones busqueda ' . $contadorBusqueda));
+		
+		foreach ($transacciones as $transaccion)
+		{
+			$marcar = 0;
+			
+			$fechaHasta = new Time('2018-11-01 00:00:00');
+			
+			if ($transaccion->transaction_type == 'Mensualidad' && $transaccion->payment_date < $fechaHasta)
+			{
+				$marcar = 1;
+				$contadorMensualidades++;
+			}
+			elseif ($transaccion->transaction_type == 'Matrícula' && $transaccion->transaction_description != 'Matrícula 2019')
+			{
+				$marcar = 1;
+				$contadorMatriculas++;
+			}
+			elseif ($transaccion->transaction_type == 'Seguro escolar' && $transaccion->transaction_description != 'Seguro escolar 2019')
+			{
+				$marcar = 1;
+				$contadorSeguro++;
+			}
+			elseif ($transaccion->transaction_type == 'Servicio educativo' && $transaccion->transaction_description != 'Servicio educativo 2019')
+			{
+				$marcar = 1;
+				$contadorServicio++;
+			}
+			
+			if ($marcar == 1)
+			{
+				$transaccionGet = $this->Studenttransactions->get($transaccion->id);
+			
+				$transaccionGet->invoiced = 1;
+			
+				if (!($this->Studenttransactions->save($transaccionGet))) 
+				{
+					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
+				}
+				else
+				{
+					$contadorActualizadas++;
+				} 
+			}
+		}
+		
+		$this->Flash->success(__('Total mensualidades ' . $contadorMensualidades));
+		$this->Flash->success(__('Total matrículas ' . $contadorMatriculas));
+		$this->Flash->success(__('Total seguro ' . $contadorSeguro));
+		$this->Flash->success(__('Total servicio educativo ' . $contadorServicio));
+		$this->Flash->success(__('Total actualizadas ' . $contadorActualizadas));
+	
+        $this->set(compact('transacciones'));
+        $this->set('_serialize', ['transacciones']);
+	}
 }

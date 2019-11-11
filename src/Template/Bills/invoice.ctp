@@ -35,7 +35,7 @@
 	<?php if ($bill->fiscal == 1): ?>
 		<br />
 		<br />
-		<div style="font-size: 13px; line-height: 15px;">
+		<div style="font-size: 9px; line-height: 11px;">
 			<table style="width:100%">
 				<tbody>
 					<tr>
@@ -57,9 +57,9 @@
 						<td style="width:20%; text-align: right;"><?= $bill->school_year ?></td>
 					</tr>
 					<tr>
-						<td style='width:80%;'>Dirección: <spam style="font-size: 9px; line-height: 11px;"><?= $bill->fiscal_address ?></spam></td>
+						<td style='width:80%; font-size: 7px; line-height: 9px;'>Dirección: <?= $bill->fiscal_address ?></td>
 						<?php if($numeroFacturaAfectada > 0): ?>
-							<td style='width:20%; text-align: right;'><spam style="font-size: 9px; line-height: 11px;"><?= "Factura afectada: Nro. " . $numeroFacturaAfectada . " Control " . $controlFacturaAfectada ?></spam></td>
+							<td style='width:20%; text-align: right;'> <?= "Factura afectada: Nro. " . $numeroFacturaAfectada . " Control " . $controlFacturaAfectada ?></td>
 						<?php else: ?>
 							<td style='width:20%;'></td>
 						<?php endif; ?>
@@ -68,12 +68,12 @@
 			</table>
 		</div>
 		<hr>
-		<div>
-			<table style="width:100%; font-size: 13px; line-height: 15px;">
+		<div style="font-size: 9px; line-height: 11px;">
+			<table style="width:100%;">
 				<thead>
 					<tr>
-						<th style="width:10%; text-align:left;">Código</th>
-						<th style="width:70%; text-align:left;">Descripción</th>
+						<th style="width:5%; text-align:left;">Código</th>
+						<th style="width:75%; text-align:left;">Descripción</th>
 						<th style="width:20%; text-align:right;">Precio Bs.S</th>
 					</tr>
 				</thead>
@@ -94,9 +94,9 @@
 			</table>
 		</div>
 		<hr>
-		<div style="width:100%;">
-			<div id="payments" style="font-size: 10px;  line-height: 12px;">
-				<b>Formas de pago:</b>
+		<div style="width:100%; font-size: 9px; line-height: 11px;">
+			<div id="payments">
+				Formas de pago:
 				<table style="width:100%;">
 					<tbody>
 						<?php foreach ($aPayments as $aPayment): ?>
@@ -110,22 +110,22 @@
 					</tbody>
 				</table>
 			</div>
-			<div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
+			<div id="emptyColumn">
 				<p>Cajero: <?= $usuarioResponsable ?></p>
 			</div>
-			<div id="total" style="font-size: 13px; line-height: 15px;">
+			<div id="total">
 				<table style="width:100%;">
 					<tr>
-						<td style="width: 50%;"><b>Sub-total:</b></td>
-						<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $bill->amount), 2, ",", ".") ?></b></td>
+						<td style="width: 50%;">Sub-total:</td>
+						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount_paid - $bill->amount), 2, ",", ".") ?></td>
 					</tr>
 					<tr>
-						<td style="width: 50%;"><b>Descuento/Recargo:</b></td>
-						<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount), 2, ",", ".") ?></b></td>
+						<td style="width: 50%;">Descuento/Recargo:</td>
+						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount), 2, ",", ".") ?></td>
 					</tr>
 					<tr>
-						<td style="width: 50%;"><b>IVA 0%:</b></td>
-						<td style="width: 50%;"><b></b></td>
+						<td style="width: 50%;">IVA 0%:</td>
+						<td style="width: 50%;"></td>
 					</tr>
 					<tr>
 						<td style="width: 50%;"><b>Total Bs.S:</b></td>
@@ -134,13 +134,12 @@
 				</table>
 			</div>
 		</div>
-		<?php
-		$countSubtraction = 16 - $counter;
-		for ($i = 1; $i <= $countSubtraction; $i++): ?>
-			<br />
-		<?php
-		endfor; ?>
-		<div style="font-size: 13px; line-height: 15px;">
+		<?php $countSubtraction = 30 - $counter; ?>
+		<div style="font-size: 9px; line-height: 11px;">
+			<?php for ($i = 1; $i <= $countSubtraction; $i++): ?>
+				<br />
+			<?php endfor; ?>
+		<div style="font-size: 9px; line-height: 11px;">
 			<table style="width:100%">
 				<tbody>
 					<tr>
@@ -162,9 +161,9 @@
 						<td style="width:20%; text-align: right;"><?= $bill->school_year ?></td>
 					</tr>
 					<tr>
-						<td style='width:80%;'>Dirección: <spam style="font-size: 9px; line-height: 11px;"><?= $bill->fiscal_address ?></spam></td>
+						<td style='width:80%; font-size: 7px; line-height: 9px;'>Dirección: <?= $bill->fiscal_address ?></td>
 						<?php if($numeroFacturaAfectada > 0): ?>
-							<td style='width:20%; text-align: right;'><spam style="font-size: 9px; line-height: 11px;"><?= "Factura afectada: Nro. " . $numeroFacturaAfectada . " Control " . $controlFacturaAfectada ?></spam></td>
+							<td style='width:20%; text-align: right;'><?= "Factura afectada: Nro. " . $numeroFacturaAfectada . " Control " . $controlFacturaAfectada ?></td>
 						<?php else: ?>
 							<td style='width:20%;'></td>
 						<?php endif; ?>
@@ -173,12 +172,12 @@
 			</table>
 		</div>
 		<hr>
-		<div>
-			<table style="width:100%; font-size: 13px; line-height: 15px;">
+		<div style="font-size: 9px; line-height: 11px;">
+			<table style="width:100%;">
 				<thead>
 					<tr>
-						<th style="width:10%; text-align:left;">Código</th>
-						<th style="width:70%; text-align:left;">Descripción</th>
+						<th style="width:5%; text-align:left;">Código</th>
+						<th style="width:75%; text-align:left;">Descripción</th>
 						<th style="width:20%; text-align:right;">Precio Bs.S</th>
 					</tr>
 				</thead>
@@ -194,9 +193,9 @@
 			</table>
 		</div>
 		<hr>
-		<div style="width:100%;">
-			<div id="payments" style="font-size: 10px;  line-height: 12px;">
-				<b>Formas de pago:</b>
+		<div style="width:100%; font-size: 9px; line-height: 11px;"> 
+			<div id="payments">
+				Formas de pago:
 				<table style="width:100%;">
 					<tbody>
 						<?php foreach ($aPayments as $aPayment): ?>
@@ -210,22 +209,22 @@
 					</tbody>
 				</table>
 			</div>
-			<div id="emptyColumn" style="font-size: 10px;  line-height: 12px;">
+			<div id="emptyColumn">
 				<p>Cajero: <?= $usuarioResponsable ?></p>
 			</div>
-			<div id="total" style="font-size: 13px; line-height: 15px;">
+			<div id="total">
 				<table style="width:100%;">
 					<tr>
-						<td style="width: 50%;"><b>Sub-total:</b></td>
-						<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $bill->amount), 2, ",", ".") ?></b></td>
+						<td style="width: 50%;">Sub-total:</td>
+						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount_paid - $bill->amount), 2, ",", ".") ?></td>
 					</tr>
 					<tr>
-						<td style="width: 50%;"><b>Descuento/Recargo:</b></td>
-						<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount), 2, ",", ".") ?></b></td>
+						<td style="width: 50%;">Descuento/Recargo:</td>
+						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount), 2, ",", ".") ?></td>
 					</tr>
 					<tr>
-						<td style="width: 50%;"><b>IVA 0%:</b></td>
-						<td style="width: 50%;"><b></b></td>
+						<td style="width: 50%;">IVA 0%:</td>
+						<td style="width: 50%;"></td>
 					</tr>
 					<tr>
 						<td style="width: 50%;"><b>Total Bs.S:</b></td>

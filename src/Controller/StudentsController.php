@@ -925,6 +925,9 @@ class StudentsController extends AppController
         $this->autoRender = false;
         
         $studenttransactions = new StudenttransactionsController();
+		
+		$tasaTemporalDolar = 0;
+		$tasaTemporalEuro = 0;
 				
         if ($this->request->is('json')) 
         {
@@ -933,22 +936,32 @@ class StudentsController extends AppController
                 $parentId = $_POST['id'];
                 $new = $_POST['new'];
 				
-				if (isset($_POST['tasaTemporal']))
+				if (isset($_POST['tasaTemporalDolar']))
 				{
-					if (substr($_POST['tasaTemporal'], -3, 1) == ',')
+					if (substr($_POST['tasaTemporalDolar'], -3, 1) == ',')
 					{
-						$replace1= str_replace('.', '', $_POST['tasaTemporal']);
+						$replace1= str_replace('.', '', $_POST['tasaTemporalDolar']);
 						$replace2 = str_replace(',', '.', $replace1);
-						$tasaTemporal = $replace2;
+						$tasaTemporalDolar = $replace2;
 					}
 					else
 					{
-						$tasaTemporal = $_POST['tasaTemporal'];
+						$tasaTemporalDolar = $_POST['tasaTemporalDolar'];
 					}
 				}
-				else
+				
+				if (isset($_POST['tasaTemporalEuro']))
 				{
-					$tasaTemporal = 0;
+					if (substr($_POST['tasaTemporalEuro'], -3, 1) == ',')
+					{
+						$replace1= str_replace('.', '', $_POST['tasaTemporalEuro']);
+						$replace2 = str_replace(',', '.', $replace1);
+						$tasaTemporalEuro = $replace2;
+					}
+					else
+					{
+						$tasaTemporalEuro = $_POST['tasaTemporalEuro'];
+					}
 				}
             }
             else 
@@ -956,20 +969,31 @@ class StudentsController extends AppController
                 die("Solicitud no válida.");
             }
 			
-			if ($tasaTemporal == 0)
-			{
-				$this->loadModel('Monedas');	
+			$this->loadModel('Monedas');
+			
+			if ($tasaTemporalDolar == 0)
+			{	
 				$moneda = $this->Monedas->get(2);
 				$dollarExchangeRate = $moneda->tasa_cambio_dolar;
 			}
 			else
 			{
-				$dollarExchangeRate = $tasaTemporal;
+				$dollarExchangeRate = $tasaTemporalDolar;
 			}
+							
+			if ($tasaTemporalEuro == 0)
+			{
+				$moneda = $this->Monedas->get(3);
+				$euro = $moneda->tasa_cambio_dolar;
+			}
+			else
+			{
+				$euro = $tasaTemporalEuro;
+			}
+			
+			$mesesTarifas = $this->mesesTarifas($tasaTemporalDolar);	
 
-			$mesesTarifas = $this->mesesTarifas($tasaTemporal);	
-
-			$otrasTarifas = $this->otrasTarifas($tasaTemporal);
+			$otrasTarifas = $this->otrasTarifas($tasaTemporalDolar);
 			    
             $currentDate = Time::now();
             
@@ -1015,7 +1039,9 @@ class StudentsController extends AppController
             $jsondata["data"]['fiscal_address'] = $parentsandguardians->fiscal_address;
             $jsondata["data"]['tax_phone'] = $parentsandguardians->tax_phone;
             $jsondata["data"]['email'] = $parentsandguardians->email;
+			$jsondata["data"]['balance'] = $parentsandguardians->balance;
 			$jsondata["data"]['dollar_exchange_rate'] = $dollarExchangeRate;
+			$jsondata["data"]['euro'] = $euro;
 			$jsondata["data"]['meses_tarifas'] = $mesesTarifas;
 			$jsondata["data"]['otras_tarifas'] = $otrasTarifas;
 			
@@ -3110,6 +3136,7 @@ class StudentsController extends AppController
             $jsondata["data"]['fiscal_address'] = $parentsandguardians->fiscal_address;
             $jsondata["data"]['tax_phone'] = $parentsandguardians->tax_phone;
             $jsondata["data"]['email'] = $parentsandguardians->email;
+			$jsondata["data"]['balance'] = $parentsandguardians->balance;
 			$jsondata["data"]['dollar_exchange_rate'] = $dollarExchangeRate;
 			$jsondata["data"]['meses_tarifas'] = $mesesTarifas;
 			$jsondata["data"]['otras_tarifas'] = $otrasTarifas;

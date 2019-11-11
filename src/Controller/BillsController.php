@@ -254,21 +254,28 @@ class BillsController extends AppController
 		
 		$this->loadModel('Discounts');
 		
-		$discounts = $this->Discounts->find('list', ['limit' => 200, 
+		/* $discounts = $this->Discounts->find('list', ['limit' => 200, 
 			'order' => ["description_discount" => "ASC"],
 			'keyField' => 'id', 
 			'valueField' => function ($discount) 
 				{
 					return $discount->get('label');
-				}]);
+				}]); */
+
+		$discounts = $this->Discounts->find('list', ['limit' => 200, 
+			'order' => ["description_discount" => "ASC"],
+			'keyField' => 'id']);
 				
 		$this->loadModel('Rates');
 		
 		$this->loadModel('Monedas');	
 		$moneda = $this->Monedas->get(2);
 		$dollarExchangeRate = $moneda->tasa_cambio_dolar; 
+		
+		$moneda = $this->Monedas->get(3);
+		$euro = $moneda->tasa_cambio_dolar; 
 				
-        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'amountMonthly'));
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'amountMonthly'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)

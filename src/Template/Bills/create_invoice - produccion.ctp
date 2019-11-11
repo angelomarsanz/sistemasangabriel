@@ -32,30 +32,27 @@
                     <h5 id="Turno" value=<?= $idTurn ?>>Fecha: <?= $dateTurn->format('d-m-Y') ?>, Turno: <?= $turn ?>, Cajero: <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h5>
                 </div>
             </div>
-			<div class="row panel panel-default">
-				<div class="col-md-3">
-					<?= $this->Form->input('dollar_exchange_rate', ['label' => 'Tasa oficial $:', 'class' => 'alternative-decimal-separator', 'value' => number_format(($dollarExchangeRate), 2, ",", ".")]) ?>
-					<button id="update-dollar" class="btn btn-success">Actualizar</button>
-					<p id="dollar-messages"></p>
-				</div>
-				<div class="col-md-3">
-					<?= $this->Form->input('euro', ['label' => 'Tasa oficial €:', 'class' => 'alternative-decimal-separator', 'value' => number_format(($euro), 2, ",", ".")]) ?>
-					<button id="update-euro" class="btn btn-success">Actualizar</button>
-					<p id="euro-messages"></p>
-				</div>
-				<div class="col-md-3">
-					<?= $this->Form->input('tasa_temporal_dolar', ['label' => 'Tasa temporal $:', 'class' => 'alternative-decimal-separator', 'value' => number_format((0), 2, ",", ".")]) ?>
-					<button id="establecer-tasa-dolar" class="btn btn-success">Establecer</button>
-					<button id="eliminar-tasa-dolar" class="btn btn-success noverScreen">Eliminar</button>
-				</div>
-				<div class="col-md-3">
-					<?= $this->Form->input('tasa_temporal_euro', ['label' => 'Tasa temporal €:', 'class' => 'alternative-decimal-separator', 'value' => number_format((0), 2, ",", ".")]) ?>
-					<button id="establecer-tasa-euro" class="btn btn-success">Establecer</button>
-					<button id="eliminar-tasa-euro" class="btn btn-success noverScreen">Eliminar</button>
-				</div>
-			</div
             <div class="row panel panel-default">
                 <div class="col-md-4">
+					<br />
+					<div class="row">
+						<div class="col-md-6">
+							<?= $this->Form->input('dollar_exchange_rate', ['label' => 'Tasa de cambio:', 'class' => 'alternative-decimal-separator', 'value' => number_format(($dollarExchangeRate), 2, ",", ".")]) ?>
+							<button id="update-dollar" class="btn btn-success">Actualizar</button>
+						</div>
+						<div class="col-md-6">
+							<?= $this->Form->input('tasa_temporal', ['label' => 'Tasa temporal:', 'class' => 'alternative-decimal-separator', 'value' => number_format((0), 2, ",", ".")]) ?>
+							<button id="establecer-tasa-temporal" class="btn btn-success">Establecer</button>
+							<button id="eliminar-tasa-temporal" class="btn btn-success noverScreen">Eliminar</button>
+						</div>
+					</div>
+					<br>
+					<div class="row">
+						<div class="col-md-12">
+							<p id="dollar-messages"></p>
+						</div>
+					</div>
+					<br>
                     <label for="family">Por favor escriba los apellidos de la familia:</label>
                     <br />
                     <input type="text" class="form-control" id="family-search">
@@ -139,7 +136,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-9">
+                <div class="col-md-6">
                     <br />
                     <p><b>Cuotas pendientes:</b></p>
                     <div class="panel panel-default pre-scrollable" style="height:210px;">
@@ -148,15 +145,12 @@
                                 <table class="table table-striped table-hover" >
                                     <thead>
                                         <tr>
-											<th scope="col" style="width:5%"></th>
-                                            <th scope="col" style="font-size: 11px; width:15%">Concepto</th>
-											<th scope="col" style="font-size: 11px; width:15%">Cuota($)</th>
-                                            <th scope="col" style="font-size: 11px; width:15%">Abonado($)</th>
-											<th scope="col" style="font-size: 11px; width:10%">Pendiente($)</th>
-											<th scope="col" style="font-size: 11px; width:10%">A pagar($)</th>
-											<th scope="col" style="color: blue; font-size: 10px; width:10%">A pagar(€)</th>
-											<th scope="col" style="color: red; font-size: 10px; width:10%">A pagar(Bs)</th>
-											<th scope="col" style="font-size: 11px; width:10%">Observación</th>
+											<th scope="col"></th>
+                                            <th scope="col">Concepto</th>
+											<th scope="col">Cuota($)</th>
+                                            <th scope="col">Abonado($)</th>
+											<th scope="col">Saldo($)</th>
+											<th scope="col">Saldo(Bs)</th>
 											<th scope="col" class="noverScreen"></th>
                                         </tr>
                                     </thead>
@@ -165,39 +159,99 @@
                             </div>
                         </div>
                     </div> 
-					<div class="row">
-						<div class="col-md-6">
-							<div id="nota-credito">
-							</div>
-							<div id="botones-cuotas">
-								<p>
-									<button id="mark-quotas" class="btn btn-success" disabled>Cobrar</button>
-									<button id="uncheck-quotas" class="btn btn-success" disabled>Reversar</button>  
-									<button id="adjust-fee" class="btn btn-success" disabled>Ajustar</button>
-								</p>
-							</div>
-							<div id="botones-notas" class="noverScreen">
-								<p>
-									<button id="reintegrar" class="btn btn-success">Reintegrar</button>
-									<button id="compensar" class="btn btn-success">Compensar</button>
-								</p>
-							</div>
-						</div>
-						<div class="col-md-3">
-							<p>Cuotas: <b><spam id="student-concept"></spam></b></p>
-						</div>
-						<div class="col-md-3">
-							<p>Sub-total alumno $: <b><spam id="student-balance">0</spam></b></p>
-							<p>Sub-total familia $: <b><spam id="total-balance"></spam></b></p> 
-						</div>  						
+					<div id="nota-credito">
 					</div>
+                    <div>
+                        <button id="mark-quotas" class="btn btn-success" disabled>Cobrar</button>
+                        <button id="uncheck-quotas" class="btn btn-success" disabled>Reversar</button>  
+						<button id="adjust-fee" class="btn btn-success" disabled>Ajustar</button>						
+                        <button id="save-payments" class="btn btn-success" disabled>Facturar</button>
+                    </div>  
+                </div>
+                <div class="col-md-3">
+                    <br />
+                    <p><b>Totales:</b></p>
+                    <div class="panel panel-default" style="height:320px; padding: 0% 3% 0% 3%;">
+                        <br />
+                        <p><b>Alumno: </b><spam id="student-name"></spam></p>
+                        <p><b>Cuotas: </b><spam id="student-concept"></spam></p>
+                        <p><b>Sub-total alumno: Bs.S </b><spam id="student-balance">0</spam></b></p>
+                        <p><b>Sub-total familia: Bs.S </b><spam id="total-balance"></spam></p>   
+                        <p><?= $this->Form->input('select_discount', ['label' => 'Descuento/Recargo:', 'class' => 'select-discount', 'options' => $discounts]); ?></p>
+						<p><b>Total a pagar: $ </b><spam id="total-general"></spam></p>
+						<p><b>Total a pagar: Bs. </b><spam id="total-general-bolivar"></spam></p>	
+						<br />
+                    </div>
+					<p id="student-messages"></p>  
                 </div>
             </div>
-			<div class="row"
-				<p id="student-messages"></p>
-			</div>
-			<div class="row">
-			    <div class="col-md-3">
+            <div class="row">
+                <div class="col-md-9 panel panel-default">
+                    <br />
+                    <p><b>Detalles de la factura:</b><spam id="invoice-messages"></spam></p>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel-body">
+                                <div class="table-responsive">          
+                                    <table class="table table-striped table-hover" >
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Alumno</th>
+                                                <th scope="col">Cuota</th>
+                                                <th scope="col">Monto</th>
+                                                <th scope="col">Monto&nbsp;a&nbsp;pagar</th>
+                                                <th scope="col">Observación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="invoice-lines"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="col-md-12 panel panel-default">
+                                <br />
+                                <p><b>Pagos realizados:</b></p>
+                                <div class="panel-body">
+                                    <div class="table-responsive">          
+                                        <table class="table table-striped table-hover" >
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" style="color:red;">&nbsp;(x)&nbsp;</th>
+                                                    <th scope="col">Forma&nbsp;de&nbsp;pago&nbsp;&nbsp;</th>
+                                                    <th scope="col">Monto</th>
+                                                    <th scope="col">&nbsp;&nbsp;Banco&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                                                    <th scope="col">Cuenta&nbsp;o&nbsp;tarjeta</th>
+                                                    <th scope="col">Serial</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="registered-payments"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <p><b>Sub-total Bs.S </b><spam id="invoice-subtotal"></spam></p>
+							<p><b>Desc/Recar Bs.S </b><spam id="invoice-descuento"></spam></p>
+                            <p><b>Iva 16% Bs. </b>0,00</p>
+                            <p><b>Total Bs.S <spam id="total-bill"></spam></spam></p>
+                            <p><b>Pagado Bs.S <spam id="paid-out"></spam></spam></p>
+                            <p><b>Por pagar Bs.S <spam id="to-pay"></spam></p>
+                            <p><b>Cambio Bs.S <spam id="change"></spam></p>
+                            <br />
+                            <button id="automatic-adjustment" class="btn btn-success" disabled>Ajuste automático</button>
+                            <button id="adjust-invoice" class="btn btn-success" disabled>Ajuste manual</button>
+                            <button id="print-invoice" class="btn btn-success" disabled>Guardar factura</button>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
                     <div class="row">
                         <div class="col-md-12 panel panel-default">
                             <br />
@@ -435,107 +489,7 @@
                         </div>
                     </div>
                 </div>
-				<div class="col-md-9">
-					<div class="row">
-						<div class="col-md-12 panel panel-default">
-							<br />
-							<div class="table-responsive">          
-								<table class="table table-striped table-hover" >
-									<thead>
-										<tr>
-											<th scope="col" style="width:25%;">Totales factura</th>
-											<th scope="col" style="width:25%; text-align:center;">Dólar ($)</th>
-											<th scope="col" style="color: blue; width:25%; text-align:center;">Euro (€)</th>
-											<th scope="col" style="color: red; width:25%; text-align:center;">Bolívar (Bs)</th>
-										</tr>
-									</thead>								
-										<tbody>
-											<tr>
-												<td>Sub-total</td>
-												<td id="sub-total-dolar" style="text-align:center;"></td>
-												<td style="color: blue; text-align:center;" id="sub-total-euro"></td>
-												<td style="color: red; text-align:center;" id="sub-total-bolivar"></td>	
-											</tr>
-											<tr>
-												<td>Saldo a favor/contra</td>
-												<td id="saldo-favor-dolar" style="text-align:center;"></td>
-												<td style="color: blue; text-align:center;" id="saldo-favor-euro"></td>
-												<td style="color: red; text-align:center;" id="saldo-favor-bolivar"></td>
-											</tr>
-											<tr>
-												<td><?= $this->Form->input('select_discount', ['label' => 'Descuento/Recargo:', 'id' => 'select-discount', 'options' => $discounts]); ?></td>
-												<td id="descuento-recargo-dolar" style="text-align:center; vertical-align: middle;">0</td>
-												<td style="color: blue; text-align:center; vertical-align: middle;" id="descuento-recargo-euro">0</td>
-												<td style="color: red; text-align:center; vertical-align: middle;" id="descuento-recargo-bolivar">0</td>
-											</tr>
-											<tr>
-												<td>Iva 16%</td>
-												<td style="text-align:center;">0</td>
-												<td style="color: blue; text-align:center;">0</td>
-												<td style="color: red; text-align:center;">0</td>
-											</tr>
-											<tr>
-												<td>Total</td>
-												<td id="total-balance-descuento-dolar" style="text-align:center;"></td>
-												<td style="color: blue; text-align:center;" id="total-balance-descuento-euro"></td>
-												<td style="color: red; text-align:center;" id="total-balance-descuento-bolivar"></td>
-											</tr>
-											<tr>	
-												<td>Pagado</td>
-												<td id="pagado-dolar" style="text-align:center;"></td>
-												<td style="color: blue; text-align:center;" id="pagado-euro"></td>
-												<td style="color: red; text-align:center;" id="pagado-bolivar"></td>
-											</tr>
-											<tr>
-												<td>Por pagar</td>
-												<td id="por-pagar-dolar" style="text-align:center;"></td>
-												<td style="color: blue; text-align:center;" id="por-pagar-euro"></td>
-												<td style="color: red; text-align:center;" id="por-pagar-bolivar"></td>
-											</tr>
-											<tr>
-												<td>Sobrante</td>
-												<td id="sobrante-dolar" style="text-align:center;"></td>
-												<td style="color: blue; text-align:center;" id="sobrante-euro"></td>
-												<td style="color: red; text-align:center;" id="sobrante-bolivar"></td>																		
-											</tr>
-										</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-6">
-							<p>
-								<button id="automatic-adjustment" class="btn btn-success" disabled>Ajuste</button>
-								<button id="print-invoice" class="btn btn-success" disabled>Guardar factura</button>
-							</p>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12 panel panel-default">
-							<br />
-							<p><b>Pagos realizados:</b></p>
-							<div class="panel-body">
-								<div class="table-responsive">          
-									<table class="table table-striped table-hover" >
-										<thead>
-											<tr>
-												<th scope="col" style="color:red;">&nbsp;(x)&nbsp;</th>
-												<th scope="col">Forma&nbsp;de&nbsp;pago&nbsp;&nbsp;</th>
-												<th scope="col">Monto</th>
-												<th scope="col">&nbsp;&nbsp;Banco&nbsp;&nbsp;&nbsp;&nbsp;</th>
-												<th scope="col">Cuenta&nbsp;o&nbsp;tarjeta</th>
-												<th scope="col">Serial</th>
-											</tr>
-										</thead>
-										<tbody id="registered-payments"></tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+            </div>
         </div>
     </div>
 </div>
@@ -555,7 +509,6 @@
 	var discountMode = '';
 	var discountAmount = 0;
 	var discount = 0;
-	var totalBalanceDescuento = 0 
 	var totalGeneral = 0;
 	var invoiceDescuento = 0;
     var totalBill = 0;
@@ -595,9 +548,6 @@
     var monthlyPayment = " ";
 	var tarifaDolar = 0;
 	var montoPendienteDolar = 0;
-	var montoAPagarDolar = 0;
-	var montoAPagarEuro = 0;
-	var montoAPagarBolivar = 0;
 	var montoDolar = 0;
     var transactionAmount = 0;
 	var tempAmount = 0;
@@ -623,12 +573,6 @@
     var section = " ";
 	var temporalMontoBolivar = 0;
 	var saldoNotaCredito = 0;
-	var euro = 0;
-	var saldoRepresentante = 0;
-	var saldoRepresentanteSigno = 0;
-	var indicadorCompensacion = 0;
-	var deudaMenosPagado = 0;
-	var sobrante = 0;
 
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
@@ -678,6 +622,7 @@
         $("#mark-quotas").attr('disabled', true);
         $("#uncheck-quotas").attr('disabled', true);
 		$("#adjust-fee").attr('disabled', true);
+        $("#save-payments").attr('disabled', true);
         $("#automatic-adjustment").attr('disabled', true);
         $("#adjust-invoice").attr('disabled', true);
         $("#print-invoice").attr('disabled', true);
@@ -757,6 +702,9 @@
         $('#change').text(" ");
 		$('.mensajes-usuario').html("");
 		$('.campo-resaltado').css('background-color', "white");
+		$(".select-discount").attr('disabled', false);
+		$('.select-discount').css('background-color', 'white');
+		$('.select-discount').val(1);
 		$('#nota-credito').html("");
 		
         for (var i = 0, item = 0; i < 7; i++)
@@ -809,7 +757,6 @@
         balance = 0;
         balanceIndicator = 0;
 		saldoNotaCredito = 0;
-		indicadorCompensacion = 0;
     }
     
     function validateFields()
@@ -841,19 +788,25 @@
     }
 
     function updateAmount()
-    {       
-        if (deudaMenosPagado > 0)
+    {
+        $('#paid-out').text(accumulatedPayment.toFixed(2));
+            
+        if (balance > 0)
         {
-            $('#amount-01').val(deudaMenosPagado);
-            $('#amount-02').val(deudaMenosPagado);
-            $('#amount-03').val(deudaMenosPagado);
-            $('#amount-04').val(deudaMenosPagado);
-            $('#amount-05').val(deudaMenosPagado);
-            $('#amount-06').val(deudaMenosPagado);
-            $('#amount-07').val(deudaMenosPagado);
+            $('#to-pay').text(balance.toFixed(2));
+            $('#change').text(0);
+            $('#amount-01').val(balance.toFixed(2));
+            $('#amount-02').val(balance.toFixed(2));
+            $('#amount-03').val(balance.toFixed(2));
+            $('#amount-04').val(balance.toFixed(2));
+            $('#amount-05').val(balance.toFixed(2));
+            $('#amount-06').val(balance.toFixed(2));
+            $('#amount-07').val(balance.toFixed(2));
         }
         else
         {
+            $('#to-pay').text(0);
+            $('#change').text(change.toFixed(2));
             $('#amount-01').val(0);
             $('#amount-02').val(0);
             $('#amount-03').val(0);
@@ -861,8 +814,7 @@
             $('#amount-05').val(0);
             $('#amount-06').val(0);
             $('#amount-07').val(0);
-        }    
-		
+        }     
         if (indicatorUpdateAmount == 0)
         {
             $("#amount-" + paymentIdentifier).css('background-color', '#ffffff');
@@ -934,18 +886,16 @@
         var createStatement = "CREATE TABLE IF NOT EXISTS studentTransactions \
         (dbId INTEGER PRIMARY KEY, \
         dbIdStudent INTEGER, \
-        dbStudentName VARCHAR(250), \
+        dbStudentName VARCHAR(500), \
         dbMonthlyPayment VARCHAR(100), \
         dbScholarship INTEGER, \
-		dbTasaCambioDolar FLOAT, \
-		dbTasaCambioEuro FLOAT, \
-		dbTarifaDolarOriginal FLOAT, \
 		dbTarifaDolar FLOAT, \
 		dbMontoAbonadoDolar FLOAT, \
 		dbMontoPendienteDolar FLOAT, \
-		dbMontoAPagarDolar FLOAT, \
-		dbMontoAPagarEuro FLOAT, \
-		dbMontoAPagarBolivar FLOAT, \
+        dbTransactionAmount FLOAT, \
+        dbOriginalAmount FLOAT, \
+        dbAmountPayable FLOAT, \
+		dbAmountPaid FLOAT, \
         dbInvoiced INTEGER, \
         dbPartialPayment INTEGER, \
         dbPaidOut INTEGER, \
@@ -976,35 +926,31 @@
         dbStudentName, \
         dbMonthlyPayment, \
         dbScholarship, \
-		dbTasaCambioDolar, \
-		dbTasaCambioEuro, \
-		dbTarifaDolarOriginal, \
 		dbTarifaDolar, \
 		dbMontoAbonadoDolar, \
 		dbMontoPendienteDolar, \
-		dbMontoAPagarDolar, \
-		dbMontoAPagarEuro, \
-		dbMontoAPagarBolivar, \
+        dbTransactionAmount, \
+        dbOriginalAmount, \
+        dbAmountPayable, \
+		dbAmountPaid, \
         dbInvoiced, \
         dbPartialPayment, \
         dbPaidOut, \
 		dbSchoolYearFrom, \
-        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = transactionIdentifier;
         var tpIdStudent = idStudent;
         var tpStudentName = studentName + " - " + grade;
         var tpMonthlyPayment = monthlyPayment;
         var tpScholarship = scholarship;
-		var tpTasaCambioDolar = dollarExchangeRate;
-		var tpTasaCambioEuro = euro;
-		var tpTarifaDolarOriginal = tarifaDolar;
 		var tpTarifaDolar = tarifaDolar;
 		var tpAbonadoDolar = montoDolar;
 		var tpPendienteDolar = montoPendienteDolar;
-		var tpAPagarDolar = montoAPagarDolar;
-		var tpAPagarEuro = montoAPagarEuro;
-		var tpAPagarBolivar = montoAPagarBolivar;
+        var tpTransactionAmount = transactionAmount;
+        var tpOriginalAmount = originalAmount;
+        var tpAmountPayable = amountPayable;
+		var tpAmountPaid = amountPaid;
         var tpInvoiced = invoiced;
         var tpPartialPayment = partialPayment;
         var tpPaidOut = paidOut;
@@ -1019,15 +965,13 @@
             tpStudentName,
             tpMonthlyPayment,
             tpScholarship,
-			tpTasaCambioDolar,
-			tpTasaCambioEuro,
-			tpTarifaDolarOriginal,
 			tpTarifaDolar,
 			tpAbonadoDolar,
 			tpPendienteDolar,
-			tpAPagarDolar,
-			tpAPagarEuro,
-			tpAPagarBolivar,
+            tpTransactionAmount,
+            tpOriginalAmount,
+            tpAmountPayable,
+			tpAmountPaid,
             tpInvoiced,
             tpPartialPayment,
             tpPaidOut,
@@ -1085,18 +1029,18 @@
         });
     }
  
-    function updateRecord(id, invoiced, observation ) 
+    function updateRecord(id, invoiced, amountPayable, observation ) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbInvoiced = ?, dbObservation = ? WHERE dbId=?";
+        var updateStatement = "UPDATE studentTransactions SET dbInvoiced = ?, dbAmountPayable = ?, dbObservation = ? WHERE dbId=?";
         
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [invoiced, observation, Number(id)], null, onError); });
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [invoiced, Number(amountPayable), observation, Number(id)], null, onError); });
     }
     
-    function updateInstallment(id, updOriginalMontoDolar, updMontoModificadoDolar, updMontoPendienteDolar, updAPagarDolar, updAPagarEuro, updAPagarBolivar) 
+    function updateInstallment(id, updMontoModificadoDolar, updMontoPendienteDolar, transactionAmount, originalAmount, amountPayable) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbTarifaDolarOriginal = ?, dbTarifaDolar = ?, dbMontoPendienteDolar = ?, dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ? WHERE dbId=?";
+        var updateStatement = "UPDATE studentTransactions SET dbTarifaDolar = ?, dbMontoPendienteDolar = ?, dbTransactionAmount = ?, dbOriginalAmount = ?, dbAmountPayable = ? WHERE dbId=?";
         
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), Number(id)], null, onError); });
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(transactionAmount), Number(originalAmount), Number(amountPayable), Number(id)], null, onError); });
     }
 	
     function showRecords() // Function For Retrive data from Database Display records as list
@@ -1138,71 +1082,69 @@
                     {
                         if (item['dbInvoiced'] == "true")
                         {
-							studentBalance = studentBalance + item['dbMontoAPagarDolar'];
-							detailLine += "<tr id=tra" + item['dbId'] + "> \
+                            studentBalance = studentBalance + item['dbTransactionAmount'];
+                            detailLine += "<tr id=tra" + item['dbId'] + ">  \
 								<td style='background-color:#c2c2d6;'><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " checked='checked' disabled></td> \
-								<td style='background-color:#c2c2d6;'>" + item['dbMonthlyPayment'] + "</td> \
-								<td style='background-color:#c2c2d6;'><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbTarifaDolar'] + "></td> \
+                                <td style='background-color:#c2c2d6;'>" + item['dbMonthlyPayment'] + "</td> \
+								<td style='background-color:#c2c2d6;'><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbTarifaDolar'] + " disabled></td> \
 								<td style='background-color:#c2c2d6;'><input type='number' class='form-control amount-paid' value=" + item['dbMontoAbonadoDolar'] + " disabled></td>";
-		
 							if (item['dbMontoPendienteDolar'] < 0)
 							{
-								detailLine += 	"<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoPendienteDolar'] + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoAPagarDolar'] + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoAPagarEuro'] + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>Hacer NC</td> \
-												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
+								detailLine += 	"<td style='color: red;'>" + item['dbMontoPendienteDolar'] + "</td> \
+												<td style='color: red;'>" + item['dbTransactionAmount'] + "</td> \
+												<td style='background-color:#c2c2d6;'><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td></tr>";
 							}
 							else
 							{
-								detailLine += 	"<td style='background-color:#c2c2d6;'>" + item['dbMontoPendienteDolar'] + "</td> \
-												<td style='background-color:#c2c2d6;'>" + item['dbMontoAPagarDolar'] + "</td> \
-												<td style='background-color:#c2c2d6; color: blue;'>" + item['dbMontoAPagarEuro'] + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
-												<td style='background-color:#c2c2d6;'></td> \
-												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
+								detailLine += 	"<td>" + item['dbMontoPendienteDolar'] + "</td> \
+												<td style='background-color:#c2c2d6;'>" + item['dbTransactionAmount'] + "</td> \
+												<td style='background-color:#c2c2d6;'><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td></tr>";
 							}
-							
+
 							$('#uncheck-quotas').attr('disabled', false);
+							$('#save-payments').attr('disabled', false);
 							if (firstInstallment == " ")
 							{
 								firstInstallment = item['dbMonthlyPayment'];
 							}
 							lastInstallment = item['dbMonthlyPayment'];
-						}
-						else
-						{
-							if (indicatorPaid == 0)
-							{
-								nextPayment = monthlyPayment;
-								indicatorPaid = 1;                            
-							}
-							detailLine += "<tr id=tra" + item['dbId'] + "> \
+                        }
+                        else
+                        {
+                            if (indicatorPaid == 0)
+                            {
+                                nextPayment = monthlyPayment;
+                                indicatorPaid = 1;                            
+                            }
+                            detailLine += "<tr id=tra" + item['dbId'] + "> \
 								<td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " disabled></td> \
-								<td>" + item['dbMonthlyPayment'] + "</td> \
+                                <td>" + item['dbMonthlyPayment'] + "</td> \
 								<td><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbTarifaDolar'] + "></td> \
 								<td><input type='number' class='form-control amount-paid' value=" + item['dbMontoAbonadoDolar'] + " disabled></td>";
 		
 							if (item['dbMontoPendienteDolar'] < 0)
 							{
 								detailLine += 	"<td style='color: red;'>" + item['dbMontoPendienteDolar'] + "</td> \
-												<td style='color: red;'>" + item['dbMontoAPagarDolar'] + "</td> \
-												<td style='color: red;'>" + item['dbMontoAPagarEuro'] + "</td> \
-												<td style='color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
-												<td style='color: red;'>Hacer NC</td> \
-												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
+												<td style='color: red;'>" + item['dbTransactionAmount'] + "</td> \
+												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td></tr>";
 							}
 							else
 							{
 								detailLine += 	"<td>" + item['dbMontoPendienteDolar'] + "</td> \
-												<td>" + item['dbMontoAPagarDolar'] + "</td> \
-												<td style='color: blue;'>" + item['dbMontoAPagarEuro'] + "</td> \
-												<td style='color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
-												<td></td> \
-												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
-							}
-						}
+												<td>" + item['dbTransactionAmount'] + "</td> \
+												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td></tr>";
+							}								
+                        }
+                    }
+                    else 
+                    {
+                            detailLine += "<tr id=tra" + item['dbId'] + "> \
+								<td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value='Pagada' checked='checked' disabled> (Pagada)</td> \
+                                <td>" + item['dbMonthlyPayment'] + "</td> \
+								<td><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbOriginalAmount'] + "></td> \
+								<td><input type='number' class='form-control amount-paid' value=" + item['dbAmountPaid'] + " disabled></td> \
+                                <td>" + item['dbTransactionAmount'] + "</td> \
+								<td><input type='number' class='form-control original-amount' value=" + item['dbOriginalAmount'] + "></td></tr>";                 
                     }
                 }
                 $("#monthly-payment").html(detailLine);
@@ -1216,34 +1158,19 @@
                     $("#student-name").html(studentName);
                     $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
                     concept = firstInstallment + ' - ' + lastInstallment;
-                    $("#student-balance").html(studentBalance);
-									
-					if (saldoNotaCredito < 0)
-					{
-						$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario no puede facturar hasta que haga una o más notas de crédito (SUNDDE) por un total de " + -1 * saldoNotaCredito + " $</b></spam>");
-						$("#botones-cuotas").addClass("noverScreen");
-					}
-					else if (saldoRepresentante > 0)
-					{
-						if (indicadorCompensacion == 0)
-						{
-							$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario, este representante tiene un saldo a favor/contra de " + saldoRepresentante + " $ ¿Qué desea hacer?</b></spam>");
-							$("#botones-cuotas").addClass("noverScreen");
-							$("#botones-notas").removeClass("noverScreen");
-							$("#mark-quotas").html(nextPayment);  
-							$("#mark-quotas").attr('disabled', false);
-							$("#adjust-fee").attr('disabled', false);
-							$("#saldo-favor-dolar").html(saldoRepresentanteSigno);
-							$("#saldo-favor-euro").html(Math.round(saldoRepresentanteSigno / tasaDolarEuro));
-							$("#saldo-favor-bolivar").html(Math.round(saldoRepresentante * dollarExchangeRate));
-						}
-					}
-					else if (saldoNotaCredito == 0)
+                    $("#student-balance").html(studentBalance.toFixed(2));
+				
+					if (saldoNotaCredito == 0)
 					{
 						$("#mark-quotas").html(nextPayment);  
 						$("#mark-quotas").attr('disabled', false);
 						$("#adjust-fee").attr('disabled', false);
 					}
+					else if (saldoNotaCredito < 0)
+					{
+						$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario no puede facturar hasta que haga una o más notas de crédito (SUNDDE) por un total de " + -1 * saldoNotaCredito + " $</b></spam>");
+					}
+					
                 }
             });
         });
@@ -1264,39 +1191,37 @@
                 {
                     item = dataSet.item(i);
                     detailLine += "<li>" + item['dbId'] 
-                    + " id "
+                    + " "
                     + item['dbIdStudent']
-                    + " Alumno " 
+                    + " " 
                     + item['dbStudentName']
-                    + " Cuota "
+                    + " "
                     + item['dbMonthlyPayment'] 
-                    + " Becado "
+                    + " "
                     + item['dbScholarship'] 
-                    + " tasaCambioDolar "
-                    + item['dbTasaCambioDolar']
-                    + " tasaCambioEuro "
-                    + item['dbTasaCambioEuro']	
-                    + " tarifaDolarOriginal "
-                    + item['dbTarifaDolarOriginal']					
-                    + " tarifaDolar "
+                    + " "
                     + item['dbTarifaDolar']
-                    + " AbonadoDolar "
+                    + " "
                     + item['dbMontoAbonadoDolar'] 	
-                    + " PendienteDolar "
+                    + " "
                     + item['dbMontoPendienteDolar'] 					
-                    + " APagarDolar "
-                    + item['dbMontoAPagarDolar']
-                    + " APagarEuro "
-                    + item['dbMontoAPagarEuro']
-                    + " APagarBolivar "
-                    + item['dbMontoAPagarBolivar']
-                    + " Seleccionada "
+                    + " "
+                    + item['dbTransactionAmount']
+                    + " "
+                    + item['dbOriginalAmount']
+                    + " "
+                    + item['dbAmountPayable']
+                    + " "
+                    + item['dbAmountPaid']
+                    + " "
                     + item['dbInvoiced']
-                    + " Pagada "
+                    + " "
+                    + item['dbPartialPayment']
+                    + " "
                     + item['dbPaidOut']
-                    + " Año escolar "
+                    + " "
                     + item['dbSchoolYearFrom']
-                    + " Observacion "
+                    + " "
                     + item['dbObservation']
                     + "</li>";
                 }
@@ -1599,84 +1524,8 @@
 			$('#mensaje-telefono').html("El número de teléfono está incompleto").css('color', 'red');
 			resultado = 1;
 		}
+
 		return resultado;
-	}
-	
-	function actualizarTotales()
-	{
-		signoDescuento = 1;
-		descuentoPrevio = 0;
-		
-		$("#student-balance").html(studentBalance);
-		$("#total-balance").html(totalBalance);
-		$("#sub-total-dolar").html(totalBalance);
-		$("#sub-total-euro").html(Math.round(totalBalance/tasaDolarEuro));
-		$("#sub-total-bolivar").html(Math.round(totalBalance*dollarExchangeRate));
-				
-		if (discountMode == 'Porcentaje')
-		{
-			if (discountAmount < 0)
-			{
-				signoDescuento = -1;
-				descuentoPrevio = discountAmount * signoDescuento;
-			}
-			else
-			{
-				descuentoPrevio = discountAmount;
-			}
-			discount = Math.round((totalBalance - saldoRepresentante) * descuentoPrevio);
-			discount = discount * signoDescuento;
-		}
-		else
-		{
-			discount = discountAmount;		
-		}			
-		
-		$("#descuento-recargo-dolar").html(discount);
-		$("#descuento-recargo-euro").html(Math.round(discount / tasaDolarEuro));
-		$("#descuento-recargo-bolivar").html(Math.round(discount * dollarExchangeRate));
-
-		totalBalanceDescuento = totalBalance - saldoRepresentante + discount;
-
-		$("#total-balance-descuento-dolar").html(totalBalanceDescuento);
-		$("#total-balance-descuento-euro").html(Math.round(totalBalanceDescuento/tasaDolarEuro));
-		$("#total-balance-descuento-bolivar").html(Math.round(totalBalanceDescuento*dollarExchangeRate));
-	
-		$('#pagado-dolar').html(accumulatedPayment);
-		$('#pagado-euro').html(Math.round(accumulatedPayment / tasaDolarEuro));
-		$('#pagado-bolivar').html(Math.round(accumulatedPayment * dollarExchangeRate));
-		
-		deudaMenosPagado = totalBalanceDescuento - accumulatedPayment;
-		
-		if (deudaMenosPagado > 0)
-		{
-			$('#por-pagar-dolar').html(deudaMenosPagado);
-			$('#por-pagar-euro').html(Math.round(deudaMenosPagado / tasaDolarEuro));
-			$('#por-pagar-bolivar').html(Math.round(deudaMenosPagado * dollarExchangeRate));			
-		}
-		else
-		{
-			$('#por-pagar-dolar').html(0);
-			$('#por-pagar-euro').html(0);
-			$('#por-pagar-bolivar').html(0);
-			
-			if (deudaMenosPagado == 0)
-			{
-				$('#sobrante-dolar').html(0);
-				$('#sobrante-euro').html(0);
-				$('#sobrante-bolivar').html(0);
-			}
-			else
-			{
-				sobrante = deudaMenosPagado * -1;
-				$('#sobrante-dolar').html(sobrante);
-				$('#sobrante-euro').html(Math.round(sobrante / tasaDolarEuro));
-				$('#sobrante-bolivar').html(Math.round(sobrante * dollarExchangeRate));
-			}
-		}
-		indicatorUpdateAmount = 1;
-		updateAmount();
-		indicatorUpdateAmount = 0;
 	}
 
 // Funciones Jquery
@@ -1789,7 +1638,7 @@
 				typeStudent = 2;
 			}
 						
-			$.post('<?php echo Router::url(["controller" => "Students", "action" => "relatedStudents"]); ?>', {"id" : idFamily, "new" : typeStudent, "tasaTemporalDolar" : $("#tasa-temporal-dolar").val(), "tasaTemporalEuro" : $("#tasa-temporal-euro").val() }, null, "json")				
+			$.post('<?php echo Router::url(["controller" => "Students", "action" => "relatedStudents"]); ?>', {"id" : idFamily, "new" : typeStudent, "tasaTemporal" : $("#tasa-temporal").val() }, null, "json")				
                      
             .done(function(response) 
             {
@@ -1820,14 +1669,8 @@
                     taxPhone = response.data.tax_phone;
                         
                     customerEmail = response.data.email;
-									
-					saldoRepresentante = response.data.balance;
-					saldoRepresentanteSigno = saldoRepresentante * -1;
 					
 					dollarExchangeRate = response.data.dollar_exchange_rate;
-					euro = response.data.euro;
-										
-					tasaDolarEuro = euro / dollarExchangeRate;
 					
 					mesesTarifas = response.data.meses_tarifas;
 					otrasTarifas = response.data.otras_tarifas;
@@ -1948,6 +1791,8 @@
 
 							partialPayment = value2.partial_payment;
 							
+							console.log("partialPayment " + partialPayment);
+
 							paidOut = value2.paid_out;
 							
 							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
@@ -1960,9 +1805,8 @@
 								{
 									montoDolar = 0;
 									montoPendienteDolar = 0;
-									montoAPagarDolar = 0;
-									montoAPagarEuro = 0;
-									montoAPagarBolivar = 0;
+									transactionAmount = 0;
+									amountPayable = 0;
 									indicadorImpresion = 1;
 								}
 								else
@@ -1974,18 +1818,17 @@
 										if (tarifaDolar != montoDolar)
 										{		
 											montoPendienteDolar = tarifaDolar - montoDolar;
-											montoAPagarDolar = montoPendienteDolar;
-											montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-											montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);	
+											originalAmount = Math.round(amountMonthly * discountFamily);
+											transactionAmount = Math.round(montoPendienteDolar * dollarExchangeRate);
+											amountPayable = transactionAmount;	
 											paidOut = false;
 										}
 										else
 										{
 											montoDolar = 0;
 											montoPendienteDolar = 0;
-											montoAPagarDolar = 0;
-											montoAPagarEuro = 0;
-											montoAPagarBolivar = 0
+											transactionAmount = 0;
+											amountPayable = 0;
 											indicadorImpresion = 1;
 										}
 									}
@@ -1994,18 +1837,17 @@
 										if (tarifaDolar != montoDolar && monthlyPayment.substring(0, 18) != "Servicio educativo")
 										{												
 											montoPendienteDolar = tarifaDolar - montoDolar;
-											montoAPagarDolar = montoPendienteDolar;
-											montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-											montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);
+											originalAmount = amountMonthly;
+											transactionAmount = Math.round(montoPendienteDolar * dollarExchangeRate);
+											amountPayable = transactionAmount;	
 											paidOut = false;
 										}
 										else
 										{
 											montoDolar = 0;
 											montoPendienteDolar = 0;
-											montoAPagarDolar = 0;
-											montoAPagarEuro = 0;
-											montoAPagarBolivar = 0
+											transactionAmount = 0;
+											amountPayable = 0;
 											indicadorImpresion = 1;
 										}									
 									}
@@ -2014,24 +1856,24 @@
 							else if (transactionType != 'Mensualidad')
 							{
 								montoPendienteDolar = tarifaDolar - montoDolar;
-								montoAPagarDolar = montoPendienteDolar;
-								montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-								montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);	
+								originalAmount = amountMonthly;
+								transactionAmount = Math.round(montoPendienteDolar * dollarExchangeRate);
+								amountPayable = transactionAmount;		
 							}
 							else if (monthlyPayment.substring(0, 3) == "Ago")
 							{
 								montoPendienteDolar = tarifaDolar - montoDolar;
-								montoAPagarDolar = montoPendienteDolar;
-								montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-								montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);											
+								originalAmount = amountMonthly;
+								transactionAmount = Math.round(montoPendienteDolar * dollarExchangeRate);
+								amountPayable = transactionAmount;												
 							}
 							else
 							{
 								tarifaDolar = Math.round(tarifaDolar * discountFamily);
 								montoPendienteDolar = tarifaDolar - montoDolar;
-								montoAPagarDolar = montoPendienteDolar;
-								montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-								montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);											
+								originalAmount = Math.round(amountMonthly * discountFamily);
+								transactionAmount = Math.round(montoPendienteDolar * dollarExchangeRate);
+								amountPayable = transactionAmount;												
 							}
 							
 							if ($('#type-invoice').val() == 'Factura inscripción regulares')
@@ -2183,40 +2025,30 @@
 			}
         });
 
-        $("#related-students").on("click", ".students", function(e)
+        $("#related-students").on("click", ".students", function()
         {
-			e.preventDefault();
-
-			resultado = validarDatosFiscales();
-			
-			if (resultado > 0)
-			{
-				alert("Estimado usuario uno o más datos fiscales presentan errores. Por favor revise");
-				window.scrollTo(0, 0);
-				return false;
-			}
-			else
-			{
-				$("#student-messages").html("Por favor espere...");
-	
-				idStudent = $(this).attr('id').substring(2);
-	
-				if (selectedStudent > -1)
-				{
-					uncheckStudent(selectedStudent);
-				}
-				selectedStudent = idStudent;
-				markStudent(selectedStudent); 
-				$("#monthly-payment").html("");
-				$("#student-name").html("");
-				$("#student-concept").text(" ");
-				studentBalance = 0;
-				$("#student-balance").html("");
-				
-				showRecords();
+            if (totalBill == 0)
+            {
+                $("#student-messages").html("Por favor espere...");
+    
+                idStudent = $(this).attr('id').substring(2);
+    
+                if (selectedStudent > -1)
+                {
+                    uncheckStudent(selectedStudent);
+                }
+                selectedStudent = idStudent;
+                markStudent(selectedStudent); 
+                $("#monthly-payment").html("");
+                $("#student-name").html("");
+                $("#student-concept").text(" ");
+                studentBalance = 0;
+                $("#student-balance").html("");
+                
+                showRecords();
 				
 				$("#student-messages").html("");
-			}
+            }
         });
         
         $("#mark-quotas").click(function () 
@@ -2225,7 +2057,14 @@
             var lastInstallment = " ";
             var flaggedFlag = 0;
 			var blocked_amount = 0;
-			inputCounter = 0;		            
+			discount = 0;
+			discountMode = '';
+			discountAmount = 0;
+			inputCounter = 0;
+			$('.select-discount').val(1);
+			$('#total-general').html('');
+			$('#total-general-bolivar').html('');
+			            
             $("#monthly-payment input").each(function (index) 
             {
 				if (inputCounter == 0)
@@ -2240,8 +2079,10 @@
 								$(this).attr('checked', true);
 								idStudentTransactions = $(this).attr('id'); 
 								markTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), 'true', ""); 
+								temporalMontoBolivar = Math.round(parseFloat($(this).attr('value')) * dollarExchangeRate);
+								updateRecord(idStudentTransactions.substring(2), 'true', temporalMontoBolivar, " "); 
 								$('#uncheck-quotas').attr('disabled', false);
+								$('#save-payments').attr('disabled', false);
 								$('#charge').attr('disabled', false);
 								if (firstInstallment == " ")
 								{
@@ -2251,8 +2092,9 @@
 								$("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
 								concept = firstInstallment + ' - ' + lastInstallment;
 								studentBalance = studentBalance + parseFloat($(this).attr('value'));
+								$("#student-balance").html(studentBalance.toFixed(2));
 								totalBalance = totalBalance + parseFloat($(this).attr('value'));
-								actualizarTotales();
+								$("#total-balance").html(totalBalance.toFixed(2));
 							}
 							else
 							{
@@ -2304,7 +2146,13 @@
             idStudentTransactions = " ";
 			idAmountTransactions = "";
             transactionDescription = " ";
+			discount = 0;
+			discountMode = '';
+			discountAmount = 0;
 			inputCounter = 0;
+			$('.select-discount').val(1);
+			$('#total-general').html('');
+			$('#total-general-bolivar').html('');
 
             $("#monthly-payment input").each(function (index) 
             {
@@ -2343,7 +2191,8 @@
 								$('#' + idStudentTransactions).attr('checked', false);
 								$('#' + idAmountTransactions).attr('disabled', false);								
 								uncheckTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), 'false', ""); 
+								temporalMontoBolivar = Math.round(transactionAmount * dollarExchangeRate);
+								updateRecord(idStudentTransactions.substring(2), 'false', temporalMontoBolivar, " "); 
 								$("#mark-quotas").html(transactionDescription);
 								if (markedQuotaCounter == 1)
 								{
@@ -2356,9 +2205,10 @@
 									$("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
 									concept = firstInstallment + ' - ' + lastInstallment;
 								}
-								studentBalance = studentBalance - transactionAmount;															
+								studentBalance = studentBalance - transactionAmount;
+								$("#student-balance").html(studentBalance.toFixed(2));
 								totalBalance = totalBalance - transactionAmount;
-								actualizarTotales();
+								$("#total-balance").html(totalBalance.toFixed(2));
 								return false;
 							}
 						}
@@ -2410,6 +2260,51 @@
                 }
             }
         }); 
+
+        $("#save-payments").click(function(e)
+        {
+			var resultado = 0;
+			
+            e.preventDefault();
+			
+			resultado = validarDatosFiscales();
+			
+			if (resultado > 0)
+			{
+				alert("Estimado usuario uno o más datos fiscales presentan errores. Por favor revise");
+				window.scrollTo(0, 0);
+				return false;
+			}
+			else
+			{			
+				if ($('.select-discount').val() == 1)
+				{
+					alert("Por favor indique si se aplicará algún descuento o recargo");
+					$('.select-discount').css('background-color', "#ffffe6");
+				}
+				else
+				{         
+					$("#mark-quotas").attr('disabled', true);
+					$("#uncheck-quotas").attr('disabled', true);
+					$("#save-payments").attr('disabled', true);
+					$(".select-discount").attr('disabled', true);
+
+					showInvoiceLines();
+					
+					totalBalance = Math.round(totalBalance * dollarExchangeRate);
+					totalBill = totalBalance;
+					$("#invoice-subtotal").html(totalBill.toFixed(2));
+					$("#invoice-descuento").html(discount.toFixed(2));
+					totalBill = totalBill + discount;
+					$("#total-bill").html(totalBill.toFixed(2));
+					balance = totalBalance + discount - accumulatedPayment;
+					indicatorUpdateAmount = 1;
+					updateAmount();
+					indicatorUpdateAmount = 0;
+					activateInvoiceButtons();
+				}
+			}
+        });     
         
         $("#automatic-adjustment").click(function(e) 
         {
@@ -2692,35 +2587,63 @@
             loadPayments();
         });
 		
-        $('#select-discount').change(function(e) 
+        $('.select-discount').change(function(e) 
         {
-			e.preventDefault();
-			discountMode = "Fijo";
+            e.preventDefault();
+			
+			discount = 0;
+			discountMode = '';
 			discountAmount = 0;
-
-			if ($('#select-discount').val() > 1)
+					
+			if ($('.select-discount').val() == 2)
+			{
+				totalGeneral = totalBalance;
+				$('#total-general').html(totalGeneral.toFixed(2));
+				totalGeneralBolivar = Math.round(totalGeneral * dollarExchangeRate);
+				$('#total-general-bolivar').html(totalGeneralBolivar.toFixed(2));	
+			}
+			else if ($('.select-discount').val() > 2)
 			{
 				$.post('<?php echo Router::url(["controller" => "Discounts", "action" => "searchDiscount"]); ?>', 
-					{"id" : $('#select-discount').val() }, null, "json")          
+					{"id" : $('.select-discount').val() }, null, "json")          
 
 				.done(function(response) 
 				{
 					if (response.success) 
 					{
 						discountMode = response.data.mode;
-						discountAmount = response.data.amount;
-						actualizarTotales();
+						discountAmount = response.data.amount;						
+						if (response.data.mode == 'Porcentaje')
+						{
+							if (response.data.amount > 0)
+							{
+								discountDecimal = totalBalance * response.data.amount;
+								discount = Math.round(discountDecimal);
+							}
+							else
+							{
+								positiveDiscount = response.data.amount * -1;
+								discountDecimal = totalBalance * positiveDiscount;
+								discount = (Math.round(discountDecimal)) * -1;
+							}
+						}
+						else
+						{
+							discount = response.data.amount		
+						}
+						totalGeneral = totalBalance + discount; 
+						$('#total-general').html(totalGeneral.toFixed(2));
+						totalGeneralBolivar = Math.round(totalGeneral * dollarExchangeRate);
+						$('#total-general-bolivar').html(totalGeneralBolivar.toFixed(2));
 					} 
 					else 
 					{
 						alert('No se encontró el descuento');
-						actualizarTotales();
 					}
 				})
 				.fail(function(jqXHR, textStatus, errorThrown) 
 				{
 					alert('Algo falló en la búsqueda. Código de error: ' + textStatus);
-					actualizarTotales();
 				});
 			}
         });
@@ -2744,7 +2667,7 @@
 			disableButtons();
 		
             $.post('<?php echo Router::url(["controller" => "Monedas", "action" => "actualizarTasa"]); ?>', 
-                {"amount" : $('#dollar-exchange-rate').val(), "tipo" : "Dolar" }, null, "json")          
+                {"amount" : $('#dollar-exchange-rate').val() }, null, "json")          
 
             .done(function(response) 
             {
@@ -2763,48 +2686,10 @@
             });  
         });
 		
-        $('#update-euro').click(function(e) 
-        {
-            e.preventDefault();
-			
-			if (totalBalance > 0)
-			{    
-				var r = confirm("Si actualiza la tasa de cambio, perderá los datos de la cobranza a la familia: " + nameFamily );
-				if (r == false)
-				{
-					return false;
-				}
-			}
-
-			$('#quota-adjustment').val("");
-			cleanPager();
-			$("#response-container").html("");
-			disableButtons();
-		
-            $.post('<?php echo Router::url(["controller" => "Monedas", "action" => "actualizarTasa"]); ?>', 
-                {"amount" : $('#euro').val(), "tipo" : "Euro" }, null, "json")          
-
-            .done(function(response) 
-            {
-                if (response.success) 
-                {
-                    $("#euro-messages").html("La tasa de cambio fue actualizada correctamente");
-                } 
-                else 
-                {
-                    $("#euro-messages").html("La tasa de cambio no pudo ser actualizada");
-                }
-            })
-            .fail(function(jqXHR, textStatus, errorThrown) 
-            {
-                $("#euro-messages").html("Algo ha fallado, la tasa de cambio no pudo ser actualizada: " + textStatus);
-            });  
-        });		
-		
-        $('#establecer-tasa-dolar').click(function(e) 
+        $('#establecer-tasa-temporal').click(function(e) 
         {
 			e.preventDefault();
-			if ($("#tasa-temporal-dolar").val() > 0)
+			if ($("#tasa-temporal").val() > 0)
 			{
 				if (totalBalance > 0)
 				{    
@@ -2819,11 +2704,9 @@
 				cleanPager();
 				$("#response-container").html("");
 				disableButtons();  
-				$('#tasa-temporal-dolar').css('background-color', '#ffb3b3');
-				$("#establecer-tasa-dolar").addClass("noverScreen");
-				$("#eliminar-tasa-dolar").removeClass("noverScreen");
-				alert("Estimado usuario, por favor recuerde establecer también la tasa temporal del Euro");
-				$( "#tasa-temporal-euro" ).focus();
+				$('#tasa-temporal').css('background-color', '#ffb3b3');
+				$("#establecer-tasa-temporal").addClass("noverScreen");
+				$("#eliminar-tasa-temporal").removeClass("noverScreen");
 			}
 			else
 			{
@@ -2831,7 +2714,7 @@
 			}
         });
 		
-        $('#eliminar-tasa-dolar').click(function(e) 
+        $('#eliminar-tasa-temporal').click(function(e) 
         {
 			e.preventDefault();
 			if (totalBalance > 0)
@@ -2847,62 +2730,10 @@
 			cleanPager();
 			$("#response-container").html("");
 			disableButtons();  
-			$('#tasa-temporal-dolar').val('0,00');			
-			$('#tasa-temporal-dolar').css('background-color', 'white');
-			$("#establecer-tasa-dolar").removeClass("noverScreen");
-			$("#eliminar-tasa-dolar").addClass("noverScreen");
-			alert("Estimado usuario, por favor recuerde eliminar también la tasa temporal del Euro");
-			$( "#tasa-temporal-euro" ).focus();
-        });
-		
-        $('#establecer-tasa-euro').click(function(e) 
-        {
-			e.preventDefault();
-			if ($("#tasa-temporal-euro").val() > 0)
-			{
-				if (totalBalance > 0)
-				{    
-					var r = confirm("Si establece una tasa temporal, perderá los datos de la cobranza a la familia: " + nameFamily );
-					if (r == false)
-					{
-						return false;
-					}
-				}
-
-				$('#quota-adjustment').val("");
-				cleanPager();
-				$("#response-container").html("");
-				disableButtons();  
-				$('#tasa-temporal-euro').css('background-color', '#ffb3b3');
-				$("#establecer-tasa-euro").addClass("noverScreen");
-				$("#eliminar-tasa-euro").removeClass("noverScreen");
-			}
-			else
-			{
-				alert("La tasa temporal debe ser mayor a cero");		
-			}
-        });
-		
-        $('#eliminar-tasa-euro').click(function(e) 
-        {
-			e.preventDefault();
-			if (totalBalance > 0)
-			{    
-				var r = confirm("Si elimina una tasa temporal, perderá los datos de la cobranza a la familia: " + nameFamily );
-				if (r == false)
-				{
-					return false;
-				}
-			}
-
-			$('#quota-adjustment').val("");
-			cleanPager();
-			$("#response-container").html("");
-			disableButtons();  
-			$('#tasa-temporal-euro').val('0,00');			
-			$('#tasa-temporal-euro').css('background-color', 'white');
-			$("#establecer-tasa-euro").removeClass("noverScreen");
-			$("#eliminar-tasa-euro").addClass("noverScreen");
+			$('#tasa-temporal').val('0,00');			
+			$('#tasa-temporal').css('background-color', 'white');
+			$("#establecer-tasa-temporal").removeClass("noverScreen");
+			$("#eliminar-tasa-temporal").addClass("noverScreen");
         });
 		
         $('#adjust-fee').click(function(e) 
@@ -2910,15 +2741,17 @@
             e.preventDefault();
 
 			var adjInputCounter = 0;
-			var adjIdAmountTransaction = ""; 
 			var adjMontoModificadoDolar = 0;
+			var adjModifiableFee = 0;
 			var adjOriginalMontoDolar = 0;
+			var adjOriginalAmount = 0;
 			var adjMontoPagadoDolar = 0;
+			var adjAmountPaid = 0;
+			var adjIdAmountTransaction = '';
 			var adjMontoPendienteDolar = 0;
-			var adjAPagarDolar = 0;
-			var adjAPagarEuro = 0;
-			var adjAPagarBolivar = 0;
+			var adjAmountPayable = 0;
 			var montoDolarCadena;
+			var stringAmount = '';
 			var adjError = 0;
 			
             $("#monthly-payment input").each(function (index) 
@@ -2926,32 +2759,29 @@
 				if (adjInputCounter == 1)
 				{
 					adjMontoModificadoDolar = parseFloat($(this).val());
+					adjModifiableFee = Math.round(adjMontoModificadoDolar * dollarExchangeRate);
 					adjIdAmountTransaction = $(this).attr('id');
 					adjInputCounter++;
 				}
 				else if (adjInputCounter == 2)
 				{
 					adjMontoPagadoDolar = parseFloat($(this).val());
+					adjAmountPaid = Math.round(adjMontoPagadoDolar * dollarExchangeRate);
 					adjInputCounter++;					
 				}
 				else if (adjInputCounter == 3)
 				{
 					adjOriginalMontoDolar = parseFloat($(this).val());
-					if (adjMontoModificadoDolar != adjOriginalMontoDolar)
+					adjOriginalAmount = Math.round(adjOriginalMontoDolar * dollarExchangeRate);					
+					if (adjModifiableFee != adjOriginalAmount)
 					{					
-						if (adjMontoModificadoDolar > adjMontoPagadoDolar)
+						if (adjModifiableFee > adjAmountPaid)
 						{
 							montoDolarCadena = (adjMontoModificadoDolar - adjMontoPagadoDolar).toFixed(2);
-							adjMontoPendienteDolar = parseFloat(montoDolarCadena);				
-							var adjAPagarDolar = adjMontoPendienteDolar;
-							var adjAPagarEuro = Math.round(adjAPagarDolar / tasaDolarEuro);
-							var adjAPagarBolivar = Math.round(adjAPagarDolar * dollarExchangeRate);;
-							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, adjMontoPendienteDolar, adjAPagarDolar, adjAPagarEuro, adjAPagarBolivar);
-							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
-						}
-						else if (adjMontoModificadoDolar == 0 && adjMontoPagadoDolar == 0)
-						{
-							updateInstallment(adjIdAmountTransaction.substring(2), 0, 0, 0, 0, 0);
+							adjMontoPendienteDolar = parseFloat(montoDolarCadena);
+							stringAmount = (adjModifiableFee - adjAmountPaid).toFixed(2);
+							adjAmountPayable = parseFloat(stringAmount);
+							updateInstallment(adjIdAmountTransaction.substring(2), adjMontoModificadoDolar, adjMontoPendienteDolar ,adjAmountPayable, adjModifiableFee, adjAmountPayable);
 							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
 						}
 						else
@@ -2980,15 +2810,8 @@
 				showRecords();
 			}
         });
-		
-        $('#compensar').click(function(e) 
-        {
-			e.preventDefault();
-			$("#nota-credito").addClass("noverScreen");
-			$("#botones-notas").addClass("noverScreen");
-			$("#botones-cuotas").removeClass("noverScreen");
-			indicadorCompensacion = 1;
-        });
+
+// fin funciones Jquery
 
     }); 
 

@@ -125,10 +125,16 @@ class MonedasController extends AppController
             {
                 die("Solicitud no válida");    
             }
-					
-			$this->loadModel('Monedas');	
-			$moneda = $this->Monedas->get(2);
 
+			if ($_POST['tipo'] == "Dolar")
+			{
+				$moneda = $this->Monedas->get(2);
+			}
+			else
+			{
+				$moneda = $this->Monedas->get(3);				
+			}
+			
 			if (substr($_POST['amount'], -3, 1) == ',')
 			{
 				$replace1= str_replace('.', '', $_POST['amount']);
