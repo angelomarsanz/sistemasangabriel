@@ -1302,6 +1302,7 @@
         accountant++;
     }
     
+	// Eliminar esta función
     function activateInvoiceButtons()
     {
         // $("#automatic-adjustment").attr('disabled', false);
