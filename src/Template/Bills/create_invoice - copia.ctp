@@ -673,10 +673,12 @@
 											<tr>
 												<th scope="col" style="color:red;">&nbsp;(x)&nbsp;</th>
 												<th scope="col">Forma&nbsp;de&nbsp;pago&nbsp;&nbsp;</th>
+												<th scope="col">Moneda</th>
 												<th scope="col">Monto</th>
 												<th scope="col">&nbsp;&nbsp;Banco&nbsp;&nbsp;&nbsp;&nbsp;</th>
 												<th scope="col">Cuenta&nbsp;o&nbsp;tarjeta</th>
 												<th scope="col">Serial</th>
+												<th scope="col">Comentario</th>
 											</tr>
 										</thead>
 										<tbody id="registered-payments"></tbody>
@@ -712,6 +714,7 @@
     var totalBill = 0;
     var paymentType = " ";
     var amountPaid = 0;
+	var montoPagadoDolar = 0;
     var bank = " ";
     var accountOrCard = " ";
     var serial = " ";
@@ -780,6 +783,9 @@
 	var indicadorCompensacion = 0;
 	var deudaMenosPagado = 0;
 	var sobrante = 0;
+	var monedaPago = "$";
+	var comentario = "";
+	var monedaPagoEliminar = "";
 
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
@@ -909,6 +915,9 @@
 		$('.mensajes-usuario').html("");
 		$('.campo-resaltado').css('background-color', "white");
 		$('#nota-credito').html("");
+		$("#nota-credito").removeClass("noverScreen");
+		$("#botones-cuotas").removeClass("noverScreen");
+		$("#botones-notas").addClass("noverScreen");		
 		
         for (var i = 0, item = 0; i < 7; i++)
         {
@@ -990,65 +999,111 @@
             return false;
         }
     }
+	
+	function checkPredeterminado()
+	{
+		monedaPago = "$";
+		$('.check-dolar').attr('checked', true);
+		$('.check-dolar').prop('checked', true);
+		$('.check-euro').attr('checked', false);
+		$('.check-euro').prop('checked', false);
+		$('.check-bolivar').attr('checked', false);
+		$('.check-bolivar').prop('checked', false);
+	}
 
     function updateAmount()
     {       
         if (deudaMenosPagado > 0)
         {
-            $('#amount-01').val(deudaMenosPagado);
-            $('#amount-02').val(deudaMenosPagado);
-            $('#amount-03').val(deudaMenosPagado);
-            $('#amount-04').val(deudaMenosPagado);
-            $('#amount-05').val(deudaMenosPagado);
-            $('#amount-06').val(deudaMenosPagado);
-            $('#amount-07').val(deudaMenosPagado);
-        }
-        else
+			aCobrar = deudaMenosPagado;
+		}
+		else
+		{
+			aCobrar = 0;
+		}
+		$('#amount-01').val(aCobrar).css("color", "black");
+		$('#amount-02').val(aCobrar).css("color", "black");
+		$('#amount-03').val(aCobrar).css("color", "black");
+		$('#amount-04').val(aCobrar).css("color", "black");
+		$('#amount-05').val(aCobrar).css("color", "black");
+		$('#amount-06').val(aCobrar).css("color", "black");
+		$('#amount-07').val(aCobrar).css("color", "black");
+	}
+	
+    function aCobrarEuros()
+    {       
+        if (deudaMenosPagado > 0)
         {
-            $('#amount-01').val(0);
-            $('#amount-02').val(0);
-            $('#amount-03').val(0);
-            $('#amount-04').val(0);
-            $('#amount-05').val(0);
-            $('#amount-06').val(0);
-            $('#amount-07').val(0);
-        }    
-		
-        if (indicatorUpdateAmount == 0)
+			aCobrar = Math.round(deudaMenosPagado / tasaDolarEuro);
+		}
+		else
+		{
+			aCobrar = 0;
+		}
+		$('#amount-01').val(aCobrar).css("color", "blue");
+		$('#amount-02').val(aCobrar).css("color", "blue");
+		$('#amount-03').val(aCobrar).css("color", "blue");
+		$('#amount-04').val(aCobrar).css("color", "blue");
+		$('#amount-05').val(aCobrar).css("color", "blue");
+		$('#amount-06').val(aCobrar).css("color", "blue");
+		$('#amount-07').val(aCobrar).css("color", "blue");
+	}
+	
+    function aCobrarBolivares()
+    {       
+        if (deudaMenosPagado > 0)
         {
-            $("#amount-" + paymentIdentifier).css('background-color', '#ffffff');
-            if (paymentType != 'Efectivo')
-            {
-                if (paymentType == 'Retención de impuesto')
-                {
-                    $("#serial-" + paymentIdentifier).css('background-color', '#ffffff');
-                    $('#serial-' + paymentIdentifier).val(null);
-                }
-                else if (paymentType == 'Tarjeta de débito' || paymentType == 'Tarjeta de crédito')
-                {
-                    $("#bank-" + paymentIdentifier).css('background-color', '#ffffff');
-                    $('#bank-' + paymentIdentifier).val(null);
-                    $("#account_or_card-" + paymentIdentifier).css('background-color', '#ffffff');
-                    $('#account_or_card-' + paymentIdentifier).val(null);
-                }
-                else if (paymentType == 'Transferencia' || paymentType == 'Depósito')
-                {
-                    $("#bank-" + paymentIdentifier).css('background-color', '#ffffff');
-                    $('#bank-' + paymentIdentifier).val(null);
-                    $("#serial-" + paymentIdentifier).css('background-color', '#ffffff');
-                    $('#serial-' + paymentIdentifier).val(null);
-                }
-                else
-                {
-                    $("#bank-" + paymentIdentifier).css('background-color', '#ffffff');
-                    $('#bank-' + paymentIdentifier).val(null);
-                    $("#account_or_card-" + paymentIdentifier).css('background-color', '#ffffff');
-                    $('#account_or_card-' + paymentIdentifier).val(null);
-                    $("#serial-" + paymentIdentifier).css('background-color', '#ffffff');
-                    $('#serial-' + paymentIdentifier).val(null);
-                }
-            }
-        }
+			aCobrar = Math.round(deudaMenosPagado * dollarExchangeRate);
+		}
+		else
+		{
+			aCobrar = 0;
+		}
+		$('#amount-01').val(aCobrar).css("color", "red");
+		$('#amount-02').val(aCobrar).css("color", "red");
+		$('#amount-03').val(aCobrar).css("color", "red");
+		$('#amount-04').val(aCobrar).css("color", "red");
+		$('#amount-05').val(aCobrar).css("color", "red");
+		$('#amount-06').val(aCobrar).css("color", "red");
+		$('#amount-07').val(aCobrar).css("color", "red");
+	}
+	
+	function inicializarCampos()
+	{
+		$("#amount-" + paymentIdentifier).css('background-color', '#ffffff');
+		$("#comentario-" + paymentIdentifier).css('background-color', '#ffffff');
+		$('#comentario-' + paymentIdentifier).val(null);
+		if (paymentType != 'Efectivo')
+		{
+			if (paymentType == 'Retención de impuesto')
+			{
+				$("#serial-" + paymentIdentifier).css('background-color', '#ffffff');
+				$('#serial-' + paymentIdentifier).val(null);
+			}
+			else if (paymentType == 'Tarjeta de débito' || paymentType == 'Tarjeta de crédito')
+			{
+				$("#bank-" + paymentIdentifier).css('background-color', '#ffffff');
+				$('#bank-' + paymentIdentifier).val(null);
+				$("#account_or_card-" + paymentIdentifier).css('background-color', '#ffffff');
+				$('#account_or_card-' + paymentIdentifier).val(null);
+			}
+			else if (paymentType == 'Transferencia' || paymentType == 'Depósito')
+			{
+				$("#bank-" + paymentIdentifier).css('background-color', '#ffffff');
+				$('#bank-' + paymentIdentifier).val(null);
+				$("#serial-" + paymentIdentifier).css('background-color', '#ffffff');
+				$('#serial-' + paymentIdentifier).val(null);
+			}
+			else
+			{
+				$("#bank-" + paymentIdentifier).css('background-color', '#ffffff');
+				$('#bank-' + paymentIdentifier).val(null);
+				$("#account_or_card-" + paymentIdentifier).css('background-color', '#ffffff');
+				$('#account_or_card-' + paymentIdentifier).val(null);
+				$("#serial-" + paymentIdentifier).css('background-color', '#ffffff');
+				$('#serial-' + paymentIdentifier).val(null);
+			}
+		}
     }
 
     function initDataBase()  // Function Call When Page is ready.
@@ -1110,11 +1165,13 @@
     {
         var createPayments = "CREATE TABLE IF NOT EXISTS payments \
         (payId INTEGER PRIMARY KEY, \
+		payMoneda VARCHAR(50), \
         payPaymentType VARCHAR(100), \
         payAmountPaid FLOAT, \
         payBank VARCHAR(200), \
         payAccountOrCard VARCHAR(50), \
-        paySerial VARCHAR (50))";
+        paySerial VARCHAR (50), \
+		payComentario VARCHAR(250))";
 
         db.transaction(function (tx) { tx.executeSql(createPayments, [], null, onError); });
     }
@@ -1202,28 +1259,34 @@
     {
         var insertPayments = "INSERT OR REPLACE INTO payments \
         (payId, \
+		payMoneda, \
         payPaymentType, \
         payAmountPaid, \
         payBank, \
         payAccountOrCard, \
-        paySerial) VALUES (?, ?, ?, ?, ?, ?)";
+        paySerial, \
+		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = accountant;
+		var tpMoneda = monedaPago;
         var tpPaymentType = paymentType;
         var tpAmountPaid = amountPaid;
         var tpBank = bank;
         var tpAccountOrCard = accountOrCard;
-        var tpSerial = serial; 
+        var tpSerial = serial
+		var tpComentario = comentario; 
 
         db.transaction(function (tx) 
         {
             tx.executeSql(insertPayments, 
             [tpId, 
+			tpMoneda,
             tpPaymentType, 
             tpAmountPaid, 
             tpBank, 
             tpAccountOrCard,
-            tpSerial], null, onError);
+            tpSerial,
+			tpComentario], null, onError);
         });
     }
     
@@ -1471,24 +1534,66 @@
                 {
                     item = dataSet.item(i);
                     detailLine += "<li>" 
+					+ "id "
                     + item['payId'] 
-                    + " "
+                    + " Moneda "
+                    + item['payMoneda']
+                    + " Tipo "
                     + item['payPaymentType']
-                    + " " 
+                    + " Pagado " 
                     + item['payAmountPaid']
-                    + " "
+                    + " Banco "
                     + item['payBank'] 
-                    + " "
+                    + " Tarjeta "
                     + item['payAccountOrCard']
-                    + " "
+                    + " Serial "
                     + item['paySerial']
+                    + " Comentario "
+                    + item['payComentario']					
                     + "</li>";
                 }
                 $("#pagos").html(detailLine);
             });
         });
     }
-
+	
+    function buscarMoneda(idPago) 
+    {
+        var selectAllPayments = "SELECT * FROM payments WHERE payId = ?";
+        var detailLine = "";
+        
+        db.transaction(function (tx) 
+        {
+            tx.executeSql(selectAllPayments, [idPago], function (tx, result) 
+            {
+                dataSet = result.rows;
+				                
+                for (var i = 0, item = null; i < dataSet.length; i++) 
+                {
+                    item = dataSet.item(i);
+					monedaPagoEliminar = item['payMoneda'];
+													
+					if (monedaPagoEliminar == "$")
+					{
+						montoPagadoDolar = amountPaid;
+					}
+					else if (monedaPagoEliminar == "€")
+					{
+						montoPagadoDolar = Math.round(amountPaid * tasaDolarEuro);
+					}
+					else
+					{
+						montoPagadoDolar = Math.round(amountPaid / dollarExchangeRate);
+					}
+									
+					accumulatedPayment = accumulatedPayment - montoPagadoDolar;
+					
+					actualizarTotales();						
+                }
+            });
+        });
+    }
+	
     function dropTable() // Function Call when Drop Button Click.. Talbe will be dropped from database.
     {
         var dropStatement = "DROP TABLE IF EXISTS studentTransactions";
@@ -1513,14 +1618,30 @@
     function printPayments()
     {
         linePayments = " ";
-        
+	        
         linePayments += "<tr id=pa" + accountant + "> \
             <td><button id=p" + accountant + " name='" + paymentType + "' value=" + amountPaid + " class='registeredPayments glyphicon glyphicon-trash'></button></td> \
-            <td>" + paymentType + "</td> \
-            <td>" + amountPaid.toFixed(2) + "</td> \
-            <td>" + bank + "</td> \
-            <td>" + accountOrCard + "</td> \
-            <td>" + serial + "</td></tr>";
+			<td style='text-align: center;'>" + paymentType + "</td>";
+			
+		if (monedaPago == "$")
+		{
+			linePayments += "<td style='text-align: center;'>" + monedaPago + "</td><td style='text-align: center;'>" + amountPaid + "</td>";
+		}
+		else if (monedaPago == "€")
+		{
+			linePayments += "<td style='color: blue; text-align: center;'>" + monedaPago + "</td><td style='color: blue; text-align: center;'>" + amountPaid + "</td>";
+		}
+		else
+		{
+			linePayments += "<td style='color: red; text-align: center;'>" + monedaPago + "</td><td style='color: red; text-align: center;'>" + amountPaid + "</td>";
+		}
+		
+		linePayments +=
+            "<td style='text-align: center;'>" + bank + "</td> \
+            <td style='text-align: center;'>" + accountOrCard + "</td> \
+            <td style='text-align: center;'>" + serial + "</td> \
+			<td style='text-align: left;'>" + comentario + "</td></tr>";
+			
         $("#registered-payments").append(linePayments);
         
         insertRecordPayments();
@@ -1528,10 +1649,8 @@
         accountant++;
     }
     
-    function activateInvoiceButtons()
+    function activarBotonesPago()
     {
-        // $("#automatic-adjustment").attr('disabled', false);
-        // $("#adjust-invoice").attr('disabled', false);
         $("#print-invoice").attr('disabled', false);
         $("#bt-01").attr('disabled', false);
         $("#bt-02").attr('disabled', false);
@@ -1541,7 +1660,19 @@
         $("#bt-06").attr('disabled', false);
         $("#bt-07").attr('disabled', false);
     }
-    
+	
+    function desactivarBotonesPago()
+    {
+        $("#print-invoice").attr('disabled', true);
+        $("#bt-01").attr('disabled', true);
+        $("#bt-02").attr('disabled', true);
+        $("#bt-03").attr('disabled', true);
+        $("#bt-04").attr('disabled', true);
+        $("#bt-05").attr('disabled', true);
+        $("#bt-06").attr('disabled', true);
+        $("#bt-07").attr('disabled', true);
+    }
+	
     function showInvoiceLines()
     {
         var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbInvoiced = 'true' ORDER BY dbStudentName";
@@ -1825,9 +1956,16 @@
 				$('#sobrante-bolivar').html(Math.round(sobrante * dollarExchangeRate));
 			}
 		}
-		indicatorUpdateAmount = 1;
+		checkPredeterminado();
 		updateAmount();
-		indicatorUpdateAmount = 0;
+		if (totalBalanceDescuento > 0)
+		{
+			activarBotonesPago();
+		}
+		else
+		{
+			desactivarBotonesPago();
+		}
 	}
 
 // Funciones Jquery
@@ -2700,16 +2838,9 @@
 
         $('.record-payment').click(function(e) 
         {
-            // Detenemos el comportamiento normal del evento click sobre el elemento clicado
-            e.preventDefault();
-            
-            if (balanceIndicator == 0)
-            {
-                balance = parseFloat((totalBalance + discount).toFixed(2));
-                balanceIndicator = 1;
-			}
-            
-            if (balance > 0)
+             e.preventDefault();
+                       
+            if (deudaMenosPagado > 0)
             {
                 paymentIdentifier = ($(this).attr('id')).substring(3);
                 
@@ -2745,33 +2876,33 @@
                 }
 
                 amountPaid = parseFloat($('#amount-' + paymentIdentifier).val());
+				
+				if (monedaPago == "$")
+				{
+					montoPagadoDolar = amountPaid;
+				}
+				else if (monedaPago == "€")
+				{
+					montoPagadoDolar = Math.round(amountPaid * tasaDolarEuro);
+				}
+				else
+				{
+					montoPagadoDolar = Math.round(amountPaid / dollarExchangeRate);
+				}
+				
                 bank = $('#bank-' + paymentIdentifier).val();
                 accountOrCard = $('#account_or_card-' + paymentIdentifier).val();
                 serial = $('#serial-' + paymentIdentifier).val();
-				
-                balance = balance - amountPaid;
-    
-                accumulatedPayment = accumulatedPayment + amountPaid;
-        
-                if (balance < 0)
-                {
-                    amountPaid = amountPaid + balance;
-                    change = -(balance);
-                }
-
-                updateAmount();
+				comentario = $('#comentario-' + paymentIdentifier).val();
 
                 printPayments();
-
-                alert('Pago registrado con éxito: Bs. ' + amountPaid.toFixed(2));
-
-                if (change > 0)
-                {
-                    paymentType = "Cambio";
-                    amountPaid = change;
-                    printPayments(); 
-                    change = 0;
-                }
+				
+               alert('Pago registrado con éxito: ' +  monedaPago + ' ' + amountPaid.toFixed(2));
+				
+                accumulatedPayment = accumulatedPayment + montoPagadoDolar;
+        
+				actualizarTotales();
+				inicializarCampos();
             }
             else
             {
@@ -2779,32 +2910,24 @@
             }
         });
 
-        $("#registered-payments").on("click", ".registeredPayments", function()
+        $("#registered-payments").on("click", ".registeredPayments", function(e)
         {
+			e.preventDefault();
+			
             selectedPayment = ($(this).attr('id').substring(1));
             paymentType = $(this).attr('name');
             amountPaid = parseFloat($(this).attr('value'));
-            var r = confirm("Desea eliminar este pago en " + paymentType + " de Bs. " + amountPaid);
+            var r = confirm("Está seguro de que desea eliminar este pago");
             if (r == false)
             {
                 return false;
             }
             $("#pa" + selectedPayment).remove();
             
+			buscarMoneda(parseFloat(selectedPayment));
+			
             deletePayment(parseFloat(selectedPayment));
-            
-            balance = balance + amountPaid;
-        
-            accumulatedPayment = accumulatedPayment - amountPaid;
-            
-            if (balance < 0)
-            {
-                amountPaid = amountPaid + balance;
-            }
-    
-            indicatorUpdateAmount = 1;
-            updateAmount();
-            indicatorUpdateAmount = 0;
+			
         });
 
         $("#print-invoice").click(function () 
@@ -2849,7 +2972,11 @@
 			discountMode = "Fijo";
 			discountAmount = 0;
 
-			if ($('#select-discount').val() > 1)
+			if ($('#select-discount').val() == 1)
+			{
+				actualizarTotales();				
+			}
+			else
 			{
 				$.post('<?php echo Router::url(["controller" => "Discounts", "action" => "searchDiscount"]); ?>', 
 					{"id" : $('#select-discount').val() }, null, "json")          
@@ -3140,7 +3267,41 @@
 			$("#botones-cuotas").removeClass("noverScreen");
 			indicadorCompensacion = 1;
         });
-
+		
+		$('.check-dolar').click(function(e) 
+        {
+			monedaPago = "$";
+			$('.check-dolar').attr('checked', true);
+			$('.check-dolar').prop('checked', true);
+			$('.check-euro').attr('checked', false);
+			$('.check-euro').prop('checked', false);
+			$('.check-bolivar').attr('checked', false);
+			$('.check-bolivar').prop('checked', false);
+			updateAmount();
+		});
+		
+		$('.check-euro').click(function(e) 
+        {
+			monedaPago = "€";
+			$('.check-dolar').attr('checked', false);
+			$('.check-dolar').prop('checked', false);
+			$('.check-euro').attr('checked', true);
+			$('.check-euro').prop('checked', true);
+			$('.check-bolivar').attr('checked', false);
+			$('.check-bolivar').prop('checked', false);
+			aCobrarEuros();
+		});
+		$('.check-bolivar').click(function(e) 
+        {
+			monedaPago = "Bs.";
+			$('.check-dolar').attr('checked', false);
+			$('.check-dolar').prop('checked', false);
+			$('.check-euro').attr('checked', false);
+			$('.check-euro').prop('checked', false);
+			$('.check-bolivar').attr('checked', true);
+			$('.check-bolivar').prop('checked', true);
+			aCobrarBolivares();
+		});
     }); 
 
 </script>
