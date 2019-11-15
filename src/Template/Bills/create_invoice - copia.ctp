@@ -657,7 +657,7 @@
 					<div class="row">
 						<div class="col-md-6">
 							<p>
-								<button id="automatic-adjustment" class="btn btn-success" disabled>Ajuste</button>
+								<button id="ajuste-automatico" class="btn btn-success" disabled>Ajuste</button>
 								<button id="print-invoice" class="btn btn-success" disabled>Guardar factura</button>
 							</p>
 						</div>
@@ -705,6 +705,7 @@
 	var typeStudent = 0;
     var customerEmail = " ";
     var totalBalance = 0;
+	var saldoPagosRealizados = 0;
 	var discountMode = '';
 	var discountAmount = 0;
 	var discount = 0;
@@ -835,7 +836,7 @@
         $("#mark-quotas").attr('disabled', true);
         $("#uncheck-quotas").attr('disabled', true);
 		$("#adjust-fee").attr('disabled', true);
-        $("#automatic-adjustment").attr('disabled', true);
+        $("#ajuste-automatico").attr('disabled', true);
         $("#adjust-invoice").attr('disabled', true);
         $("#print-invoice").attr('disabled', true);
         $("#bt-01").attr('disabled', true);
@@ -917,8 +918,30 @@
 		$('#nota-credito').html("");
 		$("#nota-credito").removeClass("noverScreen");
 		$("#botones-cuotas").removeClass("noverScreen");
-		$("#botones-notas").addClass("noverScreen");		
-		
+		$("#botones-notas").addClass("noverScreen");	
+		$('#select-discount').val(1);		
+		$("#sub-total-dolar").html("");
+		$("#sub-total-euro").html("");
+		$("#sub-total-bolivar").html("");
+		$("#saldo-favor-dolar").html("");
+		$("#saldo-favor-euro").html("");
+		$("#saldo-favor-bolivar").html("");
+		$("#descuento-recargo-dolar").html("");
+		$("#descuento-recargo-euro").html("");
+		$("#descuento-recargo-bolivar").html("");
+		$("#total-balance-descuento-dolar").html("");
+		$("#total-balance-descuento-euro").html("");
+		$("#total-balance-descuento-bolivar").html("");
+		$("#pagado-dolar").html("");
+		$("#pagado-euro").html("");
+		$("#pagado-bolivar").html("");
+		$("#por-pagar-dolar").html("");
+		$("#por-pagar-euro").html("");
+		$("#por-pagar-bolivar").html("");
+		$("#sobrante-dolar").html("");
+		$("#sobrante-euro").html("");
+		$("#sobrante-bolivar").html("");
+
         for (var i = 0, item = 0; i < 7; i++)
         {
             item = i + 1;
@@ -926,6 +949,8 @@
 
             $("#amount-" + paymentNumber).css('background-color', '#ffffff');
             $("#amount-" + paymentNumber).val(0);
+			$("#comentario-" + paymentNumber).css('background-color', '#ffffff');
+            $('#comentario-' + paymentNumber).val(null);
             
             if (item > 1 && item < 4)
             {
@@ -1313,6 +1338,13 @@
         db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), Number(id)], null, onError); });
     }
 	
+    function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar) 
+    {
+        var updateStatement = "UPDATE studentTransactions SET dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ? WHERE dbId=?";
+        
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), Number(id)], null, onError); });
+    }
+	
     function showRecords() // Function For Retrive data from Database Display records as list
     {
         var selectWithCondition = "SELECT * FROM studentTransactions WHERE dbIdStudent = ?";
@@ -1518,6 +1550,28 @@
             });
         });
     }
+	
+    function buscarRegistrosMarcados() // Busca los registros marcados para pagar
+    {
+		saldoPagosRealizados = accumulatedPayment;
+		
+        var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbInvoiced = ?";
+        
+        db.transaction(function (tx) 
+        {
+            tx.executeSql(selectAllStatement, ["true"], function (tx, result) 
+            {
+                dataSet = result.rows;
+				                
+                for (var i = 0, item = null; i < dataSet.length; i++) 
+                {
+                    item = dataSet.item(i);
+					
+					saldoPagosRealizados = saldoPagosRealizados - item['pendiente']		
+                }
+            });
+        });
+    }
     
     function showPayments() 
     {
@@ -1651,7 +1705,6 @@
     
     function activarBotonesPago()
     {
-        $("#print-invoice").attr('disabled', false);
         $("#bt-01").attr('disabled', false);
         $("#bt-02").attr('disabled', false);
         $("#bt-03").attr('disabled', false);
@@ -1663,7 +1716,6 @@
 	
     function desactivarBotonesPago()
     {
-        $("#print-invoice").attr('disabled', true);
         $("#bt-01").attr('disabled', true);
         $("#bt-02").attr('disabled', true);
         $("#bt-03").attr('disabled', true);
@@ -1906,7 +1958,7 @@
 			{
 				descuentoPrevio = discountAmount;
 			}
-			discount = Math.round((totalBalance - saldoRepresentante) * descuentoPrevio);
+			discount = Math.round((totalBalance) * descuentoPrevio);
 			discount = discount * signoDescuento;
 		}
 		else
@@ -1930,34 +1982,40 @@
 		
 		deudaMenosPagado = totalBalanceDescuento - accumulatedPayment;
 		
+		$('#por-pagar-dolar').html(0);
+		$('#por-pagar-euro').html(0);
+		$('#por-pagar-bolivar').html(0);
+
+		$('#sobrante-dolar').html(0);
+		$('#sobrante-euro').html(0);
+		$('#sobrante-bolivar').html(0);
+			
 		if (deudaMenosPagado > 0)
 		{
 			$('#por-pagar-dolar').html(deudaMenosPagado);
 			$('#por-pagar-euro').html(Math.round(deudaMenosPagado / tasaDolarEuro));
-			$('#por-pagar-bolivar').html(Math.round(deudaMenosPagado * dollarExchangeRate));			
+			$('#por-pagar-bolivar').html(Math.round(deudaMenosPagado * dollarExchangeRate));		
+		}
+		else if (deudaMenosPagado < 0)
+		{
+			sobrante = deudaMenosPagado * -1;
+			$('#sobrante-dolar').html(sobrante);
+			$('#sobrante-euro').html(Math.round(sobrante / tasaDolarEuro));
+			$('#sobrante-bolivar').html(Math.round(sobrante * dollarExchangeRate));
+		}
+		
+		checkPredeterminado();
+		updateAmount();
+		if (totalBalance > 0)
+		{
+			$("#ajuste-automatico").attr('disabled', false);
+			$("#print-invoice").attr('disabled', false);
 		}
 		else
 		{
-			$('#por-pagar-dolar').html(0);
-			$('#por-pagar-euro').html(0);
-			$('#por-pagar-bolivar').html(0);
-			
-			if (deudaMenosPagado == 0)
-			{
-				$('#sobrante-dolar').html(0);
-				$('#sobrante-euro').html(0);
-				$('#sobrante-bolivar').html(0);
-			}
-			else
-			{
-				sobrante = deudaMenosPagado * -1;
-				$('#sobrante-dolar').html(sobrante);
-				$('#sobrante-euro').html(Math.round(sobrante / tasaDolarEuro));
-				$('#sobrante-bolivar').html(Math.round(sobrante * dollarExchangeRate));
-			}
+			$("#ajuste-automatico").attr('disabled', true);
+			$("#print-invoice").attr('disabled', true);			
 		}
-		checkPredeterminado();
-		updateAmount();
 		if (totalBalanceDescuento > 0)
 		{
 			activarBotonesPago();
@@ -2700,70 +2758,29 @@
             }
         }); 
         
-        $("#automatic-adjustment").click(function(e) 
+        $("#ajuste-automatico").click(function(e) 
         {
             e.preventDefault();
-        
-            var remainingBalance = 0;
 			
-			if (discountMode == 'Porcentaje')
+			if (totalBalance == 0)
 			{
-				if (discountAmount > 0)
-				{
-					discountBase = accumulatedPayment / (1 + discountAmount);
-					discountDecimal = discountBase * discountAmount;
-					discount = Math.round(discountDecimal);
-					remainingBalance = accumulatedPayment - discount;
-				}
-				else
-				{
-					positiveDiscount = discountAmount * -1;
-					discountBase = accumulatedPayment / (1 - positiveDiscount);
-					discountDecimal = discountBase * positiveDiscount;
-					discount = (Math.round(discountDecimal)) * -1;
-					remainingBalance = accumulatedPayment - discount;
-				}
+				alert("Estimado usuario debe seleccionar al menos una cuota antes de hacer un ajuste");
+				return-false				
 			}
-			else
+			
+			if (accumulatedPayment == 0)
 			{
-				discount = discountAmount;
-				remainingBalance = accumulatedPayment - discount;
+				alert("Estimado usuario debe registrar al menos un pago antes de hacer un ajuste");
+				return-false				
 			}
-			    
-            $("#invoice-lines input").each(function (index) 
-            {
-                transactionIdentifier = $(this).attr('id').substring(2);
-                transactionAmount = parseFloat($("#fac" + transactionIdentifier).attr('value'));
-
-                if (remainingBalance == 0)
-                {
-                    updateRecord(transactionIdentifier, false, transactionAmount, " " );
-                }
-                else if (remainingBalance < transactionAmount)
-                {
-                    updateRecord(transactionIdentifier, true, remainingBalance, "Abono" );
-                    remainingBalance = 0;
-                }
-                else if (remainingBalance == transactionAmount)
-                {
-                    remainingBalance = 0;
-                }
-                else if (remainingBalance > transactionAmount)
-                {
-                    remainingBalance = remainingBalance - transactionAmount;
-                }
-
-            });
-            showInvoiceLines();
-            totalBill = accumulatedPayment - discount;
-            $("#invoice-subtotal").html(totalBill.toFixed(2));
-			$("#invoice-descuento").html(discount.toFixed(2));
-			totalBill = totalBill + discount;
-            $("#total-bill").html(totalBill.toFixed(2));
-            balance = totalBill - accumulatedPayment;
-            indicatorUpdateAmount = 1;
-            updateAmount();
-            indicatorUpdateAmount = 0;			
+				
+			if (deudaMenosPagado == 0)
+			{
+				alert("Estimado usuario la factura ya está cuadrada y no requiere un ajuste");
+				return-false
+			}
+			        
+			buscarRegistrosMarcados();
         });
 
         $("#adjust-invoice").click(function(e) 
@@ -2931,17 +2948,25 @@
         });
 
         $("#print-invoice").click(function () 
-        {			
-            if (totalBill.toFixed(2) != accumulatedPayment.toFixed(2))
+        {	
+			if (deudaMenosPagado > 0)
+			{
+				alert('Estimado usuario debe registrar más pagos para completar el total de la factura/recibo u hacer un ajuste');
+				return false;
+			}
+            else if (deudaMenosPagado < 0)
             {
-                alert('El monto total de los pagos registrados (Bs.S ' + accumulatedPayment.toFixed(2) + ') es diferente al monto total de la factura Bs.S (' + totalBill.toFixed(2) + '). Por favor corrija...');
-                return false;
+				r= confirm('Estimado usuario tiene un sobrante de $ ' + sobrante + '. ¿Desea entregarlo al representante?');
+				if (r == false)
+				{
+					return false;
+				}
             }   	
-            var r= confirm('¿Está seguro de que desea guardar la facturar? Después no podrá hacer cambios');
-            if (r == false)
-            {
-                return false;
-            }
+			r= confirm('¿Está seguro de que desea guardar la facturar? Después no podrá hacer cambios');
+			if (r == false)
+			{
+				return false;
+			}
             $("#invoice-messages").html("Por favor espere...");
             payments.idTurn = $("#Turno").attr('value');
             payments.idParentsandguardians = idParentsandguardians;

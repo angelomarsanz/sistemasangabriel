@@ -253,18 +253,21 @@ class BillsController extends AppController
         $dateTurn = Time::now();
 		
 		$this->loadModel('Discounts');
+		$this->loadModel('Bancos');
 		
-		/* $discounts = $this->Discounts->find('list', ['limit' => 200, 
-			'order' => ["description_discount" => "ASC"],
-			'keyField' => 'id', 
-			'valueField' => function ($discount) 
-				{
-					return $discount->get('label');
-				}]); */
-
 		$discounts = $this->Discounts->find('list', ['limit' => 200, 
 			'order' => ["description_discount" => "ASC"],
 			'keyField' => 'id']);
+				
+		$bancosEmisor = $this->Bancos->find('list', ['limit' => 200, 
+			'conditions' => ['tipo_banco' => 'Emisor'],
+			'order' => ['nombre_banco' => 'ASC'],
+			'keyField' => 'nombre_banco']);
+						
+		$bancosReceptor = $this->Bancos->find('list', ['limit' => 200, 
+			'conditions' => ['tipo_banco' => 'Receptor'],
+			'order' => ['nombre_banco' => 'ASC'],
+			'keyField' => 'nombre_banco']);
 				
 		$this->loadModel('Rates');
 		
@@ -275,7 +278,7 @@ class BillsController extends AppController
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar; 
 				
-        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'amountMonthly'));
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'amountMonthly', 'bancosEmisor', 'bancosReceptor'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)

@@ -219,14 +219,15 @@
 									<div class="row">
 										<div class="col-md-6">
 											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-01']) ?>
-											<?= $this->Form->input('bank', ['label' => 'Banco:', 'value' => 'N/A', 'disabled' => true, 'id' => 'bank-01']) ?>
-											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-01']) ?>	
-											<?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-01']) ?>
+											<?= $this->Form->input('bank', ['label' => 'Banco:', 'value' => 'N/A', 'disabled' => true, 'id' => 'bank-01']) ?>	
+											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'value' => 'N/A', 'disabled' => true, 'id' => 'banco-receptor-01']); ?>
+											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-01']) ?>
 										</div>
-										<div class="col-md-6">		
+										<div class="col-md-6">	
+											<?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-01']) ?>
 											<div class="form-group">
 												<label for="comentario-01">Comentario:</label>
-												<textarea class="form-control" rows="7" id="comentario-01"></textarea>
+												<textarea class="form-control" rows="3" id="comentario-01"></textarea>
 											</div>
 											<button id="bt-01" class="record-payment btn btn-success" disabled>Registrar pago</button>
 										</div>
@@ -248,49 +249,15 @@
 									<div class="row">
 										<div class="col-md-6">
 											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-02']) ?>
-											<?= $this->Form->input('bank', ['label' => 'Banco:', 'id' => 'bank-02', 'options' => 
-												[null => '',
-												'100% Banco' => '100% Banco',
-												'Activo' => 'Activo',
-												'Agrícola de Venezuela' => 'Agrícola de Venezuela',
-												'Bancamiga' => 'Bancamiga',
-												'Bancaribe' => 'Bancaribe',
-												'Bancoex' => 'Bancoex',
-												'Bancrecer' => 'Bancrecer',
-												'Banesco' => 'Banesco',
-												'Banfanb' => 'Banfanb',
-												'Bangente' => 'Bangente',
-												'Banplus' => 'Banplus',
-												'Bicentenario del Pueblo' => 'Bicentenario del Pueblo',
-												'BOD' => 'BOD',
-												'Caroní' => 'Caroní',
-												'Citibank' => 'Citibank',
-												'Delsur' => 'Delsur',
-												'Exportación y Comercio' => 'Exportación y Comercio', 
-												'Exterior' => 'Exterior',
-												'Fondo Común' => 'Fondo Común',
-												'Instituto Municipal de Crédito Popular (IMCP)' => 'Instituto Municipal de Crédito Popular (IMCP)',
-												'Internacional de Desarrollo' => 'Internacional de Desarrollo',
-												'Mercantil' => 'Mercantil',
-												'Mi Banco' => 'Mi Banco',
-												'Nacional de Crédito' => 'Nacional de Crédito',
-												'Novo Banco' => 'Novo Banco',
-												'Plata' => 'Plata',
-												'Plaza' => 'Plaza',
-												'Provincial' => 'Provincial',
-												'Sofitasa' => 'Sofitasa',
-												'Tesoro' => 'Tesoro',
-												'Venezolano de Crédito' => 'Venezolano de Crédito',
-												'Venezuela' => 'Venezuela',
-												'Otro banco no especificado en la lista']]) ?>
-												
+											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-02', 'options' => $bancosEmisor]); ?>
+											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-02', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'id' => 'account_or_card-02']) ?>
-											<?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-02']) ?>
 										</div>
-										<div class="col-md-6">		
+										<div class="col-md-6">	
+											<?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-02']) ?>
 											<div class="form-group">
 												<label for="comentario-02">Comentario:</label>
-												<textarea class="form-control" rows="7" id="comentario-02"></textarea>
+												<textarea class="form-control" rows="3" id="comentario-02"></textarea>
 											</div>
 											<button id="bt-02" class="record-payment btn btn-success" disabled>Registrar pago</button>
 										</div>
@@ -312,49 +279,15 @@
 									<div class="row">
 										<div class="col-md-6">
 											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-03']) ?>
-											<?= $this->Form->input('bank', ['label' => 'Banco:', 'id' => 'bank-03', 'options' => 
-												[null => '',
-												'100% Banco' => '100% Banco',
-												'Activo' => 'Activo',
-												'Agrícola de Venezuela' => 'Agrícola de Venezuela',
-												'Bancamiga' => 'Bancamiga',
-												'Bancaribe' => 'Bancaribe',
-												'Bancoex' => 'Bancoex',
-												'Bancrecer' => 'Bancrecer',
-												'Banesco' => 'Banesco',
-												'Banfanb' => 'Banfanb',
-												'Bangente' => 'Bangente',
-												'Banplus' => 'Banplus',
-												'Bicentenario del Pueblo' => 'Bicentenario del Pueblo',
-												'BOD' => 'BOD',
-												'Caroní' => 'Caroní',
-												'Citibank' => 'Citibank',
-												'Delsur' => 'Delsur',
-												'Exportación y Comercio' => 'Exportación y Comercio', 
-												'Exterior' => 'Exterior',
-												'Fondo Común' => 'Fondo Común',
-												'Instituto Municipal de Crédito Popular (IMCP)' => 'Instituto Municipal de Crédito Popular (IMCP)',
-												'Internacional de Desarrollo' => 'Internacional de Desarrollo',
-												'Mercantil' => 'Mercantil',
-												'Mi Banco' => 'Mi Banco',
-												'Nacional de Crédito' => 'Nacional de Crédito',
-												'Novo Banco' => 'Novo Banco',
-												'Plata' => 'Plata',
-												'Plaza' => 'Plaza',
-												'Provincial' => 'Provincial',
-												'Sofitasa' => 'Sofitasa',
-												'Tesoro' => 'Tesoro',
-												'Venezolano de Crédito' => 'Venezolano de Crédito',
-												'Venezuela' => 'Venezuela',
-												'Otro banco no especificado en la lista']]) ?>
-												
+											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-03', 'options' => $bancosEmisor]); ?>
+											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-03', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'id' => 'account_or_card-03']) ?>
-											<?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-03']) ?>
 										</div>
 										<div class="col-md-6">		
+											<?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-03']) ?>
 											<div class="form-group">
 												<label for="comentario-03">Comentario:</label>
-												<textarea class="form-control" rows="7" id="comentario-03"></textarea>
+												<textarea class="form-control" rows="3" id="comentario-03"></textarea>
 											</div>
 											<button id="bt-03" class="record-payment btn btn-success" disabled>Registrar pago</button>
 										</div>
@@ -376,49 +309,15 @@
 									<div class="row">
 										<div class="col-md-6">
 											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-04']) ?>
-											<?= $this->Form->input('bank', ['label' => 'Banco:', 'id' => 'bank-04', 'options' => 
-												[null => '',
-												'100% Banco' => '100% Banco',
-												'Activo' => 'Activo',
-												'Agrícola de Venezuela' => 'Agrícola de Venezuela',
-												'Bancamiga' => 'Bancamiga',
-												'Bancaribe' => 'Bancaribe',
-												'Bancoex' => 'Bancoex',
-												'Bancrecer' => 'Bancrecer',
-												'Banesco' => 'Banesco',
-												'Banfanb' => 'Banfanb',
-												'Bangente' => 'Bangente',
-												'Banplus' => 'Banplus',
-												'Bicentenario del Pueblo' => 'Bicentenario del Pueblo',
-												'BOD' => 'BOD',
-												'Caroní' => 'Caroní',
-												'Citibank' => 'Citibank',
-												'Delsur' => 'Delsur',
-												'Exportación y Comercio' => 'Exportación y Comercio', 
-												'Exterior' => 'Exterior',
-												'Fondo Común' => 'Fondo Común',
-												'Instituto Municipal de Crédito Popular (IMCP)' => 'Instituto Municipal de Crédito Popular (IMCP)',
-												'Internacional de Desarrollo' => 'Internacional de Desarrollo',
-												'Mercantil' => 'Mercantil',
-												'Mi Banco' => 'Mi Banco',
-												'Nacional de Crédito' => 'Nacional de Crédito',
-												'Novo Banco' => 'Novo Banco',
-												'Plata' => 'Plata',
-												'Plaza' => 'Plaza',
-												'Provincial' => 'Provincial',
-												'Sofitasa' => 'Sofitasa',
-												'Tesoro' => 'Tesoro',
-												'Venezolano de Crédito' => 'Venezolano de Crédito',
-												'Venezuela' => 'Venezuela',
-												'Otro banco no especificado en la lista']]) ?>
-												
+											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-04', 'options' => $bancosEmisor]); ?>
+											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-04', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-04']) ?>
-											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-04']) ?>
 										</div>
-										<div class="col-md-6">		
+										<div class="col-md-6">
+											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-04']) ?>
 											<div class="form-group">
 												<label for="comentario-04">Comentario:</label>
-												<textarea class="form-control" rows="7" id="comentario-04"></textarea>
+												<textarea class="form-control" rows="3" id="comentario-04"></textarea>
 											</div>
 											<button id="bt-04" class="record-payment btn btn-success" disabled>Registrar pago</button>
 										</div>
@@ -440,49 +339,15 @@
 									<div class="row">
 										<div class="col-md-6">
 											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-05']) ?>
-											<?= $this->Form->input('bank', ['label' => 'Banco:', 'id' => 'bank-05', 'options' => 
-												[null => '',
-												'100% Banco' => '100% Banco',
-												'Activo' => 'Activo',
-												'Agrícola de Venezuela' => 'Agrícola de Venezuela',
-												'Bancamiga' => 'Bancamiga',
-												'Bancaribe' => 'Bancaribe',
-												'Bancoex' => 'Bancoex',
-												'Bancrecer' => 'Bancrecer',
-												'Banesco' => 'Banesco',
-												'Banfanb' => 'Banfanb',
-												'Bangente' => 'Bangente',
-												'Banplus' => 'Banplus',
-												'Bicentenario del Pueblo' => 'Bicentenario del Pueblo',
-												'BOD' => 'BOD',
-												'Caroní' => 'Caroní',
-												'Citibank' => 'Citibank',
-												'Delsur' => 'Delsur',
-												'Exportación y Comercio' => 'Exportación y Comercio', 
-												'Exterior' => 'Exterior',
-												'Fondo Común' => 'Fondo Común',
-												'Instituto Municipal de Crédito Popular (IMCP)' => 'Instituto Municipal de Crédito Popular (IMCP)',
-												'Internacional de Desarrollo' => 'Internacional de Desarrollo',
-												'Mercantil' => 'Mercantil',
-												'Mi Banco' => 'Mi Banco',
-												'Nacional de Crédito' => 'Nacional de Crédito',
-												'Novo Banco' => 'Novo Banco',
-												'Plata' => 'Plata',
-												'Plaza' => 'Plaza',
-												'Provincial' => 'Provincial',
-												'Sofitasa' => 'Sofitasa',
-												'Tesoro' => 'Tesoro',
-												'Venezolano de Crédito' => 'Venezolano de Crédito',
-												'Venezuela' => 'Venezuela',
-												'Otro banco no especificado en la lista']]) ?>
-												
+											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-05', 'options' => $bancosEmisor]); ?>	
+											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-05', 'options' => $bancosReceptor]); ?>	
 											<?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-05']) ?>
-											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-05']) ?>
 										</div>
-										<div class="col-md-6">		
+										<div class="col-md-6">	
+											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-05']) ?>
 											<div class="form-group">
 												<label for="comentario-05">Comentario:</label>
-												<textarea class="form-control" rows="7" id="comentario-05"></textarea>
+												<textarea class="form-control" rows="3" id="comentario-05"></textarea>
 											</div>
 											<button id="bt-05" class="record-payment btn btn-success" disabled>Registrar pago</button>
 										</div>
@@ -505,49 +370,15 @@
 									<div class="row">
 										<div class="col-md-6">
 											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-06']) ?>
-											<?= $this->Form->input('bank', ['label' => 'Banco:', 'id' => 'bank-06', 'options' => 
-												[null => '',
-												'100% Banco' => '100% Banco',
-												'Activo' => 'Activo',
-												'Agrícola de Venezuela' => 'Agrícola de Venezuela',
-												'Bancamiga' => 'Bancamiga',
-												'Bancaribe' => 'Bancaribe',
-												'Bancoex' => 'Bancoex',
-												'Bancrecer' => 'Bancrecer',
-												'Banesco' => 'Banesco',
-												'Banfanb' => 'Banfanb',
-												'Bangente' => 'Bangente',
-												'Banplus' => 'Banplus',
-												'Bicentenario del Pueblo' => 'Bicentenario del Pueblo',
-												'BOD' => 'BOD',
-												'Caroní' => 'Caroní',
-												'Citibank' => 'Citibank',
-												'Delsur' => 'Delsur',
-												'Exportación y Comercio' => 'Exportación y Comercio', 
-												'Exterior' => 'Exterior',
-												'Fondo Común' => 'Fondo Común',
-												'Instituto Municipal de Crédito Popular (IMCP)' => 'Instituto Municipal de Crédito Popular (IMCP)',
-												'Internacional de Desarrollo' => 'Internacional de Desarrollo',
-												'Mercantil' => 'Mercantil',
-												'Mi Banco' => 'Mi Banco',
-												'Nacional de Crédito' => 'Nacional de Crédito',
-												'Novo Banco' => 'Novo Banco',
-												'Plata' => 'Plata',
-												'Plaza' => 'Plaza',
-												'Provincial' => 'Provincial',
-												'Sofitasa' => 'Sofitasa',
-												'Tesoro' => 'Tesoro',
-												'Venezolano de Crédito' => 'Venezolano de Crédito',
-												'Venezuela' => 'Venezuela',
-												'Otro banco no especificado en la lista']]) ?>
-												
+											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-06', 'options' => $bancosEmisor]); ?>
+											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-06', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'id' => 'account_or_card-06']) ?>
-											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-06']) ?>
 										</div>
-										<div class="col-md-6">		
+										<div class="col-md-6">	
+											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-06']) ?>
 											<div class="form-group">
 												<label for="comentario-06">Comentario:</label>
-												<textarea class="form-control" rows="7" id="comentario-06"></textarea>
+												<textarea class="form-control" rows="3" id="comentario-06"></textarea>
 											</div>
 											<button id="bt-06" class="record-payment btn btn-success" disabled>Registrar pago</button>
 										</div>
@@ -570,13 +401,14 @@
 										<div class="col-md-6">
 											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-07']) ?>
 											<?= $this->Form->input('bank', ['label' => 'Banco:', 'value' => 'N/A', 'disabled' => true, 'id' => 'bank-07']) ?>
-											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-07']) ?>	
-											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-07']) ?>
+											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-07']) ?>
+											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'value' => 'N/A', 'disabled' => true, 'id' => 'banco-receptor-07']); ?>
 										</div>
 										<div class="col-md-6">		
+											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-07']) ?>
 											<div class="form-group">
-												<label for="comentario-07">Comentario:</label>
-												<textarea class="form-control" rows="7" id="comentario-07"></textarea>
+												<label for="comentario-06">Comentario:</label>
+												<textarea class="form-control" rows="3" id="comentario-07"></textarea>
 											</div>
 											<button id="bt-07" class="record-payment btn btn-success" disabled>Registrar pago</button>
 										</div>
@@ -1008,7 +840,13 @@
         if($("#bank-" + paymentIdentifier).val().length < 1) 
         {  
             $("#bank-" + paymentIdentifier).css('background-color', '#f2f2f2');
-            alert("El nombre del banco es obligatorio");
+            alert("El nombre del banco emisor es obligatorio");
+            return false;
+        }
+        if($("#banco-receptor-" + paymentIdentifier).val().length < 1) 
+        {  
+            $("#banco-receptor-" + paymentIdentifier).css('background-color', '#f2f2f2');
+            alert("El nombre del banco receptor es obligatorio");
             return false;
         }
         if($("#account_or_card-" + paymentIdentifier).val().length < 1) 
