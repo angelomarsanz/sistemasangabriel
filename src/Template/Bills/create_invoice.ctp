@@ -621,7 +621,7 @@
 	var monedaPago = "$";
 	var comentario = "";
 	var monedaPagoEliminar = "";
-	var idCuotaAbono = 0;
+	var indicadorAjuste = 0;
 
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
@@ -672,7 +672,6 @@
         $("#uncheck-quotas").attr('disabled', true);
 		$("#adjust-fee").attr('disabled', true);
         $("#ajuste-automatico").attr('disabled', true);
-        $("#adjust-invoice").attr('disabled', true);
         $("#print-invoice").attr('disabled', true);
         $("#bt-01").attr('disabled', true);
         $("#bt-02").attr('disabled', true);
@@ -683,6 +682,38 @@
         $("#bt-07").attr('disabled', true);
     }
     
+    function deshabilitarBotonesAjuste()
+    {
+        $("#mark-quotas").attr('disabled', true);
+		$("#uncheck-quotas").attr('disabled', true);
+        $("#uncheck-quotas").attr('disabled', true);
+		$("#adjust-fee").attr('disabled', true);
+        $("#ajuste-automatico").attr('disabled', true);
+        $("#bt-01").attr('disabled', true);
+        $("#bt-02").attr('disabled', true);
+        $("#bt-03").attr('disabled', true);
+        $("#bt-04").attr('disabled', true);
+        $("#bt-05").attr('disabled', true);
+        $("#bt-06").attr('disabled', true);
+        $("#bt-07").attr('disabled', true);
+    }
+	
+    function habilitarBotonesAjuste()
+    {
+        $("#mark-quotas").attr('disabled', false);
+		$("#uncheck-quotas").attr('disabled', false);
+        $("#uncheck-quotas").attr('disabled', false);
+		$("#adjust-fee").attr('disabled', false);
+        $("#ajuste-automatico").attr('disabled', false);
+        $("#bt-01").attr('disabled', false);
+        $("#bt-02").attr('disabled', false);
+        $("#bt-03").attr('disabled', false);
+        $("#bt-04").attr('disabled', false);
+        $("#bt-05").attr('disabled', false);
+        $("#bt-06").attr('disabled', false);
+        $("#bt-07").attr('disabled', false);
+    }
+	
     function markStudent(id)
     {
         $('#st' + id + ' td').each(function ()
@@ -830,6 +861,11 @@
         balanceIndicator = 0;
 		saldoNotaCredito = 0;
 		indicadorCompensacion = 0;
+		if (indicadorAjuste == 1)
+		{
+			habilitarBotonesAjuste();
+			indicadorAjuste = 0;
+		}
     }
     
     function validateFields()
@@ -1169,10 +1205,15 @@
         });
     }
  
-    function updateRecord(id, invoiced, observation ) 
+    function updateRecord(id, invoiced, observation, indicadorShow) 
     {
         var updateStatement = "UPDATE studentTransactions SET dbInvoiced = ?, dbObservation = ? WHERE dbId=?";
-        
+
+		if (indicadorShow == 1 && indicadorAjuste == 1)
+		{
+			showRecords(1);
+		}
+		
         db.transaction(function (tx) { tx.executeSql(updateStatement, [invoiced, observation, Number(id)], null, onError); });
     }
     
@@ -1180,9 +1221,9 @@
     {
         var updateStatement = "UPDATE studentTransactions SET dbTarifaDolarOriginal = ?, dbTarifaDolar = ?, dbMontoPendienteDolar = ?, dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ? WHERE dbId=?";
      
-		if (idCuotaAbono > 0)
+		if (indicadorAjuste == 1)
 		{
-			restaurarMontos(idCuotaAbono);
+			restaurarMontos();
 		}
 		
         db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), Number(id)], null, onError); });
@@ -1195,20 +1236,21 @@
         db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(actAPagarDolar), Number(actAPagarEuro), Number(actAPagarBolivar), actObservacion, Number(id)], null, onError); });
     }
 	
-    function showRecords() // Function For Retrive data from Database Display records as list
-    {
-		if (idCuotaAbono > 0)
-		{
-			restaurarMontos(idCuotaAbono);
-		}
+    function showRecords(indicadorRestaurarMontos) // Function For Retrive data from Database Display records as list
+    {	
         var selectWithCondition = "SELECT * FROM studentTransactions WHERE dbIdStudent = ?";
         var detailLine = "";
-        var nextPayment = " ";
+        var nextPayment = "";
         var indicatorPaid = 0;
-        var firstInstallment = " ";
-        var lastInstallment = " ";
+        var firstInstallment = "";
+        var lastInstallment = "";
         studentBalance = 0;
-        
+     
+		if (indicadorRestaurarMontos == 1)
+		{
+			restaurarMontos();
+		}
+			 
         db.transaction(function (tx) 
         {
             tx.executeSql(selectWithCondition, [idStudent], function (tx, result) 
@@ -1265,7 +1307,8 @@
 							}
 							
 							$('#uncheck-quotas').attr('disabled', false);
-							if (firstInstallment == " ")
+							
+							if (firstInstallment == "")
 							{
 								firstInstallment = item['dbMonthlyPayment'];
 							}
@@ -1317,7 +1360,19 @@
                     $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
                     concept = firstInstallment + ' - ' + lastInstallment;
                     $("#student-balance").html(studentBalance);
-									
+
+					$("#mark-quotas").html(nextPayment);  
+					
+					if (indicadorAjuste == 0)
+					{
+						$("#mark-quotas").attr('disabled', false);
+						$("#adjust-fee").attr('disabled', false);
+					}
+					else
+					{
+						deshabilitarBotonesAjuste();
+					}
+					
 					if (saldoNotaCredito < 0)
 					{
 						$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario no puede facturar hasta que haga una o más notas de crédito (SUNDDE) por un total de " + -1 * saldoNotaCredito + " $</b></spam>");
@@ -1330,19 +1385,10 @@
 							$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario, este representante tiene un saldo a favor/contra de " + saldoRepresentante + " $ ¿Qué desea hacer?</b></spam>");
 							$("#botones-cuotas").addClass("noverScreen");
 							$("#botones-notas").removeClass("noverScreen");
-							$("#mark-quotas").html(nextPayment);  
-							$("#mark-quotas").attr('disabled', false);
-							$("#adjust-fee").attr('disabled', false);
 							$("#saldo-favor-dolar").html(saldoRepresentanteSigno);
 							$("#saldo-favor-euro").html(Math.round(saldoRepresentanteSigno / tasaDolarEuro));
 							$("#saldo-favor-bolivar").html(Math.round(saldoRepresentante * dollarExchangeRate));
 						}
-					}
-					else if (saldoNotaCredito == 0)
-					{
-						$("#mark-quotas").html(nextPayment);  
-						$("#mark-quotas").attr('disabled', false);
-						$("#adjust-fee").attr('disabled', false);
 					}
                 }
             });
@@ -1405,14 +1451,28 @@
         });
     }
 	
-    function buscarRegistrosMarcados() // Busca los registros marcados para pagar
+    function ajustarCuotas() 
     {
-		if (idCuotaAbono > 0)
+		if (discountMode == "Porcentaje")
 		{
-			restaurarMontos(idCuotaAbono);
+			alert("Estimado usuario, no se puede hacer el ajustar la factura si el descuento es un porcentaje. Por favor cambie el descuento a un monto fijo y después haga el ajuste")
+			return false;
+		}
+		
+        confirmar = confirm('Estimado usuario, después que ajuste la factura no podrá realizar cambios. ¿Está seguro de que desea ajustar la factura?');
+        if (confirmar == false)
+        {
+            return false;
+        }
+		
+		if (indicadorAjuste == 1)
+		{
+			restaurarMontos();
 		}
 
 		saldoPagosRealizados = accumulatedPayment + saldoRepresentante - discount;
+		
+		totalBalance = 0;
 				
         var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbInvoiced = ?";
         
@@ -1428,43 +1488,43 @@
 
 					if (saldoPagosRealizados == 0)
 					{
-						updateRecord(item['dbId'], 'false', "");
+						updateRecord(item['dbId'], 'false', "", 0);
 					}
-					if (saldoPagosRealizados < item['dbMontoPendienteDolar'])
+					else if (saldoPagosRealizados < item['dbMontoPendienteDolar'])
 					{
 						actualizarPagar(item['dbId'], saldoPagosRealizados, Math.round(saldoPagosRealizados / tasaDolarEuro), Math.round(saldoPagosRealizados * dollarExchangeRate), 'Abono');
+						totalBalance = totalBalance + saldoPagosRealizados;
 						saldoPagosRealizados = 0;
-						idCuotaAbono = item['dbId'];
+						indicadorAjuste = 1;
 					}
 					else
 					{
 						saldoPagosRealizados = saldoPagosRealizados - item['dbMontoPendienteDolar'];
+						totalBalance = totalBalance + item['dbMontoPendienteDolar'];
 					}
                 }
+				showRecords(0);
+				actualizarTotales();
             });
         });
     }
     
-    function restaurarMontos(idRegistro) 
+    function restaurarMontos() 
     {
-        var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbId = ?";
-        
+        var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbObservation = ?";
+		        
         db.transaction(function (tx) 
         {
-            tx.executeSql(selectAllStatement, [idRegistro], function (tx, result) 
+            tx.executeSql(selectAllStatement, ["Abono"], function (tx, result) 
             {
                 dataSet = result.rows;
 				                
                 for (var i = 0, item = null; i < dataSet.length; i++) 
                 {
-                    item = dataSet.item(i);
-					
-					if (item['dbObservation'] == 'Abono')
-					{
-						actualizarPagar(item['dbId'], item['dbMontoPendienteDolar'], Math.round(item['dbMontoPendienteDolar'] / tasaDolarEuro), Math.round(item['dbMontoPendienteDolar'] * dollarExchangeRate), "");
-						idCuotaAbono = 0;
-					}
+                    item = dataSet.item(i);				
+					actualizarPagar(item['dbId'], item['dbMontoPendienteDolar'], Math.round(item['dbMontoPendienteDolar'] / tasaDolarEuro), Math.round(item['dbMontoPendienteDolar'] * dollarExchangeRate), "");
                 }
+				indicadorAjuste = 0;
             });
         });
     }
@@ -2457,7 +2517,7 @@
 				studentBalance = 0;
 				$("#student-balance").html("");
 				
-				showRecords();
+				showRecords(0);
 				
 				$("#student-messages").html("");
 			}
@@ -2480,15 +2540,15 @@
 						{
 							if (flaggedFlag == 0)
 							{
-								if (idCuotaAbono > 0)
+								if (indicadorAjuste == 1)
 								{
-									restaurarMontos(idCuotaAbono);
+									restaurarMontos();
 								}
 								flaggedFlag = 1;
 								$(this).attr('checked', true);
 								idStudentTransactions = $(this).attr('id'); 
 								markTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), 'true', ""); 
+								updateRecord(idStudentTransactions.substring(2), 'true', "", 1); 
 								$('#uncheck-quotas').attr('disabled', false);
 								$('#charge').attr('disabled', false);
 								if (firstInstallment == " ")
@@ -2584,9 +2644,9 @@
 						{
 							if (idStudentTransactions != " ")
 							{
-								if (idCuotaAbono > 0)
+								if (indicadorAjuste == 1)
 								{
-									restaurarMontos(idCuotaAbono);
+									restaurarMontos();
 								}
 								if (indicatorUnmark == 0)
 								{
@@ -2595,7 +2655,7 @@
 								$('#' + idStudentTransactions).attr('checked', false);
 								$('#' + idAmountTransactions).attr('disabled', false);								
 								uncheckTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), 'false', ""); 
+								updateRecord(idStudentTransactions.substring(2), 'false', "", 1); 
 								$("#mark-quotas").html(transactionDescription);
 								if (markedQuotaCounter == 1)
 								{
@@ -2641,7 +2701,7 @@
                 {
                     $('#' + idStudentTransactions).attr('checked', false);
                     uncheckTransaction(idStudentTransactions.substring(2));
-                    updateRecord(idStudentTransactions.substring(2), 'false'); 
+                    updateRecord(idStudentTransactions.substring(2), 'false', "", 1); 
                             
                     $("#mark-quotas").html(transactionDescription);
                     if (markedQuotaCounter == 1)
@@ -2685,83 +2745,20 @@
 				return-false
 			}
 			        
-			buscarRegistrosMarcados();
-        });
-
-        $("#adjust-invoice").click(function(e) 
-        {
-            e.preventDefault();
-            
-            totalBill = 0;
-    
-            $("#invoice-lines input").each(function (index) 
-            {
-                transactionIdentifier = $(this).attr('id').substring(2);
-                monthlyPayment = $(this).attr('name');
-                transactionAmount = parseFloat($("#fac" + transactionIdentifier).attr('value'));
-                amountPayable = parseFloat($(this).val()); 
-
-                if (amountPayable == 0)
-                {
-                    updateRecord(transactionIdentifier, false, transactionAmount, " " );
-                }
-                else if (amountPayable < 0)
-                {
-                    totalBill = totalBill + transactionAmount;
-                }
-                else if (amountPayable == transactionAmount)
-                {
-                    totalBill = totalBill + transactionAmount;
-                }
-                else if (amountPayable < transactionAmount)
-                {
-                    updateRecord(transactionIdentifier, true, amountPayable, "Abono" );
-                    totalBill = totalBill + amountPayable;
-                }
-                else if (amountPayable > transactionAmount)
-                {
-                    totalBill = totalBill + transactionAmount;
-                }
-                
-            });
-
-            showInvoiceLines();
-            $("#invoice-subtotal").html(totalBill.toFixed(2));
-			
-			if (discountMode == 'Porcentaje')
-			{
-				if (discountAmount > 0)
-				{
-					discountDecimal = totalBill * discountAmount;
-					discount = Math.round(discountDecimal);
-				}
-				else
-				{
-					positiveDiscount = discountAmount * -1;
-					discountDecimal = totalBill * positiveDiscount;
-					discount = (Math.round(discountDecimal)) * -1;
-				}
-			}
-			else
-			{
-				discount = discountAmount;
-			}
-			
-			$("#invoice-descuento").html(discount.toFixed(2));
-			totalBill = totalBill + discount;			
-            $("#total-bill").html(totalBill.toFixed(2));
-            balance = totalBill - accumulatedPayment;
-            indicatorUpdateAmount = 1;
-            updateAmount();
-            indicatorUpdateAmount = 0;
+			ajustarCuotas();
         });
 
         $("#accordion").accordion();
 
         $('.record-payment').click(function(e) 
         {
-             e.preventDefault();
-                       
+            e.preventDefault();
+            			
+			if (indicadorAjuste == 1)
+			{
+				showRecords(1);
+			}
+			
             if (deudaMenosPagado > 0)
             {
                 paymentIdentifier = ($(this).attr('id')).substring(3);
@@ -3186,7 +3183,7 @@
             });
 			if (adjError == 0)
 			{
-				showRecords();
+				showRecords(1);
 			}
         });
 		
