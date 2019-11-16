@@ -507,7 +507,8 @@
 												<th scope="col">Forma&nbsp;de&nbsp;pago&nbsp;&nbsp;</th>
 												<th scope="col">Moneda</th>
 												<th scope="col">Monto</th>
-												<th scope="col">&nbsp;&nbsp;Banco&nbsp;&nbsp;&nbsp;&nbsp;</th>
+												<th scope="col">&nbsp;&nbsp;Banco emisor&nbsp;&nbsp;&nbsp;&nbsp;</th>
+												<th scope="col">&nbsp;&nbsp;Banco receptor&nbsp;&nbsp;&nbsp;&nbsp;</th>
 												<th scope="col">Cuenta&nbsp;o&nbsp;tarjeta</th>
 												<th scope="col">Serial</th>
 												<th scope="col">Comentario</th>
@@ -549,6 +550,7 @@
     var amountPaid = 0;
 	var montoPagadoDolar = 0;
     var bank = " ";
+	var bancoReceptor = "";
     var accountOrCard = " ";
     var serial = " ";
     var balance = 0;
@@ -619,6 +621,7 @@
 	var monedaPago = "$";
 	var comentario = "";
 	var monedaPagoEliminar = "";
+	var idCuotaAbono = 0;
 
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
@@ -1032,6 +1035,7 @@
         payPaymentType VARCHAR(100), \
         payAmountPaid FLOAT, \
         payBank VARCHAR(200), \
+		payBancoReceptor VARCHAR(200), \
         payAccountOrCard VARCHAR(50), \
         paySerial VARCHAR (50), \
 		payComentario VARCHAR(250))";
@@ -1126,15 +1130,17 @@
         payPaymentType, \
         payAmountPaid, \
         payBank, \
+		payBancoReceptor, \
         payAccountOrCard, \
         paySerial, \
-		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = accountant;
 		var tpMoneda = monedaPago;
         var tpPaymentType = paymentType;
         var tpAmountPaid = amountPaid;
         var tpBank = bank;
+		var tpBancoReceptor = bancoReceptor;
         var tpAccountOrCard = accountOrCard;
         var tpSerial = serial
 		var tpComentario = comentario; 
@@ -1146,7 +1152,8 @@
 			tpMoneda,
             tpPaymentType, 
             tpAmountPaid, 
-            tpBank, 
+            tpBank,
+			tpBancoReceptor,
             tpAccountOrCard,
             tpSerial,
 			tpComentario], null, onError);
@@ -1172,21 +1179,30 @@
     function updateInstallment(id, updOriginalMontoDolar, updMontoModificadoDolar, updMontoPendienteDolar, updAPagarDolar, updAPagarEuro, updAPagarBolivar) 
     {
         var updateStatement = "UPDATE studentTransactions SET dbTarifaDolarOriginal = ?, dbTarifaDolar = ?, dbMontoPendienteDolar = ?, dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ? WHERE dbId=?";
-        
+     
+		if (idCuotaAbono > 0)
+		{
+			restaurarMontos(idCuotaAbono);
+		}
+		
         db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), Number(id)], null, onError); });
     }
 	
-    function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar) 
+    function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar, actObservacion) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ? WHERE dbId=?";
+        var updateStatement = "UPDATE studentTransactions SET dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ?, dbObservation = ? WHERE dbId=?";
         
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), Number(id)], null, onError); });
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(actAPagarDolar), Number(actAPagarEuro), Number(actAPagarBolivar), actObservacion, Number(id)], null, onError); });
     }
 	
     function showRecords() // Function For Retrive data from Database Display records as list
     {
+		if (idCuotaAbono > 0)
+		{
+			restaurarMontos(idCuotaAbono);
+		}
         var selectWithCondition = "SELECT * FROM studentTransactions WHERE dbIdStudent = ?";
-        var detailLine = " ";
+        var detailLine = "";
         var nextPayment = " ";
         var indicatorPaid = 0;
         var firstInstallment = " ";
@@ -1244,7 +1260,7 @@
 												<td style='background-color:#c2c2d6;'>" + item['dbMontoAPagarDolar'] + "</td> \
 												<td style='background-color:#c2c2d6; color: blue;'>" + item['dbMontoAPagarEuro'] + "</td> \
 												<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
-												<td style='background-color:#c2c2d6;'></td> \
+												<td style='background-color:#c2c2d6;'>" + item['dbObservation'] + "</td> \
 												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
 							}
 							
@@ -1283,7 +1299,7 @@
 												<td>" + item['dbMontoAPagarDolar'] + "</td> \
 												<td style='color: blue;'>" + item['dbMontoAPagarEuro'] + "</td> \
 												<td style='color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
-												<td></td> \
+												<td>" + item['dbObservation'] + "</td> \
 												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
 							}
 						}
@@ -1391,8 +1407,13 @@
 	
     function buscarRegistrosMarcados() // Busca los registros marcados para pagar
     {
-		saldoPagosRealizados = accumulatedPayment;
-		
+		if (idCuotaAbono > 0)
+		{
+			restaurarMontos(idCuotaAbono);
+		}
+
+		saldoPagosRealizados = accumulatedPayment + saldoRepresentante - discount;
+				
         var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbInvoiced = ?";
         
         db.transaction(function (tx) 
@@ -1404,13 +1425,50 @@
                 for (var i = 0, item = null; i < dataSet.length; i++) 
                 {
                     item = dataSet.item(i);
-					
-					saldoPagosRealizados = saldoPagosRealizados - item['pendiente']		
+
+					if (saldoPagosRealizados == 0)
+					{
+						updateRecord(item['dbId'], 'false', "");
+					}
+					if (saldoPagosRealizados < item['dbMontoPendienteDolar'])
+					{
+						actualizarPagar(item['dbId'], saldoPagosRealizados, Math.round(saldoPagosRealizados / tasaDolarEuro), Math.round(saldoPagosRealizados * dollarExchangeRate), 'Abono');
+						saldoPagosRealizados = 0;
+						idCuotaAbono = item['dbId'];
+					}
+					else
+					{
+						saldoPagosRealizados = saldoPagosRealizados - item['dbMontoPendienteDolar'];
+					}
                 }
             });
         });
     }
     
+    function restaurarMontos(idRegistro) 
+    {
+        var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbId = ?";
+        
+        db.transaction(function (tx) 
+        {
+            tx.executeSql(selectAllStatement, [idRegistro], function (tx, result) 
+            {
+                dataSet = result.rows;
+				                
+                for (var i = 0, item = null; i < dataSet.length; i++) 
+                {
+                    item = dataSet.item(i);
+					
+					if (item['dbObservation'] == 'Abono')
+					{
+						actualizarPagar(item['dbId'], item['dbMontoPendienteDolar'], Math.round(item['dbMontoPendienteDolar'] / tasaDolarEuro), Math.round(item['dbMontoPendienteDolar'] * dollarExchangeRate), "");
+						idCuotaAbono = 0;
+					}
+                }
+            });
+        });
+    }
+	
     function showPayments() 
     {
         var selectAllPayments = "SELECT * FROM payments";
@@ -1530,6 +1588,7 @@
 		
 		linePayments +=
             "<td style='text-align: center;'>" + bank + "</td> \
+			<td style='text-align: center;'>" + bancoReceptor + "</td> \
             <td style='text-align: center;'>" + accountOrCard + "</td> \
             <td style='text-align: center;'>" + serial + "</td> \
 			<td style='text-align: left;'>" + comentario + "</td></tr>";
@@ -2421,6 +2480,10 @@
 						{
 							if (flaggedFlag == 0)
 							{
+								if (idCuotaAbono > 0)
+								{
+									restaurarMontos(idCuotaAbono);
+								}
 								flaggedFlag = 1;
 								$(this).attr('checked', true);
 								idStudentTransactions = $(this).attr('id'); 
@@ -2521,6 +2584,10 @@
 						{
 							if (idStudentTransactions != " ")
 							{
+								if (idCuotaAbono > 0)
+								{
+									restaurarMontos(idCuotaAbono);
+								}
 								if (indicatorUnmark == 0)
 								{
 									indicatorUnmark = 1;
@@ -2746,13 +2813,14 @@
 				}
 				
                 bank = $('#bank-' + paymentIdentifier).val();
+				bancoReceptor = $('#banco-receptor-' + paymentIdentifier).val();
                 accountOrCard = $('#account_or_card-' + paymentIdentifier).val();
                 serial = $('#serial-' + paymentIdentifier).val();
 				comentario = $('#comentario-' + paymentIdentifier).val();
 
                 printPayments();
 				
-               alert('Pago registrado con éxito: ' +  monedaPago + ' ' + amountPaid.toFixed(2));
+                alert('Pago registrado con éxito: ' +  monedaPago + ' ' + amountPaid.toFixed(2));
 				
                 accumulatedPayment = accumulatedPayment + montoPagadoDolar;
         
@@ -3049,7 +3117,7 @@
         $('#adjust-fee').click(function(e) 
         {
             e.preventDefault();
-
+			
 			var adjInputCounter = 0;
 			var adjIdAmountTransaction = ""; 
 			var adjMontoModificadoDolar = 0;
@@ -3061,7 +3129,7 @@
 			var adjAPagarBolivar = 0;
 			var montoDolarCadena;
 			var adjError = 0;
-			
+						
             $("#monthly-payment input").each(function (index) 
             {
 				if (adjInputCounter == 1)
