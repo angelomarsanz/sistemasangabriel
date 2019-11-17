@@ -863,6 +863,8 @@
         balanceIndicator = 0;
 		saldoNotaCredito = 0;
 		indicadorCompensacion = 0;
+		
+		// Revisar
 		if (indicadorAjuste == 1)
 		{
 			habilitarBotonesAjuste();
@@ -1211,6 +1213,7 @@
     {
         var updateStatement = "UPDATE studentTransactions SET dbInvoiced = ?, dbObservation = ? WHERE dbId=?";
 
+		// Revisar
 		if (indicadorShow == 1 && indicadorAjuste == 1)
 		{
 			showRecords(1);
@@ -1223,6 +1226,7 @@
     {
         var updateStatement = "UPDATE studentTransactions SET dbTarifaDolarOriginal = ?, dbTarifaDolar = ?, dbMontoPendienteDolar = ?, dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ? WHERE dbId=?";
      
+		// Revisar
 		if (indicadorAjuste == 1)
 		{
 			restaurarMontos();
@@ -1467,6 +1471,7 @@
             return false;
         }
 		
+		// Revisar
 		if (indicadorAjuste == 1)
 		{
 			restaurarMontos();
@@ -2618,6 +2623,7 @@
 						{
 							if (flaggedFlag == 0)
 							{
+								// Revisar
 								if (indicadorAjuste == 1)
 								{
 									restaurarMontos();
@@ -2722,6 +2728,7 @@
 						{
 							if (idStudentTransactions != " ")
 							{
+								// Revisar
 								if (indicadorAjuste == 1)
 								{
 									restaurarMontos();
@@ -2831,7 +2838,8 @@
         $('.record-payment').click(function(e) 
         {
             e.preventDefault();
-            			
+            
+			// Revisar
 			if (indicadorAjuste == 1)
 			{
 				showRecords(1);
