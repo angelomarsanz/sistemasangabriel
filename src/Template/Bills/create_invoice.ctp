@@ -622,6 +622,7 @@
 	var comentario = "";
 	var monedaPagoEliminar = "";
 	var indicadorAjuste = 0;
+	var indicadorNoCuotas = 0;
 
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
@@ -696,6 +697,7 @@
         $("#bt-05").attr('disabled', true);
         $("#bt-06").attr('disabled', true);
         $("#bt-07").attr('disabled', true);
+		$(".registeredPayments").attr('disabled', true);	
     }
 	
     function habilitarBotonesAjuste()
@@ -1229,11 +1231,11 @@
         db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), Number(id)], null, onError); });
     }
 	
-    function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar, actObservacion) 
+    function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar, actInvoiced, actObservacion) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ?, dbObservation = ? WHERE dbId=?";
+        var updateStatement = "UPDATE studentTransactions SET dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ?, dbInvoiced = ?, dbObservation = ? WHERE dbId=?";
         
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(actAPagarDolar), Number(actAPagarEuro), Number(actAPagarBolivar), actObservacion, Number(id)], null, onError); });
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(actAPagarDolar), Number(actAPagarEuro), Number(actAPagarBolivar), actInvoiced, actObservacion, Number(id)], null, onError); });
     }
 	
     function showRecords(indicadorRestaurarMontos) // Function For Retrive data from Database Display records as list
@@ -1245,7 +1247,7 @@
         var firstInstallment = "";
         var lastInstallment = "";
         studentBalance = 0;
-     
+     	 
 		if (indicadorRestaurarMontos == 1)
 		{
 			restaurarMontos();
@@ -1483,7 +1485,7 @@
                 dataSet = result.rows;
 				                
                 for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
+                {					
                     item = dataSet.item(i);
 
 					if (saldoPagosRealizados == 0)
@@ -1492,7 +1494,7 @@
 					}
 					else if (saldoPagosRealizados < item['dbMontoPendienteDolar'])
 					{
-						actualizarPagar(item['dbId'], saldoPagosRealizados, Math.round(saldoPagosRealizados / tasaDolarEuro), Math.round(saldoPagosRealizados * dollarExchangeRate), 'Abono');
+						actualizarPagar(item['dbId'], saldoPagosRealizados, Math.round(saldoPagosRealizados / tasaDolarEuro), Math.round(saldoPagosRealizados * dollarExchangeRate), 'true', 'Abono');
 						totalBalance = totalBalance + saldoPagosRealizados;
 						saldoPagosRealizados = 0;
 						indicadorAjuste = 1;
@@ -1503,12 +1505,63 @@
 						totalBalance = totalBalance + item['dbMontoPendienteDolar'];
 					}
                 }
-				showRecords(0);
-				actualizarTotales();
+				if (saldoPagosRealizados > 0)
+				{
+					db.transaction(function (tx) 
+					{
+						tx.executeSql(selectAllStatement, ["false"], function (tx, result) 
+						{
+							dataSet = result.rows;
+							
+							if (dataSet.length == 0)
+							{
+								indicadorNoCuotas = 1;
+								alert("No hay cuotas disponibles para ajustar la factura");
+								return false;
+							}
+							else
+							{               
+								for (var i = 0, item = null; i < dataSet.length; i++) 
+								{
+									item = dataSet.item(i);
+									
+									if (saldoPagosRealizados >= item['dbMontoPendienteDolar']) 
+									{
+										updateRecord(item['dbId'], 'true', "", 0);
+										saldoPagosRealizados = saldoPagosRealizados - item['dbMontoPendienteDolar'];
+										totalBalance = totalBalance + item['dbMontoPendienteDolar'];
+									}
+									else if (saldoPagosRealizados > 0 && saldoPagosRealizados < item['dbMontoPendienteDolar'])
+									{
+										actualizarPagar(item['dbId'], saldoPagosRealizados, Math.round(saldoPagosRealizados / tasaDolarEuro), Math.round(saldoPagosRealizados * dollarExchangeRate), 'true', 'Abono');
+										totalBalance = totalBalance + saldoPagosRealizados;
+										saldoPagosRealizados = 0;
+										indicadorAjuste = 1;
+									}
+								}
+								if (saldoPagosRealizados > 0)
+								{
+									alert("No hay cuotas disponibles para ajustar la factura");
+									return false;
+								}
+								else
+								{
+									showRecords(0);
+									actualizarTotales();
+								}
+							}
+						});
+					});			
+				}
+				else
+				{
+					showRecords(0);
+					actualizarTotales();
+				}
             });
         });
     }
-    
+		
     function restaurarMontos() 
     {
         var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbObservation = ?";
@@ -1981,6 +2034,31 @@
 		{
 			desactivarBotonesPago();
 		}
+	}
+	function guardarFactura()
+	{
+		$("#invoice-messages").html("Por favor espere...");
+		payments.idTurn = $("#Turno").attr('value');
+		payments.idParentsandguardians = idParentsandguardians;
+		payments.invoiceDate = reversedDate;
+		payments.client = $('#client').val();
+		payments.typeOfIdentificationClient = $('#type-of-identification-client').val();
+		payments.identificationNumberClient = $('#identification-number-client').val();;
+		payments.fiscalAddress = $('#fiscal-address').val();
+		payments.taxPhone = $('#tax-phone').val();
+		payments.invoiceAmount = totalBill;
+		payments.discount = discount;
+		if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
+		{
+			payments.fiscal = 0;
+		}
+		else
+		{
+			payments.fiscal = 1;
+		}
+		payments.tasaDolar = dollarExchangeRate;
+		uploadTransactions();
+		loadPayments();
 	}
 
 // Funciones Jquery
@@ -2849,9 +2927,11 @@
             deletePayment(parseFloat(selectedPayment));
 			
         });
-
-        $("#print-invoice").click(function () 
+		
+        $("#print-invoice").click(function (e) 
         {	
+            e.preventDefault();
+
 			if (deudaMenosPagado > 0)
 			{
 				alert('Estimado usuario debe registrar más pagos para completar el total de la factura/recibo u hacer un ajuste');
@@ -2859,39 +2939,34 @@
 			}
             else if (deudaMenosPagado < 0)
             {
-				r= confirm('Estimado usuario tiene un sobrante de $ ' + sobrante + '. ¿Desea entregarlo al representante?');
+                var dialog = $('<p>Estimado usuario hay un sobrante a favor del representante. ¿Qué desea hacer?</p>').dialog({
+                    buttons: {
+                        "Abonar a cuotas": function() 
+							{
+								dialog.dialog('close');
+							},
+                        "Dejarlo a favor":  function() 
+							{
+								guardarFactura();
+							},
+                        "Cancelar":  function() {
+                            dialog.dialog('close');
+                        }
+                    }
+                });
+            }   
+			else
+			{
+				r= confirm('¿Está seguro de que desea guardar la facturar? Después no podrá hacer cambios');
 				if (r == false)
 				{
 					return false;
 				}
-            }   	
-			r= confirm('¿Está seguro de que desea guardar la facturar? Después no podrá hacer cambios');
-			if (r == false)
-			{
-				return false;
+				else
+				{
+					guardarFactura();
+				}
 			}
-            $("#invoice-messages").html("Por favor espere...");
-            payments.idTurn = $("#Turno").attr('value');
-            payments.idParentsandguardians = idParentsandguardians;
-            payments.invoiceDate = reversedDate;
-            payments.client = $('#client').val();
-            payments.typeOfIdentificationClient = $('#type-of-identification-client').val();
-            payments.identificationNumberClient = $('#identification-number-client').val();;
-            payments.fiscalAddress = $('#fiscal-address').val();
-            payments.taxPhone = $('#tax-phone').val();
-            payments.invoiceAmount = totalBill;
-			payments.discount = discount;
-			if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
-			{
-				payments.fiscal = 0;
-			}
-			else
-			{
-				payments.fiscal = 1;
-			}
-			payments.tasaDolar = dollarExchangeRate;
-            uploadTransactions();
-            loadPayments();
         });
 		
         $('#select-discount').change(function(e) 
