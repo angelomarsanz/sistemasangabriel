@@ -9,6 +9,8 @@ use App\Controller\BinnaclesController;
 
 use Cake\ORM\TableRegistry;
 
+use App\Controller\EventosController;
+
 use Cake\I18n\Time;
 
 class StudenttransactionsController extends AppController
@@ -153,32 +155,37 @@ class StudenttransactionsController extends AppController
         $this->set('_serialize', ['studenttransaction']);
     }
 
-    public function edit($id = null, $billNumber = null, $originalAmount = null, $amountPayable = null, $tarifaDolar = null, $tasaDolar = null)
-    {
-        $studenttransaction = $this->Studenttransactions->get($id);
-		
-		$montoPagadoDolar = round($amountPayable / $tasaDolar);
-				
+    public function edit($transaccion = null, $billNumber = null)
+	{
+        $studenttransaction = $this->Studenttransactions->get($transaccion->transactionIdentifier);
+						
 		if ($studenttransaction->amount_dollar === null)
 		{
-			$studenttransaction->amount_dollar = $montoPagadoDolar;	
+			$studenttransaction->amount_dollar = $transaccion->montoAPagarDolar;
 		}
 		else
 		{
-			$studenttransaction->amount_dollar += $montoPagadoDolar;
+			$studenttransaction->amount_dollar += $transaccion->montoAPagarDolar;
 		}
+				
+		$studenttransaction->original_amount = $transaccion->tarifaDolarOriginal;
+		$studenttransaction->amount = $transaccion->tarifaDolar;
 		
-		$studenttransaction->original_amount = $originalAmount; 
-		$studenttransaction->amount = $studenttransaction->amount + $amountPayable;
-						
-		if ($tarifaDolar == $studenttransaction->amount_dollar)
+		if ($transaccion->tarifaDolarOriginal != $transaccion->tarifaDolar)
 		{
-			$studenttransaction->partial_payment = 0;
-			$studenttransaction->paid_out = 1;
+			$eventos = new EventosController;
+								
+			$eventos->add('controller', 'Studenttransactions', 'edit', 'Se modificó el monto de la cuota ' . $transaccion->monthlyPayment . ' de ' . $transaccion->tarifaDolarOriginal . ' a ' . $transaccion->tarifaDolar . ' $ del alumno ' . $transaccion->studentName . ' en la factura Nro. ' . $billNumber);
+		}
+						
+		if ($transaccion->observation == "Abono")
+		{
+			$studenttransaction->partial_payment = 1;
 		} 
 		else
 		{
-			$studenttransaction->partial_payment = 1;
+			$studenttransaction->partial_payment = 0;
+			$studenttransaction->paid_out = 1;
 		}
 			
         $studenttransaction->bill_number = $billNumber;

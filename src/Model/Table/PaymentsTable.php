@@ -56,7 +56,11 @@ class PaymentsTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->notEmpty('id', 'create');
+			
+        $validator
+            ->integer('bill_id')
+            ->notEmpty('bill_id');
 
         $validator
             ->requirePresence('payment_type', 'create')
@@ -76,9 +80,36 @@ class PaymentsTable extends Table
             ->notEmpty('account_or_card');
 
         $validator
-            ->integer('serial')
-            ->requirePresence('serial', 'create')
             ->notEmpty('serial');
+						
+        $validator
+            ->allowEmpty('bill_number');
+			
+        $validator
+            ->integer('responsible_user')
+            ->allowEmpty('responsible_user');
+			
+        $validator
+            ->integer('turn')
+            ->allowEmpty('turn');
+
+        $validator
+            ->allowEmpty('annulled');	
+
+        $validator
+            ->allowEmpty('name_family');	
+
+        $validator
+            ->allowEmpty('fiscal');	
+
+        $validator
+            ->allowEmpty('moneda');	
+
+        $validator
+            ->allowEmpty('banco_receptor');	
+
+        $validator
+            ->allowEmpty('comentario');					
 
         return $validator;
     }

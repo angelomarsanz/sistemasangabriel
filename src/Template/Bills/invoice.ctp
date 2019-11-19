@@ -1,4 +1,6 @@
 <style>
+@media screen
+{
     .alignRight
     {
     	text-align: right;
@@ -30,6 +32,45 @@
         display:block;
         page-break-before:always;
     }
+}
+@media print
+{
+    .alignRight
+    {
+    	text-align: right;
+    }
+    hr
+    {
+    	color: #47476b;
+		height: 1px;
+		background-color: black;
+		margin: 5px 0px 5px 0px;
+    }
+    #payments
+    {
+    	width: 25%;
+    	float: left;
+    }
+    #emptyColumn
+    {
+    	width: 40%;
+    	float: left;
+    }
+    #total
+    {
+    	width: 35%;
+    	float: left;
+    }
+    .saltopagina
+    {
+        display:block;
+        page-break-before:always;
+    }
+    .nover 
+    {
+      display:none
+    }
+}
 </style>
 <?php if ($accountService == 0): ?>
 	<?php if ($bill->fiscal == 1): ?>
@@ -98,13 +139,17 @@
 			<div id="payments">
 				Formas de pago:
 				<table style="width:100%;">
-					<tbody>
+					<tbody class="nover">
 						<?php foreach ($aPayments as $aPayment): ?>
 							<tr>
 								<td><?= h($aPayment->payment_type) ?></td>
+								<td><?= h($aPayment->bank) ?></td>
+								<td><?= h($aPayment->bancoReceptor) ?></td>
 								<td><?= h($aPayment->account_or_card) ?></td>
 								<td><?= h($aPayment->serial) ?></td>
+								<td><?= h($aPayment->moneda) ?></td>
 								<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
+								<td><?= $aPayment->comentario ?></td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>
@@ -197,13 +242,17 @@
 			<div id="payments">
 				Formas de pago:
 				<table style="width:100%;">
-					<tbody>
+					<tbody class="nover">
 						<?php foreach ($aPayments as $aPayment): ?>
 							<tr>
 								<td><?= h($aPayment->payment_type) ?></td>
+								<td><?= h($aPayment->bank) ?></td>
+								<td><?= h($aPayment->bancoReceptor) ?></td>
 								<td><?= h($aPayment->account_or_card) ?></td>
 								<td><?= h($aPayment->serial) ?></td>
+								<td><?= h($aPayment->moneda) ?></td>
 								<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
+								<td><?= $aPayment->comentario ?></td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>
@@ -267,13 +316,17 @@
 				<div id="payments" style="font-size: 10px;  line-height: 12px;">
 					<b>Formas de pago:</b>
 					<table style="width:100%;">
-						<tbody>
+						<tbody class="nover">
 							<?php foreach ($aPayments as $aPayment): ?>
 								<tr>
 									<td><?= h($aPayment->payment_type) ?></td>
+									<td><?= h($aPayment->bank) ?></td>
+									<td><?= h($aPayment->bancoReceptor) ?></td>
 									<td><?= h($aPayment->account_or_card) ?></td>
 									<td><?= h($aPayment->serial) ?></td>
+									<td><?= h($aPayment->moneda) ?></td>
 									<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
+									<td><?= $aPayment->comentario ?></td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
@@ -341,13 +394,17 @@
 				<div id="payments" style="font-size: 10px;  line-height: 12px;">
 					<b>Formas de pago:</b>
 					<table style="width:100%;">
-						<tbody>
+						<tbody class="nover">
 							<?php foreach ($aPayments as $aPayment): ?>
 								<tr>
 									<td><?= h($aPayment->payment_type) ?></td>
+									<td><?= h($aPayment->bank) ?></td>
+									<td><?= h($aPayment->bancoReceptor) ?></td>
 									<td><?= h($aPayment->account_or_card) ?></td>
 									<td><?= h($aPayment->serial) ?></td>
+									<td><?= h($aPayment->moneda) ?></td>
 									<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
+									<td><?= $aPayment->comentario ?></td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
@@ -410,13 +467,17 @@
 				<div id="payments" style="font-size: 10px;  line-height: 12px;">
 					<b>Formas de pago:</b>
 					<table style="width:100%;">
-						<tbody>
+						<tbody class="nover">
 							<?php foreach ($aPayments as $aPayment): ?>
 								<tr>
 									<td><?= h($aPayment->payment_type) ?></td>
+									<td><?= h($aPayment->bank) ?></td>
+									<td><?= h($aPayment->bancoReceptor) ?></td>
 									<td><?= h($aPayment->account_or_card) ?></td>
 									<td><?= h($aPayment->serial) ?></td>
+									<td><?= h($aPayment->moneda) ?></td>
 									<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
+									<td><?= $aPayment->comentario ?></td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
@@ -484,13 +545,17 @@
 				<div id="payments" style="font-size: 10px;  line-height: 12px;">
 					<b>Formas de pago:</b>
 					<table style="width:100%;">
-						<tbody>
+						<tbody class="nover">
 							<?php foreach ($aPayments as $aPayment): ?>
 								<tr>
 									<td><?= h($aPayment->payment_type) ?></td>
+									<td><?= h($aPayment->bank) ?></td>
+									<td><?= h($aPayment->bancoReceptor) ?></td>
 									<td><?= h($aPayment->account_or_card) ?></td>
 									<td><?= h($aPayment->serial) ?></td>
+									<td><?= h($aPayment->moneda) ?></td>
 									<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
+									<td><?= $aPayment->comentario ?></td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>

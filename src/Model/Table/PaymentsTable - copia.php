@@ -7,21 +7,21 @@ use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
- * Bills Model
+ * Payments Model
  *
- * @property \Cake\ORM\Association\BelongsTo $Guardiantransactions
+ * @property \Cake\ORM\Association\BelongsTo $Bills
  *
- * @method \App\Model\Entity\Bill get($primaryKey, $options = [])
- * @method \App\Model\Entity\Bill newEntity($data = null, array $options = [])
- * @method \App\Model\Entity\Bill[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\Bill|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\Bill patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\Bill[] patchEntities($entities, array $data, array $options = [])
- * @method \App\Model\Entity\Bill findOrCreate($search, callable $callback = null)
+ * @method \App\Model\Entity\Payment get($primaryKey, $options = [])
+ * @method \App\Model\Entity\Payment newEntity($data = null, array $options = [])
+ * @method \App\Model\Entity\Payment[] newEntities(array $data, array $options = [])
+ * @method \App\Model\Entity\Payment|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method \App\Model\Entity\Payment patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
+ * @method \App\Model\Entity\Payment[] patchEntities($entities, array $data, array $options = [])
+ * @method \App\Model\Entity\Payment findOrCreate($search, callable $callback = null)
  *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
-class BillsTable extends Table
+class PaymentsTable extends Table
 {
 
     /**
@@ -34,14 +34,14 @@ class BillsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('bills');
+        $this->table('payments');
         $this->displayField('id');
         $this->primaryKey('id');
 
         $this->addBehavior('Timestamp');
 
-        $this->belongsTo('Guardiantransactions', [
-            'foreignKey' => 'guardiantransaction_id',
+        $this->belongsTo('Bills', [
+            'foreignKey' => 'bill_id',
             'joinType' => 'INNER'
         ]);
     }
@@ -59,18 +59,26 @@ class BillsTable extends Table
             ->allowEmpty('id', 'create');
 
         $validator
-            ->integer('quantity')
-            ->requirePresence('quantity', 'create')
-            ->notEmpty('quantity');
+            ->requirePresence('payment_type', 'create')
+            ->notEmpty('payment_type');
 
-        $validator
-            ->requirePresence('concept', 'create')
-            ->notEmpty('concept');
-            
         $validator
             ->numeric('amount')
             ->requirePresence('amount', 'create')
             ->notEmpty('amount');
+
+        $validator
+            ->requirePresence('bank', 'create')
+            ->notEmpty('bank');
+
+        $validator
+            ->requirePresence('account_or_card', 'create')
+            ->notEmpty('account_or_card');
+
+        $validator
+            ->integer('serial')
+            ->requirePresence('serial', 'create')
+            ->notEmpty('serial');
 
         return $validator;
     }
@@ -84,7 +92,7 @@ class BillsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->existsIn(['guardiantransaction_id'], 'Guardiantransactions'));
+        $rules->add($rules->existsIn(['bill_id'], 'Bills'));
 
         return $rules;
     }

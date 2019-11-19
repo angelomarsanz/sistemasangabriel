@@ -1,4 +1,6 @@
 <style>
+@media screen
+{
     .alignRight
     {
     	text-align: right;
@@ -30,7 +32,46 @@
         display:block;
         page-break-before:always;
     }
-</style>
+}	
+@media print 
+{
+    .alignRight
+    {
+    	text-align: right;
+    }
+    hr
+    {
+    	color: #47476b;
+		height: 1px;
+		background-color: black;
+		margin: 5px 0px 5px 0px;
+    }
+    #payments
+    {
+    	width: 25%;
+    	float: left;
+    }
+    #emptyColumn
+    {
+    	width: 40%;
+    	float: left;
+    }
+    #total
+    {
+    	width: 35%;
+    	float: left;
+    }
+    .saltopagina
+    {
+        display:block;
+        page-break-before:always;
+    }
+    .nover 
+    {
+      display:none
+    }
+}	
+<style>
 <?php if ($accountService == 0): ?>
 	<?php if ($bill->fiscal == 1): ?>
 		<br />
@@ -95,7 +136,7 @@
 		</div>
 		<hr>
 		<div style="width:100%; font-size: 9px; line-height: 11px;">
-			<div id="payments">
+			<div id="payments" class="nover">
 				Formas de pago:
 				<table style="width:100%;">
 					<tbody>
@@ -198,7 +239,7 @@
 		</div>
 		<hr>
 		<div style="width:100%; font-size: 9px; line-height: 11px;"> 
-			<div id="payments">
+			<div id="payments" class="nover">
 				Formas de pago:
 				<table style="width:100%;">
 					<tbody>
@@ -272,7 +313,7 @@
 			</div>
 			<hr>
 			<div style="width:100%;">
-				<div id="payments" style="font-size: 10px;  line-height: 12px;">
+				<div id="payments" style="font-size: 10px;  line-height: 12px;" class="nover">
 					<b>Formas de pago:</b>
 					<table style="width:100%;">
 						<tbody>
@@ -350,7 +391,7 @@
 			</div>
 			<hr>
 			<div style="width:100%;">
-				<div id="payments" style="font-size: 10px;  line-height: 12px;">
+				<div id="payments" style="font-size: 10px;  line-height: 12px;" class="nover">
 					<b>Formas de pago:</b>
 					<table style="width:100%;">
 						<tbody>
@@ -423,7 +464,7 @@
 			</div>
 			<hr>
 			<div style="width:100%;">
-				<div id="payments" style="font-size: 10px;  line-height: 12px;">
+				<div id="payments" style="font-size: 10px;  line-height: 12px;" class="nover">
 					<b>Formas de pago:</b>
 					<table style="width:100%;">
 						<tbody>
@@ -501,7 +542,7 @@
 			</div>
 			<hr>
 			<div style="width:100%;">
-				<div id="payments" style="font-size: 10px;  line-height: 12px;">
+				<div id="payments" style="font-size: 10px;  line-height: 12px;" class="nover">
 					<b>Formas de pago:</b>
 					<table style="width:100%;">
 						<tbody>

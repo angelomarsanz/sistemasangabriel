@@ -82,20 +82,21 @@ class ConceptsController extends AppController
      *
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
-    public function add($billId = null, $transaccion = null, $fiscal = null)
+    public function add($billId = null, $studentName = null, $transactionIdentifier = null, 
+        $monthlyPayment = null, $amountPayable = null, $observation = null, $fiscal = null)
     {
         $concept = $this->Concepts->newEntity();
         $concept->bill_id = $billId;
         $concept->quantity = 1;
         $concept->accounting_code = "001";
-        $concept->student_name = $transaccion->studentName;
-        $concept->transaction_identifier = $transaccion->transactionIdentifier;
-        $concept->concept = $transaccion->monthlyPayment;
-        $concept->amount = $transaccion->montoAPagarBolivar;
-        $concept->observation = $transaccion->observation;
+        $concept->student_name = $studentName;
+        $concept->transaction_identifier = $transactionIdentifier;
+        $concept->concept = $monthlyPayment;
+        $concept->amount = $amountPayable;
+        $concept->observation = $observation;
         $concept->annulled = 0;
 		$concept->concept_migration = 0;		
-		$concept->saldo = $transaccion->montoAPagarBolivar;
+		$concept->saldo = $amountPayable;
 
         if (!($this->Concepts->save($concept)))
         {

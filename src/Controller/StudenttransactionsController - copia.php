@@ -15,38 +15,40 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
-		/* $contadorBusqueda = 0;
+		$contadorBusqueda = 0;
 		$contadorTransacciones = 0;
 		
 		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
 		$transacciones = $transaccionesEstudiante->find()
-			->where(['amount_dollar is NULL']);
-			
-		$contadorBusqueda = $transacciones->count();
+			->contain(['Students'])
+			->where(['Students.discount' => 50, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.payment_date >' => '2019-08-01 00:00:00', 'Studenttransactions.amount_dollar' => 45]);			
+			// ->where(['Students.discount' => 50, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.payment_date >' => '2019-05-01 00:00:00', 'Studenttransactions.payment_date <' => '2019-09-01 00:00:00', 'Studenttransactions.amount_dollar' => 30]);
+			//->where(['Students.discount' => 50, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.payment_date >' => '2018-10-01 00:00:00', 'Studenttransactions.payment_date <' => '2019-06-01 00:00:00', 'Studenttransactions.amount_dollar' => 20]);			
+			$contadorBusqueda = $transacciones->count();
 		
 		$this->Flash->success(__('Total transacciones busqueda ' . $contadorBusqueda));
 		
-		foreach ($transacciones as $transaccion)
+		/* foreach ($transacciones as $transaccion)
 		{
 			$transaccionGet = $this->Studenttransactions->get($transaccion->id);
 						
-			$transaccionGet->amount_dollar = 0;
+			$transaccionGet->amount_dollar = 23;
 			
 			if (!($this->Studenttransactions->save($transaccionGet))) 
 			{
-                $this->Flash->error(__('La transacción no pudo ser actualizada'));
+                $this->Flash->error(__('La transacción con id ' . $transaccionGet->id . ' no pudo ser actualizada'));
 			}
 			else
 			{
 				$contadorTransacciones++;
 			}
-		}
+		} */
 		
 		$this->Flash->success(__('Total transacciones actualizadas ' . $contadorTransacciones));
 	
         $this->set(compact('transacciones'));
-        $this->set('_serialize', ['transacciones']); */
+        $this->set('_serialize', ['transacciones']); 
     }
 	
 	public function testFunction2()

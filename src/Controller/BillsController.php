@@ -204,6 +204,9 @@ class BillsController extends AppController
 				$bill->factura_pendiente = $indicadorFacturaPendiente;
 				$bill->moneda_id = 2;
 				$bill->tasa_cambio = $this->headboard['tasaDolar'];
+				$bill->tasa_euro = $this->headboard['tasaEuro'];
+				$bill->tasa_dolar_euro = $this->headboard['tasaDolarEuro'];
+				$bill->saldo_compensado = $this->headboard['saldoCompensado'];
 				
 				if (!($this->Bills->save($bill))) 
 				{
@@ -357,21 +360,31 @@ class BillsController extends AppController
 
                     foreach ($transactions as $transaction) 
                     {
-                        $Studenttransactions->edit($transaction->transactionIdentifier, $billNumber, $transaction->originalAmount, $transaction->amountPayable, $transaction->tarifaDolar, $this->headboard['tasaDolar'] );
+                        $Studenttransactions->edit($transaction, $billNumber);
 
-                        $Concepts->add($billId, $transaction->studentName, $transaction->transactionIdentifier, 
-                            $transaction->monthlyPayment, $transaction->amountPayable, $transaction->observation, $this->headboard['fiscal']);
+                        $Concepts->add($billId, $transaction, $this->headboard['fiscal']);
                     }
 
                     foreach ($payments as $payment) 
                     {
-                        $Payments->add($billId, $billNumber, $payment->paymentType, $payment->amountPaid, $payment->bank,
-                            $payment->accountOrCard, $payment->serial, $payment->idTurn, $payment->family, $this->headboard['fiscal']);
+                        $Payments->add($billId, $billNumber, $payment, $this->headboard['fiscal']);
                     }
                     
                     $idParentsandguardian = $this->headboard['idParentsandguardians'];
+										
+					if ($this->headboard['saldoCompensado'] > 0 || $this->headboard['sobrante'] > 0)
+					{
+						$parentandguardian = $this->Bills->Parentsandguardians->get($idParentsandguardian);
+												
+						$parentandguardian->balance = $parentandguardian->balance - $this->headboard['saldoCompensado'] + $this->headboard['sobrante'];
+						
+						if (!($this->Bills->Parentsandguardians->save($parentandguardian)))
+						{
+							 $this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
+						}
+					}
 
-                    return $this->redirect(['action' => 'imprimirFactura', $billNumber, $idParentsandguardian, $billId]);
+                    return $this->redirect(['action' => 'imprimirFactura', $billNumber, $idParentsandguardian, $billId, ""]);
                 }
             }
         }
@@ -720,7 +733,7 @@ class BillsController extends AppController
         $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService']);
     }
 	
-    public function imprimirFactura($billNumber = null, $idParentsandguardian = null, $idFactura = null)
+    public function imprimirFactura($billNumber = null, $idParentsandguardian = null, $idFactura = null, $mensaje = null)
     {
         $parentandguardian = $this->Bills->Parentsandguardians->get($idParentsandguardian);
 
@@ -728,11 +741,11 @@ class BillsController extends AppController
 
         $this->Flash->success(__('Factura guardada con el número: ' . $billNumber));
 
-        $this->set(compact('billNumber', 'idParentsandguardian', 'family', 'idFactura'));
-        $this->set('_serialize', ['billNumber', 'idParentsandguardian', 'family', 'idFactura']);
+        $this->set(compact('billNumber', 'idParentsandguardian', 'family', 'idFactura', 'mensaje'));
+        $this->set('_serialize', ['billNumber', 'idParentsandguardian', 'family', 'idFactura', 'mensaje']);
     }
 
-    public function invoice($idFactura = null, $reimpresion = null, $idParentsandguardian = null, $origen = null)
+    public function invoice($idFactura = null, $reimpresion = null, $idParentsandguardian = null, $origen = null, $bill_number = null)
     {
         $this->loadModel('Controlnumbers');
 		
@@ -740,41 +753,60 @@ class BillsController extends AppController
 		
 		$mensajeUsuario = "";
 		
+		$facturaOtroCajero = 0;
+		
 		if (isset($origen))
 		{
 			if ($origen != 'verificarFacturas')
 			{				
-				$facturas = $this->Bills->find('all', ['conditions' => ['user_id' => $this->Auth->user('id'), 'impresa' => 0, 'id !=' => $idFactura],
+				$facturas = $this->Bills->find('all', ['conditions' => ['impresa' => 0, 'id !=' => $idFactura],
 					'order' => ['Bills.id' => 'ASC']]);
 					
 				$contadorRegistros = $facturas->count();
 								
 				if ($contadorRegistros > 0)
 				{
-					$facturaAnterior = $facturas->first();
+					foreach ($facturas as $factura)
+					{
+						if ($factura->user_id != $this->Auth->user('id') && $factura->bill_number < $bill_number)
+						{
+							$facturaOtroCajero = 1;
+							break;
+						}						
+					}
 					
-					if ($facturaAnterior->tipo_documento == "Factura")
+					if ($facturaOtroCajero == 1)
 					{
-						$documento = "esta factura";
-					}
-					elseif ($facturaAnterior->tipo_documento == "Recibo")
-					{
-						$documento = "este recibo";
-					}
-					elseif ($facturaAnterior->tipo_documento == "Nota de crédito")
-					{
-						$documento = "esta nota de crédito";
+						$mensajeUsuario = "Estimado usuario, otro cajero tiene una factura pendiente, espere a que la imprima y luego intente nuevamente imprimir su factura";
+						return $this->redirect(['action' => 'imprimirFactura', $bill_number, $idParentsandguardian, $idFactura, $mensaje]);
 					}
 					else
-					{
-						$documento = "esta nota de débito";
+					{					
+						$facturaAnterior = $facturas->first();
+						
+						if ($facturaAnterior->tipo_documento == "Factura")
+						{
+							$documento = "esta factura";
+						}
+						elseif ($facturaAnterior->tipo_documento == "Recibo")
+						{
+							$documento = "este recibo";
+						}
+						elseif ($facturaAnterior->tipo_documento == "Nota de crédito")
+						{
+							$documento = "esta nota de crédito";
+						}
+						else
+						{
+							$documento = "esta nota de débito";
+						}
+						
+						$mensajeUsuario = "Estimado usuario " . $documento . " con el Nro. " . $facturaAnterior->bill_number . " se debe imprimir primero y luego podrá continuar con la cobranza";	
+						
+						$idFactura = $facturaAnterior->id;
+						$reimpresion = 0;
+						$idParentsandguardian = $facturaAnterior->parentsandguardian_id;
 					}
-					
-					$mensajeUsuario = "Estimado usuario " . $documento . " con el Nro. " . $facturaAnterior->bill_number . " se debe imprimir primero y luego podrá continuar con la cobranza";	
-					
-					$idFactura = $facturaAnterior->id;
-					$reimpresion = 0;
-					$idParentsandguardian = $facturaAnterior->parentsandguardian_id;
 				}				
 			}
 		}
