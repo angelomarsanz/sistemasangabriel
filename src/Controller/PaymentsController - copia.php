@@ -89,21 +89,23 @@ class PaymentsController extends AppController
      *
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
-    public function add($billId = null, $billNumber = null, $paymentType = null, $amountPaid = null, $bank = null,
-                $accountOrCard = null, $serial = null, $idTurn = null, $family = null, $fiscal = null)
-    {
+    public function add($billId = null, $billNumber = null, $pago = null, $fiscal = null)
+    {		
         $payment = $this->Payments->newEntity();
         $payment->bill_id = $billId;
-        $payment->payment_type = $paymentType;
-        $payment->amount = $amountPaid;
-        $payment->bank = $bank;
-        $payment->account_or_card = $accountOrCard;
-        $payment->serial = $serial;
+        $payment->payment_type = $pago->paymentType;
+        $payment->amount = $pago->amountPaid;
+        $payment->bank = $pago->bank;
+        $payment->account_or_card = $pago->accountOrCard;
+        $payment->serial = $pago->serial;
         $payment->bill_number = $billNumber;
         $payment->responsible_user = $this->Auth->user('id');
-        $payment->turn = $idTurn;
+        $payment->turn = $pago->idTurn;
         $payment->annulled = 0;
-        $payment->name_family = $family; 
+        $payment->name_family = $pago->family;
+		$payment->moneda = $pago->moneda;
+		$payment->banco_receptor = $pago->bancoReceptor;
+		$payment->comentario = $pago->comentario;
         $payment->fiscal = $fiscal;        
 
         if (!($this->Payments->save($payment))) 

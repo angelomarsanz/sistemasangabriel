@@ -346,8 +346,10 @@ class PaymentsController extends AppController
 			{
 				$nuevoPago = $this->Payments->newEntity();
 				$nuevoPago->bill_id = $idFacturaNueva;
+				$nuevoPago->moneda = $pago->moneda;
 				$nuevoPago->payment_type = $pago->payment_type;
 				$nuevoPago->bank = $pago->bank;
+				$nuevoPago->banco_receptor = $pago->banco_receptor;
 				$nuevoPago->account_or_card = $pago->account_or_card;
 				$nuevoPago->serial = $pago->serial;
 				$nuevoPago->bill_number = $numeroNuevaFactura;
@@ -355,6 +357,7 @@ class PaymentsController extends AppController
 				$nuevoPago->turn = $pago->turn;
 				$nuevoPago->annulled = 0;
 				$nuevoPago->name_family = $pago->name_family; 
+				$nuevoPago->comentario = $pago->comentario; 
 				$nuevoPago->fiscal = 1;     
 				
 				if ($saldoServicioEducativo > 0)
@@ -402,6 +405,36 @@ class PaymentsController extends AppController
 			$codigoRetorno = 1;	
 		}
 		
+		return $codigoRetorno; 
+    }
+    public function pagoReciboCredito($idRecibo = null, $numeroRecibo = null, $monto = null, $turno = null)
+    {
+		$nuevoPago = $this->Payments->newEntity();
+		$nuevoPago->bill_id = $idRecibo;
+		$nuevoPago->moneda = "$";
+		$nuevoPago->payment_type = "Efectivo";
+		$nuevoPago->bank = "N/A";
+		$nuevoPago->banco_receptor = "N/A";
+		$nuevoPago->account_or_card = "N/A";
+		$nuevoPago->serial = "N/A";
+		$nuevoPago->bill_number = $numeroRecibo;
+		$nuevoPago->responsible_user = $this->Auth->user('id');
+		$nuevoPago->turn = $turno;
+		$nuevoPago->annulled = 0;
+		$nuevoPago->name_family = $familia; 
+		$nuevoPago->fiscal = 0;     
+		$nuevoPago->amount = $monto;
+		$nuevoPago->comentario = "";
+
+		if (!($this->Payments->save($nuevoPago))) 
+		{
+			$binnacles = new BinnaclesController;
+			
+			$binnacles->add('controller', 'Payments', 'pagosReciboCredito', 'El pago correspondiente al recibo con ID ' . $idRecibo . ' no fue guardado');
+			
+			$this->Flash->error(__('El pago correspondiente al recibo con ID ' . $idRecibo . ' no fue guardado, vuelva a intentar por favor.'));
+			$codigoRetorno = 1;
+		}	
 		return $codigoRetorno; 
     }
 }

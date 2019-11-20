@@ -641,4 +641,27 @@ class ParentsandguardiansController extends AppController
             }           
         } 
     }
+	public function busquedaReciboReintegro()
+	{
+		
+	}
+	
+    public function previoReciboReintegro($idRepresentante = null)
+    {	
+        if ($this->request->is('post')) 
+        {
+            $idRepresentante = $_POST['idRepresentante'];
+        }
+		
+		$representante = $this->Parentsandguardians->get($idRepresentante);
+		
+		if ($representante->balance > 0)
+		{
+			return $this->redirect(['controller' => 'Bills', 'action' => 'establecerMontoReintegro', $idRepresentante, $representante->balance]);
+		}
+		else
+		{
+			$this->Flash->error(__('Estimado usuario este representante no tiene saldo para reintegrar'));
+		}
+	}
 }

@@ -2379,10 +2379,8 @@
 							
 							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
 
-							// montoDolar = value2.amount_dollar + diferenciaOriginalActual;
-							
-							montoDolar = value2.amount_dollar;
-							
+							montoDolar = value2.amount_dollar + diferenciaOriginalActual;
+													
 							if (paidOut == true)
 							{
 								if (montoDolar === null)
@@ -3355,6 +3353,12 @@
 			$('.check-bolivar').attr('checked', true);
 			$('.check-bolivar').prop('checked', true);
 			aCobrarBolivares();
+		});
+		$('.reintegrar').click(function(e) 
+        {
+			e.preventDefault();	
+			'<?php $this->redirect(['controller' => 'Bills', 'action' => 'establecerMontoReintegro']) ?>' + idParentsandguardians + '/' + saldoRepresentante;
+			// window.location.assign('<?= Router::url(["controller" => "Bills", "action" => "establecerMontoReintegro"]) ?>' + idParentsandguardians + '/' + saldoRepresentante);			
 		});
     }); 
 

@@ -17,7 +17,7 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
-		$contadorBusqueda = 0;
+		/* $contadorBusqueda = 0;
 		$contadorTransacciones = 0;
 		
 		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
@@ -31,7 +31,7 @@ class StudenttransactionsController extends AppController
 		
 		$this->Flash->success(__('Total transacciones busqueda ' . $contadorBusqueda));
 		
-		/* foreach ($transacciones as $transaccion)
+		foreach ($transacciones as $transaccion)
 		{
 			$transaccionGet = $this->Studenttransactions->get($transaccion->id);
 						
@@ -45,12 +45,12 @@ class StudenttransactionsController extends AppController
 			{
 				$contadorTransacciones++;
 			}
-		} */
+		}
 		
 		$this->Flash->success(__('Total transacciones actualizadas ' . $contadorTransacciones));
 	
         $this->set(compact('transacciones'));
-        $this->set('_serialize', ['transacciones']); 
+        $this->set('_serialize', ['transacciones']); */
     }
 	
 	public function testFunction2()
@@ -3764,4 +3764,146 @@ class StudenttransactionsController extends AppController
         $this->set(compact('transacciones'));
         $this->set('_serialize', ['transacciones']);
 	}
+	
+	public function modificarParciales()
+	{
+		$contadorBusqueda = 0;
+		$contadorCaso1 = 0;
+		$contadorCaso2 = 0;
+		$contadorCaso3 = 0;
+
+		$contadorActualizadas = 0;
+		
+		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
+		
+		$transacciones = $transaccionesEstudiante->find('all')
+			->where(['invoiced' => 0, 'partial_payment' => 1]);
+			
+		$contadorBusqueda = $transacciones->count();
+		
+		if ($contadorBusqueda > 0)
+		{
+			foreach ($transacciones as $transaccion)
+			{
+				$transaccionGet = $this->Studenttransactions->get($transaccion->id);
+				
+				if ($transaccionGet->paid_out == 0 && $transaccionGet->bill_number != 0)
+				{
+					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$contadorCaso1++;
+				}
+				elseif ($transaccionGet->paid_out == 0 && $transaccionGet->bill_number == 0)
+				{
+					if ($transaccionGet->id != 49081 && $transaccionGet->bill_number != 49095) 
+					{
+						$transaccionGet->partial_payment = 0;
+					}
+					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$contadorCaso2++;
+				}
+				elseif ($transaccionGet->paid_out == 1)
+				{
+					$transaccionGet->partial_payment = 0;
+					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$contadorCaso3++;
+				}
+				/* if (!($this->Studenttransactions->save($transaccionGet))) 
+				{
+					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
+				}
+				else
+				{
+					$contadorActualizadas++;
+				} */
+			}
+		}
+		
+		$this->Flash->success(__('Total transaccciones encontradas ' . $contadorBusqueda));
+		$this->Flash->success(__('Total transaccciones caso 1 ' . $contadorCaso1));
+		$this->Flash->success(__('Total transaccciones caso 2 ' . $contadorCaso2));
+		$this->Flash->success(__('Total transaccciones caso 3 ' . $contadorCaso3));
+		$this->Flash->success(__('Total actualizadas ' . $contadorActualizadas));
+	
+        $this->set(compact('transacciones'));
+        $this->set('_serialize', ['transacciones']);
+	}
+	public function modificarTotales()
+	{
+		$contadorBusqueda = 0;
+		$contadorActualizadas = 0;
+		
+		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
+		
+		$transacciones = $transaccionesEstudiante->find('all')
+			->where(['invoiced' => 0, 'paid_out' => 1, 'amount_dollar !=' => 999999 ]);
+			
+		$contadorBusqueda = $transacciones->count();
+		
+		if ($contadorBusqueda > 0)
+		{
+			foreach ($transacciones as $transaccion)
+			{
+				$transaccionGet = $this->Studenttransactions->get($transaccion->id);
+				
+				$transaccionGet->amount = $transaccionGet->amount_dollar;
+				$transaccionGet->original_amount = $transaccionGet->amount_dollar;
+
+				if (!($this->Studenttransactions->save($transaccionGet))) 
+				{
+					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
+				}
+				else
+				{
+					$contadorActualizadas++;
+				}
+			}
+		}
+		
+		$this->Flash->success(__('Total transaccciones encontradas ' . $contadorBusqueda));
+		$this->Flash->success(__('Total actualizadas ' . $contadorActualizadas));
+	
+        $this->set(compact('transacciones'));
+        $this->set('_serialize', ['transacciones']);
+	}
+	public function modificarNoPagadas()
+	{
+		$contadorBusqueda = 0;
+		$contadorActualizadas = 0;
+		
+		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
+		
+		$transacciones = $transaccionesEstudiante->find('all')
+			->where(['invoiced' => 0, 'partial_payment' => 0, 'paid_out' => 0 ]);
+			
+		$contadorBusqueda = $transacciones->count();
+		
+		if ($contadorBusqueda > 0)
+		{
+			foreach ($transacciones as $transaccion)
+			{
+				$transaccionGet = $this->Studenttransactions->get($transaccion->id);
+				
+				$transaccionGet->amount = 0;
+				$transaccionGet->original_amount = 0;
+
+				if (!($this->Studenttransactions->save($transaccionGet))) 
+				{
+					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
+				}
+				else
+				{
+					$contadorActualizadas++;
+				} 
+			}
+		}
+		
+		$this->Flash->success(__('Total transaccciones encontradas ' . $contadorBusqueda));
+		$this->Flash->success(__('Total actualizadas ' . $contadorActualizadas));
+	
+        $this->set(compact('transacciones'));
+        $this->set('_serialize', ['transacciones']);
+	}		
 }

@@ -265,13 +265,72 @@ class ConceptsController extends AppController
 			{
 				$binnacles = new BinnaclesController;
 				
-				$binnacles->add('controller', 'Payments', 'conceptosReciboFactura', 'El concepto correspondiente a la factura con ID ' . $idFacturaNueva . ' no fue guardado');
+				$binnacles->add('controller', 'Concepts', 'conceptosReciboFactura', 'El concepto correspondiente a la factura con ID ' . $idFacturaNueva . ' no fue guardado');
 				
 				$this->Flash->error(__('El concepto de la factura con ID ' . $idFacturaNueva . ' no pudo ser guardado, intente nuevamente'));
 				$codigoRetorno = 1;
 				break;
 			}
 		}
+		return $codigoRetorno;
+	}
+	
+	public function conceptosReciboCredito($idRecibo = null, $monto = null)
+	{
+		$codigoRetorno = 0;
+		
+		$conceptoNuevo = $this->Concepts->newEntity();
+		$conceptoNuevo->bill_id = $idRecibo;
+		$conceptoNuevo->quantity = 1;
+		$conceptoNuevo->accounting_code = "001";
+		$conceptoNuevo->student_name = "";
+		$conceptoNuevo->transaction_identifier = 999999;
+		$conceptoNuevo->concept = "Saldo a favor";
+		$conceptoNuevo->amount = $monto;
+		$conceptoNuevo->observation = "";
+		$conceptoNuevo->annulled = 0;
+		$conceptoNuevo->concept_migration = 0;		
+		$conceptoNuevo->saldo = $monto;
+
+		if (!($this->Concepts->save($conceptoNuevo)))
+		{
+			$binnacles = new BinnaclesController;
+			
+			$binnacles->add('controller', 'Concepts', 'conceptosReciboCredito', 'El concepto correspondiente al recibo con ID ' . $idRecibo . ' no fue guardado');
+			
+			$this->Flash->error(__('El concepto del recibo con ID ' . $idRecibo . ' no pudo ser guardado, intente nuevamente'));
+			$codigoRetorno = 1;
+		}
+		
+		return $codigoRetorno;
+	}
+	public function conceptosReciboReintegro($idRecibo = null, $monto = null)
+	{
+		$codigoRetorno = 0;
+		
+		$conceptoNuevo = $this->Concepts->newEntity();
+		$conceptoNuevo->bill_id = $idRecibo;
+		$conceptoNuevo->quantity = 1;
+		$conceptoNuevo->accounting_code = "001";
+		$conceptoNuevo->student_name = "";
+		$conceptoNuevo->transaction_identifier = 999999;
+		$conceptoNuevo->concept = "Reintegro";
+		$conceptoNuevo->amount = $monto;
+		$conceptoNuevo->observation = "";
+		$conceptoNuevo->annulled = 0;
+		$conceptoNuevo->concept_migration = 0;		
+		$conceptoNuevo->saldo = $monto;
+
+		if (!($this->Concepts->save($conceptoNuevo)))
+		{
+			$binnacles = new BinnaclesController;
+			
+			$binnacles->add('controller', 'Concepts', 'conceptosReciboCredito', 'El concepto correspondiente al recibo con ID ' . $idRecibo . ' no fue guardado');
+			
+			$this->Flash->error(__('El concepto del recibo con ID ' . $idRecibo . ' no pudo ser guardado, intente nuevamente'));
+			$codigoRetorno = 1;
+		}
+		
 		return $codigoRetorno;
 	}
 }

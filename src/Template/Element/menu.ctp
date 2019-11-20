@@ -113,10 +113,11 @@
 								<li><?= $this->Html->link('Consultar nota de débito', ['controller' => 'Bills', 'action' => 'consultarNotaDebito']) ?></li>
 								<li><?= $this->Html->link('Anular factura', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Anular']) ?></li>
 								<li><?= $this->Html->link('Crear nota contable', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'NC']) ?></li>
+								<li><?= $this->Html->link('Recibo reintegro', ['controller' => 'Parentsandguardians', 'action' => 'busquedaReciboReintegro']) ?></li>			
 								<li><?= $this->Html->link('Modificar lote de facturas', ['controller' => 'Controlnumbers', 'action' => 'edit']) ?></li>
 								<li><?= $this->Html->link('Modificar el número control de facturas', ['controller' => 'Bills', 'action' => 'editControl']) ?></li>
 								<li><?= $this->Html->link('Reporte de pagos', ['controller' => 'Studenttransactions', 'action' => 'reportePagos']) ?></li>
-								<li><?= $this->Html->link('Reporte de Morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li>								
+								<li><?= $this->Html->link('Reporte de Morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li>						
 								<li><?= $this->Html->link('Crear libro de ventas EXCEL', ['controller' => 'Salesbooks', 'action' => 'createBookExcel']) ?></li>
 								<li><?= $this->Html->link('Crear libro de recibos EXCEL', ['controller' => 'Salesbooks', 'action' => 'crearLibroRecibos']) ?></li>
 								<li><?= $this->Html->link('Eventos del usuario', ['controller' => 'Eventos', 'action' => 'index']) ?></li>
