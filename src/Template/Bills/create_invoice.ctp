@@ -2366,10 +2366,7 @@
 							
 							diferenciaOriginalActual = originalAmount - amountPaid;
 							
-							if (diferenciaOriginalActual < 0)
-							{
-								diferenciaOriginalActual = 0;
-							}
+							tarifaDolar = tarifaDolar - diferenciaOriginalActual;
 							
 							invoiced = value2.invoiced;
 
@@ -2379,7 +2376,7 @@
 							
 							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
 
-							montoDolar = value2.amount_dollar + diferenciaOriginalActual;
+							montoDolar = value2.amount_dollar;
 													
 							if (paidOut == true)
 							{

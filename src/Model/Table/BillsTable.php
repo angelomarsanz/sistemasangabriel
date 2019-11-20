@@ -159,6 +159,10 @@ class BillsTable extends Table
        $validator
             ->numeric('saldo_compensado')
             ->allowEmpty('saldo_compensado');
+			
+       $validator
+            ->numeric('id_recibo_sobrante')
+            ->allowEmpty('id_recibo_sobrante');
 
         return $validator;
     }

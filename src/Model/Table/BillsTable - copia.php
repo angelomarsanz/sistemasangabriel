@@ -135,6 +135,30 @@ class BillsTable extends Table
 			
         $validator
             ->allowEmpty('factura_pendiente');
+			
+        $validator
+            ->dateTime('fecha_reimpresion')
+            ->allowEmpty('fecha_reimpresion');
+			
+       $validator
+            ->numeric('moneda_id')
+            ->allowEmpty('moneda_id');
+			
+       $validator
+            ->numeric('tasa_cambio')
+            ->allowEmpty('tasa_cambio');
+			
+       $validator
+            ->numeric('tasa_euro')
+            ->allowEmpty('tasa_euro');
+			
+       $validator
+            ->numeric('tasa_dolar_euro')
+            ->allowEmpty('tasa_dolar_euro');
+			
+       $validator
+            ->numeric('saldo_compensado')
+            ->allowEmpty('saldo_compensado');
 
         return $validator;
     }

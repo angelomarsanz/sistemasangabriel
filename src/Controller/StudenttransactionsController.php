@@ -181,6 +181,7 @@ class StudenttransactionsController extends AppController
 		if ($transaccion->observation == "Abono")
 		{
 			$studenttransaction->partial_payment = 1;
+			$studenttransaction->paid_out = 0;
 		} 
 		else
 		{
@@ -220,26 +221,24 @@ class StudenttransactionsController extends AppController
     {
         $studenttransaction = $this->Studenttransactions->get($id);
         		
-		$montoReversoDolar = $amount / $tasaCambio; 
+		$montoReversoDolar = round($amount / $tasaCambio); 
 
-		$studenttransaction->amount_dollar = round($studenttransaction->amount_dollar - $montoReversoDolar);
+		$studenttransaction->amount_dollar = $studenttransaction->amount_dollar - $montoReversoDolar;
 				
-		$studenttransaction->amount = $studenttransaction->amount - $amount;
-		
-		if ($studenttransaction->amount < 1)
+		if ($studentTransaction->original_amount != $studenttransaction->amount)
 		{
-			$studenttransaction->amount = round($studenttransaction->amount);
+			$studenttransaction->amount = $studentTransaction->original_amount;
 		}
-			
-		$studenttransaction->paid_out = 0;
-		
-		if ($studenttransaction->amount == 0)
+								
+		if ($studenttransaction->amount > $studenttransaction->amount_dollar)
 		{
-			$studenttransaction->partial_payment = 0;
+			$studenttransaction->partial_payment = 1;
+			$studenttransaction->paid_out = 0;
 		} 
 		else
 		{
-			$studenttransaction->partial_payment = 1;
+			$studenttransaction->partial_payment = 0;
+			$studenttransaction->paid_out = 1;
 		}
 			
         if ($studenttransaction->bill_number == $billNumber)
@@ -3550,34 +3549,30 @@ class StudenttransactionsController extends AppController
 	}
 	
     public function notaTransaccion($idTransaccion = null, $numeroNotaContable = null, $valor = null, $tipoNota = null, $tasaCambio = null)
-    {        
+    {
+		$estudianteController = new StudentsController();
+        
 		$codigoRetornoTransaccion = 0;
+				
+		$diferenciaOriginalActual = 0;
+		
+		$tarifaDolar = 0;
 		
         $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
 				
-		$montoNotaDolar = $valor / $tasaCambio; 
+		$montoNotaDolar = round($valor / $tasaCambio); 
 		
 		if ($tipoNota == "Crédito")
 		{
-			$transaccionEstudiante->amount_dollar = round($transaccionEstudiante->amount_dollar - $montoNotaDolar);
-			$transaccionEstudiante->amount = $transaccionEstudiante->amount - $valor; 			
+			$transaccionEstudiante->amount_dollar = $transaccionEstudiante->amount_dollar - $montoNotaDolar;
 		}
 		else
 		{
-			$transaccionEstudiante->amount_dollar = round($transaccionEstudiante->amount_dollar + $montoNotaDolar);
-			$transaccionEstudiante->amount = $transaccionEstudiante->amount + $valor; 				
-		}
-
-		if ($transaccionEstudiante->amount < 1)
-		{
-			$transaccionEstudiante->amount = round($transaccionEstudiante->amount);
+			$transaccionEstudiante->amount_dollar = $transaccionEstudiante->amount_dollar + $montoNotaDolar;
 		}
 				
-		$estudianteController = new StudentsController();
 		$mesesTarifas = $estudianteController->mesesTarifas(0);
 		$otrasTarifas = $estudianteController->otrasTarifas(0);
-		
-		$tarifaDolar = 0;
 		
 		if ($transaccionEstudiante->transaction_type == "Mensualidad" && substr($transaccionEstudiante->transaction_description, 0, 3) != "Ago")
 		{				
@@ -3628,20 +3623,19 @@ class StudenttransactionsController extends AppController
 				}
 			}
 		}
-										
-		if ($transaccionEstudiante->amount_dollar >= $tarifaDolar)
+		
+		$tarifaDolar = $tarifaDolar - diferenciaOriginalActual;	
+		
+		if ($transaccionEstudiante->amount_dollar == $tarifaDolar)
 		{
-			if ($transaccionEstudiante->amount_dollar == 0)
-			{
-				$transaccionEstudiante->partial_payment = 0;
-				$transaccionEstudiante->paid_out = 0;
-			}
-			else
-			{
-				$transaccionEstudiante->partial_payment = 0;
-				$transaccionEstudiante->paid_out = 1;
-			}
-		} 
+			$transaccionEstudiante->partial_payment = 0;
+			$transaccionEstudiante->paid_out = 1;
+		}
+		elseif ($transaccionEstudiante->amount_dollar > $tarifaDolar)
+		{
+			$transaccionEstudiante->partial_payment = 0;
+			$transaccionEstudiante->paid_out = 1;
+		}
 		else
 		{
 			if ($transaccionEstudiante->amount_dollar == 0)

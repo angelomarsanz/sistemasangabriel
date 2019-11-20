@@ -324,6 +324,8 @@ class BillsController extends AppController
 
         $Payments = new PaymentsController();
 		
+		$binnacles = new BinnaclesController;
+		
 		$codigoRetorno = 0;
 		
         if ($this->request->is('post')) 
@@ -380,10 +382,22 @@ class BillsController extends AppController
 						
 						if ($this->headboard['sobrante'] > 0)
 						{
-							$codigoRetorno = this->reciboCredito($idParentsandguardian, $parentandguardian->family, $billNumber, $this->headboard['sobrante'] > 0); 
-							if ($codigoRetorno >0)
+							$resultado = this->reciboCredito($idParentsandguardian, $parentandguardian->family, $billId, $this->headboard['sobrante'] > 0); 
+							if ($resultado['codigoRetorno'] == 0)
+							{
+								$factura = $this->Bills->get($billId);
+								$factura->id_Recibo_sobrante = $resultado['idRecibo'];
+														
+								if (!($this->Bills->save($factura)))
+								{
+									 $this->Flash->error(__('La factura no se pudo actualizar con el id del recibo del sobrante'));
+									 $binnacles->add('controller', 'Bills', 'recordInvoiceData', 'La factura ' . $billNumber . ' no se pudo actualizar con el id del recibo del sobrante');
+								}
+							}
+							else
 							{
 								$this->Flash->error(__('No se pudo guardar correctamente el recibo del sobrante'));
+								$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo crear correctamente el recibo del sobrante para la factura ' . $billNumber);
 							}
 						}
 						
@@ -391,7 +405,8 @@ class BillsController extends AppController
 						
 						if (!($this->Bills->Parentsandguardians->save($parentandguardian)))
 						{
-							 $this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
+							$this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
+							$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian . ' en la factura ' . $billNumber);
 						}
 					}
 
@@ -925,6 +940,10 @@ class BillsController extends AppController
         $concepts = new ConceptsController();
         
         $payments = new PaymentsController();
+		
+		$binnacles = new BinnaclesController;
+		
+		$eventos = new EventosController;
         
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
@@ -948,6 +967,12 @@ class BillsController extends AppController
 				{
 					$this->Flash->error(__('Esta factura ya está anulada, intente con otra factura'));
 				}
+				elseif ($factura->tipo_documento == "Recibo crédito"
+				{
+					$facturaSobrante = $this->Bills->get($factura->id_documento_padre);
+					
+					$this->Flash->error(__('Estimado usuario, para anular este recibo debe anular la factura ' . $facturaSobrante->bill_number . ' que originó el sobrante de caja');
+				)
 				else
 				{
 					$idBill = $factura->id; 
@@ -973,14 +998,34 @@ class BillsController extends AppController
 							}
 							else 
 							{
-								$concepts->edit($idBill, $_POST['bill_number'], $factura->tasa_cambio);
+								$concepts->edit($idBill, $_POST['bill_number'], $factura->tasa_cambio, 0);
 								
 								$payments->edit($idBill);
-								
-								$eventos = new EventosController;
-								
+																
 								$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló la factura Nro. ' . $bill->bill_number);
 								
+								if ($bill->id_recibo_sobrante > 0)
+								{
+									$reciboSobrante = $this->Bills->get($bill->id_recibo_sobrante);
+									$reciboSobrante->annulled = 1;
+							
+									$reciboSobrante->date_annulled = Time::now();
+																			
+									if (!($this->Bills->save($reciboSobrante))) 
+									{
+										$this->Flash->error(__('El recibo del sobrante Nro. '  . $reciboSobrante->bill_number . ' no pudo ser anulado'));
+										$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'El recibo del sobrante Nro. ' . $reciboSobrante->bill_number . ' no pudo ser anulado');
+									}
+									else
+									{
+										$concepts->edit($reciboSobrante->id, $reciboSobrante->bill_number, $reciboSobrante->tasa_cambio, 1);
+								
+										$payments->edit($reciboSobrante->id);
+								
+										$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló el recibo Nro. ' . $reciboSobrante->bill_number);
+									}
+								}			
+			
 								return $this->redirect(['action' => 'annulledInvoice', $idBill]);
 							}
 						}
@@ -1903,7 +1948,7 @@ class BillsController extends AppController
 		return $resultado;
     }
 	
-	public function reciboCredito($idParentsandguardian = null, $familia = null, $billNumber = null, $monto = null)
+	public function reciboCredito($idParentsandguardian = null, $familia = null, $idFactura = null, $monto = null)
 	{
 		$this->autoRender = false;
 		
@@ -1911,18 +1956,18 @@ class BillsController extends AppController
 
 		$pagos = new PaymentsController();
 				
-		$codigoRetorno = 0;
+		$resultado = ['codigoRetorno' => 0, 'idRecibo' => 0];
 		
 		$this->loadModel('Schools');
 
 		$school = $this->Schools->get(2);
 														
-		$resultado = $this->crearReciboCredito($billNumber = null);
+		$resultadoCrear = $this->crearReciboCredito($idFactura = null);
 
-		if ($resultado['codigoRetorno'] == 0)
+		if ($resultadoCrear['codigoRetorno'] == 0)
 		{
-			$numeroRecibo = $resultado['numeroRecibo'];
-			
+			$numeroRecibo = $resultadoCrear['numeroRecibo'];
+						
 			$recibos = $this->Bills->find('all', ['conditions' => ['bill_number' => $numeroRecibo, 'user_id' => $this->Auth->user('id')],
 					'order' => ['Bills.id' => 'DESC'] ]);
 
@@ -1931,6 +1976,8 @@ class BillsController extends AppController
 			if ($contadorRegistros > 0)
 			{
 				$recibo = $recibos->first();
+				
+				$resultado['idRecibo'] = $recibo->id;
 									
 				$codigoRetorno = $conceptos->conceptosReciboCredito($recibo->id, $monto = null);
 				
@@ -1938,21 +1985,25 @@ class BillsController extends AppController
 				{
 					$codigoRetorno = $pagos->pagosReciboCredito($recibo->id, $numeroRecibo, $monto, $this->headboard['idTurn'], $familia);
 				}
+				else
+				{
+					$resultado['codigoRetorno'] = 1;
+				}
 			}
 			else
 			{
 				$this->Flash->error(__('No se encontró el nuevo recibo ' . $numeroRecibo));
-				$codigoRetorno = 1;
+				$resultado['codigoRetorno'] = 1;
 			}
 		}
 		else
 		{
-			$codigoRetorno = 1;
+			$resultado['codigoRetorno'] = 1;
 		}	
-		return $codigoRetorno;
+		return $resultado;
 	}
 	
-    public function crearReciboCredito($billNumber = null)
+    public function crearReciboCredito($billNumber = null, $idDocumentoPadre = null)
     {
         $consecutiveInvoice = new ConsecutiveinvoicesController();
         
@@ -1987,7 +2038,7 @@ class BillsController extends AppController
 			$bill->invoice_migration = 0;
 			$bill->new_family = 0;
 			$bill->impresa = 0;
-			$bill->id_documento_padre = $billNumber;
+			$bill->id_documento_padre = $idDocumentoPadre;
 			$bill->id_anticipo = 0;
 			$bill->factura_pendiente = 0;
 			$bill->moneda_id = 2;
