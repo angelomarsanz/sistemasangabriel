@@ -104,6 +104,18 @@ class PaymentsController extends AppController
         $payment->annulled = 0;
         $payment->name_family = $pago->family;
 		$payment->moneda = $pago->moneda;
+		if ($payment->moneda == '$')
+		{
+			$payment->orden_moneda = 1;
+		}
+		if ($payment->moneda == '€')
+		{
+			$payment->orden_moneda = 2;
+		}
+		else
+		{
+			$payment->orden_moneda = 3;
+		}	
 		$payment->banco_receptor = $pago->bancoReceptor;
 		$payment->comentario = $pago->comentario;
         $payment->fiscal = $fiscal;        
@@ -237,8 +249,6 @@ class PaymentsController extends AppController
 				$idFactura = $paymentsTurns->bill_id;
             }
 			            
-			$paymentsTurns->bill_id = $bill->control_number;
-			
             if ($paymentsTurns->payment_type == "Tarjeta de débito" || $paymentsTurns->payment_type == "Tarjeta de crédito")
             {
                 $paymentsTurns->serial = $paymentsTurns->account_or_card;
@@ -347,6 +357,18 @@ class PaymentsController extends AppController
 				$nuevoPago = $this->Payments->newEntity();
 				$nuevoPago->bill_id = $idFacturaNueva;
 				$nuevoPago->moneda = $pago->moneda;
+				if ($nuevoPago->moneda == '$')
+				{
+					$nuevoPago->orden_moneda = 1;
+				}
+				if ($nuevoPago->moneda == '€')
+				{
+					$nuevoPago->orden_moneda = 2;
+				}
+				else
+				{
+					$nuevoPago->orden_moneda = 3;
+				}	
 				$nuevoPago->payment_type = $pago->payment_type;
 				$nuevoPago->bank = $pago->bank;
 				$nuevoPago->banco_receptor = $pago->banco_receptor;
@@ -412,6 +434,7 @@ class PaymentsController extends AppController
 		$nuevoPago = $this->Payments->newEntity();
 		$nuevoPago->bill_id = $idRecibo;
 		$nuevoPago->moneda = "$";
+		$nuevoPago->orden_moneda = 1;
 		$nuevoPago->payment_type = "Efectivo";
 		$nuevoPago->bank = "N/A";
 		$nuevoPago->banco_receptor = "N/A";
@@ -495,7 +518,7 @@ class PaymentsController extends AppController
         $paymentsTurn = $this->Payments->find('all')
 			->contain(['Bills'])
 			->where(['turn' => $turn, 'annulled' => 0])
-            ->order(['Payments.payment_type' => 'ASC', 'Payments.created' => 'ASC']);
+            ->order(['Payments.payment_type' => 'ASC', 'Payments.orden_moneda' => 'ASC', 'Payments.id' => 'ASC']);
             
         $billId = 0;
 		$tasaDolar = 0;

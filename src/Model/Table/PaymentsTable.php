@@ -109,7 +109,11 @@ class PaymentsTable extends Table
             ->allowEmpty('banco_receptor');	
 
         $validator
-            ->allowEmpty('comentario');					
+            ->allowEmpty('comentario');	
+
+       $validator
+            ->integer('orden_moneda')
+            ->allowEmpty('orden_moneda');			
 
         return $validator;
     }

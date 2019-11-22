@@ -213,237 +213,93 @@
 				<br />
 									
 				<h3><b>Detalle de los pagos fiscales:</b></h3>
-				<div class="row panel panel-default">
+				<div style="font-size: 12px; line-height: 14px;" class="row panel panel-default">
 					<br />
 					<div class="col-md-12">
-						<?php 
-						$paymentType = " ";
-						$totalType = 0;
-						$grandTotal = 0;
+						<?php $paymentType = "";						
+						$totalDolarFiscal = 0;
+						$totalEuroFiscal = 0;
+						$totalBolivarFiscal = 0;
 						foreach ($paymentsTurn as $paymentsTurns): 
 							if ($paymentsTurns->fiscal == 1):
-								if ($paymentType == " "):
-									$paymentType = $paymentsTurns->payment_type; ?>
-									<h4><b>Pagos en: <?= $paymentType ?></b></h4> 
-									<div class="table-responsive">
+								if ($paymentType != $paymentsTurns->payment_type):
+									if ($paymentType == ""): ?>
 										<table class="table table-striped table-hover">
 											<thead>
 												<tr>
-													<th scope="col" style="width: 15%;">Fecha y hora</th>
-													<th scope="col" style="width: 10%;">Factura</th>
-													<th scope="col" style="width: 10%;">Nro. Control</th>
+													<th scope="col" style="width: 20%;">Fecha y hora</th>
+													<th scope="col" style="width: 10%;">Factura/No Control</th>
 													<th scope="col" style="width: 10%;">Familia</th>
-													<th scope="col" style="width: 10%;">Monto Bs.</th>
-													<th scope="col" style="width: 10%;">Banco</th>
+													<th scope="col" style="width: 10%;">Dólar</th>
+													<th scope="col" style="width: 10%;">Euro</th>
+													<th scope="col" style="width: 10%;">Bolívar</th>
+													<th scope="col" style="width: 10%;">Bco emisor</th>
+													<th scope="col" style="width: 10%;">Bco receptor</th>
 													<th scope="col" style="width: 10%;">Tarjeta o serial</th>
 												</tr>
 											</thead>
-											<tbody id="payments-turn">
-								<?php
-								elseif ($paymentType != $paymentsTurns->payment_type): ?>
+											<tbody>										
+									<?php else: ?> 
 											</tbody>
+											<tfoot>
+												<tr>
+													<td>Totales</td>
+													<td></td>
+													<td></td>
+													<td><?= number_format($totalDolarFiscal, 2, ",", ".") ?></td>
+													<td><?= number_format($totalEuroFiscal, 2, ",", ".") ?></td>
+													<td><?= number_format($totalBolivarFiscal, 2, ",", ".") ?></td>
+													<td></td>
+													<td></td>
+													<td></td>
+												</tr>
+											</tfoot>
 										</table>
-									</div>
-									<p style="border-top: 1px solid #c2c2d6;"></p> 
-									<p style="text-align: right; "><b>Total <?= $paymentType . " Bs. " . (number_format($totalType, 2, ",", ".")) ?></b></p>
-									<br />
-									<?php $paymentType = $paymentsTurns->payment_type; ?>
-									<h4><b>Pagos en: <?= $paymentType ?></b></h4> 
-									<div class="table-responsive">
 										<table class="table table-striped table-hover">
 											<thead>
 												<tr>
-													<th scope="col" style="width: 15%;">Fecha y hora</th>
-													<th scope="col" style="width: 10%;">Factura</th>
-													<th scope="col" style="width: 10%;">Nro. Control</th>
+													<th scope="col" style="width: 20%;">Fecha y hora</th>
+													<th scope="col" style="width: 10%;">Factura/No Control</th>
 													<th scope="col" style="width: 10%;">Familia</th>
-													<th scope="col" style="width: 10%;">Monto Bs.</th>
-													<th scope="col" style="width: 10%;">Banco</th>
+													<th scope="col" style="width: 10%;">Dólar</th>
+													<th scope="col" style="width: 10%;">Euro</th>
+													<th scope="col" style="width: 10%;">Bolívar</th>
+													<th scope="col" style="width: 10%;">Bco emisor</th>
+													<th scope="col" style="width: 10%;">Bco receptor</th>
 													<th scope="col" style="width: 10%;">Tarjeta o serial</th>
 												</tr>
 											</thead>
-											<tbody id="payments-turn">
-									<?php 
-									$totalType = 0; 
-								endif; 
-								$totalType = $totalType + $paymentsTurns->amount;
-								$grandTotal = $grandTotal + $paymentsTurns->amount; ?>                            
-								<tr id=<?= $paymentsTurns->id ?>>
-									<td style="width: 15%;"><?= h($paymentsTurns->created->format('d-m-Y H:i:s')) ?></td>
-									<td style="width: 10%;"><?= h($paymentsTurns->bill_number) ?></td>
-									<td style="width: 10%;"><?= h($paymentsTurns->bill_id) ?></td>
+											<tbody>	
+										<?php $totalDolarFiscal = 0;
+										$totalEuroFiscal = 0;
+										$totalBolivarFiscal = 0;
+									endif; 
+									$paymentType = $paymentsTurns->payment_type;
+								endif ?>                         
+								<tr>
+									<td style="width: 25%;"><?= h($paymentsTurns->created->format('d-m-Y H:i:s')) ?></td>
+									<td style="width: 10%;"><?= $paymentsTurns->bill_number ./. $paymentsTurns->bill->bill_number ?></td>
 									<td style="width: 10%;"><?= h($paymentsTurns->name_family) ?></td>
-									<td style="width: 10%;"><?= h(number_format($paymentsTurns->amount, 2, ",", ".")) ?></td>
+									
+									<?php if ($paymentsTurns->moneda == "$": 
+										$totalDolarFiscal += $paymentsTurns->amount; ?>
+										<td style="width: 10%;"><?= number_format($paymentsTurns->amount, 2, ",", ".") ?></td><td></td><td></td>
+									<?php elseif ($paymentsTurns->moneda == "€": 
+										$totalEuroFiscal += $paymentsTurns->amount; ?>
+										<td></td><td style="width: 10%;"><?= number_format($paymentsTurns->amount, 2, ",", ".") ?></td><td></td>
+									<?php else: 
+										$totalBolivarFiscal += $paymentsTurns->amount; ?>
+										<td></td><td></td><td style="width: 10%;"><?= number_format($paymentsTurns->amount, 2, ",", ".") ?></td>
+									<?php endif; ?>
 									<td style="width: 10%;"><?= h($paymentsTurns->bank) ?></td>
+									<td style="width: 10%;"><?= h($paymentsTurns->banco_receptor) ?></td>
 									<td style="width: 10%;"><?= h($paymentsTurns->serial) ?></td>
-								</tr>
-							<?php
+								</tr> 
 							endif;
 						endforeach; ?>
-										</tbody>
-									</table>
-								</div>
-								<p style="border-top: 1px solid #c2c2d6;"></p> 
-								<p style="text-align: right;"><b>Total <?= $paymentType . " Bs. " . (number_format($totalType, 2, ",", ".")) ?></b></p>
-								<h4 style="text-align: right;"><b>Total General Bs. <?= (number_format($grandTotal, 2, ",", ".")) ?></b></h4>
 					</div>
 				</div>
-				<?php if ($receipt == 1): ?>
-					<h3><b>Detalle de los pagos no fiscales:</b></h3>
-					<div class="row panel panel-default">
-						<br />
-						<div class="col-md-12">
-							<?php 
-							$paymentType = " ";
-							$totalType = 0;
-							$grandTotal = 0;
-							foreach ($paymentsTurn as $paymentsTurns): 
-								if ($paymentsTurns->fiscal == 0):
-									if ($paymentType == " "):
-										$paymentType = $paymentsTurns->payment_type; ?>
-										<h4><b>Pagos en: <?= $paymentType ?></b></h4> 
-										<div class="table-responsive">
-											<table class="table table-striped table-hover">
-												<thead>
-													<tr>
-														<th scope="col" style="width: 15%;">Fecha y hora</th>
-														<th scope="col" style="width: 10%;">Factura</th>
-														<th scope="col" style="width: 10%;">Nro. Control</th>
-														<th scope="col" style="width: 10%;">Familia</th>
-														<th scope="col" style="width: 10%;">Monto Bs.</th>
-														<th scope="col" style="width: 10%;">Banco</th>
-														<th scope="col" style="width: 10%;">Tarjeta o serial</th>
-													</tr>
-												</thead>
-												<tbody id="payments-turn">
-									<?php
-									elseif ($paymentType != $paymentsTurns->payment_type): ?>
-												</tbody>
-											</table>
-										</div>
-										<p style="border-top: 1px solid #c2c2d6;"></p> 
-										<p style="text-align: right; "><b>Total <?= $paymentType . " Bs. " . (number_format($totalType, 2, ",", ".")) ?></b></p>
-										<br />
-										<?php $paymentType = $paymentsTurns->payment_type; ?>
-										<h4><b>Pagos en: <?= $paymentType ?></b></h4> 
-										<div class="table-responsive">
-											<table class="table table-striped table-hover">
-												<thead>
-													<tr>
-														<th scope="col" style="width: 15%;">Fecha y hora</th>
-														<th scope="col" style="width: 10%;">Factura</th>
-														<th scope="col" style="width: 10%;">Nro. Control</th>
-														<th scope="col" style="width: 10%;">Familia</th>
-														<th scope="col" style="width: 10%;">Monto Bs.</th>
-														<th scope="col" style="width: 10%;">Banco</th>
-														<th scope="col" style="width: 10%;">Tarjeta o serial</th>
-													</tr>
-												</thead>
-												<tbody id="payments-turn">
-										<?php 
-										$totalType = 0; 
-									endif; 
-									$totalType = $totalType + $paymentsTurns->amount;
-									$grandTotal = $grandTotal + $paymentsTurns->amount; ?>                            
-									<tr id=<?= $paymentsTurns->id ?>>
-										<td style="width: 15%;"><?= h($paymentsTurns->created->format('d-m-Y H:i:s')) ?></td>
-										<td style="width: 10%;"><?= h($paymentsTurns->bill_number) ?></td>
-										<td style="width: 10%;"><?= h($paymentsTurns->bill_id) ?></td>
-										<td style="width: 10%;"><?= h($paymentsTurns->name_family) ?></td>
-										<td style="width: 10%;"><?= h(number_format($paymentsTurns->amount, 2, ",", ".")) ?></td>
-										<td style="width: 10%;"><?= h($paymentsTurns->bank) ?></td>
-										<td style="width: 10%;"><?= h($paymentsTurns->serial) ?></td>
-									</tr>
-								<?php
-								endif;
-							endforeach; ?>
-											</tbody>
-										</table>
-									</div>
-									<p style="border-top: 1px solid #c2c2d6;"></p> 
-									<p style="text-align: right;"><b>Total <?= $paymentType . " Bs. " . (number_format($totalType, 2, ",", ".")) ?></b></p>
-									<h4 style="text-align: right;"><b>Total General Bs. <?= (number_format($grandTotal, 2, ",", ".")) ?></b></h4>
-						</div>
-					</div>
-				<?php endif; ?>
-				<?php if ($indicadorServicioEducativo == 1): ?>
-					<h3><b>Detalle de los pagos de servicio educativo:</b></h3>
-					<div class="row panel panel-default">
-						<br />
-						<div class="col-md-12">
-							<?php 
-							$paymentType = "";
-							$totalType = 0;
-							$grandTotal = 0;
-							foreach ($pagosServicioEducativo as $servicio): 
-								if ($servicio['tipoPago'] != ''):
-									if ($paymentType == ""):
-										$paymentType = $servicio['tipoPago']; ?>
-										<h4><b>Pagos en: <?= $paymentType ?></b></h4> 
-										<div class="table-responsive">
-											<table class="table table-striped table-hover">
-												<thead>
-													<tr>
-														<th scope="col" style="width: 15%;">Fecha y hora</th>
-														<th scope="col" style="width: 10%;">Factura</th>
-														<th scope="col" style="width: 10%;">Nro. Control</th>
-														<th scope="col" style="width: 10%;">Familia</th>
-														<th scope="col" style="width: 10%;">Monto Bs.</th>
-														<th scope="col" style="width: 10%;">Banco</th>
-														<th scope="col" style="width: 10%;">Tarjeta o serial</th>
-													</tr>
-												</thead>
-												<tbody id="payments-turn">
-									<?php
-									elseif ($paymentType != $servicio['tipoPago']): ?>
-												</tbody>
-											</table>
-										</div>
-										<p style="border-top: 1px solid #c2c2d6;"></p> 
-										<p style="text-align: right; "><b>Total <?= $paymentType . " Bs. " . (number_format($totalType, 2, ",", ".")) ?></b></p>
-										<br />
-										<?php $paymentType = $servicio['tipoPago']; ?>
-										<h4><b>Pagos en: <?= $paymentType ?></b></h4> 
-										<div class="table-responsive">
-											<table class="table table-striped table-hover">
-												<thead>
-													<tr>
-														<th scope="col" style="width: 15%;">Fecha y hora</th>
-														<th scope="col" style="width: 10%;">Factura</th>
-														<th scope="col" style="width: 10%;">Nro. Control</th>
-														<th scope="col" style="width: 10%;">Familia</th>
-														<th scope="col" style="width: 10%;">Monto Bs.</th>
-														<th scope="col" style="width: 10%;">Banco</th>
-														<th scope="col" style="width: 10%;">Tarjeta o serial</th>
-													</tr>
-												</thead>
-												<tbody id="payments-turn">
-										<?php 
-										$totalType = 0; 
-									endif; 
-									$totalType = $totalType + $servicio['monto'];
-									$grandTotal = $grandTotal + $servicio['monto']; ?>                            
-									<tr id=<?= $servicio['id'] ?>>
-										<td style="width: 15%;"><?= h($servicio['fecha']) ?></td>
-										<td style="width: 10%;"><?= h($servicio['nroFactura']) ?></td>
-										<td style="width: 10%;"><?= h($servicio['nroControl']) ?></td>
-										<td style="width: 10%;"><?= h($servicio['familia']) ?></td>
-										<td style="width: 10%;"><?= h(number_format($servicio['monto'], 2, ",", ".")) ?></td>
-										<td style="width: 10%;"><?= h($servicio['banco']) ?></td>
-										<td style="width: 10%;"><?= h($servicio['serial']) ?></td>
-									</tr>
-								<?php
-								endif;
-							endforeach; ?>
-											</tbody>
-										</table>
-									</div>
-									<p style="border-top: 1px solid #c2c2d6;"></p> 
-									<p style="text-align: right;"><b>Total <?= $paymentType . " Bs. " . (number_format($totalType, 2, ",", ".")) ?></b></p>
-									<h4 style="text-align: right;"><b>Total General Bs. <?= (number_format($grandTotal, 2, ",", ".")) ?></b></h4>
-						</div>
-					</div>
-				<?php endif; ?>				
+				
 				<div class="row">
 					<div class="col-md-12">
 						<?= $this->Form->create() ?>
