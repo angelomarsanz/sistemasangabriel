@@ -382,7 +382,7 @@ class BillsController extends AppController
 						
 						if ($this->headboard['sobrante'] > 0)
 						{
-							$resultado = this->reciboCredito($idParentsandguardian, $parentandguardian->family, $billId, $this->headboard['sobrante'] > 0); 
+							$resultado = this->reciboSobrante($idParentsandguardian, $parentandguardian->family, $billId, $this->headboard['sobrante'] > 0); 
 							if ($resultado['codigoRetorno'] == 0)
 							{
 								$factura = $this->Bills->get($billId);
@@ -475,7 +475,7 @@ class BillsController extends AppController
 						{
 							$documento = "esta factura";
 						}
-						elseif ($facturaAnterior->tipo_documento == "Recibo" || $facturaAnterior->tipo_documento == "Recibo crédito")
+						elseif ($facturaAnterior->tipo_documento == "Recibo" || $facturaAnterior->tipo_documento == "Recibo sobrante")
 						{
 							$documento = "este recibo";
 						}
@@ -967,7 +967,7 @@ class BillsController extends AppController
 				{
 					$this->Flash->error(__('Esta factura ya está anulada, intente con otra factura'));
 				}
-				elseif ($factura->tipo_documento == "Recibo crédito"
+				elseif ($factura->tipo_documento == "Recibo sobrante"
 				{
 					$facturaSobrante = $this->Bills->get($factura->id_documento_padre);
 					
@@ -1948,7 +1948,7 @@ class BillsController extends AppController
 		return $resultado;
     }
 	
-	public function reciboCredito($idParentsandguardian = null, $familia = null, $idFactura = null, $monto = null)
+	public function reciboSobrante($idParentsandguardian = null, $familia = null, $idFactura = null, $monto = null)
 	{
 		$this->autoRender = false;
 		
@@ -1962,7 +1962,7 @@ class BillsController extends AppController
 
 		$school = $this->Schools->get(2);
 														
-		$resultadoCrear = $this->crearReciboCredito($idFactura = null);
+		$resultadoCrear = $this->crearReciboSobrante($idFactura = null);
 
 		if ($resultadoCrear['codigoRetorno'] == 0)
 		{
@@ -1979,11 +1979,11 @@ class BillsController extends AppController
 				
 				$resultado['idRecibo'] = $recibo->id;
 									
-				$codigoRetorno = $conceptos->conceptosReciboCredito($recibo->id, $monto = null);
+				$codigoRetorno = $conceptos->conceptosReciboSobrante($recibo->id, $monto = null);
 				
 				if ($codigoRetorno == 0)
 				{
-					$codigoRetorno = $pagos->pagosReciboCredito($recibo->id, $numeroRecibo, $monto, $this->headboard['idTurn'], $familia);
+					$codigoRetorno = $pagos->pagosReciboSobrante($recibo->id, $numeroRecibo, $monto, $this->headboard['idTurn'], $familia);
 				}
 				else
 				{
@@ -2003,7 +2003,7 @@ class BillsController extends AppController
 		return $resultado;
 	}
 	
-    public function crearReciboCredito($billNumber = null, $idDocumentoPadre = null)
+    public function crearReciboSobrante($billNumber = null, $idDocumentoPadre = null)
     {
         $consecutiveInvoice = new ConsecutiveinvoicesController();
         
@@ -2024,7 +2024,7 @@ class BillsController extends AppController
 			$bill->bill_number = $numeroRecibo;
 			$bill->fiscal = 0;
 			$bill->control_number = $numeroRecibo;
-			$bill->tipo_documento = "Recibo crédito";
+			$bill->tipo_documento = "Recibo sobrante";
 			
 			$bill->school_year = $this->headboard['schoolYear'];
 			$bill->identification = $this->headboard['typeOfIdentificationClient'] . ' - ' . $this->headboard['identificationNumberClient'];

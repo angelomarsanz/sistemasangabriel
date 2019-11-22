@@ -278,7 +278,7 @@ class ConceptsController extends AppController
 		return $codigoRetorno;
 	}
 	
-	public function conceptosReciboCredito($idRecibo = null, $monto = null)
+	public function conceptosReciboSobrante($idRecibo = null, $monto = null)
 	{
 		$codigoRetorno = 0;
 		
@@ -288,7 +288,7 @@ class ConceptsController extends AppController
 		$conceptoNuevo->accounting_code = "001";
 		$conceptoNuevo->student_name = "";
 		$conceptoNuevo->transaction_identifier = 999999;
-		$conceptoNuevo->concept = "Saldo a favor";
+		$conceptoNuevo->concept = "Sobrante";
 		$conceptoNuevo->amount = $monto;
 		$conceptoNuevo->observation = "";
 		$conceptoNuevo->annulled = 0;

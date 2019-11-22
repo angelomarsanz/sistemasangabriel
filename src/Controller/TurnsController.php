@@ -236,9 +236,32 @@ class TurnsController extends AppController
 
     public function edit($id = null)
     {
+		$this->loadModel('Bills');
+		
 		$lastNumber = 0;
 		$lastControl = 0;
+		$vectorFiscales = [];
 
+		$plantillaFormaPago = $this->plantillaFormaPago();
+			
+		$totalesFiscales = $plantillaFormaPago;
+		$totalGeneralFiscal = ['$' => 0, '€' => 0, 'Bs.' => 0];
+		
+		$totalesAnticipos = $plantillaFormaPago;
+		$totalGeneralAnticipos = ['$' => 0, '€' => 0, 'Bs.' => 0];
+		
+		$totalesServiciosEducativos = $plantillaFormaPago;
+		$totalGeneralServiciosEducativos = ['$' => 0, '€' => 0, 'Bs.' => 0];
+		
+		$totalTotales = = ['$' => 0, '€' => 0, 'Bs.' => 0];
+		
+		$totalSobrantes = 0;
+		$totalReintegros = 0;
+		$totalFacturasCompensadas = 0;
+		
+		$bancosReceptores = $this->bancosReceptores(); 
+		$totalBancosReceptores = = ['$' => 0, '€' => 0, 'Bs.' => 0];
+		
         $payment = new PaymentsController();
         
         $turn = $this->Turns->get($id);
@@ -248,60 +271,98 @@ class TurnsController extends AppController
 		$fechaProximoDia = $fechaTurno->addDay(1);
 		$fechaProximoDiaFormateada = date_format($fechaProximoDia, "Y-m-d");
 				
-        $resultado = $payment->searchPayments($id, $fechaTurnoFormateada, $fechaProximoDiaFormateada);
-        
+        $resultado = $payment->busquedaPagos($id, $fechaTurnoFormateada, $fechaProximoDiaFormateada);
+        		
 		$paymentsTurn = $resultado[0];
-		$indicadorServicioEducativo = $resultado[1];
-		$pagosServicioEducativo = $resultado[2];
-		
-        $totalAmounts = $turn->initial_cash;
-        
-        $receipt = 0;
-		        
+		$indicadorRecibos = $resultado[1];
+		$indicadorServiciosEducativoss = $resultado[2];
+		$indicadorRecibosSobrantes = $resultado[3];
+		$pagosRecibos = $resultado[4];
+		$indicadorReintegros = $resultado[5];
+		$reintegros = $resultado[6];
+		$indicadorCompensadas = $resultado[7];
+		$facturasCompensadas = $resultado[8];
+		$recibidoBancos = $resultado[9];		
+				        
         foreach ($paymentsTurn as $paymentsTurns) 
         {			
-            if ($paymentsTurns->fiscal == 0)
+            if ($paymentsTurns->fiscal == 1)
             {
-                $receipt = 1;
-            }
-            else
-            {
-                switch ($paymentsTurns->payment_type) 
-                {
-                    case "Efectivo":
-                        $turn->cash_received = $turn->cash_received + $paymentsTurns->amount;
-                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                        break;
-                    case "Tarjeta de débito":
-                        $turn->debit_card_amount = $turn->debit_card_amount + $paymentsTurns->amount;
-                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                        break;
-                    case "Tarjeta de crédito":
-                        $turn->credit_card_amount = $turn->credit_card_amount + $paymentsTurns->amount;
-                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                        break;
-                    case "Transferencia":
-                        $turn->transfer_amount = $turn->transfer_amount + $paymentsTurns->amount;
-                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                        break;
-                    case "Depósito":
-                        $turn->deposit_amount = $turn->deposit_amount + $paymentsTurns->amount;
-                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                        break;
-                    case "Cheque":
-                        $turn->check_amount = $turn->check_amount + $paymentsTurns->amount;
-                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                        break;
-                    case "Retención de impuesto":
-                        $turn->retention_amount = $turn->retention_amount + $paymentsTurns->amount;
-                        $totalAmounts = $totalAmounts + $paymentsTurns->amount;
-                        break;
-                }
-            }
-        }
+				foreach($totalesFiscales as $fiscal)
+				{
+					if ($fiscal['formaPago'] == $paymentsTurns->payment_type && $fiscal['moneda'] == $paymentsTurns->moneda)
+					{
+						$fiscal['monto'] += $paymentsTurns->amount;
+						$totalGeneralFiscal[$paymentsTurns->moneda] += $paymentsTurns->amount;
+						$totalTotales[$paymentsTurns->moneda] += $paymentsTurns->amount;
+					}
+				}
+			}
+			elseif ($paymentsTurns->bill->tipo_documento == "Recibo" && substr($paymentsTurns->concept, 0, 8) != "Servicio")
+			{
+				foreach($totalesAnticipos as $anticipo)
+				{
+					if ($anticipo['formaPago'] == $paymentsTurns->payment_type && $anticipo['moneda'] == $paymentsTurns->moneda)
+					{
+						$anticipo['monto'] += $paymentsTurns->amount;
+						$totalGeneralAnticipos[$paymentsTurns->moneda] += $paymentsTurns->amount;
+						$totalTotales[$paymentsTurns->moneda] += $paymentsTurns->amount;		
+					}
+				}						
+			}
+		}
 
-		$this->loadModel('Bills');
-	
+		if ($indicadorRecibos == 1)
+		{
+			foreach($pagosRecibos as $recibo)
+			{
+				if ($recibo['tipoRecibo'] == "Servicio educativo")
+				{
+					foreach($totalesServiciosEducativos as $servicio)
+					{
+						if ($servicio['formaPago'] == $paymentsTurns->payment_type && $servicio['moneda'] == $paymentsTurns->moneda)
+						{
+							$servicio['monto'] += $paymentsTurns->amount;
+							$totalGeneralServiciosEducativos[$paymentsTurns->moneda] += $recibo['monto'];
+							$totalTotales[$paymentsTurns->moneda] += $recibo['monto'];				
+						}
+					}						
+				}
+				else
+				{
+					$totalSobrantes += $recibo['monto'];
+				}
+			}
+		}
+		
+		if ($indicadorReintegros == 1)
+		{
+			foreach($reintegros as $reintegro)
+			{
+				$totalReintegros += $reintegro->amount;
+			}
+		}
+		
+		if ($indicadorCompensadas == 1)
+		{
+			foreach($facturasCompensadas as $compensada)
+			{
+				$totalFacturasCompensadas += $compensada->bill->;
+			}			
+		}
+		
+		foreach($recibidoBancos as $banco)
+		{
+			foreach ($bancosReceptores as $receptor)
+			{
+				if ($banco->banco_receptor == $receptor['banco'] && $banco->moneda == $receptor['moneda'])
+				{
+					$receptor['monto'] += $banco->amount;
+					$totalBancosReceptores[$banco->moneda] += $banco->amount;
+				}		
+			}	
+		}			
+			
 		$ultimoRegistro = $this->Bills->find('all', ['conditions' => ['turn' => $id, 'fiscal' => 1],
 			'order' => ['created' => 'DESC'] ]);
 
@@ -315,8 +376,8 @@ class TurnsController extends AppController
 			$lastControl = $factura->control_number;
 		}
 		
-        $this->set(compact('turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'indicadorServicioEducativo', 'pagosServicioEducativo'));
-        $this->set('_serialize', ['turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'indicadorServicioEducativo', 'pagosServicioEducativo']);
+        $this->set(compact('turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorRecibosSobrantes', 'pagosRecibidos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas'));
+        $this->set('_serialize', ['turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorRecibosSobrantes', 'pagosRecibidos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas' ]);
     }
     
     function closeTurn()
@@ -604,5 +665,54 @@ class TurnsController extends AppController
 		$binnacles->add('controller', 'Turns', 'monetaryReconversion', 'Total registros actualizados: ' . $account2);
 		
 		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+	}
+	public function plantillaFormaPago();
+	{
+		$formaPago = 
+			['Efectivo',
+			'Tarjeta de débito',
+			'Tarjeta de crédito',
+			'Depósito',
+            'Transferencia',
+            'Cheque',
+            'Retención de impuesto'];
+			
+		$monedas = ['$', '€', 'Bs.'];
+
+		$plantillaFormaPago = [];
+				
+		foreach(formaPago as $forma)
+		{
+			foreach ($monedas as $moneda)
+			{
+				$plantillaFormaPago[] = ['formaPago' => $forma, 'moneda' => $moneda, 'monto' = 0];
+			}
+		}
+		
+		Return $plantillaFormaPago;
+	}
+	
+	public function bancosReceptores();
+	{
+		$bancos = 
+			['Banesco',
+			'Plaza',
+			'Provincial',
+			'Venezuela',
+            'Zelle'];
+			
+		$monedas = ['$', '€', 'Bs.'];
+
+		$bancosReceptores = [];
+				
+		foreach($bancos as $banco)
+		{
+			foreach ($monedas as $moneda)
+			{
+				$bancosReceptores[] = ['banco' => $banco, 'moneda' => $moneda, 'monto' => 0];
+			}
+		}
+		
+		Return $bancosReceptores;
 	}
 }

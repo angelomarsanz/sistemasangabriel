@@ -382,6 +382,8 @@ class TurnsController extends AppController
     public function turnpdf($idTurn = null, $cajero = null)
     {
         $payment = new PaymentsController();
+		
+		$this->loadModel('Bills');
         
         $turn = $this->Turns->get($idTurn); 
 				
@@ -393,22 +395,11 @@ class TurnsController extends AppController
         $resultado = $payment->searchPayments($idTurn, $fechaTurnoFormateada, $fechaProximoDiaFormateada);
         
 		$paymentsTurn = $resultado[0];
-		$indicadorServicioEducativo = $resultado[1];
-		$pagosServicioEducativo = $resultado[2];
-		
-        $receipt = 0;
-        
-        foreach ($paymentsTurn as $paymentsTurns) 
-        {
-            if ($paymentsTurns->fiscal == 0)
-            {
-                $receipt = 1;
-				break;
-            }			
-        }
-		
-		$this->loadModel('Bills');
-		
+		$indicadorRecibos = $resultado[1];
+		$pagosRecibos = $resultado[2];
+		$indicadorReintegros = $resultado[3];
+		$reintegros = $resultado[4];
+						
 		$notasContables = $this->Bills->find('all', ['conditions' => ['turn' => $idTurn, 'OR' => [['tipo_documento' => 'Nota de crédito'], ['tipo_documento' => 'Nota de débito']]],
 			'order' => ['Bills.created' => 'ASC'],
 			'contain' => ['Parentsandguardians']]);
