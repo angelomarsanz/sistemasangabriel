@@ -157,12 +157,16 @@ class BillsTable extends Table
             ->allowEmpty('tasa_dolar_euro');
 			
        $validator
-            ->numeric('saldo_compensado')
-            ->allowEmpty('saldo_compensado');
+            ->numeric('saldo_compensado_dolar')
+            ->allowEmpty('saldo_compensado_dolar');
 			
        $validator
-            ->numeric('id_recibo_sobrante')
+            ->integer('id_recibo_sobrante')
             ->allowEmpty('id_recibo_sobrante');
+			
+       $validator
+            ->numeric('sobrante_dolar')
+            ->allowEmpty('sobrante_dolar');
 
         return $validator;
     }

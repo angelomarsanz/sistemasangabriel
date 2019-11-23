@@ -2510,8 +2510,7 @@
 							}
 							else if ($('#type-invoice').val() == 'Recibo inscripción nuevos')
 							{
-								if (monthlyPayment.substring(0, 18) == 'Servicio educativo' || 
-									monthlyPayment.substring(0, 9) == "Matrícula" ||
+								if (monthlyPayment.substring(0, 9) == "Matrícula" ||
 									monthlyPayment.substring(0, 3) == "Ago")
 									{
 										if (indicadorImpresion == 0)

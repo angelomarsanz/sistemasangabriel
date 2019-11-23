@@ -166,7 +166,43 @@ class TurnsTable extends Table
             ->integer('supervisor_close')
             ->requirePresence('supervisor_close', 'create')
             ->notEmpty('supervisor_close');
+			
+        $validator
+            ->allowEmpty('totales_pagos_fiscales');
 
+        $validator
+            ->allowEmpty('total_general_fiscales');
+			
+        $validator
+            ->allowEmpty('totales_anticipos');
+			
+        $validator
+            ->allowEmpty('total_general_anticipos');
+			
+        $validator
+            ->allowEmpty('totales_servicios_educativos');
+			
+        $validator
+            ->allowEmpty('total_general_servicios_educativos');
+			
+        $validator
+            ->allowEmpty('total_totales');
+			
+        $validator
+            ->allowEmpty('totales_sobrantes');
+			
+        $validator
+            ->allowEmpty('totales_reintegros');
+			
+        $validator
+            ->allowEmpty('totales_facturas_compensadas');
+
+        $validator
+            ->allowEmpty('bancos_receptores');			
+
+        $validator
+            ->allowEmpty('total_bancos_receptores');
+			
         return $validator;
     }
 

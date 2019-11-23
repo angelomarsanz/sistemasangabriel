@@ -177,7 +177,14 @@ class BillsController extends AppController
 				{
 					$bill->fiscal = 0;
 					$bill->control_number = $billNumber;
-					$bill->tipo_documento = "Recibo";
+					if ($indicadorFacturaPendiente == 1)
+					{
+						$bill->tipo_documento = "Recibo de anticipo";
+					}
+					else
+					{
+						$bill->tipo_documento = "Recibo de servicio educativo";
+					}
 				}
 				$bill->school_year = $this->headboard['schoolYear'];
 				$bill->identification = $this->headboard['typeOfIdentificationClient'] . ' - ' . $this->headboard['identificationNumberClient'];
@@ -206,7 +213,8 @@ class BillsController extends AppController
 				$bill->tasa_cambio = $this->headboard['tasaDolar'];
 				$bill->tasa_euro = $this->headboard['tasaEuro'];
 				$bill->tasa_dolar_euro = $this->headboard['tasaDolarEuro'];
-				$bill->saldo_compensado = $this->headboard['saldoCompensado'];
+				$bill->saldo_compensado_dolar = $this->headboard['saldoCompensado'];
+				$bill->sobrante_dolar = $this->headboard['sobrante'];
 				
 				if (!($this->Bills->save($bill))) 
 				{
@@ -475,7 +483,7 @@ class BillsController extends AppController
 						{
 							$documento = "esta factura";
 						}
-						elseif ($facturaAnterior->tipo_documento == "Recibo" || $facturaAnterior->tipo_documento == "Recibo sobrante")
+						elseif (substr($facturaAnterior->tipo_documento, 0, 6) == "Recibo")
 						{
 							$documento = "este recibo";
 						}
@@ -954,7 +962,7 @@ class BillsController extends AppController
 		        
         if ($this->request->is('post')) 
         {	
-			$ultimoRegistro = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['bill_number'], 'OR' => [['tipo_documento' => 'Factura'], ['tipo_documento' => 'Recibo']]], 
+			$ultimoRegistro = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['bill_number'], 'OR' => [['tipo_documento' => 'Factura'], ['SUBSTRING(tipo_documento, 1, 6) =' => 'Recibo']]], 
 				'order' => ['Bills.created' => 'DESC']]); 
 								
 			$contadorRegistros = $ultimoRegistro->count();
@@ -967,7 +975,7 @@ class BillsController extends AppController
 				{
 					$this->Flash->error(__('Esta factura ya está anulada, intente con otra factura'));
 				}
-				elseif ($factura->tipo_documento == "Recibo sobrante"
+				elseif ($factura->tipo_documento == "Recibo de sobrante"
 				{
 					$facturaSobrante = $this->Bills->get($factura->id_documento_padre);
 					
@@ -1706,7 +1714,7 @@ class BillsController extends AppController
             {
 				$contadorRegistros = 0;
 				
-                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['billNumber'], 'tipo_documento' => 'Recibo'],
+                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['billNumber'], 'SUBSTRING(tipo_documento, 1, 6) =' => 'Recibo'],
                     'order' => ['Bills.created' => 'DESC']]);
 					
 				$contadorRegistros = $lastRecord->count();
@@ -1922,7 +1930,8 @@ class BillsController extends AppController
 		$bill->tasa_cambio = $reciboPendiente->tasa_cambio;
 		$bill->tasa_euro = $reciboPendiente->tasa_euro;
 		$bill->tasa_dolar_euro = $reciboPendiente->tasa_dolar_euro;
-		$bill->saldo_compensado = $reciboPendiente->saldo_compensado;
+		$bill->saldo_compensado_dolar = $reciboPendiente->saldo_compensado;
+		$bill->sobrante_dolar = $reciboPendiente->saldo_compensado;
 		
 		if ($this->Bills->save($bill)) 
 		{
@@ -2024,7 +2033,7 @@ class BillsController extends AppController
 			$bill->bill_number = $numeroRecibo;
 			$bill->fiscal = 0;
 			$bill->control_number = $numeroRecibo;
-			$bill->tipo_documento = "Recibo sobrante";
+			$bill->tipo_documento = "Recibo de sobrante";
 			
 			$bill->school_year = $this->headboard['schoolYear'];
 			$bill->identification = $this->headboard['typeOfIdentificationClient'] . ' - ' . $this->headboard['identificationNumberClient'];
@@ -2045,7 +2054,8 @@ class BillsController extends AppController
 			$bill->tasa_cambio = $this->headboard['tasaDolar'];
 			$bill->tasa_euro = $this->headboard['tasaEuro'];
 			$bill->tasa_dolar_euro = $this->headboard['tasaDolarEuro'];
-			$bill->saldo_compensado = 0;
+			$bill->saldo_compensado_dolar = 0;
+			$bill->sobrante_dolar = 0;
 			
 			if (!($this->Bills->save($bill))) 
 			{
@@ -2079,7 +2089,7 @@ class BillsController extends AppController
 
 		$school = $this->Schools->get(2);
 														
-		$resultadoCrear = $this->crearReciboReintegro($idParentsandguardian);
+		$resultadoCrear = $this->crearReciboReintegro($idParentsandguardian, $monto);
 
 		if ($resultadoCrear['codigoRetorno'] == 0)
 		{
@@ -2112,7 +2122,7 @@ class BillsController extends AppController
 		return $resultado;
 	}
 	
-    public function crearReciboReintegro($idParentsandguardian = null)
+    public function crearReciboReintegro($idParentsandguardian = null, $monto = null)
     {
         $consecutiveInvoice = new ConsecutiveinvoicesController();
         
@@ -2150,7 +2160,7 @@ class BillsController extends AppController
 			$bill->bill_number = $numeroRecibo;
 			$bill->fiscal = 0;
 			$bill->control_number = $numeroRecibo;
-			$bill->tipo_documento = "Recibo reintegro";
+			$bill->tipo_documento = "Recibo de reintegro";
 
 			$this->loadModel('Schools');
 			$school = $this->Schools->get(2);
@@ -2185,7 +2195,8 @@ class BillsController extends AppController
 			$bill->tasa_cambio = $tasaDolar;
 			$bill->tasa_euro = $tasaEuro;
 			$bill->tasa_dolar_euro = $tasaEuro / $tasaDolar;
-			$bill->saldo_compensado = 0;
+			$bill->saldo_compensado_dolar = 0;
+			$bill->sobrante_dolar = 0;
 			
 			if (!($this->Bills->save($bill))) 
 			{
