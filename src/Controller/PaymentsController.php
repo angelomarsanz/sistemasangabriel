@@ -666,8 +666,15 @@ class PaymentsController extends AppController
 			->contain(['Bills'])
 			->where(['turn' => $turn, 'annulled' => 0])
             ->order(['Payments.payment_type' => 'ASC', 'Payments.created' => 'ASC']);
+			
+		$contadorBancos = $recibidoBancos->count();
+			
+		if ($contadorBancos > 0)
+		{
+			$indicadorBancos = 1;
+		}
 				
-		$resultado = [$paymentsTurn, $indicadorRecibos, $indicadorServiciosEducativos, $indicadorSobrantes, $pagosRecibos, $indicadorReintegros, $reintegros, $indicadorCompensadas, $facturasCompensadas, $recibidoBancos];
+		$resultado = [$paymentsTurn, $indicadorRecibos, $indicadorServiciosEducativos, $indicadorSobrantes, $pagosRecibos, $indicadorReintegros, $reintegros, $indicadorCompensadas, $facturasCompensadas, $recibidoBancos, $indicadorBancos];
 
         return $resultado;
     }

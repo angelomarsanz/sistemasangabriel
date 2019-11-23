@@ -378,10 +378,65 @@ class TurnsController extends AppController
 			$lastControl = $factura->control_number;
 		}
 		
+		$notasContables = $this->Bills->find('all', ['conditions' => ['turn' => $idTurn, 'OR' => [['tipo_documento' => 'Nota de crédito'], ['tipo_documento' => 'Nota de débito']]],
+			'order' => ['Bills.created' => 'ASC'],
+			'contain' => ['Parentsandguardians']]);
+			
+		$contadorNotas = $notasContables->count();
+		$indicadorNotasCredito = 0;
+		$totalNotasCredito = 0;
+		$indicadorNotasDebito = 0;
+		$totalNotasDebito = 0;
+		
+		if ($contadorNotas > 0)
+		{
+			foreach ($notasContables as $notas)
+			{
+				if ($notas->tipo_documento == "Nota de crédito")
+				{
+					$indicadorNotasCredito = 1;
+					$totalNotasCredito += $notas->amount_paid;
+				}
+				else
+				{
+					$indicadorNotasDebito = 1;
+					$totalNotasDebito += $notas->amount_paid;
+				}
+			}
+		}
+		
+		$facturasRecibo = $this->Bills->find('all', ['conditions' => ['turn' => $idTurn, 'id_anticipo >' => 0],
+			'order' => ['Bills.created' => 'ASC'],
+			'contain' => ['Parentsandguardians']]);
+			
+		$contadorFacturasRecibo = $facturasRecibo->count();
+		$indicadorFacturasRecibo = 0;
+		$totalFacturasRecibo = 0;
+		
+		if ($contadorFacturasRecibo > 0)
+		{
+			$indicadorFacturasRecibo = 1;
+			foreach ($facturasRecibo as $factura)
+			{
+				$totalFacturasRecibo += $factura->amount_paid;
+			}
+		}	
+
+		$anuladas = $this->Bills->find('all', ['conditions' => ['date_annulled >=' => $turn->start_date],
+			'order' => ['Bills.created' => 'ASC']]);
+			
+		$contadorAnuladas = $anuladas->count();
+		$indicadorAnuladas = 0;
+		
+		if ($contadorAnuladas > 0)
+		{
+			$indicadorAnuladas = 1;
+		}				
+		
 		$origen = "edit";
 		
-        $this->set(compact('origen', 'turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores'));
-        $this->set('_serialize', ['origen', 'turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores']);
+        $this->set(compact('origen', 'turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas'));
+        $this->set('_serialize', ['origen', 'turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas']);
     }
     
     function closeTurn()
