@@ -9,6 +9,14 @@
       display:none
     }
 }
+@media print
+{
+	.saltopagina
+	{
+		display:block; 
+		page-break-before:always;
+	}
+}
 </style>
 <div id="page-turn" class="container">
     <div class="row">
@@ -211,19 +219,49 @@
 					</div>
 				</div>
 				<br />
-									
-				<h3><b>Detalle de los pagos fiscales:</b></h3>
+				
+				<?php $contadorLinea = 0;
+				if ($origen != 'edit'): ?>
+					<h3 class="saltopagina"><b>Detalle de los pagos fiscales:</b></h3>
+				<?php else: ?>
+					<h3><b>Detalle de los pagos fiscales:</b></h3>
+					<?php $contadorLinea++;
+				endif; ?>
+				
 				<div style="font-size: 12px; line-height: 14px;" class="row panel panel-default">
 					<br />
 					<div class="col-md-12">
 						<?php $paymentType = "";						
-						$totalDolarFiscal = 0;
-						$totalEuroFiscal = 0;
-						$totalBolivarFiscal = 0;
+						$totalDolar = 0;
+						$totalEuro = 0;
+						$totalBolivar = 0;
 						foreach ($paymentsTurn as $paymentsTurns): 
 							if ($paymentsTurns->fiscal == 1):
+								if ($contadorLinea > 50 && $origen != "edit"): 
+									$contadorLinea = 0; ?>
+									<b class="saltopagina">Pagos en <?= $paymentType ?></b>
+									<?php $contadorLinea++ ?>
+									<table class="table table-striped table-hover">
+										<thead>
+											<tr>
+												<th scope="col" style="width: 20%;">Fecha y hora</th>
+												<th scope="col" style="width: 10%;">Factura/No Control</th>
+												<th scope="col" style="width: 10%;">Familia</th>
+												<th scope="col" style="width: 10%;">Dólar</th>
+												<th scope="col" style="width: 10%;">Euro</th>
+												<th scope="col" style="width: 10%;">Bolívar</th>
+												<th scope="col" style="width: 10%;">Bco emisor</th>
+												<th scope="col" style="width: 10%;">Bco receptor</th>
+												<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+											</tr>
+											<?php $contadorLinea++ ?>
+										</thead>
+										<tbody>				
+								<?php endif; 
 								if ($paymentType != $paymentsTurns->payment_type):
 									if ($paymentType == ""): ?>
+										<b>Pagos en <?= $paymentsTurns->payment_type ?></b>
+										<?php $contadorLinea++ ?>
 										<table class="table table-striped table-hover">
 											<thead>
 												<tr>
@@ -237,6 +275,7 @@
 													<th scope="col" style="width: 10%;">Bco receptor</th>
 													<th scope="col" style="width: 10%;">Tarjeta o serial</th>
 												</tr>
+												<?php $contadorLinea++ ?>
 											</thead>
 											<tbody>										
 									<?php else: ?> 
@@ -246,15 +285,18 @@
 													<td>Totales</td>
 													<td></td>
 													<td></td>
-													<td><?= number_format($totalDolarFiscal, 2, ",", ".") ?></td>
-													<td><?= number_format($totalEuroFiscal, 2, ",", ".") ?></td>
-													<td><?= number_format($totalBolivarFiscal, 2, ",", ".") ?></td>
+													<td><?= number_format($totalDolar, 2, ",", ".") ?></td>
+													<td><?= number_format($totalEuro, 2, ",", ".") ?></td>
+													<td><?= number_format($totalBolivar, 2, ",", ".") ?></td>
 													<td></td>
 													<td></td>
 													<td></td>
 												</tr>
+												<?php $contadorLinea++ ?>
 											</tfoot>
 										</table>
+										<b>Pagos en <?= $paymentsTurns->payment_type ?></b>
+										<?php $contadorLinea++ ?>
 										<table class="table table-striped table-hover">
 											<thead>
 												<tr>
@@ -268,37 +310,654 @@
 													<th scope="col" style="width: 10%;">Bco receptor</th>
 													<th scope="col" style="width: 10%;">Tarjeta o serial</th>
 												</tr>
+												<?php $contadorLinea++ ?>
 											</thead>
 											<tbody>	
-										<?php $totalDolarFiscal = 0;
-										$totalEuroFiscal = 0;
-										$totalBolivarFiscal = 0;
+										<?php $totalDolar = 0;
+										$totalEuro = 0;
+										$totalBolivar = 0;
 									endif; 
 									$paymentType = $paymentsTurns->payment_type;
 								endif ?>                         
 								<tr>
 									<td style="width: 25%;"><?= h($paymentsTurns->created->format('d-m-Y H:i:s')) ?></td>
-									<td style="width: 10%;"><?= $paymentsTurns->bill_number ./. $paymentsTurns->bill->bill_number ?></td>
+									<td style="width: 10%;"><?= $paymentsTurns->bill_number ./. $paymentsTurns->bill->control_number ?></td>
 									<td style="width: 10%;"><?= h($paymentsTurns->name_family) ?></td>
 									
 									<?php if ($paymentsTurns->moneda == "$": 
-										$totalDolarFiscal += $paymentsTurns->amount; ?>
+										$totalDolar += $paymentsTurns->amount; ?>
 										<td style="width: 10%;"><?= number_format($paymentsTurns->amount, 2, ",", ".") ?></td><td></td><td></td>
 									<?php elseif ($paymentsTurns->moneda == "€": 
-										$totalEuroFiscal += $paymentsTurns->amount; ?>
+										$totalEuro += $paymentsTurns->amount; ?>
 										<td></td><td style="width: 10%;"><?= number_format($paymentsTurns->amount, 2, ",", ".") ?></td><td></td>
 									<?php else: 
-										$totalBolivarFiscal += $paymentsTurns->amount; ?>
+										$totalBolivar += $paymentsTurns->amount; ?>
 										<td></td><td></td><td style="width: 10%;"><?= number_format($paymentsTurns->amount, 2, ",", ".") ?></td>
 									<?php endif; ?>
 									<td style="width: 10%;"><?= h($paymentsTurns->bank) ?></td>
 									<td style="width: 10%;"><?= h($paymentsTurns->banco_receptor) ?></td>
 									<td style="width: 10%;"><?= h($paymentsTurns->serial) ?></td>
 								</tr> 
-							endif;
+								<?php $contadorLinea++ ?>
+							<?php endif;
 						endforeach; ?>
+							</tbody>
+							<tfoot>
+								<tr>
+									<td>Totales</td>
+									<td></td>
+									<td></td>
+									<td><?= number_format($totalDolar, 2, ",", ".") ?></td>
+									<td><?= number_format($totalEuro, 2, ",", ".") ?></td>
+									<td><?= number_format($totalBolivar, 2, ",", ".") ?></td>
+									<td></td>
+									<td></td>
+									<td></td>
+								</tr>
+								<?php $contadorLinea++ ?>
+							</tfoot>
+						</table>
 					</div>
 				</div>
+				
+				<?php if ($indicadorAnticipos == 1)
+					if ($contadorLinea > 45 && $origen != 'edit'): ?>
+						<h3 class="saltopagina"><b>Detalle de anticipos:</b></h3>
+					<?php else: ?>
+						<h3><b>Detalle de anticipos:</b></h3>
+						<?php $contadorLinea++;
+					endif; ?>
+					
+					<div style="font-size: 12px; line-height: 14px;" class="row panel panel-default">
+						<br />
+						<div class="col-md-12">
+							<?php $paymentType = "";						
+							$totalDolar = 0;
+							$totalEuro = 0;
+							$totalBolivar = 0;
+							foreach ($paymentsTurn as $paymentsTurns): 
+								if ($paymentsTurns->bill->tipo_documento == "Recibo" && $paymentsTurns->bill->factura_pendiente == true)
+									if ($contadorLinea > 50 && $origen != "edit"): 
+										$contadorLinea = 0; ?>
+										<b class="saltopagina">Pagos en <?= $paymentType ?></b>
+										<?php $contadorLinea++ ?>
+										<table class="table table-striped table-hover">
+											<thead>
+												<tr>
+													<th scope="col" style="width: 20%;">Fecha y hora</th>
+													<th scope="col" style="width: 10%;">Factura/No Control</th>
+													<th scope="col" style="width: 10%;">Familia</th>
+													<th scope="col" style="width: 10%;">Dólar</th>
+													<th scope="col" style="width: 10%;">Euro</th>
+													<th scope="col" style="width: 10%;">Bolívar</th>
+													<th scope="col" style="width: 10%;">Bco emisor</th>
+													<th scope="col" style="width: 10%;">Bco receptor</th>
+													<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+												</tr>
+												<?php $contadorLinea++ ?>
+											</thead>
+											<tbody>				
+									<?php endif; 
+									if ($paymentType != $paymentsTurns->payment_type):
+										if ($paymentType == ""): ?>
+											<b>Pagos en <?= $paymentsTurns->payment_type ?></b>
+											<?php $contadorLinea++ ?>
+											<table class="table table-striped table-hover">
+												<thead>
+													<tr>
+														<th scope="col" style="width: 20%;">Fecha y hora</th>
+														<th scope="col" style="width: 10%;">Factura/No Control</th>
+														<th scope="col" style="width: 10%;">Familia</th>
+														<th scope="col" style="width: 10%;">Dólar</th>
+														<th scope="col" style="width: 10%;">Euro</th>
+														<th scope="col" style="width: 10%;">Bolívar</th>
+														<th scope="col" style="width: 10%;">Bco emisor</th>
+														<th scope="col" style="width: 10%;">Bco receptor</th>
+														<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+													</tr>
+													<?php $contadorLinea++ ?>
+												</thead>
+												<tbody>										
+										<?php else: ?> 
+												</tbody>
+												<tfoot>
+													<tr>
+														<td>Totales</td>
+														<td></td>
+														<td></td>
+														<td><?= number_format($totalDolar, 2, ",", ".") ?></td>
+														<td><?= number_format($totalEuro, 2, ",", ".") ?></td>
+														<td><?= number_format($totalBolivar, 2, ",", ".") ?></td>
+														<td></td>
+														<td></td>
+														<td></td>
+													</tr>
+													<?php $contadorLinea++ ?>
+												</tfoot>
+											</table>
+											<b>Pagos en <?= $paymentsTurns->payment_type ?></b>
+											<?php $contadorLinea++ ?>
+											<table class="table table-striped table-hover">
+												<thead>
+													<tr>
+														<th scope="col" style="width: 20%;">Fecha y hora</th>
+														<th scope="col" style="width: 10%;">Factura/No Control</th>
+														<th scope="col" style="width: 10%;">Familia</th>
+														<th scope="col" style="width: 10%;">Dólar</th>
+														<th scope="col" style="width: 10%;">Euro</th>
+														<th scope="col" style="width: 10%;">Bolívar</th>
+														<th scope="col" style="width: 10%;">Bco emisor</th>
+														<th scope="col" style="width: 10%;">Bco receptor</th>
+														<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+													</tr>
+													<?php $contadorLinea++ ?>
+												</thead>
+												<tbody>	
+											<?php $totalDolar = 0;
+											$totalEuro = 0;
+											$totalBolivar = 0;
+										endif; 
+										$paymentType = $paymentsTurns->payment_type;
+									endif ?>                         
+									<tr>
+										<td style="width: 25%;"><?= h($paymentsTurns->created->format('d-m-Y H:i:s')) ?></td>
+										<td style="width: 10%;"><?= $paymentsTurns->bill_number ./. $paymentsTurns->bill->control_number ?></td>
+										<td style="width: 10%;"><?= h($paymentsTurns->name_family) ?></td>
+										
+										<?php if ($paymentsTurns->moneda == "$": 
+											$totalDolar += $paymentsTurns->amount; ?>
+											<td style="width: 10%;"><?= number_format($paymentsTurns->amount, 2, ",", ".") ?></td><td>0,00</td><td>0,00</td>
+										<?php elseif ($paymentsTurns->moneda == "€": 
+											$totalEuro += $paymentsTurns->amount; ?>
+											<td>0,00</td><td style="width: 10%;"><?= number_format($paymentsTurns->amount, 2, ",", ".") ?></td><td>0,00</td>
+										<?php else: 
+											$totalBolivar += $paymentsTurns->amount; ?>
+											<td>0,00</td><td>0,00</td><td style="width: 10%;"><?= number_format($paymentsTurns->amount, 2, ",", ".") ?></td>
+										<?php endif; ?>
+										<td style="width: 10%;"><?= h($paymentsTurns->bank) ?></td>
+										<td style="width: 10%;"><?= h($paymentsTurns->banco_receptor) ?></td>
+										<td style="width: 10%;"><?= h($paymentsTurns->serial) ?></td>
+									</tr> 
+									<?php $contadorLinea++ ?>
+								<?php endif;
+							endforeach; ?>
+								</tbody>
+								<tfoot>
+									<tr>
+										<td>Totales</td>
+										<td></td>
+										<td></td>
+										<td><?= number_format($totalDolar, 2, ",", ".") ?></td>
+										<td><?= number_format($totalEuro, 2, ",", ".") ?></td>
+										<td><?= number_format($totalBolivar, 2, ",", ".") ?></td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<?php $contadorLinea++ ?>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+				<?php endif; ?>
+				
+				<?php if ($indicadorServiciosEducativos == 1)
+					if ($contadorLinea > 45 && $origen != 'edit'): ?>
+						<h3 class="saltopagina"><b>Detalle del servicio educativo:</b></h3>
+					<?php else: ?>
+						<h3><b>Detalle de los anticipos:</b></h3>
+						<?php $contadorLinea++;
+					endif; ?>
+					
+					<div style="font-size: 12px; line-height: 14px;" class="row panel panel-default">
+						<br />
+						<div class="col-md-12">
+							<?php $paymentType = "";						
+							$totalDolar = 0;
+							$totalEuro = 0;
+							$totalBolivar = 0;
+							foreach ($pagosRecibo as $recibo): 
+								if ($recibo['tipoRecibo'] == "Servicio educativo"):
+									if ($contadorLinea > 50 && $origen != "edit"): 
+										$contadorLinea = 0; ?>
+										<b class="saltopagina">Pagos en <?= $recibo['tipoPago'] ?></b>
+										<?php $contadorLinea++ ?>
+										<table class="table table-striped table-hover">
+											<thead>
+												<tr>
+													<th scope="col" style="width: 20%;">Fecha y hora</th>
+													<th scope="col" style="width: 10%;">Factura/No Control</th>
+													<th scope="col" style="width: 10%;">Familia</th>
+													<th scope="col" style="width: 10%;">Dólar</th>
+													<th scope="col" style="width: 10%;">Euro</th>
+													<th scope="col" style="width: 10%;">Bolívar</th>
+													<th scope="col" style="width: 10%;">Bco emisor</th>
+													<th scope="col" style="width: 10%;">Bco receptor</th>
+													<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+												</tr>
+												<?php $contadorLinea++ ?>
+											</thead>
+											<tbody>				
+									<?php endif; 
+									if ($paymentType != $recibo['tipoPago']):
+										if ($paymentType == ""): ?>
+											<b>Pagos en <?= $recibo['tipoPago'] ?></b>
+											<?php $contadorLinea++ ?>
+											<table class="table table-striped table-hover">
+												<thead>
+													<tr>
+														<th scope="col" style="width: 20%;">Fecha y hora</th>
+														<th scope="col" style="width: 10%;">Factura/No Control</th>
+														<th scope="col" style="width: 10%;">Familia</th>
+														<th scope="col" style="width: 10%;">Dólar</th>
+														<th scope="col" style="width: 10%;">Euro</th>
+														<th scope="col" style="width: 10%;">Bolívar</th>
+														<th scope="col" style="width: 10%;">Bco emisor</th>
+														<th scope="col" style="width: 10%;">Bco receptor</th>
+														<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+													</tr>
+													<?php $contadorLinea++ ?>
+												</thead>
+												<tbody>										
+										<?php else: ?> 
+												</tbody>
+												<tfoot>
+													<tr>
+														<td>Totales</td>
+														<td></td>
+														<td></td>
+														<td><?= number_format($totalDolar, 2, ",", ".") ?></td>
+														<td><?= number_format($totalEuro, 2, ",", ".") ?></td>
+														<td><?= number_format($totalBolivar, 2, ",", ".") ?></td>
+														<td></td>
+														<td></td>
+														<td></td>
+													</tr>
+													<?php $contadorLinea++ ?>
+												</tfoot>
+											</table>
+											<b>Pagos en <?= $recibo['tipoPago'] ?></b>
+											<?php $contadorLinea++ ?>
+											<table class="table table-striped table-hover">
+												<thead>
+													<tr>
+														<th scope="col" style="width: 20%;">Fecha y hora</th>
+														<th scope="col" style="width: 10%;">Factura/No Control</th>
+														<th scope="col" style="width: 10%;">Familia</th>
+														<th scope="col" style="width: 10%;">Dólar</th>
+														<th scope="col" style="width: 10%;">Euro</th>
+														<th scope="col" style="width: 10%;">Bolívar</th>
+														<th scope="col" style="width: 10%;">Bco emisor</th>
+														<th scope="col" style="width: 10%;">Bco receptor</th>
+														<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+													</tr>
+													<?php $contadorLinea++ ?>
+												</thead>
+												<tbody>	
+											<?php $totalDolar = 0;
+											$totalEuro = 0;
+											$totalBolivar = 0;
+										endif; 
+										$paymentType = $paymentsTurns->payment_type;
+									endif ?>                         
+									<tr>
+										<td style="width: 25%;"><?= $recibo['fecha']->format('d-m-Y H:i:s') ?></td>
+										<td style="width: 10%;"><?= $recibo['nroFactura'] ./. $recibo['nroControl'] ?></td>
+										<td style="width: 10%;"><?= $recibo['familia'] ?></td>							
+										<?php if ($recibo['moneda'] == "$": 
+											$totalDolar += $recibo['monto']; ?>
+											<td style="width: 10%;"><?= number_format($recibo['monto'], 2, ",", ".") ?></td><td>0,00</td><td>0,00</td>
+										<?php elseif ($recibo['moneda'] == "€": 
+											$totalEuro += $recibo['monto']; ?>
+											<td>0,00</td><td style="width: 10%;"><?= number_format($recibo['monto'], 2, ",", ".") ?></td><td>0,00</td>
+										<?php else: 
+											$totalBolivar += $recibo['monto']; ?>
+											<td>0,00</td><td>0,00</td><td style="width: 10%;"><?= number_format($recibo['monto'], 2, ",", ".") ?></td>
+										<?php endif; ?>
+										<td style="width: 10%;"><?= $recibo['bancoEmisor'] ?></td>
+										<td style="width: 10%;"><?= $recibo['bancoReceptor'] ?></td>
+										<td style="width: 10%;"><?= $recibo['serial'] ?></td>
+									</tr> 
+									<?php $contadorLinea++ ?>
+								<?php endif;
+							endforeach; ?>
+								</tbody>
+								<tfoot>
+									<tr>
+										<td>Totales</td>
+										<td></td>
+										<td></td>
+										<td><?= number_format($totalDolar, 2, ",", ".") ?></td>
+										<td><?= number_format($totalEuro, 2, ",", ".") ?></td>
+										<td><?= number_format($totalBolivar, 2, ",", ".") ?></td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<?php $contadorLinea++ ?>
+								</tfoot>
+							</table>							
+						</div>
+					</div>
+				<?php endif; ?>
+				
+				<?php if ($indicadorSobrantes == 1)
+					if ($contadorLinea > 45 && $origen != 'edit'): ?>
+						<h3 class="saltopagina"><b>Detalle de sobrantes:</b></h3>
+					<?php else: ?>
+						<h3><b>Detalle de sobrantes:</b></h3>
+						<?php $contadorLinea++;
+					endif; ?>
+					
+					<div style="font-size: 12px; line-height: 14px;" class="row panel panel-default">
+						<br />
+						<div class="col-md-12">
+							<?php $paymentType = "";						
+							$totalDolar = 0;
+							$totalEuro = 0;
+							$totalBolivar = 0;
+							foreach ($pagosRecibo as $recibo): 
+								if ($recibo['tipoRecibo'] == "Sobrante"):
+									if ($contadorLinea > 50 && $origen != "edit"): 
+										$contadorLinea = 0; ?>
+										<b class="saltopagina">Pagos en <?= $recibo['tipoPago'] ?></b>
+										<?php $contadorLinea++ ?>
+										<table class="table table-striped table-hover">
+											<thead>
+												<tr>
+													<th scope="col" style="width: 20%;">Fecha y hora</th>
+													<th scope="col" style="width: 10%;">Factura/No Control</th>
+													<th scope="col" style="width: 10%;">Familia</th>
+													<th scope="col" style="width: 10%;">Dólar</th>
+													<th scope="col" style="width: 10%;">Euro</th>
+													<th scope="col" style="width: 10%;">Bolívar</th>
+													<th scope="col" style="width: 10%;">Bco emisor</th>
+													<th scope="col" style="width: 10%;">Bco receptor</th>
+													<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+												</tr>
+												<?php $contadorLinea++ ?>
+											</thead>
+											<tbody>				
+									<?php endif; 
+									if ($paymentType != $recibo['tipoPago']):
+										if ($paymentType == ""): ?>
+											<b>Pagos en <?= $recibo['tipoPago'] ?></b>
+											<?php $contadorLinea++ ?>
+											<table class="table table-striped table-hover">
+												<thead>
+													<tr>
+														<th scope="col" style="width: 20%;">Fecha y hora</th>
+														<th scope="col" style="width: 10%;">Factura/No Control</th>
+														<th scope="col" style="width: 10%;">Familia</th>
+														<th scope="col" style="width: 10%;">Dólar</th>
+														<th scope="col" style="width: 10%;">Euro</th>
+														<th scope="col" style="width: 10%;">Bolívar</th>
+														<th scope="col" style="width: 10%;">Bco emisor</th>
+														<th scope="col" style="width: 10%;">Bco receptor</th>
+														<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+													</tr>
+													<?php $contadorLinea++ ?>
+												</thead>
+												<tbody>										
+										<?php else: ?> 
+												</tbody>
+												<tfoot>
+													<tr>
+														<td>Totales</td>
+														<td></td>
+														<td></td>
+														<td><?= number_format($totalDolar, 2, ",", ".") ?></td>
+														<td><?= number_format($totalEuro, 2, ",", ".") ?></td>
+														<td><?= number_format($totalBolivar, 2, ",", ".") ?></td>
+														<td></td>
+														<td></td>
+														<td></td>
+													</tr>
+													<?php $contadorLinea++ ?>
+												</tfoot>
+											</table>
+											<b>Pagos en <?= $recibo['tipoPago'] ?></b>
+											<?php $contadorLinea++ ?>
+											<table class="table table-striped table-hover">
+												<thead>
+													<tr>
+														<th scope="col" style="width: 20%;">Fecha y hora</th>
+														<th scope="col" style="width: 10%;">Factura/No Control</th>
+														<th scope="col" style="width: 10%;">Familia</th>
+														<th scope="col" style="width: 10%;">Dólar</th>
+														<th scope="col" style="width: 10%;">Euro</th>
+														<th scope="col" style="width: 10%;">Bolívar</th>
+														<th scope="col" style="width: 10%;">Bco emisor</th>
+														<th scope="col" style="width: 10%;">Bco receptor</th>
+														<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+													</tr>
+													<?php $contadorLinea++ ?>
+												</thead>
+												<tbody>	
+											<?php $totalDolar = 0;
+											$totalEuro = 0;
+											$totalBolivar = 0;
+										endif; 
+										$paymentType = $paymentsTurns->payment_type;
+									endif ?>                         
+									<tr>
+										<td style="width: 25%;"><?= $recibo['fecha']->format('d-m-Y H:i:s') ?></td>
+										<td style="width: 10%;"><?= $recibo['nroFactura'] ./. $recibo['nroControl'] ?></td>
+										<td style="width: 10%;"><?= $recibo['familia'] ?></td>							
+										<?php if ($recibo['moneda'] == "$": 
+											$totalDolar += $recibo['monto']; ?>
+											<td style="width: 10%;"><?= number_format($recibo['monto'], 2, ",", ".") ?></td><td>0,00</td><td>0,00</td>
+										<?php elseif ($recibo['moneda'] == "€": 
+											$totalEuro += $recibo['monto']; ?>
+											<td>0,00</td><td style="width: 10%;"><?= number_format($recibo['monto'], 2, ",", ".") ?></td><td>0,00</td>
+										<?php else: 
+											$totalBolivar += $recibo['monto']; ?>
+											<td>0,00</td><td>0,00</td><td style="width: 10%;"><?= number_format($recibo['monto'], 2, ",", ".") ?></td>
+										<?php endif; ?>
+										<td style="width: 10%;"><?= $recibo['bancoEmisor'] ?></td>
+										<td style="width: 10%;"><?= $recibo['bancoReceptor'] ?></td>
+										<td style="width: 10%;"><?= $recibo['serial'] ?></td>
+									</tr> 
+									<?php $contadorLinea++ ?>
+								<?php endif;
+							endforeach; ?>							
+								</tbody>
+								<tfoot>
+									<tr>
+										<td>Totales</td>
+										<td></td>
+										<td></td>
+										<td><?= number_format($totalDolar, 2, ",", ".") ?></td>
+										<td><?= number_format($totalEuro, 2, ",", ".") ?></td>
+										<td><?= number_format($totalBolivar, 2, ",", ".") ?></td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<?php $contadorLinea++ ?>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+				<?php endif; ?>
+				
+				<?php if ($indicadorReintegros == 1)
+					if ($contadorLinea > 45 && $origen != 'edit'): ?>
+						<h3 class="saltopagina"><b>Detalle de reintegros:</b></h3>
+					<?php else: ?>
+						<h3><b>Detalle de reintegros:</b></h3>
+						<?php $contadorLinea++;
+					endif; ?>			
+					<div style="font-size: 12px; line-height: 14px;" class="row panel panel-default">
+						<br />
+						<div class="col-md-12">
+							<?php $totalDolar = 0;
+							$totalEuro = 0;
+							$totalBolivar = 0;
+							$contadorRegistros = 0;
+							foreach ($reintegros as $reintegro): 								
+								if ($contadorLinea > 50 && $origen != "edit"): 
+									$contadorLinea = 0; ?>
+									<b class="saltopagina">Detalle de reintegros:</b>
+									<?php $contadorLinea++ ?>
+									<table class="table table-striped table-hover">
+										<thead>
+											<tr>
+												<th scope="col" style="width: 20%;">Fecha y hora</th>
+												<th scope="col" style="width: 10%;">Factura/No Control</th>
+												<th scope="col" style="width: 10%;">Familia</th>
+												<th scope="col" style="width: 10%;">Dólar</th>
+												<th scope="col" style="width: 10%;">Euro</th>
+												<th scope="col" style="width: 10%;">Bolívar</th>
+												<th scope="col" style="width: 10%;">Bco emisor</th>
+												<th scope="col" style="width: 10%;">Bco receptor</th>
+												<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+											</tr>
+											<?php $contadorLinea++ ?>
+										</thead>
+										<tbody>				
+								<?php endif; 	
+								if ($contadorRegistros == 0): ?>
+									<table class="table table-striped table-hover">
+										<thead>
+											<tr>
+												<th scope="col" style="width: 20%;">Fecha y hora</th>
+												<th scope="col" style="width: 10%;">Factura/No Control</th>
+												<th scope="col" style="width: 10%;">Familia</th>
+												<th scope="col" style="width: 10%;">Dólar</th>
+												<th scope="col" style="width: 10%;">Euro</th>
+												<th scope="col" style="width: 10%;">Bolívar</th>
+												<th scope="col" style="width: 10%;">Bco emisor</th>
+												<th scope="col" style="width: 10%;">Bco receptor</th>
+												<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+											</tr>
+											<?php $contadorLinea++ ?>
+										</thead>
+										<tbody>										
+								<?php endif; ?>									                       
+								<tr>
+									<td style="width: 25%;"><?= $reintegro->bill->date_and_time->format('d-m-Y H:i:s') ?></td>
+									<td style="width: 10%;"><?= $reintegro->bill->bill_number ./. $reintegro->bill->control_number ?></td>
+									<td style="width: 10%;"><?= $reintegro->bill->parentsandguardian->family ?></td>							
+									<?php $totalDolar += $reintegro->amount; ?>
+									<td style="width: 10%;"><?= number_format($reintegro->amount, 2, ",", ".") ?></td>
+									<td>0,00</td>
+									<td>0,00</td>
+									<td style="width: 10%;">N/A</td>
+									<td style="width: 10%;">N/A</td>
+									<td style="width: 10%;">N/A</td>
+								</tr> 
+								<?php $contadorLinea++;
+								$contadorRegistros++;
+							endforeach; ?>
+								</tbody>
+								<tfoot>
+									<tr>
+										<td>Totales</td>
+										<td></td>
+										<td></td>
+										<td><?= number_format($totalDolar, 2, ",", ".") ?></td>
+										<td><?= number_format($totalEuro, 2, ",", ".") ?></td>
+										<td><?= number_format($totalBolivar, 2, ",", ".") ?></td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<?php $contadorLinea++ ?>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+				<?php endif; ?>
+				
+				<?php if ($indicadorCompensadas == 1)
+					if ($contadorLinea > 45 && $origen != 'edit'): ?>
+						<h3 class="saltopagina"><b>Detalle de facturas compensadas:</b></h3>
+					<?php else: ?>
+						<h3><b>Detalle de facturas compensadas:</b></h3>
+						<?php $contadorLinea++;
+					endif; ?>			
+					<div style="font-size: 12px; line-height: 14px;" class="row panel panel-default">
+						<br />
+						<div class="col-md-12">
+							<?php $totalDolar = 0;
+							$totalEuro = 0;
+							$totalBolivar = 0;
+							$contadorRegistros = 0;
+							foreach ($facturasCompensadas as $factura): 								
+								if ($contadorLinea > 50 && $origen != "edit"): 
+									$contadorLinea = 0; ?>
+									<b class="saltopagina">Detalle de facturas compensadas:</b>
+									<?php $contadorLinea++ ?>
+									<table class="table table-striped table-hover">
+										<thead>
+											<tr>
+												<th scope="col" style="width: 20%;">Fecha y hora</th>
+												<th scope="col" style="width: 10%;">Factura/No Control</th>
+												<th scope="col" style="width: 10%;">Familia</th>
+												<th scope="col" style="width: 10%;">Dólar</th>
+												<th scope="col" style="width: 10%;">Euro</th>
+												<th scope="col" style="width: 10%;">Bolívar</th>
+												<th scope="col" style="width: 10%;">Bco emisor</th>
+												<th scope="col" style="width: 10%;">Bco receptor</th>
+												<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+											</tr>
+											<?php $contadorLinea++ ?>
+										</thead>
+										<tbody>				
+								<?php endif; 	
+								if ($contadorRegistros == 0): ?>
+									<table class="table table-striped table-hover">
+										<thead>
+											<tr>
+												<th scope="col" style="width: 20%;">Fecha y hora</th>
+												<th scope="col" style="width: 10%;">Factura/No Control</th>
+												<th scope="col" style="width: 10%;">Familia</th>
+												<th scope="col" style="width: 10%;">Dólar</th>
+												<th scope="col" style="width: 10%;">Euro</th>
+												<th scope="col" style="width: 10%;">Bolívar</th>
+												<th scope="col" style="width: 10%;">Bco emisor</th>
+												<th scope="col" style="width: 10%;">Bco receptor</th>
+												<th scope="col" style="width: 10%;">Tarjeta o serial</th>
+											</tr>
+											<?php $contadorLinea++ ?>
+										</thead>
+										<tbody>										
+								<?php endif; ?>									                       
+								<tr>
+									<td style="width: 25%;"><?= $factura->date_and_time->format('d-m-Y H:i:s') ?></td>
+									<td style="width: 10%;"><?= $factura->bill_number ./. $factura->control_number ?></td>
+									<td style="width: 10%;"><?= $factura->parentsandguardian->family ?></td>							
+									<?php $totalDolar += $factura->saldo_compensado; ?>
+									<td style="width: 10%;"><?= number_format($factura->saldo_compensado, 2, ",", ".") ?></td>
+									<td>0,00</td>
+									<td>0,00</td>
+									<td style="width: 10%;">N/A</td>
+									<td style="width: 10%;">N/A</td>
+									<td style="width: 10%;">N/A</td>
+								</tr> 
+								<?php $contadorLinea++;
+								$contadorRegistros++;
+							endforeach; ?>
+								</tbody>
+								<tfoot>
+									<tr>
+										<td>Totales</td>
+										<td></td>
+										<td></td>
+										<td><?= number_format($totalDolar, 2, ",", ".") ?></td>
+										<td><?= number_format($totalEuro, 2, ",", ".") ?></td>
+										<td><?= number_format($totalBolivar, 2, ",", ".") ?></td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
+									<?php $contadorLinea++ ?>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+				<?php endif; ?>
 				
 				<div class="row">
 					<div class="col-md-12">

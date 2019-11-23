@@ -248,6 +248,8 @@ class PaymentsController extends AppController
 				
 				$idFactura = $paymentsTurns->bill_id;
             }
+			
+			$paymentsTurns->bill_id = $bill->control_number;
 			            
             if ($paymentsTurns->payment_type == "Tarjeta de débito" || $paymentsTurns->payment_type == "Tarjeta de crédito")
             {
@@ -476,7 +478,7 @@ class PaymentsController extends AppController
 		
 		$indicadorServiciosEducativos = 0;
 		
-		$indicadorRecibosSobrantes = 0;
+		$indicadorSobrantes = 0;
 		
 		$indicadorReintegros = 0;
 		
@@ -508,7 +510,7 @@ class PaymentsController extends AppController
 					}
 					else
 					{
-						$indicadorRecibosSobrante = 1;
+						$indicadorSobrantes = 1;
 						$conceptoRecibos[] = ['idFactura' => $recibo->bill_id, 'tipoRecibo' => 'Sobrante', 'montoDolar' => $montoConceptoDolar, 'saldoDolar' => $montoConceptoDolar];
 					}
 				}	
@@ -558,8 +560,6 @@ class PaymentsController extends AppController
 				$tasaDolarEuro = $paymentsTurns->bill->tasa_dolar_euro;
             }
 			            
-			$paymentsTurns->bill_id = $bill->control_number;
-			
             if ($paymentsTurns->payment_type == "Tarjeta de débito" || $paymentsTurns->payment_type == "Tarjeta de crédito")
             {
                 $paymentsTurns->serial = $paymentsTurns->account_or_card;
@@ -621,9 +621,9 @@ class PaymentsController extends AppController
 													'moneda' => $paymentsTurns->moneda,
 													'tipoRecibo' => $concepto['tipoRecibo'];
 													'tipoPago' => $paymentsTurns->payment_type,
-													'fecha' => $paymentsTurns->created->format('d-m-Y H:i:s'),
+													'fecha' => $paymentsTurns->created,
 													'nroFactura' => $paymentsTurns->bill_number,
-													'nroControl' => $paymentsTurns->bill_id,
+													'nroControl' => $paymentsTurns->bill->bill_number,
 													'familia' => $paymentsTurns->name_family,
 													'monto' => $montoRecibo,
 													'bancoEmisor' => $paymentsTurns->bank,
@@ -639,7 +639,7 @@ class PaymentsController extends AppController
         }
 		
 		$reintegros = $this->Concepts->find('all')
-			->contain(['Bills'])
+			->contain(['Bills' => ['Parendsandguardians'])
 			->where(['concept' => 'Reintegro', 'annulled' => 0, 'created >=' => $fechaTurnoFormateada, 'created <' => $fechaProximoDiaFormateada])
 			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
 			
@@ -651,10 +651,11 @@ class PaymentsController extends AppController
 		}
 		
 		$facturasCompensadas = $this->Concepts->Bills->find('all')
+			->contain(['Parendsandguardians'])
 			->where(['saldo_compensado >' => 0, 'annulled' => 0, 'created >=' => $fechaTurnoFormateada, 'created <' => $fechaProximoDiaFormateada])
 			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
 			
-		$contadorCompensadas = $reintegros->count();
+		$contadorCompensadas = $facturasCompensadas->count();
 			
 		if ($contadorCompensadas > 0)
 		{
@@ -666,7 +667,7 @@ class PaymentsController extends AppController
 			->where(['turn' => $turn, 'annulled' => 0])
             ->order(['Payments.payment_type' => 'ASC', 'Payments.created' => 'ASC']);
 				
-		$resultado = [$paymentsTurn, $indicadorRecibos, $indicadorServiciosEducativos, $indicadorRecibosSobrantes, $pagosRecibos, $indicadorReintegros, $reintegros, $indicadorCompensadas, $facturasCompensadas, $recibidoBancos];
+		$resultado = [$paymentsTurn, $indicadorRecibos, $indicadorServiciosEducativos, $indicadorSobrantes, $pagosRecibos, $indicadorReintegros, $reintegros, $indicadorCompensadas, $facturasCompensadas, $recibidoBancos];
 
         return $resultado;
     }

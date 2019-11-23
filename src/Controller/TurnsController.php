@@ -240,6 +240,7 @@ class TurnsController extends AppController
 		
 		$lastNumber = 0;
 		$lastControl = 0;
+		$indicadorAnticipos = 0;
 		$vectorFiscales = [];
 
 		$plantillaFormaPago = $this->plantillaFormaPago();
@@ -298,8 +299,9 @@ class TurnsController extends AppController
 					}
 				}
 			}
-			elseif ($paymentsTurns->bill->tipo_documento == "Recibo" && substr($paymentsTurns->concept, 0, 8) != "Servicio")
+			elseif ($paymentsTurns->bill->tipo_documento == "Recibo" && $paymentsTurns->bill->factura_pendiente == true)
 			{
+				$indicadorAnticipos = 1;
 				foreach($totalesAnticipos as $anticipo)
 				{
 					if ($anticipo['formaPago'] == $paymentsTurns->payment_type && $anticipo['moneda'] == $paymentsTurns->moneda)
@@ -347,7 +349,7 @@ class TurnsController extends AppController
 		{
 			foreach($facturasCompensadas as $compensada)
 			{
-				$totalFacturasCompensadas += $compensada->bill->;
+				$totalFacturasCompensadas += $compensada->saldo_compensado;
 			}			
 		}
 		
@@ -376,8 +378,10 @@ class TurnsController extends AppController
 			$lastControl = $factura->control_number;
 		}
 		
-        $this->set(compact('turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorRecibosSobrantes', 'pagosRecibidos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas'));
-        $this->set('_serialize', ['turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorRecibosSobrantes', 'pagosRecibidos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas' ]);
+		$origen = "edit";
+		
+        $this->set(compact('origen', 'turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores'));
+        $this->set('_serialize', ['origen', 'turn', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores']);
     }
     
     function closeTurn()
