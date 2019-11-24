@@ -463,7 +463,7 @@ class PaymentsController extends AppController
 		return $codigoRetorno; 
     }
 	
-    public function busquedaPagos($turn = null, $fechaTurnoFormateada = null, $fechaProximoDiaFormateada = null)
+    public function busquedaPagos($turn = null)
     {
         $this->autoRender = false;
 		
@@ -477,7 +477,7 @@ class PaymentsController extends AppController
 										
         $paymentsTurn = $this->Payments->find('all')
 			->contain(['Bills'])
-			->where(['turn' => $turn, 'annulled' => 0])
+			->where(['Bills.turn' => $turn, 'Bills.annulled' => 0])
             ->order(['Payments.payment_type' => 'ASC', 'Payments.orden_moneda' => 'ASC', 'Payments.id' => 'ASC']);
             		
         foreach ($paymentsTurn as $paymentsTurns) 
@@ -526,7 +526,7 @@ class PaymentsController extends AppController
 		
         $recibidoBancos = $this->Payments->find('all')
 			->contain(['Bills'])
-			->where(['turn' => $turn, 'annulled' => 0])
+			->where(['Bills.turn' => $turn, 'Bills.annulled' => 0])
             ->order(['Payments.payment_type' => 'ASC', 'Payments.created' => 'ASC']);
 			
 		$contadorBancos = $recibidoBancos->count();
@@ -538,6 +538,49 @@ class PaymentsController extends AppController
 				
 		$resultado = [$paymentsTurn, $indicadorSobrantes, $sobrantes, $indicadorReintegros, $reintegros, $indicadorCompensadas, $facturasCompensadas, $indicadorBancos, $recibidoBancos];
 
+        return $resultado;
+    }
+    
+	public function busquedaPagosContabilidad($turn = null)
+    {
+        $this->autoRender = false;
+
+		$codigoRetorno = 0;
+		
+		$resultado = ['codigoRetorno' => 0, 'facturas' => '', 'pagosFacturas' => ''];
+
+		$facturas = $this->Payments->Bills->find('all')
+			->contain(['Parendsandguardians'])
+			->where(['Bills.turn' => $turn, 'Bills.annulled' => 0])
+            ->order(['Bills.id' => 'ASC']);
+
+		$contadorFacturas = $facturas->count();
+			
+		if ($contadorFacturas > 0)
+		{
+			$resultado['facturas'] = $facturas;
+			
+			$pagosFacturas = $this->Payments->find('all')
+				->contain(['Bills'])
+				->where(['Bills.turn' => $turn, 'Bills.annulled' => 0])
+				->order(['Bills.id' => 'ASC', 'Payments.payment_type' => 'ASC', 'Payments.orden_moneda' => 'ASC']);
+				
+			$contadorPagos = $pagosFacturas->count();
+			
+			if ($contadorPagos > 0)
+			{
+				$resultado['pagosFacturas'] = $PagosFacturas;	
+			}
+			else
+			{
+				$resultado['codigoRetorno'] = 2;
+			}
+		}
+		else
+		{
+			$resultado['codigoRetorno'] = 1;
+		}
+		
         return $resultado;
     }
 }

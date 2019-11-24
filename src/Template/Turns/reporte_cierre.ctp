@@ -21,18 +21,21 @@
 <div id="page-turn" class="container">
     <div class="row">
         <div class="col-md-12">
-            <div class="row">
-                <div class="col-md-12">
-                    <h3 id="Turno" value=<?= $turn->id ?>><b>Cerrar Turno: <?= $turn->turn ?></b></h3>
-                    <h4>Fecha: <?= $turn->start_date->format('d-m-Y') ?>, Cajero: <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h4>
-                </div>
-            </div>
-			<div id='factura-control' class='row'>
-				<div class="col-md-3">
-					<p>Por favor introduzca el Nro. de control de la factura <b><?= $lastNumber ?></b></p>	
-					<?= $this->Form->input('control_number', ['label' => 'Nro. Control:']) ?>
-					<button id="verificar" class="btn btn-success">Verificar si se saltó el número de control</button>
-				</div>
+			<div>
+				<table style="width:100%">
+					<tbody>
+						<tr>
+							<td>Unidad Educativa Colegio</td>
+						</tr>
+						<tr>
+							<td><b>"San Gabriel Arcángel"</b></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<br />
+			<div style="width: 100%; text-align: center;">
+				<h4>Turno <?= $turn->turn ?>, de fecha: <?= $turn->start_date->format('d-m-Y') ?>, correspondiente al cajero <?= $cajero ?></h4>
 			</div>
             <br />
 			<div id='contadores'>
@@ -1493,64 +1496,13 @@
 						</div>
 					</div>
 				<?php endif; ?>
-					
-				<div class="row">
-					<div class="col-md-12">
-						<?= $this->Form->create($turn) ?>
-							<fieldset>
-								<?php
-									/* echo $this->Form->input('totales_fiscales', ['type' => 'hidden', 'value' => $totalesFiscales]);
-									echo $this->Form->input('total_general_fiscales', ['type' => 'hidden', 'value' => $totalGeneralFiscales]);
-									echo $this->Form->input('totales_anticipos', ['type' => 'hidden', 'value' => $totalesAnticipos]);
-									echo $this->Form->input('total_general_anticipos', ['type' => 'hidden', 'value' => $totalGeneralAnticipos]);
-									echo $this->Form->input('totales_servicios_educativos', ['type' => 'hidden', 'value' => $totalesServiciosEducativos]);
-									echo $this->Form->input('total_general_servicios_educativos', ['type' => 'hidden', 'value' => $totalGeneralServiciosEducativos ]);
-									echo $this->Form->input('total_totales', ['type' => 'hidden', 'value' => $totalTotales]);
-									echo $this->Form->input('total_sobrantes', ['type' => 'hidden', 'value' => $totalSobrantes]);
-									echo $this->Form->input('total_reintegros', ['type' => 'hidden', 'value' => $totalReintegros]);
-									echo $this->Form->input('total_facturas_compensadas', ['type' => 'hidden', 'value' => $totalFacturasCompensadas]);
-									echo $this->Form->input('bancos_receptores', ['type' => 'hidden', 'value' => $bancosReceptores]);
-									echo $this->Form->input('total_bancos_receptores', ['type' => 'hidden', 'value' => $totalBancosReceptores]); */
-								?>								
-							</fieldset>
-							<?= $this->Form->button(__('Cerrar turno'), ['id' => 'cerrar-turno', 'class' =>'btn btn-success']) ?>
-						<?= $this->Form->end() ?>
-						<br />
-						<br />
-					</div>
-				</div>
 			</div>
         </div>
     </div>            
 </div>   
 <script>
-    var paymentsTurn = new Array(); 
-
     $(document).ready(function() 
     {
-		if ('<?= $lastNumber ?>' == 0)
-		{
-			$('#factura-control').addClass('noverScreen');
-		}
-		else
-		{
-			$('#contadores').addClass('noverScreen');
-			$('#cerrar-turno').addClass('noverScreen');
-		}
-		$('#verificar').click(function(e) 
-        {
-			if ($('#control-number').val() == '<?= $lastControl ?>')
-			{
-				alert('Felicidades ! Los números de control están correctos, puede continuar con el cierre de turno')
-				$('#factura-control').addClass('noverScreen');
-				$('#contadores').removeClass('noverScreen');
-				$('#cerrar-turno').removeClass('noverScreen');
-			}
-			else
-			{
-				$.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "editControl"]); ?>', {turn : '<?= $turn->id ?>'});
-			}
-		});
 
     });
         
