@@ -11,6 +11,10 @@
 }
 @media print
 {
+    .noVerImpreso
+    {
+      display:none
+    }
 	.saltopagina
 	{
 		display:block; 
@@ -19,27 +23,24 @@
 }
 </style>
 <div id="page-turn" class="container">
-	<br />
     <div class="row">
         <div class="col-md-12">
-			<div>
-				<table style="width:100%">
-					<tbody>
-						<tr>
-							<td>Unidad Educativa Colegio</td>
-						</tr>
-						<tr>
-							<td><b>"San Gabriel Arcángel"</b></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<br />
-			<div style="width: 100%; text-align: center;">
-				<h4>Turno <?= $turn->turn ?>, de fecha: <?= $turn->start_date->format('d-m-Y') ?>, correspondiente al cajero <?= $cajero ?></h4>
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 id="Turno" value=<?= $turn->id ?>><b>Cerrar Turno: <?= $turn->turn ?></b></h3>
+                    <h4>Fecha: <?= $turn->start_date->format('d-m-Y') ?>, Cajero: <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h4>
+					<h5>Turno no cerrado</h5>
+                </div>
+            </div>
+			<div id='factura-control' class='row noVerImpreso'>
+				<div class="col-md-3">
+					<p>Por favor introduzca el Nro. de control de la factura <b><?= $lastNumber ?></b></p>	
+					<?= $this->Form->input('control_number', ['label' => 'Nro. Control:']) ?>
+					<button id="verificar" class="btn btn-success">Verificar si se saltó el número de control</button>
+				</div>
 			</div>
             <br />
-
+			
 			<div id='contadores' style="font-size: 12px; line-height: 14px;">	
 			
 				<p><b>Resumen pagos fiscales:</b></p>
@@ -120,7 +121,7 @@
 				</div>
 				<br />
 				
-				<p><b>Resumen servicios educativos:</b></p>
+				<p class="saltopagina"><b>Resumen servicios educativos:</b></p>
 				<div class="row panel panel-default">
 					<br />
 					<div class="col-md-12">
@@ -238,9 +239,14 @@
 				
 				<?php $contadorLinea = 0; ?>
 						
-				<?php if ($indicadorFiscales == 1): ?>
-					<p><b>Detalle de pagos fiscales:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorFiscales == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de pagos fiscales:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de pagos fiscales:</b></p>
+					<?php endif; 
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<?php 
@@ -365,9 +371,14 @@
 					</div>
 				<?php endif; ?>
 				
-				<?php if ($indicadorAnticipos == 1): ?>
-					<p><b>Detalle de anticipos:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorAnticipos == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de anticipos:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de anticipos:</b></p>
+					<?php endif; 
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<?php 
@@ -492,9 +503,14 @@
 					</div>
 				<?php endif; ?>
 				
-				<?php if ($indicadorServiciosEducativos == 1): ?>
-					<p><b>Detalle de servicios educativos:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorServiciosEducativos == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de servicios educativos:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de servicios educativos:</b></p>
+					<?php endif; 
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<?php 
@@ -619,9 +635,14 @@
 					</div>
 				<?php endif; ?>
 				
-				<?php if ($indicadorSobrantes == 1): ?> 
-					<p><b>Detalle de sobrantes:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorSobrantes == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de sobrantes:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de sobrantes:</b></p>
+					<?php endif; 
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<br />
@@ -687,9 +708,14 @@
 					</div>
 				<?php endif; ?>
 				
-				<?php if ($indicadorReintegros == 1): ?>
-					<p><b>Detalle de reintegros:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorReintegros == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de reintegros:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de reintegros:</b></p>
+					<?php endif;
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<br />
@@ -755,9 +781,14 @@
 					</div>
 				<?php endif; ?>
 				
-				<?php if ($indicadorCompensadas == 1): ?>
-					<p><b>Detalle de facturas compensadas:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorCompensadas == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de facturas compensadas:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de facturas compensadas:</b></p>
+					<?php endif; 
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<br />
@@ -823,9 +854,14 @@
 					</div>
 				<?php endif; ?>
 							
-				<?php if ($indicadorBancos == 1): ?>
-					<p><b>Detalle de bancos receptores:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorBancos == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de bancos receptores:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de bancos receptores:</b></p>
+					<?php endif; 
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<?php 
@@ -948,9 +984,14 @@
 					</div>
 				<?php endif; ?>
 				
-				<?php if ($indicadorNotasCredito == 1): ?>
-					<p><b>Detalle de notas de crédito:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorNotasCredito == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de notas de crédito:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de notas de crédito:</b></p>
+					<?php endif;
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<br />
@@ -1018,9 +1059,14 @@
 					</div>
 				<?php endif; ?>
 				
-				<?php if ($indicadorNotasDebito == 1): ?>
-					<p><b>Detalle de notas de débito:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorNotasDebito == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de notas de débito:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de notas de débito:</b></p>
+					<?php endif;
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<br />
@@ -1088,9 +1134,14 @@
 					</div>
 				<?php endif; ?>
 				
-				<?php if ($indicadorFacturasRecibo == 1): ?>
-					<p><b>Detalle de facturas correspondientes a anticipos:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorFacturasRecibo == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de facturas correspondientes a anticipos:</b></h3>
+					<?php else: ?>
+						<p><b>Detalle de facturas correspondientes a anticipos:</b></p>
+					<?php endif; 
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<br />
@@ -1156,9 +1207,13 @@
 					</div>
 				<?php endif; ?>
 				
-				<?php if ($indicadorAnuladas == 1): ?>
-					<p><b>Detalle de facturas anuladas:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorAnuladas == 1):
+					if ($contadorLinea > 20): ?>
+						<p class="saltopagina"><b>Detalle de facturas anuladas:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de facturas anuladas:</b></p>
+					<?php endif; 
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<br />
@@ -1223,9 +1278,14 @@
 					</div>
 				<?php endif; ?>
 				
-				<?php if ($indicadorRecibosAnulados == 1): ?>
-					<p><b>Detalle de recibos anulados:</b></p>
-					<?php $contadorLinea++; ?>
+				<?php if ($indicadorRecibosAnulados == 1):
+					if ($contadorLinea > 20): 
+						$contadorLinea = 0; ?>
+						<p class="saltopagina"><b>Detalle de recibos anulados:</b></p>
+					<?php else: ?>
+						<p><b>Detalle de recibos anulados:</b></p>
+					<?php endif;
+					$contadorLinea++; ?>
 					
 					<div class="row panel panel-default">
 						<br />
@@ -1289,14 +1349,52 @@
 						</div>
 					</div>
 				<?php endif; ?>
-							
-			</div>
+				
+				<div class="row noVerImpreso">
+					<div class="col-md-12">
+						<?= $this->Form->create($turn) ?>
+							<fieldset>
+							</fieldset>
+							<?= $this->Form->button(__('Cerrar turno'), ['id' => 'cerrar-turno', 'class' =>'btn btn-success']) ?>
+						<?= $this->Form->end() ?>
+						<br />
+						<br />
+					</div>
+				</div>
+				
+			</div>	
         </div>
     </div>            
 </div>   
 <script>
+
+    var paymentsTurn = new Array(); 
+
     $(document).ready(function() 
     {
+		if ('<?= $lastNumber ?>' == 0)
+		{
+			$('#factura-control').addClass('noverScreen');
+		}
+		else
+		{
+			$('#contadores').addClass('noverScreen');
+			$('#cerrar-turno').addClass('noverScreen');
+		}
+		$('#verificar').click(function(e) 
+        {
+			if ($('#control-number').val() == '<?= $lastControl ?>')
+			{
+				alert('Felicidades ! Los números de control están correctos, puede continuar con el cierre de turno')
+				$('#factura-control').addClass('noverScreen');
+				$('#contadores').removeClass('noverScreen');
+				$('#cerrar-turno').removeClass('noverScreen');
+			}
+			else
+			{
+				$.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "editControl"]); ?>', {turn : '<?= $turn->id ?>'});
+			}
+		});
 
     });
         

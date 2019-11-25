@@ -3350,11 +3350,10 @@
 			$('.check-bolivar').prop('checked', true);
 			aCobrarBolivares();
 		});
-		$('.reintegrar').click(function(e) 
+		$('#reintegrar').click(function(e) 
         {
 			e.preventDefault();	
-			'<?php $this->redirect(['controller' => 'Bills', 'action' => 'establecerMontoReintegro']) ?>' + idParentsandguardians + '/' + saldoRepresentante;
-			// window.location.assign('<?= Router::url(["controller" => "Bills", "action" => "establecerMontoReintegro"]) ?>' + idParentsandguardians + '/' + saldoRepresentante);			
+			window.location.assign('<?= Router::url(["controller" => "Bills", "action" => "establecerMontoReintegro"]) ?>' + '/' + idParentsandguardians + '/' + saldoRepresentante);			
 		});
     }); 
 

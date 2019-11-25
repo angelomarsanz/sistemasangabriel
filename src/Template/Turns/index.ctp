@@ -12,6 +12,8 @@
 						<th scope="col">Cajero</th>
 						<th scope="col">Estatus</th>
 						<th scope="col" class="actions"></th>
+						<th scope="col" class="actions"></th>
+						<th scope="col" class="actions"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -24,16 +26,32 @@
 								<td>Cerrado</td>
 							<?php else: ?>
 								<td>Abierto</td>
-							<?php endif; ?>
+							<?php endif; ?>	
 							<td class="actions">
 								<?php 
 									if ($turn->status == 0):
 										if ($turn->id > 947):
 											echo $this->Html->link('Reporte cierre', ['action' => 'reporteCierre', $turn->id], ['class' => 'btn btn-success']);
-											echo $this->Html->link('Excel general', ['action' => 'excelGeneral', $turn->id], ['class' => 'btn btn-success']);
-											echo $this->Html->link('Excel detallado', ['action' => 'excelDetallado', $turn->id], ['class' => 'btn btn-success']);											
-										else;
-											echo $this->Html->link('Imprimir', ['action' => 'turnpdf', $turn->id, $turn->user->first_name . ' ' . $turn->user->surname, '_ext' => 'pdf'], ['class' => 'btn btn-success']); 
+										else:
+											echo $this->Html->link('Reporte cierre', ['action' => 'turnpdf', $turn->id, $turn->user->first_name . ' ' . $turn->user->surname, '_ext' => 'pdf'], ['class' => 'btn btn-success']); 
+										endif;
+									endif;
+								?>
+							</td>
+							<td class="actions">
+								<?php 
+									if ($turn->status == 0):
+										if ($turn->id > 947):
+											echo $this->Html->link('Excel reporte general', ['action' => 'excelGeneral', $turn->id], ['class' => 'btn btn-success']);
+										endif;
+									endif;
+								?>
+							</td>
+							<td class="actions">
+								<?php 
+									if ($turn->status == 0):
+										if ($turn->id > 947):
+											echo $this->Html->link('Excel reporte detallado', ['action' => 'excelDetallado', $turn->id], ['class' => 'btn btn-success']);											
 										endif;
 									endif;
 								?>

@@ -431,8 +431,9 @@ class PaymentsController extends AppController
 		
 		return $codigoRetorno; 
     }
-    public function pagoReciboSobrante($idRecibo = null, $numeroRecibo = null, $monto = null, $turno = null)
+    public function pagosReciboSobrante($idRecibo = null, $numeroRecibo = null, $monto = null, $turno = null, $familia = null)
     {
+		$codigoRetorno = 0;
 		$nuevoPago = $this->Payments->newEntity();
 		$nuevoPago->bill_id = $idRecibo;
 		$nuevoPago->moneda = "$";
@@ -493,7 +494,7 @@ class PaymentsController extends AppController
 		$sobrantes = $this->Payments->Bills->find('all')
 			->contain(['Parentsandguardians'])
 			->where(['tipo_documento' => 'Recibo de sobrante', 'annulled' => 0, 'turn' => $turn])
-			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
+			->order(['Bills.id' => 'ASC']);
 			
 		$contadorSobrantes = $sobrantes->count();
 			
@@ -505,7 +506,7 @@ class PaymentsController extends AppController
 		$reintegros = $this->Payments->Bills->find('all')
 			->contain(['Parentsandguardians'])
 			->where(['tipo_documento' => 'Recibo de reintegro', 'annulled' => 0, 'turn' => $turn])
-			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
+			->order(['bills.id' => 'ASC']);
 			
 		$contadorReintegros = $reintegros->count();
 			
@@ -517,7 +518,7 @@ class PaymentsController extends AppController
 		$facturasCompensadas = $this->Payments->Bills->find('all')
 			->contain(['Parentsandguardians'])
 			->where(['saldo_compensado_dolar >' => 0, 'annulled' => 0, 'turn' => $turn])
-			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
+			->order(['bills.id' => 'ASC']);
 			
 		$contadorCompensadas = $facturasCompensadas->count();
 			
@@ -528,13 +529,14 @@ class PaymentsController extends AppController
 		
         $recibidoBancos = $this->Payments->find('all')
 			->contain(['Bills'])
-			->where(['Bills.turn' => $turn, 'Bills.annulled' => 0])
-            ->order(['Payments.payment_type' => 'ASC', 'Payments.created' => 'ASC']);
+			->where(['Bills.turn' => $turn, 'Bills.annulled' => 0, 'Payments.banco_receptor !=' => "", 'Payments.banco_receptor !=' => "N/A"])
+            ->order(['Payments.banco_receptor' => 'ASC', 'Payments.created' => 'ASC']);
 			
 		$contadorBancos = $recibidoBancos->count();
 			
 		if ($contadorBancos > 0)
 		{
+			
 			$indicadorBancos = 1;
 		}
 				

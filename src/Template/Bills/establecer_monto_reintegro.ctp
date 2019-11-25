@@ -6,12 +6,31 @@
 	    <?= $this->Form->create() ?>
 	        <fieldset>
 		    	<?php
-	                echo $this->Form->input('monto_reintegro', ['label' => 'Por favor indique el monto a reintegrar');
+	                echo $this->Form->input('monto_reintegro', ['type' => 'number', 'label' => 'Por favor indique el monto a reintegrar', 'value' => $monto]);
 		    	?>
 		    </fieldset>
-        	<?= $this->Form->button(__('Reintegrar'), ['class' =>'btn btn-success']) ?>
+        	<?= $this->Form->button(__('Reintegrar'), ['id' => 'reintegrar', 'class' =>'btn btn-success']) ?>
         <?= $this->Form->end() ?>
         <br />
-        <?= $this->Html->link('Volver al inicio', ['controller' => 'users', 'action' => 'wait'], ['class' => 'btn btn-sm btn-primary']); ?>
 	</div>
 </div>
+<script>
+    $(document).ready(function() 
+    {
+		montoMaximoReintegro = <?= $monto ?>;
+		
+        $('#reintegrar').click(function(e) 
+		{            
+            if ($("#monto-reintegro").val() < 0)
+            {    
+                alert("Estimado usuario no puede reintegrar un valor negativo");   
+                return false;
+            }
+			if ($("#monto-reintegro").val() > montoMaximoReintegro)
+			{    
+				alert("Estimado usuario no puede reintegrar un monto mayor a " + montoMaximoReintegro);   
+				return false;
+			}
+		});
+	});
+</script>

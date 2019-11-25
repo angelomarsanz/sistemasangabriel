@@ -168,7 +168,7 @@ class TurnsTable extends Table
             ->notEmpty('supervisor_close');
 			
         $validator
-            ->allowEmpty('totales_pagos_fiscales');
+            ->allowEmpty('totales_fiscales');
 
         $validator
             ->allowEmpty('total_general_fiscales');

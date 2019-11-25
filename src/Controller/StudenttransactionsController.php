@@ -3624,7 +3624,9 @@ class StudenttransactionsController extends AppController
 			}
 		}
 		
-		$tarifaDolar = $tarifaDolar - diferenciaOriginalActual;	
+		$diferenciaOriginalActual = $transaccionEstudiante->original_amount - $transaccionEstudiante->amount;
+		
+		$tarifaDolar = $tarifaDolar - $diferenciaOriginalActual;	
 		
 		if ($transaccionEstudiante->amount_dollar == $tarifaDolar)
 		{
@@ -3784,7 +3786,7 @@ class StudenttransactionsController extends AppController
 				if ($transaccionGet->paid_out == 0 && $transaccionGet->bill_number != 0)
 				{
 					$transaccionGet->amount = $transaccionGet->amount_dollar;
-					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$transaccionGet->original_amount = $transaccionGet->amount_dollar;
 					$contadorCaso1++;
 				}
 				elseif ($transaccionGet->paid_out == 0 && $transaccionGet->bill_number == 0)
@@ -3794,24 +3796,24 @@ class StudenttransactionsController extends AppController
 						$transaccionGet->partial_payment = 0;
 					}
 					$transaccionGet->amount = $transaccionGet->amount_dollar;
-					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$transaccionGet->original_amount = $transaccionGet->amount_dollar;
 					$contadorCaso2++;
 				}
 				elseif ($transaccionGet->paid_out == 1)
 				{
 					$transaccionGet->partial_payment = 0;
 					$transaccionGet->amount = $transaccionGet->amount_dollar;
-					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$transaccionGet->original_amount = $transaccionGet->amount_dollar;
 					$contadorCaso3++;
 				}
-				/* if (!($this->Studenttransactions->save($transaccionGet))) 
+				if (!($this->Studenttransactions->save($transaccionGet))) 
 				{
 					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
 				}
 				else
 				{
 					$contadorActualizadas++;
-				} */
+				}
 			}
 		}
 		
@@ -3832,7 +3834,7 @@ class StudenttransactionsController extends AppController
 		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
 		$transacciones = $transaccionesEstudiante->find('all')
-			->where(['invoiced' => 0, 'paid_out' => 1, 'amount_dollar !=' => 999999 ]);
+			->where(['invoiced' => 0, 'partial_payment' => 0, 'paid_out' => 1, 'amount_dollar !=' => 999999 ]);
 			
 		$contadorBusqueda = $transacciones->count();
 		
@@ -3890,7 +3892,7 @@ class StudenttransactionsController extends AppController
 				else
 				{
 					$contadorActualizadas++;
-				} 
+				}
 			}
 		}
 		
