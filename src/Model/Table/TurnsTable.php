@@ -196,6 +196,9 @@ class TurnsTable extends Table
 			
         $validator
             ->allowEmpty('totales_facturas_compensadas');
+			
+        $validator
+            ->allowEmpty('total_otras_operaciones');
 
         $validator
             ->allowEmpty('bancos_receptores');			

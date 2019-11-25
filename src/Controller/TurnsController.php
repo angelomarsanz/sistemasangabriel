@@ -236,7 +236,7 @@ class TurnsController extends AppController
 
     public function edit($id = null)
     {
-		$turn = $this->Turns->get($turnData['id']);
+		$turn = $this->Turns->get($id);
             
         if ($turn->status == 0)
         {
@@ -265,6 +265,7 @@ class TurnsController extends AppController
 			$turn->total_sobrantes = json_encode($totalSobrantes);
 			$turn->total_reintegros = json_encode($totalReintegros);
 			$turn->total_facturas_compensadas = json_encode($totalFacturasCompensadas);
+			$turn->total_otras_operaciones = json_encode($totalOtrasOperaciones);
 			$turn->bancos_receptores = json_encode($bancosReceptores);
 			$turn->total_bancos_receptores = json_encode($totalBancosReceptores); 			
 
@@ -288,6 +289,7 @@ class TurnsController extends AppController
 			$lastNumber = 0;
 			$lastControl = 0;
 			
+			$indicadorFiscales = 0;
 			$indicadorAnticipos = 0;
 			$indicadorServiciosEducativos = 0;
 			$indicadorAnuladas = 0;
@@ -304,11 +306,12 @@ class TurnsController extends AppController
 			$totalesServiciosEducativos = $plantillaFormaPago;
 			$totalGeneralServiciosEducativos = ['$' => 0, '€' => 0, 'Bs.' => 0];
 			
-			$totalTotales = = ['$' => 0, '€' => 0, 'Bs.' => 0];
+			$totalTotales = ['$' => 0, '€' => 0, 'Bs.' => 0];
 			
 			$totalSobrantes = 0;
 			$totalReintegros = 0;
 			$totalFacturasCompensadas = 0;
+			$totalOtrasOperaciones = 0;
 			$indicadorNotasCredito = 0;
 			$totalNotasCredito = 0;
 			$indicadorNotasDebito = 0;
@@ -317,7 +320,7 @@ class TurnsController extends AppController
 			$totalFacturasRecibo = 0;
 			
 			$bancosReceptores = $this->bancosReceptores(); 
-			$totalBancosReceptores = = ['$' => 0, '€' => 0, 'Bs.' => 0];
+			$totalBancosReceptores = ['$' => 0, '€' => 0, 'Bs.' => 0];
 			
 			$fechaTurnoFormateada = date_format($turn->start_date, "Y-m-d");
 			$fechaTurno = $turn->start_date;
@@ -340,6 +343,7 @@ class TurnsController extends AppController
 			{			
 				if ($paymentsTurns->fiscal == 1)
 				{
+					$indicadorFiscales = 0;
 					foreach($totalesFiscales as $fiscal)
 					{
 						if ($fiscal['formaPago'] == $paymentsTurns->payment_type && $fiscal['moneda'] == $paymentsTurns->moneda)
@@ -383,6 +387,7 @@ class TurnsController extends AppController
 				foreach($sobrantes as $sobrante)
 				{
 					$totalSobrantes += $recibo->amount_paid;
+					$totalOtrasOperaciones += $recibo->amount_paid;
 				}
 			}
 			
@@ -391,6 +396,7 @@ class TurnsController extends AppController
 				foreach($reintegros as $reintegro)
 				{
 					$totalReintegros += $reintegro->amount_paid;
+					$totalOtrasOperaciones += $recibo->amount_paid;
 				}
 			}
 			
@@ -399,6 +405,7 @@ class TurnsController extends AppController
 				foreach($facturasCompensadas as $compensada)
 				{
 					$totalFacturasCompensadas += $compensada->saldo_compensado;
+					$totalOtrasOperaciones += $recibo->amount_paid;
 				}			
 			}
 			
@@ -414,7 +421,7 @@ class TurnsController extends AppController
 				}	
 			}			
 						
-			$notasContables = $this->Bills->find('all', ['conditions' => ['turn' => $idTurn, 'OR' => [['tipo_documento' => 'Nota de crédito'], ['tipo_documento' => 'Nota de débito']]],
+			$notasContables = $this->Bills->find('all', ['conditions' => ['turn' => $id, 'OR' => [['tipo_documento' => 'Nota de crédito'], ['tipo_documento' => 'Nota de débito']]],
 				'order' => ['Bills.created' => 'ASC'],
 				'contain' => ['Parentsandguardians']]);
 				
@@ -437,7 +444,7 @@ class TurnsController extends AppController
 				}
 			}
 			
-			$facturasRecibo = $this->Bills->find('all', ['conditions' => ['turn' => $idTurn, 'id_anticipo >' => 0],
+			$facturasRecibo = $this->Bills->find('all', ['conditions' => ['turn' => $id, 'id_anticipo >' => 0],
 				'order' => ['Bills.created' => 'ASC'],
 				'contain' => ['Parentsandguardians']]);
 				
@@ -487,8 +494,8 @@ class TurnsController extends AppController
 				$lastControl = $factura->control_number;
 			}
 						
-			$this->set(compact('turn', 'origen', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas', 'indicadorRecibosAnulados', 'anulados'));
-			$this->set('_serialize', ['turn', 'origen', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas', 'indicadorRecibosAnulados', 'anulados']);
+			$this->set(compact('turn', 'origen', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscales', 'totalesAnticipos', 'totalGeneralAnticipos', 'indicadorFiscales', 'totalesServiciosEducativos', 'totalGeneralServiciosEducativos', 'totalTotales', 'totalSobrantes', 'totalOtrasOperaciones', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorAnticipos', 'indicadorServiciosEducativos', 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas', 'indicadorRecibosAnulados', 'anulados'));
+			$this->set('_serialize', ['turn', 'origen', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscales', 'totalesAnticipos', 'totalGeneralAnticipos', 'indicadorFiscales', 'totalesServiciosEducativos', 'totalGeneralServiciosEducativos', 'totalTotales', 'totalSobrantes', 'totalOtrasOperaciones', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorAnticipos', 'indicadorServiciosEducativos', 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas', 'indicadorRecibosAnulados', 'anulados']);
 		}
 	}
     
@@ -778,7 +785,7 @@ class TurnsController extends AppController
 		
 		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
 	}
-	public function plantillaFormaPago();
+	public function plantillaFormaPago()
 	{
 		$formaPago = 
 			['Efectivo',
@@ -793,18 +800,18 @@ class TurnsController extends AppController
 
 		$plantillaFormaPago = [];
 				
-		foreach(formaPago as $forma)
+		foreach($formaPago as $forma)
 		{
 			foreach ($monedas as $moneda)
 			{
-				$plantillaFormaPago[] = ['formaPago' => $forma, 'moneda' => $moneda, 'monto' = 0];
+				$plantillaFormaPago[] = ['formaPago' => $forma, 'moneda' => $moneda, 'monto' => 0];
 			}
 		}
 		
 		Return $plantillaFormaPago;
 	}
 	
-	public function bancosReceptores();
+	public function bancosReceptores()
 	{
 		$bancos = 
 			['Banesco',
@@ -841,6 +848,7 @@ class TurnsController extends AppController
 		$this->loadModel('Bills');
 		$payment = new PaymentsController();
 		
+		$indicadorFiscales = 0;
 		$indicadorAnticipos = 0;
 		$indicadorServiciosEducativos = 0;
 		$indicadorAnuladas = 0;
@@ -875,6 +883,7 @@ class TurnsController extends AppController
 		$totalSobrantes = json_decode($turn->total_sobrantes, true);
 		$totalReintegros = json_decode($turn->total_reintegros, true);
 		$totalFacturasCompensadas = json_decode($turn->total_facturas_compensadas, true);
+		$totalOtrasOperaciones = json_decode($turn->total_otras_operaciones, true);
 		$bancosReceptores = json_decode($turn->bancos_receptores, true);
 		$totalBancosReceptores  = json_decode($turn->total_bancos_receptores, true);			
 						
@@ -894,13 +903,18 @@ class TurnsController extends AppController
 		$facturasCompensadas = $resultado[6];
 		$indicadorBancos = $resultado[7];
 		$recibidoBancos = $resultado[8];		
-								
-		if ($totalesAnticipos['$'] > 0 || $totalesAnticipos['€'] > 0 || $totalesAnticipos['Bs.'] > 0)
+		
+		if ($totalGeneralFiscales['$'] > 0 || $totalGeneralFiscales['€'] > 0 || $totalGeneralFiscales['Bs.'] > 0)
+		{
+			$indicadorFiscales = 1;
+		}
+		
+		if ($totalGeneralAnticipos['$'] > 0 || $totalGeneralAnticipos['€'] > 0 || $totalGeneralAnticipos['Bs.'] > 0)
 		{
 			$indicadorAnticipos = 1;
 		}
 		
-		if ($totalesServiciosEducativos['$'] > 0 || $totalesServiciosEducativos['€'] > 0 || $totalesServiciosEducativos['Bs.'] > 0)
+		if ($totalGeneralServiciosEducativos['$'] > 0 || $totalGeneralServiciosEducativos['€'] > 0 || $totalGeneralServiciosEducativos['Bs.'] > 0)
 		{
 			$indicadorServiciosEducativos = 1;
 		}
@@ -910,6 +924,7 @@ class TurnsController extends AppController
 			foreach($sobrantes as $sobrante)
 			{
 				$totalSobrantes += $recibo->amount_paid;
+				$totalOtrasOperaciones += $recibo->amount_paid;
 			}
 		}
 		
@@ -918,6 +933,7 @@ class TurnsController extends AppController
 			foreach($reintegros as $reintegro)
 			{
 				$totalReintegros += $reintegro->amount_paid;
+				$totalOtrasOperaciones += $recibo->amount_paid;
 			}
 		}
 		
@@ -926,6 +942,7 @@ class TurnsController extends AppController
 			foreach($facturasCompensadas as $compensada)
 			{
 				$totalFacturasCompensadas += $compensada->saldo_compensado;
+				$totalOtrasOperaciones += $recibo->amount_paid;
 			}			
 		}
 								
@@ -1002,8 +1019,8 @@ class TurnsController extends AppController
 			$lastControl = $factura->control_number;
 		}
 					
-		$this->set(compact('turn', 'origen', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas', 'indicadorRecibosAnulados', 'recibosAnulados', 'cajero'));
-		$this->set('_serialize', ['turn', 'origen', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscal', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServicioEducativo', 'totalGeneralServicioEducativo', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'indicadorRecibos', 'indicadorServiciosEducativos' 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas', 'indicadorRecibosAnulados', 'recibosAnulados', 'cajero']);
+		$this->set(compact('turn', 'origen', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscales', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServiciosEducativos', 'totalGeneralServiciosEducativos', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'totalOtrasOperaciones', 'indicadorAnticipos', 'indicadorFiscales', 'indicadorServiciosEducativos', 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas', 'indicadorRecibosAnulados', 'recibosAnulados', 'cajero'));
+		$this->set('_serialize', ['turn', 'origen', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscales', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServiciosEducativos', 'totalGeneralServiciosEducativos', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'totalOtrasOperaciones', 'indicadorAnticipos', 'indicadorFiscales', 'indicadorServiciosEducativos', 'indicadorSobrantes', 'pagosRecibos', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas', 'indicadorRecibosAnulados', 'recibosAnulados', 'cajero']);
 	}
 	
     public function excelResumen($id = null)

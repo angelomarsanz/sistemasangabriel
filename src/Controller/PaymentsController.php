@@ -473,6 +473,8 @@ class PaymentsController extends AppController
 		
 		$indicadorCompensadas = 0;
 		
+		$indicadorBancos = 0;
+		
 		$resultado = [];
 										
         $paymentsTurn = $this->Payments->find('all')
@@ -489,7 +491,7 @@ class PaymentsController extends AppController
         }
 		
 		$sobrantes = $this->Payments->Bills->find('all')
-			->contain(['Parendsandguardians'])
+			->contain(['Parentsandguardians'])
 			->where(['tipo_documento' => 'Recibo de sobrante', 'annulled' => 0, 'turn' => $turn])
 			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
 			
@@ -501,20 +503,20 @@ class PaymentsController extends AppController
 		}
 		
 		$reintegros = $this->Payments->Bills->find('all')
-			->contain(['Parendsandguardians'])
+			->contain(['Parentsandguardians'])
 			->where(['tipo_documento' => 'Recibo de reintegro', 'annulled' => 0, 'turn' => $turn])
 			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
 			
 		$contadorReintegros = $reintegros->count();
 			
-		if ($contadorRegistros > 0)
+		if ($contadorReintegros > 0)
 		{
 			$indicadorReintegros = 1;
 		}
 		
 		$facturasCompensadas = $this->Payments->Bills->find('all')
-			->contain(['Parendsandguardians'])
-			->where(['saldo_compensado >' => 0, 'annulled' => 0, 'turn' => $turn])
+			->contain(['Parentsandguardians'])
+			->where(['saldo_compensado_dolar >' => 0, 'annulled' => 0, 'turn' => $turn])
 			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
 			
 		$contadorCompensadas = $facturasCompensadas->count();
@@ -550,7 +552,7 @@ class PaymentsController extends AppController
 		$resultado = ['codigoRetorno' => 0, 'facturas' => '', 'pagosFacturas' => ''];
 
 		$facturas = $this->Payments->Bills->find('all')
-			->contain(['Parendsandguardians'])
+			->contain(['Parentsandguardians'])
 			->where(['Bills.turn' => $turn, 'Bills.annulled' => 0])
             ->order(['Bills.id' => 'ASC']);
 
