@@ -2002,11 +2002,7 @@ class BillsController extends AppController
 									
 				$codigoRetorno = $conceptos->conceptosReciboSobrante($recibo->id, $monto = null);
 				
-				if ($codigoRetorno == 0)
-				{
-					$codigoRetorno = $pagos->pagosReciboSobrante($recibo->id, $numeroRecibo, $monto, $this->headboard['idTurn'], $familia);
-				}
-				else
+				if ($codigoRetorno != 0)
 				{
 					$resultado['codigoRetorno'] = 1;
 				}

@@ -431,6 +431,38 @@ class PaymentsController extends AppController
 		
 		return $codigoRetorno; 
     }
+    public function pagosReciboSobrante($idRecibo = null, $numeroRecibo = null, $monto = null, $turno = null, $familia = null)
+    {
+		$codigoRetorno = 0;
+		$nuevoPago = $this->Payments->newEntity();
+		$nuevoPago->bill_id = $idRecibo;
+		$nuevoPago->moneda = "$";
+		$nuevoPago->orden_moneda = 1;
+		$nuevoPago->payment_type = "Efectivo";
+		$nuevoPago->bank = "N/A";
+		$nuevoPago->banco_receptor = "N/A";
+		$nuevoPago->account_or_card = "N/A";
+		$nuevoPago->serial = "N/A";
+		$nuevoPago->bill_number = $numeroRecibo;
+		$nuevoPago->responsible_user = $this->Auth->user('id');
+		$nuevoPago->turn = $turno;
+		$nuevoPago->annulled = 0;
+		$nuevoPago->name_family = $familia; 
+		$nuevoPago->fiscal = 0;     
+		$nuevoPago->amount = $monto;
+		$nuevoPago->comentario = "";
+
+		if (!($this->Payments->save($nuevoPago))) 
+		{
+			$binnacles = new BinnaclesController;
+			
+			$binnacles->add('controller', 'Payments', 'pagosReciboSobrante', 'El pago correspondiente al recibo con ID ' . $idRecibo . ' no fue guardado');
+			
+			$this->Flash->error(__('El pago correspondiente al recibo con ID ' . $idRecibo . ' no fue guardado, vuelva a intentar por favor.'));
+			$codigoRetorno = 1;
+		}	
+		return $codigoRetorno; 
+    }
 	
     public function busquedaPagos($turn = null)
     {

@@ -31,9 +31,9 @@
 								<?php 
 									if ($turn->status == 0):
 										if ($turn->id > 947):
-											echo $this->Html->link('Reporte cierre', ['action' => 'reporteCierre', $turn->id], ['class' => 'btn btn-success']);
+											echo $this->Html->link('Reporte cierre', ['action' => 'reporteCierre', $turn->id], ['class' => 'btn btn-info']);
 										else:
-											echo $this->Html->link('Reporte cierre', ['action' => 'turnpdf', $turn->id, $turn->user->first_name . ' ' . $turn->user->surname, '_ext' => 'pdf'], ['class' => 'btn btn-success']); 
+											echo $this->Html->link('Reporte cierre', ['action' => 'turnpdf', $turn->id, $turn->user->first_name . ' ' . $turn->user->surname, '_ext' => 'pdf'], ['class' => 'btn btn-info']); 
 										endif;
 									endif;
 								?>
@@ -42,7 +42,7 @@
 								<?php 
 									if ($turn->status == 0):
 										if ($turn->id > 947):
-											echo $this->Html->link('Excel reporte general', ['action' => 'excelGeneral', $turn->id], ['class' => 'btn btn-success']);
+											echo $this->Html->link('Excel facturas, notas y recibos', ['action' => 'excelDocumentos', $turn->id], ['class' => 'btn btn-info']);
 										endif;
 									endif;
 								?>
@@ -51,7 +51,7 @@
 								<?php 
 									if ($turn->status == 0):
 										if ($turn->id > 947):
-											echo $this->Html->link('Excel reporte detallado', ['action' => 'excelDetallado', $turn->id], ['class' => 'btn btn-success']);											
+											echo $this->Html->link('Excel pagos recibidos', ['action' => 'excelPagos', $turn->id], ['class' => 'btn btn-info']);											
 										endif;
 									endif;
 								?>
