@@ -845,6 +845,8 @@
             {
                 $("#bank-" + paymentNumber).css('background-color', '#ffffff');
                 $('#bank-' + paymentNumber).val(null);
+                $("#banco-receptor-" + paymentNumber).css('background-color', '#ffffff');
+                $('#banco-receptor-' + paymentNumber).val(null);
                 $("#account_or_card-" + paymentNumber).css('background-color', '#ffffff');
                 $('#account_or_card-' + paymentNumber).val(null);
             }
@@ -852,6 +854,8 @@
             {
                 $("#bank-" + paymentNumber).css('background-color', '#ffffff');
                 $('#bank-' + paymentNumber).val(null);
+                $("#banco-receptor-" + paymentNumber).css('background-color', '#ffffff');
+                $('#banco-receptor-' + paymentNumber).val(null);
                 $("#serial-" + paymentNumber).css('background-color', '#ffffff');
                 $('#serial-' + paymentNumber).val(null);
             }
@@ -859,6 +863,8 @@
             {
                 $("#bank-" + paymentNumber).css('background-color', '#ffffff');
                 $('#bank-' + paymentNumber).val(null);
+                $("#banco-receptor-" + paymentNumber).css('background-color', '#ffffff');
+                $('#banco-receptor-' + paymentNumber).val(null);
                 $("#account_or_card-" + paymentNumber).css('background-color', '#ffffff');
                 $('#account_or_card-' + paymentNumber).val(null);
                 $("#serial-" + paymentNumber).css('background-color', '#ffffff');
@@ -1011,6 +1017,8 @@
 			{
 				$("#bank-" + paymentIdentifier).css('background-color', '#ffffff');
 				$('#bank-' + paymentIdentifier).val(null);
+                $("#banco-receptor-" + paymentNumber).css('background-color', '#ffffff');
+                $('#banco-receptor-' + paymentNumber).val(null);
 				$("#account_or_card-" + paymentIdentifier).css('background-color', '#ffffff');
 				$('#account_or_card-' + paymentIdentifier).val(null);
 			}
@@ -1018,6 +1026,8 @@
 			{
 				$("#bank-" + paymentIdentifier).css('background-color', '#ffffff');
 				$('#bank-' + paymentIdentifier).val(null);
+                $("#banco-receptor-" + paymentNumber).css('background-color', '#ffffff');
+                $('#banco-receptor-' + paymentNumber).val(null);
 				$("#serial-" + paymentIdentifier).css('background-color', '#ffffff');
 				$('#serial-' + paymentIdentifier).val(null);
 			}
@@ -1025,6 +1035,8 @@
 			{
 				$("#bank-" + paymentIdentifier).css('background-color', '#ffffff');
 				$('#bank-' + paymentIdentifier).val(null);
+                $("#banco-receptor-" + paymentNumber).css('background-color', '#ffffff');
+                $('#banco-receptor-' + paymentNumber).val(null);
 				$("#account_or_card-" + paymentIdentifier).css('background-color', '#ffffff');
 				$('#account_or_card-' + paymentIdentifier).val(null);
 				$("#serial-" + paymentIdentifier).css('background-color', '#ffffff');
@@ -1410,7 +1422,7 @@
 					{
 						if (indicadorCompensacion == 0)
 						{
-							$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario, este representante tiene un saldo a favor/contra de " + saldoRepresentante + " $ ¿Qué desea hacer?</b></spam>");
+							$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: blue;'><b>Estimado usuario, este representante tiene un saldo a favor/contra de " + saldoRepresentante + " $ ¿Qué desea hacer?</b></spam>");
 							$("#botones-cuotas").addClass("noverScreen");
 							$("#botones-notas").removeClass("noverScreen");
 							$("#saldo-favor-dolar").html(saldoRepresentanteSigno);
@@ -2093,7 +2105,14 @@
 		payments.tasaDolar = dollarExchangeRate;
 		payments.tasaEuro = euro;
 		payments.tasaDolarEuro = tasaDolarEuro;
-		payments.saldoCompensado = saldoRepresentante;
+		if (saldoRepresentante > totalBalance)
+		{
+			payments.saldoCompensado = totalBalance;
+		}
+		else
+		{
+			payments.saldoCompensado = saldoRepresentante;		
+		}
 		payments.sobrante = sobrante;
 		uploadTransactions();
 		loadPayments();
@@ -2366,10 +2385,7 @@
 							
 							diferenciaOriginalActual = originalAmount - amountPaid;
 							
-							if (diferenciaOriginalActual < 0)
-							{
-								diferenciaOriginalActual = 0;
-							}
+							tarifaDolar = tarifaDolar - diferenciaOriginalActual;
 							
 							invoiced = value2.invoiced;
 
@@ -2379,7 +2395,7 @@
 							
 							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
 
-							montoDolar = value2.amount_dollar + diferenciaOriginalActual;
+							montoDolar = value2.amount_dollar;
 													
 							if (paidOut == true)
 							{
@@ -2513,8 +2529,7 @@
 							}
 							else if ($('#type-invoice').val() == 'Recibo inscripción nuevos')
 							{
-								if (monthlyPayment.substring(0, 18) == 'Servicio educativo' || 
-									monthlyPayment.substring(0, 9) == "Matrícula" ||
+								if (monthlyPayment.substring(0, 9) == "Matrícula" ||
 									monthlyPayment.substring(0, 3) == "Ago")
 									{
 										if (indicadorImpresion == 0)
@@ -2980,7 +2995,12 @@
         {	
             e.preventDefault();
 
-			if (deudaMenosPagado > 0)
+			if (deudaMenosPagado == 1)
+			{
+				discount -= 1;
+			}
+						
+			if (deudaMenosPagado > 1)
 			{
 				alert('Estimado usuario debe registrar más pagos para completar el total de la factura/recibo u hacer un ajuste');
 				return false;
@@ -3354,11 +3374,10 @@
 			$('.check-bolivar').prop('checked', true);
 			aCobrarBolivares();
 		});
-		$('.reintegrar').click(function(e) 
+		$('#reintegrar').click(function(e) 
         {
 			e.preventDefault();	
-			'<?php $this->redirect(['controller' => 'Bills', 'action' => 'establecerMontoReintegro']) ?>' + idParentsandguardians + '/' + saldoRepresentante;
-			// window.location.assign('<?= Router::url(["controller" => "Bills", "action" => "establecerMontoReintegro"]) ?>' + idParentsandguardians + '/' + saldoRepresentante);			
+			window.location.assign('<?= Router::url(["controller" => "Bills", "action" => "establecerMontoReintegro"]) ?>' + '/' + idParentsandguardians + '/' + saldoRepresentante);			
 		});
     }); 
 

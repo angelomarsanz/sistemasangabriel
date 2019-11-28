@@ -427,56 +427,68 @@
 									<thead>
 										<tr>
 											<th scope="col" style="width:25%;">Totales factura</th>
-											<th scope="col" style="width:25%; text-align:center;">Dólar ($)</th>
-											<th scope="col" style="color: blue; width:25%; text-align:center;">Euro (€)</th>
-											<th scope="col" style="color: red; width:25%; text-align:center;">Bolívar (Bs.)</th>
+											<th scope="col" style="width:15%;"></th>
+											<th scope="col" style="width:15%; text-align:center;">Dólar ($)</th>
+											<th scope="col" style="color: blue; width:15%; text-align:center;">Euro (€)</th>
+											<th scope="col" style="color: red; width:30%; text-align:center;">Bolívar (Bs.)</th>
 										</tr>
 									</thead>								
 										<tbody>
 											<tr>
 												<td>Sub-total</td>
+												<td></td>
 												<td id="sub-total-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="sub-total-euro"></td>
 												<td style="color: red; text-align:center;" id="sub-total-bolivar"></td>	
 											</tr>
 											<tr>
 												<td>Saldo a favor/contra</td>
+												<td></td>
 												<td id="saldo-favor-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="saldo-favor-euro"></td>
 												<td style="color: red; text-align:center;" id="saldo-favor-bolivar"></td>
 											</tr>
 											<tr>
-												<td><?= $this->Form->input('select_discount', ['label' => 'Descuento/Recargo:', 'id' => 'select-discount', 'options' => $discounts]); ?></td>
+												<td><?= $this->Form->input('cantidad_descuento', ['label' => 'Descuento/Recargo:', 'type' => 'number', 'id' => 'cantidad-descuento', 'value' => 0, 'disabled' => 'true']); ?></td>
+												<td><?= $this->Form->input('tipo_descuento', ['label' => 'tipo:', 'id' => 'tipo-descuento', 'disabled' => 'true', 'options' => 
+													[null => '',
+													'Fijo' => '$',
+													'Porcentaje' => '%']]); ?></td>												
 												<td id="descuento-recargo-dolar" style="text-align:center; vertical-align: middle;">0</td>
 												<td style="color: blue; text-align:center; vertical-align: middle;" id="descuento-recargo-euro">0</td>
 												<td style="color: red; text-align:center; vertical-align: middle;" id="descuento-recargo-bolivar">0</td>
 											</tr>
 											<tr>
 												<td>Iva 16%</td>
+												<td></td>
 												<td style="text-align:center;">0</td>
 												<td style="color: blue; text-align:center;">0</td>
 												<td style="color: red; text-align:center;">0</td>
 											</tr>
 											<tr>
 												<td>Total</td>
+												<td></td>
 												<td id="total-balance-descuento-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="total-balance-descuento-euro"></td>
 												<td style="color: red; text-align:center;" id="total-balance-descuento-bolivar"></td>
 											</tr>
 											<tr>	
 												<td>Pagado</td>
+												<td></td>
 												<td id="pagado-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="pagado-euro"></td>
 												<td style="color: red; text-align:center;" id="pagado-bolivar"></td>
 											</tr>
 											<tr>
 												<td>Por pagar</td>
+												<td></td>
 												<td id="por-pagar-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="por-pagar-euro"></td>
 												<td style="color: red; text-align:center;" id="por-pagar-bolivar"></td>
 											</tr>
 											<tr>
 												<td>Sobrante</td>
+												<td></td>
 												<td id="sobrante-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="sobrante-euro"></td>
 												<td style="color: red; text-align:center;" id="sobrante-bolivar"></td>																		
@@ -676,6 +688,8 @@
         $("#mark-quotas").text("cobrar");
         $("#mark-quotas").attr('disabled', true);
         $("#uncheck-quotas").attr('disabled', true);
+		$("#cantidad-descuento").attr('disabled', true);
+		$("#tipo-descuento").attr('disabled', true);
 		$("#adjust-fee").attr('disabled', true);
         $("#ajuste-automatico").attr('disabled', true);
         $("#print-invoice").attr('disabled', true);
@@ -692,6 +706,8 @@
     {
         $("#mark-quotas").attr('disabled', false);
         $("#uncheck-quotas").attr('disabled', false);
+		$("#cantidad-descuento").attr('disabled', false);
+		$("#tipo-descuento").attr('disabled', false);
 		$("#adjust-fee").attr('disabled', false);
         $("#ajuste-automatico").attr('disabled', false);
         $("#print-invoice").attr('disabled', false);
@@ -710,6 +726,8 @@
 		$("#uncheck-quotas").attr('disabled', true);
         $("#uncheck-quotas").attr('disabled', true);
 		$("#adjust-fee").attr('disabled', true);
+		$("#cantidad-descuento").attr('disabled', true);
+		$("#tipo-descuento").attr('disabled', true);
         $("#ajuste-automatico").attr('disabled', true);
         $("#bt-01").attr('disabled', true);
         $("#bt-02").attr('disabled', true);
@@ -727,6 +745,8 @@
 		$("#uncheck-quotas").attr('disabled', false);
         $("#uncheck-quotas").attr('disabled', false);
 		$("#adjust-fee").attr('disabled', false);
+		$("#cantidad-descuento").attr('disabled', false);
+		$("#tipo-descuento").attr('disabled', false);
         $("#ajuste-automatico").attr('disabled', false);
         $("#bt-01").attr('disabled', false);
         $("#bt-02").attr('disabled', false);
@@ -807,8 +827,9 @@
 		$('#nota-credito').html("");
 		$("#nota-credito").removeClass("noverScreen");
 		$("#botones-cuotas").removeClass("noverScreen");
-		$("#botones-notas").addClass("noverScreen");	
-		$('#select-discount').val(1);		
+		$("#botones-notas").addClass("noverScreen");
+		$('#cantidad-descuento').val(0);
+		$('#tipo-descuento').val(null);		
 		$("#sub-total-dolar").html("");
 		$("#sub-total-euro").html("");
 		$("#sub-total-bolivar").html("");
@@ -2117,6 +2138,36 @@
 		uploadTransactions();
 		loadPayments();
 	}
+	
+	function actualizarDescuentos()
+	{
+		discountMode = "Fijo";
+		discountAmount = 0;
+		
+		if ($('#cantidad-descuento').val() == "" || $('#cantidad-descuento').val() == 0)
+		{
+			actualizarTotales();
+		}
+		else if ($('#tipo-descuento').val() === "")
+		{
+			alert("Estimado usuario debe seleccionar el signo de dólar o el signo de porcentaje");
+			return false;				
+		}
+		else if ($('#tipo-descuento').val() == "Fijo")
+		{						
+			discountMode = $('#tipo-descuento').val();
+			discountAmount = parseFloat($('#cantidad-descuento').val());
+			actualizarTotales();	
+		}
+		else if ($('#tipo-descuento').val() == "Porcentaje")
+		{
+			decimalPorcentaje = (parseFloat($('#cantidad-descuento').val()) / 100);
+			discountAmount = decimalPorcentaje;					
+			
+			discountMode = $('#tipo-descuento').val();
+			actualizarTotales();
+		}	
+	}
 
 // Funciones Jquery
 
@@ -3037,42 +3088,20 @@
 			}
         });
 		
-        $('#select-discount').change(function(e) 
+        $('#tipo-descuento').change(function(e) 
         {
 			e.preventDefault();
-			discountMode = "Fijo";
-			discountAmount = 0;
-
-			if ($('#select-discount').val() == 1)
-			{
-				actualizarTotales();				
-			}
-			else
-			{
-				$.post('<?php echo Router::url(["controller" => "Discounts", "action" => "searchDiscount"]); ?>', 
-					{"id" : $('#select-discount').val() }, null, "json")          
-
-				.done(function(response) 
-				{
-					if (response.success) 
-					{
-						discountMode = response.data.mode;
-						discountAmount = response.data.amount;
-						actualizarTotales();
-					} 
-					else 
-					{
-						alert('No se encontró el descuento');
-						actualizarTotales();
-					}
-				})
-				.fail(function(jqXHR, textStatus, errorThrown) 
-				{
-					alert('Algo falló en la búsqueda. Código de error: ' + textStatus);
-					actualizarTotales();
-				});
-			}
+			actualizarDescuentos();
         });
+		
+		$('#cantidad-descuento').keypress(function(e) 
+        {
+            if (e.which == 13)
+            {
+				e.preventDefault();
+				actualizarDescuentos();					
+            }
+        }); 
 		
         $('#update-dollar').click(function(e) 
         {
