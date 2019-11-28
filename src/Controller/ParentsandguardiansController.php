@@ -397,7 +397,7 @@ class ParentsandguardiansController extends AppController
     {
         if ($this->request->is('ajax')) {
             $this->autoRender = false;
-            $name = $this->request->query['term'];
+            $name = trim($this->request->query['term']);
             $results = $this->Parentsandguardians->find('all', [
                 'conditions' => [['family LIKE' => $name . '%'], ['guardian !=' => 1]]]);
             $resultsArr = [];

@@ -474,7 +474,7 @@ class PaymentsController extends AppController
 		$reintegros = $this->Payments->Bills->find('all')
 			->contain(['Parentsandguardians'])
 			->where(['tipo_documento' => 'Recibo de reintegro', 'annulled' => 0, 'turn' => $turn])
-			->order(['bills.id' => 'ASC']);
+			->order(['Bills.id' => 'ASC']);
 			
 		$contadorReintegros = $reintegros->count();
 			
@@ -486,7 +486,7 @@ class PaymentsController extends AppController
 		$facturasCompensadas = $this->Payments->Bills->find('all')
 			->contain(['Parentsandguardians'])
 			->where(['saldo_compensado_dolar >' => 0, 'annulled' => 0, 'turn' => $turn])
-			->order(['bills.id' => 'ASC']);
+			->order(['Bills.id' => 'ASC']);
 			
 		$contadorCompensadas = $facturasCompensadas->count();
 			

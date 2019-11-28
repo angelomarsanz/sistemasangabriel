@@ -61,7 +61,7 @@ class BillsController extends AppController
             [['MONTH(date_and_time)' => $month], 
             ['YEAR(date_and_time)' => $year],
             ['Bills.fiscal' => true]],
-            'order' => ['Bills.created' => 'ASC'] ]);
+            'order' => ['Bills.control_number' => 'ASC'] ]);
             
         return $invoicesBills;
     }
