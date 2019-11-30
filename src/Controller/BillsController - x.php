@@ -209,7 +209,7 @@ class BillsController extends AppController
 				$bill->id_documento_padre = 0;
 				$bill->id_anticipo = 0;
 				$bill->factura_pendiente = $indicadorFacturaPendiente;
-				$bill->moneda_id = 2;
+				$bill->moneda_id = 1;
 				$bill->tasa_cambio = $this->headboard['tasaDolar'];
 				$bill->tasa_euro = $this->headboard['tasaEuro'];
 				$bill->tasa_dolar_euro = $this->headboard['tasaDolarEuro'];
@@ -390,7 +390,8 @@ class BillsController extends AppController
 						
 						if ($this->headboard['sobrante'] > 0)
 						{
-							$resultado = $this->reciboSobrante($idParentsandguardian, $parentsandguardian->family, $billId, $this->headboard['sobrante'] > 0); 
+							$resultado = $this->reciboAdicional($idParentsandguardian, $parentsandguardian->family, $billId, "Recibo de sobrante", 2, "Sobrante", $this->headboard['sobrante']); 
+														
 							if ($resultado['codigoRetorno'] == 0)
 							{
 								$factura = $this->Bills->get($billId);
@@ -1963,7 +1964,7 @@ class BillsController extends AppController
 		$bill->id_documento_padre = 0;
 		$bill->id_anticipo = $reciboPendiente->id;
 		$bill->factura_pendiente = 0;
-		$bill->moneda_id = 2;
+		$bill->moneda_id = 1;
 		$bill->tasa_cambio = $reciboPendiente->tasa_cambio;
 		$bill->tasa_euro = $reciboPendiente->tasa_euro;
 		$bill->tasa_dolar_euro = $reciboPendiente->tasa_dolar_euro;
@@ -1994,21 +1995,17 @@ class BillsController extends AppController
 		return $resultado;
     }
 	
-	public function reciboSobrante($idParentsandguardian = null, $familia = null, $idFactura = null, $monto = null)
+	public function reciboAdicional($idParentsandguardian = null, $familia = null, $idFactura = null, $tipoRecibo = null, $moneda = null, $concepto = null, $monto = null)
 	{
 		$this->autoRender = false;
-		
+				
 		$conceptos = new ConceptsController();
 
 		$pagos = new PaymentsController();
 				
 		$resultado = ['codigoRetorno' => 0, 'idRecibo' => 0];
-		
-		$this->loadModel('Schools');
-
-		$school = $this->Schools->get(2);
-														
-		$resultadoCrear = $this->crearReciboSobrante($idFactura = null);
+																
+		$resultadoCrear = $this->crearReciboAdicional($idParentsandguardian, $idFactura, $tipoRecibo, $moneda, $monto);
 
 		if ($resultadoCrear['codigoRetorno'] == 0)
 		{
@@ -2025,7 +2022,7 @@ class BillsController extends AppController
 				
 				$resultado['idRecibo'] = $recibo->id;
 									
-				$codigoRetorno = $conceptos->conceptosReciboSobrante($recibo->id, $monto = null);
+				$codigoRetorno = $conceptos->conceptosReciboAdicional($recibo->id, $concepto, $monto);
 				
 				if ($codigoRetorno != 0)
 				{
@@ -2045,121 +2042,110 @@ class BillsController extends AppController
 		return $resultado;
 	}
 	
-    public function crearReciboSobrante($billNumber = null, $idDocumentoPadre = null)
-    {
-        $consecutiveInvoice = new ConsecutiveinvoicesController();
-        
+    public function crearReciboAdicional($idParentsandguardian = null, $idDocumentoPadre = null, $tipoRecibo = null, $moneda = null, $monto = null)
+    {       
+		$this->autoRender = false;
+				
+		/* echo "<br />crearReciboAdicional ";
+		var_dump($idParentsandguardian);
+		echo "<br />";
+		var_dump($idDocumentoPadre);
+		echo "<br />";
+		var_dump($tipoRecibo);
+		echo "<br />";
+		var_dump($moneda);
+		echo "<br />";
+		var_dump($monto);
+			
         $consecutiveReceipt = new ConsecutivereceiptsController();
 		
 		$resultado = ['codigoRetorno' => 0, 'numeroRecibo' => 0];
 
-		if ($this->headboard)
-		{
-			$numeroRecibo = $consecutiveReceipt->add();
+		$numeroRecibo = $consecutiveReceipt->add();
 			
-			$bill = $this->Bills->newEntity();
+		$bill = $this->Bills->newEntity();
+		
+		if (!(empty($this->headboard)))
+		{
+			echo "<br />Entré por headboard";
 			$bill->parentsandguardian_id = $this->headboard['idParentsandguardians'];
 			$bill->user_id = $this->Auth->user('id');
 			$bill->date_and_time = $this->headboard['invoiceDate'];
-			$bill->turn = $this->headboard['idTurn'];
-			
-			$bill->bill_number = $numeroRecibo;
-			$bill->fiscal = 0;
-			$bill->control_number = $numeroRecibo;
-			$bill->tipo_documento = "Recibo de sobrante";
-			
+			$bill->turn = $this->headboard['idTurn'];						
 			$bill->school_year = $this->headboard['schoolYear'];
 			$bill->identification = $this->headboard['typeOfIdentificationClient'] . ' - ' . $this->headboard['identificationNumberClient'];
 			$bill->client = $this->headboard['client'];
 			$bill->tax_phone = $this->headboard['taxPhone'];
 			$bill->fiscal_address = $this->headboard['fiscalAddress'];
-			$bill->amount = 0;
-			$bill->amount_paid = $this->headboard['sobrante'];
-			$bill->annulled = 0;
-			$bill->date_annulled = 0;
-			$bill->invoice_migration = 0;
-			$bill->new_family = 0;
-			$bill->impresa = 0;
-			$bill->id_documento_padre = $idDocumentoPadre;
-			$bill->id_anticipo = 0;
-			$bill->factura_pendiente = 0;
-			$bill->moneda_id = 2;
 			$bill->tasa_cambio = $this->headboard['tasaDolar'];
 			$bill->tasa_euro = $this->headboard['tasaEuro'];
 			$bill->tasa_dolar_euro = $this->headboard['tasaDolarEuro'];
-			$bill->saldo_compensado_dolar = 0;
-			$bill->sobrante_dolar = 0;
-			
-			if (!($this->Bills->save($bill))) 
-			{
-				$resultado['codigoRetorno'] = 2;
-				$this->Flash->error(__('El recibo no pudo ser guardado, intente nuevamente'));
-			}
-			else
-			{
-				$resultado['numeroRecibo'] = $numeroRecibo;
-			}
 		}
 		else
 		{
-			$this->Flash->error(__('La factura no pudo ser guardada. No existe el encabezado de la factura'));
-			$resultado['codigoRetorno'] = 1;            
-		}
-
-		return $resultado;
-    }
-	public function reciboReintegro($idParentsandguardian = null, $monto = null)
-	{
-		$this->autoRender = false;
-				
-		$conceptos = new ConceptsController();
-
-		$pagos = new PaymentsController();
-				
-		$resultado = ['codigoRetorno' => 0, 'idRecibo' => 0, 'numeroRecibo' => 0];
-		
-		$this->loadModel('Schools');
-
-		$school = $this->Schools->get(2);
-														
-		$resultadoCrear = $this->crearReciboReintegro($idParentsandguardian, $monto);
-
-		if ($resultadoCrear['codigoRetorno'] == 0)
-		{
-			$numeroRecibo = $resultadoCrear['numeroRecibo'];
+			echo "<br />Entré por else";
 			
-			$resultado['numeroRecibo'] = $numeroRecibo;
-			
-			$recibos = $this->Bills->find('all', ['conditions' => ['bill_number' => $numeroRecibo, 'user_id' => $this->Auth->user('id')],
-					'order' => ['Bills.id' => 'DESC'] ]);
+			setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+			date_default_timezone_set('America/Caracas');
+			$currentDate = Time::now();
 
-			$contadorRegistros = $recibos->count();
-					
+			$this->loadModel('Schools');
+			$school = $this->Schools->get(2);
+									
+			$this->loadModel('Turns');
+			$turnos = $this->Turns->find('all')->where(['user_id' => $this->Auth->user('id'), 'status' => true])->order(['id' => 'DESC']);
+			$contadorRegistros = $turnos->count();
 			if ($contadorRegistros > 0)
 			{
-				$recibo = $recibos->first();
-				
-				$resultado['idRecibo'] = $recibo->id;
-									
-				$codigoRetorno = $conceptos->conceptosReciboReintegro($recibo->id, $monto = null);
+				$ultimoTurno = $turnos->first();
 			}
-			else
-			{
-				$this->Flash->error(__('No se encontró el nuevo recibo ' . $numeroRecibo));
-				$resultado['codigoRetorno'] = 2;
-			}
+
+			$this->loadModel('Monedas');	
+			$moneda = $this->Monedas->get(2);
+			$tasaDolar = $moneda->tasa_cambio_dolar; 
+			
+			$moneda = $this->Monedas->get(3);
+			$tasaEuro = $moneda->tasa_cambio_dolar; 
+			
+			$parentsandguardian = $this->Bills->Parentsandguardians->get($idParentsandguardian);
+			
+			$bill->parentsandguardian_id = $idParentsandguardian;
+			$bill->user_id = $this->Auth->user('id');
+			$bill->date_and_time = $currentDate;
+			$bill->turn = $ultimoTurno->id;
+		
+			$bill->school_year = $school->current_school_year;
+			
+			$bill->identification = $parentsandguardian->type_of_identification_client . ' - ' . $parentsandguardian->identification_number_client;
+			$bill->client = $parentsandguardian->client;
+			$bill->tax_phone = $parentsandguardian->tax_phone;
+			$bill->fiscal_address = $parentsandguardian->fiscal_address;
+			$bill->tasa_cambio = $tasaDolar;
+			$bill->tasa_euro = $tasaEuro;
+			$bill->tasa_dolar_euro = $tasaEuro / $tasaDolar;	
 		}
-		else
-		{
-			$resultado['codigoRetorno'] = 1;
-		}	
-		return $resultado;
-	}
-	
-    public function crearReciboReintegro($idParentsandguardian = null, $monto = null)
-    {
-        $consecutiveInvoice = new ConsecutiveinvoicesController();
-        
+		
+		$bill->bill_number = $numeroRecibo;
+		$bill->fiscal = 0;
+		$bill->control_number = $numeroRecibo;
+		$bill->tipo_documento = $tipoRecibo;
+		$bill->amount = 0;
+		$bill->amount_paid = $monto;
+		$bill->annulled = 0;
+		$bill->date_annulled = 0;
+		$bill->invoice_migration = 0;
+		$bill->new_family = 0;
+		$bill->impresa = 0;
+		$bill->id_documento_padre = $idDocumentoPadre;
+		$bill->id_anticipo = 0;
+		$bill->factura_pendiente = 0;
+		$bill->moneda_id = $moneda;
+		$bill->saldo_compensado_dolar = 0;
+		$bill->sobrante_dolar = 0;
+		
+		echo "<br />";
+		var_dump($bill); */
+		       
         $consecutiveReceipt = new ConsecutivereceiptsController();
 		
 		$resultado = ['codigoRetorno' => 0, 'numeroRecibo' => 0];
@@ -2239,14 +2225,15 @@ class BillsController extends AppController
 		{
 			$resultado['numeroRecibo'] = $numeroRecibo;
 		}
+		
 		return $resultado;
     }
-	
+			
 	public function establecerMontoReintegro($idRepresentante = null, $monto = null)
 	{
 		if ($this->request->is(['patch', 'post', 'put']))
-        {			
-			$resultado = $this->reciboReintegro($idRepresentante, $_POST['monto_reintegro']);
+        {						
+			$resultado = $this->reciboAdicional($idRepresentante, "", 0, "Recibo de reintegro", 2, "Reintegro", $_POST['monto_reintegro']);
 			
 			if ($resultado['codigoRetorno'] == 0)
 			{
@@ -2271,40 +2258,12 @@ class BillsController extends AppController
 		$this->set(compact('monto'));
         $this->set('_serialize', ['monto']);
 	}
-	public function establecerMontoReintegro($idRepresentante = null, $monto = null)
-	{
-		if ($this->request->is(['patch', 'post', 'put']))
-        {			
-			$resultado = $this->reciboReintegro($idRepresentante, $_POST['monto_reintegro']);
-			
-			if ($resultado['codigoRetorno'] == 0)
-			{
-				$representante = $this->Bills->Parentsandguardians->get($idRepresentante);
-				
-				$representante->balance = $representante->balance - $_POST['monto_reintegro'];
-				
-				if (!($this->Bills->Parentsandguardians->save($representante)))
-				{
-					$this->Flash->error(__('No se pudo actualizar el saldo del representante'));
-				}
-				else
-				{
-					return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $resultado['idRecibo'], 0, $idRepresentante, 'establecerMontoReintegro']);
-				}
-			}
-			else
-			{
-				$this->Flash->error(__('Estimado usuario no se pudo crear el registro del recibo de reintegro'));
-			}
-		}
-		$this->set(compact('monto'));
-        $this->set('_serialize', ['monto']);
-	}
+
 	public function valeCaja()
 	{
 		if ($this->request->is(['patch', 'post', 'put']))
         {			
-			$resultado = $this->valeCaja($_POST['concepto', $_POST['moneda'], $_POST['monto');
+			$resultado = $this->reciboAdicional(0, "", 0, "Recibo de vale de caja", $_POST['moneda'], $_POST['concepto'], $_POST['monto']);
 			
 			if ($resultado['codigoRetorno'] == 0)
 			{

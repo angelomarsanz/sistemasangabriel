@@ -1525,7 +1525,7 @@ class StudentsController extends AppController
     {
         if ($this->request->is('ajax')) {
             $this->autoRender = false;
-            $name = $this->request->query['term'];
+            $name = trim($this->request->query['term']);
             $results = $this->Students->find('all', [
                 'conditions' => [['surname LIKE' => $name . '%'], ['Students.student_condition' => 'Regular']],
 				'order' => ['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]]);
@@ -1540,7 +1540,7 @@ class StudentsController extends AppController
     {
         $this->autoRender = false;
 		if ($this->request->is('ajax')) {
-            $name = $this->request->query['term'];
+            $name = trim($this->request->query['term']);
             $results = $this->Students->find('all', [
                 'conditions' => [['surname LIKE' => $name . '%'], ['Students.student_condition !=' => 'Regular']],
 				'order' => ['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]]);

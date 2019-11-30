@@ -686,10 +686,13 @@
 					</div>
 				<?php endif; ?>
 				
+				<p><?= "contadorLinea " . $contadorLinea ?><p>
+				
 				<?php if ($indicadorReintegros == 1): ?>
+				
 					<p><b>Detalle de reintegros:</b></p>
 					<?php $contadorLinea++; ?>
-					
+	
 					<div class="row panel panel-default">
 						<br />
 						<div class="col-md-12">
@@ -715,7 +718,7 @@
 										<?php $contadorLinea++; ?>
 									</thead>
 									<tbody>										
-							<?php foreach ($reintegros as $reintegro): ?>								
+							<?php foreach ($reintegros as $reintegro): ?>
 								<tr>
 									<td style="width: 10%; text-align: center;"><?= $reintegro->date_and_time->format('d-m-Y H:i:s') ?></td>
 									<td style="width: 10%; text-align: center;"><?= $reintegro->bill_number ?></td>
@@ -733,21 +736,6 @@
 								$contadorRegistros++;
 							endforeach; ?>
 									</tbody>
-									<tfoot>
-										<tr>
-											<td style="text-align: center;">Totales</td>
-											<td style="text-align: center;"></td>
-											<td style="text-align: center;"></td>
-											<td style="text-align: center;"></td>
-											<td style="text-align: center;"><?= number_format($totalDolar, 2, ",", ".") ?></td>
-											<td style="text-align: center;"><?= number_format($totalEuro, 2, ",", ".") ?></td>
-											<td style="text-align: center;"><?= number_format($totalBolivar, 2, ",", ".") ?></td>
-											<td style="text-align: center;"></td>
-											<td style="text-align: center;"></td>
-											<td style="text-align: center;"></td>
-										</tr>
-										<?php $contadorLinea++; ?>
-									</tfoot>
 								</table>
 							</div>
 						</div>

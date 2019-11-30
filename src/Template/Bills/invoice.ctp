@@ -619,7 +619,7 @@
 		<h2 style="text-align: center;">Recibo de sobrante Nro. <?= $bill->bill_number ?> por $ <?= number_format($bill->amount_paid, 2, ",", ".") ?></h2>
 		<br />
 		<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de $ <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b>
-		como anticipo para pagar futuras cuotas</p>
+		como abono para pagar futuras cuotas.</p>
 	</di>
 <?php endif; ?>
 <?php if ($indicadorReintegro == 1): ?>
@@ -631,9 +631,28 @@
 		<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
 		<h2 style="text-align: center;">Recibo de Reintegro Nro. <?= $bill->bill_number ?> por $ <?= number_format($bill->amount_paid, 2, ",", ".") ?></h2>
 		<br />
-		<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de $ <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b>
-		como anticipo para pagar futuras cuotas</p>
-	</di>
+		<p style="text-align: justify;">Hemos recibido del colegio San Gabriel Arcángel, C.A. la cantidad de $ <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b> por concepto de reintegro.</p>
+		<br />
+		<p><?= $bill->client ?></p>
+		<p><?= $bill->identification ?></p>
+		<p>Firma</p>
+	</div>
+<?php endif; ?>
+<?php if ($indicadorValeCaja == 1): ?>
+	<br />
+	<br />
+	<div>
+		<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
+		<h4>Rif J-07573084-4</h4>
+		<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
+		<h2 style="text-align: center;">Recibo de Vale de Caja Nro. <?= $bill->bill_number ?> por <?= $monedaDocumento . ' ' . number_format($bill->amount_paid, 2, ",", ".") ?></h2>
+		<br />
+		<p style="text-align: justify;">Por concepto de: </p>
+			
+		<?php foreach ($vConcepts as $vConcept): ?>
+			<?= h($vConcept['invoiceLine']) ?><br />
+		<?php endforeach; ?>
+	</div>
 <?php endif; ?>
 <script>
     $(document).ready(function()

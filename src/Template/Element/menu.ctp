@@ -70,6 +70,7 @@
 								<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
 								<li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
 								<li><?= $this->Html->link('Histórico cambio tasa dólar', ['controller' => 'Historicotasas', 'action' => 'index']) ?></li>
+								<li><?= $this->Html->link('Vale de caja', ['controller' => 'Bills', 'action' => 'valeCaja']) ?></li>
 							</ul>
 						</li>
 						<li class="dropdown">

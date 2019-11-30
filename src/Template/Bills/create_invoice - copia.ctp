@@ -427,56 +427,68 @@
 									<thead>
 										<tr>
 											<th scope="col" style="width:25%;">Totales factura</th>
-											<th scope="col" style="width:25%; text-align:center;">Dólar ($)</th>
-											<th scope="col" style="color: blue; width:25%; text-align:center;">Euro (€)</th>
-											<th scope="col" style="color: red; width:25%; text-align:center;">Bolívar (Bs.)</th>
+											<th scope="col" style="width:15%;"></th>
+											<th scope="col" style="width:15%; text-align:center;">Dólar ($)</th>
+											<th scope="col" style="color: blue; width:15%; text-align:center;">Euro (€)</th>
+											<th scope="col" style="color: red; width:30%; text-align:center;">Bolívar (Bs.)</th>
 										</tr>
 									</thead>								
 										<tbody>
 											<tr>
 												<td>Sub-total</td>
+												<td></td>
 												<td id="sub-total-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="sub-total-euro"></td>
 												<td style="color: red; text-align:center;" id="sub-total-bolivar"></td>	
 											</tr>
 											<tr>
 												<td>Saldo a favor/contra</td>
+												<td></td>
 												<td id="saldo-favor-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="saldo-favor-euro"></td>
 												<td style="color: red; text-align:center;" id="saldo-favor-bolivar"></td>
 											</tr>
 											<tr>
-												<td><?= $this->Form->input('select_discount', ['label' => 'Descuento/Recargo:', 'id' => 'select-discount', 'options' => $discounts]); ?></td>
+												<td><?= $this->Form->input('cantidad_descuento', ['label' => 'Descuento/Recargo:', 'type' => 'number', 'id' => 'cantidad-descuento', 'value' => 0, 'disabled' => 'true']); ?></td>
+												<td><?= $this->Form->input('tipo_descuento', ['label' => 'tipo:', 'id' => 'tipo-descuento', 'disabled' => 'true', 'options' => 
+													[null => '',
+													'Fijo' => '$',
+													'Porcentaje' => '%']]); ?></td>												
 												<td id="descuento-recargo-dolar" style="text-align:center; vertical-align: middle;">0</td>
 												<td style="color: blue; text-align:center; vertical-align: middle;" id="descuento-recargo-euro">0</td>
 												<td style="color: red; text-align:center; vertical-align: middle;" id="descuento-recargo-bolivar">0</td>
 											</tr>
 											<tr>
 												<td>Iva 16%</td>
+												<td></td>
 												<td style="text-align:center;">0</td>
 												<td style="color: blue; text-align:center;">0</td>
 												<td style="color: red; text-align:center;">0</td>
 											</tr>
 											<tr>
 												<td>Total</td>
+												<td></td>
 												<td id="total-balance-descuento-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="total-balance-descuento-euro"></td>
 												<td style="color: red; text-align:center;" id="total-balance-descuento-bolivar"></td>
 											</tr>
 											<tr>	
 												<td>Pagado</td>
+												<td></td>
 												<td id="pagado-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="pagado-euro"></td>
 												<td style="color: red; text-align:center;" id="pagado-bolivar"></td>
 											</tr>
 											<tr>
 												<td>Por pagar</td>
+												<td></td>
 												<td id="por-pagar-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="por-pagar-euro"></td>
 												<td style="color: red; text-align:center;" id="por-pagar-bolivar"></td>
 											</tr>
 											<tr>
 												<td>Sobrante</td>
+												<td></td>
 												<td id="sobrante-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="sobrante-euro"></td>
 												<td style="color: red; text-align:center;" id="sobrante-bolivar"></td>																		
@@ -676,6 +688,8 @@
         $("#mark-quotas").text("cobrar");
         $("#mark-quotas").attr('disabled', true);
         $("#uncheck-quotas").attr('disabled', true);
+		$("#cantidad-descuento").attr('disabled', true);
+		$("#tipo-descuento").attr('disabled', true);
 		$("#adjust-fee").attr('disabled', true);
         $("#ajuste-automatico").attr('disabled', true);
         $("#print-invoice").attr('disabled', true);
@@ -692,6 +706,8 @@
     {
         $("#mark-quotas").attr('disabled', false);
         $("#uncheck-quotas").attr('disabled', false);
+		$("#cantidad-descuento").attr('disabled', false);
+		$("#tipo-descuento").attr('disabled', false);
 		$("#adjust-fee").attr('disabled', false);
         $("#ajuste-automatico").attr('disabled', false);
         $("#print-invoice").attr('disabled', false);
@@ -710,6 +726,8 @@
 		$("#uncheck-quotas").attr('disabled', true);
         $("#uncheck-quotas").attr('disabled', true);
 		$("#adjust-fee").attr('disabled', true);
+		$("#cantidad-descuento").attr('disabled', true);
+		$("#tipo-descuento").attr('disabled', true);
         $("#ajuste-automatico").attr('disabled', true);
         $("#bt-01").attr('disabled', true);
         $("#bt-02").attr('disabled', true);
@@ -727,6 +745,8 @@
 		$("#uncheck-quotas").attr('disabled', false);
         $("#uncheck-quotas").attr('disabled', false);
 		$("#adjust-fee").attr('disabled', false);
+		$("#cantidad-descuento").attr('disabled', false);
+		$("#tipo-descuento").attr('disabled', false);
         $("#ajuste-automatico").attr('disabled', false);
         $("#bt-01").attr('disabled', false);
         $("#bt-02").attr('disabled', false);
@@ -807,8 +827,9 @@
 		$('#nota-credito').html("");
 		$("#nota-credito").removeClass("noverScreen");
 		$("#botones-cuotas").removeClass("noverScreen");
-		$("#botones-notas").addClass("noverScreen");	
-		$('#select-discount').val(1);		
+		$("#botones-notas").addClass("noverScreen");
+		$('#cantidad-descuento').val(0);
+		$('#tipo-descuento').val(null);		
 		$("#sub-total-dolar").html("");
 		$("#sub-total-euro").html("");
 		$("#sub-total-bolivar").html("");
@@ -891,12 +912,6 @@
 		saldoNotaCredito = 0;
 		indicadorCompensacion = 0;
 		
-		// Asíncrono
-		if (indicadorAjuste == 1)
-		{
-			habilitarBotonesAjuste();
-			indicadorAjuste = 0;
-		}
     }
     
     function validateFields()
@@ -1242,30 +1257,18 @@
         });
     }
  
-    function updateRecord(id, invoiced, observation, indicadorShow) 
+    function updateRecord(id, invoiced) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbInvoiced = ?, dbObservation = ? WHERE dbId=?";
-
-		// Asíncrono
-		if (indicadorShow == 1 && indicadorAjuste == 1)
-		{
-			showRecords(1);
-		}
+        var updateStatement = "UPDATE studentTransactions SET dbInvoiced = ? WHERE dbId=?";
 		
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [invoiced, observation, Number(id)], null, onError); });
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [invoiced, Number(id)], null, onError); });
     }
     
-    function updateInstallment(id, updOriginalMontoDolar, updMontoModificadoDolar, updMontoPendienteDolar, updAPagarDolar, updAPagarEuro, updAPagarBolivar) 
+    function updateInstallment(id, updOriginalMontoDolar, updMontoModificadoDolar, updMontoPendienteDolar, updAPagarDolar, updAPagarEuro, updAPagarBolivar, updObservation) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbTarifaDolarOriginal = ?, dbTarifaDolar = ?, dbMontoPendienteDolar = ?, dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ? WHERE dbId=?";
-     
-		// Asíncrono
-		if (indicadorAjuste == 1)
-		{
-			restaurarMontos();
-		}
-		
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), Number(id)], null, onError); });
+        var updateStatement = "UPDATE studentTransactions SET dbTarifaDolarOriginal = ?, dbTarifaDolar = ?, dbMontoPendienteDolar = ?, dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ?, dbObservation = ? WHERE dbId=?";
+     		
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), updObservation, Number(id)], null, onError); });
     }
 	
     function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar, actInvoiced, actObservacion) 
@@ -1275,7 +1278,7 @@
         db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(actAPagarDolar), Number(actAPagarEuro), Number(actAPagarBolivar), actInvoiced, actObservacion, Number(id)], null, onError); });
     }
 	
-    function showRecords(indicadorRestaurarMontos) // Function For Retrive data from Database Display records as list
+    function showRecords() // Function For Retrive data from Database Display records as list
     {	
         var selectWithCondition = "SELECT * FROM studentTransactions WHERE dbIdStudent = ?";
         var detailLine = "";
@@ -1284,12 +1287,7 @@
         var firstInstallment = "";
         var lastInstallment = "";
         studentBalance = 0;
-     	 
-		if (indicadorRestaurarMontos == 1)
-		{
-			restaurarMontos();
-		}
-			 
+     	 			 
         db.transaction(function (tx) 
         {
             tx.executeSql(selectWithCondition, [idStudent], function (tx, result) 
@@ -1505,12 +1503,6 @@
             return false;
         }
 		
-		// Asíncrono
-		if (indicadorAjuste == 1)
-		{
-			restaurarMontos();
-		}
-
 		saldoPagosRealizados = accumulatedPayment + saldoRepresentante - discount;
 		
 		totalBalance = 0;
@@ -1529,7 +1521,7 @@
 
 					if (saldoPagosRealizados == 0)
 					{
-						updateRecord(item['dbId'], 'false', "", 0);
+						updateRecord(item['dbId'], 'false');
 					}
 					else if (saldoPagosRealizados < item['dbMontoPendienteDolar'])
 					{
@@ -1566,7 +1558,7 @@
 									
 									if (saldoPagosRealizados >= item['dbMontoPendienteDolar']) 
 									{
-										updateRecord(item['dbId'], 'true', "", 0);
+										updateRecord(item['dbId'], 'true');
 										saldoPagosRealizados = saldoPagosRealizados - item['dbMontoPendienteDolar'];
 										totalBalance = totalBalance + item['dbMontoPendienteDolar'];
 									}
@@ -1585,7 +1577,7 @@
 								}
 								else
 								{
-									showRecords(0);
+									showRecords();
 									actualizarTotales();
 								}
 							}
@@ -1594,7 +1586,7 @@
 				}
 				else
 				{
-					showRecords(0);
+					showRecords();
 					actualizarTotales();
 				}
             });
@@ -2116,6 +2108,36 @@
 		payments.sobrante = sobrante;
 		uploadTransactions();
 		loadPayments();
+	}
+	
+	function actualizarDescuentos()
+	{
+		discountMode = "Fijo";
+		discountAmount = 0;
+		
+		if ($('#cantidad-descuento').val() == "" || $('#cantidad-descuento').val() == 0)
+		{
+			actualizarTotales();
+		}
+		else if ($('#tipo-descuento').val() === "")
+		{
+			alert("Estimado usuario debe seleccionar el signo de dólar o el signo de porcentaje");
+			return false;				
+		}
+		else if ($('#tipo-descuento').val() == "Fijo")
+		{						
+			discountMode = $('#tipo-descuento').val();
+			discountAmount = parseFloat($('#cantidad-descuento').val());
+			actualizarTotales();	
+		}
+		else if ($('#tipo-descuento').val() == "Porcentaje")
+		{
+			decimalPorcentaje = (parseFloat($('#cantidad-descuento').val()) / 100);
+			discountAmount = decimalPorcentaje;					
+			
+			discountMode = $('#tipo-descuento').val();
+			actualizarTotales();
+		}	
 	}
 
 // Funciones Jquery
@@ -2655,7 +2677,7 @@
 				studentBalance = 0;
 				$("#student-balance").html("");
 				
-				showRecords(0);
+				showRecords();
 				
 				$("#student-messages").html("");
 			}
@@ -2678,16 +2700,11 @@
 						{
 							if (flaggedFlag == 0)
 							{
-								// Asíncrono
-								if (indicadorAjuste == 1)
-								{
-									restaurarMontos();
-								}
 								flaggedFlag = 1;
 								$(this).attr('checked', true);
 								idStudentTransactions = $(this).attr('id'); 
 								markTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), 'true', "", 1); 
+								updateRecord(idStudentTransactions.substring(2), 'true'); 
 								$('#uncheck-quotas').attr('disabled', false);
 								$('#charge').attr('disabled', false);
 								if (firstInstallment == " ")
@@ -2783,11 +2800,6 @@
 						{
 							if (idStudentTransactions != " ")
 							{
-								// Asíncrono
-								if (indicadorAjuste == 1)
-								{
-									restaurarMontos();
-								}
 								if (indicatorUnmark == 0)
 								{
 									indicatorUnmark = 1;
@@ -2795,7 +2807,7 @@
 								$('#' + idStudentTransactions).attr('checked', false);
 								$('#' + idAmountTransactions).attr('disabled', false);								
 								uncheckTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), 'false', "", 1); 
+								updateRecord(idStudentTransactions.substring(2), 'false'); 
 								$("#mark-quotas").html(transactionDescription);
 								if (markedQuotaCounter == 1)
 								{
@@ -2841,7 +2853,7 @@
                 {
                     $('#' + idStudentTransactions).attr('checked', false);
                     uncheckTransaction(idStudentTransactions.substring(2));
-                    updateRecord(idStudentTransactions.substring(2), 'false', "", 1); 
+                    updateRecord(idStudentTransactions.substring(2), 'false'); 
                             
                     $("#mark-quotas").html(transactionDescription);
                     if (markedQuotaCounter == 1)
@@ -2893,13 +2905,7 @@
         $('.record-payment').click(function(e) 
         {
             e.preventDefault();
-            
-			// Asíncrono
-			if (indicadorAjuste == 1)
-			{
-				showRecords(1);
-			}
-			
+            		
             if (deudaMenosPagado > 0)
             {
                 paymentIdentifier = ($(this).attr('id')).substring(3);
@@ -3037,42 +3043,20 @@
 			}
         });
 		
-        $('#select-discount').change(function(e) 
+        $('#tipo-descuento').change(function(e) 
         {
 			e.preventDefault();
-			discountMode = "Fijo";
-			discountAmount = 0;
-
-			if ($('#select-discount').val() == 1)
-			{
-				actualizarTotales();				
-			}
-			else
-			{
-				$.post('<?php echo Router::url(["controller" => "Discounts", "action" => "searchDiscount"]); ?>', 
-					{"id" : $('#select-discount').val() }, null, "json")          
-
-				.done(function(response) 
-				{
-					if (response.success) 
-					{
-						discountMode = response.data.mode;
-						discountAmount = response.data.amount;
-						actualizarTotales();
-					} 
-					else 
-					{
-						alert('No se encontró el descuento');
-						actualizarTotales();
-					}
-				})
-				.fail(function(jqXHR, textStatus, errorThrown) 
-				{
-					alert('Algo falló en la búsqueda. Código de error: ' + textStatus);
-					actualizarTotales();
-				});
-			}
+			actualizarDescuentos();
         });
+		
+		$('#cantidad-descuento').keypress(function(e) 
+        {
+            if (e.which == 13)
+            {
+				e.preventDefault();
+				actualizarDescuentos();					
+            }
+        }); 
 		
         $('#update-dollar').click(function(e) 
         {
@@ -3296,12 +3280,12 @@
 							var adjAPagarDolar = adjMontoPendienteDolar;
 							var adjAPagarEuro = Math.round(adjAPagarDolar / tasaDolarEuro);
 							var adjAPagarBolivar = Math.round(adjAPagarDolar * dollarExchangeRate);;
-							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, adjMontoPendienteDolar, adjAPagarDolar, adjAPagarEuro, adjAPagarBolivar);
+							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, adjMontoPendienteDolar, adjAPagarDolar, adjAPagarEuro, adjAPagarBolivar, "");
 							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
 						}
-						else if (adjMontoModificadoDolar == 0 && adjMontoPagadoDolar == 0)
+						else if (adjMontoModificadoDolar == adjMontoPagadoDolar)
 						{
-							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, 0, 0, 0, 0, 0);
+							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, 0, 0, 0, 0, "(E)");
 							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
 						}
 						else
@@ -3327,7 +3311,7 @@
             });
 			if (adjError == 0)
 			{
-				showRecords(1);
+				showRecords();
 			}
         });
 		

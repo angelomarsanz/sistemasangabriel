@@ -412,7 +412,7 @@ class ParentsandguardiansController extends AppController
     {
         if ($this->request->is('ajax')) {
             $this->autoRender = false;
-            $name = $this->request->query['term'];
+            $name = trim($this->request->query['term']);
             $results = $this->Parentsandguardians->find('all', [
                 'conditions' => [['surname_mother LIKE' => $name . '%'], ['guardian !=' => 1]]]);
             $resultsArr = [];
@@ -427,7 +427,7 @@ class ParentsandguardiansController extends AppController
     {
         if ($this->request->is('ajax')) {
             $this->autoRender = false;
-            $name = $this->request->query['term'];
+            $name = trim($this->request->query['term']);
             $results = $this->Parentsandguardians->find('all', [
                 'conditions' => [['surname LIKE' => $name . '%'], ['guardian !=' => 1]]]);
             $resultsArr = [];
@@ -442,7 +442,7 @@ class ParentsandguardiansController extends AppController
     {
         if ($this->request->is('ajax')) {
             $this->autoRender = false;
-            $name = $this->request->query['term'];
+            $name = trim($this->request->query['term']);
             $results = $this->Parentsandguardians->find('all', [
                 'conditions' => [['client LIKE' => $name . '%'], ['guardian !=' => 1]]]);
             $resultsArr = [];
