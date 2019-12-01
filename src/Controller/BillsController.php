@@ -33,13 +33,28 @@ class BillsController extends AppController
 
     public function testFunction()
     {
-        /* $recibos = $this->Bills->find('all')
-			->contain(['Parentsandguardians'])
-			->where(['factura_pendiente' => 1, 'annulled' => 0])
-			->order(['Bills.id' => 'ASC']);
+		/* $contadorActualizadas = 0;
 		
-        $this->set(compact('recibos'));
-        $this->set('_serialize', ['recibos']); */
+        $documentos = $this->Bills->find('all');
+		
+		foreach ($documentos as $documento)
+		{
+			$documento->moneda_id = 1;
+			
+			if ($this->Bills->save($documento)) 
+			{ 
+				$contadorActualizadas++;	
+			} 
+			else
+			{
+				$this->Flash->error(__('No se pudo actualizar el documento con id : ' . $documento->id));
+			}
+		}
+		$this->Flash->success(__('Total documentos actualizados: ' . $contadorActualizadas));
+		
+		
+        $this->set(compact('documentos'));
+        $this->set('_serialize', ['documentos']); */
     }
 	
     public function index($idFamily = null, $family = null)

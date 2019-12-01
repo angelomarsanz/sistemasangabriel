@@ -3806,14 +3806,14 @@ class StudenttransactionsController extends AppController
 					$transaccionGet->original_amount = $transaccionGet->amount_dollar;
 					$contadorCaso3++;
 				}
-				if (!($this->Studenttransactions->save($transaccionGet))) 
+				/* if (!($this->Studenttransactions->save($transaccionGet))) 
 				{
 					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
 				}
 				else
 				{
 					$contadorActualizadas++;
-				}
+				} */
 			}
 		}
 		
@@ -3847,14 +3847,14 @@ class StudenttransactionsController extends AppController
 				$transaccionGet->amount = $transaccionGet->amount_dollar;
 				$transaccionGet->original_amount = $transaccionGet->amount_dollar;
 
-				if (!($this->Studenttransactions->save($transaccionGet))) 
+				/* if (!($this->Studenttransactions->save($transaccionGet))) 
 				{
 					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
 				}
 				else
 				{
 					$contadorActualizadas++;
-				}
+				} */
 			}
 		}
 		
@@ -3885,14 +3885,14 @@ class StudenttransactionsController extends AppController
 				$transaccionGet->amount = 0;
 				$transaccionGet->original_amount = 0;
 
-				if (!($this->Studenttransactions->save($transaccionGet))) 
+				/* if (!($this->Studenttransactions->save($transaccionGet))) 
 				{
 					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
 				}
 				else
 				{
 					$contadorActualizadas++;
-				}
+				} */
 			}
 		}
 		

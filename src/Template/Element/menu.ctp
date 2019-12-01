@@ -40,7 +40,7 @@
 <nav class="navbar navbar-default navbar-fixed-top" style="background-color: #b3e0ff;">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a href='/sistemasangabriel/users/home'><img src='/sistemasangabriel/files/schools/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png' width = 50 height = 60 class="img-thumbnail img-responsive logo"/></a>
+            <a href="<?php echo Router::url(["controller" => "Users", "action" => "home"]); ?>"><img src="<?php echo Router::url(["controller" => "files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 60 class="img-thumbnail img-responsive logo"/></a>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -53,6 +53,7 @@
                 <ul class="nav navbar-nav">
                     <li><?=  $this->Html->link('', ['controller' => 'Users', 'action' => 'home'], ['class' => "glyphicon glyphicon-home iconoMenu", 'title' => 'Inicio']) ?></li>
                     <li><a href="#" id="imprimir-pantalla" class="glyphicon glyphicon-print iconoMenu" title="Imprimir pantalla"></a></li>
+					<li><a href="#" id="exportar-excel" class="glyphicon glyphicon-th-list iconoMenu" title="Exportar a excel"></a></li>
 					<li><?=  $this->Html->link('', ['controller' => 'Users', 'action' => 'edit', $current_user['id']], ['class' => "glyphicon glyphicon-user iconoMenu", 'title' => 'Modificar mi perfil']) ?></li>
 					<?php if($current_user['role'] == 'Administrador'): ?>
 						<li class="dropdown">

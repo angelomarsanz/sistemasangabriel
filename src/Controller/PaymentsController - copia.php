@@ -104,6 +104,18 @@ class PaymentsController extends AppController
         $payment->annulled = 0;
         $payment->name_family = $pago->family;
 		$payment->moneda = $pago->moneda;
+		if ($payment->moneda == '$')
+		{
+			$payment->orden_moneda = 1;
+		}
+		if ($payment->moneda == '€')
+		{
+			$payment->orden_moneda = 2;
+		}
+		else
+		{
+			$payment->orden_moneda = 3;
+		}	
 		$payment->banco_receptor = $pago->bancoReceptor;
 		$payment->comentario = $pago->comentario;
         $payment->fiscal = $fiscal;        
@@ -236,9 +248,9 @@ class PaymentsController extends AppController
 				
 				$idFactura = $paymentsTurns->bill_id;
             }
-			            
-			$paymentsTurns->bill_id = $bill->control_number;
 			
+			$paymentsTurns->bill_id = $bill->control_number;
+			            
             if ($paymentsTurns->payment_type == "Tarjeta de débito" || $paymentsTurns->payment_type == "Tarjeta de crédito")
             {
                 $paymentsTurns->serial = $paymentsTurns->account_or_card;
@@ -347,6 +359,18 @@ class PaymentsController extends AppController
 				$nuevoPago = $this->Payments->newEntity();
 				$nuevoPago->bill_id = $idFacturaNueva;
 				$nuevoPago->moneda = $pago->moneda;
+				if ($nuevoPago->moneda == '$')
+				{
+					$nuevoPago->orden_moneda = 1;
+				}
+				if ($nuevoPago->moneda == '€')
+				{
+					$nuevoPago->orden_moneda = 2;
+				}
+				else
+				{
+					$nuevoPago->orden_moneda = 3;
+				}	
 				$nuevoPago->payment_type = $pago->payment_type;
 				$nuevoPago->bank = $pago->bank;
 				$nuevoPago->banco_receptor = $pago->banco_receptor;
@@ -407,231 +431,64 @@ class PaymentsController extends AppController
 		
 		return $codigoRetorno; 
     }
-    public function pagoReciboSobrante($idRecibo = null, $numeroRecibo = null, $monto = null, $turno = null)
-    {
-		$nuevoPago = $this->Payments->newEntity();
-		$nuevoPago->bill_id = $idRecibo;
-		$nuevoPago->moneda = "$";
-		$nuevoPago->payment_type = "Efectivo";
-		$nuevoPago->bank = "N/A";
-		$nuevoPago->banco_receptor = "N/A";
-		$nuevoPago->account_or_card = "N/A";
-		$nuevoPago->serial = "N/A";
-		$nuevoPago->bill_number = $numeroRecibo;
-		$nuevoPago->responsible_user = $this->Auth->user('id');
-		$nuevoPago->turn = $turno;
-		$nuevoPago->annulled = 0;
-		$nuevoPago->name_family = $familia; 
-		$nuevoPago->fiscal = 0;     
-		$nuevoPago->amount = $monto;
-		$nuevoPago->comentario = "";
-
-		if (!($this->Payments->save($nuevoPago))) 
-		{
-			$binnacles = new BinnaclesController;
-			
-			$binnacles->add('controller', 'Payments', 'pagosReciboSobrante', 'El pago correspondiente al recibo con ID ' . $idRecibo . ' no fue guardado');
-			
-			$this->Flash->error(__('El pago correspondiente al recibo con ID ' . $idRecibo . ' no fue guardado, vuelva a intentar por favor.'));
-			$codigoRetorno = 1;
-		}	
-		return $codigoRetorno; 
-    }
 	
-    public function busquedaPagos($turn = null, $fechaTurnoFormateada = null, $fechaProximoDiaFormateada = null)
+    public function busquedaPagos($turn = null)
     {
         $this->autoRender = false;
 		
-		$conceptoRecibos = [];
-		$conceptoRecibos[] = ['idFactura' => 0, 'tipoRecibo' => '', 'montoDolar' => 0, 'saldoDolar' => 0];
-		
-		$pagosRecibos = [];
-									
-		$montoRecibo = 0;
-		
-		$indicadorRecibos = 0;
-		
-		$indicadorServiciosEducativos = 0;
-		
-		$indicadorRecibosSobrantes = 0;
-		
+		$indicadorSobrantes = 0;
+							
 		$indicadorReintegros = 0;
 		
 		$indicadorCompensadas = 0;
 		
-		$resultado = [];
+		$indicadorBancos = 0;
 		
-		$this->loadModel('Concepts');
-	
-		$recibos = $this->Concepts->find('all')
-			->contain(['Bills'])
-			->where(['OR' => [['concept' => 'Sobrante'], ['SUBSTRING(concept, 1, 18) =' => 'Servicio educativo']], 'annulled' => 0, 'created >=' => $fechaTurnoFormateada, 'created <' => $fechaProximoDiaFormateada])
-			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
-			
-		$contadorRegistros = $recibos->count();
-			
-		if ($contadorRegistros > 0)
-		{
-			$indicadorRecibos = 1;
-			
-				foreach ($recibos as $recibo)
-				{
-					$montoConceptoDolar = round($recibo->amount * $recibo->bill->tasa_cambio);
-					
-					if (substr($servicio->concept, 0, 18) == "Servicio educativo")
-					{
-						$indicadorServiciosEducativos = 1;
-						$conceptoRecibos[] = ['idFactura' => $recibo->bill_id, 'tipoRecibo' => 'Servicio educativo', 'montoDolar' => $montoConceptoDolar, 'saldoDolar' => $montoConceptoDolar];
-					}
-					else
-					{
-						$indicadorRecibosSobrante = 1;
-						$conceptoRecibos[] = ['idFactura' => $recibo->bill_id, 'tipoRecibo' => 'Sobrante', 'montoDolar' => $montoConceptoDolar, 'saldoDolar' => $montoConceptoDolar];
-					}
-				}	
-			
-		}
-							
+		$resultado = [];
+										
         $paymentsTurn = $this->Payments->find('all')
 			->contain(['Bills'])
-			->where(['turn' => $turn, 'annulled' => 0])
-            ->order(['Payments.payment_type' => 'ASC', 'Payments.created' => 'ASC']);
-            
-        $billId = 0;
-		$tasaDolar = 0;
-		$tasaEuro = 0;
-		$montoDolar = 0;
-		$montoDolarEuro = 0;
-		
+			->where(['Bills.turn' => $turn, 'Bills.annulled' => 0])
+            ->order(['Payments.payment_type' => 'ASC', 'Payments.orden_moneda' => 'ASC', 'Payments.id' => 'ASC']);
+            		
         foreach ($paymentsTurn as $paymentsTurns) 
-        {    
-            if ($billId == 0)
-            {
-                $billId = $paymentsTurns->bill_id;
-                
-                $bill = $this->Payments->Bills->get($billId);
-				
-				$idFactura = $paymentsTurns->bill_id;
-				
-				$tasaDolar = $paymentsTurns->bill->tasa_cambio;
-				
-				$tasaEuro = $paymentsTurns->bill->tasa_euro;
-							
-				$tasaDolarEuro = $paymentsTurns->bill->tasa_dolar_euro;
-            }
-			
-            if ($billId != $paymentsTurns->bill_id)
-            {
-                $billId = $paymentsTurns->bill_id;
-
-                $bill = $this->Payments->Bills->get($billId);
-				
-				$idFactura = $paymentsTurns->bill_id;
-				
-				$tasaDolar = $paymentsTurns->bill->tasa_cambio;
-				
-				$tasaEuro = $paymentsTurns->bill->tasa_euro;
-				
-				$tasaDolarEuro = $paymentsTurns->bill->tasa_dolar_euro;
-            }
-			            
-			$paymentsTurns->bill_id = $bill->control_number;
-			
+        {               
             if ($paymentsTurns->payment_type == "Tarjeta de débito" || $paymentsTurns->payment_type == "Tarjeta de crédito")
             {
                 $paymentsTurns->serial = $paymentsTurns->account_or_card;
             }
-			
-			foreach ($conceptoRecibos as $concepto)
-			{				
-				if ($concepto['idFactura'] == $idFactura)
-				{
-					if ($concepto['saldoDolar'] > 0)
-					{						
-						if ($paymentsTurn->moneda == "$")
-						{
-							if ($concepto['saldoDolar'] >= $paymentsTurns->amount)
-							{
-								$concepto['saldoDolar'] -= $paymentsTurns->amount;
-								$montoRecibo = $paymentsTurns->amount;
-								$paymentsTurns->amount = 0;
-							}
-							else
-							{
-								$paymentsTurns->amount -= $concepto['saldoDolar'];
-								$montoRecibo = $concepto['saldoDolar'];
-								$concept['saldoDolar'] = 0;
-							}
-						}
-						elseif ($paymentsTurn->moneda == "€")
-						{
-							if (round($concepto['saldoDolar'] / $tasaDolarEuro) >= $paymentsTurns->amount)
-							{
-								$concepto['saldoDolar'] -= round($paymentsTurns->amount * $tasaDolarEuro);
-								$montoRecibo = $paymentsTurns->amount;
-								$paymentsTurns->amount = 0;
-							}
-							else
-							{
-								$paymentsTurns->amount -= round($concepto['saldoDolar'] / $tasaDolarEuro);
-								$montoRecibo = round($concepto['saldoDolar'] / $tasaDolarEuro);
-								$concept['saldoDolar'] = 0;
-							}							
-						}
-						else
-						{
-							if (round($concepto['saldoDolar'] * $tasaDolar) >= $paymentsTurns->amount)
-							{
-								$concepto['saldoDolar'] -= round($paymentsTurns->amount / $tasaDolar);
-								$montoRecibo = $paymentsTurns->amount;
-								$paymentsTurns->amount = 0;
-							}
-							else
-							{
-								$paymentsTurns->amount -= round($concepto['saldoDolar'] * $tasaDolar);
-								$montoRecibo = round($concepto['saldoDolar'] * $tasaDolar);
-								$concept['saldoDolar'] = 0;
-							}	
-						}
-
-						$pagosRecibos[] = ['id' => $paymentsTurns->id,
-													'moneda' => $paymentsTurns->moneda,
-													'tipoRecibo' => $concepto['tipoRecibo'];
-													'tipoPago' => $paymentsTurns->payment_type,
-													'fecha' => $paymentsTurns->created->format('d-m-Y H:i:s'),
-													'nroFactura' => $paymentsTurns->bill_number,
-													'nroControl' => $paymentsTurns->bill_id,
-													'familia' => $paymentsTurns->name_family,
-													'monto' => $montoRecibo,
-													'bancoEmisor' => $paymentsTurns->bank,
-													'bancoReceptor' => $paymentsTurns->banco_receptor,
-													'serial' => $paymentsTurns->serial,
-													'comentario' => $paymentsTurns->comentario,
-													'tasaDolar' => $tasaDolar,
-													'tasaEuro' => $tasaEuro,
-													'tasaDolarEuro' => $tasaDolarEuro];
-					}
-				}
-			}
         }
 		
-		$reintegros = $this->Concepts->find('all')
-			->contain(['Bills'])
-			->where(['concept' => 'Reintegro', 'annulled' => 0, 'created >=' => $fechaTurnoFormateada, 'created <' => $fechaProximoDiaFormateada])
-			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
+		$sobrantes = $this->Payments->Bills->find('all')
+			->contain(['Parentsandguardians'])
+			->where(['tipo_documento' => 'Recibo de sobrante', 'annulled' => 0, 'turn' => $turn])
+			->order(['Bills.id' => 'ASC']);
+			
+		$contadorSobrantes = $sobrantes->count();
+			
+		if ($contadorSobrantes > 0)
+		{
+			$indicadorSobrantes = 1;
+		}
+		
+		$reintegros = $this->Payments->Bills->find('all')
+			->contain(['Parentsandguardians'])
+			->where(['tipo_documento' => 'Recibo de reintegro', 'annulled' => 0, 'turn' => $turn])
+			->order(['Bills.id' => 'ASC']);
 			
 		$contadorReintegros = $reintegros->count();
 			
-		if ($contadorRegistros > 0)
+		if ($contadorReintegros > 0)
 		{
 			$indicadorReintegros = 1;
 		}
 		
-		$facturasCompensadas = $this->Concepts->Bills->find('all')
-			->where(['saldo_compensado >' => 0, 'annulled' => 0, 'created >=' => $fechaTurnoFormateada, 'created <' => $fechaProximoDiaFormateada])
-			->order(['bill_id' => 'ASC', 'created' => 'ASC']);
+		$facturasCompensadas = $this->Payments->Bills->find('all')
+			->contain(['Parentsandguardians'])
+			->where(['saldo_compensado_dolar >' => 0, 'annulled' => 0, 'turn' => $turn])
+			->order(['Bills.id' => 'ASC']);
 			
-		$contadorCompensadas = $reintegros->count();
+		$contadorCompensadas = $facturasCompensadas->count();
 			
 		if ($contadorCompensadas > 0)
 		{
@@ -640,11 +497,62 @@ class PaymentsController extends AppController
 		
         $recibidoBancos = $this->Payments->find('all')
 			->contain(['Bills'])
-			->where(['turn' => $turn, 'annulled' => 0])
-            ->order(['Payments.payment_type' => 'ASC', 'Payments.created' => 'ASC']);
+			->where(['Bills.turn' => $turn, 'Bills.annulled' => 0, 'Payments.banco_receptor !=' => "", 'Payments.banco_receptor !=' => "N/A"])
+            ->order(['Payments.banco_receptor' => 'ASC', 'Payments.created' => 'ASC']);
+			
+		$contadorBancos = $recibidoBancos->count();
+			
+		if ($contadorBancos > 0)
+		{
+			
+			$indicadorBancos = 1;
+		}
 				
-		$resultado = [$paymentsTurn, $indicadorRecibos, $indicadorServiciosEducativos, $indicadorRecibosSobrantes, $pagosRecibos, $indicadorReintegros, $reintegros, $indicadorCompensadas, $facturasCompensadas, $recibidoBancos];
+		$resultado = [$paymentsTurn, $indicadorSobrantes, $sobrantes, $indicadorReintegros, $reintegros, $indicadorCompensadas, $facturasCompensadas, $indicadorBancos, $recibidoBancos];
 
+        return $resultado;
+    }
+    
+	public function busquedaPagosContabilidad($turn = null)
+    {
+        $this->autoRender = false;
+
+		$codigoRetorno = 0;
+		
+		$resultado = ['codigoRetorno' => 0, 'facturas' => '', 'pagosFacturas' => ''];
+
+		$facturas = $this->Payments->Bills->find('all')
+			->contain(['Parentsandguardians'])
+			->where(['Bills.turn' => $turn, 'Bills.annulled' => 0])
+            ->order(['Bills.bill_number' => 'ASC']);
+
+		$contadorFacturas = $facturas->count();
+			
+		if ($contadorFacturas > 0)
+		{
+			$resultado['facturas'] = $facturas;
+			
+			$pagosFacturas = $this->Payments->find('all')
+				->contain(['Bills'])
+				->where(['Bills.turn' => $turn, 'Bills.annulled' => 0])
+				->order(['Bills.bill_number' => 'ASC', 'Payments.payment_type' => 'ASC', 'Payments.orden_moneda' => 'ASC']);
+				
+			$contadorPagos = $pagosFacturas->count();
+			
+			if ($contadorPagos > 0)
+			{
+				$resultado['pagosFacturas'] = $pagosFacturas;	
+			}
+			else
+			{
+				$resultado['codigoRetorno'] = 2;
+			}
+		}
+		else
+		{
+			$resultado['codigoRetorno'] = 1;
+		}
+		
         return $resultado;
     }
 }
