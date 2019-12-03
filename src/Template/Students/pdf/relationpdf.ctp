@@ -51,5 +51,5 @@
         </tbody>
     </table>  
     <hr size="4" />
-    <p>Leyenda: * = Cancelado, * = Pendiente y B = Becado</p>
+    <p>Leyenda: * = Cancelado, P = Pendiente, B = Becado, Número = Indica el porcentaje de descuento de la cuota</p>
 </div>

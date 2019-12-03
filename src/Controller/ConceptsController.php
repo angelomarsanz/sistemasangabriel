@@ -114,7 +114,7 @@ class ConceptsController extends AppController
      * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Network\Exception\NotFoundException When record not found.
      */
-    public function edit($idBill = null, $billNumber = null, $tasaCambio = null, $indicadorReversoTransaccion = null)
+    public function edit($idBill = null, $billNumber = null, $tasaCambio = null)
     {
         $this->autoRender = false;
         
@@ -136,7 +136,7 @@ class ConceptsController extends AppController
             }
             else
             {
-				if ($indicadorReversoTransaccion == 0)
+				if ($concept->transaction_identifier != 999999)
 				{
 					$studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber, $tasaCambio);   
 				}

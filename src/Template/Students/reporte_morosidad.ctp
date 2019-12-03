@@ -62,7 +62,7 @@
 		<?php if ($tipoReporte == "Por grado"): ?>
 			<div>
 				<div style="float: left; width:10%;">
-					<p><?= $this->html->image('../files/schools/profile_photo/' . $school->get('profile_photo_dir') . '/'. $school->get('profile_photo'), ['width' => 200, 'height' => 200, 'class' => 'img-thumbnail img-responsive']) ?></p>
+					<p><img src="<?php echo Router::url(["controller" => "files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 50 class="img-thumbnail img-responsive logo"/></p>
 				</div>
 				<div style="float: left; width: 90%;">
 					<p style="text-align: right;">Página 1</p>
@@ -107,7 +107,7 @@
 			</div>
 			<div class="saltopagina">
 				<div style="float: left; width:10%;">
-					<p><?= $this->html->image('../files/schools/profile_photo/' . $school->get('profile_photo_dir') . '/'. $school->get('profile_photo'), ['width' => 200, 'height' => 200, 'class' => 'img-thumbnail img-responsive']) ?></p>
+					<p><img src="<?php echo Router::url(["controller" => "files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 50 class="img-thumbnail img-responsive logo"/></p>
 				</div>
 				<div style="float: left; width: 90%;">
 					<p style="text-align: right;">Página 2</p>
@@ -126,10 +126,10 @@
 				<br />
 				<br />
 			</div>
-		<?php else: ?>
+		<?php elseif ($tipoReporte == "Total general"): ?>
 			<div>
 				<div style="float: left; width:10%;">
-					<p><?= $this->html->image('../files/schools/profile_photo/' . $school->get('profile_photo_dir') . '/'. $school->get('profile_photo'), ['width' => 200, 'height' => 200, 'class' => 'img-thumbnail img-responsive']) ?></p>
+					<p><img src="<?php echo Router::url(["controller" => "files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 50 class="img-thumbnail img-responsive logo"/></p>
 				</div>
 				<div style="float: left; width: 90%;">
 					<p style="text-align: right;">Página 2</p>
@@ -148,6 +148,51 @@
 				<br />
 				<br />
 			</div>
+		<?php else: 
+			$contadorAlumnosMorosos = 1; ?>
+			<div>
+				<div style="float: left; width:10%;">
+					<p><img src="<?php echo Router::url(["controller" => "files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 50 class="img-thumbnail img-responsive logo"/></p>
+				</div>
+				<div style="float: left; width: 90%;">
+					<p style="text-align: right;">Página 1</p>
+					<h5><b><?= $school->name ?></b></h5>
+					<p>RIF: <?= $school->rif ?></p>
+					<h3 style="text-align: center;"><?= 'Reporte de alumnos Morosos al ' . $mes . "/" . $ano ?> </h3>
+				</div>
+			</div>
+			<div>
+				<table class="table table-striped table-hover">
+					<thead>
+						<tr>
+							<th style="text-align:center;">Nro.</th>
+							<th style="text-align:center;">Descuento (%)</th>
+							<th style="text-align:center;">Cuotas pendientes</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ($detalleMorosos as $clave => $moroso): ?>
+							<tr>
+								<td style='text-align:left;'><?= $contadorAlumnosMorosos ?></td>
+								<td style='text-align:center;'><?= $moroso['descuento'] ?></td>
+								<td style='text-align:center;'><?= $moroso['cuotasPendientes'] ?></td>
+								<td style='text-align:center;'><?= number_format($moroso['pendiente'], 2, ",", ".") ?></td>
+							</tr> 
+							<?php $contadorAlumnosMorosos++; 
+						endforeach; ?>
+					</tbody>
+					<tfoot>
+						<tr>
+							<td style='text-align:left;'><b>Total</b></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td style='text-align:center;'><b><?= number_format($totalMoroso, 2, ",", ".") ?></b></td>
+
+						</tr>
+					</tfoot>
+				</table>
 		<?php endif; ?>
 		<br />			
 	</div>

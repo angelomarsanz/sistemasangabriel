@@ -226,6 +226,12 @@ class StudentsTable extends Table
             ->notEmpty('new_student');
 			
         $validator
+            ->allowEmpty('descuento_ano_anterior');
+			
+        $validator
+            ->allowEmpty('tipo_descuento');
+			
+        $validator
             ->allowEmpty('discount');
 			
         return $validator;
@@ -268,7 +274,7 @@ class StudentsTable extends Table
     public function findRegular(Query $query, array $options)
     {
         $query->where([['id >' => 1], ['student_condition' => 'Regular']])
-			->order(['section_id' => 'ASC']); 
+			->order(['section_id' => 'ASC', 'surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']); 
 		
         $arrayResult = [];
         

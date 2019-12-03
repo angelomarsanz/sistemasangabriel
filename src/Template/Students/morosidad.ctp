@@ -33,8 +33,14 @@
 	               	echo $this->Form->input('tipo_reporte', ['label' => 'Tipo de reporte: ', 'options' => 
 	                    ["" => "",
 						'Total general' => 'Total general',
-	                    'Por grado' => 'Por grado']]);
+	                    'Por grado' => 'Por grado',
+						'Por alumno' => 'Por alumno']]);
 					echo "<div id='mensaje-tipo-reporte' class='mensaje-usuario'></div>";
+	               	echo $this->Form->input('ano_escolar', ['label' => 'Inscritos en el: ', 'options' => 
+	                    ["" => "",
+						'Año escolar anterior' => 'Año escolar anterior',
+	                    'Año escolar actual' => 'Año escolar actual']]);
+					echo "<div id='mensaje-ano-escolar' class='mensaje-usuario'></div>";
 					echo "<br />"
 		    	?>
 		    </fieldset>
@@ -69,7 +75,22 @@
 			{
 				indicadorError = 1;
 				$("#mensaje-tipo-reporte").html("Por favor seleccione el tipo de reporte").css("color", 'red');
-			}			
+			}
+
+			if ($('#ano_escolar').val() == "")
+			{
+				indicadorError = 1;
+				$("#mensaje-ano-escolar").html("Por favor seleccione el año escolar").css("color", 'red');
+			}	
+			
+			$anoMesRequerido = $('#ano').val() . $('#mes').val();
+			$anoMesPeriodo = $('#ano_escolar').val() . "09"; 
+
+			if ($anoMesRequerido > $anoMesPeriodo)
+			{
+				indicadorError = 1;
+				$("#mensaje-ano-escolar").html("El período escolar seleccionado debe estar acorde con el mes y año de la mensualidad").css("color", 'red');				
+			}
 			
 			if (indicadorError > 0)
 			{

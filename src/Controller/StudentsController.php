@@ -1195,7 +1195,7 @@ class StudentsController extends AppController
 			{
 				if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
 				{
-					if ($studentTransaction->amount > 0)
+					if ($studentTransaction->amount_dollar > 0)
 					{
 						$swSignedUp = 1;
 					}
@@ -1747,7 +1747,7 @@ class StudentsController extends AppController
 					{
 						if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
 						{
-							if ($studentTransaction->amount > 0)
+							if ($studentTransaction->amount_dollar > 0)
 							{
 								$swSignedUp = 1;
 							}
@@ -2191,7 +2191,8 @@ class StudentsController extends AppController
 					->select(['Studenttransactions.student_id', 
 						'Studenttransactions.transaction_description', 
 						'Studenttransactions.amount', 
-						'Studenttransactions.original_amount'])
+						'Studenttransactions.original_amount',
+						'Studenttransactions.amount_dollar'])
 					->where([['Studenttransactions.student_id' => $familyStudent->id],
 						['Studenttransactions.transaction_description' => $concepto]])
 					->order(['Studenttransactions.created' => 'DESC']);
@@ -2200,7 +2201,7 @@ class StudentsController extends AppController
 
 				if ($row)
 				{
-					if ($row->amount > 0)
+					if ($row->amount_dollar > 0)
 					{
 						$arraySignedUp[$familyStudent->id] = 'Pagado';
 						if ($familyStudent->new_student == 1)
@@ -2802,17 +2803,17 @@ class StudentsController extends AppController
     {
         if ($this->request->is('post')) 
         {
-			return $this->redirect(['controller' => 'Students', 'action' => 'reporteMorosidad', $_POST["mes"], $_POST["ano"], $_POST["tipo_reporte"]]);
+			return $this->redirect(['controller' => 'Students', 'action' => 'reporteMorosidad', $_POST["mes"], $_POST["ano"], $_POST["tipo_reporte"], $_POST["ano_escolar"]]);
         }
 	}
 	
-	public function reporteMorosidad($mes = null, $ano = null, $tipoReporte = null)
+	public function reporteMorosidad($mes = null, $ano = null, $tipoReporte = null, $anoEscolar = null)
 	{
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
                
         $currentDate = Time::now();
-		
+				
 		$currentYear = $currentDate->year;
 		$currentMonth = $currentDate->month;
 		
@@ -2827,9 +2828,17 @@ class StudentsController extends AppController
 		$dollarExchangeRate = $moneda->tasa_cambio_dolar; 
 				
 		$mesesTarifas = $this->mesesTarifas(0);
-						
-		$yearFrom = $school->current_school_year;
-		$yearUntil = $yearFrom + 1;
+								
+		if ($anoEscolar == "Año escolar anterior")
+		{
+			$yearFrom = $school->current_school_year - 1;
+			$yearUntil = $school->current_school_year;
+		}	
+		else
+		{
+			$yearFrom = $school->current_school_year;
+			$yearUntil = $yearFrom + 1;
+		}
 				
 		$yearMonthFrom = $yearFrom . '09';
 			
@@ -2882,6 +2891,9 @@ class StudentsController extends AppController
 		$tDefaulters[0]['totalStudents'] = 0;
 		
 		$swSection = 0;
+		
+		$detalleMorosos = [];
+		$totalMoroso = 0;
 				
 		foreach ($studentsFor as $studentsFors)
 		{		
@@ -2903,13 +2915,13 @@ class StudentsController extends AppController
 				}
 				else
 				{				
-					$studentTransactions = $this->Students->Studenttransactions->find('all')->where(['student_id' => $studentsFors->id]);
+					$studentTransactions = $this->Students->Studenttransactions->find('all')->where(['student_id' => $studentsFors->id, 'invoiced' => 0]);
 
 					foreach ($studentTransactions as $studentTransaction) 
 					{
 						if ($studentTransaction->transaction_description == 'Matrícula ' . $yearFrom)
 						{
-							if ($studentTransaction->amount > 0)
+							if ($studentTransaction->amount_dollar > 0)
 							{
 								$swSignedUp = 1;
 							}
@@ -2930,7 +2942,7 @@ class StudentsController extends AppController
 									
 								$yearMonth = $year . $numberOfTheMonth;
 									
-								if ($yearMonth >= $yearMonthFrom && $yearMonth <= $yearMonthEnd)
+								if ($month != "Ago")
 								{
 									if ($studentTransaction->paid_out == 0)
 									{
@@ -2942,12 +2954,34 @@ class StudentsController extends AppController
 											{
 												if ($mesesTarifa["anoMes"] == $yearMonth)
 												{
-													$amountMonthly = $mesesTarifa["tarifaBolivar"];
+													if ($studentsFors->discount != null)
+													{
+														$amountMonthly = round(($mesesTarifa["tarifaBolivar"] * $studentsFors->discount) / 100);
+													}
+													else
+													{
+														$amountMonthly = $mesesTarifa["tarifaBolivar"];
+													}
 													break;
 												}
 											}
 											$delinquentMonths++;
 											$totalDebt = $totalDebt + $amountMonthly;
+											if (isset($detalleMorosos[$studentsFors->full_name]))
+											{
+												$detalleMorosos[$studentsFors->full_name]['cuotasPendientes']++;
+												$detalleMorosos[$studentsFors->full_name]['pendiente'] += $amountMonthly; 
+												$totalMoroso += $amountMonthly;
+											}
+											else
+											{
+												$detalleMorosos[$studentsFors->full_name] = 
+													['grado' => $nameSection->full_name,
+													'descuento' => $studentsFors->discount,
+													'cuotasPendientes' => 1,
+													'pendiente' => $amountMonthly];
+												$totalMoroso += $amountMonthly;
+											}
 										}
 									}
 									else
@@ -2956,7 +2990,14 @@ class StudentsController extends AppController
 										{
 											if ($mesesTarifa["anoMes"] == $yearMonth)
 											{
-												$tarifaDolarAnoMes = $mesesTarifa["tarifaDolar"];
+												if ($studentsFors->discount != null)
+												{
+													$tarifaDolarAnoMes = round(($mesesTarifa["tarifaDolar"] * $studentsFors->discount) / 100);
+												}
+												else
+												{
+													$tarifaDolarAnoMes = $mesesTarifa["tarifaDolar"];
+												}
 												break;
 											}
 										}
@@ -2966,11 +3007,27 @@ class StudentsController extends AppController
 
 											if ($yearMonth <= $yearMonthUntil)
 											{											
-												$diferenciaDolares = $tarifaDolarAnoMes - $studentTransaction->amount_dolar;
+												$diferenciaDolares = $tarifaDolarAnoMes - $studentTransaction->amount_dollar;
 												$diferenciaBolivares = round($diferenciaDolares * $dollarExchangeRate);
 											
 												$delinquentMonths++;
 												$totalDebt = $totalDebt + $diferenciaBolivares;
+													
+												if (isset($detalleMorosos[$studentsFors->full_name]))
+												{
+													$detalleMorosos[$studentsFors->full_name]['cuotasPendientes']++;
+													$detalleMorosos[$studentsFors->full_name]['pendiente'] += $diferenciaBolivares; 
+													$totalMoroso += $diferenciaBolivares;
+												}
+												else
+												{
+													$detalleMorosos[$studentsFors->full_name] = 
+														['grado' => $nameSection->full_name,
+														'descuento' => $studentsFors->discount,
+														'cuotasPendientes' => 1,
+														'pendiente' => $diferenciaBolivares];
+													$totalMoroso += $diferenciaBolivares;
+												}
 											}
 										}
 									}
@@ -3038,7 +3095,8 @@ class StudentsController extends AppController
 				}
 			}
 		}
-		$this->set(compact('school', 'defaulters', 'tDefaulters', 'totalDebt', 'currentDate', 'ano', 'mes', 'tipoReporte'));
+			
+		$this->set(compact('school', 'defaulters', 'tDefaulters', 'totalDebt', 'currentDate', 'ano', 'mes', 'tipoReporte', 'detalleMorosos', 'totalMoroso'));
 	}
     public function relatedstudentsPrueba()
     {

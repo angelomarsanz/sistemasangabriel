@@ -1093,7 +1093,7 @@ class BillsController extends AppController
 							}
 							else 
 							{
-								$concepts->edit($idBill, $_POST['bill_number'], $factura->tasa_cambio, 0);
+								$concepts->edit($idBill, $_POST['bill_number'], $factura->tasa_cambio);
 								
 								$payments->edit($idBill);
 																
@@ -1116,19 +1116,34 @@ class BillsController extends AppController
 									}
 									else
 									{
-										$concepts->edit($reciboSobrante->id, $reciboSobrante->bill_number, $reciboSobrante->tasa_cambio, 1);
+										$concepts->edit($reciboSobrante->id, $reciboSobrante->bill_number, $reciboSobrante->tasa_cambio);
 																
 										$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló el recibo Nro. ' . $reciboSobrante->bill_number);
 									}
 								}
 
-								if ($factura->saldo_compensado_dolar > 0 || $sobrante > 0)
+								if ($factura->saldo_compensado_dolar > 0 || $factura->tipo_documento == "Recibo de reintegro" || $sobrante > 0)
 								{
 									$parentsandguardian = $this->Bills->Parentsandguardians->get($factura->parentsandguardian_id);
 																				
 									if ($factura->saldo_compensado_dolar > 0)
 									{
 										$parentsandguardian->balance += $factura->saldo_compensado_dolar;
+									}
+									elseif ($factura->tipo_documento == "Recibo de reintegro")
+									{
+										if ($factura->moneda_id == 1)
+										{
+											$parentsandguardian->balance += round($factura->amount_paid / $factura->tasa_cambio);
+										}
+										elseif ($factura->moneda_id == 2)
+										{
+											$parentsandguardian->balance += $factura->amount_paid;
+										}
+										else
+										{
+											$parentsandguardian->balance += round($factura->amount_paid * $factura->tasa_dolar_euro);
+										}										
 									}
 									elseif ($sobrante > 0)
 									{
@@ -1141,7 +1156,7 @@ class BillsController extends AppController
 										$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian . ' en la factura ' . $billNumber);
 									}
 								}
-			
+											
 								return $this->redirect(['action' => 'annulledInvoice', $idBill]);
 							}
 						}
