@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-4">
 		<div class="page-header">
-	        <h3>Vale de caja</h3>
+	        <h3>Recibo de compra</h3>
 	    </div>
 	    <?= $this->Form->create() ?>
 	        <fieldset>

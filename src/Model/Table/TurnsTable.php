@@ -168,45 +168,21 @@ class TurnsTable extends Table
             ->notEmpty('supervisor_close');
 			
         $validator
-            ->allowEmpty('totales_fiscales');
+            ->allowEmpty('vector_pagos');
+			
+        $validator
+            ->allowEmpty('vector_totales_recibidos');
 
         $validator
-            ->allowEmpty('total_general_fiscales');
+            ->allowEmpty('total_formas_pago');
 			
         $validator
-            ->allowEmpty('totales_anticipos');
+            ->allowEmpty('total_general_compensado');
 			
         $validator
-            ->allowEmpty('total_general_anticipos');
+            ->allowEmpty('total_general_facturado');
 			
-        $validator
-            ->allowEmpty('totales_servicios_educativos');
-			
-        $validator
-            ->allowEmpty('total_general_servicios_educativos');
-			
-        $validator
-            ->allowEmpty('total_totales');
-			
-        $validator
-            ->allowEmpty('totales_sobrantes');
-			
-        $validator
-            ->allowEmpty('totales_reintegros');
-			
-        $validator
-            ->allowEmpty('totales_facturas_compensadas');
-			
-        $validator
-            ->allowEmpty('total_otras_operaciones');
-
-        $validator
-            ->allowEmpty('bancos_receptores');			
-
-        $validator
-            ->allowEmpty('total_bancos_receptores');
-			
-        return $validator;
+		return $validator;
     }
 
     /**

@@ -225,9 +225,9 @@ class StudenttransactionsController extends AppController
 
 		$studenttransaction->amount_dollar = $studenttransaction->amount_dollar - $montoReversoDolar;
 				
-		if ($studentTransaction->original_amount != $studenttransaction->amount)
+		if ($studenttransaction->original_amount != $studenttransaction->amount)
 		{
-			$studenttransaction->amount = $studentTransaction->original_amount;
+			$studenttransaction->amount = $studenttransaction->original_amount;
 		}
 								
 		if ($studenttransaction->amount > $studenttransaction->amount_dollar)

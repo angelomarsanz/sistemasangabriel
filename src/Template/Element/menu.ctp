@@ -53,7 +53,7 @@
                 <ul class="nav navbar-nav">
                     <li><?=  $this->Html->link('', ['controller' => 'Users', 'action' => 'home'], ['class' => "glyphicon glyphicon-home iconoMenu", 'title' => 'Inicio']) ?></li>
                     <li><a href="#" id="imprimir-pantalla" class="glyphicon glyphicon-print iconoMenu" title="Imprimir pantalla"></a></li>
-					<li><a href="#" id="exportar-excel" class="glyphicon glyphicon-th-list iconoMenu" title="Exportar a excel"></a></li>
+					<li><a href="#" id="exportar-excel" class="glyphicon glyphicon-list-alt iconoMenu" title="Exportar a excel"></a></li>
 					<li><?=  $this->Html->link('', ['controller' => 'Users', 'action' => 'edit', $current_user['id']], ['class' => "glyphicon glyphicon-user iconoMenu", 'title' => 'Modificar mi perfil']) ?></li>
 					<?php if($current_user['role'] == 'Administrador'): ?>
 						<li class="dropdown">
@@ -71,7 +71,6 @@
 								<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
 								<li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
 								<li><?= $this->Html->link('Histórico cambio tasa dólar', ['controller' => 'Historicotasas', 'action' => 'index']) ?></li>
-								<li><?= $this->Html->link('Vale de caja', ['controller' => 'Bills', 'action' => 'valeCaja']) ?></li>
 							</ul>
 						</li>
 						<li class="dropdown">
@@ -106,6 +105,8 @@
 							</ul>
 						</li>
 						
+						<li><?= $this->Html->link('Compras', ['controller' => 'Bills', 'action' => 'compra']) ?></li>
+						
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Contabilidad <span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">    
@@ -125,7 +126,7 @@
 								<li><?= $this->Html->link('Eventos del usuario', ['controller' => 'Eventos', 'action' => 'index']) ?></li>
 							</ul>
 						</li>
-						
+												
 						<li><a href="http://138.186.179.63/wiki/index.php/Aplicacion_ventas" id="wiki" title="wiki">Wiki</a></li>
     
                         <!-- <?php if ($current_user['username'] == 'angel2703'): ?>

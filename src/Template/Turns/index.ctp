@@ -14,6 +14,7 @@
 						<th scope="col" class="actions"></th>
 						<th scope="col" class="actions"></th>
 						<th scope="col" class="actions"></th>
+						<th scope="col" class="actions"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -30,7 +31,7 @@
 							<td class="actions">
 								<?php 
 									if ($turn->status == 0):
-										if ($turn->id > 959):
+										if ($turn->id > 970):
 											echo $this->Html->link('Reporte cierre', ['action' => 'reporteCierre', $turn->id], ['class' => 'btn btn-info']);
 										else:
 											echo $this->Html->link('Reporte cierre', ['action' => 'turnpdf', $turn->id, $turn->user->first_name . ' ' . $turn->user->surname, '_ext' => 'pdf'], ['class' => 'btn btn-info']); 
@@ -41,8 +42,8 @@
 							<td class="actions">
 								<?php 
 									if ($turn->status == 0):
-										if ($turn->id > 959):
-											echo $this->Html->link('Excel facturas, notas y recibos', ['action' => 'excelDocumentos', $turn->id], ['class' => 'btn btn-info']);
+										if ($turn->id > 970):
+											echo $this->Html->link('Reporte contador', ['action' => 'reporteContador', $turn->id], ['class' => 'btn btn-info', 'disabled' => 'disabled']);
 										endif;
 									endif;
 								?>
@@ -50,8 +51,17 @@
 							<td class="actions">
 								<?php 
 									if ($turn->status == 0):
-										if ($turn->id > 947):
-											echo $this->Html->link('Excel pagos recibidos', ['action' => 'excelPagos', $turn->id], ['class' => 'btn btn-info']);											
+										if ($turn->id > 970):
+											echo $this->Html->link('Documentos', ['action' => 'excelDocumentos', $turn->id], ['class' => 'btn btn-info']);
+										endif;
+									endif;
+								?>
+							</td>
+							<td class="actions">
+								<?php 
+									if ($turn->status == 0):
+										if ($turn->id > 970):
+											echo $this->Html->link('Pagos', ['action' => 'excelPagos', $turn->id], ['class' => 'btn btn-info']);											
 										endif;
 									endif;
 								?>

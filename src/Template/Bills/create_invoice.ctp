@@ -2959,6 +2959,43 @@
                 }
 
                 amountPaid = parseFloat($('#amount-' + paymentIdentifier).val());
+				bank = $('#bank-' + paymentIdentifier).val();
+				bancoReceptor = $('#banco-receptor-' + paymentIdentifier).val();
+                accountOrCard = $('#account_or_card-' + paymentIdentifier).val();
+                serial = $('#serial-' + paymentIdentifier).val();
+				comentario = $('#comentario-' + paymentIdentifier).val();
+				
+				if (bank == 'Zelle' && monedaPago != '$')
+				{
+					alert('Estimado usuario los pagos desde Zelle deben ser en dólares');
+					return false;
+				}
+				else if (bancoReceptor == 'Zelle' && monedaPago != '$')
+				{
+					alert('Estimado usuario los pagos hacia Zelle deben ser en dólares');
+					return false;
+				}
+				else if (bank != 'Zelle' && bank != "N/A" && monedaPago != 'Bs.')
+				{
+					alert('Estimado usuario los pagos desde bancos nacionales deben ser en bolívares');
+					return false;
+				}
+				else if (bancoReceptor != 'Zelle' && bancoReceptor != "N/A" && monedaPago != 'Bs.')
+				{
+					alert('Estimado usuario los pagos hacia bancos nacionales deben ser en bolívares');
+					return false;
+				}	
+
+				if (bank == 'Zelle' && paymentType != 'Transferencia')
+				{
+					alert('Estimado usuario los pagos desde Zelle solo deben ser en transferencia');
+					return false;
+				}
+				else if (bancoReceptor == 'Zelle' && paymentType != 'Transferencia')
+				{
+					alert('Estimado usuario los pagos desde Zelle solo deben ser en transferencia');
+					return false;
+				}				
 				
 				if (monedaPago == "$")
 				{
@@ -2972,13 +3009,7 @@
 				{
 					montoPagadoDolar = Math.round(amountPaid / dollarExchangeRate);
 				}
-				
-                bank = $('#bank-' + paymentIdentifier).val();
-				bancoReceptor = $('#banco-receptor-' + paymentIdentifier).val();
-                accountOrCard = $('#account_or_card-' + paymentIdentifier).val();
-                serial = $('#serial-' + paymentIdentifier).val();
-				comentario = $('#comentario-' + paymentIdentifier).val();
-
+			
                 printPayments();
 				
                 alert('Pago registrado con éxito: ' +  monedaPago + ' ' + amountPaid.toFixed(2));

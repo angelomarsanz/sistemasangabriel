@@ -351,6 +351,8 @@ class BillsController extends AppController
 		
 		$codigoRetorno = 0;
 		
+		$sobranteNeto = 0;
+		
         if ($this->request->is('post')) 
         {
 			$indicadorFacturaPendiente = 0;
@@ -410,7 +412,7 @@ class BillsController extends AppController
 							if ($resultado['codigoRetorno'] == 0)
 							{
 								$factura = $this->Bills->get($billId);
-								$factura->id_Recibo_sobrante = $resultado['idRecibo'];
+								$factura->id_recibo_sobrante = $resultado['idRecibo'];
 														
 								if (!($this->Bills->save($factura)))
 								{
@@ -424,9 +426,16 @@ class BillsController extends AppController
 								$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo crear correctamente el recibo del sobrante para la factura ' . $billNumber);
 							}
 						}
-						
-						$parentsandguardian->balance = $parentsandguardian->balance - $this->headboard['saldoCompensado'] + $this->headboard['sobrante'];
-						
+							
+						if ($this->headboard['saldoCompensado'] > 0)
+						{
+							$parentsandguardian->balance = $parentsandguardian->balance - $this->headboard['saldoCompensado'];
+						}
+						elseif ($this->headboard['sobrante'] > 0)
+						{
+							$parentsandguardian->balance = $parentsandguardian->balance + $this->headboard['sobrante'];
+						}
+												
 						if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))
 						{
 							$this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
@@ -637,8 +646,8 @@ class BillsController extends AppController
 		$montoSobrante = 0;
         $indicadorReintegro = 0;
 		$montoReitegro = 0;
-        $indicadorValeCaja = 0;
-		$montoValeCaja = 0;
+        $indicadorCompra = 0;
+		$montoCompra = 0;
         $previousAcccountingCode = " ";
 		$indicadorAnticipo = 0;
  
@@ -733,10 +742,10 @@ class BillsController extends AppController
 					$indicadorReintegro = 1;
 					$montoReintegro = $aConcept->amount;
 				}
-			    elseif (substr($aConcept->concept, 0, 17) == "Vale de caja por:")
+			    elseif (substr($aConcept->concept, 0, 10) == "Compra de:")
 				{
-					$indicadorValeCaja = 1;
-					$montoValeCaja = $aConcept->amount;
+					$indicadorCompra = 1;
+					$montoCompra = $aConcept->amount;
 					$invoiceLine = $aConcept->concept;
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
@@ -875,10 +884,12 @@ class BillsController extends AppController
 					$indicadorReintegro = 1;
 					$montoReintegro = $aConcept->amount;
 				}
-			    elseif (substr($aConcept->concept, 0, 17) == "Vale de caja por:")
+			    elseif (substr($aConcept->concept, 0, 10) == "Compra de:")
 				{
-					$indicadorValeCaja = 1;
-					$montoValeCaja = $aConcept->amount;
+					$indicadorCompra = 1;
+					$montoCompra = $aConcept->amount;
+					$invoiceLine = $aConcept->concept;
+					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 				}
 				elseif (substr($aConcept->concept, 0, 14) == "Seguro escolar")
@@ -950,8 +961,8 @@ class BillsController extends AppController
 		
 		$vista = "invoice";
 					
-        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorValeCaja', 'montoValeCaja', 'monedaDocumento'));
-        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorValeCaja', 'montoValeCaja', 'monedaDocumento']);
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'monedaDocumento'));
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'monedaDocumento']);
     }
 	
     public function invoiceConcept($accountingCode, $invoiceLine = null, $amountConcept = null)
@@ -1026,6 +1037,8 @@ class BillsController extends AppController
 		$binnacles = new BinnaclesController;
 		
 		$eventos = new EventosController;
+		
+		$sobrante = 0;
         
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
@@ -1063,7 +1076,7 @@ class BillsController extends AppController
 		
 					if ($anoMesActual == $anoMesFactura || $factura->fiscal == 0)
 					{
-						if ($factura->moneda_id > 1 && $factura->tasa_cambio != 1)
+						if ($factura->tasa_cambio != 1)
 						{
 							$bill = $this->Bills->get($idBill);
 							
@@ -1089,6 +1102,9 @@ class BillsController extends AppController
 								if ($bill->id_recibo_sobrante > 0)
 								{
 									$reciboSobrante = $this->Bills->get($bill->id_recibo_sobrante);
+									
+									$sobrante = $reciboSobrante->amount_paid; 
+									
 									$reciboSobrante->annulled = 1;
 							
 									$reciboSobrante->date_annulled = Time::now();
@@ -1101,12 +1117,30 @@ class BillsController extends AppController
 									else
 									{
 										$concepts->edit($reciboSobrante->id, $reciboSobrante->bill_number, $reciboSobrante->tasa_cambio, 1);
-								
-										$payments->edit($reciboSobrante->id);
-								
+																
 										$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló el recibo Nro. ' . $reciboSobrante->bill_number);
 									}
-								}			
+								}
+
+								if ($factura->saldo_compensado_dolar > 0 || $sobrante > 0)
+								{
+									$parentsandguardian = $this->Bills->Parentsandguardians->get($factura->parentsandguardian_id);
+																				
+									if ($factura->saldo_compensado_dolar > 0)
+									{
+										$parentsandguardian->balance += $factura->saldo_compensado_dolar;
+									}
+									elseif ($sobrante > 0)
+									{
+										$parentsandguardian->balance -= $reciboSobrante->amount_paid;
+									}
+										
+									if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))
+									{
+										$this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
+										$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian . ' en la factura ' . $billNumber);
+									}
+								}
 			
 								return $this->redirect(['action' => 'annulledInvoice', $idBill]);
 							}
@@ -2139,10 +2173,10 @@ class BillsController extends AppController
 			$bill->turn = $ultimoTurno->id;
 			$bill->school_year = $school->current_school_year;
 		
-			if ($tipoRecibo == "Recibo de vale de caja")
+			if ($tipoRecibo == "Recibo de compra")
 			{
-				$bill->identification = "";
-				$bill->client = $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname');
+				$bill->identification = "J - 075730844";
+				$bill->client = "U.E. Colegio San Gabriel Arcángel";
 				$bill->tax_phone = "";
 				$bill->fiscal_address = "";				
 			}
@@ -2222,19 +2256,19 @@ class BillsController extends AppController
         $this->set('_serialize', ['monto']);
 	}
 
-	public function valeCaja()
+	public function compra()
 	{
 		if ($this->request->is(['patch', 'post', 'put']))
         {				
-			$resultado = $this->reciboAdicional(1, "", 0, "Recibo de vale de caja", $_POST['moneda'], "Vale de caja por: " . $_POST['concepto'], $_POST['monto']);
+			$resultado = $this->reciboAdicional(1, "", 0, "Recibo de compra", $_POST['moneda'], "Compra de: " . $_POST['concepto'], $_POST['monto']);
 			
 			if ($resultado['codigoRetorno'] == 0)
 			{
-				return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $resultado['idRecibo'], 0, 1, 'valeCaja']);
+				return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $resultado['idRecibo'], 0, 1, 'compra']);
 			}
 			else
 			{
-				$this->Flash->error(__('Estimado usuario no se pudo crear el vale de caja'));
+				$this->Flash->error(__('Estimado usuario no se pudo crear el recibo de compra'));
 			}
 		}
 	}

@@ -273,8 +273,18 @@ class TurnsController extends AppController
 			$lastNumber = 0;
 			$lastControl = 0;
 			
+			$indicadorFacturasAnticipos = 0;
+			$indicadorServiciosEducativos = 0;
+			$indicadorReintegros = 0;
+			$indicadorCompras = 0;
+			$indicadorNotasCredito = 0;
+			$indicadorNotasDebito = 0;
+			$indicadorFacturasRecibos = 0;
+			$indicadorSobrantes = 0;
+			$indicadorFacturasAnuladas = 0;
+			$indicadorRecibosAnulados = 0;
+
 			$vectorPagos = []; 
-		
 			$contadorNumero = 1;
 			
 			$this->loadModel('Rates');
@@ -306,6 +316,26 @@ class TurnsController extends AppController
 							
 			$totalGeneralCompensado = 0; 
 			$totalGeneralFacturado = 0;
+			
+			$documentosAnulados = $this->Bills->find('all', ['conditions' => ['date_annulled >=' => $turn->start_date],
+				'order' => ['Bills.id' => 'ASC']]);
+				
+			$contadorAnulados = $documentosAnulados->count();
+			
+			if ($contadorAnulados > 0)
+			{
+				foreach ($documentosAnulados as $anulado)
+				{
+					if ($anulado->fiscal == 1)
+					{
+						$indicadorFacturasAnuladas = 1;
+					}
+					else
+					{
+						$indicadorRecibosAnulados = 1;
+					}
+				}
+			}
 								
 			$resultado = $payment->busquedaPagosContabilidad($id);
 			
@@ -314,6 +344,71 @@ class TurnsController extends AppController
 						
 			foreach ($facturas as $factura)
 			{
+				if ($factura->tipo_documento == "Factura" || $factura->tipo_documento == "Recibo de anticipo" )
+				{
+					$indicadorFacturasAnticipos = 1;
+				}
+				elseif ($factura->tipo_documento == "Recibo de servicio educativo")
+				{
+					$indicadorServiciosEducativos = 1;
+				}
+				elseif ($factura->tipo_documento == "Recibo de reintegro")
+				{
+					$indicadorReintegros = 1;
+					
+					if ($factura->moneda_id == 1)
+					{
+						$vectorTotalesRecibidos['Menos reintegros']['Efectivo Bs.'] -= $factura->amount_paid;
+						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo Bs.'] -= $factura->amount_paid;	
+					}
+					elseif ($factura->moneda_id == 2)
+					{
+						$vectorTotalesRecibidos['Menos reintegros']['Efectivo $'] -= $factura->amount_paid;
+						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] -= $factura->amount_paid;	
+					}					
+					else
+					{
+						$vectorTotalesRecibidos['Menos reintegros']['Efectivo €'] -= $factura->amount_paid;
+						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] -= $factura->amount_paid;	
+					}									
+				}
+				elseif ($factura->tipo_documento == "Recibo de compra")
+				{
+					$indicadorCompras = 1;
+					
+					if ($factura->moneda_id == 1)
+					{
+						$vectorTotalesRecibidos['Menos compras']['Efectivo Bs.'] -= $factura->amount_paid;
+						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo Bs.'] -= $factura->amount_paid;	
+					}
+					elseif ($factura->moneda_id == 2)
+					{
+						$vectorTotalesRecibidos['Menos compras']['Efectivo $'] -= $factura->amount_paid;
+						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] -= $factura->amount_paid;	
+					}					
+					else
+					{
+						$vectorTotalesRecibidos['Menos compras']['Efectivo €'] -= $factura->amount_paid;
+						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] -= $factura->amount_paid;	
+					}	
+				}
+				elseif ($factura->tipo_documento == "Nota de crédito")
+				{
+					$indicadorNotasCredito = 1;
+				}
+				elseif ($factura->tipo_documento == "Nota de débito")
+				{
+					$indicadorNotasDebito = 1;
+				}
+				elseif ($factura->tipo_documento == "Recibo de sobrante")
+				{
+					$indicadorSobrantes = 1;
+				}
+				elseif ($factura->id_anticipo > 0)
+				{
+					$indicadorFacturasRecibos = 1;
+				}
+				
 				if ($factura->moneda_id == 1)
 				{
 					$montoFacturaBolivares = $factura->amount_paid;
@@ -332,21 +427,22 @@ class TurnsController extends AppController
 				
 				if ($factura->tipo_documento == "Factura" || $factura->tipo_documento == "Recibo de anticipo" || $factura->tipo_documento == "Recibo de servicio educativo")
 				{
-					$totalGeneralCompensado += $factura->saldo_compensado_dolar;
+					$totalGeneralCompensado += round($factura->saldo_compensado_dolar * $factura->tasa_cambio);
 					$totalGeneralFacturado += $factura->amount_paid;
 				}
 				
 				$vectorPagos[$factura->id] = 
 					['Nro' => $contadorNumero,
-					'fechaHora' => $factura->date_and_time,
-					'nroFactura' => $factura->bill_number,
+					'fecha' => $factura->date_and_time,
 					'nroControl' => $factura->control_number,
+					'nroFactura' => $factura->bill_number,
 					'tipoDocumento' => $factura->tipo_documento,
 					'familia' => $factura->parentsandguardian->family,
 					'tasaDolar' => $factura->tasa_cambio,
 					'tasaEuro' => $factura->tasa_euro,
 					'tasaDolarEuro' => $factura->tasa_dolar_euro,
 					'totalFacturaBolivar' => $montoFacturaBolivares,
+					'totalFacturaDolar' => $montoFacturaDolares,
 					'efectivoDolar' => 0,
 					'efectivoEuro' => 0,
 					'efectivoBolivar' => 0,
@@ -355,8 +451,7 @@ class TurnsController extends AppController
 					'transferenciaBolivar' => 0,
 					'depositoBolivar' => 0,
 					'chequeBolivar' => 0,
-					'totalFacturadoDolar' => $montoFacturaDolares,
-					'ncNdDolar' => $factura->saldo_compensado_dolar,
+					'compensadoDolar' => $factura->saldo_compensado_dolar,
 					'totalCobradoDolar' => 0];	
 				$contadorNumero++;
 			}
@@ -394,18 +489,7 @@ class TurnsController extends AppController
 						$totalFormasPago['Efectivo $']['monto'] += $pago->amount;
 						$totalFormasPago['Efectivo $']['montoBs'] += round($pago->amount * $pago->bill->tasa_cambio);
 						$totalFormasPago['Total general cobrado Bs.']['montoBs'] += round($pago->amount * $pago->bill->tasa_cambio);
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de reintegro")
-					{
-						$vectorTotalesRecibidos['Menos reintegros']['Efectivo $'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] -= $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de compra")
-					{
-						$vectorTotalesRecibidos['Menos compras']['Efectivo $'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] -= $pago->amount;
-					}
-					
+					}					
 				}
 				elseif ($pago->payment_type == "Efectivo" && $pago->moneda == "€")
 				{
@@ -438,18 +522,7 @@ class TurnsController extends AppController
 						$totalFormasPago['Efectivo €']['monto'] += $pago->amount;
 						$totalFormasPago['Efectivo €']['montoBs'] += round($pago->amount * $pago->bill->tasa_euro);
 						$totalFormasPago['Total general cobrado Bs.']['montoBs'] += round($pago->amount * $pago->bill->tasa_euro);
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de reintegro")
-					{
-						$vectorTotalesRecibidos['Menos reintegros']['Efectivo €'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] -= $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de compra")
-					{
-						$vectorTotalesRecibidos['Menos compras']['Efectivo €'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] -= $pago->amount;
 					}					
-
 				}
 				elseif ($pago->payment_type == "Efectivo" && $pago->moneda == "Bs.")
 				{
@@ -482,18 +555,7 @@ class TurnsController extends AppController
 						$totalFormasPago['Efectivo Bs.']['monto'] += $pago->amount;
 						$totalFormasPago['Efectivo Bs.']['montoBs'] += $pago->amount;
 						$totalFormasPago['Total general cobrado Bs.']['montoBs'] += $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de reintegro")
-					{
-						$vectorTotalesRecibidos['Menos reintegros']['Efectivo Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo Bs.'] -= $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de compra")
-					{
-						$vectorTotalesRecibidos['Menos compras']['Efectivo Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo Bs.'] -= $pago->amount;
-					}
-					
+					}					
 				}			
 				elseif ($pago->payment_type == "Tarjeta de débito" && $pago->moneda == "Bs.")
 				{
@@ -526,17 +588,7 @@ class TurnsController extends AppController
 						$totalFormasPago['TDB/TDC Bs.']['monto'] += $pago->amount;
 						$totalFormasPago['TDB/TDC Bs.']['montoBs'] += $pago->amount;
 						$totalFormasPago['Total general cobrado Bs.']['montoBs'] += $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de reintegro")
-					{
-						$vectorTotalesRecibidos['Menos reintegros']['TDB/TDC Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['TDB/TDC Bs.'] -= $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de compra")
-					{
-						$vectorTotalesRecibidos['Menos compras']['TDB/TDC Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['TDB/TDC Bs.'] -= $pago->amount;
-					}										
+					}									
 				}
 				elseif ($pago->payment_type == "Tarjeta de crédito" && $pago->moneda == "Bs.")
 				{
@@ -569,16 +621,6 @@ class TurnsController extends AppController
 						$totalFormasPago['TDB/TDC Bs.']['monto'] += $pago->amount;
 						$totalFormasPago['TDB/TDC Bs.']['montoBs'] += $pago->amount;
 						$totalFormasPago['Total general cobrado Bs.']['montoBs'] += $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de reintegro")
-					{
-						$vectorTotalesRecibidos['Menos reintegros']['TDB/TDC Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['TDB/TDC Bs.'] -= $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de compra")
-					{
-						$vectorTotalesRecibidos['Menos compras']['TDB/TDC Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['TDB/TDC Bs.'] -= $pago->amount;
 					}
 				}			
 				elseif ($pago->banco_receptor == "Zelle" && $pago->moneda == "$")
@@ -613,16 +655,6 @@ class TurnsController extends AppController
 						$totalFormasPago['Zelle $']['montoBs'] += round($pago->amount * $pago->bill->tasa_cambio);
 						$totalFormasPago['Total general cobrado Bs.']['montoBs'] += round($pago->amount * $pago->bill->tasa_cambio);
 					}
-					elseif ($pago->bill->tipo_documento == "Recibo de reintegro")
-					{
-						$vectorTotalesRecibidos['Menos reintegros']['Zelle $'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Zelle $'] -= $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de compra")
-					{
-						$vectorTotalesRecibidos['Menos compras']['Zelle $'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Zelle $'] -= $pago->amount;
-					}
 				}
 				elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "Bs.")
 				{
@@ -655,18 +687,7 @@ class TurnsController extends AppController
 						$totalFormasPago['Transferencia Bs.']['monto'] += $pago->amount;
 						$totalFormasPago['Transferencia Bs.']['montoBs'] += $pago->amount;
 						$totalFormasPago['Total general cobrado Bs.']['montoBs'] += $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de reintegro")
-					{
-						$vectorTotalesRecibidos['Menos reintegros']['Transferencia Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Transferencia Bs.'] -= $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de compra")
-					{
-						$vectorTotalesRecibidos['Menos compras']['Transferencia Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Transferencia Bs.'] -= $pago->amount;
-					}
-					
+					}					
 				}			
 				elseif ($pago->payment_type == "Depósito" && $pago->moneda == "Bs.")
 				{
@@ -699,18 +720,7 @@ class TurnsController extends AppController
 						$totalFormasPago['Depósito Bs.']['monto'] += $pago->amount;
 						$totalFormasPago['Depósito Bs.']['montoBs'] += $pago->amount;
 						$totalFormasPago['Total general cobrado Bs.']['montoBs'] += $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de reintegro")
-					{
-						$vectorTotalesRecibidos['Menos reintegros']['Depósito Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Depósito Bs.'] -= $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de compra")
-					{
-						$vectorTotalesRecibidos['Menos compras']['Depósito Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Depósito Bs.'] -= $pago->amount;
-					}
-					
+					}				
 				}				
 				elseif ($pago->payment_type == "Cheque" && $pago->moneda == "Bs.")
 				{
@@ -743,23 +753,84 @@ class TurnsController extends AppController
 						$totalFormasPago['Cheque Bs.']['monto'] += $pago->amount;
 						$totalFormasPago['Cheque Bs.']['montoBs'] += $pago->amount;
 						$totalFormasPago['Total general cobrado Bs.']['montoBs'] += $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de reintegro")
-					{
-						$vectorTotalesRecibidos['Menos reintegros']['Cheque Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Cheque Bs.'] -= $pago->amount;
-					}
-					elseif ($pago->bill->tipo_documento == "Recibo de compra")
-					{
-						$vectorTotalesRecibidos['Menos compras']['Cheque Bs.'] -= $pago->amount;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Cheque Bs.'] -= $pago->amount;
-					}
-					
+					}					
 				}		
 			}
-														
-			$this->set(compact('turn', 'vectorPagos', 'cajero', 'vectorTotalesRecibidos', 'totalFormasPago', 'totalGeneralCompensado', 'totalGeneralFacturado', 'tasaDolar', 'tasaEuro'));
-			$this->set('_serialize', ['turn', 'vectorPagos', 'cajero', 'vectorTotalesRecibidos', 'totalFormasPago', 'totalGeneralCompensado', 'totalGeneralFacturado', 'tasaDolar', 'tasaEuro']);
+			
+			$turn->vector_pagos = json_encode($vectorPagos);
+			$turn->vector_totales_recibidos = json_encode($vectorTotalesRecibidos);
+			$turn->total_formas_pago = json_encode($totalFormasPago);
+			$turn->total_general_compensado = json_encode($totalGeneralCompensado);
+			$turn->total_general_facturado = json_encode($totalGeneralFacturado);
+ 			
+            if (!($this->Turns->save($turn)))
+            {
+				$this->Flash->error(__('No se pudieron guardar los contadores del turno, por favor intente nuevamente'));
+                return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+            }
+			
+			$ultimoRegistro = $this->Bills->find('all', ['conditions' => ['turn' => $id, 'fiscal' => 1],
+				'order' => ['created' => 'DESC'] ]);
+
+			$contadorRegistro = $ultimoRegistro->count();
+				
+			if ($contadorRegistro > 0)
+			{	
+				$factura = $ultimoRegistro->first();
+
+				$lastNumber = $factura->bill_number;
+				$lastControl = $factura->control_number;
+			}
+													
+			$this->set(compact
+				('turn',
+				'lastNumber',
+				'lastControl',
+				'facturas',
+				'vectorPagos',
+				'cajero',
+				'vectorTotalesRecibidos',
+				'totalFormasPago',
+				'totalGeneralCompensado',
+				'totalGeneralFacturado',
+				'tasaDolar',
+				'tasaEuro',
+				'indicadorFacturasAnticipos',
+				'indicadorServiciosEducativos',
+				'indicadorReintegros',
+				'indicadorCompras',
+				'indicadorNotasCredito',
+				'indicadorNotasDebito',
+				'indicadorSobrantes',
+				'indicadorFacturasRecibos',
+				'indicadorFacturasAnuladas',
+				'indicadorRecibosAnulados',
+				'documentosAnulados'));	
+				
+			$this->set('_serialize', 
+				['turn',
+				'lastNumber',
+				'lastControl',				
+				'facturas',
+				'vectorPagos', 
+				'cajero', 
+				'vectorTotalesRecibidos', 
+				'totalFormasPago', 
+				'totalGeneralCompensado', 
+				'totalGeneralFacturado', 
+				'tasaDolar', 
+				'tasaEuro',
+				'indicadorFacturasAnticipos',
+				'indicadorServiciosEducativos',
+				'indicadorReintegros',
+				'indicadorCompras',
+				'indicadorNotasCredito',
+				'indicadorNotasDebito',
+				'indicadorSobrantes',
+				'indicadorFacturasRecibos',
+				'indicadorFacturasAnuladas',
+				'indicadorRecibosAnulados',
+				'documentosAnulados']);
 		}
 	}
     
@@ -1223,182 +1294,175 @@ class TurnsController extends AppController
 	
     public function reporteCierre($id = null)
     {
-		$this->loadModel('Bills');
-		$payment = new PaymentsController();
-		
-		$indicadorFiscales = 0;
-		$indicadorAnticipos = 0;
-		$indicadorServiciosEducativos = 0;
-		$indicadorAnuladas = 0;
-		$indicadorRecibosAnulados = 0;
-			
-		$indicadorNotasCredito = 0;
-		$totalNotasCredito = 0;
-		$indicadorNotasDebito = 0;
-		$totalNotasDebito = 0;
-		$indicadorFacturasRecibo = 0;
-		$totalFacturasRecibo = 0;
-			
 		$turn = $this->Turns->get($id);
             
         if ($turn->status == 1)
         {
-            $this->Flash->error(__('Este turno no se ha cerrado'));
+            $this->Flash->error(__('Este turno no ha sido cerrado'));
             return $this->redirect(['controller' => 'users', 'action' => 'wait']);
         }
+
+		$this->loadModel('Bills');		
+		$payment = new PaymentsController();
+					
+		$indicadorFacturasAnticipos = 0;
+		$indicadorServiciosEducativos = 0;
+		$indicadorReintegros = 0;
+		$indicadorCompras = 0;
+		$indicadorNotasCredito = 0;
+		$indicadorNotasDebito = 0;
+		$indicadorFacturasRecibos = 0;
+		$indicadorSobrantes = 0;
+		$indicadorFacturasAnuladas = 0;
+		$indicadorRecibosAnulados = 0;
 		
-		$usuario = $this->Turns->Users->get($turn->user_id);
+		$this->loadModel('Rates');
+	
+		$this->loadModel('Monedas');	
+		$moneda = $this->Monedas->get(2);
+		$tasaDolar = $moneda->tasa_cambio_dolar; 
 		
-		$cajero = $usuario->first_name . ' ' . $usuario->surname; 
-			
-		$totalesFiscales = json_decode($turn->totales_fiscales);
-		$totalGeneralFiscales = json_decode($turn->total_general_fiscales, true);
-		$totalesAnticipos = json_decode($turn->totales_anticipos);
-		$totalGeneralAnticipos = json_decode($turn->total_general_anticipos, true);
-		$totalesServiciosEducativos = json_decode($turn->totales_servicios_educativos);
-		$totalGeneralServiciosEducativos = json_decode($turn->total_general_servicios_educativos, true);
-		$totalTotales = json_decode($turn->total_totales, true);
-		$totalSobrantes = json_decode($turn->total_sobrantes, true);
-		$totalReintegros = json_decode($turn->total_reintegros, true);
-		$totalFacturasCompensadas = json_decode($turn->total_facturas_compensadas, true);
-		$totalOtrasOperaciones = json_decode($turn->total_otras_operaciones, true);
-		$bancosReceptores = json_decode($turn->bancos_receptores);
-		$totalBancosReceptores  = json_decode($turn->total_bancos_receptores, true);	
+		$moneda = $this->Monedas->get(3);
+		$tasaEuro = $moneda->tasa_cambio_dolar; 
 						
-		$fechaTurnoFormateada = date_format($turn->start_date, "Y-m-d");
-		$fechaTurno = $turn->start_date;
-		$fechaProximoDia = $fechaTurno->addDay(1);
-		$fechaProximoDiaFormateada = date_format($fechaProximoDia, "Y-m-d");
-				
-		$resultado = $payment->busquedaPagos($id);
-				
-		$paymentsTurn = $resultado[0];
-		$indicadorSobrantes = $resultado[1];
-		$sobrantes = $resultado[2];
-		$indicadorReintegros = $resultado[3];
-		$reintegros = $resultado[4];
-		$indicadorCompensadas = $resultado[5];
-		$facturasCompensadas = $resultado[6];
-		$indicadorBancos = $resultado[7];
-		$recibidoBancos = $resultado[8];
+		$usuario = $this->Turns->Users->get($turn->user_id);
+	
+		$cajero = $usuario->first_name . ' ' . $usuario->surname;
+
+		$vectorPagos = json_decode($turn->vector_pagos, true);
+		$vectorTotalesRecibidos = json_decode($turn->vector_totales_recibidos, true);
+		$totalFormasPago = json_decode($turn->total_formas_pago, true);
+		$totalGeneralCompensado = $turn->total_general_compensado;
+		$totalGeneralFacturado = $turn->total_general_facturado;
 		
-		if ($totalGeneralFiscales['$'] > 0 || $totalGeneralFiscales['€'] > 0 || $totalGeneralFiscales['Bs.'] > 0)
-		{
-			$indicadorFiscales = 1;
-		}
-		
-		if ($totalGeneralAnticipos['$'] > 0 || $totalGeneralAnticipos['€'] > 0 || $totalGeneralAnticipos['Bs.'] > 0)
-		{
-			$indicadorAnticipos = 1;
-		}
-		
-		if ($totalGeneralServiciosEducativos['$'] > 0 || $totalGeneralServiciosEducativos['€'] > 0 || $totalGeneralServiciosEducativos['Bs.'] > 0)
-		{
-			$indicadorServiciosEducativos = 1;
-		}
-		
-		if ($indicadorSobrantes == 1)
-		{
-			foreach($sobrantes as $sobrante)
-			{
-				$totalSobrantes += $sobrante->amount_paid;
-				$totalOtrasOperaciones += $sobrante->amount_paid;
-			}
-		}
-		
-		if ($indicadorReintegros == 1)
-		{
-			foreach($reintegros as $reintegro)
-			{
-				$totalReintegros += $reintegro->amount_paid;
-				$totalOtrasOperaciones += $reintegro->amount_paid;
-			}
-		}
-		
-		if ($indicadorCompensadas == 1)
-		{
-			foreach($facturasCompensadas as $compensada)
-			{
-				$totalFacturasCompensadas += $compensada->saldo_compensado;
-				$totalOtrasOperaciones += $compensada->amount_paid;
-			}			
-		}
-								
-		$notasContables = $this->Bills->find('all', ['conditions' => ['turn' => $id, 'OR' => [['tipo_documento' => 'Nota de crédito'], ['tipo_documento' => 'Nota de débito']]],
-			'order' => ['Bills.created' => 'ASC'],
-			'contain' => ['Parentsandguardians']]);
+		$documentosAnulados = $this->Bills->find('all', ['conditions' => ['date_annulled >=' => $turn->start_date],
+			'order' => ['Bills.id' => 'ASC']]);
 			
-		$contadorNotas = $notasContables->count();
+		$contadorAnulados = $documentosAnulados->count();
 		
-		if ($contadorNotas > 0)
+		if ($contadorAnulados > 0)
 		{
-			foreach ($notasContables as $notas)
+			foreach ($documentosAnulados as $anulado)
 			{
-				if ($notas->tipo_documento == "Nota de crédito")
+				if ($anulado->fiscal == 1)
 				{
-					$indicadorNotasCredito = 1;
-					$totalNotasCredito += $notas->amount_paid;
+					$indicadorFacturasAnuladas = 1;
 				}
 				else
 				{
-					$indicadorNotasDebito = 1;
-					$totalNotasDebito += $notas->amount_paid;
+					$indicadorRecibosAnulados = 1;
 				}
 			}
 		}
+							
+		$resultado = $payment->busquedaPagosContabilidad($id);
 		
-		$facturasRecibo = $this->Bills->find('all', ['conditions' => ['turn' => $id, 'id_anticipo >' => 0],
-			'order' => ['Bills.created' => 'ASC'],
-			'contain' => ['Parentsandguardians']]);
-			
-		$contadorFacturasRecibo = $facturasRecibo->count();
-		
-		if ($contadorFacturasRecibo > 0)
-		{
-			$indicadorFacturasRecibo = 1;
-			foreach ($facturasRecibo as $factura)
-			{
-				$totalFacturasRecibo += $factura->amount_paid;
-			}
-		}	
-
-		$anuladas = $this->Bills->find('all', ['conditions' => ['date_annulled >=' => $turn->start_date],
-			'order' => ['Bills.created' => 'ASC']]);
-			
-		$contadorAnuladas = $anuladas->count();
-		
-		if ($contadorAnuladas > 0)
-		{
-			$indicadorAnuladas = 1;
-		}		
-
-		$recibosAnulados = $this->Bills->find('all', ['conditions' => ['date_annulled >=' => $turn->start_date],
-			'order' => ['Bills.created' => 'ASC']]);
-			
-		$contadorRecibosAnulados = $recibosAnulados->count();
-		
-		if ($contadorRecibosAnulados > 0)
-		{
-			$indicadorRecibosAnulados = 1;
-		}			
-		
-		$origen = "reporteCierre";
-
-		$ultimoRegistro = $this->Bills->find('all', ['conditions' => ['turn' => $id, 'fiscal' => 1],
-			'order' => ['created' => 'DESC'] ]);
-
-		$contadorRegistro = $ultimoRegistro->count();
-			
-		if ($contadorRegistro > 0)
-		{	
-			$factura = $ultimoRegistro->first();
-
-			$lastNumber = $factura->bill_number;
-			$lastControl = $factura->control_number;
-		}
+		$facturas = $resultado['facturas'];
+		$pagosFacturas = $resultado['pagosFacturas'];
 					
-		$this->set(compact('turn', 'origen', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscales', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServiciosEducativos', 'totalGeneralServiciosEducativos', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'totalOtrasOperaciones', 'indicadorAnticipos', 'indicadorFiscales', 'indicadorServiciosEducativos', 'indicadorSobrantes', 'sobrantes', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas', 'indicadorRecibosAnulados', 'recibosAnulados', 'cajero'));
-		$this->set('_serialize', ['turn', 'origen', 'paymentsTurn', 'totalAmounts', 'receipt', 'lastNumber', 'lastControl', 'totalesFiscales', 'totalGeneralFiscales', 'totalesAnticipos', 'totalGeneralAnticipos', 'totalesServiciosEducativos', 'totalGeneralServiciosEducativos', 'totalTotales', 'totalSobrantes', 'totalReintegros', 'totalFacturasCompensadas', 'totalOtrasOperaciones', 'indicadorAnticipos', 'indicadorFiscales', 'indicadorServiciosEducativos', 'indicadorSobrantes', 'sobrantes', 'indicadorReintegros', 'reintegros', 'indicadorCompensadas', 'facturasCompensadas', 'indicadorBancos', 'recibidoBancos', 'bancosReceptores', 'totalBancosReceptores', 'notasContables', 'indicadorNotasCredito', 'indicadorNotasDebito', 'indicadorFacturasRecibo', 'facturasRecibo', 'indicadorAnuladas', 'anuladas', 'indicadorRecibosAnulados', 'recibosAnulados', 'cajero']);
+		foreach ($facturas as $factura)
+		{
+			if ($factura->tipo_documento == "Factura" || $factura->tipo_documento == "Recibo de anticipo" )
+			{
+				$indicadorFacturasAnticipos = 1;
+			}
+			elseif ($factura->tipo_documento == "Recibo de servicio educativo")
+			{
+				$indicadorServiciosEducativos = 1;
+			}
+			elseif ($factura->tipo_documento == "Recibo de reintegro")
+			{
+				$indicadorReintegros = 1;									
+			}
+			elseif ($factura->tipo_documento == "Recibo de compra")
+			{
+				$indicadorCompras = 1;
+			}
+			elseif ($factura->tipo_documento == "Nota de crédito")
+			{
+				$indicadorNotasCredito = 1;
+			}
+			elseif ($factura->tipo_documento == "Nota de débito")
+			{
+				$indicadorNotasDebito = 1;
+			}
+			elseif ($factura->tipo_documento == "Recibo de sobrante")
+			{
+				$indicadorSobrantes = 1;
+			}
+			elseif ($factura->id_anticipo > 0)
+			{
+				$indicadorFacturasRecibos = 1;
+			}
+			
+			if ($factura->moneda_id == 1)
+			{
+				$montoFacturaBolivares = $factura->amount_paid;
+				$montoFacturaDolares = round($factura->amount_paid / $factura->tasa_cambio);				
+			}
+			elseif ($factura->moneda_id == 2)
+			{
+				$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_cambio);
+				$montoFacturaDolares = $factura->amount_paid;
+			}
+			else
+			{
+				$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_euro);
+				$montoFacturaDolares = round($factura->amount_paid * $factura->tasa_dolar_euro);
+			}
+			
+			if ($factura->tipo_documento == "Factura" || $factura->tipo_documento == "Recibo de anticipo" || $factura->tipo_documento == "Recibo de servicio educativo")
+			{
+				$totalGeneralCompensado += round($factura->saldo_compensado_dolar * $factura->tasa_cambio);
+				$totalGeneralFacturado += $factura->amount_paid;
+			}
+		}
+															
+		$this->set(compact
+			('turn',
+			'facturas',
+			'vectorPagos',
+			'cajero',
+			'vectorTotalesRecibidos',
+			'totalFormasPago',
+			'totalGeneralCompensado',
+			'totalGeneralFacturado',
+			'tasaDolar',
+			'tasaEuro',
+			'indicadorFacturasAnticipos',
+			'indicadorServiciosEducativos',
+			'indicadorReintegros',
+			'indicadorCompras',
+			'indicadorNotasCredito',
+			'indicadorNotasDebito',
+			'indicadorFacturasRecibos',
+			'indicadorSobrantes',
+			'indicadorFacturasAnuladas',
+			'indicadorRecibosAnulados',
+			'documentosAnulados'));	
+			
+		$this->set('_serialize', 
+			['turn',
+			'facturas',
+			'vectorPagos', 
+			'cajero', 
+			'vectorTotalesRecibidos', 
+			'totalFormasPago', 
+			'totalGeneralCompensado', 
+			'totalGeneralFacturado', 
+			'tasaDolar', 
+			'tasaEuro',
+			'indicadorFacturasAnticipos',
+			'indicadorServiciosEducativos',
+			'indicadorReintegros',
+			'indicadorCompras',
+			'indicadorNotasCredito',
+			'indicadorNotasDebito',
+			'indicadorFacturasRecibos',
+			'indicadorSobrantes',
+			'indicadorFacturasAnuladas',
+			'indicadorRecibosAnulados',
+			'documentosAnulados']);	
 	}
 	
     public function excelDocumentos($id = null)

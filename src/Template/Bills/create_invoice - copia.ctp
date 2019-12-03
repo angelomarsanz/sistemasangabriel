@@ -448,12 +448,14 @@
 												<td style="color: blue; text-align:center;" id="saldo-favor-euro"></td>
 												<td style="color: red; text-align:center;" id="saldo-favor-bolivar"></td>
 											</tr>
-											<tr>
-												<td><?= $this->Form->input('cantidad_descuento', ['label' => 'Descuento/Recargo:', 'type' => 'number', 'id' => 'cantidad-descuento', 'value' => 0, 'disabled' => 'true']); ?></td>
-												<td><?= $this->Form->input('tipo_descuento', ['label' => 'tipo:', 'id' => 'tipo-descuento', 'disabled' => 'true', 'options' => 
+											<tr>	
+												<td><?= $this->Form->input('descuento_recargo', ['label' => 'Descuento/Recargo:', 'id' => 'descuento-recargo', 'disabled' => 'true', 'options' => 
 													[null => '',
-													'Fijo' => '$',
-													'Porcentaje' => '%']]); ?></td>												
+													'Descuento $' => 'Descuento: $',
+													'Descuento %' => 'Descuento: %',
+													'Recargo $' => 'Recargo: $',
+													'Recargo %' => 'Recargo: %']]); ?></td>	
+												<td><?= $this->Form->input('cantidad_descuento', ['label' => 'Cantidad:', 'type' => 'number', 'id' => 'cantidad-descuento', 'value' => 0, 'disabled' => 'true']); ?></td>													
 												<td id="descuento-recargo-dolar" style="text-align:center; vertical-align: middle;">0</td>
 												<td style="color: blue; text-align:center; vertical-align: middle;" id="descuento-recargo-euro">0</td>
 												<td style="color: red; text-align:center; vertical-align: middle;" id="descuento-recargo-bolivar">0</td>
@@ -688,9 +690,9 @@
         $("#mark-quotas").text("cobrar");
         $("#mark-quotas").attr('disabled', true);
         $("#uncheck-quotas").attr('disabled', true);
-		$("#cantidad-descuento").attr('disabled', true);
-		$("#tipo-descuento").attr('disabled', true);
 		$("#adjust-fee").attr('disabled', true);
+		$("#descuento-recargo").attr('disabled', true);
+		$("#cantidad-descuento").attr('disabled', true);
         $("#ajuste-automatico").attr('disabled', true);
         $("#print-invoice").attr('disabled', true);
         $("#bt-01").attr('disabled', true);
@@ -706,9 +708,9 @@
     {
         $("#mark-quotas").attr('disabled', false);
         $("#uncheck-quotas").attr('disabled', false);
-		$("#cantidad-descuento").attr('disabled', false);
-		$("#tipo-descuento").attr('disabled', false);
 		$("#adjust-fee").attr('disabled', false);
+		$("#descuento-recargo").attr('disabled', false);
+		$("#cantidad-descuento").attr('disabled', false);
         $("#ajuste-automatico").attr('disabled', false);
         $("#print-invoice").attr('disabled', false);
         $("#bt-01").attr('disabled', false);
@@ -726,8 +728,8 @@
 		$("#uncheck-quotas").attr('disabled', true);
         $("#uncheck-quotas").attr('disabled', true);
 		$("#adjust-fee").attr('disabled', true);
+		$("#descuento-recargo").attr('disabled', true);
 		$("#cantidad-descuento").attr('disabled', true);
-		$("#tipo-descuento").attr('disabled', true);
         $("#ajuste-automatico").attr('disabled', true);
         $("#bt-01").attr('disabled', true);
         $("#bt-02").attr('disabled', true);
@@ -745,8 +747,8 @@
 		$("#uncheck-quotas").attr('disabled', false);
         $("#uncheck-quotas").attr('disabled', false);
 		$("#adjust-fee").attr('disabled', false);
+		$("#descuento-recargo").attr('disabled', false);
 		$("#cantidad-descuento").attr('disabled', false);
-		$("#tipo-descuento").attr('disabled', false);
         $("#ajuste-automatico").attr('disabled', false);
         $("#bt-01").attr('disabled', false);
         $("#bt-02").attr('disabled', false);
@@ -828,8 +830,8 @@
 		$("#nota-credito").removeClass("noverScreen");
 		$("#botones-cuotas").removeClass("noverScreen");
 		$("#botones-notas").addClass("noverScreen");
+		$('#descuento-recargo').val(null);		
 		$('#cantidad-descuento').val(0);
-		$('#tipo-descuento').val(null);		
 		$("#sub-total-dolar").html("");
 		$("#sub-total-euro").html("");
 		$("#sub-total-bolivar").html("");
@@ -2115,27 +2117,42 @@
 		discountMode = "Fijo";
 		discountAmount = 0;
 		
-		if ($('#cantidad-descuento').val() == "" || $('#cantidad-descuento').val() == 0)
+		if ($('#cantidad-descuento').val() < 0)
+		{
+			alert("Estimado usuario debe escribir una cantidad mayor a cero");
+			return false;	
+		}		
+		else if ($('#cantidad-descuento').val() == "" || $('#cantidad-descuento').val() == 0)
 		{
 			actualizarTotales();
 		}
-		else if ($('#tipo-descuento').val() === "")
+		else if ($('#descuento-recargo').val() === "")
 		{
-			alert("Estimado usuario debe seleccionar el signo de dólar o el signo de porcentaje");
+			alert("Estimado usuario debe seleccionar el tipo de descuento o recargo");
 			return false;				
 		}
-		else if ($('#tipo-descuento').val() == "Fijo")
+		else if ($('#descuento-recargo').val() == "Descuento $")
 		{						
-			discountMode = $('#tipo-descuento').val();
+			discountMode = "Fijo";
+			discountAmount = parseFloat($('#cantidad-descuento').val()) * -1;
+			actualizarTotales();	
+		}
+		else if ($('#descuento-recargo').val() == "Descuento %")
+		{
+			discountMode = "Porcentaje";
+			discountAmount = (parseFloat($('#cantidad-descuento').val()) / 100) * -1;
+			actualizarTotales();
+		}	
+		else if ($('#descuento-recargo').val() == "Recargo $")
+		{						
+			discountMode = "Fijo";
 			discountAmount = parseFloat($('#cantidad-descuento').val());
 			actualizarTotales();	
 		}
-		else if ($('#tipo-descuento').val() == "Porcentaje")
+		else if ($('#descuento-recargo').val() == "Recargo %")
 		{
-			decimalPorcentaje = (parseFloat($('#cantidad-descuento').val()) / 100);
-			discountAmount = decimalPorcentaje;					
-			
-			discountMode = $('#tipo-descuento').val();
+			discountMode = "Porcentaje";
+			discountAmount = parseFloat($('#cantidad-descuento').val()) / 100;
 			actualizarTotales();
 		}	
 	}
@@ -3043,21 +3060,19 @@
 			}
         });
 		
-        $('#tipo-descuento').change(function(e) 
+        $('#descuento-recargo').change(function(e) 
         {
 			e.preventDefault();
 			actualizarDescuentos();
         });
 		
-		$('#cantidad-descuento').keypress(function(e) 
-        {
-            if (e.which == 13)
-            {
-				e.preventDefault();
-				actualizarDescuentos();					
-            }
-        }); 
-		
+		$('#cantidad-descuento').change(function(e) 
+        { 
+			e.preventDefault();
+			actualizarDescuentos();					
+
+        });
+				
         $('#update-dollar').click(function(e) 
         {
             e.preventDefault();
