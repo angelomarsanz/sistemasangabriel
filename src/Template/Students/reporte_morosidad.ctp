@@ -166,14 +166,19 @@
 					<thead>
 						<tr>
 							<th style="text-align:center;">Nro.</th>
+							<th style="text-align:center;">Grado</th>
+							<th style="text-align:center;">Alumno</th>
 							<th style="text-align:center;">Descuento (%)</th>
 							<th style="text-align:center;">Cuotas pendientes</th>
+							<th style="text-align:center;">Monto en Bs.</th>
 						</tr>
 					</thead>
 					<tbody>
 						<?php foreach ($detalleMorosos as $clave => $moroso): ?>
 							<tr>
 								<td style='text-align:left;'><?= $contadorAlumnosMorosos ?></td>
+								<td style='text-align:center;'><?= $moroso['grado'] ?></td>
+								<td style='text-align:left;'><?= $clave ?></td>
 								<td style='text-align:center;'><?= $moroso['descuento'] ?></td>
 								<td style='text-align:center;'><?= $moroso['cuotasPendientes'] ?></td>
 								<td style='text-align:center;'><?= number_format($moroso['pendiente'], 2, ",", ".") ?></td>
@@ -194,6 +199,7 @@
 					</tfoot>
 				</table>
 		<?php endif; ?>
+		<p><b>Nota: las cuotas anteriores al mes de noviembre 2018 se han devaluado porque se cobraban en bolívares.</b></p> 
 		<br />			
 	</div>
 </div>
