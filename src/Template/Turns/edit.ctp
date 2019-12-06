@@ -224,7 +224,7 @@
 											<td style="text-align: center;"><b><?= number_format($totalGeneralFacturado, 2, ",", ".") ?></b></td>
 										</tr>
 										<tr>
-											<td><b>Diferencia por redondeo en conversión de divisas </b></td>
+											<td><b>Diferencia (Redondeos, sobrantes, etc) </b></td>
 											<td></td>
 											<td></td>
 											<td style="text-align: center;"><b><?= number_format($totalGeneralFacturado - $totalFormasPago['Total general cobrado Bs.']['montoBs'] - $totalGeneralCompensado, 2, ",", ".") ?></b></td>
@@ -828,7 +828,7 @@
 										<tbody>				
 											<?php $totalDolar = 0;
 											foreach ($facturas as $factura):  
-												if ($factura->tipo_documento == "Nota de crédito"): ?> 
+												if ($factura->tipo_documento == "Recibo de sobrante"): ?> 
 													<td><?= $factura->parentsandguardian->family ?></td>
 													<td style="text-align: center;"><?= $factura->control_number ?></td>
 													<td><?= $factura->tipo_documento ?></td>
@@ -840,7 +840,7 @@
 												<td><b>Totales</b></td>
 												<td></td>
 												<td></td>
-												<td style="text-align: center;"><b><?= number_format($totalBolivar, 2, ",", ".") ?></b></td>
+												<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
 											</tr>
 										</tbody>
 									</table>
@@ -880,9 +880,11 @@
 											<?php $totalBolivar = 0;
 											foreach ($documentosAnulados as $anulado):  
 												if ($anulado->fiscal == 1): ?> 
-													<td style="text-align: center;"><?= $anulado->control_number ?></td>
-													<td style="text-align: center;"><?= $anulado->bill_number ?></td>
-													<td style="text-align: center;"><?= $anulado->tipo_documento ?></td>
+													<tr>
+														<td style="text-align: center;"><?= $anulado->control_number ?></td>
+														<td style="text-align: center;"><?= $anulado->bill_number ?></td>
+														<td style="text-align: center;"><?= $anulado->tipo_documento ?></td>
+													</tr>
 												<?php endif;
 											endforeach; ?>
 										</tbody>

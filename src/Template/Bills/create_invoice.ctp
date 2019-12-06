@@ -631,6 +631,9 @@
 	var saldoRepresentanteSigno = 0;
 	var indicadorCompensacion = 0;
 	var deudaMenosPagado = 0;
+	var deudaMenosPagadoDecimal = 0;
+	var montoDolarDecimal = 0;
+	var acumuladoDolarDecimal = 0;
 	var porPagar = 0;
 	var sobrante = 0;
 	var monedaPago = "$";
@@ -1124,6 +1127,7 @@
 		payMoneda VARCHAR(50), \
         payPaymentType VARCHAR(100), \
         payAmountPaid FLOAT, \
+		payMontoDecimal FLOAT, \
         payBank VARCHAR(200), \
 		payBancoReceptor VARCHAR(200), \
         payAccountOrCard VARCHAR(50), \
@@ -1219,16 +1223,18 @@
 		payMoneda, \
         payPaymentType, \
         payAmountPaid, \
+		payMontoDecimal, \
         payBank, \
 		payBancoReceptor, \
         payAccountOrCard, \
         paySerial, \
-		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = accountant;
 		var tpMoneda = monedaPago;
         var tpPaymentType = paymentType;
         var tpAmountPaid = amountPaid;
+		var tpMontoDecimal = montoDolarDecimal;
         var tpBank = bank;
 		var tpBancoReceptor = bancoReceptor;
         var tpAccountOrCard = accountOrCard;
@@ -1241,7 +1247,8 @@
             [tpId, 
 			tpMoneda,
             tpPaymentType, 
-            tpAmountPaid, 
+            tpAmountPaid,
+			tpMontoDecimal,
             tpBank,
 			tpBancoReceptor,
             tpAccountOrCard,
@@ -1672,17 +1679,21 @@
 					if (monedaPagoEliminar == "$")
 					{
 						montoPagadoDolar = amountPaid;
+						montoDolarDecimal = item['payMontoDecimal'];
 					}
 					else if (monedaPagoEliminar == "€")
 					{
 						montoPagadoDolar = Math.round(amountPaid * tasaDolarEuro);
+						montoDolarDecimal = item['payMontoDecimal'] * tasaDolarEuro;
 					}
 					else
 					{
 						montoPagadoDolar = Math.round(amountPaid / dollarExchangeRate);
+						montoDolarDecimal = item['payMontoDecimal'] / dollarExchangeRate;
 					}
 									
-					accumulatedPayment = accumulatedPayment - montoPagadoDolar;
+					accumulatedPayment -= montoPagadoDolar;
+					acumuladoDolarDecimal -= montoDolarDecimal;
 					
 					actualizarTotales();						
                 }
@@ -2029,6 +2040,7 @@
 		$('#pagado-bolivar').html(Math.round(accumulatedPayment * dollarExchangeRate));
 		
 		deudaMenosPagado = totalBalanceDescuento - accumulatedPayment;
+		deudaMenosPagadoDecimal = totalBalanceDescuento - acumuladoDolarDecimal;
 				
 		if (deudaMenosPagado > 0)
 		{
@@ -2086,7 +2098,7 @@
 		payments.identificationNumberClient = $('#identification-number-client').val();;
 		payments.fiscalAddress = $('#fiscal-address').val();
 		payments.taxPhone = $('#tax-phone').val();
-		payments.invoiceAmount = Math.round(totalBalance*dollarExchangeRate);
+		payments.invoiceAmount = Math.round(totalBalance * dollarExchangeRate);
 		payments.discount = Math.round(discount * dollarExchangeRate);
 		if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
 		{
@@ -2958,7 +2970,7 @@
                     paymentType = "Retención de impuesto";
                 }
 
-                amountPaid = parseFloat($('#amount-' + paymentIdentifier).val());
+                amountPaid = Math.round(parseFloat($('#amount-' + paymentIdentifier).val()));
 				bank = $('#bank-' + paymentIdentifier).val();
 				bancoReceptor = $('#banco-receptor-' + paymentIdentifier).val();
                 accountOrCard = $('#account_or_card-' + paymentIdentifier).val();
@@ -3000,21 +3012,25 @@
 				if (monedaPago == "$")
 				{
 					montoPagadoDolar = amountPaid;
+					montoDolarDecimal = amountPaid;
 				}
 				else if (monedaPago == "€")
 				{
 					montoPagadoDolar = Math.round(amountPaid * tasaDolarEuro);
+					montoDolarDecimal = amountPaid * tasaDolarEuro;
 				}
 				else
 				{
 					montoPagadoDolar = Math.round(amountPaid / dollarExchangeRate);
+					montoDolarDecimal = amountPaid / dollarExchangeRate;
 				}
 			
                 printPayments();
 				
                 alert('Pago registrado con éxito: ' +  monedaPago + ' ' + amountPaid.toFixed(2));
 				
-                accumulatedPayment = accumulatedPayment + montoPagadoDolar;
+                accumulatedPayment += montoPagadoDolar;
+				acumuladoDolarDecimal += montoDolarDecimal;
         
 				actualizarTotales();
 				inicializarCampos();
@@ -3048,11 +3064,6 @@
         $("#print-invoice").click(function (e) 
         {	
             e.preventDefault();
-
-			if (deudaMenosPagado == 1)
-			{
-				discount -= 1;
-			}
 						
 			if (deudaMenosPagado > 1)
 			{
@@ -3064,14 +3075,15 @@
                 var dialog = $('<p>Estimado usuario hay un sobrante a favor del representante. ¿Qué desea hacer?</p>').dialog({
                     buttons: {
                         "Abonar a cuotas": function() 
-							{
-								dialog.dialog('close');
-							},
+						{
+							dialog.dialog('close');
+						},
                         "Dejarlo a favor":  function() 
-							{
-								guardarFactura();
-							},
-                        "Cancelar":  function() {
+						{
+							guardarFactura();
+						},
+                        "Cancelar":  function() 
+						{
                             dialog.dialog('close');
                         }
                     }
@@ -3086,6 +3098,10 @@
 				}
 				else
 				{
+					if (deudaMenosPagadoDecimal > 0)
+					{
+						discount -= deudaMenosPagadoDecimal;
+					}
 					guardarFactura();
 				}
 			}
@@ -3331,7 +3347,7 @@
 						}
 						else if (adjMontoModificadoDolar == adjMontoPagadoDolar)
 						{
-							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, 0, 0, 0, 0, "(E)");
+							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, 0, 0, 0, 0, "(Exonerado)");
 							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
 						}
 						else

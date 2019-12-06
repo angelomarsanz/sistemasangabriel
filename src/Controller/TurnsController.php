@@ -1394,28 +1394,6 @@ class TurnsController extends AppController
 			{
 				$indicadorFacturasRecibos = 1;
 			}
-			
-			if ($factura->moneda_id == 1)
-			{
-				$montoFacturaBolivares = $factura->amount_paid;
-				$montoFacturaDolares = round($factura->amount_paid / $factura->tasa_cambio);				
-			}
-			elseif ($factura->moneda_id == 2)
-			{
-				$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_cambio);
-				$montoFacturaDolares = $factura->amount_paid;
-			}
-			else
-			{
-				$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_euro);
-				$montoFacturaDolares = round($factura->amount_paid * $factura->tasa_dolar_euro);
-			}
-			
-			if ($factura->tipo_documento == "Factura" || $factura->tipo_documento == "Recibo de anticipo" || $factura->tipo_documento == "Recibo de servicio educativo")
-			{
-				$totalGeneralCompensado += round($factura->saldo_compensado_dolar * $factura->tasa_cambio);
-				$totalGeneralFacturado += $factura->amount_paid;
-			}
 		}
 															
 		$this->set(compact

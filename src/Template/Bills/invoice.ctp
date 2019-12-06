@@ -162,7 +162,7 @@
 				<table style="width:100%;">
 					<tr>
 						<td style="width: 50%;">Sub-total:</td>
-						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount_paid - $bill->amount), 2, ",", ".") ?></td>
+						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount_paid), 2, ",", ".") ?></td>
 					</tr>
 					<tr>
 						<td style="width: 50%;">Descuento/Recargo:</td>
@@ -174,7 +174,7 @@
 					</tr>
 					<tr>
 						<td style="width: 50%;"><b>Total Bs.S:</b></td>
-						<td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b></td>
+						<td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid + $bill->amount, 2, ",", ".") ?></b></td>
 					</tr>
 				</table>
 			</div>
@@ -265,7 +265,7 @@
 				<table style="width:100%;">
 					<tr>
 						<td style="width: 50%;">Sub-total:</td>
-						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount_paid - $bill->amount), 2, ",", ".") ?></td>
+						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount_paid), 2, ",", ".") ?></td>
 					</tr>
 					<tr>
 						<td style="width: 50%;">Descuento/Recargo:</td>
@@ -277,7 +277,7 @@
 					</tr>
 					<tr>
 						<td style="width: 50%;"><b>Total Bs.S:</b></td>
-						<td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b></td>
+						<td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid + $bill->amount, 2, ",", ".") ?></b></td>
 					</tr>
 				</table>
 			</div>
@@ -339,7 +339,7 @@
 					<table style="width:100%;">
 						<tr>
 							<td style="width: 50%;"><b>Sub-total:</b></td>
-							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $bill->amount), 2, ",", ".") ?></b></td>
+							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid), 2, ",", ".") ?></b></td>
 						</tr>
 						<tr>
 							<td style="width: 50%;"><b>Descuento/Recargo:</b></td>
@@ -347,7 +347,7 @@
 						</tr>
 						<tr>
 							<td style="width: 50%;"><b>Total Bs.S:</b></td>
-							<td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b></td>
+							<td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid + $bill->amount, 2, ",", ".") ?></b></td>
 						</tr>
 					</table>
 				</div>
@@ -417,7 +417,7 @@
 					<table style="width:100%;">
 						<tr>
 							<td style="width: 50%;"><b>Sub-total:</b></td>
-							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $bill->amount), 2, ",", ".") ?></b></td>
+							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid), 2, ",", ".") ?></b></td>
 						</tr>
 						<tr>
 							<td style="width: 50%;"><b>Descuento/Recargo:</b></td>
@@ -425,7 +425,7 @@
 						</tr>
 						<tr>
 							<td style="width: 50%;"><b>Total Bs.S:</b></td>
-							<td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b></td>
+							<td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid + $bill->amount, 2, ",", ".") ?></b></td>
 						</tr>
 					</table>
 				</div>
@@ -490,7 +490,7 @@
 					<table style="width:100%;">
 						<tr>
 							<td style="width: 50%;"><b>Sub-total:</b></td>
-							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $bill->amount - $accountService), 2, ",", ".") ?></b></td>
+							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $accountService), 2, ",", ".") ?></b></td>
 						</tr>
 						<tr>
 							<td style="width: 50%;"><b>Descuento/Recargo:</b></td>
@@ -498,7 +498,7 @@
 						</tr>
 						<tr>
 							<td style="width: 50%;"><b>Total Bs.S:</b></td>
-							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $accountService), 2, ",", ".") ?></b></td>
+							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid + $bill->amount - $accountService), 2, ",", ".") ?></b></td>
 						</tr>
 					</table>
 				</div>
@@ -568,7 +568,7 @@
 					<table style="width:100%;">
 						<tr>
 							<td style="width: 50%;"><b>Sub-total:</b></td>
-							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $bill->amount - $accountService), 2, ",", ".") ?></b></td>
+							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $accountService), 2, ",", ".") ?></b></td>
 						</tr>
 						<tr>
 							<td style="width: 50%;"><b>Descuento/Recargo:</b></td>
@@ -576,7 +576,7 @@
 						</tr>
 						<tr>
 							<td style="width: 50%;"><b>Total Bs.S:</b></td>
-							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid - $accountService), 2, ",", ".") ?></b></td>
+							<td style="width: 50%; text-align:right;"><b><?= number_format(($bill->amount_paid + $bill->amount - $accountService), 2, ",", ".") ?></b></td>
 						</tr>
 					</table>
 				</div>

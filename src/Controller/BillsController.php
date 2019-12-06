@@ -675,7 +675,7 @@ class BillsController extends AppController
 						$invoiceLine .= $lastInstallment;
 					}
 					$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
-					$locLoadIndicator = 1;
+					$loadIndicator = 1;
 				}
 				if ($aConcept->observation == "Abono" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
 				{
@@ -687,9 +687,9 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
-				if ($aConcept->observation == "(E)" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
+				elseif ($aConcept->observation == "(Exonerado)" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
 				{
-					$invoiceLine = $aConcept->student_name . " " . $aConcept->concept . " - (E)";
+					$invoiceLine = $aConcept->student_name . " " . $aConcept->concept . " - (Exonerado)";
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -814,7 +814,7 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
-				elseif ($aConcept->observation == "(E)" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
+				elseif ($aConcept->observation == "(Exonerado)" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
 				{
 					if ($lastInstallment != " ")
 					{
@@ -822,7 +822,7 @@ class BillsController extends AppController
 						$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
 						$loadIndicator = 1;
 					}
-					$invoiceLine = $aConcept->student_name . " " . $aConcept->concept . " - (E)";
+					$invoiceLine = $aConcept->student_name . " " . $aConcept->concept . " - (Exonerado)";
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;
@@ -938,10 +938,10 @@ class BillsController extends AppController
 				}
 			}
 		}
-			
-        if ($loadIndicator == 0 and $lastInstallment != " ")
-        {
-            if ($firstMonthly== $lastInstallment)
+							
+        if ($loadIndicator == 0 && $lastInstallment != " ")
+        {			
+            if ($firstMonthly == $lastInstallment)
             {
                 $invoiceLine .= substr($firstMonthly, 4, 4);
             }
