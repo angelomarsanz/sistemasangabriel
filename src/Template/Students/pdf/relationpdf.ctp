@@ -17,12 +17,14 @@
     <h4>Relación de Mensualidades</h4>
 </div>
 <hr size="4" />
-<div style="font-size: 20px;">
+<div style="font-size: 14px; line-height: 16px;">
     <table style="width:100%">
         <thead>
             <tr>
                 <th style="width:5%; text-align:center;">Nro.</th>
                 <th style="width:30%; text-align:left;">Alumno</th>
+				<th style="width:5%; text-align:center;">Tipo Desc</th>
+				<th style="width:5%; text-align:center;">Desc %</th>
                 <th style="width:5%; text-align:center;">Sep</th>
                 <th style="width:5%; text-align:center;">Oct</th>
                 <th style="width:5%; text-align:center;">Nov</th>
@@ -42,6 +44,8 @@
                 <tr>
                     <td style="text-align:center;"><?= $accountStudent ?></td>
                     <td><?= h($monthlyPayment['student']) ?></td>
+					<td style="text-align:center;"><?= h($monthlyPayment['tipoDescuento']) ?></td>
+					<td style="text-align:center;"><?= h($monthlyPayment['descuento']) ?></td>
                     <?php foreach (($monthlyPayment['studentTransactions']) as $studentTransaction): ?>
                         <td style="text-align:center;"><?= h($studentTransaction['monthlyPayment']) ?></td>
                     <?php endforeach; ?>
@@ -51,5 +55,5 @@
         </tbody>
     </table>  
     <hr size="4" />
-    <p>Leyenda: * = Cancelado, P = Pendiente, B = Becado, Número = Indica el porcentaje de descuento de la cuota</p>
+    <p>Leyenda: * = Cancelado, P = Pendiente, B = Becado</p>
 </div>

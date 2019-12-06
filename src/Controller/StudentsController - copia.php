@@ -1207,22 +1207,6 @@ class StudentsController extends AppController
 				$monthlyPayments[$accountantManager]['student'] = $student->full_name;
 			
 				$monthlyPayments[$accountantManager]['studentTransactions'] = [];
-				
-				if ($student->scholarship == true)
-				{
-					$monthlyPayments[$accountantManager]['tipoDescuento'] = "Becado";
-					$monthlyPayments[$accountantManager]['descuento'] = 100;
-				}
-				elseif ($student->discount === null)
-				{
-					$monthlyPayments[$accountantManager]['tipoDescuento'] = "";
-					$monthlyPayments[$accountantManager]['descuento'] = 0;
-				}
-				else
-				{
-					$monthlyPayments[$accountantManager]['tipoDescuento'] = "Hijos";
-					$monthlyPayments[$accountantManager]['descuento'] = $student->discount;
-				}
 
 				foreach ($studentTransactions as $studentTransaction) 
 				{
