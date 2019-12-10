@@ -212,6 +212,12 @@
 											<td style="text-align: center;"><b><?= number_format($totalGeneralCompensado, 2, ",", ".") ?></b></td>
 										</tr>
 										<tr>
+											<td><b>Menos sobrantes</b></td>
+											<td style="text-align: center;">$</td>
+											<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
+											<td style="text-align: center;"><b><?= number_format(round($totalGeneralSobrantes * $tasaDolar), 2, ",", ".") ?></b></td>
+										</tr>									
+										<tr>
 											<td><b>Total general cobrado + facturas compensadas</b></td>
 											<td></td>
 											<td></td>
@@ -224,7 +230,7 @@
 											<td style="text-align: center;"><b><?= number_format($totalGeneralFacturado, 2, ",", ".") ?></b></td>
 										</tr>
 										<tr>
-											<td><b>Diferencia (Redondeos, sobrantes, etc) </b></td>
+											<td><b>Diferencia (Redondeos y otras diferencias)  </b></td>
 											<td></td>
 											<td></td>
 											<td style="text-align: center;"><b><?= number_format($totalGeneralFacturado - $totalFormasPago['Total general cobrado Bs.']['montoBs'] - $totalGeneralCompensado, 2, ",", ".") ?></b></td>
@@ -277,7 +283,8 @@
 										</tr>
 									</thead>
 									<tbody>				
-										<?php $totalFacturaBolivar = 0; 
+										<?php $totalCobradoBolivares = 0;
+										$totalFacturaBolivar = 0; 
 										$totalEfectivoDolar = 0;
 										$totalEfectivoEuro = 0;
 										$totalEfectivoBolivar = 0;
@@ -313,9 +320,17 @@
 													<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>										
 													<td style="text-align: center;"><?= number_format($pago['depositoBolivar'], 2, ",", ".") ?></td>
 													<td style="text-align: center;"><?= number_format($pago['chequeBolivar'], 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format(round($pago['totalCobradoDolar'] * $pago['tasaDolar']), 2, ",", ".") ?></td>
+													<?php $totalCobradoBolivares = 
+														round(($pago['efectivoDolar'] + $pago['zelleDolar']) * $pago['tasaDolar']) +
+														round($pago['efectivoEuro'] * $pago['tasaEuro']) +
+														$pago['efectivoBolivar'] + 
+														$pago['tddTdcBolivar'] + 
+														$pago['transferenciaBolivar'] +
+														$pago['depositoBolivar'] +
+														$pago['chequeBolivar']; ?>												
+													<td style="text-align: center;"><?= number_format($totalCobradoBolivares, 2, ",", ".") ?></td>
 													<td style="text-align: center;"><?= number_format(round($pago['compensadoDolar'] * $pago['tasaDolar']), 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format($pago['totalFacturaBolivar'] - round($pago['totalCobradoDolar'] * $pago['tasaDolar']) - round($pago['compensadoDolar'] * $pago['tasaDolar']), 2, ",", ".") ?></td>										
+													<td style="text-align: center;"><?= number_format($pago['totalFacturaBolivar'] - $totalCobradoBolivares - round($pago['compensadoDolar'] * $pago['tasaDolar']), 2, ",", ".") ?></td>										
 												</tr>
 												<?php $totalFacturaBolivar += $pago['totalFacturaBolivar']; 
 												$totalEfectivoDolar += $pago['efectivoDolar'];
@@ -415,25 +430,35 @@
 										$totalDepositos = 0;
 										$totalCheques = 0;
 										foreach ($vectorPagos as $pago):  
-											if ($pago['tipoDocumento'] == "Recibo de servicio educativo"): ?> 
-												<td><?= $pago['familia']; ?></td>
-												<td style="text-align: center;"><?= $pago['nroControl']; ?></td>
-												<td style="text-align: center;"><?= $pago['nroFactura']; ?></td>
-												<td><?= $pago['tipoDocumento']; ?></td>
-												<td style="text-align: center;"><?= number_format($pago['totalFacturaBolivar'], 2, ",", ".") ?></td>												
-												<td style="text-align: center;"><?= number_format($pago['tasaDolar'], 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format($pago['tasaEuro'], 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format($pago['efectivoDolar'], 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format($pago['efectivoEuro'], 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format($pago['efectivoBolivar'], 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format($pago['zelleDolar'], 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format($pago['tddTdcBolivar'], 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>										
-												<td style="text-align: center;"><?= number_format($pago['depositoBolivar'], 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format($pago['chequeBolivar'], 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format(round($pago['totalCobradoDolar'] * $pago['tasaDolar']), 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format(round($pago['compensadoDolar'] * $pago['tasaDolar']), 2, ",", ".") ?></td>
-												<td style="text-align: center;"><?= number_format($pago['totalFacturaBolivar'] - round($pago['totalCobradoDolar'] * $pago['tasaDolar']) - round($pago['compensadoDolar'] * $pago['tasaDolar']), 2, ",", ".") ?></td>							
+											if ($pago['tipoDocumento'] == "Recibo de servicio educativo"): ?>
+												<tr>
+													<td><?= $pago['familia']; ?></td>
+													<td style="text-align: center;"><?= $pago['nroControl']; ?></td>
+													<td style="text-align: center;"><?= $pago['nroFactura']; ?></td>
+													<td><?= $pago['tipoDocumento']; ?></td>
+													<td style="text-align: center;"><?= number_format($pago['totalFacturaBolivar'], 2, ",", ".") ?></td>												
+													<td style="text-align: center;"><?= number_format($pago['tasaDolar'], 2, ",", ".") ?></td>
+													<td style="text-align: center;"><?= number_format($pago['tasaEuro'], 2, ",", ".") ?></td>
+													<td style="text-align: center;"><?= number_format($pago['efectivoDolar'], 2, ",", ".") ?></td>
+													<td style="text-align: center;"><?= number_format($pago['efectivoEuro'], 2, ",", ".") ?></td>
+													<td style="text-align: center;"><?= number_format($pago['efectivoBolivar'], 2, ",", ".") ?></td>
+													<td style="text-align: center;"><?= number_format($pago['zelleDolar'], 2, ",", ".") ?></td>
+													<td style="text-align: center;"><?= number_format($pago['tddTdcBolivar'], 2, ",", ".") ?></td>
+													<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>										
+													<td style="text-align: center;"><?= number_format($pago['depositoBolivar'], 2, ",", ".") ?></td>
+													<td style="text-align: center;"><?= number_format($pago['chequeBolivar'], 2, ",", ".") ?></td>
+													<?php $totalCobradoBolivares = 
+														round(($pago['efectivoDolar'] + $pago['zelleDolar']) * $pago['tasaDolar']) +
+														round($pago['efectivoEuro'] * $pago['tasaEuro']) +
+														$pago['efectivoBolivar'] + 
+														$pago['tddTdcBolivar'] + 
+														$pago['transferenciaBolivar'] +
+														$pago['depositoBolivar'] +
+														$pago['chequeBolivar']; ?>												
+													<td style="text-align: center;"><?= number_format($totalCobradoBolivares, 2, ",", ".") ?></td>
+													<td style="text-align: center;"><?= number_format(round($pago['compensadoDolar'] * $pago['tasaDolar']), 2, ",", ".") ?></td>
+													<td style="text-align: center;"><?= number_format($pago['totalFacturaBolivar'] - $totalCobradoBolivares - round($pago['compensadoDolar'] * $pago['tasaDolar']), 2, ",", ".") ?></td>
+												</tr>
 												<?php $totalFacturaBolivar += $pago['totalFacturaBolivar']; 
 												$totalEfectivoDolar += $pago['efectivoDolar'];
 												$totalEfectivoEuro += $pago['efectivoEuro'];
@@ -536,20 +561,22 @@
 											$totalBolivar = 0;
 											foreach ($facturas as $factura):  
 												if ($factura->tipo_documento == "Recibo de reintegro"): ?> 
-													<td><?= $factura->parentsandguardian->family ?></td>
-													<td style="text-align: center;"><?= $factura->bill_number ?></td>
-													<td><?= $factura->tipo_documento ?></td>
-													<?php if ($factura->moneda_id == 1):
-														$totalBolivar += $factura->amount_paid; ?>
-														<td></td><td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
-													<?php elseif ($factura->moneda_id == 2):
-														$totalDolar += $factura->amount_paid; ?>
-														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td><td></td>
-													<?php else:
-														$totalEuro += $factura->amount_paid; ?>
-														<td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td>
-													<?php endif;
-												endif;
+													<tr>
+														<td><?= $factura->parentsandguardian->family ?></td>
+														<td style="text-align: center;"><?= $factura->bill_number ?></td>
+														<td><?= $factura->tipo_documento ?></td>
+														<?php if ($factura->moneda_id == 1):
+															$totalBolivar += $factura->amount_paid; ?>
+															<td></td><td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+														<?php elseif ($factura->moneda_id == 2):
+															$totalDolar += $factura->amount_paid; ?>
+															<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td><td></td>
+														<?php else:
+															$totalEuro += $factura->amount_paid; ?>
+															<td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td>
+														<?php endif; ?>
+													</tr>
+												<?php endif;
 											endforeach; ?>
 											<tr>
 												<td><b>Totales</b></td>
@@ -602,20 +629,22 @@
 											$totalBolivar = 0;
 											foreach ($facturas as $factura):  
 												if ($factura->tipo_documento == "Recibo de compra"): ?> 
-													<td><?= $factura->parentsandguardian->family ?></td>
-													<td style="text-align: center;"><?= $factura->bill_number ?></td>
-													<td><?= $factura->tipo_documento ?></td>
-													<?php if ($factura->moneda_id == 1):
-														$totalBolivar += $factura->amount_paid; ?>
-														<td></td><td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
-													<?php elseif ($factura->moneda_id == 2):
-														$totalDolar += $factura->amount_paid; ?>
-														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td><td></td>
-													<?php else:
-														$totalEuro += $factura->amount_paid; ?>
-														<td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td>
-													<?php endif;
-												endif;
+													<tr>
+														<td><?= $factura->parentsandguardian->family ?></td>
+														<td style="text-align: center;"><?= $factura->bill_number ?></td>
+														<td><?= $factura->tipo_documento ?></td>
+														<?php if ($factura->moneda_id == 1):
+															$totalBolivar += $factura->amount_paid; ?>
+															<td></td><td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+														<?php elseif ($factura->moneda_id == 2):
+															$totalDolar += $factura->amount_paid; ?>
+															<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td><td></td>
+														<?php else:
+															$totalEuro += $factura->amount_paid; ?>
+															<td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td>
+														<?php endif; ?>
+													</tr>
+												<?php endif;
 											endforeach; ?>
 											<tr>
 												<td><b>Totales</b></td>
@@ -665,12 +694,14 @@
 											<?php $totalBolivar = 0;
 											foreach ($facturas as $factura):  
 												if ($factura->tipo_documento == "Nota de crédito"): ?> 
-													<td><?= $factura->parentsandguardian->family ?></td>
-													<td style="text-align: center;"><?= $factura->control_number ?></td>
-													<td style="text-align: center;"><?= $factura->bill_number ?></td>
-													<td><?= $factura->tipo_documento ?></td>
-													<?php $totalBolivar += $factura->amount_paid; ?>
-													<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+													<tr>
+														<td><?= $factura->parentsandguardian->family ?></td>
+														<td style="text-align: center;"><?= $factura->control_number ?></td>
+														<td style="text-align: center;"><?= $factura->bill_number ?></td>
+														<td><?= $factura->tipo_documento ?></td>
+														<?php $totalBolivar += $factura->amount_paid; ?>
+														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+													</tr>
 												<?php endif;
 											endforeach; ?>
 											<tr>
@@ -719,13 +750,15 @@
 										<tbody>				
 											<?php $totalBolivar = 0;
 											foreach ($facturas as $factura):  
-												if ($factura->tipo_documento == "Nota de débito"): ?> 
-													<td><?= $factura->parentsandguardian->family ?></td>
-													<td style="text-align: center;"><?= $factura->control_number ?></td>
-													<td style="text-align: center;"><?= $factura->bill_number ?></td>
-													<td><?= $factura->tipo_documento ?></td>
-													<?php $totalBolivar += $factura->amount_paid; ?>
-													<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+												if ($factura->tipo_documento == "Nota de débito"): ?>
+													<tr>
+														<td><?= $factura->parentsandguardian->family ?></td>
+														<td style="text-align: center;"><?= $factura->control_number ?></td>
+														<td style="text-align: center;"><?= $factura->bill_number ?></td>
+														<td><?= $factura->tipo_documento ?></td>
+														<?php $totalBolivar += $factura->amount_paid; ?>
+														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+													</tr>
 												<?php endif;
 											endforeach; ?>
 											<tr>
@@ -774,13 +807,15 @@
 										<tbody>				
 											<?php $totalBolivar = 0;
 											foreach ($facturas as $factura):  
-												if ($factura->id_anticipo > 0): ?> 
-													<td><?= $factura->parentsandguardian->family ?></td>
-													<td style="text-align: center;"><?= $factura->control_number ?></td>
-													<td style="text-align: center;"><?= $factura->bill_number ?></td>
-													<td><?= $factura->tipo_documento ?></td>
-													<?php $totalBolivar += $factura->amount_paid; ?>
-													<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+												if ($factura->id_anticipo > 0): ?>
+													<tr>
+														<td><?= $factura->parentsandguardian->family ?></td>
+														<td style="text-align: center;"><?= $factura->control_number ?></td>
+														<td style="text-align: center;"><?= $factura->bill_number ?></td>
+														<td><?= $factura->tipo_documento ?></td>
+														<?php $totalBolivar += $factura->amount_paid; ?>
+														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+													</tr>
 												<?php endif;
 											endforeach; ?>
 											<tr>
@@ -826,21 +861,21 @@
 											</tr>
 										</thead>
 										<tbody>				
-											<?php $totalDolar = 0;
-											foreach ($facturas as $factura):  
-												if ($factura->tipo_documento == "Recibo de sobrante"): ?> 
-													<td><?= $factura->parentsandguardian->family ?></td>
-													<td style="text-align: center;"><?= $factura->control_number ?></td>
-													<td><?= $factura->tipo_documento ?></td>
-													<?php $totalDolar += $factura->amount_paid; ?>
-													<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+											<?php foreach ($facturas as $factura):  
+												if ($factura->tipo_documento == "Recibo de sobrante"): ?>
+													<tr>
+														<td><?= $factura->parentsandguardian->family ?></td>
+														<td style="text-align: center;"><?= $factura->control_number ?></td>
+														<td><?= $factura->tipo_documento ?></td>
+														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+													</tr>
 												<?php endif;
 											endforeach; ?>
 											<tr>
 												<td><b>Totales</b></td>
 												<td></td>
 												<td></td>
-												<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
+												<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
 											</tr>
 										</tbody>
 									</table>
@@ -924,8 +959,10 @@
 											<?php $totalBolivar = 0;
 											foreach ($documentosAnulados as $anulado):  
 												if ($anulado->fiscal == 0): ?> 
-													<td style="text-align: center;"><?= $anulado->control_number ?></td>
-													<td style="text-align: center;"><?= $anulado->tipo_documento ?></td>
+													<tr>
+														<td style="text-align: center;"><?= $anulado->control_number ?></td>
+														<td style="text-align: center;"><?= $anulado->tipo_documento ?></td>
+													</tr>
 												<?php endif;
 											endforeach; ?>
 										</tbody>
@@ -935,6 +972,7 @@
 						</div>
 					<?php endif; ?>
 				</div>
+							
 				<div class="row noVerImpreso">
 					<div class="col-md-12">
 						<?= $this->Form->create($turn) ?>

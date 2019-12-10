@@ -20,7 +20,7 @@ class HistoricotasasController extends AppController
      */
     public function index()
     {
-        $historicotasas = $this->paginate($this->Historicotasas, ['order' => ['created' => 'DESC']]);
+        $historicotasas = $this->paginate($this->Historicotasas, ['contain' => 'Monedas', 'order' => ['created' => 'DESC']]);
 
         $this->set(compact('historicotasas'));
         $this->set('_serialize', ['historicotasas']);

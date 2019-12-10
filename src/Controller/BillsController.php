@@ -230,6 +230,10 @@ class BillsController extends AppController
 				$bill->tasa_dolar_euro = $this->headboard['tasaDolarEuro'];
 				$bill->saldo_compensado_dolar = $this->headboard['saldoCompensado'];
 				$bill->sobrante_dolar = $this->headboard['sobrante'];
+				$bill->tasa_temporal_dolar = $this->headboard['tasaTemporalDolar'];
+				$bill->tasa_temporal_euro = $this->headboard['tasaTemporalEuro'];
+				$bill->cuotas_alumno_becado = $this->headboard['cuotasAlumnoBecado'];
+				$bill->cambio_monto_cuota = $this->headboard['cambioMontoCuota'];
 				
 				if (!($this->Bills->save($bill))) 
 				{
@@ -405,7 +409,7 @@ class BillsController extends AppController
 					{
 						$parentsandguardian = $this->Bills->Parentsandguardians->get($idParentsandguardian);
 						
-						if ($this->headboard['sobrante'] > 0)
+						if ($this->headboard['imprimirReciboSobrante'] > 0)
 						{
 							$resultado = $this->reciboAdicional($idParentsandguardian, $parentsandguardian->family, $billId, "Recibo de sobrante", 2, "Sobrante", $this->headboard['sobrante']); 
 														
@@ -427,14 +431,9 @@ class BillsController extends AppController
 							}
 						}
 							
-						if ($this->headboard['saldoCompensado'] > 0)
-						{
-							$parentsandguardian->balance = $parentsandguardian->balance - $this->headboard['saldoCompensado'];
-						}
-						elseif ($this->headboard['sobrante'] > 0)
-						{
-							$parentsandguardian->balance = $parentsandguardian->balance + $this->headboard['sobrante'];
-						}
+
+						$parentsandguardian->balance = $parentsandguardian->balance - $this->headboard['saldoCompensado'] + $this->headboard['sobrante'];
+
 												
 						if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))
 						{
@@ -2055,6 +2054,10 @@ class BillsController extends AppController
 		$bill->tasa_dolar_euro = $reciboPendiente->tasa_dolar_euro;
 		$bill->saldo_compensado_dolar = $reciboPendiente->saldo_compensado;
 		$bill->sobrante_dolar = $reciboPendiente->saldo_compensado;
+		$bill->tasa_temporal_dolar = $reciboPendiente->tasa_temporal_dolar;
+		$bill->tasa_temporal_euro = $reciboPendiente->tasa_temporal_euro;
+		$bill->cuotas_alumno_becado = $reciboPendiente->cuotas_alumno_becado;
+		$bill->cambio_monto_cuota = $reciboPendiente->cambio_monto_cuota;
 		
 		if ($this->Bills->save($bill)) 
 		{

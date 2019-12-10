@@ -178,7 +178,6 @@
 							</div>
 							<div id="botones-notas" class="noverScreen">
 								<p>
-									<button id="reintegrar" class="btn btn-success">Reintegrar</button>
 									<button id="compensar" class="btn btn-success">Compensar</button>
 								</p>
 							</div>
@@ -556,6 +555,7 @@
 	var discountMode = '';
 	var discountAmount = 0;
 	var discount = 0;
+	var balanceDescuento = 0;
 	var totalBalanceDescuento = 0 
 	var totalGeneral = 0;
 	var invoiceDescuento = 0;
@@ -631,6 +631,9 @@
 	var saldoRepresentanteSigno = 0;
 	var indicadorCompensacion = 0;
 	var deudaMenosPagado = 0;
+	var deudaMenosPagadoDecimal = 0;
+	var montoDolarDecimal = 0;
+	var acumuladoDolarDecimal = 0;
 	var porPagar = 0;
 	var sobrante = 0;
 	var monedaPago = "$";
@@ -638,6 +641,7 @@
 	var monedaPagoEliminar = "";
 	var indicadorAjuste = 0;
 	var indicadorNoCuotas = 0;
+	var contadorCuotasSeleccionadas = 0;
 
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
@@ -1124,6 +1128,7 @@
 		payMoneda VARCHAR(50), \
         payPaymentType VARCHAR(100), \
         payAmountPaid FLOAT, \
+		payMontoDecimal FLOAT, \
         payBank VARCHAR(200), \
 		payBancoReceptor VARCHAR(200), \
         payAccountOrCard VARCHAR(50), \
@@ -1219,16 +1224,18 @@
 		payMoneda, \
         payPaymentType, \
         payAmountPaid, \
+		payMontoDecimal, \
         payBank, \
 		payBancoReceptor, \
         payAccountOrCard, \
         paySerial, \
-		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = accountant;
 		var tpMoneda = monedaPago;
         var tpPaymentType = paymentType;
         var tpAmountPaid = amountPaid;
+		var tpMontoDecimal = montoDolarDecimal;
         var tpBank = bank;
 		var tpBancoReceptor = bancoReceptor;
         var tpAccountOrCard = accountOrCard;
@@ -1241,7 +1248,8 @@
             [tpId, 
 			tpMoneda,
             tpPaymentType, 
-            tpAmountPaid, 
+            tpAmountPaid,
+			tpMontoDecimal,
             tpBank,
 			tpBancoReceptor,
             tpAccountOrCard,
@@ -1417,12 +1425,18 @@
 					{
 						$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario no puede facturar hasta que haga una o más notas de crédito (SUNDDE) por un total de " + -1 * saldoNotaCredito + " $</b></spam>");
 						$("#botones-cuotas").addClass("noverScreen");
+						$("#print-invoice").attr('disabled', true);
+						$("#ajuste-automatico").attr('disabled', true);
+						$(".record-payment").attr('disabled', true);
 					}
 					else if (saldoRepresentante > 0)
 					{
 						if (indicadorCompensacion == 0)
 						{
-							$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: blue;'><b>Estimado usuario, este representante tiene un saldo a favor/contra de " + saldoRepresentante + " $ ¿Qué desea hacer?</b></spam>");
+							$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: blue;'><b>Estimado usuario, este representante tiene un saldo a favor/contra de " + saldoRepresentante + " $ ¿Quiere usarlo para compensar el pago de las cuotas?</b></spam>");
+							$("#print-invoice").attr('disabled', true);
+							$("#ajuste-automatico").attr('disabled', true);
+							$(".record-payment").attr('disabled', true);							
 							$("#botones-cuotas").addClass("noverScreen");
 							$("#botones-notas").removeClass("noverScreen");
 							$("#saldo-favor-dolar").html(saldoRepresentanteSigno);
@@ -1672,17 +1686,21 @@
 					if (monedaPagoEliminar == "$")
 					{
 						montoPagadoDolar = amountPaid;
+						montoDolarDecimal = item['payMontoDecimal'];
 					}
 					else if (monedaPagoEliminar == "€")
 					{
 						montoPagadoDolar = Math.round(amountPaid * tasaDolarEuro);
+						montoDolarDecimal = item['payMontoDecimal'] * tasaDolarEuro;
 					}
 					else
 					{
 						montoPagadoDolar = Math.round(amountPaid / dollarExchangeRate);
+						montoDolarDecimal = item['payMontoDecimal'] / dollarExchangeRate;
 					}
 									
-					accumulatedPayment = accumulatedPayment - montoPagadoDolar;
+					accumulatedPayment -= montoPagadoDolar;
+					acumuladoDolarDecimal -= montoDolarDecimal;
 					
 					actualizarTotales();						
                 }
@@ -2018,6 +2036,7 @@
 		$("#descuento-recargo-euro").html(Math.round(discount / tasaDolarEuro));
 		$("#descuento-recargo-bolivar").html(Math.round(discount * dollarExchangeRate));
 
+		balanceDescuento = totalBalance + discount;
 		totalBalanceDescuento = totalBalance - saldoRepresentante + discount;
 
 		$("#total-balance-descuento-dolar").html(totalBalanceDescuento);
@@ -2029,6 +2048,7 @@
 		$('#pagado-bolivar').html(Math.round(accumulatedPayment * dollarExchangeRate));
 		
 		deudaMenosPagado = totalBalanceDescuento - accumulatedPayment;
+		deudaMenosPagadoDecimal = totalBalanceDescuento - acumuladoDolarDecimal;
 				
 		if (deudaMenosPagado > 0)
 		{
@@ -2733,6 +2753,7 @@
 								concept = firstInstallment + ' - ' + lastInstallment;
 								studentBalance = studentBalance + parseFloat($(this).attr('value'));
 								totalBalance = totalBalance + parseFloat($(this).attr('value'));
+								contadorCuotasSeleccionadas++;
 								actualizarTotales();
 							}
 							else
@@ -2839,6 +2860,7 @@
 								}
 								studentBalance = studentBalance - transactionAmount;															
 								totalBalance = totalBalance - transactionAmount;
+								contadorCuotasSeleccionadas--;
 								actualizarTotales();
 								return false;
 							}
@@ -2958,7 +2980,7 @@
                     paymentType = "Retención de impuesto";
                 }
 
-                amountPaid = parseFloat($('#amount-' + paymentIdentifier).val());
+                amountPaid = Math.round(parseFloat($('#amount-' + paymentIdentifier).val()));
 				bank = $('#bank-' + paymentIdentifier).val();
 				bancoReceptor = $('#banco-receptor-' + paymentIdentifier).val();
                 accountOrCard = $('#account_or_card-' + paymentIdentifier).val();
@@ -3000,21 +3022,25 @@
 				if (monedaPago == "$")
 				{
 					montoPagadoDolar = amountPaid;
+					montoDolarDecimal = amountPaid;
 				}
 				else if (monedaPago == "€")
 				{
 					montoPagadoDolar = Math.round(amountPaid * tasaDolarEuro);
+					montoDolarDecimal = amountPaid * tasaDolarEuro;
 				}
 				else
 				{
 					montoPagadoDolar = Math.round(amountPaid / dollarExchangeRate);
+					montoDolarDecimal = amountPaid / dollarExchangeRate;
 				}
 			
                 printPayments();
 				
                 alert('Pago registrado con éxito: ' +  monedaPago + ' ' + amountPaid.toFixed(2));
 				
-                accumulatedPayment = accumulatedPayment + montoPagadoDolar;
+                accumulatedPayment += montoPagadoDolar;
+				acumuladoDolarDecimal += montoDolarDecimal;
         
 				actualizarTotales();
 				inicializarCampos();
@@ -3049,33 +3075,39 @@
         {	
             e.preventDefault();
 
-			if (deudaMenosPagado == 1)
+			if (contadorCuotasSeleccionadas == 0)
 			{
-				discount -= 1;
+				alert('Estimado usuario debe seleccionar al menos una cuota para poder facturar');
+				return false;				
 			}
-						
-			if (deudaMenosPagado > 1)
+			else if (deudaMenosPagado > 1)
 			{
 				alert('Estimado usuario debe registrar más pagos para completar el total de la factura/recibo u hacer un ajuste');
 				return false;
 			}
             else if (deudaMenosPagado < 0)
             {
-                var dialog = $('<p>Estimado usuario hay un sobrante a favor del representante. ¿Qué desea hacer?</p>').dialog({
-                    buttons: {
-                        "Abonar a cuotas": function() 
+				if (saldoRepresentante < balanceDescuento)
+				{
+					var dialog = $('<p>Estimado usuario hay un sobrante a favor del representante. ¿Qué desea hacer?</p>').dialog(
+					{
+						buttons: 
+						{
+							"Abonar a cuotas": function() 
 							{
 								dialog.dialog('close');
 							},
-                        "Dejarlo a favor":  function() 
+							"Dejarlo a favor":  function() 
 							{
 								guardarFactura();
 							},
-                        "Cancelar":  function() {
-                            dialog.dialog('close');
-                        }
-                    }
-                });
+							"Cancelar":  function() 
+							{
+								dialog.dialog('close');
+							}
+						}
+					});
+				}
             }   
 			else
 			{
@@ -3086,6 +3118,10 @@
 				}
 				else
 				{
+					if (deudaMenosPagadoDecimal > 0)
+					{
+						discount -= deudaMenosPagadoDecimal;
+					}
 					guardarFactura();
 				}
 			}
@@ -3331,7 +3367,7 @@
 						}
 						else if (adjMontoModificadoDolar == adjMontoPagadoDolar)
 						{
-							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, 0, 0, 0, 0, "(E)");
+							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, 0, 0, 0, 0, "(Exonerado)");
 							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
 						}
 						else
@@ -3364,6 +3400,9 @@
         $('#compensar').click(function(e) 
         {
 			e.preventDefault();
+			$("#print-invoice").attr('disabled', false);
+			$("#ajuste-automatico").attr('disabled', false);
+			$(".record-payment").attr('disabled', false);		
 			$("#nota-credito").addClass("noverScreen");
 			$("#botones-notas").addClass("noverScreen");
 			$("#botones-cuotas").removeClass("noverScreen");
@@ -3403,11 +3442,6 @@
 			$('.check-bolivar').attr('checked', true);
 			$('.check-bolivar').prop('checked', true);
 			aCobrarBolivares();
-		});
-		$('#reintegrar').click(function(e) 
-        {
-			e.preventDefault();	
-			window.location.assign('<?= Router::url(["controller" => "Bills", "action" => "establecerMontoReintegro"]) ?>' + '/' + idParentsandguardians + '/' + saldoRepresentante);			
 		});
     }); 
 

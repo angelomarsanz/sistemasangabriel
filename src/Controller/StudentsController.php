@@ -3267,4 +3267,96 @@ class StudentsController extends AppController
     {
         
     }
+	public function becadosAnoAnterior()
+	{
+		$this->loadModel('Discounts');
+		$contadorTotal = 0;
+		$contadorBecados = 0;
+		$contadorHijos20 = 0;
+		$contadorHijos50 = 0;
+		
+		$becados = $this->Students->find('all')->where(['OR' => [['scholarship' => true], ['discount' => 20], ['discount' => 50]]]);
+        
+		foreach ($becados as $becado)
+		{
+			$descuento = $this->Discounts->newEntity();
+			$contadorTotal++;
+			if ($becado->scholarship == true)
+			{
+				$descuento->description_discount = $becado->id;
+				$descuento->discount_mode = "Becado";
+				$descuento->discount_amount = 100;
+				$contadorBecados++;
+			}
+			elseif ($becado->discount == 20)
+			{
+				$descuento->description_discount = $becado->id;
+				$descuento->discount_mode = "Hijos";
+				$descuento->discount_amount = $becado->discount;	
+				$contadorHijos20++;
+			}
+			elseif ($becado->discount == 50)
+			{
+				$descuento->description_discount = $becado->id;
+				$descuento->discount_mode = "Hijos";
+				$descuento->discount_amount = $becado->discount;	
+				$contadorHijos50++;
+			}
+			
+			if (!($this->Discounts->save($descuento))) 
+			{
+                $this->Flash->error(__('No se pudo grabar el alumno en la tabla'));
+			}
+		}
+		$this->Flash->success(__('Total alumnos becados año anterior ' . $contadorBecados));
+		$this->Flash->success(__('Total alumnos beca hijos 20% ' . $contadorHijos20));
+		$this->Flash->success(__('Total alumnos beca hijos 50% ' . $contadorHijos50));
+		$this->Flash->success(__('Total alumnos becados ' . $contadorTotal));
+	}
+	public function actualizarBecadosAnoAnterior()
+	{
+		$this->loadModel('Discounts');
+		$contadorActualizados = 0;
+		$contadorBecados = 0;
+		$contadorHijos20 = 0;
+		$contadorHijos50 = 0;
+		
+		$becados = $this->Discounts->find('all');
+        
+		foreach ($becados as $becado)
+		{
+			$estudiante = $this->Students->get($becado->description_discount);
+						
+			if ($becado->discount_mode == "Becado")
+			{
+				$estudiante->becado_ano_anterior = true;
+				$estudiante->tipo_descuento_ano_anterior = "Becado";
+				$estudiante->descuento_ano_anterior = 100;
+				$contadorBecados++;
+			}
+			elseif ($becado->discount_mode == "Hijos" && $becado->discount_amount == 20)
+			{
+				$estudiante->tipo_descuento_ano_anterior = "Hijos";
+				$estudiante->descuento_ano_anterior = $becado->discount_amount;
+				$contadorHijos20++;
+			}			
+			elseif ($becado->discount_mode == "Hijos" && $becado->discount_amount == 50)
+			{
+				$estudiante->tipo_descuento_ano_anterior = "Hijos";
+				$estudiante->descuento_ano_anterior = $becado->discount_amount;
+				$contadorHijos50++;
+			}
+
+			$contadorActualizados++;
+			
+			if (!($this->Students->save($estudiante))) 
+			{
+                $this->Flash->error(__('No se pudo actualizar el alumno en la tabla'));
+			}
+		}
+		$this->Flash->success(__('Total alumnos becados ' . $contadorBecados));
+		$this->Flash->success(__('Total alumnos beca hijos 20% ' . $contadorHijos20));
+		$this->Flash->success(__('Total alumnos beca hijos 50% ' . $contadorHijos50));
+		$this->Flash->success(__('Total alumnos actualizados ' . $contadorActualizados));
+	}
 }

@@ -226,6 +226,12 @@ class StudentsTable extends Table
             ->notEmpty('new_student');
 			
         $validator
+            ->allowEmpty('becado_ano_anterior');
+			
+        $validator
+            ->allowEmpty('tipo_descuento_ano_anterior');
+			
+        $validator
             ->allowEmpty('descuento_ano_anterior');
 			
         $validator

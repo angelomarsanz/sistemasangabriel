@@ -62,6 +62,9 @@ class StudenttransactionsTable extends Table
             ->dateTime('payment_date')
             ->requirePresence('payment_date', 'create')
             ->notEmpty('payment_date');
+			
+        $validator
+            ->allowEmpty('ano_escolar');
 
         $validator
             ->requirePresence('transaction_type', 'create')

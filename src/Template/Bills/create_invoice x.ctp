@@ -1159,8 +1159,8 @@
         dbStudentName, \
         dbMonthlyPayment, \
         dbScholarship, \
-		dbDescuentoAlumno, \
-		dbMorosoAnoAnterior, \
+		dbDescuentoAlumno, \ 
+		dbMorosoAnoAnterior, \ 
 		dbTasaCambioDolar, \
 		dbTasaCambioEuro, \
 		dbTarifaDolarOriginal, \
@@ -1207,7 +1207,6 @@
             tpMonthlyPayment,
             tpScholarship,
 			tpDescuentoAlumno,
-			tpMorosoAnoAnterior,
 			tpTasaCambioDolar,
 			tpTasaCambioEuro,
 			tpTarifaDolarOriginal,
@@ -1924,9 +1923,6 @@
                         accountPaid++;						
                     }
                 }
-				
-				payments.cuotasAlumnoBecado = cuotasAlumnoBecado;
-				
                 var stringStudentTransactions = JSON.stringify(tbStudentTransactions);
                                 
                 var stringPaymentsMade = JSON.stringify(tbPaymentsMade);
@@ -2167,6 +2163,7 @@
 		payments.imprimirReciboSobrante = imprimirReciboSobrante;
 		payments.tasaTemporalDolar = tasaTemporalDolar;
 		payments.tasaTemporalEuro = tasaTemporalEuro;
+		payments.cuotasAlumnoBecado = cuotasAlumnoBecado;
 		payments.cambioMontoCuota = cambioMontoCuota;
 		
 		uploadTransactions();
@@ -2521,7 +2518,7 @@
 											montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
 											montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);	
 											paidOut = false;
-											if (monthlyPayment.substring(0, 3) == "Jul" && montoDolar < tarifaDolar)
+											if (monthlyPayment.substring(0, 3) != "Jul" && montoPagadoDolar > 0)
 											{
 												morosoAnoAnterior = 1;
 											}
@@ -2578,11 +2575,7 @@
 								montoPendienteDolar = tarifaDolar - montoDolar;
 								montoAPagarDolar = montoPendienteDolar;
 								montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-								montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);
-								if (monthlyPayment.substring(0, 3) == "Jul")
-								{
-									morosoAnoAnterior = 1;
-								}
+								montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);											
 							}
 							
 							if ($('#type-invoice').val() == 'Factura inscripción regulares')

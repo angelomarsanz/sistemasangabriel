@@ -167,6 +167,18 @@ class BillsTable extends Table
        $validator
             ->numeric('sobrante_dolar')
             ->allowEmpty('sobrante_dolar');
+			
+        $validator
+            ->allowEmpty('tasa_temporal_dolar');
+			
+        $validator
+            ->allowEmpty('tasa_temporal_euro');
+			
+        $validator
+            ->allowEmpty('cuotas_alumno_becado');
+			
+        $validator
+            ->allowEmpty('cambio_monto_cuota');
 
         return $validator;
     }
