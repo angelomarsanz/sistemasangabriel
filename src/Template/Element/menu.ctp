@@ -240,7 +240,12 @@
 		if (r == false)
 		{
 			return false;
-		}	
+		}
+		else
+		{
+			window.print();
+			return false;
+		}
 	}
 	
 	// Eventos
