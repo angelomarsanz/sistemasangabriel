@@ -1213,7 +1213,7 @@ class StudentsController extends AppController
 					$monthlyPayments[$accountantManager]['tipoDescuento'] = "Becado";
 					$monthlyPayments[$accountantManager]['descuento'] = 100;
 				}
-				elseif ($student->discount === null)
+				elseif ($student->discount === null || $student->discount == 0)
 				{
 					$monthlyPayments[$accountantManager]['tipoDescuento'] = "";
 					$monthlyPayments[$accountantManager]['descuento'] = 0;

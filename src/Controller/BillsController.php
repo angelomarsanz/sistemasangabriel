@@ -354,9 +354,7 @@ class BillsController extends AppController
 		$binnacles = new BinnaclesController;
 		
 		$codigoRetorno = 0;
-		
-		$sobranteNeto = 0;
-		
+				
         if ($this->request->is('post')) 
         {
 			$indicadorFacturaPendiente = 0;
@@ -429,12 +427,13 @@ class BillsController extends AppController
 								$this->Flash->error(__('No se pudo guardar correctamente el recibo del sobrante'));
 								$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo crear correctamente el recibo del sobrante para la factura ' . $billNumber);
 							}
+							$parentsandguardian->balance = $this->headboard['sobrante']; 
 						}
-							
-
-						$parentsandguardian->balance = $parentsandguardian->balance - $this->headboard['saldoCompensado'] + $this->headboard['sobrante'];
-
-												
+						else
+						{
+							$parentsandguardian->balance -= $this->headboard['saldoCompensado'];
+						}
+																			
 						if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))
 						{
 							$this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
@@ -1129,7 +1128,13 @@ class BillsController extends AppController
 									{
 										$parentsandguardian->balance += $factura->saldo_compensado_dolar;
 									}
-									elseif ($factura->tipo_documento == "Recibo de reintegro")
+									
+									if ($sobrante > 0)
+									{
+										$parentsandguardian->balance -= $reciboSobrante->amount_paid;
+									}
+
+									if ($factura->tipo_documento == "Recibo de reintegro")
 									{
 										if ($factura->moneda_id == 1)
 										{
@@ -1143,10 +1148,6 @@ class BillsController extends AppController
 										{
 											$parentsandguardian->balance += round($factura->amount_paid * $factura->tasa_dolar_euro);
 										}										
-									}
-									elseif ($sobrante > 0)
-									{
-										$parentsandguardian->balance -= $reciboSobrante->amount_paid;
 									}
 										
 									if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))

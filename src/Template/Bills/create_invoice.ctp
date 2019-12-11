@@ -648,6 +648,10 @@
 	var cuotasAlumnoBecado = 0;
 	var cambioMontoCuota = 0;
 	var morosoAnoAnterior = 0;
+	var anoEscolarEntero = 0;
+	var anoEscolarAnterior = 0;
+	var julioAnoAnterior = "";
+	var julioExonerado = 0;
 
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
@@ -2092,7 +2096,14 @@
 		else if (deudaMenosPagado < 0)
 		{
 			porPagar = 0;
-			sobrante = deudaMenosPagado * -1;
+			if (saldoRepresentante < balanceDescuento)
+			{
+				sobrante = deudaMenosPagado * -1;
+			}
+			else
+			{
+				sobrante = 0;
+			}
 		}
 		else
 		{
@@ -2422,9 +2433,16 @@
 						{
 							students += "<td>Becado</td></tr>";
 							scholarship = 1;
+							julioExonerado = 1;
 						}
 						
 						schoolYearFrom = value.schoolYearFrom;
+						
+						anoEscolarEntero = parseInt(schoolYearFrom);
+						
+						anoEscolarAnterior = anoEscolarEntero - 1;
+						
+						julioAnoAnterior = "Jul " + schoolYearFrom;
 						
 						if (value.discount_family === null)
 						{
@@ -2433,6 +2451,10 @@
 						else
 						{	
 							discountFamily = (100 - value.discount_family) / 100;
+							if (discountFamily < 1)
+							{
+								julioExonerado = 1;
+							}
 						}
 						
                         $.each(value.studentTransactions, function(key2, value2) 
@@ -2521,7 +2543,8 @@
 											montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
 											montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);	
 											paidOut = false;
-											if (monthlyPayment.substring(0, 3) == "Jul" && montoDolar < tarifaDolar)
+											
+											if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
 											{
 												morosoAnoAnterior = 1;
 											}
@@ -2579,7 +2602,7 @@
 								montoAPagarDolar = montoPendienteDolar;
 								montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
 								montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);
-								if (monthlyPayment.substring(0, 3) == "Jul")
+								if (monthlyPayment == julioAnoAnterior && julioExonerado == 0)
 								{
 									morosoAnoAnterior = 1;
 								}

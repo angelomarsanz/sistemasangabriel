@@ -17,14 +17,14 @@
     <h4>Relación de Mensualidades</h4>
 </div>
 <hr size="4" />
-<div style="font-size: 14px; line-height: 16px;">
+<div style="font-size: 18px; line-height: 20px;">
     <table style="width:100%">
         <thead>
             <tr>
                 <th style="width:5%; text-align:center;">Nro.</th>
                 <th style="width:30%; text-align:left;">Alumno</th>
-				<th style="width:5%; text-align:center;">Tipo Desc</th>
-				<th style="width:5%; text-align:center;">Desc %</th>
+				<th style="width:5%; text-align:center;">Desc</th>
+				<th style="width:5%; text-align:center;">%</th>
                 <th style="width:5%; text-align:center;">Sep</th>
                 <th style="width:5%; text-align:center;">Oct</th>
                 <th style="width:5%; text-align:center;">Nov</th>

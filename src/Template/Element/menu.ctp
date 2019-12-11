@@ -233,7 +233,16 @@
 			actualizarIndicadorImpresion(gIdFactura);
 		}
 	}
-
+	
+	function imprimirFacturaRecibo()
+	{
+		var r = confirm("Estimado usuario por favor coloque en la impresora el papel fiscal con el Nro. de control *** " + gNumeroControl + " ***.");
+		if (r == false)
+		{
+			return false;
+		}	
+	}
+	
 	// Eventos
 	
     $(document).ready(function()
@@ -254,6 +263,10 @@
 							window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
 							return false;
 						}
+						else
+						{
+							imprimirFacturaRecibo();
+						}
 					}
 					else
 					{
@@ -262,14 +275,16 @@
 						return false;
 					}
 				}
-				var r = confirm("Estimado usuario por favor coloque en la impresora el papel fiscal con el Nro. de control *** " + gNumeroControl + " ***.");
-				if (r == false)
+				else
 				{
-					return false;
+					imprimirFacturaRecibo();
 				}
 			}
-			window.print();
-			return false;
+			else
+			{
+				window.print();
+				return false;
+			}
 		});
 	});
 </script>     
