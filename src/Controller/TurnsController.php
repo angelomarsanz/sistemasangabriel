@@ -410,6 +410,21 @@ class TurnsController extends AppController
 					{
 						$indicadorSobrantes = 1;
 						$totalGeneralSobrantes += $factura->amount_paid;
+						if ($factura->moneda_id == 1)
+						{
+							$vectorTotalesRecibidos['Menos sobrantes (vueltos pendientes por entregar)']['Efectivo Bs.'] -= $factura->amount_paid;
+							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo Bs.'] -= $factura->amount_paid;	
+						}
+						elseif ($factura->moneda_id == 2)
+						{
+							$vectorTotalesRecibidos['Menos sobrantes (vueltos pendientes por entregar)']['Efectivo $'] -= $factura->amount_paid;
+							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] -= $factura->amount_paid;	
+						}					
+						else
+						{
+							$vectorTotalesRecibidos['Menos sobrantes (vueltos pendientes por entregar)']['Efectivo €'] -= $factura->amount_paid;
+							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] -= $factura->amount_paid;	
+						}						
 					}
 					elseif ($factura->id_anticipo > 0)
 					{
@@ -465,7 +480,11 @@ class TurnsController extends AppController
 						'depositoBolivar' => 0,
 						'chequeBolivar' => 0,
 						'compensadoDolar' => $factura->saldo_compensado_dolar,
-						'totalCobradoDolar' => 0];	
+						'totalCobradoDolar' => 0,
+						'tasaTemporalDolar' => $factura->tasa_temporal_dolar,
+						'tasaTemporalEuro' => $factura->tasa_temporal_euro,
+						'cuotasAlumnoBecado' => $factura->cuotas_alumno_becado,
+						'cambioMontoCuota' => $factura->cambio_monto_cuota];	
 					$contadorNumero++;
 				}
 			}
@@ -722,6 +741,8 @@ class TurnsController extends AppController
 				$lastNumber = $factura->bill_number;
 				$lastControl = $factura->control_number;
 			}
+			
+			$vista = "turnsEdit";
 													
 			$this->set(compact
 				('turn',
@@ -748,7 +769,8 @@ class TurnsController extends AppController
 				'indicadorFacturasAnuladas',
 				'indicadorRecibosAnulados',
 				'documentosAnulados',
-				'totalGeneralSobrantes'));	
+				'totalGeneralSobrantes',
+				'vista'));	
 				
 			$this->set('_serialize', 
 				['turn',
@@ -775,7 +797,8 @@ class TurnsController extends AppController
 				'indicadorFacturasAnuladas',
 				'indicadorRecibosAnulados',
 				'documentosAnulados',
-				'totalGeneralSobrantes']);
+				'totalGeneralSobrantes',
+				'vista']);
 		}
 	}
     
@@ -1191,6 +1214,7 @@ class TurnsController extends AppController
 			'Total facturas + anticipos de inscripción',
 			'Menos reintegros',
 			'Menos compras',
+			'Menos sobrantes (vueltos pendientes por entregar)',
 			'Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname'),
             'Total recibido de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname'),
             'Diferencia'];

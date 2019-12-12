@@ -285,6 +285,11 @@
 					imprimirFacturaRecibo();
 				}
 			}
+			else if (gVista == "turnsEdit")
+			{
+				alert("Estimado usuario no puede imprimir el reporte de cierre si no ha cerrado el turno");
+				return false;		
+			}
 			else
 			{
 				window.print();
