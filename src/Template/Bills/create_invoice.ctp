@@ -217,7 +217,7 @@
 									</div>
 									<div class="row">
 										<div class="col-md-6">
-											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-01']) ?>
+											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-01', 'class' => 'alternative-decimal-separator']) ?>
 											<?= $this->Form->input('bank', ['label' => 'Banco:', 'value' => 'N/A', 'disabled' => true, 'id' => 'bank-01']) ?>	
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'value' => 'N/A', 'disabled' => true, 'id' => 'banco-receptor-01']); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-01']) ?>
@@ -247,7 +247,7 @@
 									</div>
 									<div class="row">
 										<div class="col-md-6">
-											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-02']) ?>
+											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-02', 'class' => 'alternative-decimal-separator']) ?>
 											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-02', 'options' => $bancosEmisor]); ?>
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-02', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'id' => 'account_or_card-02']) ?>
@@ -277,7 +277,7 @@
 									</div>
 									<div class="row">
 										<div class="col-md-6">
-											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-03']) ?>
+											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-03', 'class' => 'alternative-decimal-separator']) ?>
 											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-03', 'options' => $bancosEmisor]); ?>
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-03', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'id' => 'account_or_card-03']) ?>
@@ -307,7 +307,7 @@
 									</div>
 									<div class="row">
 										<div class="col-md-6">
-											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-04']) ?>
+											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-04', 'class' => 'alternative-decimal-separator']) ?>
 											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-04', 'options' => $bancosEmisor]); ?>
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-04', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-04']) ?>
@@ -337,7 +337,7 @@
 									</div>
 									<div class="row">
 										<div class="col-md-6">
-											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-05']) ?>
+											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-05', 'class' => 'alternative-decimal-separator']) ?>
 											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-05', 'options' => $bancosEmisor]); ?>	
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-05', 'options' => $bancosReceptor]); ?>	
 											<?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-05']) ?>
@@ -368,7 +368,7 @@
 									</div>
 									<div class="row">
 										<div class="col-md-6">
-											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-06']) ?>
+											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-06', 'class' => 'alternative-decimal-separator']) ?>
 											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-06', 'options' => $bancosEmisor]); ?>
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-06', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'id' => 'account_or_card-06']) ?>
@@ -398,7 +398,7 @@
 									</div>
 									<div class="row">
 										<div class="col-md-6">
-											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-07']) ?>
+											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-07', 'class' => 'alternative-decimal-separator']) ?>
 											<?= $this->Form->input('bank', ['label' => 'Banco:', 'value' => 'N/A', 'disabled' => true, 'id' => 'bank-07']) ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-07']) ?>
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'value' => 'N/A', 'disabled' => true, 'id' => 'banco-receptor-07']); ?>
@@ -454,7 +454,7 @@
 													'Descuento %' => 'Descuento: %',
 													'Recargo $' => 'Recargo: $',
 													'Recargo %' => 'Recargo: %']]); ?></td>	
-												<td><?= $this->Form->input('cantidad_descuento', ['label' => 'Cantidad:', 'type' => 'number', 'id' => 'cantidad-descuento', 'value' => 0, 'disabled' => 'true']); ?></td>													
+												<td><?= $this->Form->input('cantidad_descuento', ['label' => 'Cantidad:', 'type' => 'text', 'id' => 'cantidad-descuento', 'value' => 0, 'disabled' => 'true', 'class' => 'alternative-decimal-separator']); ?></td>													
 												<td id="descuento-recargo-dolar" style="text-align:center; vertical-align: middle;">0</td>
 												<td style="color: blue; text-align:center; vertical-align: middle;" id="descuento-recargo-euro">0</td>
 												<td style="color: red; text-align:center; vertical-align: middle;" id="descuento-recargo-bolivar">0</td>
@@ -462,9 +462,9 @@
 											<tr>
 												<td>Iva 16%</td>
 												<td></td>
-												<td style="text-align:center;">0</td>
-												<td style="color: blue; text-align:center;">0</td>
-												<td style="color: red; text-align:center;">0</td>
+												<td style="text-align:center;">0,00</td>
+												<td style="color: blue; text-align:center;">0,00</td>
+												<td style="color: red; text-align:center;">0,00</td>
 											</tr>
 											<tr>
 												<td>Total</td>
@@ -551,18 +551,29 @@
 	var typeStudent = 0;
     var customerEmail = " ";
     var totalBalance = 0;
+	var totalBalanceEuros = 0;
+	var totalBalanceBolivares = 0;
 	var saldoPagosRealizados = 0;
 	var discountMode = '';
 	var discountAmount = 0;
 	var discount = 0;
+	var descuentoEuros = 0;
+	var descuentoBolivares = 0; 
 	var balanceDescuento = 0;
-	var totalBalanceDescuento = 0 
+	var balanceDescuentoEuros = 0;
+	var balanceDescuentoBolivare = 0;
+	var totalBalanceDescuento = 0
+	var totalBalanceDescuentoEuros = 0
+	var totalBalanceDescuentoBolivares = 0	
 	var totalGeneral = 0;
 	var invoiceDescuento = 0;
     var totalBill = 0;
     var paymentType = " ";
     var amountPaid = 0;
+	var montoPagado = 0;
 	var montoPagadoDolar = 0;
+	var montoPagadoEuro = 0;
+	var montoPagadoBolivar = 0;
     var bank = " ";
 	var bancoReceptor = "";
     var accountOrCard = " ";
@@ -570,6 +581,8 @@
     var balance = 0;
     var balanceIndicator = 0;
     var accumulatedPayment = 0;
+    var acumuladoPagadoEuros = 0;
+    var acumuladoPagadoBolivares = 0;
     var accountantPaid = 0;
     var accountant = 1;
     var linePayments = " ";
@@ -620,7 +633,6 @@
     var idStudentTransactions = " ";
 	var idAmountTransactions = "";
     var amountPayable = 0;
-	var amountPaid = 0;
     var selectedPayment = -1;
     var grade = " ";
     var section = " ";
@@ -629,13 +641,20 @@
 	var euro = 0;
 	var saldoRepresentante = 0;
 	var saldoRepresentanteSigno = 0;
+	var saldoRepresentanteEuros = 0;
+	var saldoRepresentanteSignoEuros = 0;
+	var saldoRepresentanteBolivares = 0;
+	var saldoRepresentanteSignoBolivares = 0;
 	var indicadorCompensacion = 0;
 	var deudaMenosPagado = 0;
-	var deudaMenosPagadoDecimal = 0;
-	var montoDolarDecimal = 0;
-	var acumuladoDolarDecimal = 0;
+	var deudaMenosPagadoEuros = 0;
+	var deudaMenosPagadoDolares = 0;
 	var porPagar = 0;
+	var porPagarEuros = 0;
+	var porPagarBolivares = 0;
 	var sobrante = 0;
+	var sobranteEuros = 0;
+	var sobranteBolivares = 0;
 	var monedaPago = "$";
 	var comentario = "";
 	var monedaPagoEliminar = "";
@@ -990,51 +1009,51 @@
 		{
 			aCobrar = 0;
 		}
-		$('#amount-01').val(aCobrar).css("color", "black");
-		$('#amount-02').val(aCobrar).css("color", "black");
-		$('#amount-03').val(aCobrar).css("color", "black");
-		$('#amount-04').val(aCobrar).css("color", "black");
-		$('#amount-05').val(aCobrar).css("color", "black");
-		$('#amount-06').val(aCobrar).css("color", "black");
-		$('#amount-07').val(aCobrar).css("color", "black");
+		$('#amount-01').val(formatoNumero(aCobrar)).css("color", "black");
+		$('#amount-02').val(formatoNumero(aCobrar)).css("color", "black");
+		$('#amount-03').val(formatoNumero(aCobrar)).css("color", "black");
+		$('#amount-04').val(formatoNumero(aCobrar)).css("color", "black");
+		$('#amount-05').val(formatoNumero(aCobrar)).css("color", "black");
+		$('#amount-06').val(formatoNumero(aCobrar)).css("color", "black");
+		$('#amount-07').val(formatoNumero(aCobrar)).css("color", "black");
 	}
 	
     function aCobrarEuros()
     {       
-        if (deudaMenosPagado > 0)
+        if (deudaMenosPagadoEuros > 0)
         {
-			aCobrar = Math.round(deudaMenosPagado / tasaDolarEuro);
+			aCobrar = deudaMenosPagadoEuros;
 		}
 		else
 		{
 			aCobrar = 0;
 		}
-		$('#amount-01').val(aCobrar).css("color", "blue");
-		$('#amount-02').val(aCobrar).css("color", "blue");
-		$('#amount-03').val(aCobrar).css("color", "blue");
-		$('#amount-04').val(aCobrar).css("color", "blue");
-		$('#amount-05').val(aCobrar).css("color", "blue");
-		$('#amount-06').val(aCobrar).css("color", "blue");
-		$('#amount-07').val(aCobrar).css("color", "blue");
+		$('#amount-01').val(formatoNumero(aCobrar)).css("color", "blue");
+		$('#amount-02').val(formatoNumero(aCobrar)).css("color", "blue");
+		$('#amount-03').val(formatoNumero(aCobrar)).css("color", "blue");
+		$('#amount-04').val(formatoNumero(aCobrar)).css("color", "blue");
+		$('#amount-05').val(formatoNumero(aCobrar)).css("color", "blue");
+		$('#amount-06').val(formatoNumero(aCobrar)).css("color", "blue");
+		$('#amount-07').val(formatoNumero(aCobrar)).css("color", "blue");
 	}
 	
     function aCobrarBolivares()
     {       
         if (deudaMenosPagado > 0)
         {
-			aCobrar = Math.round(deudaMenosPagado * dollarExchangeRate);
+			aCobrar = deudaMenosPagadoBolivares;
 		}
 		else
 		{
 			aCobrar = 0;
 		}
-		$('#amount-01').val(aCobrar).css("color", "red");
-		$('#amount-02').val(aCobrar).css("color", "red");
-		$('#amount-03').val(aCobrar).css("color", "red");
-		$('#amount-04').val(aCobrar).css("color", "red");
-		$('#amount-05').val(aCobrar).css("color", "red");
-		$('#amount-06').val(aCobrar).css("color", "red");
-		$('#amount-07').val(aCobrar).css("color", "red");
+		$('#amount-01').val(formatoNumero(aCobrar)).css("color", "red");
+		$('#amount-02').val(formatoNumero(aCobrar)).css("color", "red");
+		$('#amount-03').val(formatoNumero(aCobrar)).css("color", "red");
+		$('#amount-04').val(formatoNumero(aCobrar)).css("color", "red");
+		$('#amount-05').val(formatoNumero(aCobrar)).css("color", "red");
+		$('#amount-06').val(formatoNumero(aCobrar)).css("color", "red");
+		$('#amount-07').val(formatoNumero(aCobrar)).css("color", "red");
 	}
 	
 	function inicializarCampos()
@@ -1118,17 +1137,17 @@
         dbStudentName VARCHAR(250), \
         dbMonthlyPayment VARCHAR(100), \
         dbScholarship INTEGER, \
-		dbDescuentoAlumno FLOAT, \
+		dbDescuentoAlumno DECIMAL(15,2), \
 		dbMorosoAnoAnterior INTEGER, \
-		dbTasaCambioDolar FLOAT, \
-		dbTasaCambioEuro FLOAT, \
-		dbTarifaDolarOriginal FLOAT, \
-		dbTarifaDolar FLOAT, \
-		dbMontoAbonadoDolar FLOAT, \
-		dbMontoPendienteDolar FLOAT, \
-		dbMontoAPagarDolar FLOAT, \
-		dbMontoAPagarEuro FLOAT, \
-		dbMontoAPagarBolivar FLOAT, \
+		dbTasaCambioDolar DECIMAL(15,2), \
+		dbTasaCambioEuro DECIMAL(15,2), \
+		dbTarifaDolarOriginal DECIMAL(15,2), \
+		dbTarifaDolar DECIMAL(15,2), \
+		dbMontoAbonadoDolar DECIMAL(15,2), \
+		dbMontoPendienteDolar DECIMAL(15,2), \
+		dbMontoAPagarDolar DECIMAL(15,2), \
+		dbMontoAPagarEuro DECIMAL(15,2), \
+		dbMontoAPagarBolivar DECIMAL(15,2), \
         dbInvoiced INTEGER, \
         dbPartialPayment INTEGER, \
         dbPaidOut INTEGER, \
@@ -1144,8 +1163,7 @@
         (payId INTEGER PRIMARY KEY, \
 		payMoneda VARCHAR(50), \
         payPaymentType VARCHAR(100), \
-        payAmountPaid FLOAT, \
-		payMontoDecimal FLOAT, \
+        payAmountPaid DECIMAL(15,2), \
         payBank VARCHAR(200), \
 		payBancoReceptor VARCHAR(200), \
         payAccountOrCard VARCHAR(50), \
@@ -1247,18 +1265,16 @@
 		payMoneda, \
         payPaymentType, \
         payAmountPaid, \
-		payMontoDecimal, \
         payBank, \
 		payBancoReceptor, \
         payAccountOrCard, \
         paySerial, \
-		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = accountant;
 		var tpMoneda = monedaPago;
         var tpPaymentType = paymentType;
-        var tpAmountPaid = amountPaid;
-		var tpMontoDecimal = montoDolarDecimal;
+        var tpAmountPaid = montoPagado;
         var tpBank = bank;
 		var tpBancoReceptor = bancoReceptor;
         var tpAccountOrCard = accountOrCard;
@@ -1272,7 +1288,6 @@
 			tpMoneda,
             tpPaymentType, 
             tpAmountPaid,
-			tpMontoDecimal,
             tpBank,
 			tpBancoReceptor,
             tpAccountOrCard,
@@ -1320,7 +1335,7 @@
         var firstInstallment = "";
         var lastInstallment = "";
         studentBalance = 0;
-     	 			 
+		     	 			 
         db.transaction(function (tx) 
         {
             tx.executeSql(selectWithCondition, [idStudent], function (tx, result) 
@@ -1330,7 +1345,7 @@
                 for (var i = 0, item = null; i < dataSet.length; i++) 
                 {
                     item = dataSet.item(i);
-                    
+					                    
                     if (i == 0)
                     {
                         if (item['dbScholarship'] == 1)
@@ -1362,24 +1377,24 @@
 							detailLine += "<tr id=tra" + item['dbId'] + "> \
 								<td style='background-color:#c2c2d6;'><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " checked='checked' disabled></td> \
 								<td style='background-color:#c2c2d6;'>" + item['dbMonthlyPayment'] + "</td> \
-								<td style='background-color:#c2c2d6;'><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbTarifaDolar'] + " disabled></td> \
-								<td style='background-color:#c2c2d6;'><input type='number' class='form-control amount-paid' value=" + item['dbMontoAbonadoDolar'] + " disabled></td>";
+								<td style='background-color:#c2c2d6;'><input type='text' id=am" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + formatoNumero(item['dbTarifaDolar']) + " disabled></td> \
+								<td style='background-color:#c2c2d6;'><input type='text' class='form-control amount-paid' value=" + formatoNumero(item['dbMontoAbonadoDolar']) + " disabled></td>";
 		
 							if (item['dbMontoPendienteDolar'] < 0)
 							{
-								detailLine += 	"<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoPendienteDolar'] + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoAPagarDolar'] + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoAPagarEuro'] + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
+								detailLine += 	"<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
+												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarDolar']) + "</td> \
+												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
+												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
 												<td style='background-color:#c2c2d6; color: red;'>Hacer NC</td> \
 												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
 							}
 							else
 							{
-								detailLine += 	"<td style='background-color:#c2c2d6;'>" + item['dbMontoPendienteDolar'] + "</td> \
-												<td style='background-color:#c2c2d6;'>" + item['dbMontoAPagarDolar'] + "</td> \
-												<td style='background-color:#c2c2d6; color: blue;'>" + item['dbMontoAPagarEuro'] + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
+								detailLine += 	"<td style='background-color:#c2c2d6;'>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
+												<td style='background-color:#c2c2d6;'>" + formatoNumero(item['dbMontoAPagarDolar']) + "</td> \
+												<td style='background-color:#c2c2d6; color: blue;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
+												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
 												<td style='background-color:#c2c2d6;'>" + item['dbObservation'] + "</td> \
 												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
 							}
@@ -1402,8 +1417,8 @@
 							detailLine += "<tr id=tra" + item['dbId'] + "> \
 								<td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " disabled></td> \
 								<td>" + item['dbMonthlyPayment'] + "</td> \
-								<td><input type='number' id=am" + item['dbId'] + " class='form-control modifiable-fee' value=" + item['dbTarifaDolar'] + "></td> \
-								<td><input type='number' class='form-control amount-paid' value=" + item['dbMontoAbonadoDolar'] + " disabled></td>";
+								<td><input type='text' id=am" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + formatoNumero(item['dbTarifaDolar']) + "></td> \
+								<td><input type='text' class='form-control amount-paid' value=" + formatoNumero(item['dbMontoAbonadoDolar']) + " disabled></td>";
 		
 							if (item['dbMontoPendienteDolar'] < 0)
 							{
@@ -1416,10 +1431,10 @@
 							}
 							else
 							{
-								detailLine += 	"<td>" + item['dbMontoPendienteDolar'] + "</td> \
-												<td>" + item['dbMontoAPagarDolar'] + "</td> \
-												<td style='color: blue;'>" + item['dbMontoAPagarEuro'] + "</td> \
-												<td style='color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
+								detailLine += 	"<td>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
+												<td>" + formatoNumero(item['dbMontoAPagarDolar']) + "</td> \
+												<td style='color: blue;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
+												<td style='color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
 												<td>" + item['dbObservation'] + "</td> \
 												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
 							}
@@ -1427,6 +1442,7 @@
                     }
                 }
                 $("#monthly-payment").html(detailLine);
+				$(".alternative-decimal-separator").numeric({ altDecimal: "," });
                 if (nextPayment == "" && studentBalance == 0)
                 {
                     disableButtons();
@@ -1438,7 +1454,7 @@
                     $("#student-name").html(studentName);
                     $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
                     concept = firstInstallment + ' - ' + lastInstallment;
-                    $("#student-balance").html(studentBalance);
+                    $("#student-balance").html(formatoNumero(studentBalance));
 
 					$("#mark-quotas").html(nextPayment);  
 					
@@ -1471,8 +1487,8 @@
 							$("#botones-cuotas").addClass("noverScreen");
 							$("#botones-notas").removeClass("noverScreen");
 							$("#saldo-favor-dolar").html(saldoRepresentanteSigno);
-							$("#saldo-favor-euro").html(Math.round(saldoRepresentanteSigno / tasaDolarEuro));
-							$("#saldo-favor-bolivar").html(Math.round(saldoRepresentante * dollarExchangeRate));
+							$("#saldo-favor-euro").html(formatoNumero(saldoRepresentanteSigno / tasaDolarEuro));
+							$("#saldo-favor-bolivar").html(formatoNumero(saldoRepresentante * dollarExchangeRate));
 						}
 					}
                 }
@@ -1550,7 +1566,7 @@
             return false;
         }
 		
-		saldoPagosRealizados = accumulatedPayment + saldoRepresentante - discount;
+		saldoPagosRealizados = dosDecimales(accumulatedPayment + saldoRepresentante - discount);
 		
 		totalBalance = 0;
 				
@@ -1572,15 +1588,18 @@
 					}
 					else if (saldoPagosRealizados < item['dbMontoPendienteDolar'])
 					{
-						actualizarPagar(item['dbId'], saldoPagosRealizados, Math.round(saldoPagosRealizados / tasaDolarEuro), Math.round(saldoPagosRealizados * dollarExchangeRate), 'true', 'Abono');
+						saldoPagosRealizadosEuros = dosDecimales(saldoPagosRealizados / tasaDolarEuro);
+						saldoPagosRealizadosBolivares = dosDecimales(saldoPagosRealizados * dollarExchangeRate);
+						
+						actualizarPagar(item['dbId'], saldoPagosRealizados, saldoPagosRealizadosEuros, saldoPagosRealizadosBolivares, 'true', 'Abono');
 						totalBalance = totalBalance + saldoPagosRealizados;
 						saldoPagosRealizados = 0;
 						indicadorAjuste = 1;
 					}
 					else
 					{
-						saldoPagosRealizados = saldoPagosRealizados - item['dbMontoPendienteDolar'];
-						totalBalance = totalBalance + item['dbMontoPendienteDolar'];
+						saldoPagosRealizados = dosDecimales(saldoPagosRealizados - item['dbMontoPendienteDolar']);
+						totalBalance = dosDecimales(totalBalance + item['dbMontoPendienteDolar']);
 					}
                 }
 				if (saldoPagosRealizados > 0)
@@ -1606,12 +1625,15 @@
 									if (saldoPagosRealizados >= item['dbMontoPendienteDolar']) 
 									{
 										updateRecord(item['dbId'], 'true');
-										saldoPagosRealizados = saldoPagosRealizados - item['dbMontoPendienteDolar'];
-										totalBalance = totalBalance + item['dbMontoPendienteDolar'];
+										saldoPagosRealizados = dosDecimales(saldoPagosRealizados - item['dbMontoPendienteDolar']);
+										totalBalance = dosDecimales(totalBalance + item['dbMontoPendienteDolar']);
 									}
 									else if (saldoPagosRealizados > 0 && saldoPagosRealizados < item['dbMontoPendienteDolar'])
 									{
-										actualizarPagar(item['dbId'], saldoPagosRealizados, Math.round(saldoPagosRealizados / tasaDolarEuro), Math.round(saldoPagosRealizados * dollarExchangeRate), 'true', 'Abono');
+										saldoPagosRealizadosEuros = dosDecimales(saldoPagosRealizados / tasaDolarEuro);
+										saldoPagosRealizadosBolivares = dosDecimales(saldoPagosRealizados * dollarExchangeRate);
+										
+										actualizarPagar(item['dbId'], saldoPagosRealizados, saldoPagosRealizadosEuros, saldoPagosRealizadosBolivares, 'true', 'Abono');
 										totalBalance = totalBalance + saldoPagosRealizados;
 										saldoPagosRealizados = 0;
 										indicadorAjuste = 1;
@@ -1653,7 +1675,7 @@
                 for (var i = 0, item = null; i < dataSet.length; i++) 
                 {
                     item = dataSet.item(i);				
-					actualizarPagar(item['dbId'], item['dbMontoPendienteDolar'], Math.round(item['dbMontoPendienteDolar'] / tasaDolarEuro), Math.round(item['dbMontoPendienteDolar'] * dollarExchangeRate), "");
+					actualizarPagar(item['dbId'], item['dbMontoPendienteDolar'], item['dbMontoPendienteDolar'] / tasaDolarEuro, item['dbMontoPendienteDolar'] * dollarExchangeRate, "");
                 }
 				indicadorAjuste = 0;
             });
@@ -1716,22 +1738,28 @@
 													
 					if (monedaPagoEliminar == "$")
 					{
-						montoPagadoDolar = amountPaid;
-						montoDolarDecimal = item['payMontoDecimal'];
+						montoPagadoDolar = montoPagado;
+						montoPagadoEuro = dosDecimales(montoPagado / tasaDolarEuro);
+						montoPagadoBolivar = dosDecimales(montoPagado * dollarExchangeRate);
 					}
 					else if (monedaPagoEliminar == "€")
 					{
-						montoPagadoDolar = Math.round(amountPaid * tasaDolarEuro);
-						montoDolarDecimal = item['payMontoDecimal'] * tasaDolarEuro;
+						montoPagadoDolar = dosDecimales(montoPagado * tasaDolarEuro);
+						montoPagadoEuro = montoPagado;
+						montoPagadoBolivar = dosDecimales(montoPagado * euro);
 					}
 					else
 					{
-						montoPagadoDolar = Math.round(amountPaid / dollarExchangeRate);
-						montoDolarDecimal = item['payMontoDecimal'] / dollarExchangeRate;
+						montoPagadoDolar = dosDecimales(montoPagado / dollarExchangeRate);
+						montoPagadoEuro = dosDecimales(montoPagado / euro);
+						montoPagadoBolivar = montoPagado;
 					}
-									
-					accumulatedPayment -= montoPagadoDolar;
-					acumuladoDolarDecimal -= montoDolarDecimal;
+														
+					accumulatedPayment -= dosDecimales(montoPagadoDolar);	
+					acumuladoPagadoEuros -= dosDecimales(montoPagadoEuro);
+					console.log('acumuladoPagadoEuros ' + acumuladoPagadoEuros);
+					
+					acumuladoPagadoBolivares -= dosDecimales(montoPagadoBolivar);
 					
 					actualizarTotales();						
                 }
@@ -1765,20 +1793,20 @@
         linePayments = " ";
 	        
         linePayments += "<tr id=pa" + accountant + "> \
-            <td><button id=p" + accountant + " name='" + paymentType + "' value=" + amountPaid + " class='registeredPayments glyphicon glyphicon-trash'></button></td> \
+            <td><button id=p" + accountant + " name='" + paymentType + "' value=" + montoPagado + " class='registeredPayments glyphicon glyphicon-trash'></button></td> \
 			<td style='text-align: center;'>" + paymentType + "</td>";
 			
 		if (monedaPago == "$")
 		{
-			linePayments += "<td style='text-align: center;'>" + monedaPago + "</td><td style='text-align: center;'>" + amountPaid + "</td>";
+			linePayments += "<td style='text-align: center;'>" + monedaPago + "</td><td style='text-align: center;'>" + formatoNumero(montoPagado) + "</td>";
 		}
 		else if (monedaPago == "€")
 		{
-			linePayments += "<td style='color: blue; text-align: center;'>" + monedaPago + "</td><td style='color: blue; text-align: center;'>" + amountPaid + "</td>";
+			linePayments += "<td style='color: blue; text-align: center;'>" + monedaPago + "</td><td style='color: blue; text-align: center;'>" + formatoNumero(montoPagado) + "</td>";
 		}
 		else
 		{
-			linePayments += "<td style='color: red; text-align: center;'>" + monedaPago + "</td><td style='color: red; text-align: center;'>" + amountPaid + "</td>";
+			linePayments += "<td style='color: red; text-align: center;'>" + monedaPago + "</td><td style='color: red; text-align: center;'>" + formatoNumero(montoPagado) + "</td>";
 		}
 		
 		linePayments +=
@@ -1877,9 +1905,9 @@
 					tbStudentTransactions[transactionCounter].tarifaDolarOriginal = item['dbTarifaDolarOriginal'];
 					tbStudentTransactions[transactionCounter].tarifaDolar = item['dbTarifaDolar'];
                     tbStudentTransactions[transactionCounter].monthlyPayment = item['dbMonthlyPayment'];
-					tbStudentTransactions[transactionCounter].montoAPagarDolar = item['dbMontoAPagarDolar'];
-                    tbStudentTransactions[transactionCounter].montoAPagarEuro = item['dbMontoAPagarEuro'];
-					tbStudentTransactions[transactionCounter].montoAPagarBolivar = item['dbMontoAPagarBolivar'];
+					tbStudentTransactions[transactionCounter].montoAPagarDolar = dosDecimales(item['dbMontoAPagarDolar']);
+                    tbStudentTransactions[transactionCounter].montoAPagarEuro = dosDecimales(item['dbMontoAPagarEuro']);
+					tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);					
                     tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 					
                     transactionCounter++;
 					if (item['dbMonthlyPayment'].substring(0, 9) == "Matrícula")
@@ -2045,49 +2073,63 @@
 		signoDescuento = 1;
 		descuentoPrevio = 0;
 		
-		$("#student-balance").html(studentBalance);
-		$("#total-balance").html(totalBalance);
-		$("#sub-total-dolar").html(totalBalance);
-		$("#sub-total-euro").html(Math.round(totalBalance/tasaDolarEuro));
-		$("#sub-total-bolivar").html(Math.round(totalBalance*dollarExchangeRate));
+		$("#student-balance").html(formatoNumero(studentBalance));
+		$("#total-balance").html(formatoNumero(totalBalance));
+		
+		totalBalanceEuros = dosDecimales(totalBalance / tasaDolarEuro);
+		totalBalanceBolivares = dosDecimales(totalBalance * dollarExchangeRate);
+	
+		$("#sub-total-dolar").html(formatoNumero(totalBalance));
+		$("#sub-total-euro").html(formatoNumero(totalBalanceEuros));
+		$("#sub-total-bolivar").html(formatoNumero(totalBalanceBolivares));
 				
 		if (discountMode == 'Porcentaje')
 		{
 			if (discountAmount < 0)
 			{
 				signoDescuento = -1;
-				descuentoPrevio = discountAmount * signoDescuento;
+				descuentoPrevio = dosDecimales(discountAmount * signoDescuento);
 			}
 			else
 			{
 				descuentoPrevio = discountAmount;
 			}
-			discount = Math.round((totalBalance) * descuentoPrevio);
-			discount = discount * signoDescuento;
+			discount = dosDecimales(totalBalance * descuentoPrevio);
+			discount = dosDecimales(discount * signoDescuento);
 		}
 		else
 		{
 			discount = discountAmount;		
-		}			
+		}
 		
-		$("#descuento-recargo-dolar").html(discount);
-		$("#descuento-recargo-euro").html(Math.round(discount / tasaDolarEuro));
-		$("#descuento-recargo-bolivar").html(Math.round(discount * dollarExchangeRate));
+		descuentoEuros = dosDecimales(discount / tasaDolarEuro);
+		descuentoBolivares = dosDecimales(discount * dollarExchangeRate);
+						
+		$("#descuento-recargo-dolar").html(formatoNumero(discount));
+		$("#descuento-recargo-euro").html(formatoNumero(descuentoEuros));
+		$("#descuento-recargo-bolivar").html(formatoNumero(descuentoBolivares));
 
-		balanceDescuento = totalBalance + discount;
-		totalBalanceDescuento = totalBalance - saldoRepresentante + discount;
+		balanceDescuento = dosDecimales(totalBalance + discount);
+		totalBalanceDescuento = dosDecimales(totalBalance - saldoRepresentante + discount);
 
-		$("#total-balance-descuento-dolar").html(totalBalanceDescuento);
-		$("#total-balance-descuento-euro").html(Math.round(totalBalanceDescuento/tasaDolarEuro));
-		$("#total-balance-descuento-bolivar").html(Math.round(totalBalanceDescuento*dollarExchangeRate));
-	
-		$('#pagado-dolar').html(accumulatedPayment);
-		$('#pagado-euro').html(Math.round(accumulatedPayment / tasaDolarEuro));
-		$('#pagado-bolivar').html(Math.round(accumulatedPayment * dollarExchangeRate));
+		balanceDescuentoEuros = dosDecimales(totalBalanceEuros + descuentoEuros);
+		totalBalanceDescuentoEuros = dosDecimales(totalBalanceEuros - saldoRepresentanteEuros + descuentoEuros);
+
+		balanceDescuentoBolivares = dosDecimales(totalBalanceBolivares + descuentoBolivares);
+		totalBalanceDescuentoBolivares = dosDecimales(totalBalanceBolivares - saldoRepresentanteBolivares + descuentoBolivares);
 		
-		deudaMenosPagado = totalBalanceDescuento - accumulatedPayment;
-		deudaMenosPagadoDecimal = totalBalanceDescuento - acumuladoDolarDecimal;
-				
+		$("#total-balance-descuento-dolar").html(formatoNumero(totalBalanceDescuento));
+		$("#total-balance-descuento-euro").html(formatoNumero(totalBalanceDescuentoEuros));
+		$("#total-balance-descuento-bolivar").html(formatoNumero(totalBalanceDescuentoBolivares));
+		
+		$('#pagado-dolar').html(formatoNumero(accumulatedPayment));
+		$('#pagado-euro').html(formatoNumero(acumuladoPagadoEuros));
+		$('#pagado-bolivar').html(formatoNumero(acumuladoPagadoBolivares));
+		
+		deudaMenosPagado = dosDecimales(totalBalanceDescuento - accumulatedPayment);
+		deudaMenosPagadoEuros = dosDecimales(totalBalanceDescuentoEuros - acumuladoPagadoEuros);
+		deudaMenosPagadoBolivares = dosDecimales(totalBalanceDescuentoBolivares - acumuladoPagadoBolivares);
+
 		if (deudaMenosPagado > 0)
 		{
 			porPagar = deudaMenosPagado;
@@ -2098,7 +2140,7 @@
 			porPagar = 0;
 			if (saldoRepresentante < balanceDescuento)
 			{
-				sobrante = deudaMenosPagado * -1;
+				sobrante = dosDecimales(deudaMenosPagado * -1);
 			}
 			else
 			{
@@ -2111,13 +2153,59 @@
 			sobrante = 0;
 		}
 		
-		$('#por-pagar-dolar').html(porPagar);
-		$('#por-pagar-euro').html(Math.round(porPagar / tasaDolarEuro));
-		$('#por-pagar-bolivar').html(Math.round(porPagar * dollarExchangeRate));				
+		if (deudaMenosPagadoEuros > 0)
+		{
+			porPagarEuros = deudaMenosPagadoEuros;
+			sobranteEuros = 0;
+		}
+		else if (deudaMenosPagadoEuros < 0)
+		{
+			porPagarEuros = 0;
+			if (saldoRepresentanteEuros < balanceDescuentoEuros)
+			{
+				sobranteEuros = dosDecimales(deudaMenosPagadoEuros * -1);
+			}
+			else
+			{
+				sobranteEuros = 0;
+			}
+		}
+		else
+		{
+			porPagarEuros = 0;
+			sobranteEuros = 0;
+		}
 		
-		$('#sobrante-dolar').html(sobrante);
-		$('#sobrante-euro').html(Math.round(sobrante / tasaDolarEuro));
-		$('#sobrante-bolivar').html(Math.round(sobrante * dollarExchangeRate));
+		if (deudaMenosPagadoBolivares > 0)
+		{
+			porPagarBolivares = deudaMenosPagadoBolivares;
+			sobranteBolivares = 0;
+		}
+		else if (deudaMenosPagadoBolivares < 0)
+		{
+			porPagarBolivares = 0;
+			if (saldoRepresentanteBolivares < balanceDescuentoBolivares)
+			{
+				sobranteBolivares = dosDecimales(deudaMenosPagadoBolivares * -1);
+			}
+			else
+			{
+				sobranteBolivares = 0;
+			}
+		}
+		else
+		{
+			porPagarBolivares = 0;
+			sobranteBolivares = 0;
+		}
+		
+		$('#por-pagar-dolar').html(formatoNumero(porPagar));
+		$('#por-pagar-euro').html(formatoNumero(porPagarEuros));
+		$('#por-pagar-bolivar').html(formatoNumero(porPagarBolivares));				
+		
+		$('#sobrante-dolar').html(formatoNumero(sobrante));
+		$('#sobrante-euro').html(formatoNumero(sobranteEuros));
+		$('#sobrante-bolivar').html(formatoNumero(sobranteBolivares));
 			
 		checkPredeterminado();
 		updateAmount();
@@ -2142,6 +2230,7 @@
 			desactivarBotonesPago();
 		}
 	}
+	
 	function guardarFactura()
 	{
 		$("#invoice-messages").html("Por favor espere...");
@@ -2153,8 +2242,17 @@
 		payments.identificationNumberClient = $('#identification-number-client').val();;
 		payments.fiscalAddress = $('#fiscal-address').val();
 		payments.taxPhone = $('#tax-phone').val();
-		payments.invoiceAmount = Math.round(totalBalance * dollarExchangeRate);
-		payments.discount = Math.round(discount * dollarExchangeRate);
+		payments.invoiceAmount = dosDecimales(totalBalance * dollarExchangeRate);
+		
+		if (deudaMenosPagadoBolivares > 0 && deudaMenosPagadoBolivares < dollarExchangeRate)
+		{
+			payments.discount = dosDecimales(descuentoBolivares - deudaMenosPagadoBolivares);
+		}
+		else
+		{
+			payments.discount = descuentoBolivares; 
+		}
+		
 		if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
 		{
 			payments.fiscal = 0;
@@ -2165,7 +2263,7 @@
 		}
 		payments.tasaDolar = dollarExchangeRate;
 		payments.tasaEuro = euro;
-		payments.tasaDolarEuro = tasaDolarEuro;
+		payments.tasaDolarEuro = dosDecimales(tasaDolarEuro);
 		if (saldoRepresentante > totalBalance)
 		{
 			payments.saldoCompensado = totalBalance;
@@ -2206,27 +2304,89 @@
 		else if ($('#descuento-recargo').val() == "Descuento $")
 		{						
 			discountMode = "Fijo";
-			discountAmount = parseFloat($('#cantidad-descuento').val()) * -1;
+			discountAmount = dosDecimales(parseFloat($('#cantidad-descuento').val()) * -1);
 			actualizarTotales();	
 		}
 		else if ($('#descuento-recargo').val() == "Descuento %")
 		{
 			discountMode = "Porcentaje";
-			discountAmount = (parseFloat($('#cantidad-descuento').val()) / 100) * -1;
+			discountAmount = dosDecimales((parseFloat($('#cantidad-descuento').val()) / 100) * -1);
 			actualizarTotales();
 		}	
 		else if ($('#descuento-recargo').val() == "Recargo $")
 		{						
 			discountMode = "Fijo";
-			discountAmount = parseFloat($('#cantidad-descuento').val());
+			discountAmount = dosDecimales(parseFloat($('#cantidad-descuento').val()));
 			actualizarTotales();	
 		}
 		else if ($('#descuento-recargo').val() == "Recargo %")
 		{
 			discountMode = "Porcentaje";
-			discountAmount = parseFloat($('#cantidad-descuento').val()) / 100;
+			discountAmount = dosDecimales(parseFloat($('#cantidad-descuento').val()) / 100);
 			actualizarTotales();
 		}	
+	}
+	
+	function formatoNumero(num) 
+	{
+		if (!num || num == 'NaN') return '0,00';
+		if (num == 'Infinity') return '&#x221e;';
+		num = num.toString().replace(/\$|\,/g, '');
+		if (isNaN(num))
+			num = "0";
+		sign = (num == (num = Math.abs(num)));
+		num = Math.floor(num * 100 + 0.50000000001);
+		cents = num % 100;
+		num = Math.floor(num / 100).toString();
+		if (cents < 10)
+			cents = "0" + cents;
+		for (var i = 0; i < Math.floor((num.length - (1 + i)) / 3) ; i++)
+			num = num.substring(0, num.length - (4 * i + 3)) + '.' + num.substring(num.length - (4 * i + 3));
+		return (((sign) ? '' : '-') + num + ',' + cents);
+	}
+		
+	function dosDecimales(numero)
+	{
+		var result = Math.round(numero * 100) / 100 ;
+		return result;
+	}
+	
+	function eliminarComa(cadenaRecibida)
+	{
+		var indicadorNoPuntos = 0;
+		var cadena = "";
+		var cadenaConvertida = "";
+	
+		if (cadenaRecibida.indexOf(",") != -1)
+		{	
+			cadena = cadenaRecibida;
+			
+			while (indicadorNoPuntos < 1)
+			{
+				if (cadena.indexOf(".") != -1)
+				{
+					cadenaConvertida = cadena.replace(".", "");
+					cadena = cadenaConvertida;
+				}
+				else
+				{
+					indicadorNoPuntos = 1
+					if (cadenaConvertida == "")
+					{
+						cadenaConPuntoDecimal = cadena.replace(",", ".");
+					}
+					else
+					{
+						cadenaConPuntoDecimal = cadenaConvertida.replace(",", ".");
+					}
+				}
+			}
+		}
+		else
+		{
+			cadenaConPuntoDecimal = cadenaRecibida;
+		}
+		return cadenaConPuntoDecimal;	
 	}
 
 // Funciones Jquery
@@ -2370,14 +2530,21 @@
                     taxPhone = response.data.tax_phone;
                         
                     customerEmail = response.data.email;
-									
-					saldoRepresentante = response.data.balance;
-					saldoRepresentanteSigno = saldoRepresentante * -1;
-					
+														
 					dollarExchangeRate = response.data.dollar_exchange_rate;
 					euro = response.data.euro;
 										
-					tasaDolarEuro = euro / dollarExchangeRate;
+					cadenaTasaDolarEuro = (euro / dollarExchangeRate).toFixed(5);
+					tasaDolarEuro = parseFloat(cadenaTasaDolarEuro);
+					
+					saldoRepresentante = response.data.balance;
+					saldoRepresentanteSigno = dosDecimales(saldoRepresentante * -1);
+					
+					saldoRepresentanteEuros = dosDecimales(saldoRepresentante / tasaDolarEuro); 
+					saldoRepresentanteSignoEuros = dosDecimales(saldoRepresentanteSigno / tasaDolarEuro);
+
+					saldoRepresentanteBolivares = dosDecimales(saldoRepresentante * dollarExchangeRate); 
+					saldoRepresentanteSignoBolivares = dosDecimales(saldoRepresentanteSigno * dollarExchangeRate);
 					
 					mesesTarifas = response.data.meses_tarifas;
 					otrasTarifas = response.data.otras_tarifas;
@@ -2499,15 +2666,15 @@
 								});
 							}
 
-							transactionAmount = value2.amount;
+							transactionAmount = dosDecimales(value2.amount);
 							
-							amountPaid = value2.amount;
+							amountPaid = dosDecimales(value2.amount);
 						
-							originalAmount = value2.original_amount;
+							originalAmount = dosDecimales(value2.original_amount);
 							
-							diferenciaOriginalActual = originalAmount - amountPaid;
+							diferenciaOriginalActual = dosDecimales(originalAmount - amountPaid);
 							
-							tarifaDolar = tarifaDolar - diferenciaOriginalActual;
+							tarifaDolar = dosDecimales(tarifaDolar - diferenciaOriginalActual);
 							
 							invoiced = value2.invoiced;
 
@@ -2517,7 +2684,7 @@
 							
 							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
 
-							montoDolar = value2.amount_dollar;
+							montoDolar = dosDecimales(value2.amount_dollar);
 													
 							if (paidOut == true)
 							{
@@ -2534,14 +2701,14 @@
 								{						
 									if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
 									{
-										tarifaDolar = Math.round(tarifaDolar * discountFamily);
+										tarifaDolar = dosDecimales(tarifaDolar * discountFamily);
 										
 										if (tarifaDolar != montoDolar)
 										{		
-											montoPendienteDolar = tarifaDolar - montoDolar;
+											montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 											montoAPagarDolar = montoPendienteDolar;
-											montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-											montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);	
+											montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
+											montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
 											paidOut = false;
 											
 											if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
@@ -2563,10 +2730,10 @@
 									{
 										if (tarifaDolar != montoDolar && monthlyPayment.substring(0, 18) != "Servicio educativo")
 										{												
-											montoPendienteDolar = tarifaDolar - montoDolar;
+											montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 											montoAPagarDolar = montoPendienteDolar;
-											montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-											montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);
+											montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
+											montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);
 											paidOut = false;
 										}
 										else
@@ -2583,25 +2750,25 @@
 							}
 							else if (transactionType != 'Mensualidad')
 							{
-								montoPendienteDolar = tarifaDolar - montoDolar;
+								montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 								montoAPagarDolar = montoPendienteDolar;
-								montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-								montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);	
+								montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
+								montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
 							}
 							else if (monthlyPayment.substring(0, 3) == "Ago")
 							{
-								montoPendienteDolar = tarifaDolar - montoDolar;
+								montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 								montoAPagarDolar = montoPendienteDolar;
-								montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-								montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);											
+								montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
+								montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);											
 							}
 							else
 							{
-								tarifaDolar = Math.round(tarifaDolar * discountFamily);
-								montoPendienteDolar = tarifaDolar - montoDolar;
+								tarifaDolar = dosDecimales(tarifaDolar * discountFamily);
+								montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 								montoAPagarDolar = montoPendienteDolar;
-								montoAPagarEuro = Math.round(montoAPagarDolar / tasaDolarEuro);
-								montoAPagarBolivar = Math.round(montoAPagarDolar * dollarExchangeRate);
+								montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
+								montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);
 								if (monthlyPayment == julioAnoAnterior && julioExonerado == 0)
 								{
 									morosoAnoAnterior = 1;
@@ -2823,8 +2990,8 @@
 								lastInstallment = $(this).attr('name');
 								$("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
 								concept = firstInstallment + ' - ' + lastInstallment;
-								studentBalance = studentBalance + parseFloat($(this).attr('value'));
-								totalBalance = totalBalance + parseFloat($(this).attr('value'));
+								studentBalance = dosDecimales(studentBalance + parseFloat($(this).attr('value')));
+								totalBalance = dosDecimales(totalBalance + parseFloat($(this).attr('value')));
 								contadorCuotasSeleccionadas++;
 								actualizarTotales();
 							}
@@ -2930,8 +3097,8 @@
 									$("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
 									concept = firstInstallment + ' - ' + lastInstallment;
 								}
-								studentBalance = studentBalance - transactionAmount;															
-								totalBalance = totalBalance - transactionAmount;
+								studentBalance = dosDecimales(studentBalance - transactionAmount);															
+								totalBalance = dosDecimales(totalBalance - transactionAmount);
 								contadorCuotasSeleccionadas--;
 								actualizarTotales();
 								return false;
@@ -2977,11 +3144,11 @@
                     {
                         $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + '):');
                         concept = firstInstallment + ' - ' + lastInstallment;
-                    }
-                    studentBalance = studentBalance - transactionAmount;
-                    $("#student-balance").html(studentBalance.toFixed(2));
-                    totalBalance = totalBalance - transactionAmount;
-                    $("#total-balance").html(totalBalance.toFixed(2));
+                    }					
+					studentBalance = dosDecimales(studentBalance - transactionAmount);															
+					totalBalance = dosDecimales(totalBalance - transactionAmount);
+					contadorCuotasSeleccionadas--;
+					actualizarTotales();
                 }
             }
         }); 
@@ -3045,8 +3212,8 @@
                     case '07':
                     paymentType = "Retención de impuesto";
                 }
-
-                amountPaid = Math.round(parseFloat($('#amount-' + paymentIdentifier).val()));
+				
+				montoPagado = dosDecimales(eliminarComa($('#amount-' + paymentIdentifier).val()));
 				bank = $('#bank-' + paymentIdentifier).val();
 				bancoReceptor = $('#banco-receptor-' + paymentIdentifier).val();
                 accountOrCard = $('#account_or_card-' + paymentIdentifier).val();
@@ -3063,16 +3230,26 @@
 					alert('Estimado usuario los pagos hacia Zelle deben ser en dólares');
 					return false;
 				}
-				else if (bank != 'Zelle' && bank != "N/A" && monedaPago != 'Bs.')
+				if (bank == 'Euros' && monedaPago != '€')
+				{
+					alert('Estimado usuario los pagos desde Zelle deben ser en dólares');
+					return false;
+				}
+				else if (bancoReceptor == 'Euros' && monedaPago != '€')
+				{
+					alert('Estimado usuario los pagos hacia Zelle deben ser en dólares');
+					return false;
+				}
+				else if (bank != 'Zelle' && bank != "Euros" && bank != "N/A" && monedaPago != 'Bs.')
 				{
 					alert('Estimado usuario los pagos desde bancos nacionales deben ser en bolívares');
 					return false;
 				}
-				else if (bancoReceptor != 'Zelle' && bancoReceptor != "N/A" && monedaPago != 'Bs.')
+				else if (bancoReceptor != 'Zelle' && bancoReceptor != "Euros" && bancoReceptor != "N/A" && monedaPago != 'Bs.')
 				{
 					alert('Estimado usuario los pagos hacia bancos nacionales deben ser en bolívares');
 					return false;
-				}	
+				}
 
 				if (bank == 'Zelle' && paymentType != 'Transferencia')
 				{
@@ -3083,31 +3260,35 @@
 				{
 					alert('Estimado usuario los pagos desde Zelle solo deben ser en transferencia');
 					return false;
-				}				
+				}			
 				
 				if (monedaPago == "$")
 				{
-					montoPagadoDolar = amountPaid;
-					montoDolarDecimal = amountPaid;
+					montoPagadoDolar = montoPagado;
+					montoPagadoEuro = dosDecimales(montoPagado / tasaDolarEuro);
+					montoPagadoBolivar = dosDecimales(montoPagado * dollarExchangeRate);
 				}
 				else if (monedaPago == "€")
 				{
-					montoPagadoDolar = Math.round(amountPaid * tasaDolarEuro);
-					montoDolarDecimal = amountPaid * tasaDolarEuro;
+					montoPagadoDolar = dosDecimales(montoPagado * tasaDolarEuro);
+					montoPagadoEuro = montoPagado;
+					montoPagadoBolivar = dosDecimales(montoPagado * euro);
 				}
 				else
 				{
-					montoPagadoDolar = Math.round(amountPaid / dollarExchangeRate);
-					montoDolarDecimal = amountPaid / dollarExchangeRate;
+					montoPagadoDolar = dosDecimales(montoPagado / dollarExchangeRate);
+					montoPagadoEuro = dosDecimales(montoPagado / euro);
+					montoPagadoBolivar = montoPagado;
 				}
 			
                 printPayments();
 				
-                alert('Pago registrado con éxito: ' +  monedaPago + ' ' + amountPaid.toFixed(2));
+                alert('Pago registrado con éxito: ' +  monedaPago + ' ' + formatoNumero(montoPagado));
 				
-                accumulatedPayment += montoPagadoDolar;
-				acumuladoDolarDecimal += montoDolarDecimal;
-        
+                accumulatedPayment += dosDecimales(montoPagadoDolar);
+				acumuladoPagadoEuros += dosDecimales(montoPagadoEuro);
+				acumuladoPagadoBolivares += dosDecimales(montoPagadoBolivar);
+
 				actualizarTotales();
 				inicializarCampos();
             }
@@ -3123,7 +3304,7 @@
 			
             selectedPayment = ($(this).attr('id').substring(1));
             paymentType = $(this).attr('name');
-            amountPaid = parseFloat($(this).attr('value'));
+            montoPagado = parseFloat($(this).attr('value'));
             var r = confirm("Está seguro de que desea eliminar este pago");
             if (r == false)
             {
@@ -3146,7 +3327,7 @@
 				alert('Estimado usuario debe seleccionar al menos una cuota para poder facturar');
 				return false;				
 			}
-			else if (deudaMenosPagado > 1)
+			else if (deudaMenosPagado > 0)
 			{
 				alert('Estimado usuario debe registrar más pagos para completar el total de la factura/recibo u hacer un ajuste');
 				return false;
@@ -3197,10 +3378,6 @@
 				}
 				else
 				{
-					if (deudaMenosPagadoDecimal > 0)
-					{
-						discount -= deudaMenosPagadoDecimal;
-					}
 					guardarFactura();
 				}
 			}
@@ -3298,6 +3475,7 @@
         $('#establecer-tasa-dolar').click(function(e) 
         {
 			e.preventDefault();
+																			
 			if ($("#tasa-temporal-dolar").val() > 0)
 			{
 				if (totalBalance > 0)
@@ -3440,11 +3618,10 @@
 					{					
 						if (adjMontoModificadoDolar > adjMontoPagadoDolar)
 						{
-							montoDolarCadena = (adjMontoModificadoDolar - adjMontoPagadoDolar).toFixed(2);
-							adjMontoPendienteDolar = parseFloat(montoDolarCadena);				
+							adjMontoPendienteDolar = dosDecimales(adjMontoModificadoDolar - adjMontoPagadoDolar);				
 							var adjAPagarDolar = adjMontoPendienteDolar;
-							var adjAPagarEuro = Math.round(adjAPagarDolar / tasaDolarEuro);
-							var adjAPagarBolivar = Math.round(adjAPagarDolar * dollarExchangeRate);;
+							var adjAPagarEuro = dosDecimales(adjAPagarDolar / tasaDolarEuro);
+							var adjAPagarBolivar = dosDecimales(adjAPagarDolar * dollarExchangeRate);
 							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, adjMontoPendienteDolar, adjAPagarDolar, adjAPagarEuro, adjAPagarBolivar, "");
 							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
 							cambioMontoCuota = 1;

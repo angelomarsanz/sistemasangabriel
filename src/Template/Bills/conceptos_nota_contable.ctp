@@ -132,6 +132,32 @@
 </div>
 <script>
 	var tasaCambio = <?= $dollarExchangeRate; ?>;
+
+	function dosDecimales(numero)
+	{
+		var original = parseFloat(numero);
+		var result = Math.round(original * 100) / 100 ;
+		return result;
+	}
+	
+	function formatoNumero(num) 
+	{
+		if (!num || num == 'NaN') return '0,00';
+		if (num == 'Infinity') return '&#x221e;';
+		num = num.toString().replace(/\$|\,/g, '');
+		if (isNaN(num))
+			num = "0";
+		sign = (num == (num = Math.abs(num)));
+		num = Math.floor(num * 100 + 0.50000000001);
+		cents = num % 100;
+		num = Math.floor(num / 100).toString();
+		if (cents < 10)
+			cents = "0" + cents;
+		for (var i = 0; i < Math.floor((num.length - (1 + i)) / 3) ; i++)
+			num = num.substring(0, num.length - (4 * i + 3)) + '.' + num.substring(num.length - (4 * i + 3));
+		return (((sign) ? '' : '-') + num + ',' + cents);
+	}
+	
     $(document).ready(function()
     {
     	$(".alternative-decimal-separator").numeric({ altDecimal: "," });
@@ -155,9 +181,9 @@
 				{
 					montoNotaNumerico = parseFloat(montoNotaCadena);			
 				}
-
-				$('#NV-' + $(this).attr('id').substring(3)).val(montoNotaNumerico * tasaCambio);
-				$('#MN-' + $(this).attr('id').substring(3)).val(montoNotaNumerico * tasaCambio);
+				
+				$('#NV-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambio)));
+				$('#MN-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambio)));
 			});
 		});
 				

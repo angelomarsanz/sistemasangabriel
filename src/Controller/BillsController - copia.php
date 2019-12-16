@@ -230,6 +230,10 @@ class BillsController extends AppController
 				$bill->tasa_dolar_euro = $this->headboard['tasaDolarEuro'];
 				$bill->saldo_compensado_dolar = $this->headboard['saldoCompensado'];
 				$bill->sobrante_dolar = $this->headboard['sobrante'];
+				$bill->tasa_temporal_dolar = $this->headboard['tasaTemporalDolar'];
+				$bill->tasa_temporal_euro = $this->headboard['tasaTemporalEuro'];
+				$bill->cuotas_alumno_becado = $this->headboard['cuotasAlumnoBecado'];
+				$bill->cambio_monto_cuota = $this->headboard['cambioMontoCuota'];
 				
 				if (!($this->Bills->save($bill))) 
 				{
@@ -350,9 +354,7 @@ class BillsController extends AppController
 		$binnacles = new BinnaclesController;
 		
 		$codigoRetorno = 0;
-		
-		$sobranteNeto = 0;
-		
+				
         if ($this->request->is('post')) 
         {
 			$indicadorFacturaPendiente = 0;
@@ -405,7 +407,7 @@ class BillsController extends AppController
 					{
 						$parentsandguardian = $this->Bills->Parentsandguardians->get($idParentsandguardian);
 						
-						if ($this->headboard['sobrante'] > 0)
+						if ($this->headboard['imprimirReciboSobrante'] > 0)
 						{
 							$resultado = $this->reciboAdicional($idParentsandguardian, $parentsandguardian->family, $billId, "Recibo de sobrante", 2, "Sobrante", $this->headboard['sobrante']); 
 														
@@ -425,17 +427,13 @@ class BillsController extends AppController
 								$this->Flash->error(__('No se pudo guardar correctamente el recibo del sobrante'));
 								$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo crear correctamente el recibo del sobrante para la factura ' . $billNumber);
 							}
+							$parentsandguardian->balance = $this->headboard['sobrante']; 
 						}
-							
-						if ($this->headboard['saldoCompensado'] > 0)
+						else
 						{
-							$parentsandguardian->balance = $parentsandguardian->balance - $this->headboard['saldoCompensado'];
+							$parentsandguardian->balance -= $this->headboard['saldoCompensado'];
 						}
-						elseif ($this->headboard['sobrante'] > 0)
-						{
-							$parentsandguardian->balance = $parentsandguardian->balance + $this->headboard['sobrante'];
-						}
-												
+																			
 						if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))
 						{
 							$this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
@@ -675,7 +673,7 @@ class BillsController extends AppController
 						$invoiceLine .= $lastInstallment;
 					}
 					$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
-					$locLoadIndicator = 1;
+					$loadIndicator = 1;
 				}
 				if ($aConcept->observation == "Abono" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
 				{
@@ -687,9 +685,9 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
-				if ($aConcept->observation == "(E)" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
+				elseif ($aConcept->observation == "(Exonerado)" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
 				{
-					$invoiceLine = $aConcept->student_name . " " . $aConcept->concept . " - (E)";
+					$invoiceLine = $aConcept->student_name . " " . $aConcept->concept . " - (Exonerado)";
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -814,7 +812,7 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
-				elseif ($aConcept->observation == "(E)" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
+				elseif ($aConcept->observation == "(Exonerado)" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
 				{
 					if ($lastInstallment != " ")
 					{
@@ -822,7 +820,7 @@ class BillsController extends AppController
 						$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
 						$loadIndicator = 1;
 					}
-					$invoiceLine = $aConcept->student_name . " " . $aConcept->concept . " - (E)";
+					$invoiceLine = $aConcept->student_name . " " . $aConcept->concept . " - (Exonerado)";
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;
@@ -938,10 +936,10 @@ class BillsController extends AppController
 				}
 			}
 		}
-			
-        if ($loadIndicator == 0 and $lastInstallment != " ")
-        {
-            if ($firstMonthly== $lastInstallment)
+							
+        if ($loadIndicator == 0 && $lastInstallment != " ")
+        {			
+            if ($firstMonthly == $lastInstallment)
             {
                 $invoiceLine .= substr($firstMonthly, 4, 4);
             }
@@ -1130,7 +1128,13 @@ class BillsController extends AppController
 									{
 										$parentsandguardian->balance += $factura->saldo_compensado_dolar;
 									}
-									elseif ($factura->tipo_documento == "Recibo de reintegro")
+									
+									if ($sobrante > 0)
+									{
+										$parentsandguardian->balance -= $reciboSobrante->amount_paid;
+									}
+
+									if ($factura->tipo_documento == "Recibo de reintegro")
 									{
 										if ($factura->moneda_id == 1)
 										{
@@ -1144,10 +1148,6 @@ class BillsController extends AppController
 										{
 											$parentsandguardian->balance += round($factura->amount_paid * $factura->tasa_dolar_euro);
 										}										
-									}
-									elseif ($sobrante > 0)
-									{
-										$parentsandguardian->balance -= $reciboSobrante->amount_paid;
 									}
 										
 									if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))
@@ -2055,6 +2055,10 @@ class BillsController extends AppController
 		$bill->tasa_dolar_euro = $reciboPendiente->tasa_dolar_euro;
 		$bill->saldo_compensado_dolar = $reciboPendiente->saldo_compensado;
 		$bill->sobrante_dolar = $reciboPendiente->saldo_compensado;
+		$bill->tasa_temporal_dolar = $reciboPendiente->tasa_temporal_dolar;
+		$bill->tasa_temporal_euro = $reciboPendiente->tasa_temporal_euro;
+		$bill->cuotas_alumno_becado = $reciboPendiente->cuotas_alumno_becado;
+		$bill->cambio_monto_cuota = $reciboPendiente->cambio_monto_cuota;
 		
 		if ($this->Bills->save($bill)) 
 		{

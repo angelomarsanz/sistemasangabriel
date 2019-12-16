@@ -1138,7 +1138,7 @@ class BillsController extends AppController
 									{
 										if ($factura->moneda_id == 1)
 										{
-											$parentsandguardian->balance += round($factura->amount_paid / $factura->tasa_cambio);
+											$parentsandguardian->balance += round($factura->amount_paid / $factura->tasa_cambio, 2);
 										}
 										elseif ($factura->moneda_id == 2)
 										{
@@ -1146,7 +1146,7 @@ class BillsController extends AppController
 										}
 										else
 										{
-											$parentsandguardian->balance += round($factura->amount_paid * $factura->tasa_dolar_euro);
+											$parentsandguardian->balance += round($factura->amount_paid * $factura->tasa_dolar_euro, 2);
 										}										
 									}
 										

@@ -221,7 +221,7 @@ class StudenttransactionsController extends AppController
     {
         $studenttransaction = $this->Studenttransactions->get($id);
         		
-		$montoReversoDolar = round($amount / $tasaCambio); 
+		$montoReversoDolar = round($amount / $tasaCambio, 2); 
 
 		$studenttransaction->amount_dollar = $studenttransaction->amount_dollar - $montoReversoDolar;
 				
@@ -3571,7 +3571,7 @@ class StudenttransactionsController extends AppController
 		
         $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
 				
-		$montoNotaDolar = round($valor / $tasaCambio); 
+		$montoNotaDolar = round($valor / $tasaCambio, 2); 
 		
 		if ($tipoNota == "Crédito")
 		{
@@ -3609,7 +3609,7 @@ class StudenttransactionsController extends AppController
 
 					$estudiante = $this->Studenttransactions->Students->get($transaccionEstudiante->student_id);
 				   
-					if ($estudiante->discount === null)
+					if ($estudiante->discount === null )
 					{
 						$descuentoFamilia = 1;
 					}
@@ -3618,7 +3618,7 @@ class StudenttransactionsController extends AppController
 						$descuentoFamilia = (100 - $estudiante->discount) / 100;
 					}
 					
-					$tarifaDolar = round($tarifaDolar * $descuentoFamilia);
+					$tarifaDolar = round($tarifaDolar * $descuentoFamilia, 2);
 					break;
 				}
 			}

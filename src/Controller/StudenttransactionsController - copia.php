@@ -181,6 +181,7 @@ class StudenttransactionsController extends AppController
 		if ($transaccion->observation == "Abono")
 		{
 			$studenttransaction->partial_payment = 1;
+			$studenttransaction->paid_out = 0;
 		} 
 		else
 		{
@@ -220,26 +221,24 @@ class StudenttransactionsController extends AppController
     {
         $studenttransaction = $this->Studenttransactions->get($id);
         		
-		$montoReversoDolar = $amount / $tasaCambio; 
+		$montoReversoDolar = round($amount / $tasaCambio); 
 
-		$studenttransaction->amount_dollar = round($studenttransaction->amount_dollar - $montoReversoDolar);
+		$studenttransaction->amount_dollar = $studenttransaction->amount_dollar - $montoReversoDolar;
 				
-		$studenttransaction->amount = $studenttransaction->amount - $amount;
-		
-		if ($studenttransaction->amount < 1)
+		if ($studenttransaction->original_amount != $studenttransaction->amount)
 		{
-			$studenttransaction->amount = round($studenttransaction->amount);
+			$studenttransaction->amount = $studenttransaction->original_amount;
 		}
-			
-		$studenttransaction->paid_out = 0;
-		
-		if ($studenttransaction->amount == 0)
+								
+		if ($studenttransaction->amount > $studenttransaction->amount_dollar)
 		{
-			$studenttransaction->partial_payment = 0;
+			$studenttransaction->partial_payment = 1;
+			$studenttransaction->paid_out = 0;
 		} 
 		else
 		{
-			$studenttransaction->partial_payment = 1;
+			$studenttransaction->partial_payment = 0;
+			$studenttransaction->paid_out = 1;
 		}
 			
         if ($studenttransaction->bill_number == $billNumber)
@@ -296,6 +295,7 @@ class StudenttransactionsController extends AppController
         $studenttransaction->payment_date = 0;
         $studenttransaction->transaction_migration = 0;
 		$studenttransaction->amount_dollar = 0;
+		$studenttransaction->ano_escolar = $quotaYear;
         
         if (!($this->Studenttransactions->save($studenttransaction))) 
         {
@@ -317,6 +317,7 @@ class StudenttransactionsController extends AppController
 			$studenttransaction->payment_date = 0;
 			$studenttransaction->transaction_migration = 0;
 			$studenttransaction->amount_dollar = 0;
+			$studenttransaction->ano_escolar = $quotaYear;
 
             $studenttransaction->transaction_type = 'Seguro escolar';
             $studenttransaction->transaction_description = 'Seguro escolar' . ' ' . $quotaYear;
@@ -343,6 +344,7 @@ class StudenttransactionsController extends AppController
 				$studenttransaction->payment_date = 0;
 				$studenttransaction->transaction_migration = 0;
 				$studenttransaction->amount_dollar = 0;
+				$studenttransaction->ano_escolar = $quotaYear;
 
 				$studenttransaction->transaction_type = 'Thales';
 				$studenttransaction->transaction_description = 'Thales' . ' ' . $quotaYear;
@@ -368,7 +370,8 @@ class StudenttransactionsController extends AppController
 				$studenttransaction->partial_payment = 0;
 				$studenttransaction->bill_number = 0;
 				$studenttransaction->transaction_migration = 0;
-				$studenttransaction->amount_dollar = 0;                                    
+				$studenttransaction->amount_dollar = 0;
+				$studenttransaction->ano_escolar = $quotaYear;				
 				
 				if ($i < 5)
 				{
@@ -441,6 +444,7 @@ class StudenttransactionsController extends AppController
         $studenttransaction->payment_date = 0;
         $studenttransaction->transaction_migration = 0;
 		$studenttransaction->amount_dollar = 0;
+		$studenttransaction->ano_escolar = $quotaYear;
 		
         if (!($this->Studenttransactions->save($studenttransaction))) 
         {
@@ -461,6 +465,7 @@ class StudenttransactionsController extends AppController
 			$studenttransaction->payment_date = 0;
 			$studenttransaction->transaction_migration = 0;
 			$studenttransaction->amount_dollar = 0;
+			$studenttransaction->ano_escolar = $quotaYear;
 
             $studenttransaction->transaction_type = 'Seguro escolar';
             $studenttransaction->transaction_description = 'Seguro escolar' . ' ' . $quotaYear;
@@ -485,6 +490,7 @@ class StudenttransactionsController extends AppController
 			$studenttransaction->payment_date = 0;
 			$studenttransaction->transaction_migration = 0;
 			$studenttransaction->amount_dollar = 0;
+			$studenttransaction->ano_escolar = $quotaYear;
 
             $studenttransaction->transaction_type = 'Thales';
             $studenttransaction->transaction_description = 'Thales' . ' ' . $quotaYear;
@@ -510,6 +516,7 @@ class StudenttransactionsController extends AppController
 				$studenttransaction->bill_number = 0;
 				$studenttransaction->transaction_migration = 0;
 				$studenttransaction->amount_dollar = 0;
+				$studenttransaction->ano_escolar = $quotaYear;
            
 				if ($i < 5)
 				{
@@ -579,6 +586,7 @@ class StudenttransactionsController extends AppController
         $studenttransaction->payment_date = 0;
         $studenttransaction->transaction_migration = 0;
 		$studenttransaction->amount_dollar = 0;
+		$studenttransaction->ano_escolar = $quotaYear;
         
         if (!($this->Studenttransactions->save($studenttransaction))) 
         {
@@ -599,6 +607,7 @@ class StudenttransactionsController extends AppController
 			$studenttransaction->payment_date = 0;
 			$studenttransaction->transaction_migration = 0;
 			$studenttransaction->amount_dollar = 0;
+			$studenttransaction->ano_escolar = $quotaYear;
                
             $studenttransaction->transaction_type = 'Servicio educativo';
             $studenttransaction->transaction_description = 'Servicio educativo' . ' ' . $quotaYear;
@@ -625,6 +634,7 @@ class StudenttransactionsController extends AppController
 				$studenttransaction->bill_number = 0;
 				$studenttransaction->transaction_migration = 0;
 				$studenttransaction->amount_dollar = 0;
+				$studenttransaction->ano_escolar = $quotaYear;
 
                 if ($i < 5)
                 {
@@ -3550,34 +3560,30 @@ class StudenttransactionsController extends AppController
 	}
 	
     public function notaTransaccion($idTransaccion = null, $numeroNotaContable = null, $valor = null, $tipoNota = null, $tasaCambio = null)
-    {        
+    {
+		$estudianteController = new StudentsController();
+        
 		$codigoRetornoTransaccion = 0;
+				
+		$diferenciaOriginalActual = 0;
+		
+		$tarifaDolar = 0;
 		
         $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
 				
-		$montoNotaDolar = $valor / $tasaCambio; 
+		$montoNotaDolar = round($valor / $tasaCambio); 
 		
 		if ($tipoNota == "Crédito")
 		{
-			$transaccionEstudiante->amount_dollar = round($transaccionEstudiante->amount_dollar - $montoNotaDolar);
-			$transaccionEstudiante->amount = $transaccionEstudiante->amount - $valor; 			
+			$transaccionEstudiante->amount_dollar = $transaccionEstudiante->amount_dollar - $montoNotaDolar;
 		}
 		else
 		{
-			$transaccionEstudiante->amount_dollar = round($transaccionEstudiante->amount_dollar + $montoNotaDolar);
-			$transaccionEstudiante->amount = $transaccionEstudiante->amount + $valor; 				
-		}
-
-		if ($transaccionEstudiante->amount < 1)
-		{
-			$transaccionEstudiante->amount = round($transaccionEstudiante->amount);
+			$transaccionEstudiante->amount_dollar = $transaccionEstudiante->amount_dollar + $montoNotaDolar;
 		}
 				
-		$estudianteController = new StudentsController();
 		$mesesTarifas = $estudianteController->mesesTarifas(0);
 		$otrasTarifas = $estudianteController->otrasTarifas(0);
-		
-		$tarifaDolar = 0;
 		
 		if ($transaccionEstudiante->transaction_type == "Mensualidad" && substr($transaccionEstudiante->transaction_description, 0, 3) != "Ago")
 		{				
@@ -3628,20 +3634,21 @@ class StudenttransactionsController extends AppController
 				}
 			}
 		}
-										
-		if ($transaccionEstudiante->amount_dollar >= $tarifaDolar)
+		
+		$diferenciaOriginalActual = $transaccionEstudiante->original_amount - $transaccionEstudiante->amount;
+		
+		$tarifaDolar = $tarifaDolar - $diferenciaOriginalActual;	
+		
+		if ($transaccionEstudiante->amount_dollar == $tarifaDolar)
 		{
-			if ($transaccionEstudiante->amount_dollar == 0)
-			{
-				$transaccionEstudiante->partial_payment = 0;
-				$transaccionEstudiante->paid_out = 0;
-			}
-			else
-			{
-				$transaccionEstudiante->partial_payment = 0;
-				$transaccionEstudiante->paid_out = 1;
-			}
-		} 
+			$transaccionEstudiante->partial_payment = 0;
+			$transaccionEstudiante->paid_out = 1;
+		}
+		elseif ($transaccionEstudiante->amount_dollar > $tarifaDolar)
+		{
+			$transaccionEstudiante->partial_payment = 0;
+			$transaccionEstudiante->paid_out = 1;
+		}
 		else
 		{
 			if ($transaccionEstudiante->amount_dollar == 0)
@@ -3790,7 +3797,7 @@ class StudenttransactionsController extends AppController
 				if ($transaccionGet->paid_out == 0 && $transaccionGet->bill_number != 0)
 				{
 					$transaccionGet->amount = $transaccionGet->amount_dollar;
-					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$transaccionGet->original_amount = $transaccionGet->amount_dollar;
 					$contadorCaso1++;
 				}
 				elseif ($transaccionGet->paid_out == 0 && $transaccionGet->bill_number == 0)
@@ -3800,14 +3807,14 @@ class StudenttransactionsController extends AppController
 						$transaccionGet->partial_payment = 0;
 					}
 					$transaccionGet->amount = $transaccionGet->amount_dollar;
-					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$transaccionGet->original_amount = $transaccionGet->amount_dollar;
 					$contadorCaso2++;
 				}
 				elseif ($transaccionGet->paid_out == 1)
 				{
 					$transaccionGet->partial_payment = 0;
 					$transaccionGet->amount = $transaccionGet->amount_dollar;
-					$transaccionGet->amount = $transaccionGet->amount_dollar;
+					$transaccionGet->original_amount = $transaccionGet->amount_dollar;
 					$contadorCaso3++;
 				}
 				/* if (!($this->Studenttransactions->save($transaccionGet))) 
@@ -3838,7 +3845,7 @@ class StudenttransactionsController extends AppController
 		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
 		$transacciones = $transaccionesEstudiante->find('all')
-			->where(['invoiced' => 0, 'paid_out' => 1, 'amount_dollar !=' => 999999 ]);
+			->where(['invoiced' => 0, 'partial_payment' => 0, 'paid_out' => 1, 'amount_dollar !=' => 999999 ]);
 			
 		$contadorBusqueda = $transacciones->count();
 		
@@ -3851,14 +3858,14 @@ class StudenttransactionsController extends AppController
 				$transaccionGet->amount = $transaccionGet->amount_dollar;
 				$transaccionGet->original_amount = $transaccionGet->amount_dollar;
 
-				if (!($this->Studenttransactions->save($transaccionGet))) 
+				/* if (!($this->Studenttransactions->save($transaccionGet))) 
 				{
 					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
 				}
 				else
 				{
 					$contadorActualizadas++;
-				}
+				} */
 			}
 		}
 		
@@ -3889,14 +3896,14 @@ class StudenttransactionsController extends AppController
 				$transaccionGet->amount = 0;
 				$transaccionGet->original_amount = 0;
 
-				if (!($this->Studenttransactions->save($transaccionGet))) 
+				/* if (!($this->Studenttransactions->save($transaccionGet))) 
 				{
 					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
 				}
 				else
 				{
 					$contadorActualizadas++;
-				} 
+				} */
 			}
 		}
 		
@@ -3905,5 +3912,92 @@ class StudenttransactionsController extends AppController
 	
         $this->set(compact('transacciones'));
         $this->set('_serialize', ['transacciones']);
-	}		
+	}
+	public function anoEscolar()
+	{
+		$contadorBusqueda = 0;
+		$contadorMensualidad2018 = 0;
+		$contadorMensualidad2019 = 0;
+		$contadorMatricula2019 = 0;
+		$contadorSeguro2019 = 0;
+		$contadorServicio2019 = 0;
+		$contadorThales2019 = 0;
+		$contadorActualizadas = 0;
+		
+		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
+		
+		$transacciones = $transaccionesEstudiante->find('all')->where(['invoiced' => 0]);
+			
+		$contadorBusqueda = $transacciones->count();
+		
+		$this->Flash->success(__('Total transacciones activas ' . $contadorBusqueda));
+		
+		foreach ($transacciones as $transaccion)
+		{
+			$actualizar = 0;	
+			$ano2019 = new Time('2019-09-01 00:00:00');
+
+			$transaccionGet = $this->Studenttransactions->get($transaccion->id);
+			
+			if ($transaccion->transaction_type == 'Mensualidad' && $transaccion->payment_date < $ano2019)
+			{
+				$transaccionGet->ano_escolar = 2018;
+				$contadorMensualidad2018++;
+				$actualizar = 1;
+			}
+			elseif ($transaccion->transaction_type == 'Mensualidad' && $transaccion->payment_date >= $ano2019)
+			{
+				$transaccionGet->ano_escolar = 2019;
+				$contadorMensualidad2019++;
+				$actualizar = 1;
+			}						
+			elseif ($transaccion->transaction_type == 'Matrícula' && $transaccion->transaction_description == 'Matrícula 2019')
+			{
+				$transaccionGet->ano_escolar = 2019;
+				$contadorMatricula2019++;
+				$actualizar = 1;
+			}
+			elseif ($transaccion->transaction_type == 'Seguro escolar' && $transaccion->transaction_description == 'Seguro escolar 2019')
+			{
+				$transaccionGet->ano_escolar = 2019;
+				$contadorSeguro2019++;
+				$actualizar = 1;
+			}
+			elseif ($transaccion->transaction_type == 'Servicio educativo' && $transaccion->transaction_description == 'Servicio educativo 2019')
+			{
+				$transaccionGet->ano_escolar = 2019;
+				$contadorServicio2019++;
+				$actualizar = 1;
+			}
+			elseif ($transaccion->transaction_type == 'Thales' && $transaccion->transaction_description == 'Thales 2019')
+			{
+				$transaccionGet->ano_escolar = 2019;
+				$contadorThales2019++;
+				$actualizar = 1;
+			}
+			
+			if ($actualizar == 1)
+			{			
+				if (!($this->Studenttransactions->save($transaccionGet))) 
+				{
+					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
+				}
+				else
+				{
+					$contadorActualizadas++;
+				}
+			}
+		}
+		
+		$this->Flash->success(__('Total mensualidades 2018 ' . $contadorMensualidad2018));
+		$this->Flash->success(__('Total mensualidades 2019 ' . $contadorMensualidad2019));
+		$this->Flash->success(__('Total matrículas 2019 ' . $contadorMatricula2019));
+		$this->Flash->success(__('Total seguro 2019 ' . $contadorSeguro2019));
+		$this->Flash->success(__('Total servicio educativo 2019 ' . $contadorServicio2019));
+		$this->Flash->success(__('Total Thales 2019 ' . $contadorThales2019));
+		$this->Flash->success(__('Total actualizadas ' . $contadorActualizadas));
+	
+        $this->set(compact('transacciones'));
+        $this->set('_serialize', ['transacciones']);
+	}	
 }
