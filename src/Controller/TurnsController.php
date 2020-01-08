@@ -309,6 +309,7 @@ class TurnsController extends AppController
 			$totalFormasPago['Efectivo €'] = ['moneda' => '€', 'monto' => 0, 'montoBs' => 0];
 			$totalFormasPago['Efectivo Bs.'] = ['moneda' => 'Bs.', 'monto' => 0, 'montoBs' => 0];
 			$totalFormasPago['Zelle $'] = ['moneda' => '$', 'monto' => 0, 'montoBs' => 0];
+			$totalFormasPago['Euros €'] = ['moneda' => '€', 'monto' => 0, 'montoBs' => 0];
 			$totalFormasPago['TDB/TDC Bs.'] = ['moneda' => 'Bs.', 'monto' => 0, 'montoBs' => 0];
 			$totalFormasPago['Transferencia Bs.'] = ['moneda' => 'Bs.', 'monto' => 0, 'montoBs' => 0];
 			$totalFormasPago['Depósito Bs.'] = ['moneda' => 'Bs.', 'monto' => 0, 'montoBs' => 0];
@@ -428,11 +429,13 @@ class TurnsController extends AppController
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] -= $factura->amount_paid;	
 						}						
 					}
-					elseif ($factura->id_anticipo > 0)
+					
+					if ($factura->id_anticipo > 0)
 					{
 						$indicadorFacturasRecibos = 1;
 					}
-					elseif ($factura->amount != 0)
+					
+					if ($factura->amount != 0)
 					{
 						$totalDescuentosRecargos += $factura->amount;
 
@@ -477,6 +480,7 @@ class TurnsController extends AppController
 						'efectivoEuro' => 0,
 						'efectivoBolivar' => 0,
 						'zelleDolar' => 0,
+						'euros' => 0,
 						'tddTdcBolivar' => 0,
 						'transferenciaBolivar' => 0,
 						'depositoBolivar' => 0,
@@ -638,6 +642,30 @@ class TurnsController extends AppController
 							$totalFormasPago['Zelle $']['montoBs'] += round($pago->amount * $pago->bill->tasa_cambio, 2);
 							$totalFormasPago['Total general cobrado Bs.']['montoBs'] += round($pago->amount * $pago->bill->tasa_cambio, 2);
 						}
+					}
+					elseif ($pago->banco_receptor == "Euros" && $pago->moneda == "€")
+					{
+						$vectorPagos[$pago->bill->id]['euros'] += $pago->amount;
+						$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount * $pago->bill->tasa_dolar_euro, 2);
+												
+						if ($pago->bill->tipo_documento == "Factura")
+						{
+							$vectorTotalesRecibidos['Facturas']['Euros €'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Euros €'] += $pago->amount;
+							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Euros €'] += $pago->amount; 
+							$totalFormasPago['Euros €']['monto'] += $pago->amount;
+							$totalFormasPago['Euros €']['montoBs'] += round($pago->amount * $pago->bill->tasa_euro, 2);
+							$totalFormasPago['Total general cobrado Bs.']['montoBs'] += round($pago->amount * $pago->bill->tasa_euro, 2);
+						}
+						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
+						{
+							$vectorTotalesRecibidos['Anticipo de inscripción']['Euros €'] += $pago->amount; 
+							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Euros €'] += $pago->amount;
+							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Euros €'] += $pago->amount;
+							$totalFormasPago['Euros €']['monto'] += $pago->amount;
+							$totalFormasPago['Euros €']['montoBs'] += round($pago->amount * $pago->bill->tasa_euro, 2);
+							$totalFormasPago['Total general cobrado Bs.']['montoBs'] += round($pago->amount * $pago->bill->tasa_euro, 2);
+						}				
 					}
 					elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "Bs.")
 					{
@@ -1232,6 +1260,7 @@ class TurnsController extends AppController
 					'Efectivo €' => "",
 					'Efectivo Bs.' => "",
 					'Zelle $' => "",
+					'Euros €' => "",
 					'TDB/TDC Bs.' => "",
 					'Transferencia Bs.' => "",
 					'Depósito Bs.' => "", 
@@ -1244,6 +1273,7 @@ class TurnsController extends AppController
 					'Efectivo €' => 0,
 					'Efectivo Bs.' => 0,
 					'Zelle $' => 0,
+					'Euros €' => 0,
 					'TDB/TDC Bs.' => 0,
 					'Transferencia Bs.' => 0,
 					'Depósito Bs.' => 0, 
@@ -1447,13 +1477,7 @@ class TurnsController extends AppController
 		$contadorNumero = 1;
 					
 		$turn = $this->Turns->get($id);
-            
-        /* if ($turn->status == 1)
-        {
-            $this->Flash->error(__('Este turno no se ha cerrado'));
-            return $this->redirect(['controller' => 'users', 'action' => 'wait']);
-        } */
-		
+            		
 		$usuario = $this->Turns->Users->get($turn->user_id);
 		
 		$cajero = $usuario->first_name . ' ' . $usuario->surname; 

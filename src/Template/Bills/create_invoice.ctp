@@ -3232,12 +3232,12 @@
 				}
 				if (bank == 'Euros' && monedaPago != '€')
 				{
-					alert('Estimado usuario los pagos desde Zelle deben ser en dólares');
+					alert('Estimado usuario los pagos desde Euros deben ser en euros');
 					return false;
 				}
 				else if (bancoReceptor == 'Euros' && monedaPago != '€')
 				{
-					alert('Estimado usuario los pagos hacia Zelle deben ser en dólares');
+					alert('Estimado usuario los pagos hacia Euros deben ser en euros');
 					return false;
 				}
 				else if (bank != 'Zelle' && bank != "Euros" && bank != "N/A" && monedaPago != 'Bs.')
