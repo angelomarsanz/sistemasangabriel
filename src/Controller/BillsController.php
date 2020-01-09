@@ -1147,13 +1147,30 @@ class BillsController extends AppController
 										else
 										{
 											$parentsandguardian->balance += round($factura->amount_paid * $factura->tasa_dolar_euro, 2);
-										}										
+										}
+										
+										if ($factura->vector_sobrantes_reintegros != null)
+										{
+											$vectorRecibosSobrantes = json_decode($factura->vector_sobrantes_reintegros, true);
+											
+											foreach ($vectorRecibosSobrantes as $sobrante)
+											{
+												$reciboSobranteReintegro = $this->Bills->get($sobrante);
+												$reciboSobranteReintegro->reintegro_sobrante = 0;
+												
+												if (!($this->Bills->save($reciboSobranteReintegro)))
+												{
+													$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con ID ' . $reciboSobranteReintegro->id));
+													$binnacles->add('controller', 'Bills', 'annulInvoice', 'No se pudo actualizar el recibo de sobrante con ID ' . $reciboSobranteReintegro->id);
+												}
+											}
+										}
 									}
 										
 									if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))
 									{
 										$this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
-										$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian . ' en la factura ' . $billNumber);
+										$binnacles->add('controller', 'Bills', 'annulInvoice', 'No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian . ' en la factura ' . $billNumber);
 									}
 								}
 											
@@ -2247,12 +2264,77 @@ class BillsController extends AppController
 			
 	public function establecerMontoReintegro($idRepresentante = null, $monto = null)
 	{
+		$contadorRecibosSobrantes = 0;
+		
 		if ($this->request->is(['patch', 'post', 'put']))
         {						
 			$resultado = $this->reciboAdicional($idRepresentante, "", 0, "Recibo de reintegro", 2, "Reintegro", $_POST['monto_reintegro']);
 			
 			if ($resultado['codigoRetorno'] == 0)
 			{
+				$this->loadModel('Turns');
+				
+				$turnos = $this->Turns->find('all')->where(['user_id' => $this->Auth->user('id'), 'status' => true])->order(['id' => 'DESC']);
+							
+				$contadorRegistros = $turnos->count();
+				
+				if ($contadorRegistros > 0)
+				{
+					$ultimoTurno = $turnos->first();
+				}
+				
+				$recibosSobrantes = $this->Bills->find('all', 
+					['conditions' => 
+						['tipo_documento' => 'Recibo de sobrante',
+						'parentsandguardian_id' => $idRepresentante,
+						'turn' => $ultimoTurno->id,
+						'amount_paid >=' => $_POST['monto_reintegro']],
+					'order' => ['Bills.id' => 'ASC']]);
+										
+				$contadorRecibosSobrantes = $recibosSobrantes->count();
+								
+				if ($contadorRecibosSobrantes > 0)
+				{
+					$saldoReintegro = $_POST['monto_reintegro'];
+					$vectorRecibosSobrantes = [];
+					
+					foreach ($recibosSobrantes as $recibo)
+					{						
+						$reciboSobrante = $this->Bills->get($recibo->id);
+						
+						if ($reciboSobrante->amount_paid >= $saldoReintegro)
+						{
+							$reciboSobrante->reintegro_sobrante = $saldoReintegro;
+							$saldoReintegro = 0;
+							$vectorRecibosSobrantes[] = $recibo->id;
+							if (!($this->Bills->save($reciboSobrante)))
+							{
+								$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con Id : ' . $reciboSobrante->id));
+							}
+							break;
+						}
+						else
+						{
+							$reciboSobrante->reintegro_sobrante = $reciboSobrante->amount_paid;
+							$saldoReintegro -= $reciboSobrante->amount_paid;
+							$vectorRecibosSobrantes[] = $recibo->id;
+							if (!($this->Bills->save($reciboSobrante)))
+							{
+								$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con Id : ' . $reciboSobrante->id));
+								break;
+							}
+						}
+					}
+					
+					$reciboReintegro = $this->Bills->get($resultado['idRecibo']);
+					
+					$reciboReintegro->vector_sobrantes_reintegros = json_encode($vectorRecibosSobrantes);
+					if (!($this->Bills->save($reciboReintegro)))
+					{
+						$this->Flash->error(__('No se pudo actualizar el recibo de reintegro con el vector de sobrantes: ' . $reciboReintegro->id));
+					}
+				}
+
 				$representante = $this->Bills->Parentsandguardians->get($idRepresentante);
 				
 				$representante->balance = $representante->balance - $_POST['monto_reintegro'];

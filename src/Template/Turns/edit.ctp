@@ -268,7 +268,13 @@
 											<td style="text-align: center;">$</td>
 											<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format(round($totalGeneralSobrantes * $tasaDolar, 2), 2, ",", ".") ?></b></td>
-										</tr>									
+										</tr>	
+										<tr>
+											<td><b>Menos reintegros de sobrantes de este turno</b></td>
+											<td style="text-align: center;">$</td>
+											<td style="text-align: center;"><b><?= number_format($totalGeneralReintegrosSobrantes, 2, ",", ".") ?></b></td>
+											<td style="text-align: center;"><b><?= number_format(round($totalGeneralReintegrosSobrantes * $tasaDolar, 2), 2, ",", ".") ?></b></td>
+										</tr>											
 										<tr>
 											<td><b>Total general cobrado + facturas compensadas - sobrantes (vueltos pendientes por entregar)</b></td>
 											<td></td>
@@ -291,7 +297,7 @@
 											<td><b>Diferencia (Redondeos y otras diferencias)  </b></td>
 											<td></td>
 											<td></td>
-											<td style="text-align: center;"><b><?= number_format(($totalGeneralFacturado + $totalDescuentosRecargos) - ($totalFormasPago['Total general cobrado Bs.']['montoBs'] + $totalGeneralCompensado - round($totalGeneralSobrantes * $tasaDolar, 2)), 2, ",", ".") ?></b></td>
+											<td style="text-align: center;"><b><?= number_format(($totalGeneralFacturado + $totalDescuentosRecargos) - ($totalFormasPago['Total general cobrado Bs.']['montoBs'] + $totalGeneralCompensado - round($totalGeneralSobrantes * $tasaDolar, 2) - round($totalGeneralReintegrosSobrantes * $tasaDolar, 2)), 2, ",", ".") ?></b></td>
 										</tr>
 									</tbody>
 								</table>
@@ -354,6 +360,7 @@
 										$totalCobradoBolivares = 0;  
 										$totalFacturaDolar = 0;  
 										$totalFacturaBolivar = 0; 
+										$totalDescuentosRecargos = 0;
 										$totalEfectivoDolar = 0;
 										$totalEfectivoEuro = 0;
 										$totalEfectivoBolivar = 0;
@@ -442,6 +449,9 @@
 												<?php $totalFacturaDolar += $pago['totalFacturaDolar']; 
 												$totalFacturaBolivar += $pago['totalFacturaBolivar']; 
 												$totalEfectivoDolar += $pago['efectivoDolar'];
+												if (isset($pago['descuentoRecargo'])): 
+													$totalDescuentosRecargos += $pago['descuentoRecargo'];
+												endif;
 												$totalEfectivoEuro += $pago['efectivoEuro'];
 												$totalEfectivoBolivar += $pago['efectivoBolivar'];
 												$totalZelle += $pago['zelleDolar'];

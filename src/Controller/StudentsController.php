@@ -2210,7 +2210,8 @@ class StudentsController extends AppController
 						'Studenttransactions.original_amount',
 						'Studenttransactions.amount_dollar'])
 					->where([['Studenttransactions.student_id' => $familyStudent->id],
-						['Studenttransactions.transaction_description' => $concepto]])
+						['Studenttransactions.transaction_description' => $concepto],
+						['Studenttransactions.amount_dollar >' => 0]])
 					->order(['Studenttransactions.created' => 'DESC']);
 
 				$row = $signedUp->first();	

@@ -61,6 +61,7 @@
 										<th style="text-align: center;">Efectivo €</th>
 										<th style="text-align: center;">Efectivo Bs.</th>
 										<th style="text-align: center;">Zelle $</th>
+										<th style="text-align: center;">Euros €</th>
 										<th style="text-align: center;">TDD/TDC Bs.</th>
 										<th style="text-align: center;">Transferencia Bs.</th>
 										<th style="text-align: center;">Depósito Bs.</th>
@@ -72,7 +73,7 @@
 									</tr>
 								</thead>
 								<tbody>				
-									<?php foreach ($vectorPagos as $pago): ?> 
+									<?php foreach ($vectorPagos as $pago): ?>
 										<tr>
 											<td style="text-align: center;"><?= $pago['Nro']; ?></td>
 											<td style="text-align: center;"><?= $pago['fechaHora']->format('d-m-Y H:i:s'); ?></td>
@@ -86,7 +87,12 @@
 											<td style="text-align: center;"><?= number_format($pago['efectivoDolar'], 2, ",", ".") ?></td>
 											<td style="text-align: center;"><?= number_format($pago['efectivoEuro'], 2, ",", ".") ?></td>
 											<td style="text-align: center;"><?= number_format($pago['efectivoBolivar'], 2, ",", ".") ?></td>
-											<td style="text-align: center;"><?= number_format($pago['zelleDolar'], 2, ",", ".") ?></td>
+											<td style="text-align: center;"><?= number_format($pago['zelleDolar'], 2, ",", ".") ?></td>											
+											<?php if (isset($pago['euros'])): ?>
+												<td style="text-align: center;"><?= number_format($pago['euros'], 2, ",", ".") ?></td>
+											<?php else: ?>
+												<td style="text-align: center;"><?= "0,00" ?></td>
+											<?php endif; ?>
 											<td style="text-align: center;"><?= number_format($pago['tddTdcBolivar'], 2, ",", ".") ?></td>
 											<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>										
 											<td style="text-align: center;"><?= number_format($pago['depositoBolivar'], 2, ",", ".") ?></td>

@@ -318,6 +318,7 @@ class TurnsController extends AppController
 			
 			$totalDescuentosRecargos = 0;
 			$totalGeneralSobrantes = 0;
+			$totalGeneralReintegrosSobrantes = 0;
 			$totalGeneralCompensado = 0; 
 			$totalGeneralFacturado = 0;
 							
@@ -412,22 +413,13 @@ class TurnsController extends AppController
 					elseif ($factura->tipo_documento == "Recibo de sobrante")
 					{
 						$indicadorSobrantes = 1;
-						$totalGeneralSobrantes += $factura->amount_paid;
-						if ($factura->moneda_id == 1)
-						{
-							$vectorTotalesRecibidos['Menos sobrantes (vueltos pendientes por entregar)']['Efectivo Bs.'] -= $factura->amount_paid;
-							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo Bs.'] -= $factura->amount_paid;	
-						}
-						elseif ($factura->moneda_id == 2)
-						{
-							$vectorTotalesRecibidos['Menos sobrantes (vueltos pendientes por entregar)']['Efectivo $'] -= $factura->amount_paid;
-							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] -= $factura->amount_paid;	
-						}					
-						else
-						{
-							$vectorTotalesRecibidos['Menos sobrantes (vueltos pendientes por entregar)']['Efectivo €'] -= $factura->amount_paid;
-							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] -= $factura->amount_paid;	
-						}						
+						$sobranteMenosReintegro = $factura->amount_paid - $factura->reintegro_sobrante;
+						$totalGeneralSobrantes += $sobranteMenosReintegro;
+						$totalGeneralReintegrosSobrantes += $factura->reintegro_sobrante;
+						
+						$vectorTotalesRecibidos['Menos sobrantes (vueltos pendientes por entregar)']['Efectivo $'] -= $sobranteMenosReintegro;
+						$vectorTotalesRecibidos['Menos reintegros de vueltos de este turno']['Efectivo $'] -= $factura->reintegro_sobrante;
+						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] -= $factura->amount_paid;	
 					}
 					
 					if ($factura->id_anticipo > 0)
@@ -747,6 +739,7 @@ class TurnsController extends AppController
 			$turn->total_formas_pago = json_encode($totalFormasPago);
 			$turn->total_descuentos_recargos = $totalDescuentosRecargos;
 			$turn->total_general_sobrantes = $totalGeneralSobrantes;
+			$turn->total_general_reintegros_sobrantes = $totalGeneralReintegrosSobrantes;
 			$turn->total_general_compensado = $totalGeneralCompensado;
 			$turn->total_general_facturado = $totalGeneralFacturado;
 			$turn->tasa_dolar = $tasaDolar;
@@ -800,6 +793,7 @@ class TurnsController extends AppController
 				'indicadorRecibosAnulados',
 				'documentosAnulados',
 				'totalGeneralSobrantes',
+				'totalGeneralReintegrosSobrantes',
 				'vista'));	
 				
 			$this->set('_serialize', 
@@ -828,6 +822,7 @@ class TurnsController extends AppController
 				'indicadorRecibosAnulados',
 				'documentosAnulados',
 				'totalGeneralSobrantes',
+				'totalGeneralReintegrosSobrantes',
 				'vista']);
 		}
 	}
@@ -1245,6 +1240,7 @@ class TurnsController extends AppController
 			'Menos reintegros',
 			'Menos compras',
 			'Menos sobrantes (vueltos pendientes por entregar)',
+			'Menos reintegros de vueltos de este turno',
 			'Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname'),
             'Total recibido de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname'),
             'Diferencia'];
@@ -1326,11 +1322,15 @@ class TurnsController extends AppController
 		$vectorPagos = json_decode($turn->vector_pagos, true);
 		$vectorTotalesRecibidos = json_decode($turn->vector_totales_recibidos, true);
 		$totalFormasPago = json_decode($turn->total_formas_pago, true);
+		
 		$totalGeneralSobrantes = $turn->total_general_sobrantes;
-		if ($totalGeneralSobrantes > 0)
+		$totalGeneralReintegrosSobrantes = $turn->total_general_reintegros_sobrantes;
+		
+		if ($totalGeneralSobrantes > 0 || $totalGeneralReintegrosSobrantes > 0)
 		{
 			$indicadorSobrantesRegistrados = 1;
 		}
+		
 		$totalDescuentosRecargos = $turn->total_descuentos_recargos;
 		if ($totalDescuentosRecargos > 0)
 		{
@@ -1400,7 +1400,9 @@ class TurnsController extends AppController
 					$indicadorSobrantes = 1;
 					if ($indicadorSobrantesRegistrados == 0)
 					{
-						$totalGeneralSobrantes += $factura->amount_paid;
+						$sobranteMenosReintegro = $factura->amount_paid - $factura->reintegro_sobrante;
+						$totalGeneralSobrantes += $sobranteMenosReintegro;
+						$totalGeneralReintegrosSobrantes += $factura->reintegro_sobrante;
 					}
 				}
 				elseif ($factura->id_anticipo > 0)
@@ -1440,7 +1442,8 @@ class TurnsController extends AppController
 			'indicadorFacturasAnuladas',
 			'indicadorRecibosAnulados',
 			'documentosAnulados',
-			'totalGeneralSobrantes'));	
+			'totalGeneralSobrantes',
+			'totalGeneralReintegrosSobrantes'));	
 			
 		$this->set('_serialize', 
 			['turn',
@@ -1465,7 +1468,8 @@ class TurnsController extends AppController
 			'indicadorFacturasAnuladas',
 			'indicadorRecibosAnulados',
 			'documentosAnulados',
-			'totalGeneralSobrantes']);	
+			'totalGeneralSobrantes',
+			'totalGeneralReintegrosSobrantes']);	
 	}
 	
     public function excelDocumentos($id = null)
@@ -1498,17 +1502,17 @@ class TurnsController extends AppController
 			if ($factura->moneda_id == 1)
 			{
 				$montoFacturaBolivares = $factura->amount_paid;
-				$montoFacturaDolares = round($factura->amount_paid / $factura->tasa_cambio);				
+				$montoFacturaDolares = round($factura->amount_paid / $factura->tasa_cambio, 2);				
 			}
 			elseif ($factura->moneda_id == 2)
 			{
-				$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_cambio);
+				$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_cambio, 2);
 				$montoFacturaDolares = $factura->amount_paid;
 			}
 			else
 			{
-				$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_euro);
-				$montoFacturaDolares = round($factura->amount_paid * $factura->tasa_dolar_euro);
+				$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_euro, 2);
+				$montoFacturaDolares = round($factura->amount_paid * $factura->tasa_dolar_euro, 2);
 			}
 			
 			$vectorPagos[$factura->id] = 
@@ -1526,6 +1530,7 @@ class TurnsController extends AppController
 				'efectivoEuro' => 0,
 				'efectivoBolivar' => 0,
 				'zelleDolar' => 0,
+				'euros' => 0,
 				'tddTdcBolivar' => 0,
 				'transferenciaBolivar' => 0,
 				'depositoBolivar' => 0,
@@ -1538,6 +1543,8 @@ class TurnsController extends AppController
 		
 		foreach ($pagosFacturas as $pago)
 		{
+			$tasaDolarEuroFactura = round($pago->bill->tasa_euro / $pago->bill->tasa_cambio, 5);
+			
 			if ($pago->payment_type == "Efectivo" && $pago->moneda == "$")
 			{
 				$vectorPagos[$pago->bill->id]['efectivoDolar'] += $pago->amount;
@@ -1546,48 +1553,54 @@ class TurnsController extends AppController
 			elseif ($pago->payment_type == "Efectivo" && $pago->moneda == "€")
 			{
 				$vectorPagos[$pago->bill->id]['efectivoEuro'] += $pago->amount;
-				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount * $pago->bill->tasa_dolar_euro);
+				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount * $tasaDolarEuroFactura, 2);
 			}
 			elseif ($pago->payment_type == "Efectivo" && $pago->moneda == "Bs.")
 			{
 				$vectorPagos[$pago->bill->id]['efectivoBolivar'] += $pago->amount;
-				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio);
+				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
 			}			
 			elseif ($pago->payment_type == "Tarjeta de débito" && $pago->moneda == "Bs.")
 			{
 				$vectorPagos[$pago->bill->id]['tddTdcBolivar'] += $pago->amount;
-				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio);
+				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
 			}
 			elseif ($pago->payment_type == "Tarjeta de crédito" && $pago->moneda == "Bs.")
 			{
 				$vectorPagos[$pago->bill->id]['tddTdcBolivar'] += $pago->amount;
-				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio);
+				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
 			}			
 			elseif ($pago->banco_receptor == "Zelle" && $pago->moneda == "$")
 			{
 				$vectorPagos[$pago->bill->id]['zelleDolar'] += $pago->amount;
 				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += $pago->amount;
 			}
+			elseif ($pago->banco_receptor == "Euros" && $pago->moneda == "€")
+			{
+				$vectorPagos[$pago->bill->id]['euros'] += $pago->amount;
+				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount * $tasaDolarEuroFactura, 2);
+			}
 			elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "Bs.")
 			{
 				$vectorPagos[$pago->bill->id]['transferenciaBolivar'] += $pago->amount;
-				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio);
+				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
 			}			
 			elseif ($pago->payment_type == "Depósito" && $pago->moneda == "Bs.")
 			{
 				$vectorPagos[$pago->bill->id]['depositoBolivar'] += $pago->amount;
-				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio);
+				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
 			}				
 			elseif ($pago->payment_type == "Cheque" && $pago->moneda == "Bs.")
 			{
 				$vectorPagos[$pago->bill->id]['chequeBolivar'] += $pago->amount;
-				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio);
+				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
 			}						
 		}
 							
 		$this->set(compact('turn', 'vectorPagos', 'cajero'));
 		$this->set('_serialize', ['turn', 'vectorPagos', 'cajero']);
 	}
+	
     public function excelPagos($id = null)
     {
 		$payment = new PaymentsController();
@@ -1630,17 +1643,17 @@ class TurnsController extends AppController
 					if ($factura->moneda_id == 1)
 					{
 						$montoFacturaBolivares = $factura->amount_paid;
-						$montoFacturaDolares = round($factura->amount_paid / $factura->tasa_cambio);				
+						$montoFacturaDolares = round($factura->amount_paid / $factura->tasa_cambio, 2);				
 					}
 					elseif ($factura->moneda_id == 2)
 					{
-						$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_cambio);
+						$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_cambio, 2);
 						$montoFacturaDolares = $factura->amount_paid;
 					}
 					else
 					{
-						$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_euro);
-						$montoFacturaDolares = round($factura->amount_paid * $factura->tasa_dolar_euro);
+						$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_euro, 2);
+						$montoFacturaDolares = round($factura->amount_paid * $factura->tasa_dolar_euro, 2);
 					}
 					
 					$vectorPagos[$contador] = 
@@ -1659,6 +1672,7 @@ class TurnsController extends AppController
 						'efectivoEuro' => 0,
 						'efectivoBolivar' => 0,
 						'zelleDolar' => 0,
+						'euros' => 0,
 						'tddTdcBolivar' => 0,
 						'transferenciaBolivar' => 0,
 						'depositoBolivar' => 0,
@@ -1694,6 +1708,10 @@ class TurnsController extends AppController
 					elseif ($pago->banco_receptor == "Zelle" && $pago->moneda == "$")
 					{
 						$vectorPagos[$contador]['zelleDolar'] += $pago->amount;
+					}
+					elseif ($pago->banco_receptor == "Euros" && $pago->moneda == "€")
+					{
+						$vectorPagos[$contador]['euros'] += $pago->amount;
 					}
 					elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "Bs.")
 					{

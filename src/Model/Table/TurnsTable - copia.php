@@ -183,9 +183,6 @@ class TurnsTable extends Table
             ->allowEmpty('total_general_sobrantes');
 			
         $validator
-            ->allowEmpty('total_general_reintegros_sobrantes');
-			
-        $validator
             ->allowEmpty('total_general_compensado');
 			
         $validator
