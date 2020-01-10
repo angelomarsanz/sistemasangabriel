@@ -192,6 +192,9 @@ class TurnsTable extends Table
             ->allowEmpty('total_general_facturado');
 			
         $validator
+            ->allowEmpty('total_facturas_recibos');
+			
+        $validator
             ->allowEmpty('tasa_dolar');
 			
         $validator

@@ -244,7 +244,7 @@
 										<td style="text-align: center;"><b><?= number_format(round($totalGeneralReintegrosSobrantes * $tasaDolar, 2), 2, ",", ".") ?></b></td>
 									</tr>											
 									<tr>
-										<td><b>Total general cobrado + facturas compensadas - sobrantes (vueltos pendientes por entregar)</b></td>
+										<td><b>Total general cobrado + facturas compensadas - sobrantes (vueltos pendientes por entregar) - reintegros de sobrantes de este turno</b></td>
 										<td></td>
 										<td></td>
 										<td style="text-align: center;"><b><?= number_format($totalFormasPago['Total general cobrado Bs.']['montoBs'] + $totalGeneralCompensado - round($totalGeneralSobrantes * $tasaDolar, 2), 2, ",", ".") ?></b></td>
@@ -262,10 +262,16 @@
 										<td style="text-align: center;"><b><?= number_format($totalDescuentosRecargos, 2, ",", ".") ?></b></td>
 									</tr>
 									<tr>
+										<td><b>Facturas correspondientes a recibos de anticipos</b></td>
+										<td></td>
+										<td></td>
+										<td style="text-align: center;"><b><?= number_format($totalFacturasRecibos * -1, 2, ",", ".") ?></b></td>
+									</tr>
+									<tr>
 										<td><b>Diferencia (Redondeos y otras diferencias)  </b></td>
 										<td></td>
 										<td></td>
-										<td style="text-align: center;"><b><?= number_format(($totalGeneralFacturado + $totalDescuentosRecargos) - ($totalFormasPago['Total general cobrado Bs.']['montoBs'] + $totalGeneralCompensado - round($totalGeneralSobrantes * $tasaDolar, 2) - round($totalGeneralReintegrosSobrantes * $tasaDolar, 2)), 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format(($totalGeneralFacturado + $totalDescuentosRecargos - $totalFacturasRecibos) - ($totalFormasPago['Total general cobrado Bs.']['montoBs'] + $totalGeneralCompensado - round($totalGeneralSobrantes * $tasaDolar, 2) - round($totalGeneralReintegrosSobrantes * $tasaDolar, 2)), 2, ",", ".") ?></b></td>
 									</tr>
 								</tbody>
 							</table>

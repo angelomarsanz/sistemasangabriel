@@ -321,6 +321,7 @@ class TurnsController extends AppController
 			$totalGeneralReintegrosSobrantes = 0;
 			$totalGeneralCompensado = 0; 
 			$totalGeneralFacturado = 0;
+			$totalFacturasRecibos = 0;
 							
 			$documentosAnulados = $this->Bills->find('all', ['conditions' => ['annulled' => true, 'turn' => $id],
 				'order' => ['Bills.id' => 'ASC']]);
@@ -425,9 +426,10 @@ class TurnsController extends AppController
 					if ($factura->id_anticipo > 0)
 					{
 						$indicadorFacturasRecibos = 1;
+						$totalFacturasRecibos += $factura->amount_paid;
 					}
 					
-					if ($factura->amount != 0)
+					if ($factura->amount > 0)
 					{
 						$totalDescuentosRecargos += $factura->amount;
 
@@ -742,6 +744,7 @@ class TurnsController extends AppController
 			$turn->total_general_reintegros_sobrantes = $totalGeneralReintegrosSobrantes;
 			$turn->total_general_compensado = $totalGeneralCompensado;
 			$turn->total_general_facturado = $totalGeneralFacturado;
+			$turn->total_facturas_recibos = $totalFacturasRecibos;
 			$turn->tasa_dolar = $tasaDolar;
 			$turn->tasa_euro = $tasaEuro;
 			$turn->tasa_euro_dolar = $tasaDolarEuro;
@@ -779,6 +782,7 @@ class TurnsController extends AppController
 				'totalDescuentosRecargos',
 				'totalGeneralCompensado',
 				'totalGeneralFacturado',
+				'totalFacturasRecibos',
 				'tasaDolar',
 				'tasaEuro',
 				'indicadorFacturasAnticipos',
@@ -808,6 +812,7 @@ class TurnsController extends AppController
 				'totalDescuentosRecargos',				
 				'totalGeneralCompensado', 
 				'totalGeneralFacturado', 
+				'totalFacturasRecibos',
 				'tasaDolar', 
 				'tasaEuro',
 				'indicadorFacturasAnticipos',
@@ -1332,12 +1337,21 @@ class TurnsController extends AppController
 		}
 		
 		$totalDescuentosRecargos = $turn->total_descuentos_recargos;
+		
 		if ($totalDescuentosRecargos > 0)
 		{
 			$indicadorDescuentosRecargosRegistrados = 1;
-		}		
+		}
+		
 		$totalGeneralCompensado = $turn->total_general_compensado;
 		$totalGeneralFacturado = $turn->total_general_facturado;
+		$totalFacturasRecibos = $turn->total_facturas_recibos;
+		
+		if ($totalFacturasRecibos > 0)
+		{
+			$indicadorFacturasRecibos = 1;
+		}
+		
 		$tasaDolar = $turn->tasa_dolar;
 		$tasaEuro = $turn->tasa_euro;
 		
@@ -1405,11 +1419,8 @@ class TurnsController extends AppController
 						$totalGeneralReintegrosSobrantes += $factura->reintegro_sobrante;
 					}
 				}
-				elseif ($factura->id_anticipo > 0)
-				{
-					$indicadorFacturasRecibos = 1;
-				}
-				elseif ($factura->amount != 0)
+								
+				if ($factura->amount > 0)
 				{
 					if ($indicadorDescuentosRecargosRegistrados == 0)
 					{
@@ -1429,6 +1440,7 @@ class TurnsController extends AppController
 			'totalDescuentosRecargos',
 			'totalGeneralCompensado',
 			'totalGeneralFacturado',
+			'totalFacturasRecibos',
 			'tasaDolar',
 			'tasaEuro',
 			'indicadorFacturasAnticipos',
@@ -1455,6 +1467,7 @@ class TurnsController extends AppController
 			'totalDescuentosRecargos',
 			'totalGeneralCompensado', 
 			'totalGeneralFacturado', 
+			'totalFacturasRecibos',
 			'tasaDolar', 
 			'tasaEuro',
 			'indicadorFacturasAnticipos',
