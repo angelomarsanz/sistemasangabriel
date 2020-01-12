@@ -540,6 +540,7 @@
 </div>
 <button id="mostrar-registros" type=submit>Tabla studentTransactions</button>
 <button id="mostrar-pagos" type=submit>Tabla payments</button>
+<button id="prueba-ajuste">Prueba ajuste</button>
 <div id="mensajes"></div>
 <div id="results"></div>
 <div id="pagos"></div>
@@ -671,6 +672,7 @@
 	var anoEscolarAnterior = 0;
 	var julioAnoAnterior = "";
 	var julioExonerado = 0;
+	var diferenciaBolivares = 0;
 
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
@@ -1889,13 +1891,50 @@
 		biggestYearFrom = schoolYearFrom;
 		
         var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbInvoiced = 'true'";
-
+		var idCuotaAbono = 0;
+		var idCuotaExonerada = 0;
+		var cantidadElementos = 0;
+		var diferenciaBolivaresDividida = diferenciaBolivares;
+		var diferenciaUltimoElemento = diferenciaBolivares;
+		var diferenciaBolivaresTotal = diferenciaBolivares;
+		var contadorElementos = 1;
+		
         db.transaction(function (tx) 
         {
             tx.executeSql(selectForInvoice, [], function (tx, result) 
             {
                 dataSet = result.rows;
-                    
+				cantidadElementos = dataSet.length;
+
+				for (var i = 0, item = null; i < dataSet.length; i++) 
+				{
+					item = dataSet.item(i);				
+					
+					if (item['dbObservation'] == 'Abono')
+					{
+						idCuotaAbono = item['dbId'];
+					}
+					
+					if (item['dbObservation'] == '(Exonerado)')
+					{
+						idCuotaAbono = item['dbId'];
+						cantidadElementos -= 1;
+					}
+				}
+				
+				if (cantidadElementos > 1)
+				{
+					diferenciaBolivaresDividida = dosDecimales(diferenciaBolivares / cantidadElementos);
+					diferenciaUltimoElemento = diferenciaBolivaresDividida;
+					
+					diferenciaBolivaresTotal = dosDecimales(diferenciaBolivaresDividida * cantidadElementos);
+					
+					if (diferenciaBolivares != diferenciaBolivaresTotal)
+					{
+						diferenciaUltimoElemento = dosDecimales(diferenciaUltimoElemento + (diferenciaBolivares - diferenciaBolivaresTotal));
+					}
+				}
+			 
                 for (var i = 0, item = null; i < dataSet.length; i++) 
                 {
                     item = dataSet.item(i);
@@ -1907,9 +1946,43 @@
                     tbStudentTransactions[transactionCounter].monthlyPayment = item['dbMonthlyPayment'];
 					tbStudentTransactions[transactionCounter].montoAPagarDolar = dosDecimales(item['dbMontoAPagarDolar']);
                     tbStudentTransactions[transactionCounter].montoAPagarEuro = dosDecimales(item['dbMontoAPagarEuro']);
-					tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);					
-                    tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 					
+					
+					if (item['Observation'] == '(Exonerado')
+					{
+						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);	
+					}
+					else if (cantidadElementos == 1)
+					{
+						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivares);
+					}
+					else if (idCuotaAbono > 0)
+					{
+						if (item['dbId'] == idCuotaAbono)
+						{
+							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivares);
+						}
+						else
+						{
+							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);	
+						}													
+					}
+					else
+					{
+						if (contadorElementos == cantidadElementos)
+						{
+							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaUltimoElemento);
+						}
+						else
+						{
+							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivaresDividida);
+						}
+					}
+					contadorElementos++;
+										
+                    tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 	
+					
                     transactionCounter++;
+					
 					if (item['dbMonthlyPayment'].substring(0, 9) == "Matrícula")
 					{
 						biggestYearFrom = parseInt(item['dbMonthlyPayment'].substring(10, 14));
@@ -2232,7 +2305,7 @@
 	}
 	
 	function guardarFactura()
-	{
+	{		
 		$("#invoice-messages").html("Por favor espere...");
 		payments.idTurn = $("#Turno").attr('value');
 		payments.idParentsandguardians = idParentsandguardians;
@@ -2242,16 +2315,18 @@
 		payments.identificationNumberClient = $('#identification-number-client').val();;
 		payments.fiscalAddress = $('#fiscal-address').val();
 		payments.taxPhone = $('#tax-phone').val();
-		payments.invoiceAmount = dosDecimales(totalBalance * dollarExchangeRate);
-		
-		if (deudaMenosPagadoBolivares > 0 && deudaMenosPagadoBolivares < dollarExchangeRate)
+						
+		if (deudaMenosPagadoBolivares == 0)
 		{
-			payments.discount = dosDecimales(descuentoBolivares - deudaMenosPagadoBolivares);
+			payments.invoiceAmount = dosDecimales(totalBalance * dollarExchangeRate);
 		}
 		else
 		{
-			payments.discount = descuentoBolivares; 
+			diferenciaBolivares = deudaMenosPagadoBolivares * -1;
+			payments.invoiceAmount = dosDecimales((totalBalance * dollarExchangeRate) + diferenciaBolivares);
 		}
+		
+		payments.discount = descuentoBolivares; 
 		
 		if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
 		{
@@ -2388,7 +2463,7 @@
 		}
 		return cadenaConPuntoDecimal;	
 	}
-
+	    
 // Funciones Jquery
 
     $(document).ready(function() 
@@ -3694,6 +3769,7 @@
 			$('.check-bolivar').prop('checked', false);
 			aCobrarEuros();
 		});
+		
 		$('.check-bolivar').click(function(e) 
         {
 			monedaPago = "Bs.";
@@ -3705,6 +3781,13 @@
 			$('.check-bolivar').prop('checked', true);
 			aCobrarBolivares();
 		});
+		
+		$('#prueba-ajuste').click(function(e) 
+        {
+			diferenciaBolivares = 22.5;
+			uploadTransactions();
+		});
+		
     }); 
 
 </script>
