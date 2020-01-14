@@ -2322,8 +2322,24 @@
 		}
 		else
 		{
-			diferenciaBolivares = deudaMenosPagadoBolivares * -1;
-			payments.invoiceAmount = dosDecimales((totalBalance * dollarExchangeRate) + diferenciaBolivares);
+			if (deudaMenosPagadoBolivares < 0)
+			{
+				diferenciaSinSigno = deudaMenosPagadoBolivares * -1;
+			}
+			else
+			{
+				diferenciaSinSigno = deudaMenosPagadoBolivares;
+			}
+			
+			if (diferenciaSinSigno < dosDecimales(0.01 * dollarExchangeRate))
+			{
+				diferenciaBolivares = deudaMenosPagadoBolivares * -1;
+				payments.invoiceAmount = dosDecimales((totalBalance * dollarExchangeRate) + diferenciaBolivares);
+			}
+			else
+			{
+				payments.invoiceAmount = dosDecimales(totalBalance * dollarExchangeRate);
+			}
 		}
 		
 		payments.discount = descuentoBolivares; 

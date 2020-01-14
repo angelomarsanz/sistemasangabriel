@@ -429,7 +429,7 @@ class TurnsController extends AppController
 						$totalFacturasRecibos += $factura->amount_paid;
 					}
 					
-					if ($factura->amount > 0)
+					if ($factura->amount != 0)
 					{
 						$totalDescuentosRecargos += $factura->amount;
 
@@ -1338,7 +1338,7 @@ class TurnsController extends AppController
 		
 		$totalDescuentosRecargos = $turn->total_descuentos_recargos;
 		
-		if ($totalDescuentosRecargos > 0)
+		if ($totalDescuentosRecargos != 0)
 		{
 			$indicadorDescuentosRecargosRegistrados = 1;
 		}
@@ -1420,7 +1420,7 @@ class TurnsController extends AppController
 					}
 				}
 								
-				if ($factura->amount > 0)
+				if ($factura->amount != 0)
 				{
 					if ($indicadorDescuentosRecargosRegistrados == 0)
 					{
