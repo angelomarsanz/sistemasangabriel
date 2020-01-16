@@ -1759,8 +1759,6 @@
 														
 					accumulatedPayment -= dosDecimales(montoPagadoDolar);	
 					acumuladoPagadoEuros -= dosDecimales(montoPagadoEuro);
-					console.log('acumuladoPagadoEuros ' + acumuladoPagadoEuros);
-					
 					acumuladoPagadoBolivares -= dosDecimales(montoPagadoBolivar);
 					
 					actualizarTotales();						
@@ -2185,8 +2183,8 @@
 		balanceDescuento = dosDecimales(totalBalance + discount);
 		totalBalanceDescuento = dosDecimales(totalBalance - saldoRepresentante + discount);
 
-		balanceDescuentoEuros = dosDecimales(totalBalanceEuros + descuentoEuros);
-		totalBalanceDescuentoEuros = dosDecimales(totalBalanceEuros - saldoRepresentanteEuros + descuentoEuros);
+		balanceDescuentoEuros = dosDecimales(balanceDescuento / tasaDolarEuro);
+		totalBalanceDescuentoEuros = dosDecimales(totalBalanceDescuento / tasaDolarEuro);
 
 		balanceDescuentoBolivares = dosDecimales(totalBalanceBolivares + descuentoBolivares);
 		totalBalanceDescuentoBolivares = dosDecimales(totalBalanceBolivares - saldoRepresentanteBolivares + descuentoBolivares);
@@ -2200,7 +2198,7 @@
 		$('#pagado-bolivar').html(formatoNumero(acumuladoPagadoBolivares));
 		
 		deudaMenosPagado = dosDecimales(totalBalanceDescuento - accumulatedPayment);
-		deudaMenosPagadoEuros = dosDecimales(totalBalanceDescuentoEuros - acumuladoPagadoEuros);
+		deudaMenosPagadoEuros = dosDecimales(deudaMenosPagado / tasaDolarEuro);
 		deudaMenosPagadoBolivares = dosDecimales(totalBalanceDescuentoBolivares - acumuladoPagadoBolivares);
 
 		if (deudaMenosPagado > 0)
@@ -2226,29 +2224,9 @@
 			sobrante = 0;
 		}
 		
-		if (deudaMenosPagadoEuros > 0)
-		{
-			porPagarEuros = deudaMenosPagadoEuros;
-			sobranteEuros = 0;
-		}
-		else if (deudaMenosPagadoEuros < 0)
-		{
-			porPagarEuros = 0;
-			if (saldoRepresentanteEuros < balanceDescuentoEuros)
-			{
-				sobranteEuros = dosDecimales(deudaMenosPagadoEuros * -1);
-			}
-			else
-			{
-				sobranteEuros = 0;
-			}
-		}
-		else
-		{
-			porPagarEuros = 0;
-			sobranteEuros = 0;
-		}
-		
+		porPagarEuros = dosDecimales(porPagar / tasaDolarEuro);
+		sobranteEuros = dosDecimales(sobrante / tasaDolarEuro);
+			
 		if (deudaMenosPagadoBolivares > 0)
 		{
 			porPagarBolivares = deudaMenosPagadoBolivares;
