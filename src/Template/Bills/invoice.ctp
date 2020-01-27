@@ -654,6 +654,22 @@
 		<?php endforeach; ?>
 	</div>
 <?php endif; ?>
+<?php if ($indicadorVueltoCompra == 1): ?>
+	<br />
+	<br />
+	<div>
+		<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
+		<h4>Rif J-07573084-4</h4>
+		<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
+		<h2 style="text-align: center;">Recibo de Vuelto de Compra Nro. <?= $bill->bill_number ?> por <?= $monedaDocumento . ' ' . number_format($bill->amount_paid, 2, ",", ".") ?></h2>
+		<br />
+		<p style="text-align: justify;">Por concepto de: </p>
+			
+		<?php foreach ($vConcepts as $vConcept): ?>
+			<?= h($vConcept['invoiceLine']) ?><br />
+		<?php endforeach; ?>
+	</div>
+<?php endif; ?>
 <script>
     $(document).ready(function()
     {

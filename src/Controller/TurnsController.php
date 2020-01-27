@@ -278,6 +278,7 @@ class TurnsController extends AppController
 			$indicadorServiciosEducativos = 0;
 			$indicadorReintegros = 0;
 			$indicadorCompras = 0;
+			$indicadorVueltoCompra = 0;
 			$indicadorNotasCredito = 0;
 			$indicadorNotasDebito = 0;
 			$indicadorFacturasRecibos = 0;
@@ -401,6 +402,26 @@ class TurnsController extends AppController
 						{
 							$vectorTotalesRecibidos['Menos compras']['Efectivo €'] -= $factura->amount_paid;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] -= $factura->amount_paid;	
+						}	
+					}
+					elseif ($factura->tipo_documento == "Recibo de vuelto de compra")
+					{
+						$indicadorVueltoCompra = 1;
+						
+						if ($factura->moneda_id == 1)
+						{
+							$vectorTotalesRecibidos['Más vueltos de compras']['Efectivo Bs.'] += $factura->amount_paid;
+							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo Bs.'] += $factura->amount_paid;	
+						}
+						elseif ($factura->moneda_id == 2)
+						{
+							$vectorTotalesRecibidos['Más vueltos de compras']['Efectivo $'] += $factura->amount_paid;
+							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] += $factura->amount_paid;	
+						}					
+						else
+						{
+							$vectorTotalesRecibidos['Más vueltos de compras']['Efectivo €'] += $factura->amount_paid;
+							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] += $factura->amount_paid;	
 						}	
 					}
 					elseif ($factura->tipo_documento == "Nota de crédito")
@@ -789,6 +810,7 @@ class TurnsController extends AppController
 				'indicadorServiciosEducativos',
 				'indicadorReintegros',
 				'indicadorCompras',
+				'indicadorVueltoCompra',
 				'indicadorNotasCredito',
 				'indicadorNotasDebito',
 				'indicadorSobrantes',
@@ -819,6 +841,7 @@ class TurnsController extends AppController
 				'indicadorServiciosEducativos',
 				'indicadorReintegros',
 				'indicadorCompras',
+				'indicadorVueltoCompra',
 				'indicadorNotasCredito',
 				'indicadorNotasDebito',
 				'indicadorSobrantes',
@@ -1246,6 +1269,7 @@ class TurnsController extends AppController
 			'Menos compras',
 			'Menos sobrantes (vueltos pendientes por entregar)',
 			'Menos reintegros de vueltos de este turno',
+			'Más vueltos de compras',
 			'Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname'),
             'Total recibido de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname'),
             'Diferencia'];
@@ -1310,6 +1334,7 @@ class TurnsController extends AppController
 		$indicadorServiciosEducativos = 0;
 		$indicadorReintegros = 0;
 		$indicadorCompras = 0;
+		$indicadorVueltoCompra = 0;
 		$indicadorNotasCredito = 0;
 		$indicadorNotasDebito = 0;
 		$indicadorFacturasRecibos = 0;
@@ -1401,6 +1426,10 @@ class TurnsController extends AppController
 				{
 					$indicadorCompras = 1;
 				}
+				elseif ($factura->tipo_documento == "Recibo de vuelto de compra")
+				{
+					$indicadorVueltoCompra = 1;
+				}
 				elseif ($factura->tipo_documento == "Nota de crédito")
 				{
 					$indicadorNotasCredito = 1;
@@ -1447,6 +1476,7 @@ class TurnsController extends AppController
 			'indicadorServiciosEducativos',
 			'indicadorReintegros',
 			'indicadorCompras',
+			'indicadorVueltoCompra',
 			'indicadorNotasCredito',
 			'indicadorNotasDebito',
 			'indicadorFacturasRecibos',

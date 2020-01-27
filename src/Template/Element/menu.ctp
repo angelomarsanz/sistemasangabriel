@@ -104,8 +104,14 @@
 								<!-- <li><?= $this->Html->link('Reporte contacto alumnos', ['controller' => 'Students', 'action' => 'reportStudentsGeneral']) ?></li> -->
 							</ul>
 						</li>
-						
-						<li><?= $this->Html->link('Compras', ['controller' => 'Bills', 'action' => 'compra']) ?></li>
+												
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Compras <span class="caret"></span></a>
+							<ul class="dropdown-menu" role="menu">    
+								<li><?= $this->Html->link('Recibo', ['controller' => 'Bills', 'action' => 'compra']) ?></li>
+								<li><?= $this->Html->link('Vuelto', ['controller' => 'Bills', 'action' => 'vueltoCompra']) ?></li>
+							</ul>
+						</li>
 						
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Cuentas por cobrar <span class="caret"></span></a>

@@ -185,6 +185,12 @@ class BillsTable extends Table
 			
         $validator
             ->allowEmpty('vector_sobrantes_reintegros');
+			
+        $validator
+            ->allowEmpty('compensacion_sobrante');
+			
+        $validator
+            ->allowEmpty('vector_sobrantes_compensados');
 
         return $validator;
     }

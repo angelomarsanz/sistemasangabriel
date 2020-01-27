@@ -179,6 +179,12 @@ class BillsTable extends Table
 			
         $validator
             ->allowEmpty('cambio_monto_cuota');
+			
+        $validator
+            ->allowEmpty('reintegro_sobrante');
+			
+        $validator
+            ->allowEmpty('vector_sobrantes_reintegros');
 
         return $validator;
     }

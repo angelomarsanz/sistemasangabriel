@@ -278,6 +278,9 @@ class ParentsandguardiansTable extends Table
         $validator
             ->requirePresence('new_guardian', 'create')
             ->notEmpty('new_guardian');
+			
+        $validator
+            ->allowEmpty('vector_saldo_favor');
 
         return $validator;
     }
