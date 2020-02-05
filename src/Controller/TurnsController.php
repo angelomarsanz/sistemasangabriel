@@ -359,6 +359,17 @@ class TurnsController extends AppController
 					if ($factura->tipo_documento == "Factura" || $factura->tipo_documento == "Recibo de anticipo" )
 					{
 						$indicadorFacturasAnticipos = 1;
+						
+						if ($factura->vector_sobrantes_compensados != null)
+						{		
+							$vectorSobrantesCompensados = json_decode($factura->vector_sobrantes_compensados, true);
+							
+							foreach ($vectorSobrantesCompensados as $sobranteCompensado)
+							{
+								$vectorTotalesRecibidos['Más compensaciones de sobrantes']['Efectivo $'] += $sobranteCompensado['saldoCompensado'];
+								$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] += $sobranteCompensado['saldoCompensado'];
+							}	
+						}
 					}
 					elseif ($factura->tipo_documento == "Recibo de servicio educativo")
 					{
@@ -1270,6 +1281,7 @@ class TurnsController extends AppController
 			'Menos sobrantes (vueltos pendientes por entregar)',
 			'Menos reintegros de vueltos de este turno',
 			'Más vueltos de compras',
+			'Más compensaciones de sobrantes',
 			'Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname'),
             'Total recibido de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname'),
             'Diferencia'];
