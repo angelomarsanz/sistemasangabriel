@@ -33,29 +33,141 @@ class BillsController extends AppController
 
     public function testFunction()
     {
-		/* $contadorActualizadas = 0;
+		/* $binnacles = new BinnaclesController;
 		
-        $documentos = $this->Bills->find('all');
+		$this->loadModel('Binnacles');
 		
-		foreach ($documentos as $documento)
-		{
-			$documento->moneda_id = 1;
+		$vectorSaldoFavor = [];
+
+		$vectorSaldoFavor[] = 
+			['id' => 1, 
+			'tipoDocumento' => 'Recibo de sobrante',
+			'montoDocumento' => 10,
+			'montoReintegrado' => 0,
+			'montoCompensado' => 0,
+			'anulado' => 0];
 			
-			if ($this->Bills->save($documento)) 
-			{ 
-				$contadorActualizadas++;	
-			} 
-			else
+		echo "<br />Vector original<br /><br />";
+		var_dump($vectorSaldoFavor);
+		
+		$jsonSaldoFavor = json_encode($vectorSaldoFavor);
+	
+		$binnacles->add('controller', 'Bills', 'testFucntion', $jsonSaldoFavor);
+		
+		$registrosBitacora = $this->Binnacles->find('all', ['order' => ['id' => 'DESC']]);
+
+		$ultimoRegistro = $registrosBitacora->first();
+			
+		$vectorSaldoFavor = json_decode($ultimoRegistro->novelty, true);
+		
+		foreach ($vectorSaldoFavor as $favor)
+		{
+			echo "<br />idFavor " . $favor['id'] . "<br /><br />";			
+		}
+		
+		$vectorSaldoFavor[] = 
+			['id' => 2, 
+			'tipoDocumento' => 'Recibo de sobrante',
+			'montoDocumento' => 5,
+			'montoReintegrado' => 0,
+			'montoCompensado' => 0,
+			'anulado' => 0];
+			
+		echo "<br />Se agregó elemento<br /><br />";
+		var_dump($vectorSaldoFavor);
+			
+		$jsonSaldoFavor = json_encode($vectorSaldoFavor);
+	
+		$binnacles->add('controller', 'Bills', 'testFucntion', $jsonSaldoFavor);
+	
+		$registrosBitacora = $this->Binnacles->find('all', ['order' => ['id' => 'DESC']]);
+
+		$ultimoRegistro = $registrosBitacora->first();	
+		
+		$objetoSaldoFavor = json_decode($ultimoRegistro->novelty);
+				
+		echo "<br />Objeto recuperado<br /><br />";
+		var_dump($objetoSaldoFavor);
+			
+		foreach ($objetoSaldoFavor as $objeto)
+		{
+			if ($objeto->id == 1)
 			{
-				$this->Flash->error(__('No se pudo actualizar el documento con id : ' . $documento->id));
+				$objeto->montoCompensado = 10;
+			}
+			
+			if ($objeto->id == 2)
+			{
+				$objeto->anulado = 1;
 			}
 		}
-		$this->Flash->success(__('Total documentos actualizados: ' . $contadorActualizadas));
 		
+		echo "<br />Objeto modificado<br /><br />";
+		var_dump($objetoSaldoFavor); 
 		
-        $this->set(compact('documentos'));
-        $this->set('_serialize', ['documentos']); */
+		$vectorSaldoFavor = (array) $objetoSaldoFavor;
+		
+		echo "<br />Objeto convertido a vector<br /><br />";
+		var_dump($vectorSaldoFavor); 
+		
+		$jsonSaldoFavor = json_encode($vectorSaldoFavor);
+	
+		$binnacles->add('controller', 'Bills', 'testFucntion', $jsonSaldoFavor);
+		
+		$registrosBitacora = $this->Binnacles->find('all', ['order' => ['id' => 'DESC']]);
+
+		$ultimoRegistro = $registrosBitacora->first();	
+		
+		$vectorSaldoFavor = json_decode($ultimoRegistro->novelty, true);
+		
+		echo "<br />Vector recuperado de la BD<br /><br />";
+		var_dump($vectorSaldoFavor); */		
     }
+	
+	public function testFunction2()
+	{
+		/* $contadorRecibosSobrantes = 0;
+		$contadorCoincidentes = 0;
+		$contadorNoCoincidentes = 0;
+		
+		$recibosSobrantes = $this->Bills->find('all', 
+			['conditions' => 
+			['tipo_documento' => 'Recibo de sobrante',
+			'annulled' => 0],
+			'order' => ['Bills.id' => 'DESC']]);
+			
+		$contadorRecibosSobrantes = $recibosSobrantes->count();
+			
+		if ($contadorRecibosSobrantes > 0)
+		{	
+			foreach ($recibosSobrantes as $recibo)
+			{
+				$reciboSobrante = $this->Bills->get($recibo->id);
+				
+				$representante = $this->Bills->Parentsandguardians->get($recibo->parentsandguardian_id);
+				
+				if ($representante->balance == $reciboSobrante->amount_paid)
+				{
+					$contadorCoincidentes++;
+					$this->Flash->success(__(' idRepresentante ' . $reciboSobrante->parentsandguardian_id . ' saldoRepresentante ' . $representante->balance . ' idReciboSobrante ' . $reciboSobrante->id . ' montoRecibo ' . $reciboSobrante->amount_paid));
+				}
+				else
+				{
+					$contadorNoCoincidentes++;
+					$reciboSobrante->reintegro_sobrante = $reciboSobrante->amount_paid;
+					
+					if (!($this->Bills->save($reciboSobrante))) 
+					{
+						$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con el id : ' . $reciboSobrante->id));           
+					}
+				}			
+			}
+		}
+		
+		$this->Flash->success(__('Coincidentes ' . $contadorCoincidentes));
+		$this->Flash->success(__('No coincidentes ' . $contadorNoCoincidentes));
+		$this->Flash->success(__('Total recibos sobrantes ' . $contadorRecibosSobrantes)); */
+	}
 	
     public function index($idFamily = null, $family = null)
     {
@@ -427,13 +539,72 @@ class BillsController extends AppController
 								$this->Flash->error(__('No se pudo guardar correctamente el recibo del sobrante'));
 								$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo crear correctamente el recibo del sobrante para la factura ' . $billNumber);
 							}
-							$parentsandguardian->balance = $this->headboard['sobrante']; 
+							
+							$parentsandguardian->balance += $this->headboard['sobrante']; 
 						}
 						else
-						{
+						{							
 							$parentsandguardian->balance -= $this->headboard['saldoCompensado'];
+											
+							$recibosSobrantesCompensados = $this->Bills->find('all', 
+							['conditions' => 
+								['tipo_documento' => 'Recibo de sobrante',
+								'parentsandguardian_id' => $idParentsandguardian,
+								'reintegro_sobrante < amount_paid',
+								'compensacion_sobrante < amount_paid',
+								'annulled' => 0],
+							'order' => ['Bills.id' => 'DESC']]);
+										
+							$contadorRecibosSobrantesCompensados = $recibosSobrantesCompensados->count();
+													
+							if ($contadorRecibosSobrantesCompensados > 0)
+							{
+								$saldoCompensadoFactura = $this->headboard['saldoCompensado'];
+								$vectorSobrantesCompensados = [];
+								
+								foreach ($recibosSobrantesCompensados as $recibo)
+								{
+									if ($saldoCompensadoFactura > 0)
+									{
+										$reciboSobranteCompensado = $this->Bills->get($recibo->id);
+										
+										$disponibleParaCompensar = $reciboSobranteCompensado->amount_paid - $reciboSobranteCompensado->reintegro_sobrante - $reciboSobranteCompensado->compensacion_sobrante;							
+										
+										if ($saldoCompensadoFactura > $disponibleParaCompensar)
+										{
+											$reciboSobranteCompensado->compensacion_sobrante += $disponibleParaCompensar;
+											$saldoCompensadoFactura -= $disponibleParaCompensar;
+											$vectorSobrantesCompensados[] = ['id' => $reciboSobranteCompensado->id, 'saldoCompensado' => $disponibleParaCompensar];
+										}
+										else
+										{								
+											$reciboSobranteCompensado->compensacion_sobrante += $saldoCompensadoFactura;
+											$vectorSobrantesCompensados[] = ['id' => $reciboSobranteCompensado->id, 'saldoCompensado' => $saldoCompensadoFactura];	
+											$saldoCompensadoFactura = 0;
+										}
+																					
+										if (!($this->Bills->save($reciboSobranteCompensado)))
+										{
+											$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con Id : ' . $reciboSobranteCompensado->id));
+										}										
+									}
+									else
+									{
+										break;
+									}
+								}
+															
+								$facturaCompensada = $this->Bills->get($billId);
+								$facturaCompensada->vector_sobrantes_compensados = json_encode($vectorSobrantesCompensados);
+														
+								if (!($this->Bills->save($facturaCompensada)))
+								{
+									 $this->Flash->error(__('La factura ' . $billNumber . ' No se pudo actualizar con el vector_sobrantes_compensados'));
+									 $binnacles->add('controller', 'Bills', 'recordInvoiceData', 'La factura ' . $billNumber . ' No se pudo actualizar con el vector_sobrantes_compensados');
+								}
+							}
 						}
-																			
+						
 						if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))
 						{
 							$this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
@@ -646,6 +817,8 @@ class BillsController extends AppController
 		$montoReitegro = 0;
         $indicadorCompra = 0;
 		$montoCompra = 0;
+        $indicadorVueltoCompra = 0;
+		$montoVueltoCompra = 0;		
         $previousAcccountingCode = " ";
 		$indicadorAnticipo = 0;
  
@@ -744,6 +917,14 @@ class BillsController extends AppController
 				{
 					$indicadorCompra = 1;
 					$montoCompra = $aConcept->amount;
+					$invoiceLine = $aConcept->concept;
+					$amountConcept = $aConcept->amount;
+					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+				}
+			    elseif (substr($aConcept->concept, 0, 20) == "Vuelto de compra de:")
+				{
+					$indicadorVueltoCompra = 1;
+					$montoVueltoCompra = $aConcept->amount;
 					$invoiceLine = $aConcept->concept;
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
@@ -959,8 +1140,8 @@ class BillsController extends AppController
 		
 		$vista = "invoice";
 					
-        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'monedaDocumento'));
-        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'monedaDocumento']);
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento'));
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento']);
     }
 	
     public function invoiceConcept($accountingCode, $invoiceLine = null, $amountConcept = null)
@@ -1127,6 +1308,23 @@ class BillsController extends AppController
 									if ($factura->saldo_compensado_dolar > 0)
 									{
 										$parentsandguardian->balance += $factura->saldo_compensado_dolar;
+										
+										if ($factura->vector_sobrantes_compensados != null)
+										{
+											$vectorSobrantesCompensados = json_decode($factura->vector_sobrantes_compensados, true);
+											
+											foreach ($vectorSobrantesCompensados as $sobranteCompensado)
+											{
+												$reciboSobranteCompensado = $this->Bills->get($sobranteCompensado['id']);
+												
+												$reciboSobranteCompensado->compensacion_sobrante -= $sobranteCompensado['saldoCompensado'];
+												
+												if (!($this->Bills->save($reciboSobranteCompensado)))
+												{
+													$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con Id : ' . $reciboSobranteCompensado->id));
+												}		
+											}
+										}					
 									}
 									
 									if ($sobrante > 0)
@@ -1153,15 +1351,34 @@ class BillsController extends AppController
 										{
 											$vectorRecibosSobrantes = json_decode($factura->vector_sobrantes_reintegros, true);
 											
+											$saldoSobranteReintegro = round($factura->amount_paid / $factura->tasa_cambio, 2);
+																						
 											foreach ($vectorRecibosSobrantes as $sobrante)
 											{
-												$reciboSobranteReintegro = $this->Bills->get($sobrante);
-												$reciboSobranteReintegro->reintegro_sobrante = 0;
-												
-												if (!($this->Bills->save($reciboSobranteReintegro)))
+												if ($saldoSobranteReintegro > 0)
 												{
-													$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con ID ' . $reciboSobranteReintegro->id));
-													$binnacles->add('controller', 'Bills', 'annulInvoice', 'No se pudo actualizar el recibo de sobrante con ID ' . $reciboSobranteReintegro->id);
+													$reciboSobranteReintegro = $this->Bills->get($sobrante);
+												
+													if ($reciboSobranteReintegro->reintegro_sobrante >= $saldoSobranteReintegro)
+													{													
+														$reciboSobranteReintegro->reintegro_sobrante -= $saldoSobranteReintegro;
+														$saldoSobranteReintegro = 0;
+													}
+													else
+													{
+														$saldoSobranteReintegro -= $reciboSobranteReintegro->reintegro_sobrante;
+														$reciboSobranteReintegro->reintegro_sobrante = 0;
+													}
+												
+													if (!($this->Bills->save($reciboSobranteReintegro)))
+													{
+														$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con ID ' . $reciboSobranteReintegro->id));
+														$binnacles->add('controller', 'Bills', 'annulInvoice', 'No se pudo actualizar el recibo de sobrante con ID ' . $reciboSobranteReintegro->id);
+													}	
+												}
+												else
+												{
+													break;	
 												}
 											}
 										}
@@ -1748,7 +1965,7 @@ class BillsController extends AppController
 					$parentsandguardian = $this->Bills->Parentsandguardians->get($idParentsandguardian);
 											
 					$parentsandguardian->balance = $parentsandguardian->balance + round($acumuladoNota / $dollarExchangeRate);
-						
+											
 					if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))
 					{
 						 $this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
@@ -2287,42 +2504,46 @@ class BillsController extends AppController
 					['conditions' => 
 						['tipo_documento' => 'Recibo de sobrante',
 						'parentsandguardian_id' => $idRepresentante,
-						'turn' => $ultimoTurno->id,
-						'amount_paid >=' => $_POST['monto_reintegro']],
-					'order' => ['Bills.id' => 'ASC']]);
+						'reintegro_sobrante < amount_paid',
+						'compensacion_sobrante < amount_paid',
+						'annulled' => 0],
+					'order' => ['Bills.id' => 'DESC']]);
 										
 				$contadorRecibosSobrantes = $recibosSobrantes->count();
-								
+												
 				if ($contadorRecibosSobrantes > 0)
 				{
 					$saldoReintegro = $_POST['monto_reintegro'];
 					$vectorRecibosSobrantes = [];
 					
 					foreach ($recibosSobrantes as $recibo)
-					{						
-						$reciboSobrante = $this->Bills->get($recibo->id);
-						
-						if ($reciboSobrante->amount_paid >= $saldoReintegro)
+					{
+						if ($saldoReintegro > 0)
 						{
-							$reciboSobrante->reintegro_sobrante = $saldoReintegro;
-							$saldoReintegro = 0;
+							$reciboSobrante = $this->Bills->get($recibo->id);
+							
+							$disponibleParaReintegrar = $reciboSobrante->amount_paid - $reciboSobrante->reintegro_sobrante - $reciboSobrante->compensacion_sobrante;							
+							
+							if ($saldoReintegro > $disponibleParaReintegrar)
+							{
+								$reciboSobrante->reintegro_sobrante += $disponibleParaReintegrar;
+								$saldoReintegro -= $disponibleParaReintegrar;
+							}
+							else
+							{								
+								$reciboSobrante->reintegro_sobrante += $saldoReintegro;
+								$saldoReintegro = 0;
+							}
 							$vectorRecibosSobrantes[] = $recibo->id;
+							
 							if (!($this->Bills->save($reciboSobrante)))
 							{
 								$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con Id : ' . $reciboSobrante->id));
-							}
-							break;
+							}							
 						}
 						else
 						{
-							$reciboSobrante->reintegro_sobrante = $reciboSobrante->amount_paid;
-							$saldoReintegro -= $reciboSobrante->amount_paid;
-							$vectorRecibosSobrantes[] = $recibo->id;
-							if (!($this->Bills->save($reciboSobrante)))
-							{
-								$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con Id : ' . $reciboSobrante->id));
-								break;
-							}
+							break;
 						}
 					}
 					
@@ -2362,6 +2583,23 @@ class BillsController extends AppController
 		if ($this->request->is(['patch', 'post', 'put']))
         {				
 			$resultado = $this->reciboAdicional(1, "", 0, "Recibo de compra", $_POST['moneda'], "Compra de: " . $_POST['concepto'], $_POST['monto']);
+			
+			if ($resultado['codigoRetorno'] == 0)
+			{
+				return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $resultado['idRecibo'], 0, 1, 'compra']);
+			}
+			else
+			{
+				$this->Flash->error(__('Estimado usuario no se pudo crear el recibo de compra'));
+			}
+		}
+	}
+	
+	public function vueltoCompra()
+	{
+		if ($this->request->is(['patch', 'post', 'put']))
+        {				
+			$resultado = $this->reciboAdicional(1, "", 0, "Recibo de vuelto de compra", $_POST['moneda'], "Vuelto de compra de: " . $_POST['concepto'], $_POST['monto']);
 			
 			if ($resultado['codigoRetorno'] == 0)
 			{

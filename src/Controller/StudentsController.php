@@ -39,28 +39,33 @@ class StudentsController extends AppController
     
     public function testFunction()
     { 
-		/* $contador = 0;
+		/* $contadorActualizados = 0;
 
-		$estudiantes = $this->Students->find('all')
-			->where([['number_of_brothers' => '2019'], ['new_student' => 1]])
-			// ->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
-			->order(['modified' => 'ASC']);
+		$becados = $this->Students->find('all')
+			->where(['scholarship' => 1]);
 			
-		$contadorEstudiantes = $estudiantes->count();
+		$contadorBecados = $becados->count();
 		
-		$this->Flash->success(__('Estudiantes encontrados ' . $contadorEstudiantes));
+		$this->Flash->success(__('Estudiantes becados ' . $contadorBecados));
 		
-		$transacciones = $this->Students->Studenttransactions->find('all')
-			// ->where(['paid_out' => 1, 'OR' => [['transaction_description' => 'Matrícula 2019'], ['transaction_description' => 'Ago 2020']]])
-			->where(['transaction_description' => 'Matrícula 2019'])
-			->order(['student_id' => 'ASC', 'transaction_description' => 'DESC']);	
+		foreach ($becados as $becado)
+		{
+			$student = $this->Students->get($becado->id);
+			
+			$student->tipo_descuento = "Becado";
+			$student->discount = 100;
+			
+		   if ($this->Students->save($student)) 
+			{
+				$contadorActualizados++;
+			} 
+			else 
+			{
+				$this->Flash->error(__('El alumno con el id ' . $student->id . ' no pudo ser actualizado'));
+			}
+		}
 		
-		$contadorTransacciones = $transacciones->count();
-		
-		$this->Flash->success(__('Transacciones encontrados ' . $contadorTransacciones));
-		
-        $this->set(compact('estudiantes', 'transacciones'));
-        $this->set('_serialize', ['estudiantes', 'transacciones']);	*/	
+		$this->Flash->success(__('Estudiantes actualizados ' . $contadorActualizados)); */
     }
 	
     public function testFunction2()
@@ -486,7 +491,7 @@ class StudentsController extends AppController
 					}
 					else
 					{
-						$indicadorError = $studentTransactions->createQuotasRegularPrevious($row->id);	
+						$indicadorError = $studentTransactions->createQuotasRegular($row->id);	
 					}					
 					
 					if ($indicadorError == 0)
@@ -839,6 +844,8 @@ class StudentsController extends AppController
         ]);
 
         $student->scholarship = 1;
+		$student->tipo_descuento = "Becado";
+		$student->discount = 100;
         
         if ($this->Students->save($student)) 
         {
@@ -861,6 +868,8 @@ class StudentsController extends AppController
         ]);
 
         $student->scholarship = 0;
+		$student->tipo_descuento = "";
+		$student->discount = 0;
         
         if ($this->Students->save($student)) 
         {
@@ -1080,8 +1089,10 @@ class StudentsController extends AppController
 							'first_name' => $result->first_name,
 							'second_name' => $result->second_name,
 							'level_of_study' => $result->level_of_study,
+							'becado_ano_anterior' => $result->becado_ano_anterior,
 							'scholarship' => $result->scholarship,
 							'schoolYearFrom' => $result->balance,
+							'descuento_ano_anterior' => $result->descuento_ano_anterior,
 							'discount_family' => $result->discount,
 							'sublevel' => $sections->sublevel,
 							'section' => $sections->section,
@@ -1210,7 +1221,7 @@ class StudentsController extends AppController
 				
 				if ($student->scholarship == true)
 				{
-					$monthlyPayments[$accountantManager]['tipoDescuento'] = "Becado";
+					$monthlyPayments[$accountantManager]['tipoDescuento'] = "Completo";
 					$monthlyPayments[$accountantManager]['descuento'] = 100;
 				}
 				elseif ($student->discount === null || $student->discount == 0)
@@ -1220,7 +1231,7 @@ class StudentsController extends AppController
 				}
 				else
 				{
-					$monthlyPayments[$accountantManager]['tipoDescuento'] = "Hijos";
+					$monthlyPayments[$accountantManager]['tipoDescuento'] = $student->tipo_descuento;
 					$monthlyPayments[$accountantManager]['descuento'] = $student->discount;
 				}
 
@@ -3359,5 +3370,51 @@ class StudentsController extends AppController
 		$this->Flash->success(__('Total alumnos beca hijos 20% ' . $contadorHijos20));
 		$this->Flash->success(__('Total alumnos beca hijos 50% ' . $contadorHijos50));
 		$this->Flash->success(__('Total alumnos actualizados ' . $contadorActualizados));
+	}
+	public function becasEspeciales()
+	{
+		
+	}
+    public function aplicarBecaEspecial($id = null, $controller = null, $action = null)
+    {
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		
+        $student = $this->Students->get($id);
+        
+        if ($this->request->is(['patch', 'post', 'put'])) 
+        {
+            $student = $this->Students->patchEntity($student, $this->request->data);
+			
+			if ($student->discount > 0)
+			{
+				$student->tipo_descuento = "Especial";
+			}
+			else
+			{
+				$student->tipo_descuento = "";
+			}
+            		            
+            if ($this->Students->save($student)) 
+            {
+				$this->Flash->success(__('La beca se aplicó exitosamente'));
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);;
+            }
+            else 
+            {
+                $this->Flash->error(__('La beca no se pudo aplicar correctamente'));
+            }
+        }    
+        $this->set(compact('student', 'controller', 'action'));
+        $this->set('_serialize', ['student', 'controller', 'action']);
+	}
+	public function reporteBecados()
+	{
+		$becados = $this->Students->find('all')
+			->where(['student_condition' => 'Regular', 'discount >' => 0])
+			->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
+			
+		$this->set(compact('becados'));
+        $this->set('_serialize', ['becados']);
 	}
 }

@@ -1890,7 +1890,7 @@ class StudenttransactionsController extends AppController
             
         $finalYear = $nextYear;  
 
-		$students20 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.discount' => 20]]);
+		$students20 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.tipo_descuento' => 'Hijos', 'Students.discount' => 20]]);
 		
         if ($students20)
 		{
@@ -2001,6 +2001,7 @@ class StudenttransactionsController extends AppController
 			$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
 				
 			$student->discount = 20;
+			$student->tipo_descuento = "Hijos";
 
 			if (!($this->Studenttransactions->Students->save($student)))
 			{
@@ -2040,7 +2041,7 @@ class StudenttransactionsController extends AppController
             
         $finalYear = $nextYear;  
 
-		$students50 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.discount' => 50]]);
+		$students50 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.tipo_descuento' => 'Hijos', 'Students.discount' => 50]]);
 		
         if ($students50)
 		{
@@ -2151,6 +2152,7 @@ class StudenttransactionsController extends AppController
 			$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
 				
 			$student->discount = 50;
+			$student->tipo_descuento = "Hijos";
 
 			if (!($this->Studenttransactions->Students->save($student)))
 			{

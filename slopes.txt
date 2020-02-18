@@ -1,3 +1,8 @@
+--
+En febrero se debe considerar nuevo año escolar para la planilla
+--
+
+
 Emi u.esangabriel.rrhh@gmail.com
 
 Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar descuento
@@ -140,9 +145,13 @@ current_year_registration - 2019
 previous_year_registration - 2018
 next_year_registration - 2020
 
-- Se debe modificar el sistema para que el campo "balance" se actualice
+Se debe modificar el sistema para que el campo "balance" se actualice
 unicamente cuando se haga la cobranza de la matrìcula de ese año, no
 cuando el padre actualice los datos
+
+Copiar Scholarship a becado_ano_anterior
+Copiar tipo_descuento a tipo_descuento_ano_anterior
+Copiar discount a descuento_ano_anterior
 
 -------
 Arreglo campo "balance" en Students

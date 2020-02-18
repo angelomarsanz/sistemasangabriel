@@ -1759,8 +1759,6 @@
 														
 					accumulatedPayment -= dosDecimales(montoPagadoDolar);	
 					acumuladoPagadoEuros -= dosDecimales(montoPagadoEuro);
-					console.log('acumuladoPagadoEuros ' + acumuladoPagadoEuros);
-					
 					acumuladoPagadoBolivares -= dosDecimales(montoPagadoBolivar);
 					
 					actualizarTotales();						
@@ -1897,6 +1895,7 @@
 		var diferenciaBolivaresDividida = diferenciaBolivares;
 		var diferenciaUltimoElemento = diferenciaBolivares;
 		var diferenciaBolivaresTotal = diferenciaBolivares;
+		var contadorElementos = 1;
 		
         db.transaction(function (tx) 
         {
@@ -1923,10 +1922,10 @@
 				
 				if (cantidadElementos > 1)
 				{
-					diferenciaBolivaresDividida = dosDecimales(diferenciaBolivares / cantidad elementos);
+					diferenciaBolivaresDividida = dosDecimales(diferenciaBolivares / cantidadElementos);
 					diferenciaUltimoElemento = diferenciaBolivaresDividida;
 					
-					diferenciaBolivaresTotal = diferenciaBolivaresDividida * cantidadElementos;
+					diferenciaBolivaresTotal = dosDecimales(diferenciaBolivaresDividida * cantidadElementos);
 					
 					if (diferenciaBolivares != diferenciaBolivaresTotal)
 					{
@@ -1950,13 +1949,35 @@
 					{
 						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);	
 					}
-					else if (cantidadElementos )
-					
-					
+					else if (cantidadElementos == 1)
+					{
+						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivares);
+					}
+					else if (idCuotaAbono > 0)
+					{
+						if (item['dbId'] == idCuotaAbono)
+						{
+							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivares);
+						}
+						else
+						{
+							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);	
+						}													
+					}
+					else
+					{
+						if (contadorElementos == cantidadElementos)
+						{
+							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaUltimoElemento);
+						}
+						else
+						{
+							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivaresDividida);
+						}
+					}
+					contadorElementos++;
 										
                     tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 	
-
-					alert('montoAPagarBolivar ' + tbStudentTransactions[transactionCounter].montoAPagarBolivar);
 					
                     transactionCounter++;
 					
@@ -2162,8 +2183,8 @@
 		balanceDescuento = dosDecimales(totalBalance + discount);
 		totalBalanceDescuento = dosDecimales(totalBalance - saldoRepresentante + discount);
 
-		balanceDescuentoEuros = dosDecimales(totalBalanceEuros + descuentoEuros);
-		totalBalanceDescuentoEuros = dosDecimales(totalBalanceEuros - saldoRepresentanteEuros + descuentoEuros);
+		balanceDescuentoEuros = dosDecimales(balanceDescuento / tasaDolarEuro);
+		totalBalanceDescuentoEuros = dosDecimales(totalBalanceDescuento / tasaDolarEuro);
 
 		balanceDescuentoBolivares = dosDecimales(totalBalanceBolivares + descuentoBolivares);
 		totalBalanceDescuentoBolivares = dosDecimales(totalBalanceBolivares - saldoRepresentanteBolivares + descuentoBolivares);
@@ -2177,7 +2198,7 @@
 		$('#pagado-bolivar').html(formatoNumero(acumuladoPagadoBolivares));
 		
 		deudaMenosPagado = dosDecimales(totalBalanceDescuento - accumulatedPayment);
-		deudaMenosPagadoEuros = dosDecimales(totalBalanceDescuentoEuros - acumuladoPagadoEuros);
+		deudaMenosPagadoEuros = dosDecimales(deudaMenosPagado / tasaDolarEuro);
 		deudaMenosPagadoBolivares = dosDecimales(totalBalanceDescuentoBolivares - acumuladoPagadoBolivares);
 
 		if (deudaMenosPagado > 0)
@@ -2203,29 +2224,9 @@
 			sobrante = 0;
 		}
 		
-		if (deudaMenosPagadoEuros > 0)
-		{
-			porPagarEuros = deudaMenosPagadoEuros;
-			sobranteEuros = 0;
-		}
-		else if (deudaMenosPagadoEuros < 0)
-		{
-			porPagarEuros = 0;
-			if (saldoRepresentanteEuros < balanceDescuentoEuros)
-			{
-				sobranteEuros = dosDecimales(deudaMenosPagadoEuros * -1);
-			}
-			else
-			{
-				sobranteEuros = 0;
-			}
-		}
-		else
-		{
-			porPagarEuros = 0;
-			sobranteEuros = 0;
-		}
-		
+		porPagarEuros = dosDecimales(porPagar / tasaDolarEuro);
+		sobranteEuros = dosDecimales(sobrante / tasaDolarEuro);
+			
 		if (deudaMenosPagadoBolivares > 0)
 		{
 			porPagarBolivares = deudaMenosPagadoBolivares;
@@ -2292,17 +2293,31 @@
 		payments.identificationNumberClient = $('#identification-number-client').val();;
 		payments.fiscalAddress = $('#fiscal-address').val();
 		payments.taxPhone = $('#tax-phone').val();
-		
-		alert('deudaMenosPagadoBolivares: ' + deudaMenosPagadoBolivares);
-				
+						
 		if (deudaMenosPagadoBolivares == 0)
 		{
 			payments.invoiceAmount = dosDecimales(totalBalance * dollarExchangeRate);
 		}
 		else
 		{
-			diferenciaBolivares = deudaMenosPagadoBolivares * -1;
-			payments.invoiceAmount = dosDecimales((totalBalance * dollarExchangeRate) + diferenciaBolivares);
+			if (deudaMenosPagadoBolivares < 0)
+			{
+				diferenciaSinSigno = deudaMenosPagadoBolivares * -1;
+			}
+			else
+			{
+				diferenciaSinSigno = deudaMenosPagadoBolivares;
+			}
+			
+			if (diferenciaSinSigno < dosDecimales(0.01 * dollarExchangeRate))
+			{
+				diferenciaBolivares = deudaMenosPagadoBolivares * -1;
+				payments.invoiceAmount = dosDecimales((totalBalance * dollarExchangeRate) + diferenciaBolivares);
+			}
+			else
+			{
+				payments.invoiceAmount = dosDecimales(totalBalance * dollarExchangeRate);
+			}
 		}
 		
 		payments.discount = descuentoBolivares; 
@@ -2442,59 +2457,7 @@
 		}
 		return cadenaConPuntoDecimal;	
 	}
-	
-    function ajusteFacturaBolivares(diferenciaBolivares)
-    {	
-        var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbInvoiced = 'true'";
-		var idCuotaAbono = 0;
-		var idCuotaExonerada = 0;
-		var bolivares = 0;
-		
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(selectForInvoice, [], function (tx, result) 
-            {
-                dataSet = result.rows;
-				
-				cantidadElementos = dataSet.length;
-				
-				if (cantidadElementos == 1)
-				{
-					item = dataSet.item(0);
-					bolivares = item['dbMontoAPagarBolivar'] + diferenciaBolivares;
-					alert('id y bolívares: ' + item['dbId'] + ' ' + bolivares);
-					actualizarBolivares(item['dbId'], bolivares);
-				}
-				else
-				{
-					for (var i = 0, item = null; i < dataSet.length; i++) 
-					{
-						item = dataSet.item(i);				
-						
-						if (item['dbObservation'] == 'Abono')
-						{
-							idCuotaAbono = item['dbId'];
-						}
-						
-						if (item['dbObservation'] == '(Exonerado)')
-						{
-							idCuotaAbono = item['dbId'];
-							cantidadElementos -= 1;
-						}
-					} 
-				}				
-            });
-        });
-    }
-	
-    function actualizarBolivares(id, bolivares) 
-    {
-		alert('actualizarBolivares');
-        var updateStatement = "UPDATE studentTransactions SET dbMontoAPagarBolivar = ? WHERE dbId=?";
-		
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [bolivares, Number(id)], null, onError); });
-    }
-    
+	    
 // Funciones Jquery
 
     $(document).ready(function() 
@@ -3815,6 +3778,7 @@
 		
 		$('#prueba-ajuste').click(function(e) 
         {
+			diferenciaBolivares = 22.5;
 			uploadTransactions();
 		});
 		

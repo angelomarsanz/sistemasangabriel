@@ -221,7 +221,7 @@ class StudenttransactionsController extends AppController
     {
         $studenttransaction = $this->Studenttransactions->get($id);
         		
-		$montoReversoDolar = round($amount / $tasaCambio); 
+		$montoReversoDolar = round($amount / $tasaCambio, 2); 
 
 		$studenttransaction->amount_dollar = $studenttransaction->amount_dollar - $montoReversoDolar;
 				
@@ -1890,7 +1890,7 @@ class StudenttransactionsController extends AppController
             
         $finalYear = $nextYear;  
 
-		$students20 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.discount' => 20]]);
+		$students20 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.tipo_descuento' => 'Hijos', 'Students.discount' => 20]]);
 		
         if ($students20)
 		{
@@ -2001,6 +2001,7 @@ class StudenttransactionsController extends AppController
 			$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
 				
 			$student->discount = 20;
+			$student->tipo_descuento = "Hijos";
 
 			if (!($this->Studenttransactions->Students->save($student)))
 			{
@@ -2040,7 +2041,7 @@ class StudenttransactionsController extends AppController
             
         $finalYear = $nextYear;  
 
-		$students50 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.discount' => 50]]);
+		$students50 = $this->Studenttransactions->Students->find('all', ['conditions' => ['Students.tipo_descuento' => 'Hijos', 'Students.discount' => 50]]);
 		
         if ($students50)
 		{
@@ -2151,6 +2152,7 @@ class StudenttransactionsController extends AppController
 			$student = $this->Studenttransactions->Students->get($arrayStudent['id']);
 				
 			$student->discount = 50;
+			$student->tipo_descuento = "Hijos";
 
 			if (!($this->Studenttransactions->Students->save($student)))
 			{
@@ -3571,7 +3573,7 @@ class StudenttransactionsController extends AppController
 		
         $transaccionEstudiante = $this->Studenttransactions->get($idTransaccion);
 				
-		$montoNotaDolar = round($valor / $tasaCambio); 
+		$montoNotaDolar = round($valor / $tasaCambio, 2); 
 		
 		if ($tipoNota == "Crédito")
 		{
@@ -3609,7 +3611,7 @@ class StudenttransactionsController extends AppController
 
 					$estudiante = $this->Studenttransactions->Students->get($transaccionEstudiante->student_id);
 				   
-					if ($estudiante->discount === null)
+					if ($estudiante->discount === null )
 					{
 						$descuentoFamilia = 1;
 					}
@@ -3618,7 +3620,7 @@ class StudenttransactionsController extends AppController
 						$descuentoFamilia = (100 - $estudiante->discount) / 100;
 					}
 					
-					$tarifaDolar = round($tarifaDolar * $descuentoFamilia);
+					$tarifaDolar = round($tarifaDolar * $descuentoFamilia, 2);
 					break;
 				}
 			}

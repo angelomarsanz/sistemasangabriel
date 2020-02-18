@@ -65,7 +65,7 @@
 								<li><?= $this->Html->link('Factura inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Factura inscripción regulares']) ?></li> 
 								<li><?= $this->Html->link('Factura inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Factura inscripción nuevos']) ?></li> 
 								<!-- <li><?= $this->Html->link('Recibo inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo inscripción regulares']) ?></li> -->
-								<!-- <li><?= $this->Html->link('Recibo inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo inscripción nuevos']) ?></li> -->
+								<li><?= $this->Html->link('Recibo inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo inscripción nuevos']) ?></li>
 								<li><?= $this->Html->link('Recibo servicio educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo servicio educativo']) ?></li>																	
 								<li><?= $this->Html->link('Cobrar mensualidades', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
 								<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
@@ -99,9 +99,10 @@
 								<li><?= $this->Html->link('Alumnos que no completaron en el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
 								<li><?= $this->Html->link('Aplicar descuento a alumnos (familias con tres hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota20']) ?></li>
 								<li><?= $this->Html->link('Aplicar descuento a alumnos (familias con cuatro o más hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota50']) ?></li>
-								<li><?= $this->Html->link('Becar alumno', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
-								<li><?= $this->Html->link('Alumnos Becados', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
-								<!-- <li><?= $this->Html->link('Reporte contacto alumnos', ['controller' => 'Students', 'action' => 'reportStudentsGeneral']) ?></li> -->
+								<li><?= $this->Html->link('Becar alumno 100%', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
+								<li><?= $this->Html->link('Alumnos Becados 100%', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
+								<li><?= $this->Html->link('Becas especiales', ['controller' => 'Students', 'action' => 'becasEspeciales']) ?></li>
+								<li><?= $this->Html->link('Reporte becados: Beca completa, por hijos y especiales', ['controller' => 'Students', 'action' => 'reporteBecados']) ?></li>
 							</ul>
 						</li>
 												

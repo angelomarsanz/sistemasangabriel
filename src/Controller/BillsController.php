@@ -410,7 +410,12 @@ class BillsController extends AppController
 			'conditions' => ['tipo_banco' => 'Receptor'],
 			'order' => ['nombre_banco' => 'ASC'],
 			'keyField' => 'nombre_banco']);
-				
+			
+		$this->loadModel('Schools');
+		$school = $this->Schools->get(2);	
+		
+		$anoEscolarActual = $school->current_school_year; 
+		
 		$this->loadModel('Rates');
 		
 		$this->loadModel('Monedas');	
@@ -420,7 +425,7 @@ class BillsController extends AppController
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar; 
 				
-        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'amountMonthly', 'bancosEmisor', 'bancosReceptor'));
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'amountMonthly', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)
