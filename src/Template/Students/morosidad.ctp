@@ -15,12 +15,12 @@
 	                    '05' => 'Mayo',
 	                    '06' => 'Junio',
 	                    '07' => 'Julio',
-	                    '08' => 'Agosto',
 	                    '09' => 'Septiembre',
 	                    '10' => 'Octubre',
 	                    '11' => 'Noviembre',
 	                    '12' => 'Diciembre']]); 
 					echo "<div id='mensaje-mes' class='mensaje-usuario'></div>";
+					echo "Nota: Agosto no está en la lista de meses porque es parte de los conceptos de incripción<br/><br />";
 	               	echo $this->Form->input('ano', ['label' => 'Año: ', 'options' => 
 	                    ["" => "",
 						'2018' => '2018',

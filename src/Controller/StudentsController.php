@@ -2984,22 +2984,23 @@ class StudentsController extends AppController
 												{
 													if ($studentsFors->discount != null)
 													{
-														$amountMonthly = round(($mesesTarifa["tarifaBolivar"] * $studentsFors->discount) / 100);
+														$amountMonthly = round(($mesesTarifa["tarifaDolar"] * (100 - $studentsFors->discount)) / 100);
 													}
 													else
 													{
-														$amountMonthly = $mesesTarifa["tarifaBolivar"];
+														$amountMonthly = $mesesTarifa["tarifaDolar"];
 													}
 													break;
 												}
 											}
 											$delinquentMonths++;
-											$totalDebt = $totalDebt + $amountMonthly;
+											$saldoCuota = $amountMonthly - $studentTransaction->amount_dolar;
+											$totalDebt = $totalDebt + $saldoCuota;
 											if (isset($detalleMorosos[$studentsFors->full_name]))
 											{
 												$detalleMorosos[$studentsFors->full_name]['cuotasPendientes']++;
-												$detalleMorosos[$studentsFors->full_name]['pendiente'] += $amountMonthly; 
-												$totalMoroso += $amountMonthly;
+												$detalleMorosos[$studentsFors->full_name]['pendiente'] += $saldoCuota; 
+												$totalMoroso += $saldoCuota;
 											}
 											else
 											{
@@ -3007,8 +3008,8 @@ class StudentsController extends AppController
 													['grado' => $nameSection->full_name,
 													'descuento' => $studentsFors->discount,
 													'cuotasPendientes' => 1,
-													'pendiente' => $amountMonthly];
-												$totalMoroso += $amountMonthly;
+													'pendiente' => $saldoCuota];
+												$totalMoroso += $saldoCuota;
 											}
 										}
 									}
@@ -3020,7 +3021,7 @@ class StudentsController extends AppController
 											{
 												if ($studentsFors->discount != null)
 												{
-													$tarifaDolarAnoMes = round(($mesesTarifa["tarifaDolar"] * $studentsFors->discount) / 100);
+													$tarifaDolarAnoMes = round(($mesesTarifa["tarifaDolar"] * (100 - $studentsFors->discount)) / 100, 2);
 												}
 												else
 												{
@@ -3029,7 +3030,9 @@ class StudentsController extends AppController
 												break;
 											}
 										}
-										if ($studentTransaction->amount_dollar < $tarifaDolarAnoMes)
+										$descuentoAplicado = $studentTransaction->original_amount - $studentTransaction->amount;
+										$cuotaAplicadaAlumno = $tarifaDolarAnoMes - $descuentoAplicado; 
+										if ($studentTransaction->amount_dollar < $cuotaAplicadaAlumno)
 										{
 											$wholeYear = 1;
 
@@ -3039,13 +3042,13 @@ class StudentsController extends AppController
 												$diferenciaBolivares = round($diferenciaDolares * $dollarExchangeRate);
 											
 												$delinquentMonths++;
-												$totalDebt = $totalDebt + $diferenciaBolivares;
+												$totalDebt = $totalDebt + $diferenciaDolares;
 													
 												if (isset($detalleMorosos[$studentsFors->full_name]))
 												{
 													$detalleMorosos[$studentsFors->full_name]['cuotasPendientes']++;
-													$detalleMorosos[$studentsFors->full_name]['pendiente'] += $diferenciaBolivares; 
-													$totalMoroso += $diferenciaBolivares;
+													$detalleMorosos[$studentsFors->full_name]['pendiente'] += $diferenciaDolares; 
+													$totalMoroso += $diferenciaDolares;
 												}
 												else
 												{
@@ -3053,8 +3056,8 @@ class StudentsController extends AppController
 														['grado' => $nameSection->full_name,
 														'descuento' => $studentsFors->discount,
 														'cuotasPendientes' => 1,
-														'pendiente' => $diferenciaBolivares];
-													$totalMoroso += $diferenciaBolivares;
+														'pendiente' => $diferenciaDolares];
+													$totalMoroso += $diferenciaDolares;
 												}
 											}
 										}
