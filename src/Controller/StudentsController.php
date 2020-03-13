@@ -2127,7 +2127,7 @@ class StudentsController extends AppController
 			}
 			else
 			{
-				$this->Flash->error(___('No se encontraron alumnos'));
+				$this->Flash->error(___('Error al guardar el archivo Binnacles'));
 			}
 		}
 	}
@@ -2156,10 +2156,8 @@ class StudentsController extends AppController
 		
 		$objetColumnsReport = json_decode($binnacle->novelty);
 						
-		$arrayColumnsReport = (array) $objetColumnsReport;
-		
-		$arrayMark = $this->markColumns($arrayColumnsReport);
-		
+		$arrayMark = (array) $objetColumnsReport;
+				
 		$filtersReport = $binnacle->extra_column1;
 		
 		$orderReport = $binnacle->extra_column2;
@@ -2299,6 +2297,20 @@ class StudentsController extends AppController
 	{
 		$arrayMark = [];
 		
+		isset($columnsReport['Students.estatus']) ? $arrayMark['Students.estatus'] = 'siExl' : $arrayMark['Students.estatus'] = 'noExl';
+				
+		isset($columnsReport['Students.sex']) ? $arrayMark['Students.sex'] = 'siExl' : $arrayMark['Students.sex'] = 'noExl';
+		
+		isset($columnsReport['Students.nationality']) ? $arrayMark['Students.nationality'] = 'siExl' : $arrayMark['Students.nationality'] = 'noExl';
+		
+		isset($columnsReport['Students.identity_card']) ? $arrayMark['Students.identity_card'] = 'siExl' : $arrayMark['Students.identity_card'] = 'noExl';
+				
+		isset($columnsReport['Students.balance']) ? $arrayMark['Students.balance'] = 'siExl' : $arrayMark['Students.balance'] = 'noExl';
+				
+		isset($columnsReport['Students.section_id']) ? $arrayMark['Students.section_id'] = 'siExl' : $arrayMark['Students.section_id'] = 'noExl';
+		
+		isset($columnsReport['Students.grado_renovacion']) ? $arrayMark['Students.grado_renovacion'] = 'siExl' : $arrayMark['Students.grado_renovacion'] = 'noExl';
+		
 		isset($columnsReport['Parentsandguardians.full_name']) ? $arrayMark['Parentsandguardians.full_name'] = 'siExl' : $arrayMark['Parentsandguardians.full_name'] = 'noExl';
 				
 		isset($columnsReport['Parentsandguardians.sex']) ? $arrayMark['Parentsandguardians.sex'] = 'siExl' : $arrayMark['Parentsandguardians.sex'] = 'noExl';
@@ -2309,16 +2321,28 @@ class StudentsController extends AppController
 
 		isset($columnsReport['Parentsandguardians.cell_phone']) ? $arrayMark['Parentsandguardians.cell_phone'] = 'siExl' : $arrayMark['Parentsandguardians.cell_phone'] = 'noExl';
 
-		isset($columnsReport['Parentsandguardians.email']) ? $arrayMark['Parentsandguardians.email'] = 'siExl' : $arrayMark['Parentsandguardians.email'] = 'noExl';		
+		isset($columnsReport['Parentsandguardians.email']) ? $arrayMark['Parentsandguardians.email'] = 'siExl' : $arrayMark['Parentsandguardians.email'] = 'noExl';	
 		
-		isset($columnsReport['Students.sex']) ? $arrayMark['Students.sex'] = 'siExl' : $arrayMark['Students.sex'] = 'noExl';
+		isset($columnsReport['Parentsandguardians.nombre_completo_padre']) ? $arrayMark['Parentsandguardians.nombre_completo_padre'] = 'siExl' : $arrayMark['Parentsandguardians.nombre_completo_padre'] = 'noExl';
+						
+		isset($columnsReport['Parentsandguardians.documento_identidad_padre']) ? $arrayMark['Parentsandguardians.documento_identidad_padre'] = 'siExl' : $arrayMark['Parentsandguardians.documento_identidad_padre'] = 'noExl';
+
+		isset($columnsReport['Parentsandguardians.work_phone_father']) ? $arrayMark['Parentsandguardians.work_phone_father'] = 'siExl' : $arrayMark['Parentsandguardians.work_phone_father'] = 'noExl';
+
+		isset($columnsReport['Parentsandguardians.cell_phone_father']) ? $arrayMark['Parentsandguardians.cell_phone_father'] = 'siExl' : $arrayMark['Parentsandguardians.cell_phone_father'] = 'noExl';
+
+		isset($columnsReport['Parentsandguardians.email_father']) ? $arrayMark['Parentsandguardians.email_father'] = 'siExl' : $arrayMark['Parentsandguardians.email_father'] = 'noExl';	
 		
-		isset($columnsReport['Students.nationality']) ? $arrayMark['Students.nationality'] = 'siExl' : $arrayMark['Students.nationality'] = 'noExl';
+		isset($columnsReport['Parentsandguardians.nombre_completo_madre']) ? $arrayMark['Parentsandguardians.nombre_completo_madre'] = 'siExl' : $arrayMark['Parentsandguardians.nombre_completo_madre'] = 'noExl';
+						
+		isset($columnsReport['Parentsandguardians.documento_identidad_madre']) ? $arrayMark['Parentsandguardians.documento_identidad_madre'] = 'siExl' : $arrayMark['Parentsandguardians.documento_identidad_madre'] = 'noExl';
+
+		isset($columnsReport['Parentsandguardians.work_phone_mother']) ? $arrayMark['Parentsandguardians.work_phone_mother'] = 'siExl' : $arrayMark['Parentsandguardians.work_phone_mother'] = 'noExl';
+
+		isset($columnsReport['Parentsandguardians.cell_phone_mother']) ? $arrayMark['Parentsandguardians.cell_phone_mother'] = 'siExl' : $arrayMark['Parentsandguardians.cell_phone_mother'] = 'noExl';
+
+		isset($columnsReport['Parentsandguardians.email_mother']) ? $arrayMark['Parentsandguardians.email_mother'] = 'siExl' : $arrayMark['Parentsandguardians.email_mother'] = 'noExl';
 		
-		isset($columnsReport['Students.identity_card']) ? $arrayMark['Students.identity_card'] = 'siExl' : $arrayMark['Students.identity_card'] = 'noExl';
-				
-		isset($columnsReport['Students.section_id']) ? $arrayMark['Students.section_id'] = 'siExl' : $arrayMark['Students.section_id'] = 'noExl';
-				
 		return $arrayMark;
 	}
     public function editStatus($id = null, $controller = null, $action = null)

@@ -173,13 +173,13 @@
 									<th scope="col"><b>Familia</b></th>
 								<?php endif; ?>
 								
-								<th scope="col"><b>Estatus</b></th>
+								<th scope="col" class=<?= $arrayMark['Students.estatus'] ?>><b>Estatus</b></th>
 								<th scope="col" class=<?= $arrayMark['Students.sex'] ?>><b>Sexo</b></th>
 								<th scope="col" class=<?= $arrayMark['Students.nationality'] ?>><b>Nacionalidad alumno</b></th>
 								<th scope="col" class=<?= $arrayMark['Students.identity_card'] ?>><b>Cédula o pasaporte alumno</b></th>	
-								<th scope="col"><b>Año Inscripción</b></th>		
-								<th scope="col" class=<?= $arrayMark['Students.section_id'] ?>><b>Grado inscripción/renovación</b></th>								
+								<th scope="col" class=<?= $arrayMark['Students.balance'] ?>><b>Año Inscripción</b></th>									
 								<th scope="col" class=<?= $arrayMark['Students.section_id'] ?>><b>Grado y sección asignada</b></th>	
+								<th scope="col" class=<?= $arrayMark['Students.grado_renovacion'] ?>><b>Grado (Renovación inscripción)</b></th>	
 								
 								<th scope="col" class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><b>Nombre Representante</b></th>
 								<th scope="col" class=<?= $arrayMark['Parentsandguardians.sex'] ?>><b>Sexo</b></th>
@@ -188,17 +188,17 @@
 								<th scope="col" class=<?= $arrayMark['Parentsandguardians.cell_phone'] ?>><b>Celular representante</b></th>
 								<th scope="col" class=<?= $arrayMark['Parentsandguardians.email'] ?>><b>Email representante</b></th>
 								
-								<th scope="col"><b>Nombre del padre</b></th>
-								<th scope="col"><b>Cédula o pasaporte del padre</b></th>
-								<th scope="col"><b>Teléfono trabajo del padre</b></th>
-								<th scope="col"><b>Celular del padre</b></th>
-								<th scope="col"><b>Email del padre</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.nombre_completo_padre'] ?>><b>Nombre del padre</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.documento_identidad_padre'] ?>><b>Cédula o pasaporte del padre</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.work_phone_father'] ?>><b>Teléfono trabajo del padre</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.cell_phone_father'] ?>><b>Celular del padre</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.email_father'] ?>><b>Email del padre</b></th>
 								
-								<th scope="col"><b>Nombre de la madre</b></th>
-								<th scope="col"><b>Cédula o pasaporte de la madre</b></th>
-								<th scope="col"><b>Teléfono trabajo de la madre</b></th>
-								<th scope="col"><b>Celular de la madre</b></th>
-								<th scope="col"><b>Email de la madre</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.nombre_completo_madre'] ?>><b>Nombre de la madre</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.documento_identidad_madre'] ?>><b>Cédula o pasaporte de la madre</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.work_phone_mother'] ?>><b>Teléfono trabajo de la madre</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.cell_phone_mother'] ?>><b>Celular de la madre</b></th>
+								<th scope="col" class=<?= $arrayMark['Parentsandguardians.email_mother'] ?>><b>Email de la madre</b></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -213,14 +213,14 @@
 									<td><?= $familyStudent->parentsandguardian->family ?></td>                        
 								<?php endif; ?>
 								
-								<td><?= $studentCondition ?></td>
+								<td class=<?= $arrayMark['Students.estatus'] ?>><?= $studentCondition ?></td>
 								<td class=<?= $arrayMark['Students.sex'] ?>><?= $familyStudent->sex ?></td>
 								<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 								<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
-								<td><?= $lastYearRegistration ?></td>
-								<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->level_of_study ?></td>
+								<td class=<?= $arrayMark['Students.balance'] ?>><?= $lastYearRegistration ?></td>
 								<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
-
+								<td class=<?= $arrayMark['Students.grado_renovacion'] ?>><?= $familyStudent->level_of_study ?></td>
+								
 								<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>							
 								<td class=<?= $arrayMark['Parentsandguardians.sex'] ?>><?= $familyStudent->parentsandguardian->sex ?></td>
 								<td class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><?= $familyStudent->parentsandguardian->type_of_identification . '-' . $familyStudent->parentsandguardian->identidy_card ?></td>
@@ -228,57 +228,57 @@
 								<td class=<?= $arrayMark['Parentsandguardians.cell_phone'] ?>><?= $familyStudent->parentsandguardian->cell_phone ?></td>
 								<td class=<?= $arrayMark['Parentsandguardians.email'] ?>><?= $familyStudent->parentsandguardian->email ?></td>
 							
-								<td><?= $familyStudent->parentsandguardian->second_surname_father . ' ' . $familyStudent->parentsandguardian->surname_father . ' ' . $familyStudent->parentsandguardian->first_name_father . ' ' . $familyStudent->parentsandguardian->second_name_father ?></td>							
-								<td><?= $familyStudent->parentsandguardian->type_of_identification_father . '-' . $familyStudent->parentsandguardian->identidy_card_father ?></td>
-								<td><?= $familyStudent->parentsandguardian->work_phone_father ?></td>
-								<td><?= $familyStudent->parentsandguardian->cell_phone_father ?></td>
-								<td><?= $familyStudent->parentsandguardian->email_father ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.nombre_completo_padre'] ?>><?= $familyStudent->parentsandguardian->second_surname_father . ' ' . $familyStudent->parentsandguardian->surname_father . ' ' . $familyStudent->parentsandguardian->first_name_father . ' ' . $familyStudent->parentsandguardian->second_name_father ?></td>							
+								<td class=<?= $arrayMark['Parentsandguardians.documento_identidad_padre'] ?>><?= $familyStudent->parentsandguardian->type_of_identification_father . '-' . $familyStudent->parentsandguardian->identidy_card_father ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.work_phone_father'] ?>><?= $familyStudent->parentsandguardian->work_phone_father ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.cell_phone_father'] ?>><?= $familyStudent->parentsandguardian->cell_phone_father ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.email_father'] ?>><?= $familyStudent->parentsandguardian->email_father ?></td>
 								
-								<td><?= $familyStudent->parentsandguardian->second_surname_mother . ' ' . $familyStudent->parentsandguardian->surname_mother . ' ' . $familyStudent->parentsandguardian->first_name_mother . ' ' . $familyStudent->parentsandguardian->second_name_mother ?></td>							
-								<td><?= $familyStudent->parentsandguardian->type_of_identification_mother . '-' . $familyStudent->parentsandguardian->identidy_card_mother ?></td>
-								<td><?= $familyStudent->parentsandguardian->work_phone_mother ?></td>
-								<td><?= $familyStudent->parentsandguardian->cell_phone_mother ?></td>
-								<td><?= $familyStudent->parentsandguardian->email_mother ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.nombre_completo_madre'] ?>><?= $familyStudent->parentsandguardian->second_surname_mother . ' ' . $familyStudent->parentsandguardian->surname_mother . ' ' . $familyStudent->parentsandguardian->first_name_mother . ' ' . $familyStudent->parentsandguardian->second_name_mother ?></td>							
+								<td class=<?= $arrayMark['Parentsandguardians.documento_identidad_madre'] ?>><?= $familyStudent->parentsandguardian->type_of_identification_mother . '-' . $familyStudent->parentsandguardian->identidy_card_mother ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.work_phone_mother'] ?>><?= $familyStudent->parentsandguardian->work_phone_mother ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.cell_phone_mother'] ?>><?= $familyStudent->parentsandguardian->cell_phone_mother ?></td>
+								<td class=<?= $arrayMark['Parentsandguardians.email_mother'] ?>><?= $familyStudent->parentsandguardian->email_mother ?></td>
 							</tr>
 				<?php else: ?>
 					<?php $accountRecords++; ?>
 					<tr>
 						<td><?= $accountRecords ?></td>
-							<?php if ($orderReport == "Familia"): ?>
-								<td><?= $familyStudent->parentsandguardian->family ?></td>                        								
-								<td><?= $familyStudent->full_name ?></td>
-							<?php else: ?>
-								<td><?= $familyStudent->full_name ?></td>								
-								<td><?= $familyStudent->parentsandguardian->family ?></td>                        
-							<?php endif; ?>
-							
-						<td><?= $studentCondition ?></td>	
+						
+						<?php if ($orderReport == "Familia"): ?>
+							<td><?= $familyStudent->parentsandguardian->family ?></td>                        
+							<td><?= $familyStudent->full_name ?></td>
+						<?php else: ?>
+							<td><?= $familyStudent->full_name ?></td>								
+							<td><?= $familyStudent->parentsandguardian->family ?></td>                        
+						<?php endif; ?>
+						
+						<td class=<?= $arrayMark['Students.estatus'] ?>><?= $studentCondition ?></td>
 						<td class=<?= $arrayMark['Students.sex'] ?>><?= $familyStudent->sex ?></td>
 						<td class=<?= $arrayMark['Students.nationality'] ?>><?= $familyStudent->nationality ?></td>
 						<td class=<?= $arrayMark['Students.identity_card'] ?>><?= $familyStudent->type_of_identification . '-' . $familyStudent->identity_card ?></td>
-						<td><?= $lastYearRegistration ?></td>
-						<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->level_of_study ?></td>
+						<td class=<?= $arrayMark['Students.balance'] ?>><?= $lastYearRegistration ?></td>
 						<td class=<?= $arrayMark['Students.section_id'] ?>><?= $familyStudent->section->level .', ' . $familyStudent->section->sublevel . ', ' . $familyStudent->section->section ?></td>
-
-						<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>
+						<td class=<?= $arrayMark['Students.grado_renovacion'] ?>><?= $familyStudent->level_of_study ?></td>
+						
+						<td class=<?= $arrayMark['Parentsandguardians.full_name'] ?>><?= $familyStudent->parentsandguardian->full_name ?></td>							
 						<td class=<?= $arrayMark['Parentsandguardians.sex'] ?>><?= $familyStudent->parentsandguardian->sex ?></td>
 						<td class=<?= $arrayMark['Parentsandguardians.identidy_card'] ?>><?= $familyStudent->parentsandguardian->type_of_identification . '-' . $familyStudent->parentsandguardian->identidy_card ?></td>
 						<td class=<?= $arrayMark['Parentsandguardians.work_phone'] ?>><?= $familyStudent->parentsandguardian->work_phone ?></td>
 						<td class=<?= $arrayMark['Parentsandguardians.cell_phone'] ?>><?= $familyStudent->parentsandguardian->cell_phone ?></td>
 						<td class=<?= $arrayMark['Parentsandguardians.email'] ?>><?= $familyStudent->parentsandguardian->email ?></td>
-
-						<td><?= $familyStudent->parentsandguardian->second_surname_father . ' ' . $familyStudent->parentsandguardian->surname_father . ' ' . $familyStudent->parentsandguardian->first_name_father . ' ' . $familyStudent->parentsandguardian->second_name_father ?></td>							
-						<td><?= $familyStudent->parentsandguardian->type_of_identification_father . '-' . $familyStudent->parentsandguardian->identidy_card_father ?></td>
-						<td><?= $familyStudent->parentsandguardian->work_phone_father ?></td>
-						<td><?= $familyStudent->parentsandguardian->cell_phone_father ?></td>
-						<td><?= $familyStudent->parentsandguardian->email_father ?></td>
+					
+						<td class=<?= $arrayMark['Parentsandguardians.nombre_completo_padre'] ?>><?= $familyStudent->parentsandguardian->second_surname_father . ' ' . $familyStudent->parentsandguardian->surname_father . ' ' . $familyStudent->parentsandguardian->first_name_father . ' ' . $familyStudent->parentsandguardian->second_name_father ?></td>							
+						<td class=<?= $arrayMark['Parentsandguardians.documento_identidad_padre'] ?>><?= $familyStudent->parentsandguardian->type_of_identification_father . '-' . $familyStudent->parentsandguardian->identidy_card_father ?></td>
+						<td class=<?= $arrayMark['Parentsandguardians.work_phone_father'] ?>><?= $familyStudent->parentsandguardian->work_phone_father ?></td>
+						<td class=<?= $arrayMark['Parentsandguardians.cell_phone_father'] ?>><?= $familyStudent->parentsandguardian->cell_phone_father ?></td>
+						<td class=<?= $arrayMark['Parentsandguardians.email_father'] ?>><?= $familyStudent->parentsandguardian->email_father ?></td>
 						
-						<td><?= $familyStudent->parentsandguardian->second_surname_mother . ' ' . $familyStudent->parentsandguardian->surname_mother . ' ' . $familyStudent->parentsandguardian->first_name_mother . ' ' . $familyStudent->parentsandguardian->second_name_mother ?></td>							
-						<td><?= $familyStudent->parentsandguardian->type_of_identification_mother . '-' . $familyStudent->parentsandguardian->identidy_card_mother ?></td>
-						<td><?= $familyStudent->parentsandguardian->work_phone_mother ?></td>
-						<td><?= $familyStudent->parentsandguardian->cell_phone_mother ?></td>
-						<td><?= $familyStudent->parentsandguardian->email_mother ?></td>
-
+						<td class=<?= $arrayMark['Parentsandguardians.nombre_completo_madre'] ?>><?= $familyStudent->parentsandguardian->second_surname_mother . ' ' . $familyStudent->parentsandguardian->surname_mother . ' ' . $familyStudent->parentsandguardian->first_name_mother . ' ' . $familyStudent->parentsandguardian->second_name_mother ?></td>							
+						<td class=<?= $arrayMark['Parentsandguardians.documento_identidad_madre'] ?>><?= $familyStudent->parentsandguardian->type_of_identification_mother . '-' . $familyStudent->parentsandguardian->identidy_card_mother ?></td>
+						<td class=<?= $arrayMark['Parentsandguardians.work_phone_mother'] ?>><?= $familyStudent->parentsandguardian->work_phone_mother ?></td>
+						<td class=<?= $arrayMark['Parentsandguardians.cell_phone_mother'] ?>><?= $familyStudent->parentsandguardian->cell_phone_mother ?></td>
+						<td class=<?= $arrayMark['Parentsandguardians.email_mother'] ?>><?= $familyStudent->parentsandguardian->email_mother ?></td>
 					</tr>
 				<?php endif; ?>
 			<?php endif; ?>

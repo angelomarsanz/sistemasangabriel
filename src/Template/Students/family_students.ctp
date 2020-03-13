@@ -84,28 +84,43 @@
 				</div>
 				<div id="columns-report" class="row">
 					<div class="col-md-6">
+						<h4>Datos del estudiante</h4>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.estatus]"> Estatus del alumno</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.sex]"> Sexo</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.nationality]"> Nacionalidad</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.identity_card]"> Cédula o pasaporte</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.balance]"> Año escolar</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.section_id]"> Grado y sección actual</p>
+						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.grado_renovacion]"> Grado renovación inscripción</p>
+						
+					</div>
+					<div class="col-md-6">
 						<h4>Datos de la familia</h4>
 						<div class="row">
 							<div class="col-md-1">
 							</div>
 							<div class="col-md-11">
-								<h5>Datos del representante:</h5>
+								<h5><b>Datos del representante:</b></h5>
 									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.full_name]" id="nombre"> Nombre</p>
 									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.sex]"> Sexo</p>
 									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.identidy_card]"> Cédula o pasaporte</p>
 									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.work_phone]"> Teléfono trabajo</p>
 									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.cell_phone]"> Celular</p>
 									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.email]"> Email</p>
+								<h5><b>Datos del padre:</b></h5>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.nombre_completo_padre]" id="nombre"> Nombre</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.documento_identidad_padre]"> Cédula o pasaporte</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.work_phone_father]"> Teléfono trabajo</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.cell_phone_father]"> Celular</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.email_father]"> Email</p>
+								<h5><b>Datos de la madre:</b></h5>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.nombre_completo_madre]" id="nombre"> Nombre</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.documento_identidad_madre]"> Cédula o pasaporte</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.work_phone_mother]"> Teléfono trabajo</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.cell_phone_mother]"> Celular</p>
+									<p><input class="column-mark" type="checkbox" name="columnsReport[Parentsandguardians.email_mother]"> Email</p>
 							</div>
 						</div>
-					</div>
-					<div class="col-md-6">
-						<h4>Datos del estudiante</h4>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.sex]"> Sexo</p>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.nationality]"> Nacionalidad</p>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.identity_card]"> Cédula o pasaporte</p>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.balance]"> Año escolar</p>
-						<p><input class="column-mark" type="checkbox" name="columnsReport[Students.section_id]"> Grado y sección</p>
 					</div>
 				</div>
 			</fieldset>

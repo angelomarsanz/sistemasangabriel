@@ -2127,7 +2127,7 @@ class StudentsController extends AppController
 			}
 			else
 			{
-				$this->Flash->error(___('No se encontraron alumnos'));
+				$this->Flash->error(___('Error al guardar el archivo Binnacles'));
 			}
 		}
 	}
