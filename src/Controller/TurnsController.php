@@ -438,6 +438,10 @@ class TurnsController extends AppController
 					elseif ($factura->tipo_documento == "Nota de crédito")
 					{
 						$indicadorNotasCredito = 1;
+						$montoDolarNC = round($factura->amount_paid / $factura->tasa_cambio, 2);
+						$vectorTotalesRecibidos['Notas de crédito']['Efectivo $'] -= $montoDolarNC;
+						$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo $'] -= $montoDolarNC;
+						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] -= $montoDolarNC;
 					}
 					elseif ($factura->tipo_documento == "Nota de débito")
 					{
@@ -533,7 +537,7 @@ class TurnsController extends AppController
 						if ($pago->bill->tipo_documento == "Factura")
 						{
 							$vectorTotalesRecibidos['Facturas']['Efectivo $'] += $pago->amount;
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Efectivo $'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo $'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] += $pago->amount; 
 							$totalFormasPago['Efectivo $']['monto'] += $pago->amount;
 							$totalFormasPago['Efectivo $']['montoBs'] += round($pago->amount * $pago->bill->tasa_cambio, 2);
@@ -542,7 +546,7 @@ class TurnsController extends AppController
 						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
 						{
 							$vectorTotalesRecibidos['Anticipos de inscripción']['Efectivo $'] += $pago->amount; 
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Efectivo $'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo $'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] += $pago->amount;
 							$totalFormasPago['Efectivo $']['monto'] += $pago->amount;
 							$totalFormasPago['Efectivo $']['montoBs'] += round($pago->amount * $pago->bill->tasa_cambio, 2);
@@ -557,7 +561,7 @@ class TurnsController extends AppController
 						if ($pago->bill->tipo_documento == "Factura")
 						{
 							$vectorTotalesRecibidos['Facturas']['Efectivo €'] += $pago->amount;
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Efectivo €'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo €'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] += $pago->amount; 
 							$totalFormasPago['Efectivo €']['monto'] += $pago->amount;
 							$totalFormasPago['Efectivo €']['montoBs'] += round($pago->amount * $pago->bill->tasa_euro, 2);
@@ -566,7 +570,7 @@ class TurnsController extends AppController
 						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
 						{
 							$vectorTotalesRecibidos['Anticipos de inscripción']['Efectivo €'] += $pago->amount; 
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Efectivo €'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo €'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] += $pago->amount;
 							$totalFormasPago['Efectivo €']['monto'] += $pago->amount;
 							$totalFormasPago['Efectivo €']['montoBs'] += round($pago->amount * $pago->bill->tasa_euro, 2);
@@ -581,7 +585,7 @@ class TurnsController extends AppController
 						if ($pago->bill->tipo_documento == "Factura")
 						{
 							$vectorTotalesRecibidos['Facturas']['Efectivo Bs.'] += $pago->amount;
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Efectivo Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo Bs.'] += $pago->amount; 
 							$totalFormasPago['Efectivo Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['Efectivo Bs.']['montoBs'] += $pago->amount;
@@ -590,7 +594,7 @@ class TurnsController extends AppController
 						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
 						{
 							$vectorTotalesRecibidos['Anticipos de inscripción']['Efectivo Bs.'] += $pago->amount; 
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Efectivo Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo Bs.'] += $pago->amount;
 							$totalFormasPago['Efectivo Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['Efectivo Bs.']['montoBs'] += $pago->amount;
@@ -605,7 +609,7 @@ class TurnsController extends AppController
 						if ($pago->bill->tipo_documento == "Factura")
 						{
 							$vectorTotalesRecibidos['Facturas']['TDB/TDC Bs.'] += $pago->amount;
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['TDB/TDC Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['TDB/TDC Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['TDB/TDC Bs.'] += $pago->amount; 
 							$totalFormasPago['TDB/TDC Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['TDB/TDC Bs.']['montoBs'] += $pago->amount;
@@ -614,7 +618,7 @@ class TurnsController extends AppController
 						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
 						{
 							$vectorTotalesRecibidos['Anticipos de inscripción']['TDB/TDC Bs.'] += $pago->amount; 
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['TDB/TDC Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['TDB/TDC Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['TDB/TDC Bs.'] += $pago->amount;
 							$totalFormasPago['TDB/TDC Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['TDB/TDC Bs.']['montoBs'] += $pago->amount;
@@ -629,7 +633,7 @@ class TurnsController extends AppController
 						if ($pago->bill->tipo_documento == "Factura")
 						{
 							$vectorTotalesRecibidos['Facturas']['TDB/TDC Bs.'] += $pago->amount;
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['TDB/TDC Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['TDB/TDC Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['TDB/TDC Bs.'] += $pago->amount; 
 							$totalFormasPago['TDB/TDC Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['TDB/TDC Bs.']['montoBs'] += $pago->amount;
@@ -638,7 +642,7 @@ class TurnsController extends AppController
 						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
 						{
 							$vectorTotalesRecibidos['Anticipos de inscripción']['TDB/TDC Bs.'] += $pago->amount; 
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['TDB/TDC Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['TDB/TDC Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['TDB/TDC Bs.'] += $pago->amount;
 							$totalFormasPago['TDB/TDC Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['TDB/TDC Bs.']['montoBs'] += $pago->amount;
@@ -653,7 +657,7 @@ class TurnsController extends AppController
 						if ($pago->bill->tipo_documento == "Factura")
 						{
 							$vectorTotalesRecibidos['Facturas']['Zelle $'] += $pago->amount;
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Zelle $'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Zelle $'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Zelle $'] += $pago->amount; 
 							$totalFormasPago['Zelle $']['monto'] += $pago->amount;
 							$totalFormasPago['Zelle $']['montoBs'] += round($pago->amount * $pago->bill->tasa_cambio, 2);
@@ -662,7 +666,7 @@ class TurnsController extends AppController
 						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
 						{
 							$vectorTotalesRecibidos['Anticipos de inscripción']['Zelle $'] += $pago->amount; 
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Zelle $'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Zelle $'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Zelle $'] += $pago->amount;
 							$totalFormasPago['Zelle $']['monto'] += $pago->amount;
 							$totalFormasPago['Zelle $']['montoBs'] += round($pago->amount * $pago->bill->tasa_cambio, 2);
@@ -677,7 +681,7 @@ class TurnsController extends AppController
 						if ($pago->bill->tipo_documento == "Factura")
 						{
 							$vectorTotalesRecibidos['Facturas']['Euros €'] += $pago->amount;
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Euros €'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Euros €'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Euros €'] += $pago->amount; 
 							$totalFormasPago['Euros €']['monto'] += $pago->amount;
 							$totalFormasPago['Euros €']['montoBs'] += round($pago->amount * $pago->bill->tasa_euro, 2);
@@ -686,7 +690,7 @@ class TurnsController extends AppController
 						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
 						{
 							$vectorTotalesRecibidos['Anticipos de inscripción']['Euros €'] += $pago->amount; 
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Euros €'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Euros €'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Euros €'] += $pago->amount;
 							$totalFormasPago['Euros €']['monto'] += $pago->amount;
 							$totalFormasPago['Euros €']['montoBs'] += round($pago->amount * $pago->bill->tasa_euro, 2);
@@ -701,7 +705,7 @@ class TurnsController extends AppController
 						if ($pago->bill->tipo_documento == "Factura")
 						{
 							$vectorTotalesRecibidos['Facturas']['Transferencia Bs.'] += $pago->amount;
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Transferencia Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Transferencia Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Transferencia Bs.'] += $pago->amount; 
 							$totalFormasPago['Transferencia Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['Transferencia Bs.']['montoBs'] += $pago->amount;
@@ -710,7 +714,7 @@ class TurnsController extends AppController
 						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
 						{
 							$vectorTotalesRecibidos['Anticipos de inscripción']['Transferencia Bs.'] += $pago->amount; 
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Transferencia Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Transferencia Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Transferencia Bs.'] += $pago->amount;
 							$totalFormasPago['Transferencia Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['Transferencia Bs.']['montoBs'] += $pago->amount;
@@ -725,7 +729,7 @@ class TurnsController extends AppController
 						if ($pago->bill->tipo_documento == "Factura")
 						{
 							$vectorTotalesRecibidos['Facturas']['Depósito Bs.'] += $pago->amount;
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Depósito Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Depósito Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Depósito Bs.'] += $pago->amount; 
 							$totalFormasPago['Depósito Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['Depósito Bs.']['montoBs'] += $pago->amount;
@@ -734,7 +738,7 @@ class TurnsController extends AppController
 						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
 						{
 							$vectorTotalesRecibidos['Anticipos de inscripción']['Depósito Bs.'] += $pago->amount; 
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Depósito Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Depósito Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Depósito Bs.'] += $pago->amount;
 							$totalFormasPago['Depósito Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['Depósito Bs.']['montoBs'] += $pago->amount;
@@ -749,7 +753,7 @@ class TurnsController extends AppController
 						if ($pago->bill->tipo_documento == "Factura")
 						{
 							$vectorTotalesRecibidos['Facturas']['Cheque Bs.'] += $pago->amount;
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Cheque Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Cheque Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Cheque Bs.'] += $pago->amount; 
 							$totalFormasPago['Cheque Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['Cheque Bs.']['montoBs'] += $pago->amount;
@@ -758,7 +762,7 @@ class TurnsController extends AppController
 						elseif ($pago->bill->tipo_documento == "Recibo de anticipo")
 						{
 							$vectorTotalesRecibidos['Anticipos de inscripción']['Cheque Bs.'] += $pago->amount; 
-							$vectorTotalesRecibidos['Total facturas + anticipos de inscripción']['Cheque Bs.'] += $pago->amount;
+							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Cheque Bs.'] += $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Cheque Bs.'] += $pago->amount;
 							$totalFormasPago['Cheque Bs.']['monto'] += $pago->amount;
 							$totalFormasPago['Cheque Bs.']['montoBs'] += $pago->amount;
@@ -1274,8 +1278,9 @@ class TurnsController extends AppController
 	{
 		$renglonTotal = 
 			['Facturas',
+			'Notas de crédito',
 			'Anticipos de inscripción',
-			'Total facturas + anticipos de inscripción',
+			'Total facturas - notas de crédito + anticipos de inscripción',
 			'Menos reintegros',
 			'Menos compras',
 			'Menos sobrantes (vueltos pendientes por entregar)',
