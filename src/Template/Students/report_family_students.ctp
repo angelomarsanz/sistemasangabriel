@@ -99,19 +99,7 @@
 								<th></th>
 								<th></th>
 							</tr>
-							<?php if ($filtersReport == 'Regular' || $filtersReport == '*'): ?>
-								<?php if ($orderReport == "Familia"): ?>
-									<tr>
-										<th></th>
-										<th><?= 'Total familias en este período: ' . $contadorFamilias ?></th>
-									</tr>
-								<?php endif; ?>
-								<tr>
-									<th></th>
-									<th><?= 'Alumnos regulares inscritos para este período: ' . $accountRegularRegistration ?></th>
-								</tr>
-							<?php endif; ?>
-							<?php if ($filtersReport == 'Nuevo' || $filtersReport == '*'): ?>
+							<?php if ($filtersReport == 'Nuevos'): ?>
 								<?php if ($orderReport == "Familia"): ?>
 									<tr>
 										<th></th>
@@ -122,8 +110,57 @@
 									<th></th>
 									<th><?= 'Alumnos nuevos inscritos para este período: ' . $accountNewRegistration ?></th>
 								</tr>
-							<?php endif; ?>
-							<?php if ($filtersReport == '*'): ?>
+							<?php elseif ($filtersReport == 'Regulares'): ?>
+								<?php if ($orderReport == "Familia"): ?>
+									<tr>
+										<th></th>
+										<th><?= 'Total familias en este período: ' . $contadorFamilias ?></th>
+									</tr>
+								<?php endif; ?>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos regulares inscritos para este período: ' . $accountRegularRegistration ?></th>
+								</tr>
+							<?php elseif ($filtersReport == 'Nuevos y regulares'): ?>
+								<?php if ($orderReport == "Familia"): ?>
+									<tr>
+										<th></th>
+										<th><?= 'Total familias nuevas y regulares en este período: ' . $contadorFamilias ?></th>
+									</tr>
+								<?php endif; ?>
+								<?php $nuevosMasRegulares = $accountNewRegistration + $accountRegularRegistration; ?>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos nuevos inscritos para este período: ' . $accountNewRegistration ?></th>
+								</tr>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos regulares inscritos para este período: ' . $accountRegularRegistration ?></th>
+								</tr>
+								<tr>
+									<th></th>
+									<th><?= 'Total alumnos: ' . $nuevosMasRegulares ?></th>
+								</tr>
+							<?php elseif ($filtersReport == 'Nuevos próximo año escolar'): ?>
+								<?php if ($orderReport == "Familia"): ?>
+									<tr>
+										<th></th>
+										<th><?= 'Total familias nuevas para el próximo año escolar: ' . $contadorFamilias ?></th>
+									</tr>
+								<?php endif; ?>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos nuevos inscritos para el próximo año escolar: ' . $accountNewRegistration ?></th>
+								</tr>
+							<?php else: ?>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos nuevos inscritos para este período: ' . $accountNewRegistration ?></th>
+								</tr>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos regulares inscritos para este período: ' . $accountRegularRegistration ?></th>
+								</tr>
 								<tr>
 									<th></th>
 									<th><?= 'Alumnos egresados: ' . $accountStudents['Graduated'] ?></th>

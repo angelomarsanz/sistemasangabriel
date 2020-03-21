@@ -298,11 +298,19 @@ class StudentsTable extends Table
     }
     public function findFamily(Query $query, array $options)
     {
-		if ($options['filtersReport'] == 'Regular') 
+		if ($options['filtersReport'] == 'Nuevos')
+		{
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 1]];
+		}
+		elseif ($options['filtersReport'] == 'Regulares') 
 		{
 			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 0]];
 		}
-		elseif ($options['filtersReport'] == 'Nuevo')
+		elseif ($options['filtersReport'] == 'Nuevos y regulares')
+		{
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular']];
+		}
+		elseif ($options['filtersReport'] == 'Nuevos próximo año escolar')
 		{
 			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 1]];
 		}
