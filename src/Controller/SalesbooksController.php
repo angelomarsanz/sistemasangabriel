@@ -159,97 +159,41 @@ class SalesbooksController extends AppController
             $invoicesBills = $bills->indexBills($_POST['month'], $_POST['year']);
 
             $contador = 0;
+			
+			$facturaAnterior = 0;
+			$contadorControlFacturas = 0;
 
 			foreach ($invoicesBills as $invoicesBill)
 			{
-				$salesbook = $this->Salesbooks->newEntity();
-				
-				if ($invoicesBill->date_and_time->day < 10)
+				if ($contador == 0)
 				{
-					$dia = "0" . $invoicesBill->date_and_time->day;
+					$facturaAnterior = $invoicesBill->control_number;
 				}
 				else
 				{
-					$dia = $invoicesBill->date_and_time->day;
-				}
-						
-				if ($invoicesBill->date_and_time->month < 10)
-				{
-					$mes = "0" . $invoicesBill->date_and_time->month;
-				}
-				else
-				{
-					$mes = $invoicesBill->date_and_time->month;
-				}		
-						
-				$salesbook->fecha = $dia . '/' . $mes . '/' . $invoicesBill->date_and_time->year . ' ';
-				
-				$salesbook->tipo_documento = "Fact";
-				
-				$this->loadModel('Bills');
-				
-				if ($invoicesBill->tipo_documento == "Factura")
-				{
-					$salesbook->numero_factura = $invoicesBill->bill_number;
-					$salesbook->nota_debito = "";
-					$salesbook->nota_credito = "";
-					$salesbook->factura_afectada = "";
-				}
-				elseif ($invoicesBill->tipo_documento == "Nota de débito")
-				{
-					$salesbook->numero_factura = "";
-					$salesbook->nota_debito = $invoicesBill->bill_number;
-					$salesbook->nota_credito = "";
-										
-					$facturaAfectada = $this->Bills->get($invoicesBill->id_documento_padre);					
-					$salesbook->factura_afectada = $facturaAfectada->bill_number;
-				}				
-				else
-				{
-					$salesbook->numero_factura = "";
-					$salesbook->nota_debito = "";
-					$salesbook->nota_credito = $invoicesBill->bill_number;
-										
-					$facturaAfectada = $this->Bills->get($invoicesBill->id_documento_padre);					
-					$salesbook->factura_afectada = $facturaAfectada->bill_number;
-				}								
-				
-				$salesbook->numero_control = $invoicesBill->control_number;
-								
-				if ($invoicesBill->annulled == false )
-				{
-					$salesbook->cedula_rif = $invoicesBill->identification;
-					$salesbook->nombre_razon_social = $invoicesBill->client;
-					
-					if ($invoicesBill->tipo_documento == "Nota de crédito")
-					{
-						$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid * -1;
-						$salesbook->ventas_exoneradas = $invoicesBill->amount_paid * -1;
+					$contadorControlFacturas = $invoicesBill->control_number - $facturaAnterior;
+					if ($contadorControlFacturas > 1)
+					{						
+						while ($contadorControlFacturas > 1)
+						{
+							$facturaAnterior++;
+							$codigoRetorno = $this->crearRegistroLibro($invoicesBill, $facturaAnterior);
+							if ($codigoRetorno == 1)
+							{
+								$errorBill = 1;
+								break;
+							}
+							$contadorControlFacturas--;
+						}
 					}
-					else
+					$codigoRetorno = $this->crearRegistroLibro($invoicesBill, 0);
+					if ($codigoRetorno == 1)
 					{
-						$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid;
-						$salesbook->ventas_exoneradas = $invoicesBill->amount_paid;
+						$errorBill = 1;
+						break;
 					}
+					$facturaAnterior = $invoicesBill->control_number;
 				}
-				else
-				{
-					$salesbook->cedula_rif = "";
-					$salesbook->nombre_razon_social = "ANULADA";
-					$salesbook->total_ventas_mas_impuesto = 0;
-					$salesbook->ventas_exoneradas = 0;
-				}        
-				$salesbook->base = "";
-				$salesbook->alicuota = "16%";
-				$salesbook->iva = 0;
-
-				if (!($this->Salesbooks->save($salesbook))) 
-				{
-					$this->Flash->error(__('La factura: ' . $invoicesBill->bill_number . ' no pudo ser grabada en el libro de ventas'));
-					$errorBill = 1;
-					break;
-				}
-							
 				$contador++;
 			}
 
@@ -265,6 +209,116 @@ class SalesbooksController extends AppController
             }
 		}
     }
+	
+	public function crearRegistroLibro($invoicesBill = null, $controlSinFactura = null)
+	{
+		$codigoRetorno = 0;
+		
+		$salesbook = $this->Salesbooks->newEntity();
+		
+		if ($invoicesBill->date_and_time->day < 10)
+		{
+			$dia = "0" . $invoicesBill->date_and_time->day;
+		}
+		else
+		{
+			$dia = $invoicesBill->date_and_time->day;
+		}
+				
+		if ($invoicesBill->date_and_time->month < 10)
+		{
+			$mes = "0" . $invoicesBill->date_and_time->month;
+		}
+		else
+		{
+			$mes = $invoicesBill->date_and_time->month;
+		}		
+				
+		$salesbook->fecha = $dia . '/' . $mes . '/' . $invoicesBill->date_and_time->year . ' ';
+		
+		$salesbook->tipo_documento = "Fact";
+		
+		$this->loadModel('Bills');
+		
+		if ($controlSinFactura > 0)
+		{
+			$salesbook->numero_factura = "Sin número";
+			$salesbook->nota_debito = "";
+			$salesbook->nota_credito = "";
+			$salesbook->factura_afectada = "";
+			$salesbook->numero_control = $controlSinFactura;			
+		}
+		elseif ($invoicesBill->tipo_documento == "Factura")
+		{
+			$salesbook->numero_factura = $invoicesBill->bill_number;
+			$salesbook->nota_debito = "";
+			$salesbook->nota_credito = "";
+			$salesbook->factura_afectada = "";
+			$salesbook->numero_control = $invoicesBill->control_number;
+		}
+		elseif ($invoicesBill->tipo_documento == "Nota de débito")
+		{
+			$salesbook->numero_factura = "";
+			$salesbook->nota_debito = $invoicesBill->bill_number;
+			$salesbook->nota_credito = "";
+								
+			$facturaAfectada = $this->Bills->get($invoicesBill->id_documento_padre);					
+			$salesbook->factura_afectada = $facturaAfectada->bill_number;
+			$salesbook->numero_control = $invoicesBill->control_number;
+		}				
+		else
+		{
+			$salesbook->numero_factura = "";
+			$salesbook->nota_debito = "";
+			$salesbook->nota_credito = $invoicesBill->bill_number;
+								
+			$facturaAfectada = $this->Bills->get($invoicesBill->id_documento_padre);					
+			$salesbook->factura_afectada = $facturaAfectada->bill_number;
+			$salesbook->numero_control = $invoicesBill->control_number;
+		}		
+
+		if ($controlSinFactura > 0)
+		{
+			$salesbook->cedula_rif = "";
+			$salesbook->nombre_razon_social = "ANULADA";
+			$salesbook->total_ventas_mas_impuesto = 0;
+			$salesbook->ventas_exoneradas = 0;
+		}        				
+		elseif ($invoicesBill->annulled == false )
+		{
+			$salesbook->cedula_rif = $invoicesBill->identification;
+			$salesbook->nombre_razon_social = $invoicesBill->client;
+			
+			if ($invoicesBill->tipo_documento == "Nota de crédito")
+			{
+				$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid * -1;
+				$salesbook->ventas_exoneradas = $invoicesBill->amount_paid * -1;
+			}
+			else
+			{
+				$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid;
+				$salesbook->ventas_exoneradas = $invoicesBill->amount_paid;
+			}
+		}
+		else
+		{
+			$salesbook->cedula_rif = "";
+			$salesbook->nombre_razon_social = "ANULADA";
+			$salesbook->total_ventas_mas_impuesto = 0;
+			$salesbook->ventas_exoneradas = 0;
+		}        
+		
+		$salesbook->base = "";
+		$salesbook->alicuota = "16%";
+		$salesbook->iva = 0;
+
+		if (!($this->Salesbooks->save($salesbook))) 
+		{
+			$this->Flash->error(__('La factura: ' . $invoicesBill->bill_number . ' no pudo ser grabada en el libro de ventas'));
+			$codigoRetorno = 1;
+		}
+		return $codigoRetorno;
+	}
     
     public function downloadBook()
     {
