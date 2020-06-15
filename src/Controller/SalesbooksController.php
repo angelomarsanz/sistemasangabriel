@@ -169,31 +169,28 @@ class SalesbooksController extends AppController
 				{
 					$facturaAnterior = $invoicesBill->control_number;
 				}
-				else
-				{
-					$contadorControlFacturas = $invoicesBill->control_number - $facturaAnterior;
-					if ($contadorControlFacturas > 1)
-					{						
-						while ($contadorControlFacturas > 1)
-						{
-							$facturaAnterior++;
-							$codigoRetorno = $this->crearRegistroLibro($invoicesBill, $facturaAnterior);
-							if ($codigoRetorno == 1)
-							{
-								$errorBill = 1;
-								break;
-							}
-							$contadorControlFacturas--;
-						}
-					}
-					$codigoRetorno = $this->crearRegistroLibro($invoicesBill, 0);
-					if ($codigoRetorno == 1)
+				$contadorControlFacturas = $invoicesBill->control_number - $facturaAnterior;
+				if ($contadorControlFacturas > 1)
+				{						
+					while ($contadorControlFacturas > 1)
 					{
-						$errorBill = 1;
-						break;
+						$facturaAnterior++;
+						$codigoRetorno = $this->crearRegistroLibro($invoicesBill, $facturaAnterior);
+						if ($codigoRetorno == 1)
+						{
+							$errorBill = 1;
+							break;
+						}
+						$contadorControlFacturas--;
 					}
-					$facturaAnterior = $invoicesBill->control_number;
 				}
+				$codigoRetorno = $this->crearRegistroLibro($invoicesBill, 0);
+				if ($codigoRetorno == 1)
+				{
+					$errorBill = 1;
+					break;
+				}
+				$facturaAnterior = $invoicesBill->control_number;				
 				$contador++;
 			}
 

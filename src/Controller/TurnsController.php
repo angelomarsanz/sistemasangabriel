@@ -437,11 +437,118 @@ class TurnsController extends AppController
 					}
 					elseif ($factura->tipo_documento == "Nota de crédito")
 					{
-						$indicadorNotasCredito = 1;
 						$montoDolarNC = round($factura->amount_paid / $factura->tasa_cambio, 2);
-						$vectorTotalesRecibidos['Notas de crédito']['Efectivo $'] -= $montoDolarNC;
-						$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo $'] -= $montoDolarNC;
-						$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] -= $montoDolarNC;
+												
+						$facturaOriginalNC = $this->Bills->get($factura->id_documento_padre);
+						
+						$montoDolarFacturaOriginal = round($facturaOriginalNC->amount_paid / $facturaOriginalNC->tasa_cambio, 2);
+		
+						$porcentajeFacturaOriginalNC = $montoDolarNC / $montoDolarFacturaOriginal;
+															
+						$pagosFacturaOriginal = $payment->busquedaPagosFactura($factura->id_documento_padre);
+						
+						$codigoRetornoPagos = $pagosFacturaOriginal['codigoRetorno'];
+						
+						if ($codigoRetornoPagos == 0)
+						{
+							$pagosOriginal = $pagosFacturaOriginal['pagosFactura'];	
+							foreach ($pagosOriginal as $pagoOriginal)
+							{
+								switch ($pagoOriginal->payment_type) 
+								{
+									case "Efectivo":
+										if ($pagoOriginal->moneda == "$")
+										{
+											$porcentajePagoIndividual = round($pagoOriginal->amount * $porcentajeFacturaOriginalNC, 2);
+											$vectorTotalesRecibidos['Notas de crédito']['Efectivo $'] += $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo $'] -= $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo $'] -= $porcentajePagoIndividual;
+										}
+										elseif ($pagoOriginal->moneda == "€")
+										{
+											$porcentajePagoIndividual = round($pagoOriginal->amount * $porcentajeFacturaOriginalNC, 2);
+											$vectorTotalesRecibidos['Notas de crédito']['Efectivo €'] += $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo €'] -= $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] -= $porcentajePagoIndividual;
+										}
+										else
+										{
+											$montoDolarPagoOriginal = round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);
+											$montoBolivaresPagoOriginalActualizado = round($montoDolarPagoOriginal * $factura->tasa_cambio, 2);											
+											$porcentajePagoIndividual = round($montoBolivaresPagoOriginalActualizado * $porcentajeFacturaOriginalNC, 2);
+											$vectorTotalesRecibidos['Notas de crédito']['Efectivo Bs.'] += $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Efectivo Bs.'] -= $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo Bs.'] -= $porcentajePagoIndividual;											
+										}										
+										break;
+									case "Transferencia":
+										if ($pagoOriginal->bank == "Zelle")
+										{
+											$porcentajePagoIndividual = round($pagoOriginal->amount * $porcentajeFacturaOriginalNC, 2);
+											$vectorTotalesRecibidos['Notas de crédito']['Zelle $'] += $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Zelle $'] -= $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Zelle $'] -= $porcentajePagoIndividual;
+										}
+										elseif ($pagoOriginal->bank == "Euros")
+										{
+											$porcentajePagoIndividual = round($pagoOriginal->amount * $porcentajeFacturaOriginalNC, 2);
+											$vectorTotalesRecibidos['Notas de crédito']['Euros €'] += $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Euros €'] -= $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Euros €'] -= $porcentajePagoIndividual;
+										}
+										else
+										{
+											$montoDolarPagoOriginal = round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);
+											$montoBolivaresPagoOriginalActualizado = round($montoDolarPagoOriginal * $factura->tasa_cambio, 2);											
+											$porcentajePagoIndividual = round($montoBolivaresPagoOriginalActualizado * $porcentajeFacturaOriginalNC, 2);
+											$vectorTotalesRecibidos['Notas de crédito']['Transferencia Bs.'] += $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Transferencia Bs.'] -= $porcentajePagoIndividual;
+											$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Transferencia Bs.'] -= $porcentajePagoIndividual;											
+										}										
+										break;
+									case "Tarjeta de débito":
+										$montoDolarPagoOriginal = round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);
+										$montoBolivaresPagoOriginalActualizado = round($montoDolarPagoOriginal * $factura->tasa_cambio, 2);											
+										$porcentajePagoIndividual = round($montoBolivaresPagoOriginalActualizado * $porcentajeFacturaOriginalNC, 2);
+										$vectorTotalesRecibidos['Notas de crédito']['TDB/TDC Bs.'] += $porcentajePagoIndividual;
+										$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['TDB/TDC Bs.'] -= $porcentajePagoIndividual;
+										$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['TDB/TDC Bs.'] -= $porcentajePagoIndividual;											
+										break;
+									case "Tarjeta de crédito":
+										$montoDolarPagoOriginal = round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);
+										$montoBolivaresPagoOriginalActualizado = round($montoDolarPagoOriginal * $factura->tasa_cambio, 2);											
+										$porcentajePagoIndividual = round($montoBolivaresPagoOriginalActualizado * $porcentajeFacturaOriginalNC, 2);
+										$vectorTotalesRecibidos['Notas de crédito']['TDB/TDC Bs.'] += $porcentajePagoIndividual;
+										$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['TDB/TDC Bs.'] -= $porcentajePagoIndividual;
+										$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['TDB/TDC Bs.'] -= $porcentajePagoIndividual;											
+										break;
+									case "Depósito":
+										$montoDolarPagoOriginal = round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);
+										$montoBolivaresPagoOriginalActualizado = round($montoDolarPagoOriginal * $factura->tasa_cambio, 2);											
+										$porcentajePagoIndividual = round($montoBolivaresPagoOriginalActualizado * $porcentajeFacturaOriginalNC, 2);
+										$vectorTotalesRecibidos['Notas de crédito']['Depósito Bs.'] += $porcentajePagoIndividual;
+										$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Depósito Bs.'] -= $porcentajePagoIndividual;
+										$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Depósito Bs.'] -= $porcentajePagoIndividual;											
+										break;
+									case "Cheque":
+										$montoDolarPagoOriginal = round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);
+										$montoBolivaresPagoOriginalActualizado = round($montoDolarPagoOriginal * $factura->tasa_cambio, 2);											
+										$porcentajePagoIndividual = round($montoBolivaresPagoOriginalActualizado * $porcentajeFacturaOriginalNC, 2);
+										$vectorTotalesRecibidos['Notas de crédito']['Cheque Bs.'] += $porcentajePagoIndividual;
+										$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Cheque Bs.'] -= $porcentajePagoIndividual;
+										$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Cheque Bs.'] -= $porcentajePagoIndividual;											
+										break;
+									default:
+										break;
+								}
+							}
+						}
+						else
+						{
+							$this->Flash->error(__('No se encontraron pagos para la factura original con ID ' . $factura->id_documento_padre));
+						}
+						
+						$indicadorNotasCredito = 1;
 					}
 					elseif ($factura->tipo_documento == "Nota de débito")
 					{
@@ -1697,9 +1804,9 @@ class TurnsController extends AppController
 		foreach ($facturas as $factura)
 		{
 			foreach ($pagosFacturas as $pago)
-			{
+			{				
 				if ($factura->id == $pago->bill->id)
-				{
+				{		
 					if ($factura->moneda_id == 1)
 					{
 						$montoFacturaBolivares = $factura->amount_paid;
@@ -1786,10 +1893,6 @@ class TurnsController extends AppController
 						$vectorPagos[$contador]['chequeBolivar'] += $pago->amount;
 					}
 					$contador++;
-				}
-				elseif ($factura->id < $pago->bill->id)
-				{
-					break;
 				}
 			}
 		}
