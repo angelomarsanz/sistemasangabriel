@@ -351,8 +351,8 @@ class StudentsController extends AppController
             $student->parentsandguardian_id = $idParentsandguardians;
             $student->code_for_user = " ";
             $student->school_card = " ";
-            $student->profile_photo = " ";
-            $student->profile_photo_dir = " ";
+            $student->profile_photo = "";
+            $student->profile_photo_dir = "";
             $student->section_id = 1;
             $student->student_condition = "Regular";
             $student->scholarship = 0;
@@ -665,17 +665,28 @@ class StudentsController extends AppController
 
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
-            $student = $this->Students->patchEntity($student, $this->request->data);
-            if ($this->Students->save($student)) 
-            {
-                $this->Flash->success(__('La foto fue guardada exitosamente'));
+			$student = $this->Students->patchEntity($student, $this->request->data);
 
-                return $this->redirect(['action' => 'index']);
-            }
-            else 
-            {
-                $this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
-            }
+			$archivoFoto = $student->profile_photo;
+			$extensionFoto = substr(strtolower(strrchr($archivoFoto['name'], '.')), 1);
+			$extensiones_permitidas = array('jpg', 'jpeg', 'gif', 'png');
+					
+			if (in_array($extensionFoto, $extensiones_permitidas))
+			{
+				if ($this->Students->save($student)) 
+				{
+					$this->Flash->success(__('La foto fue guardada exitosamente'));
+					return $this->redirect(['action' => 'index']);
+				}
+				else 
+				{
+					$this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
+				}
+			}
+			else
+			{
+				$this->Flash->error(__('Estimado representante, la foto debe tener alguna de estas extensiones: jpg, jpeg, gif o png'));
+			}
         }    
         $this->set(compact('student', 'parentsandguardian', 'profilePhoto'));
         $this->set('_serialize', ['student', 'parentsandguardian', 'profilePhoto']);
@@ -692,8 +703,8 @@ class StudentsController extends AppController
             $student->user_id = 4;
             $student->code_for_user = " ";
             $student->school_card = " ";
-            $student->profile_photo = " ";
-            $student->profile_photo_dir = " ";
+            $student->profile_photo = "";
+            $student->profile_photo_dir = "";
             $student->section_id = 1;
             $student->student_condition = "Regular";
             $student->scholarship = 0;
@@ -1474,11 +1485,13 @@ class StudentsController extends AppController
 
         $school = $this->Schools->get(2);
 		
+		$currentDate = Time::now();
+		
 		$currentYearRegistration = $school->current_year_registration;
 		
         $student = $this->Students->get($id);
 		
-		if ($student->profile_photo != "" && $student->profile_photo != "Sin foto")
+		if ($student->profile_photo != "" && $student->profile_photo != " " && $student->profile_photo != "Sin foto")
 		{
 			$brothers = $this->Students->find('all')->where(['parentsandguardian_id' => $student->parentsandguardian_id, 'id !=' => $id]);
 
@@ -1511,8 +1524,8 @@ class StudentsController extends AppController
 			
 			return $this->redirect(['controller' => 'Students', 'action' => 'index']);	
 		}
-		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration'));
-		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration']);
+		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate'));
+		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate']);
     }
     
     public function cardboardpdf($id = null)

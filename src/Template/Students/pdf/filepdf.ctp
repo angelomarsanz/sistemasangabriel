@@ -8,7 +8,7 @@
 <div style="width: 100%;">
     <div style="width: 80%; float: left;">
         <h3 style="text-align: center;">Unidad Educativa Colegio "San Gabriel Arcángel"</h3>
-        <p style="text-align: center;line-height: 5px;">Valencia, Estado Carabobo</p>
+        <p style="text-align: center;line-height: 5px;">Valencia, <?= $currentDate->format('d/m/Y'); ?></p>
 		<?php if ($student->number_of_brothers > $currentYearRegistration): ?>
 			<?php $currentYear = $student->number_of_brothers; ?>
 		<?php else: ?>
