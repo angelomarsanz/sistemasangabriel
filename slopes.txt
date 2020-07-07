@@ -1,10 +1,6 @@
 --
 En febrero se debe considerar nuevo año escolar para la planilla
 --
-
-
-Emi u.esangabriel.rrhh@gmail.com
-
 Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar descuento
 
 ---
@@ -30,31 +26,7 @@ En septiembre cuando comienza el período escolar se debe actualizar el campo
 current_school_year de la tabla Shools con el año del nuevo perìodo escolar. Se
 debe hacer en el proceso de asignar seccion (Pendiente)
 
----
-
-Girardo Brayan - Reporte de mensualidades - no aparece aun asignándole la sección
-
----
-
 En el reporte de familias con 3, 4 ó más hijos ignorar a los que no se inscribieron en el año escolar en curso
-
-Colocar estatus de egresado a alumnos (lo revise con lorelys y son alumnos que pagaron año completo)
-Alvarado Castejón
-Avanzo Sequeira
-García Iannino
-Pumar Eugenia
-Suárez Cabaña
-Tellez García
-
----
-
-Reportes maestro (minuta):
-Detalles Para Reporte:  
-Reporte Familias - Alumnos: agregar todos los campos: Mama, Papa, estatus... etc.
-
-Total de Familias -> Cambiar por Total de Datos
-Agregar Total Familias Activas
-Agregar Total Familias Inactivas
 
 Reportes Maestros:
 
@@ -64,56 +36,8 @@ Alumnos Retirados: Son aquellos que en el transcurso de su vida escolar se van d
 
 Eliminar memoria de selección en reportes maestros (Listo)
 
--- 
-
-Arreglo factura septiembre 2018
-1ra. Factura 06/09/2018 - 98278 (80519)
-Factura servicio educativo - 25/09/2018 98506 (Se le colocó el indicador de recibo)
-Siguiente factura 98507 se le asignó (80747)
-
-Facturas impresas incorrectamente:
-
-Factura 98676 - Control 80916 (Stuve)
-Factura 98676 - Control 80917 (Stuve)
-Factura 98677 - Control 80918 (Alemany) Anulada
-Factura 98677 - Control 80919 (Alemany) Anulada
-Factura 98678 - Control 80921 (Lamuño)
-Factura 98679 - Control 80920 (Hidalgo)
-Factura 98680 - Control 80922 (Alemany) 
-
-01/11/2018, No se imprimió la factura 
-99.359, se debe anular y refacturar
-
-99.358 - 81.600
-99.359 - 0
-99.360 - 81.601
-
-11/12/2018, no se imprimió la factura
-100.190, ya se anuló y refacturó
-el 14/12/2018
-
-100.189 - 82.430
-100.190 - 0
-100.191 - 82.431
-
-13/12/2018, No se imprimió la factura 
-100322, se debe anular y refacturar
-
-100.321 - 82.561
-100.322 - 0
-100.323 - 82.562
-
-Se anulò la factura 100594
-al 21/01/2019 estàn correctos los numeros
-de control en produccion
-
---- Salto lìneas factura
-
-Con solo Bs.S se dejan 20 líneas antes de imprimir la copia
-Con ambas monedas (Bs.F y Bs.S) se dejan 16 líneas 
-Con solo Bs.S y Descuento/Recargo se dejan 18 líneas
-
 ---
+
 Renovación inscripción
 
 Cuando vaya a iniciar la renovación de inscripción de alumnos 
@@ -152,63 +76,3 @@ cuando el padre actualice los datos
 Copiar Scholarship a becado_ano_anterior
 Copiar tipo_descuento a tipo_descuento_ano_anterior
 Copiar discount a descuento_ano_anterior
-
--------
-Arreglo campo "balance" en Students
-Estadísticas iniciales:
-
-1449 regs Students number_of_brothers
-- 2016 - 1210
-- 2017 - 160
-- 2018 - 79
-
-1208 regs Studenttransactions Matrícula 2016
-- 1 reg abonado > 0
-- 1207 regs abonado == 0
-
-1291 regs Studenttransactions Matrícula 2017
-- 1138 regs abonado > 0
-- 153 regs abonado == 0
-
-939 regs Studenttransactions Matrícula 2018
-- 900 reg abonado > 0
-- 39 regs abonado == 0
-
-Fase 1:
-1 - Quitar actualización campos "number_of_brothers" y "balance" en la
-acción "edit" de StudentController
-2 - Actualizar "balance" con el año que corresponda, cada vez que se haga un abono a cualquier transacción
-de tipo Matrícula
-3 - Después de actualizar "balance" en el paso 2, Si "number_of_brothers" == 0 entonces
-actualizar "number_of_brothers" con el valor de "balance" de lo contrario no actualizar.
-
-Fase 2:
-1 - Leer Students y asignar 0 a "balance" en todos los registros - 1449 regs - 1449 regs
-2 - Leer Studenttransactions, seleccionar Matrícula 2017 y abonado > 0 y
-actualizar y asignar 2017 a balance - 1138 regs - 1138 regs
-3 - Leer Studenttransactions, seleccionar Matrícula 2018 y abonado > 0 y
-actualizar y asignar 2018 a balance - 900 regs - 900 regs
-4 - De los registros con balance mayor a cero, verificar si hay alguno donde
-number_of_brothers sea mayor a "balance" (no debería haber) - 0 regs - 0 regs
-5 - Verificar cuantos registros quedaron con cero en balance que
-corresponden a:
-2016 - 203 regs - 203 regs
-2017 - 27 regs - 27 regs 
-2018 - 18 regs - 18 regs 
-6 - Emitir un reporte con los alumnos con condición "Regular" cuyo valor en
-el campo balance sea distinto de "2018" esos serán los que Lorelys
-debe hacerle seguimiento que deberían ser: 179 regs
-8 - Arreglar, reciclar o desincorporar el reporte "Alumnos egresados"
-
---- 
-
-En Students.defaulters.ctp revisar como se hace la
-selecciòn porque hay una diferencia de 4 alumnos
-en comparaciòn con "asignar secciòn" y "familias con tres hijos"
-
----
-
-Para las diferencias en dólares se inició el campo amount_dollar con 20 para todas aquellas
-mensualidades que tenían paid_out = 1 sin filtrar años ni meses.
-
----

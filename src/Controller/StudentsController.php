@@ -582,7 +582,7 @@ class StudentsController extends AppController
 					}
 					else
 					{
-						return $this->redirect(['action' => 'profilePhoto', $id]);
+						return $this->redirect(['action' => 'editPhoto', $id]);
 					}
 				}
 				else
@@ -1477,34 +1477,42 @@ class StudentsController extends AppController
 		$currentYearRegistration = $school->current_year_registration;
 		
         $student = $this->Students->get($id);
-        
-        $brothers = $this->Students->find('all')->where(['parentsandguardian_id' => $student->parentsandguardian_id, 'id !=' => $id]);
+		
+		if ($student->profile_photo != "" && $student->profile_photo != "Sin foto")
+		{
+			$brothers = $this->Students->find('all')->where(['parentsandguardian_id' => $student->parentsandguardian_id, 'id !=' => $id]);
 
-        $brothersArray = $brothers->toArray();
-        
-        $brothersPdf = [];
-        $account = 0;
-        
-        if ($brothersArray):
-            foreach ($brothersArray as $brothersArrays):
-                $brothersPdf[$account]['nameStudent'] = $brothersArrays['surname'] . ' ' . $brothersArrays['first_name'];
-                $brothersPdf[$account]['gradeStudent'] = $brothersArrays['level_of_study'];
-                $account++;
-            endforeach;
-        endif;
-        
-        $parentsandguardian = $this->Students->Parentsandguardians->get($student->parentsandguardian_id);
+			$brothersArray = $brothers->toArray();
+			
+			$brothersPdf = [];
+			$account = 0;
+			
+			if ($brothersArray):
+				foreach ($brothersArray as $brothersArrays):
+					$brothersPdf[$account]['nameStudent'] = $brothersArrays['surname'] . ' ' . $brothersArrays['first_name'];
+					$brothersPdf[$account]['gradeStudent'] = $brothersArrays['level_of_study'];
+					$account++;
+				endforeach;
+			endif;
+			
+			$parentsandguardian = $this->Students->Parentsandguardians->get($student->parentsandguardian_id);
 
-        $this->viewBuilder()
-            ->className('Dompdf.Pdf')
-            ->layout('default')
-            ->options(['config' => [
-                'filename' => $student->full_name,
-                'render' => 'download'
-            ]]);
-
-        $this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration'));
-        $this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration']);
+			$this->viewBuilder()
+				->className('Dompdf.Pdf')
+				->layout('default')
+				->options(['config' => [
+					'filename' => $student->full_name,
+					'render' => 'download'
+				]]);
+		}
+		else
+		{
+			$this->Flash->error(__('Estimado representante, antes de imprimir la ficha de inscripción debe subir una foto de perfil del estudiante'));
+			
+			return $this->redirect(['controller' => 'Students', 'action' => 'index']);	
+		}
+		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration'));
+		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration']);
     }
     
     public function cardboardpdf($id = null)

@@ -2914,7 +2914,7 @@
 										}
 									}									
 									else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
-										monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+										// monthlyPayment.substring(0, 14) == "Seguro escolar" ||
 										monthlyPayment.substring(0, 3) == "Ago")
 									{
 
@@ -2945,7 +2945,7 @@
 										}
 									}
 									else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
-										monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+										// monthlyPayment.substring(0, 14) == "Seguro escolar" ||
 										monthlyPayment.substring(0, 3) == "Ago")
 									{
 										insertRecord();

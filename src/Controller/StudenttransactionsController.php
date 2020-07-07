@@ -23,27 +23,27 @@ class StudenttransactionsController extends AppController
 		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
 		$transacciones = $transaccionesEstudiante->find()
-			->contain(['Students'])
-			->where(['Students.discount' => 50, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.payment_date >' => '2019-08-01 00:00:00', 'Studenttransactions.amount_dollar' => 45]);			
-			// ->where(['Students.discount' => 50, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.payment_date >' => '2019-05-01 00:00:00', 'Studenttransactions.payment_date <' => '2019-09-01 00:00:00', 'Studenttransactions.amount_dollar' => 30]);
-			//->where(['Students.discount' => 50, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.payment_date >' => '2018-10-01 00:00:00', 'Studenttransactions.payment_date <' => '2019-06-01 00:00:00', 'Studenttransactions.amount_dollar' => 20]);			
+			->where(['Studenttransactions.payment_date' => '2020-08-01 00:00:00']);			
 			$contadorBusqueda = $transacciones->count();
 		
 		$this->Flash->success(__('Total transacciones busqueda ' . $contadorBusqueda));
 		
 		foreach ($transacciones as $transaccion)
 		{
-			$transaccionGet = $this->Studenttransactions->get($transaccion->id);
+			if ($transaccion->amount_dollar == 22.5 || $transaccion->amount_dollar == 36)
+			{
+				$transaccionGet = $this->Studenttransactions->get($transaccion->id);
 						
-			$transaccionGet->amount_dollar = 23;
+				$transaccionGet->amount_dollar = 45;
 			
-			if (!($this->Studenttransactions->save($transaccionGet))) 
-			{
-                $this->Flash->error(__('La transacción con id ' . $transaccionGet->id . ' no pudo ser actualizada'));
-			}
-			else
-			{
-				$contadorTransacciones++;
+				if (!($this->Studenttransactions->save($transaccionGet))) 
+				{
+					$this->Flash->error(__('La transacción con id ' . $transaccionGet->id . ' no pudo ser actualizada'));
+				}
+				else
+				{
+					$contadorTransacciones++;
+				}
 			}
 		}
 		
@@ -63,13 +63,13 @@ class StudenttransactionsController extends AppController
 		
 		foreach ($excels as $excel)
 		{
-			$studenttransaction = $this->Studenttransactions->get($excel->report);
+			$studenttransaction = $this->Studenttransactions->get($excel->number);
 			
-			$studenttransaction->amount_dollar = $excel->start_end;
+			$studenttransaction->amount_dollar = $excel->col1;
 			
 			if (!($this->Studenttransactions->save($studenttransaction))) 
 			{
-                $this->Flash->error(__('La transacción no pudo ser guardada'));
+                $this->Flash->error(__('La transacción con ID ' . $excel->number . ' no pudo ser guardada'));
 			}
 			else
 			{

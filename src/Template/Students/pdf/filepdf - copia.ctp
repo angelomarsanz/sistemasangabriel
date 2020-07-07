@@ -34,7 +34,7 @@
 </div>
 <div style="clear:both; width: 100%;">
     <?php if ($student->new_student == 0): ?>
-        <p style="font-size: 25px;">Conceptos de pagos: Anticipo de matrícula 2020 y abono a agosto 2021.</p>
+        <p style="font-size: 25px;">Conceptos de pagos: Abono a matrícula 2020, abono a agosto 2021, seguro escolar y diferencia agosto 2020.</p>
     <?php endif; ?>    
     <p><b>Alumno:&nbsp;<?= $student->full_name ?></b></p>
 </div>
@@ -166,47 +166,40 @@
 <?php if ($student->new_student == 0): ?>
     <div class="saltopagina">
         <p><b>Nota importante:</b></p>
-        <p>Para garantizar la excelencia educativa y el servicio académico que caracteriza a nuestra institución, 
-		acepta estar de acuerdo con nuestros términos, especialmente en la parte correspondiente al compromiso del alumno y 
-		del representante, en su numeral doce (12), que textualmente dice: "Se acuerda que si durante el presente año 
-		escolar el Ministerio del Poder Popular para la Educación o el Ejecutivo Nacional a través de decreto, establezca un 
-		aumento salarial que obligue al colegio ante su personal docente, administrativo y obrero, dicho aumento será 
-		trasladado en forma directa a las mensualidades que cancele cada uno de sus representados".</p>
+        <p>En la parte correspondiente al compromiso del alumno y del representante, en su numeral doce (12), que textualmente
+        dice: "Se acuerda que si durante el presente año escolar el Ministerio del Poder Popular para la Educación o el Ejecutivo
+        Nacional a través de decreto, establezca un aumento salarial que obligue al colegio ante su personal docente, administrativo
+        y obrero, dicho aumento será trasladado en forma directa a las mensualidades que cancele cada uno de sus representados".</p>
         <p><b>Recaudos para la renovación de la matrícula:</b></p>
         <?php if (substr($student->level_of_study, 0, 11) == "Pre-escolar"): ?>
             <p>a) Fotocopia de la partida de nacimiento.</p>
-            <p>b) Fotografía tipo carnet reciente en digital, la misma debe adjuntarse en el formulario de actualización de datos. 
-			Tenga en cuenta que si no registra la fotografía en digital deberá entregar dos (2) fotos tipo carnet en físico y 
-			recientes del alumno, una deberá estar pegada en esta ficha de inscripción.</p>
+            <p>b) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
+            del alumno o la foto de perfil no sea visualice correctamente</p>
 			<p>c) Factura del mes de julio 2020</p>
         <?php elseif (substr($student->level_of_study, 0, 8) == "Primaria"): ?>
             <p>a) Fotocopia de la partida de nacimiento.</p>
             <p>b) Fotocopia de la cédula de identidad (de 5to. grado en adelante es indispensable por orden del M.P.P.E.).</p>
-            <p>c) Fotografía tipo carnet reciente en digital, la misma debe adjuntarse en el formulario de actualización de datos. 
-			Tenga en cuenta que si no registra la fotografía en digital deberá entregar dos (2) fotos tipo carnet en físico y 
-			recientes del alumno, una deberá estar pegada en esta ficha de inscripción.</p>
+            <p>c) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
+            del alumno o la foto de perfil no sea visualice correctamente</p>
 			<p>d) Factura del mes de julio 2020</p>
         <?php else: ?>
             <p>a) Fotocopia de la cédula de identidad del alumno vigente.</p>
-            <p>b) Fotografía tipo carnet reciente en digital, la misma debe adjuntarse en el formulario de actualización de datos. 
-			Tenga en cuenta que si no registra la fotografía en digital deberá entregar dos (2) fotos tipo carnet en físico y 
-			recientes del alumno, una deberá estar pegada en esta ficha de inscripción.</p>
+            <p>b) Dos fotos recientes del alumno. Una pegada en esta ficha, en caso de que la ficha no se imprima con la foto de perfil
+            del alumno o la foto de perfil no sea visualice correctamente</p>
 			<p>c) Factura del mes de julio 2020</p>
         <?php endif; ?>
 		
 		<div style="color: red; text-align: center;">
-			<h3>* Atención *</h3>
-			<p><b>Para contribuir con las medidas preventivas del COVID-19, los recaudos para la renovación de matrícula no serán 
-			obligatorios para formalizar el proceso de inscripción (temporalmente).</b></p> 
+			<h3>** Alerta **</h3>
+			<p><b>Por prevención del COVID-19 los recaudos para la renovación de matrícula no van a ser exigidos temporalmente para el proceso de inscripción.</b></p> 
         </div>
-		<p>Es importante que cumpla con el pago por concepto de Consejo Educativo (10 $ en efectivo).</p>
+		<p><b>Debe cancelar el concepto de Consejo Educativo (10 $ en efectivo).</b></p>
 		<p><b>Horario de inscripción:</b></p>
         <p>8:00 am - 12:00 m</p>
-        <p>El alumno estará formalmente inscrito al completar el registro (o actualización de datos) y cumplir con el pago 
-		de los anticipos indicados, por tanto debe:</p>
-        <p>- Actualizar en la plataforma web del Colegio (www.colegiosangabrielarcangel.com) en la sección "Actualización de datos y 
-		renovación de matrícula",  los cambios de residencia o números telefónicos durante el año escolar de ser necesario.</p>
-        <p>- Tenga en cuenta que si decide no continuar disfrutando de los servicios de nuestra institución, no se le podrá conceder 
-		el reintegro de los pagos realizados.</p>
+        <p><b>Sin excepción:</b></p>
+        <p>El alumno no se considera inscrito si no abona los derechos de renovación de matrícula</p>
+        <p>En el mes de septiembre no habrá inscripciones</p>
+        <p>- Actualizar en la página web del colegio los cambios de residencia o números telefónicos durante el año escolar.</p>
+        <p style="text-align: justify;"><b>- <u>Si decide no continuar en el colegio no tendrá derecho a que se le reintegre lo cancelado.</u></b></p>
     </div>
 <?php endif; ?>
