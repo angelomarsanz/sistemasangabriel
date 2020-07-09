@@ -2680,7 +2680,8 @@
 						
 						schoolYearFrom = value.schoolYearFrom;
 																		
-						julioAnoAnterior = "Jul " + schoolYearFrom;
+						// julioAnoAnterior = "Jul " + schoolYearFrom;
+						julioAnoAnterior = "Jul 2020";
 						
 						if (value.descuento_ano_anterior == 0)
 						{

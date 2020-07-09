@@ -668,24 +668,32 @@ class StudentsController extends AppController
 			$student = $this->Students->patchEntity($student, $this->request->data);
 
 			$archivoFoto = $student->profile_photo;
-			$extensionFoto = substr(strtolower(strrchr($archivoFoto['name'], '.')), 1);
-			$extensiones_permitidas = array('jpg', 'jpeg', 'gif', 'png');
-					
-			if (in_array($extensionFoto, $extensiones_permitidas))
+			
+			if (isset($archivoFoto['name']))
 			{
-				if ($this->Students->save($student)) 
+				$extensionFoto = substr(strtolower(strrchr($archivoFoto['name'], '.')), 1);
+				$extensiones_permitidas = array('jpg', 'jpeg', 'gif', 'png');
+						
+				if (in_array($extensionFoto, $extensiones_permitidas))
 				{
-					$this->Flash->success(__('La foto fue guardada exitosamente'));
-					return $this->redirect(['action' => 'index']);
+					if ($this->Students->save($student)) 
+					{
+						$this->Flash->success(__('La foto fue guardada exitosamente'));
+						return $this->redirect(['action' => 'index']);
+					}
+					else 
+					{
+						$this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
+					}
 				}
-				else 
+				else
 				{
-					$this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
+					$this->Flash->error(__('Estimado representante la foto debe tener alguna de estas extensiones: jpg, jpeg, gif o png'));
 				}
 			}
 			else
 			{
-				$this->Flash->error(__('Estimado representante, la foto debe tener alguna de estas extensiones: jpg, jpeg, gif o png'));
+				$this->Flash->error(__('Estimado representante debe subir un archivo con alguna de estas extensiones: jpg, jpeg, gif o png'));
 			}
         }    
         $this->set(compact('student', 'parentsandguardian', 'profilePhoto'));
@@ -1484,7 +1492,9 @@ class StudentsController extends AppController
 		$this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
-		
+	
+		$usuarioActual = $this->Auth->user('username');
+	
 		$currentDate = Time::now();
 		
 		$currentYearRegistration = $school->current_year_registration;
@@ -1520,9 +1530,38 @@ class StudentsController extends AppController
 		}
 		else
 		{
-			$this->Flash->error(__('Estimado representante, antes de imprimir la ficha de inscripción debe subir una foto de perfil del estudiante'));
-			
-			return $this->redirect(['controller' => 'Students', 'action' => 'index']);	
+			if ($usuarioActual == 'angel2703' || $usuarioActual == 'adminsg' || $usuarioActual == 'evelin')
+			{
+				$brothers = $this->Students->find('all')->where(['parentsandguardian_id' => $student->parentsandguardian_id, 'id !=' => $id]);
+
+				$brothersArray = $brothers->toArray();
+				
+				$brothersPdf = [];
+				$account = 0;
+				
+				if ($brothersArray):
+					foreach ($brothersArray as $brothersArrays):
+						$brothersPdf[$account]['nameStudent'] = $brothersArrays['surname'] . ' ' . $brothersArrays['first_name'];
+						$brothersPdf[$account]['gradeStudent'] = $brothersArrays['level_of_study'];
+						$account++;
+					endforeach;
+				endif;
+				
+				$parentsandguardian = $this->Students->Parentsandguardians->get($student->parentsandguardian_id);
+
+				$this->viewBuilder()
+					->className('Dompdf.Pdf')
+					->layout('default')
+					->options(['config' => [
+						'filename' => $student->full_name,
+						'render' => 'download'
+					]]);				
+			}
+			else
+			{
+				$this->Flash->error(__('Estimado representante, antes de imprimir la ficha de inscripción debe subir una foto de perfil del estudiante'));
+				return $this->redirect(['controller' => 'Students', 'action' => 'index']);					
+			}
 		}
 		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate'));
 		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate']);

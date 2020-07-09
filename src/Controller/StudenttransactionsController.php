@@ -17,6 +17,7 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
+		// Prueba de calidad
 		/* $contadorBusqueda = 0;
 		$contadorTransacciones = 0;
 		
