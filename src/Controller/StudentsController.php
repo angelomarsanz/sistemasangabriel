@@ -39,33 +39,42 @@ class StudentsController extends AppController
     
     public function testFunction()
     { 
-		/* $contadorActualizados = 0;
+		/* $contador = 0;
+		$anoBusqueda = 2019;
+		$contadorFotoExtensionCorrecta = 0;
+		$contadorFotoExtensionIncorrecta = 0;
 
-		$becados = $this->Students->find('all')
-			->where(['scholarship' => 1]);
+		$estudiantes = $this->Students->find('all')
+			->where(['balance' => $anoBusqueda]);
 			
-		$contadorBecados = $becados->count();
+		$contadorEstudiantes = $estudiantes->count();
 		
-		$this->Flash->success(__('Estudiantes becados ' . $contadorBecados));
+		$this->Flash->success(__('Estudiantes inscritos en el año ' . $anoBusqueda . ': ' . $contadorEstudiantes));
 		
-		foreach ($becados as $becado)
+		if ($contadorEstudiantes > 0)
 		{
-			$student = $this->Students->get($becado->id);
-			
-			$student->tipo_descuento = "Becado";
-			$student->discount = 100;
-			
-		   if ($this->Students->save($student)) 
+			foreach ($estudiantes as $estudiante)
 			{
-				$contadorActualizados++;
-			} 
-			else 
-			{
-				$this->Flash->error(__('El alumno con el id ' . $student->id . ' no pudo ser actualizado'));
+				if ($estudiante->profile_photo != "" && $estudiante->profile_photo != " " && $estudiante->profile_photo != "Sin foto")
+				{
+					$extensionFoto = substr(strtolower(strrchr($estudiante->profile_photo, '.')), 1);
+					
+					if ($extensionFoto == false)
+					{
+						// $this->Flash->success(__('id ' . $estudiante->id . ' alumno ' . $estudiante->full_name . ' archivo foto: ' . $estudiante->profile_photo));
+						$contadorFotoExtensionIncorrecta++;
+						echo "<br />" . '  ' . $contadorFotoExtensionIncorrecta . ". " . $estudiante->full_name;
+						// $this->Flash->success(__($contadorFotoExtensionIncorrecta . '. ' . $estudiante->full_name));
+					}
+					else
+					{
+						$contadorFotoExtensionCorrecta++;		
+					}
+				}
 			}
 		}
-		
-		$this->Flash->success(__('Estudiantes actualizados ' . $contadorActualizados)); */
+		$this->Flash->success(__('Estudiantes con extensión de foto correcta ' . $contadorFotoExtensionCorrecta));
+		$this->Flash->success(__('Estudiantes con extensión de foto incorrecta ' . $contadorFotoExtensionIncorrecta)); */
     }
 	
     public function testFunction2()
@@ -528,6 +537,8 @@ class StudentsController extends AppController
 		
 		$indicadorError = 0;
 		
+		$indicadorJulioPendiente = 0;
+		
         $currentDate = Time::now();
 		
 		$currentYear = $currentDate->year;
@@ -549,7 +560,7 @@ class StudentsController extends AppController
         $parentsandguardian = $this->Students->Parentsandguardians->get($student->parentsandguardian_id);
 		
         $sections = $this->Students->Sections->find('list', ['limit' => 200]);
-
+				
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
             $student = $this->Students->patchEntity($student, $this->request->data);
@@ -594,9 +605,40 @@ class StudentsController extends AppController
             {
                 $this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
             }
-        }    
-        $this->set(compact('student', 'parentsandguardian', 'currentYear', 'lastYear', 'nextYear', 'sections', 'families'));
-        $this->set('_serialize', ['student', 'parentsandguardian', 'sections', 'families']);
+        }
+		else
+		{
+			if ($student->scholarship == false)
+			{
+				$transactionDescription = 'Jul ' . $school->current_year_registration;
+					
+				$busquedaJulioAnoAnterior = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => $transactionDescription])->order(['id' => 'DESC']);
+
+				$contadorRegistrosJulio = $busquedaJulioAnoAnterior->count();
+				
+				if ($contadorRegistrosJulio > 0)
+				{				
+					$registroJulio = $busquedaJulioAnoAnterior->first();
+					
+					$concept = 'Mensualidad';
+					
+					$this->loadModel('Rates');
+			
+					$busquedaMensualidad = $this->Rates->find('all', ['conditions' => ['concept' => $concept], 
+					'order' => ['Rates.created' => 'DESC'] ]);
+
+					$registroMensualidad = $busquedaMensualidad->first();
+
+					if ($registroJulio->amount_dollar < $registroMensualidad->amount)
+					{
+						$indicadorJulioPendiente = 1;			
+					}
+				}
+			}
+		}
+
+        $this->set(compact('student', 'parentsandguardian', 'currentYear', 'lastYear', 'nextYear', 'sections', 'families', 'indicadorJulioPendiente'));
+        $this->set('_serialize', ['student', 'parentsandguardian', 'sections', 'families', 'indicadorJulioPendiente']);
     }
     
     public function reasignFamily($id = null, $controller = null, $action = null)
@@ -671,19 +713,26 @@ class StudentsController extends AppController
 			
 			if (isset($archivoFoto['name']))
 			{
-				$extensionFoto = substr(strtolower(strrchr($archivoFoto['name'], '.')), 1);
 				$extensiones_permitidas = array('jpg', 'jpeg', 'gif', 'png');
-						
-				if (in_array($extensionFoto, $extensiones_permitidas))
-				{
-					if ($this->Students->save($student)) 
+				$extensionFoto = substr(strtolower(strrchr($archivoFoto['name'], '.')), 1);
+				
+				if ($extensionFoto != false)
+				{						
+					if (in_array($extensionFoto, $extensiones_permitidas))
 					{
-						$this->Flash->success(__('La foto fue guardada exitosamente'));
-						return $this->redirect(['action' => 'index']);
+						if ($this->Students->save($student)) 
+						{
+							$this->Flash->success(__('La foto fue guardada exitosamente'));
+							return $this->redirect(['action' => 'index']);
+						}
+						else 
+						{
+							$this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
+						}
 					}
-					else 
+					else
 					{
-						$this->Flash->error(__('Los datos del alumno no se actualizaron, por favor verifique los datos e intente nuevamente'));
+						$this->Flash->error(__('Estimado representante la foto debe tener alguna de estas extensiones: jpg, jpeg, gif o png'));
 					}
 				}
 				else
@@ -1501,7 +1550,27 @@ class StudentsController extends AppController
 		
         $student = $this->Students->get($id);
 		
+		$indicadorDescarga = 0;
+		
 		if ($student->profile_photo != "" && $student->profile_photo != " " && $student->profile_photo != "Sin foto")
+		{
+			$extensiones_permitidas = array('jpg', 'jpeg', 'gif', 'png');
+			$extensionFoto = substr(strtolower(strrchr($student->profile_photo, '.')), 1);
+			if ($extensionFoto != false)
+			{	
+				if (in_array($extensionFoto, $extensiones_permitidas))
+				{
+					$indicadorDescarga = 1;
+				}
+			}
+		}
+	
+		if ($usuarioActual == 'angel2703' || $usuarioActual == 'adminsg' || $usuarioActual == 'evelin')
+		{
+			$indicadorDescarga = 1;
+		}
+		
+		if ($indicadorDescarga == 1)
 		{
 			$brothers = $this->Students->find('all')->where(['parentsandguardian_id' => $student->parentsandguardian_id, 'id !=' => $id]);
 
@@ -1530,38 +1599,8 @@ class StudentsController extends AppController
 		}
 		else
 		{
-			if ($usuarioActual == 'angel2703' || $usuarioActual == 'adminsg' || $usuarioActual == 'evelin')
-			{
-				$brothers = $this->Students->find('all')->where(['parentsandguardian_id' => $student->parentsandguardian_id, 'id !=' => $id]);
-
-				$brothersArray = $brothers->toArray();
-				
-				$brothersPdf = [];
-				$account = 0;
-				
-				if ($brothersArray):
-					foreach ($brothersArray as $brothersArrays):
-						$brothersPdf[$account]['nameStudent'] = $brothersArrays['surname'] . ' ' . $brothersArrays['first_name'];
-						$brothersPdf[$account]['gradeStudent'] = $brothersArrays['level_of_study'];
-						$account++;
-					endforeach;
-				endif;
-				
-				$parentsandguardian = $this->Students->Parentsandguardians->get($student->parentsandguardian_id);
-
-				$this->viewBuilder()
-					->className('Dompdf.Pdf')
-					->layout('default')
-					->options(['config' => [
-						'filename' => $student->full_name,
-						'render' => 'download'
-					]]);				
-			}
-			else
-			{
-				$this->Flash->error(__('Estimado representante, antes de imprimir la ficha de inscripción debe subir una foto de perfil del estudiante'));
-				return $this->redirect(['controller' => 'Students', 'action' => 'index']);					
-			}
+			$this->Flash->error(__('Estimado usuario, antes de imprimir la ficha de inscripción debe subir una foto de perfil del estudiante con alguna de estas extensiones: .gif, .jpeg, .jpg y .png'));
+			return $this->redirect(['controller' => 'Students', 'action' => 'index']);					
 		}
 		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate'));
 		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate']);

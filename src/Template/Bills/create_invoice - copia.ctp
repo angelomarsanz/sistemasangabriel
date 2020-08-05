@@ -611,6 +611,7 @@
     var transactionIdentifier = 0;
     var monthlyPayment = " ";
 	var tarifaDolar = 0;
+	var tarifaDolarSinDescuento = 0;
 	var montoPendienteDolar = 0;
 	var montoAPagarDolar = 0;
 	var montoAPagarEuro = 0;
@@ -668,12 +669,16 @@
 	var cuotasAlumnoBecado = 0;
 	var cambioMontoCuota = 0;
 	var morosoAnoAnterior = 0;
-	var anoEscolarEntero = 0;
-	var anoEscolarAnterior = 0;
 	var julioAnoAnterior = "";
 	var julioExonerado = 0;
 	var diferenciaBolivares = 0;
-
+	var becadoAnoAnterior = 0;
+	var descuentoAnoAnterior = 0;
+	var anoEscolarActual = <?= $anoEscolarActual ?>;
+	var anoEscolarAnterior = <?= $anoEscolarActual - 1 ?>;
+	var anoEscolarInscripcion = <?= $anoEscolarInscripcion ?>;
+	var anoEscolarMensualidad = 0;
+	
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
 
@@ -2660,6 +2665,8 @@
 							section = "No asignado";
 						}
 						
+						becadoAnoAnterior = value.becado_ano_anterior;
+						
 						if (value.scholarship == 0)
 						{
 							students += "<td>Regular</td></tr>";
@@ -2673,12 +2680,18 @@
 						}
 						
 						schoolYearFrom = value.schoolYearFrom;
+																		
+						julioAnoAnterior = "Jul " + anoEscolarInscripcion;
+						console.log('julioAnoAnterior ' + julioAnoAnterior);
 						
-						anoEscolarEntero = parseInt(schoolYearFrom);
-						
-						anoEscolarAnterior = anoEscolarEntero - 1;
-						
-						julioAnoAnterior = "Jul " + schoolYearFrom;
+						if (value.descuento_ano_anterior == 0)
+						{
+							descuentoAnoAnterior = 1;
+						}
+						else
+						{	
+							descuentoAnoAnterior = (100 - value.descuento_ano_anterior) / 100;
+						}
 						
 						if (value.discount_family === null)
 						{
@@ -2705,6 +2718,8 @@
 
 							transactionType = value2.transaction_type;
 							
+							anoEscolarMensualidad = value2.ano_escolar;
+														
 							monthlyPayment = value2.transaction_description;
 							
 							amountMonthly = 0;
@@ -2770,29 +2785,66 @@
 								{						
 									if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
 									{
-										tarifaDolar = dosDecimales(tarifaDolar * discountFamily);
+										tarifaDolarSinDescuento = tarifaDolar;
 										
-										if (tarifaDolar != montoDolar)
-										{		
-											montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
-											montoAPagarDolar = montoPendienteDolar;
-											montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
-											montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
-											paidOut = false;
-											
-											if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
-											{
-												morosoAnoAnterior = 1;
-											}
+										if (anoEscolarMensualidad == anoEscolarActual)
+										{
+											tarifaDolar = dosDecimales(tarifaDolar * discountFamily);
 										}
 										else
 										{
-											montoDolar = 0;
-											montoPendienteDolar = 0;
-											montoAPagarDolar = 0;
-											montoAPagarEuro = 0;
-											montoAPagarBolivar = 0
-											indicadorImpresion = 1;
+											tarifaDolar = dosDecimales(tarifaDolar * descuentoAnoAnterior);
+										}
+										
+										if (tarifaDolar == tarifaDolarSinDescuento)
+										{										
+											if (tarifaDolar != montoDolar)
+											{
+												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+												montoAPagarDolar = montoPendienteDolar;
+												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
+												montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
+												paidOut = false;
+												
+												if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
+												{
+													morosoAnoAnterior = 1;
+												}
+											}
+											else
+											{
+												montoDolar = 0;
+												montoPendienteDolar = 0;
+												montoAPagarDolar = 0;
+												montoAPagarEuro = 0;
+												montoAPagarBolivar = 0
+												indicadorImpresion = 1;
+											}
+										}
+										else
+										{											
+											if (tarifaDolar != montoDolar && tarifaDolarSinDescuento != montoDolar)
+											{
+												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+												montoAPagarDolar = montoPendienteDolar;
+												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
+												montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
+												paidOut = false;
+												
+												if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
+												{
+													morosoAnoAnterior = 1;
+												}
+											}
+											else
+											{
+												montoDolar = 0;
+												montoPendienteDolar = 0;
+												montoAPagarDolar = 0;
+												montoAPagarEuro = 0;
+												montoAPagarBolivar = 0
+												indicadorImpresion = 1;
+											}
 										}
 									}
 									else
@@ -2832,8 +2884,16 @@
 								montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);											
 							}
 							else
-							{
-								tarifaDolar = dosDecimales(tarifaDolar * discountFamily);
+							{								
+								if (anoEscolarMensualidad == anoEscolarActual)
+								{
+									tarifaDolar = dosDecimales(tarifaDolar * discountFamily);
+								}
+								else
+								{
+									tarifaDolar = dosDecimales(tarifaDolar * descuentoAnoAnterior);
+								}
+								
 								montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 								montoAPagarDolar = montoPendienteDolar;
 								montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
@@ -2856,7 +2916,7 @@
 										}
 									}									
 									else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
-										monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+										// monthlyPayment.substring(0, 14) == "Seguro escolar" ||
 										monthlyPayment.substring(0, 3) == "Ago")
 									{
 
@@ -2887,7 +2947,7 @@
 										}
 									}
 									else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
-										monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+										// monthlyPayment.substring(0, 14) == "Seguro escolar" ||
 										monthlyPayment.substring(0, 3) == "Ago")
 									{
 										insertRecord();

@@ -17,39 +17,19 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
-		// Prueba de calidad
 		/* $contadorBusqueda = 0;
 		$contadorTransacciones = 0;
 		
 		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
 		
 		$transacciones = $transaccionesEstudiante->find()
-			->where(['Studenttransactions.payment_date' => '2020-08-01 00:00:00']);			
-			$contadorBusqueda = $transacciones->count();
+			->contain(['Students'])
+			->where(['Students.balance' => 2020]);
+			// ->where(['Student.balance' => '2020', 'Studenttransactions.payment_date' => '2020-07-01 00:00:00', 'Studenttransactions.amount_dollar <' => 45]);			
+		$contadorBusqueda = $transacciones->count();
 		
 		$this->Flash->success(__('Total transacciones busqueda ' . $contadorBusqueda));
-		
-		foreach ($transacciones as $transaccion)
-		{
-			if ($transaccion->amount_dollar == 22.5 || $transaccion->amount_dollar == 36)
-			{
-				$transaccionGet = $this->Studenttransactions->get($transaccion->id);
-						
-				$transaccionGet->amount_dollar = 45;
 			
-				if (!($this->Studenttransactions->save($transaccionGet))) 
-				{
-					$this->Flash->error(__('La transacción con id ' . $transaccionGet->id . ' no pudo ser actualizada'));
-				}
-				else
-				{
-					$contadorTransacciones++;
-				}
-			}
-		}
-		
-		$this->Flash->success(__('Total transacciones actualizadas ' . $contadorTransacciones));
-	
         $this->set(compact('transacciones'));
         $this->set('_serialize', ['transacciones']); */
     }

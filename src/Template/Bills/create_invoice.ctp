@@ -676,6 +676,7 @@
 	var descuentoAnoAnterior = 0;
 	var anoEscolarActual = <?= $anoEscolarActual ?>;
 	var anoEscolarAnterior = <?= $anoEscolarActual - 1 ?>;
+	var anoEscolarInscripcion = <?= $anoEscolarInscripcion ?>;
 	var anoEscolarMensualidad = 0;
 	
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
@@ -2632,6 +2633,8 @@
                         						
                     $.each(response.data.students, function(key, value) 
                     {
+						julioExonerado = 0;
+						
                         students += "<tr id=st" + value.id + " class='students'>";
                         idStudent = value.id;
 						
@@ -2680,8 +2683,8 @@
 						
 						schoolYearFrom = value.schoolYearFrom;
 																		
-						// julioAnoAnterior = "Jul " + schoolYearFrom;
-						julioAnoAnterior = "Jul 2020";
+						julioAnoAnterior = "Jul " + anoEscolarInscripcion;
+						console.log('julioAnoAnterior ' + julioAnoAnterior);
 						
 						if (value.descuento_ano_anterior == 0)
 						{
@@ -2699,10 +2702,6 @@
 						else
 						{	
 							discountFamily = (100 - value.discount_family) / 100;
-							if (discountFamily < 1)
-							{
-								julioExonerado = 1;
-							}
 						}
 						
                         $.each(value.studentTransactions, function(key2, value2) 
