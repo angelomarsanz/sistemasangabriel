@@ -67,6 +67,7 @@
 							[null => " ",
 							 'Nuevos' => 'Alumnos nuevos',
 							 'Regulares' => 'Alumnos regulares',
+							 'Regulares próximo año escolar' => 'Alumnos regulares inscritos para el próximo año escolar',
 							 'Nuevos y regulares' => 'Alumnos nuevos y regulares',
 							 'Nuevos próximo año escolar' => 'Alumnos nuevos inscritos para el próximo año escolar',
 							 'Todos' => 'Nuevos, regulares, egresados, expulsados, etc.'

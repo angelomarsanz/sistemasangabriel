@@ -2268,12 +2268,19 @@ class StudentsController extends AppController
 		$school = $this->Schools->get(2);
 		
 		$anoEscolarActual = $school->current_school_year;
-					
-		$conceptoRegulares = 'Matrícula ' . $anoEscolarActual;
-		
-		if ($filtersReport == "Nuevos próximo año escolar")
+		$proximoAnoEscolar = $anoEscolarActual + 1;
+
+		if ($filtersReport == "Regulares próximo año escolar")
 		{
-			$proximoAnoEscolar = $anoEscolarActual + 1;		
+			$conceptoRegulares = 'Matrícula ' . $proximoAnoEscolar;
+		}
+		else
+		{
+			$conceptoRegulares = 'Matrícula ' . $anoEscolarActual;
+		}
+				
+		if ($filtersReport == "Nuevos próximo año escolar")
+		{		
 			$conceptoNuevos = 'Matrícula ' . $proximoAnoEscolar; 
 		}
 		else

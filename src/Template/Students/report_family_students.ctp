@@ -121,6 +121,17 @@
 									<th></th>
 									<th><?= 'Alumnos regulares inscritos para este período: ' . $accountRegularRegistration ?></th>
 								</tr>
+							<?php elseif ($filtersReport == 'Regulares próximo año escolar'): ?>
+								<?php if ($orderReport == "Familia"): ?>
+									<tr>
+										<th></th>
+										<th><?= 'Total familias en este período: ' . $contadorFamilias ?></th>
+									</tr>
+								<?php endif; ?>
+								<tr>
+									<th></th>
+									<th><?= 'Alumnos regulares inscritos para el próximo año escolar: ' . $accountRegularRegistration ?></th>
+								</tr>
 							<?php elseif ($filtersReport == 'Nuevos y regulares'): ?>
 								<?php if ($orderReport == "Familia"): ?>
 									<tr>
