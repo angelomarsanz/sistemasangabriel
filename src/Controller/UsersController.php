@@ -24,20 +24,16 @@ class UsersController extends AppController
 
     public function isAuthorized($user)
     {
-        if(isset($user['role']) and $user['role'] === 'Representante')
-        {
-            if(in_array($this->request->action, ['inactiveSystem', 'home', 'view', 'edit', 'delete', 'logout']))
-            {
-                return true;
-            }
-        }
-        if(isset($user['role']) and $user['role'] === 'Jefe de nómina')
-        {
-            if(in_array($this->request->action, ['inactiveSystem', 'home', 'view', 'edit', 'logout']))
-            {
-                return true;
-            }
-        }
+        if(isset($user['role'])
+		{
+			if ($user['role'] === 'Representante' || $user['role'] === 'Jefe de nómina' || $user['role'] === 'Control de estudios')
+			{
+				if(in_array($this->request->action, ['home', 'view', 'edit', 'logout']))
+				{
+					return true;
+				}
+			}
+		}
 
         return parent::isAuthorized($user);
     }        

@@ -17,68 +17,8 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
-		/* $contadorBusqueda = 0;
-		$contadorTransacciones = 0;
-		
-		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
-		
-		$transacciones = $transaccionesEstudiante->find()
-			->contain(['Students'])
-			->where(['Students.discount' => 50, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.payment_date >' => '2019-08-01 00:00:00', 'Studenttransactions.amount_dollar' => 45]);			
-			// ->where(['Students.discount' => 50, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.payment_date >' => '2019-05-01 00:00:00', 'Studenttransactions.payment_date <' => '2019-09-01 00:00:00', 'Studenttransactions.amount_dollar' => 30]);
-			//->where(['Students.discount' => 50, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.payment_date >' => '2018-10-01 00:00:00', 'Studenttransactions.payment_date <' => '2019-06-01 00:00:00', 'Studenttransactions.amount_dollar' => 20]);			
-			$contadorBusqueda = $transacciones->count();
-		
-		$this->Flash->success(__('Total transacciones busqueda ' . $contadorBusqueda));
-		
-		foreach ($transacciones as $transaccion)
-		{
-			$transaccionGet = $this->Studenttransactions->get($transaccion->id);
-						
-			$transaccionGet->amount_dollar = 23;
-			
-			if (!($this->Studenttransactions->save($transaccionGet))) 
-			{
-                $this->Flash->error(__('La transacción con id ' . $transaccionGet->id . ' no pudo ser actualizada'));
-			}
-			else
-			{
-				$contadorTransacciones++;
-			}
-		}
-		
-		$this->Flash->success(__('Total transacciones actualizadas ' . $contadorTransacciones));
-	
-        $this->set(compact('transacciones'));
-        $this->set('_serialize', ['transacciones']); */
     }
 	
-	public function testFunction2()
-	{
-		/* $this->loadModel('Excels');
-	
-		$excels = $this->Excels->find('all');
-		
-		$contador = 0;
-		
-		foreach ($excels as $excel)
-		{
-			$studenttransaction = $this->Studenttransactions->get($excel->report);
-			
-			$studenttransaction->amount_dollar = $excel->start_end;
-			
-			if (!($this->Studenttransactions->save($studenttransaction))) 
-			{
-                $this->Flash->error(__('La transacción no pudo ser guardada'));
-			}
-			else
-			{
-				$contador++;
-			}
-		}
-		$this->Flash->success(__('Total transacciones ' . $contador)); */
-	}
-
     public function index()
     {
        if ($this->request->is('post'))
@@ -1294,14 +1234,8 @@ class StudenttransactionsController extends AppController
         $spanishMonth = str_replace($monthsEnglish, $monthsSpanish, $month);
         return $spanishMonth;
     }
-    public function searchLevel()
-    {
-        if ($this->request->is('post')) 
-        {
-            return $this->redirect(['action' => 'assignSection', $_POST['level_of_study']]);
-        }
-    }
-    public function assignSection()
+
+public function assignSection()
     {
 		/* Antes de iniciar el proceso de renovación de matrícula 2019-2020 se debe crear
 		en Students el campo "regular_renewal_year" y comparar contra "current_year_registration"
@@ -1488,6 +1422,7 @@ class StudenttransactionsController extends AppController
             $this->set('_serialize', ['assign']);
         }
     }
+
     public function levelSublevel($level = null)
     {
         $levelOfStudy = ['Pre-escolar, pre-kinder',                                

@@ -1,3 +1,6 @@
+<?php
+    use Cake\Routing\Router;
+?>
 <style>
 @media screen
 {
@@ -179,7 +182,7 @@
     }
     function redirectAction()
     {
-        $.redirect('../studenttransactions/assignSection', {level : $("#select-level").val() }); 
+		$.redirect('<?php echo Router::url(["controller" => "studenttransactions", "action" => "assignSection"]); ?>', { level : $("#select-level").val() }); 
     }
 
     $(document).ready(function() 

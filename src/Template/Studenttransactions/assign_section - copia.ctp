@@ -1,3 +1,6 @@
+<?php
+    use Cake\Routing\Router;
+?>
 <style>
 @media screen
 {
@@ -82,7 +85,7 @@
                                             <td><input type="hidden" name="student[<?= $accountArray ?>][id]" value=<?= $studentsLevels->student->id ?>></td>
                                             <td><?= $accountStudent ?></td>
                                             <td><?= $studentsLevels->student->full_name ?></td>
-                                            <td style="text-align: center;"><?= number_format(($lastRate - $studentsLevels->amount), 2, ",", ".") ?></td>
+                                            <td style="text-align: center;"><?= number_format(($studentsLevels->amount - $studentsLevels->amount), 2, ",", ".") ?></td>
                                             <td><select name="student[<?= $accountArray ?>][section]" class="section">
                                                 <?php if ($studentsLevels->student->section->section == 'A'): ?>
                                                     <option value="A" selected>A</option>
@@ -179,7 +182,7 @@
     }
     function redirectAction()
     {
-        $.redirect('../studenttransactions/assignSection', {level : $("#select-level").val() }); 
+		$.redirect('<?php echo Router::url(["controller" => "studenttransactions", "action" => "assignSection"]); ?>', { level : $("#select-level").val() }); 
     }
 
     $(document).ready(function() 
@@ -191,7 +194,7 @@
             $(".section").html("<option value='A' selected>A</option><option value='B'>B</option><option value='C'>C</option>");
             changeSection();
         });
-        $("#select-level").change(redirectAction);
+        $("#select-level").change(redirectAction());
         $("#printer-section").click(function(e)
         {
             if ($("#printer-section").attr("href") == "#")

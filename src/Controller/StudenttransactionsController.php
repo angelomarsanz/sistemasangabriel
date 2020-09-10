@@ -17,49 +17,8 @@ class StudenttransactionsController extends AppController
 {
     public function testFunction()
     {
-		/* $contadorBusqueda = 0;
-		$contadorTransacciones = 0;
-		
-		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
-		
-		$transacciones = $transaccionesEstudiante->find()
-			->contain(['Students'])
-			->where(['Students.balance' => 2020]);
-			// ->where(['Student.balance' => '2020', 'Studenttransactions.payment_date' => '2020-07-01 00:00:00', 'Studenttransactions.amount_dollar <' => 45]);			
-		$contadorBusqueda = $transacciones->count();
-		
-		$this->Flash->success(__('Total transacciones busqueda ' . $contadorBusqueda));
-			
-        $this->set(compact('transacciones'));
-        $this->set('_serialize', ['transacciones']); */
     }
 	
-	public function testFunction2()
-	{
-		/* $this->loadModel('Excels');
-	
-		$excels = $this->Excels->find('all');
-		
-		$contador = 0;
-		
-		foreach ($excels as $excel)
-		{
-			$studenttransaction = $this->Studenttransactions->get($excel->number);
-			
-			$studenttransaction->amount_dollar = $excel->col1;
-			
-			if (!($this->Studenttransactions->save($studenttransaction))) 
-			{
-                $this->Flash->error(__('La transacción con ID ' . $excel->number . ' no pudo ser guardada'));
-			}
-			else
-			{
-				$contador++;
-			}
-		}
-		$this->Flash->success(__('Total transacciones ' . $contador)); */
-	}
-
     public function index()
     {
        if ($this->request->is('post'))
@@ -1275,27 +1234,72 @@ class StudenttransactionsController extends AppController
         $spanishMonth = str_replace($monthsEnglish, $monthsSpanish, $month);
         return $spanishMonth;
     }
-    public function searchLevel()
-    {
-        if ($this->request->is('post')) 
-        {
-            return $this->redirect(['action' => 'assignSection', $_POST['level_of_study']]);
-        }
-    }
+
     public function assignSection()
-    {
-		/* Antes de iniciar el proceso de renovación de matrícula 2019-2020 se debe crear
-		en Students el campo "regular_renewal_year" y comparar contra "current_year_registration"
-		si son iguales dar acceso a asignar secciones, de lo contrario enviar mensaje que se debe ejecutar al
-		inicio del año escolar */
-		
+    {	
         if ($this->request->is('post'))
         {
-            if (isset($_POST['level']))
+			$this->loadModel('Schools');
+
+			$school = $this->Schools->get(2);
+			
+			$currentYearRegistration = $school->current_year_registration;
+			
+			$anoEscolarActual = $school->current_school_year;
+			
+			setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+			date_default_timezone_set('America/Caracas');
+
+			$fechaHoraActual = Time::now();
+			
+			if ($currentYearRegistration != $anoEscolarActual)
+			{
+				if ($fechaHoraActual->month == 9)
+				{
+					$estudiantes = $this->Studenttransactions->Students->find()
+						->where(['Students.student_condition' => 'Regular']);
+				
+					$indicadorNoActualizado = 0;
+					foreach ($estudiantes as $estudiante)
+					{
+						$estudianteBuscado = $this->Studenttransactions->Students->get($estudiante->id);
+						
+						$estudianteBuscado->becado_ano_anterior = $estudianteBuscado->scholarship;
+						$estudianteBuscado->tipo_descuento_ano_anterior = $estudianteBuscado->tipo_descuento;
+						$estudianteBuscado->descuento_ano_anterior = $estudianteBuscado->discount;
+						
+						if (!($this->Studenttransactions->Students->save($estudianteBuscado)))
+						{
+							$this->Flash->error(__('No se pudo actualizar el estudiante con el ID: ' . $estudianteBuscado->id));
+							$indicadorNoActualizado = 1;
+						}
+					}
+					if ($indicadorNoActualizado == 0)
+					{
+						$school->current_school_year = $school->current_year_registration;
+						if (!($this->Schools->save($school))) 
+						{
+							$this->Flash->error(__('No se pudo actualizar el año escolar'));
+							return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+						}	
+						else
+						{
+							$this->Flash->success(__('Se actualizaron correctamente los datos para el nuevo año escolar'));
+						}
+					}
+				}
+				else
+				{
+					$this->Flash->error(__('Estimado usuario no se pueden asignar secciones cuando se inicia el período de inscripción de alumnos regulares: ' . $fechaHoraActual->month));
+					return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+				}
+			}
+			
+            if (isset($_POST['level'])) // Si el usuario requiere que se muestren los alumnos inscritos para un nivel de estudio específico
             {
                 $level = $_POST['level'];
             }
-            else
+            else // El usuario ya actualizó las secciones en el formulario y se procede a actualizar en la base de datos
             {
                 $result = 0;
                 
@@ -1305,11 +1309,11 @@ class StudenttransactionsController extends AppController
                 {
                     $student = $this->Studenttransactions->Students->get($valor['id']);
 
-                    if ($accountStudent == 0)
+                    if ($accountStudent == 0) // Si es el primer alumno de este grupo
                     {
-                        $level = $student->level_of_study;
+                        $level = $student->level_of_study; // Tomamos el nivel de estudio del grupo
                         
-                        $sublevel = $this->levelSublevel($level);
+                        $sublevel = $this->levelSublevel($level); 
                         
                         $sections = $this->Studenttransactions->Students->Sections->find('all')
                             ->where(['sublevel' => $sublevel])
@@ -1320,11 +1324,11 @@ class StudenttransactionsController extends AppController
                     {
                         if ($valor['section'] == $section->section)
                         {
-                            $student->section_id = $section->id;
+                            $student->section_id = $section->id; // actualizamos la sección del alumno de acuerdo con la sección que asignó el usuario
                         }
                     }
 					
-                    if (!($this->Studenttransactions->Students->save($student)))
+                    if (!($this->Studenttransactions->Students->save($student))) // Se actualizan los datos en la base de datos
                     {
                         $result = 1;
                         
@@ -1333,27 +1337,22 @@ class StudenttransactionsController extends AppController
 					
                     $accountStudent++;
                 }
-                if ($result == 0)
+                if ($result == 0) // Si todo ok
                 {
                     $this->Flash->success(__('Los alumnos fueron asignados exitosamente a su sección'));
                 } 
             }
         }
+		
+		$assign = 1;
 		        
-        $assign = 1;
-
         if (isset($level))
         {
             $studentTransactions = TableRegistry::get('Studenttransactions');
-            
-			$this->loadModel('Schools');
-
-			$school = $this->Schools->get(2);
-			
-			$currentYearRegistration = $school->current_year_registration;
-						
+            						
 			$transactionDescription = 'Matrícula ' . $currentYearRegistration;
 			
+			// Busqueda de todos los inscritos
 			$inscribed = $studentTransactions->find()
 				->select(
 					['Studenttransactions.id',
@@ -1362,10 +1361,11 @@ class StudenttransactionsController extends AppController
 				->where([['Studenttransactions.transaction_description' => $transactionDescription],
 					['Studenttransactions.amount >' => 0],
 					['Students.level_of_study !=' => ""], 
-					['Students.student_condition' => 'Regular']]);
+					['Students.student_condition' => 'Regular']]); 
 	
 			$totalEnrolled = $inscribed->count();
 						
+			// Busqueda de todos los inscritos en el nivel de estudio que seleccionó el usuario			
 			$studentsLevel = $studentTransactions->find()
 				->select(
 					['Studenttransactions.id',
@@ -1399,6 +1399,7 @@ class StudenttransactionsController extends AppController
 			{
 				$sublevel = $this->levelSublevel($level);
 
+				// Búsqueda de todas las secciones que pertenecen al nivel de estudio 
 				$sections = $this->Studenttransactions->Students->Sections->find('all')
 					->where(['sublevel' => $sublevel])
 					->order(['Sections.section' => 'ASC']);
@@ -1407,32 +1408,32 @@ class StudenttransactionsController extends AppController
 				{
 					if ($section->section == 'A')
 					{
-						$idSectionA = $section->id;
+						$idSectionA = $section->id; // Guardo el ID de la sección "A" del nivel de estudio
 					}
 				}                    
 			}
 
-			foreach ($studentsLevel as $studentsLevels)
+			foreach ($studentsLevel as $studentsLevels) // Recorro todos los estudiantes inscritos en el nivel de estudio seleccionado
 			{     
 				if ($level != '')
 				{
 					$swSection = 0;
 
-					foreach ($sections as $section)
+					foreach ($sections as $section) 
 					{
-						if ($studentsLevels->student->section_id == $section->id)
+						if ($studentsLevels->student->section_id == $section->id) // Si coincide la sección del estudiante con alguna de las secciones del nivel de estudio que seleccionó el usuario
 						{
-							$swSection = 1;
+							$swSection = 1; // Asigno el valor 1, que quiere decir que el estudiante ya fue asignado a la nueva sección en su nuevo nivel de estudio
 						}
 					}
 					
-					if ($swSection == 0)
+					if ($swSection == 0) // Si no se le ha asignado la sección al estudiante en su nuevo nivel de estudio
 					{
 						$student = $this->Studenttransactions->Students->get($studentsLevels->student->id);
 
-						$student->section_id = $idSectionA;        
+						$student->section_id = $idSectionA; // Le asigno la sección "A" como genérica        
 
-						if (!($this->Studenttransactions->Students->save($student)))
+						if (!($this->Studenttransactions->Students->save($student))) // Actualizo la base de datos con la nueva sección del alumno
 						{                       
 							$this->Flash->error(__('No pudo ser actualizado el alumno identificado con el id: ' . $student->id));            
 						}
@@ -1463,11 +1464,11 @@ class StudenttransactionsController extends AppController
 			$this->set(compact('level', 'studentsLevel', 'totalEnrolled', 'totalLevel', 'sectionA', 'sectionB', 'sectionC', 'levelChat', 'assign'));
 			$this->set('_serialize', ['level', 'studentsLevel', 'totalEnrolled', 'totalLevel', 'sectionA', 'sectionB', 'sectionC', 'levelChat', 'assign']);
         }
-        else
-        {
-            $this->set(compact('assign'));
+		else
+		{
+			$this->set(compact('assign'));
             $this->set('_serialize', ['assign']);
-        }
+		}
     }
     public function levelSublevel($level = null)
     {
@@ -3983,4 +3984,8 @@ class StudenttransactionsController extends AppController
         $this->set(compact('transacciones'));
         $this->set('_serialize', ['transacciones']);
 	}	
+	public function cuotasPendientes()
+	{
+		
+	}
 }

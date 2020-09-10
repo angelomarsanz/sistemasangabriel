@@ -2633,6 +2633,8 @@
                         						
                     $.each(response.data.students, function(key, value) 
                     {
+						julioExonerado = 0;
+						
                         students += "<tr id=st" + value.id + " class='students'>";
                         idStudent = value.id;
 						
@@ -2700,10 +2702,6 @@
 						else
 						{	
 							discountFamily = (100 - value.discount_family) / 100;
-							if (discountFamily < 1)
-							{
-								julioExonerado = 1;
-							}
 						}
 						
                         $.each(value.studentTransactions, function(key2, value2) 

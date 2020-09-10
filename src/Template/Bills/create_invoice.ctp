@@ -2986,7 +2986,10 @@
 									}
 									else
 									{
-										insertRecord();
+										if (monthlyPayment.substring(0, 14) != "Seguro escolar")
+										{
+											insertRecord();
+										}
 									}
 								}
 							}

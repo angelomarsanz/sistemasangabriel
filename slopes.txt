@@ -4,75 +4,47 @@ En febrero se debe considerar nuevo año escolar para la planilla
 Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar descuento
 
 ---
-Para los estatus recordar que hay un boolean - new_student en la tabla student
-Ese status se debe cambiar a "0" al iniciar el proceso de renovación de inscripción a aquellos
-alumnos regulares que se inscribieron para el período escolar actual. Se debe
-exceptuar los regulares que se inscribieron a partir de febrero para el
-próximo período.
-Es decir un alumno regular tiene el status de new_student en "1" durante todo
-su primer año en el colegio.
+Cambios necesarios para el período de renovación de matrícula (junio de cada año):
 
-También al iniciar el proceso de renovación de inscripción (en junio), el campo level_of_study
-se debe blanquear únicamente a los alumnos que están inscritos en el año escolar actual.
+	Para los estatus recordar que hay un boolean - new_student en la tabla student
+	Ese status se debe cambiar a "0" al iniciar el proceso de renovación de inscripción a aquellos
+	alumnos regulares que se inscribieron para el período escolar actual. Se debe
+	exceptuar los regulares que se inscribieron a partir de febrero para el
+	próximo período.
+	Es decir un alumno regular tiene el status de new_student en "1" durante todo
+	su primer año en el colegio.
 
-En Junio cuando comienza el período de renovación de inscripción, se debe actualizar
-el campo current_year_registration de la tabla Shools con el año del nuevo período de inscripción
+	También al iniciar el proceso de renovación de inscripción (en junio), el campo level_of_study
+	se debe blanquear únicamente a los alumnos que están inscritos en el año escolar actual.
 
-Esto se debe hacer cuando se cree por primera vez la tarifa de agosto del año siguiente
+	En Junio cuando comienza el período de renovación de inscripción, se debe actualizar
+	el campo current_year_registration de la tabla Shools con el año del nuevo período de inscripción
 
-Nota: 02/07/2019 - Ya se hicieron estos cambios y se instalaron en producción
+	Esto se debe hacer cuando se cree por primera vez la tarifa de agosto del año siguiente
 
-En septiembre cuando comienza el período escolar se debe actualizar el campo
-current_school_year de la tabla Shools con el año del nuevo perìodo escolar. Se
-debe hacer en el proceso de asignar seccion (Pendiente)
+	También en el inicio de la renovación de matrícula, el programa asignar sección debe validar 
+	que el current_school_year sea igual current_year_registration, si son diferentes debe abortar la operaciòn 
+	y enviar un mensaje un mensaje de error.
+	
+Cambios necesarios para el período de inicio de nuevo año escolar:
 
-En el reporte de familias con 3, 4 ó más hijos ignorar a los que no se inscribieron en el año escolar en curso
+	El programa createInvoice verifique si el current_school_year es igual current_year_registration, si es diferente verificar
+    si la fecha actual corresponde al mes de septiembre (9) y si es positivo asignar current_year_registration a current_school_year. (Falta aquí)
 
-Reportes Maestros:
+	El programa assignSection verifique si el current_school_year es igual current_year_registration, si es diferente verificar
+    si la fecha actual corresponde al mes de septiembre (9) y si es positivo asignar current_year_registration a current_school_year y
+	actualizar las becas. (Listo)
+
+	Copiar Scholarship a becado_ano_anterior
+	Copiar tipo_descuento a tipo_descuento_ano_anterior
+	Copiar discount a descuento_ano_anterior
+
+	En el reporte de familias con 3, 4 ó más hijos ignorar a los que no se inscribieron en el año escolar en curso
+
+Notas importantes:
 
 Reporte de Alumnos Egresados : Alumnos egresados / Exalumnos son aquellos que se gradúan de 5to Año.
 
 Alumnos Retirados: Son aquellos que en el transcurso de su vida escolar se van del colegio.
 
-Eliminar memoria de selección en reportes maestros (Listo)
 
----
-
-Renovación inscripción
-
-Cuando vaya a iniciar la renovación de inscripción de alumnos 
-regulares en junio o julio 2019, se debe crear un campo
-adicional en la tabla school que se llamará
-"regular_renewal_year" con el valor "2019"
-y se deben modificar las siguientes acciones para que
-la creación de las cuotas tomen como referencia 
-de "año" el valor de ese campo y no el de "current_year_registration":
-
-De StudentController:
-edit
-
-De StudenttransactionsController:
-"createQuotasRegular" y "createQuotasRegularPrevious"
-
-Además la acción "assignSection" se debe modificar para
-comparar el campo "current_year_registration" con 
-"regular_renewal_year" y si son iguales dar acceso
-a asignar secciones, de lo contrario enviar mensaje
-que se debe ejecutar al inicio del año escolar */
----
-Nuevo período escolar
-
-En septiembre cuando inicie el nuevo año 
-escolar, antes de ejecutar "Asignar sección" se deben
-actualizar los campos:
-current_year_registration - 2019
-previous_year_registration - 2018
-next_year_registration - 2020
-
-Se debe modificar el sistema para que el campo "balance" se actualice
-unicamente cuando se haga la cobranza de la matrìcula de ese año, no
-cuando el padre actualice los datos
-
-Copiar Scholarship a becado_ano_anterior
-Copiar tipo_descuento a tipo_descuento_ano_anterior
-Copiar discount a descuento_ano_anterior
