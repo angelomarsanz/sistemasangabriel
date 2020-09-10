@@ -27,13 +27,24 @@ class StudentsController extends AppController
 
     public function isAuthorized($user)
     {
-        if(isset($user['role']) and $user['role'] === 'Representante')
-        {
-            if(in_array($this->request->action, ['index', 'view', 'edit', 'filepdf', 'profilePhoto', 'editPhoto']))
-            {
-                return true;
-            }
+		if(isset($user['role']))
+		{
+			if ($user['role'] === 'Representante')
+			{
+				if(in_array($this->request->action, ['index', 'view', 'edit', 'filepdf', 'profilePhoto', 'editPhoto']))
+				{
+					return true;
+				}
+			}
+			if ($user['role'] === 'Control de estudios')
+			{
+				if(in_array($this->request->action, ['familyStudents', 'reportFamilyStudents', 'familiasDescuento20', 'familiasDescuento50', 'consultStudent', 'viewStudent', 'edit', 'editStatus', 'reporteBecados', 'reportGraduateStudents', 'consultStudentDelete', 'indexConsult', 'viewConsult', 'filepdf', 'findStudent', 'findStudentDelete']))
+				{
+					return true;
+				}				
+			}
         }
+				
         return parent::isAuthorized($user);
     }
     
@@ -1536,7 +1547,7 @@ class StudentsController extends AppController
         
     }
     
-    public function filepdf($id = null)
+    public function filepdf($id = null, $origen = null)
     {
 		$this->loadModel('Schools');
 
@@ -1600,7 +1611,15 @@ class StudentsController extends AppController
 		else
 		{
 			$this->Flash->error(__('Estimado usuario, antes de imprimir la ficha de inscripción debe subir una foto de perfil del estudiante con alguna de estas extensiones: .gif, .jpeg, .jpg y .png'));
-			return $this->redirect(['controller' => 'Students', 'action' => 'index']);					
+			
+			if (isset($origen) && $origen == "viewStudent")
+			{
+				return $this->redirect(['controller' => 'Students', 'action' => 'indexConsult']);	
+			}
+			else
+			{
+				return $this->redirect(['controller' => 'Students', 'action' => 'index']);
+			}
 		}
 		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate'));
 		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate']);

@@ -17,13 +17,23 @@ class ParentsandguardiansController extends AppController
 
     public function isAuthorized($user)
     {
-        if(isset($user['role']) and $user['role'] === 'Representante')
-        {
-            if(in_array($this->request->action, ['view', 'add', 'edit', 'profilePhoto', 'editPhoto']))
-            {
-                return true;
-            }
-        }
+		if(isset($user['role']))
+		{
+			if ($user['role'] === 'Representante')
+			{
+				if(in_array($this->request->action, ['view', 'add', 'edit', 'profilePhoto', 'editPhoto']))
+				{
+					return true;
+				}
+			}
+			if ($user['role'] === 'Control de estudios')
+			{
+				if(in_array($this->request->action, ['consultFamily', 'viewData', 'view', 'edit', 'findFamily', 'findMother', 'findGuardian']))
+				{
+					return true;
+				}				
+			}
+		}
 
         return parent::isAuthorized($user);
     }        

@@ -5,24 +5,26 @@
 	<input type="hidden" id="id-user" value=<?= $user->id ?> />
 </div>
 <div>
-	<button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">Actualizar usuario</button>
-	<div class="modal fade" id="myModal" role="dialog">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal">&times;</button>
-					<h4 class="modal-title">Actualizar usuario</h4>
-				</div>
-				<div class="modal-body">
-					<p><input type="number" id="username" value=<?= $user->username ?> class="form-control" /></p>
-				</div>
-				<div class="modal-footer">
-				  <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-				  <button id="actualizar" "type="button" class="btn btn-success" data-dismiss="modal">Actualizar</button>
+	<?php if(isset($current_user['role']) && $current_user['role'] == 'Administrador'): ?>
+		<button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">Actualizar usuario</button>
+		<div class="modal fade" id="myModal" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Actualizar usuario</h4>
+					</div>
+					<div class="modal-body">
+						<p><input type="number" id="username" value=<?= $user->username ?> class="form-control" /></p>
+					</div>
+					<div class="modal-footer">
+					  <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+					  <button id="actualizar" "type="button" class="btn btn-success" data-dismiss="modal">Actualizar</button>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	<?php endif; ?>
 	<br />
 	<br />
 	<?= $this->Html->link('Ver datos de la familia', ['action' => 'view', $idFamily], ['class' => 'btn btn-success']); ?>
@@ -31,9 +33,11 @@
 	<?= $this->Html->link('Ver alumnos', ['controller' => 'Students', 'action' => 'indexConsult', $idFamily, $family], ['class' => 'btn btn-success']); ?>
 	<br />
 	<br />
-	<?= $this->Html->link('Ver facturas', ['controller' => 'Bills' , 'action' => 'index', $idFamily, $family], ['class' => 'btn btn-success']); ?>
-	<br />
-	<br />
+	<?php if(isset($current_user['role']) && $current_user['role'] == 'Administrador'): ?>
+		<?= $this->Html->link('Ver facturas', ['controller' => 'Bills' , 'action' => 'index', $idFamily, $family], ['class' => 'btn btn-success']); ?>
+		<br />
+		<br />
+	<?php endif; ?>
 </div>
 <script>
     $(document).ready(function() 

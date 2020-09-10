@@ -24,7 +24,7 @@ class UsersController extends AppController
 
     public function isAuthorized($user)
     {
-        if(isset($user['role'])
+        if(isset($user['role']))
 		{
 			if ($user['role'] === 'Representante' || $user['role'] === 'Jefe de nómina' || $user['role'] === 'Control de estudios')
 			{

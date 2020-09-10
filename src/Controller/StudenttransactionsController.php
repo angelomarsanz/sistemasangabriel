@@ -15,6 +15,22 @@ use Cake\I18n\Time;
 
 class StudenttransactionsController extends AppController
 {
+    public function isAuthorized($user)
+    {
+		if(isset($user['role']))
+		{
+			if ($user['role'] === 'Control de estudios')
+			{
+				if(in_array($this->request->action, ['reportStudentGeneral', 'scholarshipIndex']))
+				{
+					return true;
+				}				
+			}
+		}
+
+        return parent::isAuthorized($user);
+    }        
+	
     public function testFunction()
     {
     }
