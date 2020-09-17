@@ -294,16 +294,10 @@
 											<td style="text-align: center;"><b><?= number_format($totalDescuentosRecargos, 2, ",", ".") ?></b></td>
 										</tr>
 										<tr>
-											<td><b>Menos facturas correspondientes a recibos de anticipos</b></td>
-											<td></td>
-											<td></td>
-											<td style="text-align: center;"><b><?= number_format($totalFacturasRecibos * -1, 2, ",", ".") ?></b></td>
-										</tr>
-										<tr>
 											<td><b>Diferencia (Redondeos y otras diferencias)  </b></td>
 											<td></td>
 											<td></td>
-											<td style="text-align: center;"><b><?= number_format(($totalGeneralFacturado + $totalDescuentosRecargos - $totalFacturasRecibos) - ($totalFormasPago['Total general cobrado Bs.']['montoBs'] + $totalGeneralCompensado - round($totalGeneralSobrantes * $tasaDolar, 2) - round($totalGeneralReintegrosSobrantes * $tasaDolar, 2)), 2, ",", ".") ?></b></td>
+											<td style="text-align: center;"><b><?= number_format(($totalGeneralFacturado + $totalDescuentosRecargos) - ($totalFormasPago['Total general cobrado Bs.']['montoBs'] + $totalGeneralCompensado - round($totalGeneralSobrantes * $tasaDolar, 2) - round($totalGeneralReintegrosSobrantes * $tasaDolar, 2)), 2, ",", ".") ?></b></td>
 										</tr>
 									</tbody>
 								</table>

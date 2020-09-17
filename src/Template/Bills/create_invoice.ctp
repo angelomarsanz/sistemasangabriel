@@ -2634,6 +2634,7 @@
                     $.each(response.data.students, function(key, value) 
                     {
 						julioExonerado = 0;
+						morosoAnoAnterior = 0;
 						
                         students += "<tr id=st" + value.id + " class='students'>";
                         idStudent = value.id;
@@ -2767,7 +2768,7 @@
 							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
 
 							montoDolar = dosDecimales(value2.amount_dollar);
-													
+														
 							if (paidOut == true)
 							{
 								if (montoDolar === null)

@@ -71,6 +71,8 @@
 								<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
 								<li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
 								<li><?= $this->Html->link('Histórico cambio tasa dólar y euro', ['controller' => 'Historicotasas', 'action' => 'index']) ?></li>
+								<li><?= $this->Html->link('Pagos', ['controller' => 'Bills', 'action' => 'pagosPendientesRevision']) ?></li>
+								<li><?= $this->Html->link('Facturas pendientes de impresión', ['controller' => 'Bills', 'action' => 'facturasPendientesRevision']) ?></li>
 							</ul>
 						</li>
 						<li class="dropdown">
@@ -210,6 +212,7 @@
 						</li>					
                     <?php elseif($current_user['role'] == 'Representante'): ?>
                         <li><?=  $this->Html->link('Actualizar datos', ['controller' => 'Guardiantransactions', 'action' => 'homeScreen']) ?></li>
+						<li><?=  $this->Html->link('Pagos', ['controller' => 'Studenttransactions', 'action' => 'cuotasPendientes']) ?></li>
                     <?php endif; ?>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">

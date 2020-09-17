@@ -57,36 +57,11 @@
 }
 </style>
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-12">
     	<div class="page-header">
-	        <h3>Pagos pendientes</h3>
-			<h5>
-				<?= $this->Form->create() ?>
-					<fieldset>						
-						<label for="saldo">Saldo ($):</label>
-						<input type="text" name="saldo" value="495,00" style="text-align: center">
-						<label for="a_pagar">A pagar ($):</label>
-						<input type="text" name="a_pagar" value="495,00" style="text-align: center">
-					</fieldset>
-				<?= $this->Form->end() ?>
-			</h5>
+	        <h3>Pagos pendientes por conciliar</h3>
         </div>
 		<div>
-			<h4>Alumno: RUIZ AGUILAR ÁNGEL SAMUEL </h4>
-			<?php  
-			$cuotas = 
-				['Sep 2020',
-				'Oct 2020',
-				'Nov 2020',
-				'Dic 2020',
-				'Ene 2021',
-				'Feb 2021',
-				'Mar 2021',
-				'Abr 2021',
-				'May 2021',
-				'Jun 2021',
-				'Jul 2021'];
-			?>
 			<?= $this->Form->create() ?>
 				<fieldset>
 					<div class="table-responsive">
@@ -94,31 +69,50 @@
 							<thead>
 								<tr>
 									<th scope="col">Nro.</th>
-									<th scope="col">cuota</th>
-									<th scope="col">$</th>
-									<th scope="col">€</th>
-									<th scope="col">Bs.</th>
-									<th scope="col">Seleccionar</th>
+									<th scope="col">Familia</th>
+									<th scope="col">Forma de pago</th>
+									<th scope="col">Banco</th>
+									<th scope="col">Referencia</th>
+									<th scope="col">Moneda</th>
+									<th scope="col">Monto</th>
+									<th scope="col">Detalles</th>
 								</tr>
 							</thead>
 							<tbody>
-								<?php foreach ($cuotas as $cuota): ?>
 									<tr>
 										<td>1</td>
-										<td><?= $cuota ?></td>
-										<td>45,00</td>
-										<td>51,75</td>
-										<td>16200000,00</td>
-										<td><input type="checkbox"></td>
+										<td>RUÍZ AGUILAR</td>
+										<td>Zelle</td>
+										<td>Zelle</td>
+										<td>442423</td>
+										<td>$</td>
+										<td>180,00</td>
+										<td><?= $this->Form->button(__('Detalles'), ['class' =>'btn btn-success', 'id' => 'detalles']) ?></td>
 									</tr>
-								<?php endforeach; ?>
+									<tr>
+										<td>2</td>
+										<td>SÁNCHEZ OLIVO</td>
+										<td>Transferencia bancaria nacional</td>
+										<td>Banesco</td>
+										<td>1313131</td>
+										<td>Bs.</td>
+										<td>25.000.000,00</td>
+										<td><?= $this->Form->button(__('Detalles'), ['class' =>'btn btn-success', 'id' => 'detalles']) ?></td>
+									</tr>
+									<tr>
+										<td>3</td>
+										<td>TORRES FIGUEROA</td>
+										<td>Euros</td>
+										<td>Euros</td>
+										<td>442423</td>
+										<td>€</td>
+										<td>105,00</td>
+										<td><?= $this->Form->button(__('Detalles'), ['class' =>'btn btn-success', 'id' => 'detalles']) ?></td>
+									</tr>
 							</tbody>
 						</table>
 					</div>
 				</fieldset>   
-				<?= $this->Form->button(__('Pagar'), ['class' =>'btn btn-success', 'id' => 'pagar']) ?>
-				<br />
-				<br />
 			<?= $this->Form->end() ?>
 		</div>
 	</div>

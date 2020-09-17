@@ -26,6 +26,13 @@ class StudenttransactionsController extends AppController
 					return true;
 				}				
 			}
+			if ($user['role'] === 'Representante')
+			{
+				if(in_array($this->request->action, ['cuotasPendientes']))
+				{
+					return true;
+				}				
+			}
 		}
 
         return parent::isAuthorized($user);
@@ -33,6 +40,30 @@ class StudenttransactionsController extends AppController
 	
     public function testFunction()
     {
+		/* $transaccciones = $this->Studenttransactions->find('all')
+			->where(['amount' => 45, 'original_amount' => 0]);
+			
+		$cantidadTransacciones = $transaccciones->count();
+		$this->Flash->success(__('Total transaccciones con amount_dolar igual a cero ' . $cantidadTransacciones));
+		
+		$transaccionesActualizadas = 0;
+		
+		foreach ($transaccciones as $transaccion)
+		{
+			$obtenerTransaccion = $this->Studenttransactions->get($transaccion->id);
+			
+			$obtenerTransaccion->original_amount = 45;
+
+			if (!($this->Studenttransactions->save($obtenerTransaccion)))				
+			{
+				$this->Flash->error(__('No se pudo actualizar la transacción con el ID ' . $obtenerTransaccion->id));
+			}
+			else
+			{
+				$transaccionesActualizadas++;
+			}
+		}
+		$this->Flash->success(__('Total transaccciones actualizadas ' . $transaccionesActualizadas )); */
     }
 	
     public function index()
@@ -1567,6 +1598,11 @@ class StudenttransactionsController extends AppController
     }
     public function reportLevel($level = null)
     {
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+            date_default_timezone_set('America/Caracas');
+
+        $fechaActual = Time::now();
+		
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
@@ -1605,8 +1641,8 @@ class StudenttransactionsController extends AppController
 		
 		$levelChatScript = $this->replaceChatScript($level);
 
-		$this->set(compact('school', 'studentsFor', 'level', 'totalPages', 'levelChatScript'));
-		$this->set('_serialize', ['school', 'studentsFor', 'level', 'totalPages', 'levelChatScript']);
+		$this->set(compact('school', 'studentsFor', 'level', 'totalPages', 'levelChatScript', 'fechaActual'));
+		$this->set('_serialize', ['school', 'studentsFor', 'level', 'totalPages', 'levelChatScript', 'fechaActual']);
     }
     public function replaceCharacters($level = null)
     {
@@ -3722,43 +3758,46 @@ class StudenttransactionsController extends AppController
 		{
 			$marcar = 0;
 			
-			$fechaHasta = new Time('2018-11-01 00:00:00');
+			$fechaHasta = new Time('2019-09-01 00:00:00');
 			
-			if ($transaccion->transaction_type == 'Mensualidad' && $transaccion->payment_date < $fechaHasta)
+			if ($transaccion->invoiced == 0)
 			{
-				$marcar = 1;
-				$contadorMensualidades++;
-			}
-			elseif ($transaccion->transaction_type == 'Matrícula' && $transaccion->transaction_description != 'Matrícula 2019')
-			{
-				$marcar = 1;
-				$contadorMatriculas++;
-			}
-			elseif ($transaccion->transaction_type == 'Seguro escolar' && $transaccion->transaction_description != 'Seguro escolar 2019')
-			{
-				$marcar = 1;
-				$contadorSeguro++;
-			}
-			elseif ($transaccion->transaction_type == 'Servicio educativo' && $transaccion->transaction_description != 'Servicio educativo 2019')
-			{
-				$marcar = 1;
-				$contadorServicio++;
-			}
-			
-			if ($marcar == 1)
-			{
-				$transaccionGet = $this->Studenttransactions->get($transaccion->id);
-			
-				$transaccionGet->invoiced = 1;
-			
-				if (!($this->Studenttransactions->save($transaccionGet))) 
+				if ($transaccion->transaction_type == 'Mensualidad' && $transaccion->payment_date < $fechaHasta)
 				{
-					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
+					$marcar = 1;
+					$contadorMensualidades++;
 				}
-				else
+				elseif ($transaccion->transaction_type == 'Matrícula' && $transaccion->transaction_description != 'Matrícula 2019' && $transaccion->transaction_description != 'Matrícula 2020')
 				{
-					$contadorActualizadas++;
-				} 
+					$marcar = 1;
+					$contadorMatriculas++;
+				}
+				elseif ($transaccion->transaction_type == 'Seguro escolar' && $transaccion->transaction_description != 'Seguro escolar 2019' && $transaccion->transaction_description != 'Seguro escolar 2020')
+				{
+					$marcar = 1;
+					$contadorSeguro++;
+				}
+				elseif ($transaccion->transaction_type == 'Servicio educativo' && $transaccion->transaction_description != 'Servicio educativo 2019' && $transaccion->transaction_description != 'Servicio educativo 2020')
+				{
+					$marcar = 1;
+					$contadorServicio++;
+				}
+				
+				if ($marcar == 1)
+				{
+					$transaccionGet = $this->Studenttransactions->get($transaccion->id);
+				
+					$transaccionGet->invoiced = 1;
+				
+					if (!($this->Studenttransactions->save($transaccionGet))) 
+					{
+						$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
+					}
+					else
+					{
+						$contadorActualizadas++;
+					} 
+				}
 			}
 		}
 		

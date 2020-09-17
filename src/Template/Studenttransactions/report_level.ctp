@@ -63,6 +63,7 @@
     <?php foreach ($studentsFor as $studentsFors): ?> 
         <?php if ($accountStudent == 1): ?>
             <p style="text-align: right;"><?= 'Página ' . $accountPage . ' de ' . $totalPages ?></p>
+			<p style="text-align: right;"><?= 'Fecha y hora: ' . $fechaActual->format('d-m-Y H:i:s') ?></p>
             <?php $currentSection = $studentsFors->student->section->section; ?>
             <?php $accountPage++; ?>
             <div>
@@ -95,6 +96,7 @@
                     </tbody>
                     </table>
                     <p class="saltopagina" style="text-align: right;"><?= 'Página ' . $accountPage . ' de ' . $totalPages ?></p>
+					<p style="text-align: right;"><?= 'Fecha y hora: ' . $fechaActual->format('d-m-Y H:i:s') ?></p>
                     <?php $accountPage++; ?>
                     <div>
                         <div style="float: left; width:10%;">
@@ -132,6 +134,7 @@
                 </tbody>
                 </table>
                 <p class="saltopagina" style="text-align: right;"><?= 'Página ' . $accountPage . ' de ' . $totalPages ?></p>
+				<p style="text-align: right;"><?= 'Fecha y hora: ' . $fechaActual->format('d-m-Y H:i:s') ?></p>
                 <?php $accountPage++; ?>
                 <?php $accountStudent = 1 ?>
                 <?php $currentSection = $studentsFors->student->section->section; ?>
