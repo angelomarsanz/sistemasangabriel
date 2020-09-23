@@ -566,97 +566,103 @@
 											$transferenciaDestiempo = "";
 											$cuotasAlumnoBecado = "";
 											$cambioMontoCuota = "";
-											if ($pago['tipoDocumento'] == "Factura" || $pago['tipoDocumento'] == "Recibo de anticipo"): ?> 
-												<tr>
-													<td><?= $pago['familia']; ?></td>
-													<td style="text-align: center;"><?= $pago['nroControl'] . " " . $pago['nroFactura']; ?></td>
-													<?php if ($pago['tipoDocumento'] == "Factura"): ?>
-														<td style="text-align: center;">F</td>
-													<?php else: ?>
-														<td style="text-align: center;">R</td>
-													<?php endif; ?>
-													<td style="text-align: center;"><?= number_format(round($pago['totalFacturaDolar'], 2), 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format($pago['totalFacturaBolivar'], 2, ",", ".") ?></td>
-													<?php if (isset($pago['descuentoRecargo'])): ?>
-														<td style="text-align: center;"><?= number_format($pago['descuentoRecargo'], 2, ",", ".") ?></td>
-													<?php else: ?>
-														<td style="text-align: center;">0,00</td>
-													<?php endif; ?>
-													<td style="text-align: center;"><?= number_format($pago['tasaDolar'], 2, ",", ".") . " " . number_format($pago['tasaEuro'], 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format($pago['efectivoDolar'], 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format($pago['efectivoEuro'], 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format($pago['efectivoBolivar'], 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format($pago['zelleDolar'], 2, ",", ".") ?></td>
-													<?php if (isset($pago['euros'])): ?>
-														<td style="text-align: center;"><?= number_format($pago['euros'], 2, ",", ".") ?></td>
-													<?php else: ?>
-														<td style="text-align: center;"><?= "0,00" ?></td>
-													<?php endif; ?>
-													<td style="text-align: center;"><?= number_format($pago['tddTdcBolivar'], 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>										
-													<td style="text-align: center;"><?= number_format($pago['depositoBolivar'], 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format($pago['chequeBolivar'], 2, ",", ".") ?></td>
-													<?php $cobradoBolivares = 
-														round(($pago['efectivoDolar'] + $pago['zelleDolar']) * $pago['tasaDolar'], 2) +
-														round($pago['efectivoEuro'] * $pago['tasaEuro'], 2) +
-														$pago['efectivoBolivar'] + 
-														$pago['tddTdcBolivar'] + 
-														$pago['transferenciaBolivar'] +
-														$pago['depositoBolivar'] +
-														$pago['chequeBolivar']; 
-														if (isset($pago['euros'])): 
-															$cobradoBolivares += round($pago['euros'] * $pago['tasaEuro'], 2); 
-														endif; ?>														
-													<td style="text-align: center;"><?= number_format($cobradoBolivares, 2, ",", ".") ?></td>
-													<?php $compensado = round($pago['compensadoDolar'] * $pago['tasaDolar'], 2); ?>
-													<td style="text-align: center;"><?= number_format($compensado, 2, ",", ".") ?></td>
-													<?php if (isset($pago['descuentoRecargo'])):
-														$diferencia = ($pago['totalFacturaBolivar'] + $pago['descuentoRecargo']) - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));
-													else: 
-														$diferencia = $pago['totalFacturaBolivar'] - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));													
-													endif; ?>
-													<td style="text-align: center;"><?= number_format($diferencia, 2, ",", ".") ?></td>
-													<?php if (isset($pago['tasaTemporalDolar'])):
-														if ($pago['tasaTemporalDolar'] == 1):
-															$transferenciaDestiempo = "T";
+											$facturaDeAnticipo = 0;
+											if (isset($pago['facturaDeAnticipo'])):
+												$facturaDeAnticipo = $pago['facturaDeAnticipo'];
+											endif;
+											if ($facturaDeAnticipo == 0):
+												if ($pago['tipoDocumento'] == "Factura" || $pago['tipoDocumento'] == "Recibo de anticipo"): ?> 
+													<tr>
+														<td><?= $pago['familia']; ?></td>
+														<td style="text-align: center;"><?= $pago['nroControl'] . " " . $pago['nroFactura']; ?></td>
+														<?php if ($pago['tipoDocumento'] == "Factura"): ?>
+															<td style="text-align: center;">F</td>
+														<?php else: ?>
+															<td style="text-align: center;">R</td>
+														<?php endif; ?>
+														<td style="text-align: center;"><?= number_format(round($pago['totalFacturaDolar'], 2), 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($pago['totalFacturaBolivar'], 2, ",", ".") ?></td>
+														<?php if (isset($pago['descuentoRecargo'])): ?>
+															<td style="text-align: center;"><?= number_format($pago['descuentoRecargo'], 2, ",", ".") ?></td>
+														<?php else: ?>
+															<td style="text-align: center;">0,00</td>
+														<?php endif; ?>
+														<td style="text-align: center;"><?= number_format($pago['tasaDolar'], 2, ",", ".") . " " . number_format($pago['tasaEuro'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($pago['efectivoDolar'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($pago['efectivoEuro'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($pago['efectivoBolivar'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($pago['zelleDolar'], 2, ",", ".") ?></td>
+														<?php if (isset($pago['euros'])): ?>
+															<td style="text-align: center;"><?= number_format($pago['euros'], 2, ",", ".") ?></td>
+														<?php else: ?>
+															<td style="text-align: center;"><?= "0,00" ?></td>
+														<?php endif; ?>
+														<td style="text-align: center;"><?= number_format($pago['tddTdcBolivar'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>										
+														<td style="text-align: center;"><?= number_format($pago['depositoBolivar'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($pago['chequeBolivar'], 2, ",", ".") ?></td>
+														<?php $cobradoBolivares = 
+															round(($pago['efectivoDolar'] + $pago['zelleDolar']) * $pago['tasaDolar'], 2) +
+															round($pago['efectivoEuro'] * $pago['tasaEuro'], 2) +
+															$pago['efectivoBolivar'] + 
+															$pago['tddTdcBolivar'] + 
+															$pago['transferenciaBolivar'] +
+															$pago['depositoBolivar'] +
+															$pago['chequeBolivar']; 
+															if (isset($pago['euros'])): 
+																$cobradoBolivares += round($pago['euros'] * $pago['tasaEuro'], 2); 
+															endif; ?>														
+														<td style="text-align: center;"><?= number_format($cobradoBolivares, 2, ",", ".") ?></td>
+														<?php $compensado = round($pago['compensadoDolar'] * $pago['tasaDolar'], 2); ?>
+														<td style="text-align: center;"><?= number_format($compensado, 2, ",", ".") ?></td>
+														<?php if (isset($pago['descuentoRecargo'])):
+															$diferencia = ($pago['totalFacturaBolivar'] + $pago['descuentoRecargo']) - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));
+														else: 
+															$diferencia = $pago['totalFacturaBolivar'] - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));													
+														endif; ?>
+														<td style="text-align: center;"><?= number_format($diferencia, 2, ",", ".") ?></td>
+														<?php if (isset($pago['tasaTemporalDolar'])):
+															if ($pago['tasaTemporalDolar'] == 1):
+																$transferenciaDestiempo = "T";
+															endif;
 														endif;
+														if (isset($pago['tasaTemporalEuro'])):
+															if ($pago['tasaTemporalEuro'] == 1):
+																$transferenciaDestiempo = "T";
+															endif;
+														endif;
+														if (isset($pago['cuotasAlumnoBecado'])):
+															if ($pago['cuotasAlumnoBecado'] > 0):
+																$cuotasAlumnoBecado = "C";
+															endif;
+														endif;
+														if (isset($pago['cambioMontoCuota'])):
+															if ($pago['cambioMontoCuota'] == 1):
+																$cambioMontoCuota = "M";
+															endif;
+														endif; ?>
+														<td style="text-align: center;"><?= $transferenciaDestiempo . $cuotasAlumnoBecado . $cambioMontoCuota; ?></td>
+													</tr>
+													<?php $totalFacturaDolar += $pago['totalFacturaDolar'];  
+													$totalFacturaBolivar += $pago['totalFacturaBolivar']; 
+													if (isset($pago['descuentoRecargo'])): 
+														$totalDescuentosRecargosFA += $pago['descuentoRecargo'];
 													endif;
-													if (isset($pago['tasaTemporalEuro'])):
-														if ($pago['tasaTemporalEuro'] == 1):
-															$transferenciaDestiempo = "T";
-														endif;
-													endif;
-													if (isset($pago['cuotasAlumnoBecado'])):
-														if ($pago['cuotasAlumnoBecado'] > 0):
-															$cuotasAlumnoBecado = "C";
-														endif;
-													endif;
-													if (isset($pago['cambioMontoCuota'])):
-														if ($pago['cambioMontoCuota'] == 1):
-															$cambioMontoCuota = "M";
-														endif;
-													endif; ?>
-													<td style="text-align: center;"><?= $transferenciaDestiempo . $cuotasAlumnoBecado . $cambioMontoCuota; ?></td>
-												</tr>
-												<?php $totalFacturaDolar += $pago['totalFacturaDolar'];  
-												$totalFacturaBolivar += $pago['totalFacturaBolivar']; 
-												if (isset($pago['descuentoRecargo'])): 
-													$totalDescuentosRecargosFA += $pago['descuentoRecargo'];
+													$totalEfectivoDolar += $pago['efectivoDolar'];
+													$totalEfectivoEuro += $pago['efectivoEuro'];
+													$totalEfectivoBolivar += $pago['efectivoBolivar'];
+													$totalZelle += $pago['zelleDolar'];
+													if (isset($pago['euros'])):
+														$totalEuros += $pago['euros'];
+													endif; 
+													$totalTdbTdc += $pago['tddTdcBolivar'];
+													$totalTransferencias += $pago['transferenciaBolivar'];
+													$totalDepositos += $pago['depositoBolivar'];
+													$totalCheques += $pago['chequeBolivar'];
+													$totalCobradoBolivares += $cobradoBolivares;
+													$totalCompensado += $compensado;
+													$totalDiferencia += $diferencia;
 												endif;
-												$totalEfectivoDolar += $pago['efectivoDolar'];
-												$totalEfectivoEuro += $pago['efectivoEuro'];
-												$totalEfectivoBolivar += $pago['efectivoBolivar'];
-												$totalZelle += $pago['zelleDolar'];
-												if (isset($pago['euros'])):
-													$totalEuros += $pago['euros'];
-												endif; 
-												$totalTdbTdc += $pago['tddTdcBolivar'];
-												$totalTransferencias += $pago['transferenciaBolivar'];
-												$totalDepositos += $pago['depositoBolivar'];
-												$totalCheques += $pago['chequeBolivar'];
-												$totalCobradoBolivares += $cobradoBolivares;
-												$totalCompensado += $compensado;
-												$totalDiferencia += $diferencia;
 											endif;
 										endforeach; ?>
 										<tr>
