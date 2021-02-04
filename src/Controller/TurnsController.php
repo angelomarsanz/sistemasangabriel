@@ -1874,6 +1874,7 @@ class TurnsController extends AppController
 		$contadorNumero = 1;
 		$montoFacturaBolivares = 0;
 		$montoFacturaDolares = 0;
+		$transferenciaDestiempo = '';
 					
 		$turn = $this->Turns->get($id);
             
@@ -1902,6 +1903,7 @@ class TurnsController extends AppController
 		{
 			foreach ($pagosFacturas as $pago)
 			{				
+				$transferenciaDestiempo = '';
 				if ($factura->id == $pago->bill->id)
 				{		
 					if ($factura->moneda_id == 1)
@@ -1918,6 +1920,11 @@ class TurnsController extends AppController
 					{
 						$montoFacturaBolivares = round($factura->amount_paid * $factura->tasa_euro, 2);
 						$montoFacturaDolares = round($factura->amount_paid * $factura->tasa_dolar_euro, 2);
+					}
+					
+					if ($factura->tasa_temporal_dolar == 1 || $factura->tasa_temporal_euro == 1)
+					{
+						$transferenciaDestiempo = "Sí";
 					}
 					
 					$vectorPagos[$contador] = 
@@ -1945,7 +1952,8 @@ class TurnsController extends AppController
 						'bancoReceptor' => $pago->banco_receptor,
 						'cuentaTarjeta' => $pago->account_or_card,
 						'serial' => $pago->serial,
-						'comentario' => $pago->comentario];
+						'comentario' => $pago->comentario,
+						'transferenciaDestiempo' => $transferenciaDestiempo];
 
 					$contadorNumero++;
 

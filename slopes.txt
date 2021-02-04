@@ -52,4 +52,7 @@ la tarifa de Matrìcula y agosto del pròximo año escolar, las cuotas aparecen 
 cobranza y el usuario debe modificarlas al monto de la matrìcula y agosto. Al iniciarse el nuevo año escolar, le 
 aparecerà como si debe esa cuota. Se debe idear un mecanismo para que esto no suceda
 
+--
+En la tabla transacciones amount_dollar es el monto abonado a la cuota
+
 

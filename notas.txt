@@ -1,0 +1,6 @@
+En xampp\htdocs\sistemasangabriel\src\Template\Layout\default.ctp se invoca la rutina imprimir() del template menu.ctp una vez que el navegador ha enviado a imprimir la factura
+En la función imprimir si se está posicionado en la vista bills/invoice se llama a la rutina bills/verificarFacturas 
+En la función verificarFacturas se chequea si el usuario activo tiene otra factura por imprimir, si tiene se llama a la acción bills/invoice nuevamente
+En la acción bills/invoice se verifica si quien llamó esa acción es verificarFacturas, si no es, entonces se busca si hay facturas por imprimir de cualquier usuario 
+Si hay facturas por imprimir de otro usuario y es menor el número de control, se muestra un mensaje de que debe esperar a que el otro usuario imprima la factura
+Si quien llamó la acción bills/invoice es verificarFacturas y no hay ningún mensaje pendiente por imprimir entonces se muestra el mensaje que debe imprimir esa factura ahora

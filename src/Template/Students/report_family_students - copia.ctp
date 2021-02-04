@@ -58,6 +58,8 @@
 <div>
 	<?php $accountRecords = 0; ?>
 	<?php foreach ($familyStudents as $familyStudent): ?>
+		<?php if (isset($arraySignedUp[$familyStudent->id])): ?>
+			<!-- <?php if ($arraySignedUp[$familyStudent->id] == "Pagado"): ?> -->
 				<?php 
 					$lastYearRegistration = $familyStudent->balance;		
 					if ($familyStudent->student_condition == "Regular"):
@@ -348,6 +350,8 @@
 						<td class=<?= $arrayMark['Parentsandguardians.email_mother'] ?>><?= $familyStudent->parentsandguardian->email_mother ?></td>
 					</tr>
 				<?php endif; ?>
+			<!-- <?php endif; ?> -->
+		<?php endif; ?>
 	<?php endforeach ?>
 	</tbody>
 	</table>

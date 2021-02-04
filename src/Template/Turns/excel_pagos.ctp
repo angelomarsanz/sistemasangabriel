@@ -50,7 +50,7 @@
 								<thead>
 									<tr>
 										<th style="text-align: center">Nro</th>
-										<th style="text-align: center">Fecha y hora</th>
+										<th style="text-align: center">Fecha</th>
 										<th style="text-align: center">Factura</th>
 										<th style="text-align: center">Control</th>
 										<th style="text-align: center;">Tipo documento</th>
@@ -71,6 +71,7 @@
 										<th style="text-align: center">Banco receptor</th>
 										<th style="text-align: center">Cuenta o tarjeta</th>
 										<th style="text-align: center">Serial</th>
+										<th style="text-align: center">Destiempo</th>
 										<th style="text-align: center">Comentario</th>
 									</tr>
 								</thead>
@@ -78,7 +79,7 @@
 									<?php foreach ($vectorPagos as $pago): ?> 
 										<tr>
 											<td style="text-align: center"><?= $pago['Nro'] ?></td>
-											<td style="text-align: center"><?= $pago['fechaHora']->format('d-m-Y H:i:s') ?></td>
+											<td style="text-align: center"><?= $pago['fechaHora']->format('d/m/Y') ?></td>
 											<td style="text-align: center"><?= $pago['nroFactura'] ?></td>
 											<td style="text-align: center"><?= $pago['nroControl'] ?></td>
 											<td><?= $pago['tipoDocumento']; ?></td>
@@ -103,6 +104,7 @@
 											<td style="text-align: center"><?= $pago['bancoReceptor'] ?></td>
 											<td style="text-align: center"><?= $pago['cuentaTarjeta'] ?></td>
 											<td style="text-align: center"><?= $pago['serial'] ?></td>
+											<td style="text-align: center"><?= $pago['transferenciaDestiempo'] ?></td>
 											<td style="text-align: center"><?= $pago['comentario'] ?></td>		
 										</tr> 
 									<?php endforeach; ?>

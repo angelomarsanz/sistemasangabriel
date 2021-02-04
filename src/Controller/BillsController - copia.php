@@ -33,141 +33,27 @@ class BillsController extends AppController
 
     public function testFunction()
     {
-		/* $binnacles = new BinnaclesController;
-		
-		$this->loadModel('Binnacles');
-		
-		$vectorSaldoFavor = [];
-
-		$vectorSaldoFavor[] = 
-			['id' => 1, 
-			'tipoDocumento' => 'Recibo de sobrante',
-			'montoDocumento' => 10,
-			'montoReintegrado' => 0,
-			'montoCompensado' => 0,
-			'anulado' => 0];
-			
-		echo "<br />Vector original<br /><br />";
-		var_dump($vectorSaldoFavor);
-		
-		$jsonSaldoFavor = json_encode($vectorSaldoFavor);
-	
-		$binnacles->add('controller', 'Bills', 'testFucntion', $jsonSaldoFavor);
-		
-		$registrosBitacora = $this->Binnacles->find('all', ['order' => ['id' => 'DESC']]);
-
-		$ultimoRegistro = $registrosBitacora->first();
-			
-		$vectorSaldoFavor = json_decode($ultimoRegistro->novelty, true);
-		
-		foreach ($vectorSaldoFavor as $favor)
-		{
-			echo "<br />idFavor " . $favor['id'] . "<br /><br />";			
-		}
-		
-		$vectorSaldoFavor[] = 
-			['id' => 2, 
-			'tipoDocumento' => 'Recibo de sobrante',
-			'montoDocumento' => 5,
-			'montoReintegrado' => 0,
-			'montoCompensado' => 0,
-			'anulado' => 0];
-			
-		echo "<br />Se agregó elemento<br /><br />";
-		var_dump($vectorSaldoFavor);
-			
-		$jsonSaldoFavor = json_encode($vectorSaldoFavor);
-	
-		$binnacles->add('controller', 'Bills', 'testFucntion', $jsonSaldoFavor);
-	
-		$registrosBitacora = $this->Binnacles->find('all', ['order' => ['id' => 'DESC']]);
-
-		$ultimoRegistro = $registrosBitacora->first();	
-		
-		$objetoSaldoFavor = json_decode($ultimoRegistro->novelty);
-				
-		echo "<br />Objeto recuperado<br /><br />";
-		var_dump($objetoSaldoFavor);
-			
-		foreach ($objetoSaldoFavor as $objeto)
-		{
-			if ($objeto->id == 1)
-			{
-				$objeto->montoCompensado = 10;
-			}
-			
-			if ($objeto->id == 2)
-			{
-				$objeto->anulado = 1;
-			}
-		}
-		
-		echo "<br />Objeto modificado<br /><br />";
-		var_dump($objetoSaldoFavor); 
-		
-		$vectorSaldoFavor = (array) $objetoSaldoFavor;
-		
-		echo "<br />Objeto convertido a vector<br /><br />";
-		var_dump($vectorSaldoFavor); 
-		
-		$jsonSaldoFavor = json_encode($vectorSaldoFavor);
-	
-		$binnacles->add('controller', 'Bills', 'testFucntion', $jsonSaldoFavor);
-		
-		$registrosBitacora = $this->Binnacles->find('all', ['order' => ['id' => 'DESC']]);
-
-		$ultimoRegistro = $registrosBitacora->first();	
-		
-		$vectorSaldoFavor = json_decode($ultimoRegistro->novelty, true);
-		
-		echo "<br />Vector recuperado de la BD<br /><br />";
-		var_dump($vectorSaldoFavor); */		
     }
 	
 	public function testFunction2()
 	{
-		/* $contadorRecibosSobrantes = 0;
-		$contadorCoincidentes = 0;
-		$contadorNoCoincidentes = 0;
-		
-		$recibosSobrantes = $this->Bills->find('all', 
-			['conditions' => 
-			['tipo_documento' => 'Recibo de sobrante',
-			'annulled' => 0],
-			'order' => ['Bills.id' => 'DESC']]);
-			
-		$contadorRecibosSobrantes = $recibosSobrantes->count();
-			
-		if ($contadorRecibosSobrantes > 0)
-		{	
-			foreach ($recibosSobrantes as $recibo)
+
+	}
+
+    public function isAuthorized($user)
+    {
+		if(isset($user['role']))
+		{
+			if ($user['role'] === 'Representante')
 			{
-				$reciboSobrante = $this->Bills->get($recibo->id);
-				
-				$representante = $this->Bills->Parentsandguardians->get($recibo->parentsandguardian_id);
-				
-				if ($representante->balance == $reciboSobrante->amount_paid)
+				if(in_array($this->request->action, ['pagoRealizado', 'comprobante']))
 				{
-					$contadorCoincidentes++;
-					$this->Flash->success(__(' idRepresentante ' . $reciboSobrante->parentsandguardian_id . ' saldoRepresentante ' . $representante->balance . ' idReciboSobrante ' . $reciboSobrante->id . ' montoRecibo ' . $reciboSobrante->amount_paid));
-				}
-				else
-				{
-					$contadorNoCoincidentes++;
-					$reciboSobrante->reintegro_sobrante = $reciboSobrante->amount_paid;
-					
-					if (!($this->Bills->save($reciboSobrante))) 
-					{
-						$this->Flash->error(__('No se pudo actualizar el recibo de sobrante con el id : ' . $reciboSobrante->id));           
-					}
-				}			
+					return true;
+				}				
 			}
 		}
-		
-		$this->Flash->success(__('Coincidentes ' . $contadorCoincidentes));
-		$this->Flash->success(__('No coincidentes ' . $contadorNoCoincidentes));
-		$this->Flash->success(__('Total recibos sobrantes ' . $contadorRecibosSobrantes)); */
-	}
+        return parent::isAuthorized($user);
+    }        
 	
     public function index($idFamily = null, $family = null)
     {
@@ -410,7 +296,13 @@ class BillsController extends AppController
 			'conditions' => ['tipo_banco' => 'Receptor'],
 			'order' => ['nombre_banco' => 'ASC'],
 			'keyField' => 'nombre_banco']);
-				
+			
+		$this->loadModel('Schools');
+		$school = $this->Schools->get(2);	
+		
+		$anoEscolarActual = $school->current_school_year; 
+		$anoEscolarInscripcion = $school->current_year_registration; 
+		
 		$this->loadModel('Rates');
 		
 		$this->loadModel('Monedas');	
@@ -420,7 +312,7 @@ class BillsController extends AppController
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar; 
 				
-        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'amountMonthly', 'bancosEmisor', 'bancosReceptor'));
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'amountMonthly', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual', 'anoEscolarInscripcion'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)
@@ -2610,5 +2502,33 @@ class BillsController extends AppController
 				$this->Flash->error(__('Estimado usuario no se pudo crear el recibo de compra'));
 			}
 		}
+	}
+	public function pagoRealizado()
+	{
+		
+	}
+	public function comprobante()
+	{
+		
+	}
+	public function pagosPendientesRevision()
+	{
+		
+	}
+	public function detallePagoRealizado()
+	{
+		
+	}
+	public function facturaPendienteImpresion()
+	{
+		
+	}
+	public function listadoFacturasPorImprimir()
+	{
+		
+	}
+	public function actualizarTasasDivisas()
+	{
+		
 	}
 }
