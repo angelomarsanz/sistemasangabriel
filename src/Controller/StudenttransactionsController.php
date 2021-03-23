@@ -154,8 +154,8 @@ class StudenttransactionsController extends AppController
 		{
 			$studenttransaction->amount_dollar += $transaccion->montoAPagarDolar;
 		}
-				
-		$studenttransaction->original_amount = $transaccion->tarifaDolarOriginal;
+		
+		$studenttransaction->original_amount = $transaccion->tarifaDolarOriginal;	
 		$studenttransaction->amount = $transaccion->tarifaDolar;
 		
 		if ($transaccion->tarifaDolarOriginal != $transaccion->tarifaDolar)

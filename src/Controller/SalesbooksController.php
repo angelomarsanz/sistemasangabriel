@@ -168,30 +168,30 @@ class SalesbooksController extends AppController
 				if ($contador == 0)
 				{
 					$facturaAnterior = $invoicesBill->control_number;
-				}
-				$contadorControlFacturas = $invoicesBill->control_number - $facturaAnterior;
-				if ($contadorControlFacturas > 1)
-				{						
-					while ($contadorControlFacturas > 1)
-					{
-						$facturaAnterior++;
-						$codigoRetorno = $this->crearRegistroLibro($invoicesBill, $facturaAnterior);
-						if ($codigoRetorno == 1)
-						{
-							$errorBill = 1;
-							break;
-						}
-						$contadorControlFacturas--;
-					}
-				}
-				$codigoRetorno = $this->crearRegistroLibro($invoicesBill, 0);
-				if ($codigoRetorno == 1)
-				{
-					$errorBill = 1;
-					break;
-				}
-				$facturaAnterior = $invoicesBill->control_number;				
-				$contador++;
+                }
+                $contadorControlFacturas = $invoicesBill->control_number - $facturaAnterior;
+                if ($contadorControlFacturas > 1 && $facturaAnterior != 0)
+                {						
+                    while ($contadorControlFacturas > 1)
+                    {
+                        $facturaAnterior++;
+                        $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $facturaAnterior);
+                        if ($codigoRetorno == 1)
+                        {
+                            $errorBill = 1;
+                            break;
+                        }
+                        $contadorControlFacturas--;
+                    }
+                }
+                $codigoRetorno = $this->crearRegistroLibro($invoicesBill, 0);
+                if ($codigoRetorno == 1)
+                {
+                    $errorBill = 1;
+                    break;
+                }
+                $facturaAnterior = $invoicesBill->control_number;				
+                $contador++;
 			}
 
             if ($errorBill == 0)  
@@ -244,7 +244,15 @@ class SalesbooksController extends AppController
 			$salesbook->nota_credito = "";
 			$salesbook->factura_afectada = "";
 			$salesbook->numero_control = $controlSinFactura;			
-		}
+        }
+		elseif ($invoicesBill->control_number == 0)
+		{
+			$salesbook->numero_factura = $invoicesBill->bill_number;
+			$salesbook->nota_debito = "";
+			$salesbook->nota_credito = "";
+			$salesbook->factura_afectada = "";
+			$salesbook->numero_control = 'Sin control';			
+        }
 		elseif ($invoicesBill->tipo_documento == "Factura")
 		{
 			$salesbook->numero_factura = $invoicesBill->bill_number;
@@ -281,7 +289,14 @@ class SalesbooksController extends AppController
 			$salesbook->total_ventas_mas_impuesto = 0;
 			$salesbook->ventas_exoneradas = 0;
 		}        				
-		elseif ($invoicesBill->annulled == false )
+		elseif ($invoicesBill->control_number == 0)
+		{
+			$salesbook->cedula_rif = "";
+			$salesbook->nombre_razon_social = "ANULADA";
+			$salesbook->total_ventas_mas_impuesto = 0;
+			$salesbook->ventas_exoneradas = 0;
+		}        				
+        elseif ($invoicesBill->annulled == false )
 		{
 			$salesbook->cedula_rif = $invoicesBill->identification;
 			$salesbook->nombre_razon_social = $invoicesBill->client;

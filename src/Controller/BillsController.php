@@ -551,6 +551,8 @@ class BillsController extends AppController
 				{
 					foreach ($facturas as $factura)
 					{
+						// Nota: El problema que se presenta cuando un usuario consulta una factura o va reimprimir y le aparece la factura de otro usuario es
+						// porque no se considera la posibilidad de que haya una factura con número de control mayor
 						if ($factura->user_id != $this->Auth->user('id') && $factura->bill_number < $bill_number)
 						{
 							$facturaOtroCajero = 1;
@@ -564,31 +566,40 @@ class BillsController extends AppController
 						return $this->redirect(['action' => 'imprimirFactura', $bill_number, $idParentsandguardian, $idFactura, $mensaje]);
 					}
 					else
-					{					
-						$facturaAnterior = $facturas->first();
-						
-						if ($facturaAnterior->tipo_documento == "Factura")
-						{
-							$documento = "esta factura";
+					{		
+						// Para solucionar el problema se debe usar un foreach e ir descartando si las facturas son de otro usuario. La que no sea de otro usuario se 
+						// obliga a imprimir
+						foreach ($facturas as $factura)
+						{		
+							if ($factura->user_id == $this->Auth->user('id'))
+							{	
+								$facturaAnterior = $factura;
+							
+								if ($facturaAnterior->tipo_documento == "Factura")
+								{
+									$documento = "esta factura";
+								}
+								elseif (substr($facturaAnterior->tipo_documento, 0, 6) == "Recibo")
+								{
+									$documento = "este recibo";
+								}
+								elseif ($facturaAnterior->tipo_documento == "Nota de crédito")
+								{
+									$documento = "esta nota de crédito";
+								}
+								else
+								{
+									$documento = "esta nota de débito";
+								}
+								
+								$mensajeUsuario = "Estimado usuario " . $documento . " con el Nro. " . $facturaAnterior->bill_number . " se debe imprimir primero y luego podrá continuar con la cobranza";	
+								
+								$idFactura = $facturaAnterior->id;
+								$reimpresion = 0;
+								$idParentsandguardian = $facturaAnterior->parentsandguardian_id;
+								break;
+							}
 						}
-						elseif (substr($facturaAnterior->tipo_documento, 0, 6) == "Recibo")
-						{
-							$documento = "este recibo";
-						}
-						elseif ($facturaAnterior->tipo_documento == "Nota de crédito")
-						{
-							$documento = "esta nota de crédito";
-						}
-						else
-						{
-							$documento = "esta nota de débito";
-						}
-						
-						$mensajeUsuario = "Estimado usuario " . $documento . " con el Nro. " . $facturaAnterior->bill_number . " se debe imprimir primero y luego podrá continuar con la cobranza";	
-						
-						$idFactura = $facturaAnterior->id;
-						$reimpresion = 0;
-						$idParentsandguardian = $facturaAnterior->parentsandguardian_id;
 					}
 				}				
 			}

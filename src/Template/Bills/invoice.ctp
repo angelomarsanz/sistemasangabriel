@@ -670,6 +670,7 @@
 		<?php endforeach; ?>
 	</div>
 <?php endif; ?>
+<button class='nover btn btn-success' onclick='imprimirPantalla()'>Imprimir</button> 
 <script>
     $(document).ready(function()
     {

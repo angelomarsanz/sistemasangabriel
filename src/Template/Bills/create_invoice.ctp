@@ -1258,11 +1258,11 @@
 			saldoNotaCredito = saldoNotaCredito + montoPendienteDolar;
 		}
 		
-		// Eliminar este condición cuando se hagan todas las notas de crédito SUNDDE 2019
-		if (monthlyPayment == "Ago 2020" && montoDolar == 40)
+		// Esta condición se utilizó para atender la denuncia de la SUNDDE, está sin efecto. Por esa razón se comentó 
+		/* if (monthlyPayment == "Ago 2020" && montoDolar == 40)
 		{
 			saldoNotaCredito = saldoNotaCredito - 10;
-		}
+		} */
     }
     
     function insertRecordPayments() // Get value from Input and insert record . Function Call when Save/Submit Button Click..

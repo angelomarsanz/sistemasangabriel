@@ -231,6 +231,12 @@
 	gNumeroControl = "<?= $numeroControl ?>";
 	gIndicadorImpresa = "<?= $indicadorImpresa ?>";
 	gReimpresion = "<?= $reimpresion ?>";
+
+	console.log('gVista ' + gVista);
+	console.log('gIdFactura ' + gIdFactura);
+	console.log('gNumeroControl ' + gNumeroControl);
+	console.log('gIndicadorImpresa ' + gIndicadorImpresa);
+	console.log('gReimpresion ' + gReimpresion);
 	
 	// Funciones
 	
@@ -267,10 +273,56 @@
 	
 	function imprimirFacturaRecibo()
 	{
+		console.log('imprimirFacturaRecibo');
+
 		var r = confirm("Estimado usuario por favor coloque en la impresora el papel fiscal con el Nro. de control *** " + gNumeroControl + " ***.");
 		if (r == false)
 		{
 			return false;
+		}
+		else
+		{
+			window.print();
+			return false;
+		}
+	}
+
+	function imprimirPantalla()
+	{
+		console.log('imprimirPantalla');
+		if (gVista == "invoice")
+		{
+			if (gIndicadorImpresa == 1)
+			{
+				if (gReimpresion == 1)
+				{
+					var r = confirm("Estimado usuario esta factura ya está impresa en papel fiscal con el Nro. de control *** " + gNumeroControl + " ***. Por favor verifique antes de continuar. Si está seguro de reimprimir pulse el botón ACEPTAR de lo contrario CANCELAR");
+					if (r == false)
+					{
+						window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
+						return false;
+					}
+					else
+					{
+						imprimirFacturaRecibo();
+					}
+				}
+				else
+				{
+					alert("Estimado usuario esta factura ya está impresa en papel fiscal con el Nro. de control *** " + gNumeroControl + " ***.");
+					window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
+					return false;
+				}
+			}
+			else
+			{
+				imprimirFacturaRecibo();
+			}
+		}
+		else if (gVista == "turnsEdit")
+		{
+			alert("Estimado usuario no puede imprimir el reporte de cierre si no ha cerrado el turno");
+			return false;		
 		}
 		else
 		{
@@ -286,46 +338,9 @@
 		$('#imprimir-pantalla').click(function(e){
 			
 			e.preventDefault();
-					
-			if (gVista == "invoice")
-			{
-				if (gIndicadorImpresa == 1)
-				{
-					if (gReimpresion == 1)
-					{
-						var r = confirm("Estimado usuario esta factura ya está impresa en papel fiscal con el Nro. de control *** " + gNumeroControl + " ***. Por favor verifique antes de continuar. Si está seguro de reimprimir pulse el botón ACEPTAR de lo contrario CANCELAR");
-						if (r == false)
-						{
-							window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
-							return false;
-						}
-						else
-						{
-							imprimirFacturaRecibo();
-						}
-					}
-					else
-					{
-						alert("Estimado usuario esta factura ya está impresa en papel fiscal con el Nro. de control *** " + gNumeroControl + " ***.");
-						window.location="<?php echo Router::url(["controller" => "Bills", "action" => "retornoImpresion"]); ?>";
-						return false;
-					}
-				}
-				else
-				{
-					imprimirFacturaRecibo();
-				}
-			}
-			else if (gVista == "turnsEdit")
-			{
-				alert("Estimado usuario no puede imprimir el reporte de cierre si no ha cerrado el turno");
-				return false;		
-			}
-			else
-			{
-				window.print();
-				return false;
-			}
+
+			console.log('imprimir-pantalla');
+			imprimirPantalla();					
 		});
 	});
 </script>     

@@ -1549,6 +1549,8 @@ class StudentsController extends AppController
     
     public function filepdf($id = null, $origen = null)
     {
+		$ultimoAnoInscripcion = 0;
+
 		$this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
@@ -1583,6 +1585,12 @@ class StudentsController extends AppController
 		
 		if ($indicadorDescarga == 1)
 		{
+			$matriculasEstudiante = $this->Students->Studenttransactions->find('all')->where(['student_id' => $id, 'transaction_type' => 'Matrícula'])->order(['id' => 'DESC']);
+
+			$ultimaMatricula = $matriculasEstudiante->first();
+
+			$ultimoAnoInscripcion =  substr($ultimaMatricula->transaction_description, 11, 4);
+
 			$brothers = $this->Students->find('all')->where(['parentsandguardian_id' => $student->parentsandguardian_id, 'id !=' => $id]);
 
 			$brothersArray = $brothers->toArray();
@@ -1621,8 +1629,8 @@ class StudentsController extends AppController
 				return $this->redirect(['controller' => 'Students', 'action' => 'index']);
 			}
 		}
-		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate'));
-		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate']);
+		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate', 'ultimoAnoInscripcion'));
+		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate', 'ultimoAnoInscripcion']);
     }
     
     public function cardboardpdf($id = null)
@@ -1940,6 +1948,10 @@ class StudentsController extends AppController
 											if ($mesesTarifa["anoMes"] == $yearMonth)
 											{
 												$tarifaDolarAnoMes = $mesesTarifa["tarifaDolar"];
+												if ($studentsFors->discount > 0)
+												{
+													$tarifaDolarAnoMes = ($tarifaDolarAnoMes * $studentsFors->discount) / 100;
+												}
 												break;
 											}
 										}
@@ -1972,7 +1984,7 @@ class StudentsController extends AppController
 						
 						$defaulters[$accountantManager]['section'] = $nameSection->full_name;
 						
-						$arrayGeneral = $this->addCounter($defaulters, $accountantManager, $tDefaulters, $delinquentMonths, $wholeYear, $scholarship);
+						$arrayGeneral = $this->addCounter($defaulters, $accountantManager, $tDefaulters, $delinquentMonths, $wholeYear, $scholarship, $studentsFors->full_name);
 						
 						$defaulters = $arrayGeneral[0];
 						
@@ -1984,7 +1996,7 @@ class StudentsController extends AppController
 					{
 						if ($previousSection == $studentsFors->section_id)
 						{				
-							$arrayGeneral = $this->addCounter($defaulters, $accountantManager, $tDefaulters, $delinquentMonths, $wholeYear, $scholarship);
+							$arrayGeneral = $this->addCounter($defaulters, $accountantManager, $tDefaulters, $delinquentMonths, $wholeYear, $scholarship, $studentsFors->full_name);
 						
 							$defaulters = $arrayGeneral[0];
 						
@@ -2009,7 +2021,7 @@ class StudentsController extends AppController
 							$defaulters[$accountantManager]['prepaid'] = 0;	
 							$defaulters[$accountantManager]['scholarship'] = 0;
 
-							$arrayGeneral = $this->addCounter($defaulters, $accountantManager, $tDefaulters, $delinquentMonths, $wholeYear, $scholarship);
+							$arrayGeneral = $this->addCounter($defaulters, $accountantManager, $tDefaulters, $delinquentMonths, $wholeYear, $scholarship, $studentsFors->full_name);
 						
 							$defaulters = $arrayGeneral[0];
 						
@@ -2024,7 +2036,7 @@ class StudentsController extends AppController
 		$this->set(compact('school', 'defaulters', 'tDefaulters', 'totalDebt', 'currentDate'));
 	}
 	
-	public function addCounter($defaulters = null, $accountantManager = null, $tDefaulters = null, $delinquentMonths = null, $wholeYear = null, $scholarship = null)
+	public function addCounter($defaulters = null, $accountantManager = null, $tDefaulters = null, $delinquentMonths = null, $wholeYear = null, $scholarship = null, $alumno = null)
 	{
 		if ($scholarship == 1)
 		{
@@ -2068,8 +2080,10 @@ class StudentsController extends AppController
 					default:
 						$defaulters[$accountantManager]['fiveMore']++;
 						$tDefaulters[0]['fiveMore']++;
+						break;
 				}
 			}
+			
 			if ($wholeYear == 0)
 			{
 				$defaulters[$accountantManager]['prepaid']++;
@@ -2779,7 +2793,20 @@ class StudentsController extends AppController
 				202109,
 				202110,
 				202111,
-				202112
+				202112,
+				202201,
+				202202,
+				202203,
+				202204,
+				202205,
+				202206,
+				202207,
+				202208,
+				202209,
+				202210,
+				202211,
+				202212
+
 			];
 				
 		if ($tasaTemporal == 0)
