@@ -53,7 +53,7 @@
                                             $currentDatei = $currentDate->year . $currentDate->month . $currentDate->day;
                                             
                                             if ($updateIndicator == 0):
-                                                echo $this->Html->link('Descargar ficha de inscripción', ['action' => 'filepdf', $student->id, '_ext' => 'pdf'], ['class' => 'btn btn-sm btn-info']);
+                                                echo $this->Html->link('Imprimir ficha de inscripción', ['action' => 'filepdf', $student->id, 'Students', 'index'], ['class' => 'btn btn-sm btn-info']);
                                             endif;
                                         ?>
                                     <?php endif; ?>

@@ -17,7 +17,7 @@
     <h4>Relación de Mensualidades</h4>
 </div>
 <hr size="4" />
-<div style="font-size: 18px; line-height: 20px;">
+<div style="font-size: 10px; line-height: 15px;">
     <table style="width:100%">
         <thead>
             <tr>
@@ -55,5 +55,5 @@
         </tbody>
     </table>  
     <hr size="4" />
-    <p>Leyenda: * = Cancelado, P = Pendiente, B = Becado</p>
+    <p>Leyenda: * = Cancelado, A = Abono, P = Pendiente, B = Becado</p>
 </div>

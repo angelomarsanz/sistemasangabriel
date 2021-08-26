@@ -3,6 +3,10 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 
+use App\Controller\StudenttransactionsController;
+
+use Cake\ORM\TableRegistry;
+
 /**
  * Binnacles Controller
  *
@@ -24,6 +28,75 @@ class BinnaclesController extends AppController
      *
      * @return \Cake\Network\Response|null
      */
+
+    public function testFunction()
+    {
+        $transacciones = TableRegistry::get('Studenttransactions');
+
+        $transaccionesActualizadas = 0;
+
+        $transaccionesDecimales = $this->Binnacles->find('all');
+
+        foreach ($transaccionesDecimales as $decimales)
+        {
+            $transaccionModificar = $transacciones->get($decimales->extra_column6);
+
+            $anoModificacion = $transaccionModificar->modified->year;
+
+            if ($transaccionModificar->modified->month < 10)
+            {
+                $mesModificacion = '0' . $transaccionModificar->modified->month;
+            }
+            else
+            {
+                $mesModificacion = $transaccionModificar->modified->month;
+            }
+            
+            if ($transaccionModificar->modified->day < 10)
+            {			
+                $diaModificacion = '0' . $transaccionModificar->modified->day;
+            }
+            else
+            {
+                $diaModificacion = $transaccionModificar->modified->day;
+            }
+
+            $fechaModificacion = $anoModificacion . $mesModificacion . $diaModificacion;
+
+            if ($fechaModificacion > '20210428')
+            {
+                $this->Flash->success(__('ID Transacción fecha modificación mayor al 28/04/2021 ' . $transaccionModificar->id )); 
+            }
+            else
+            {
+                if ($decimales->extra_column7 > 0)
+                {
+                    $transaccionModificar->amount = $decimales->extra_column7;
+                }
+
+                if ($decimales->extra_column8 > 0)
+                {
+                    $transaccionModificar->original_amount = $decimales->extra_column8;
+                }
+
+                if ($decimales->extra_column9 > 0)
+                {
+                    $transaccionModificar->amount_dollar = $decimales->extra_column9;
+                }
+
+                if (!($transacciones->save($transaccionModificar)))				
+                {
+                    $this->Flash->error(__('No se pudo actualizar la transacción con el ID ' . $transaccionModificar->id));
+                }
+                else
+                { 
+                    $transaccionesActualizadas++;
+                }               
+            }
+        }
+        $this->Flash->success(__('Transacciones modificadas ' . $transaccionesActualizadas )); 
+    }
+
     public function index()
     {
         $binnacles = $this->paginate($this->Binnacles);

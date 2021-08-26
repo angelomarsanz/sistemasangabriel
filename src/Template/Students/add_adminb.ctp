@@ -25,11 +25,10 @@
                         <?php
                             echo $this->Form->input('surname', ['label' => 'Primer apellido: *']);
                             echo $this->Form->input('first_name', ['label' => 'Primer nombre: *']);
-                            echo $this->Form->input('number_of_brothers', ['label' => 'Tipo (Alumno nuevo/caso especial): *', 'required' => true, 'options' => 
+                            echo $this->Form->input('number_of_brothers', ['label' => 'Tipo (Alumno nuevo): *', 'required' => true, 'options' => 
                                 [null => " ",
                                 0 => 'Alumno nuevo ' . $lastYear . '-' . $currentYear, 
-								1 => 'Alumno nuevo ' . $currentYear . '-' . $nextYear,
-                                2 => 'Alumno regular (caso especial)']]);
+								1 => 'Alumno nuevo ' . $currentYear . '-' . $nextYear]]);
                         ?>
 						<div id='same-names' class='noverScreen fontColor'>
 							<p><b>Estimado usuario, ya existe uno o más estudiantes con nombres similares en la base de datos. A fin de evitar tener registros duplicados, antes de pulsar el botón "Guardar", por favor verifique si el estudiante que está agregando coincide con el(los) que se muestra(n) a continuación:</b></p>

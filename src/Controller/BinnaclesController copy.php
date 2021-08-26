@@ -10,7 +10,15 @@ use App\Controller\AppController;
  */
 class BinnaclesController extends AppController
 {
-
+    public function isAuthorized($user)
+    {
+		if(in_array($this->request->action, ['add']))
+		{
+			return true;
+		}
+        return parent::isAuthorized($user);
+    }
+	
     /**
      * Index method
      *
@@ -46,21 +54,107 @@ class BinnaclesController extends AppController
      *
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
-    public function add()
+    public function add($typeClass = null, $className = null, $methodName = null, $novelty = null, $arrayExtra = null)
     {
+		$this->autoRender = false;
+		
+		$arrayResult = [];
+		$arrayResult['indicator'] = 0;
+		$arrayResult['message'] = "Registro grabado exitosamente";
+		$arrayResult['id'] = 0;
+		
         $binnacle = $this->Binnacles->newEntity();
-        if ($this->request->is('post')) {
-            $binnacle = $this->Binnacles->patchEntity($binnacle, $this->request->data);
-            if ($this->Binnacles->save($binnacle)) {
-                $this->Flash->success(__('The binnacle has been saved.'));
+		
+		$binnacle->type_class = $typeClass;
+		
+		$binnacle->class_name = $className;
+		
+		$binnacle->method_name = $methodName;
+		
+		$binnacle->novelty = $novelty;
+		
+		if (isset($arrayExtra))
+		{
+			$accountArray = 1;
+			
+			foreach ($arrayExtra as $arrayExtras)
+			{
+				if ($accountArray == 1)
+				{
+					$binnacle->extra_column1 = $arrayExtras;
+				}
+				
+				if ($accountArray == 2)
+				{
+					$binnacle->extra_column2 = $arrayExtras;
+				}
 
-                return $this->redirect(['action' => 'index']);
-            } else {
-                $this->Flash->error(__('The binnacle could not be saved. Please, try again.'));
-            }
-        }
-        $this->set(compact('binnacle'));
-        $this->set('_serialize', ['binnacle']);
+				if ($accountArray == 3)
+				{
+					$binnacle->extra_column3 = $arrayExtras;
+				}
+				
+				if ($accountArray == 4)
+				{
+					$binnacle->extra_column4 = $arrayExtras;
+				}
+				
+				if ($accountArray == 5)
+				{
+					$binnacle->extra_column5 = $arrayExtras;
+				}
+				
+				if ($accountArray == 6)
+				{
+					$binnacle->extra_column6 = $arrayExtras;
+				}
+				
+				if ($accountArray == 7)
+				{
+					$binnacle->extra_column7 = $arrayExtras;
+				}
+				
+				if ($accountArray == 8)
+				{
+					$binnacle->extra_column8 = $arrayExtras;
+				}
+				
+				if ($accountArray == 9)
+				{
+					$binnacle->extra_column9 = $arrayExtras;
+				}
+				
+				if ($accountArray == 10)
+				{
+					$binnacle->extra_column10 = $arrayExtras;
+				}
+				
+				$accountArray++;
+			}
+		}
+				
+		$binnacle->responsible_user = $this->Auth->user('username');
+				
+        if ($this->Binnacles->save($binnacle))
+		{
+			$lastRecord = $this->Binnacles->find('all')
+				->where(['responsible_user' => $this->Auth->user('username')])
+				->order(['created' => 'DESC']);
+				
+			$row = $lastRecord->first();
+			
+			if ($row)
+			{
+				$arrayResult['id'] = $row->id;
+			}
+		}
+		else
+		{
+			$arrayResult['indicator'] = 1;
+			$arrayResult['message'] = "No se pudo grabar el registro";
+		}
+	
+		return $arrayResult;
     }
 
     /**

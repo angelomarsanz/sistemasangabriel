@@ -40,7 +40,7 @@
 <nav class="navbar navbar-default navbar-fixed-top" style="background-color: #b3e0ff;">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a href="<?php echo Router::url(["controller" => "Users", "action" => "home"]); ?>"><img src="<?php echo Router::url(["controller" => "files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 60 class="img-thumbnail img-responsive logo"/></a>
+            <a href="<?php echo Router::url(["controller" => "Users", "action" => "home"]); ?>"><img src="<?php echo Router::url(["controller" => "webroot/files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 60 class="img-thumbnail img-responsive logo"/></a>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -54,8 +54,8 @@
                     <li><?=  $this->Html->link('', ['controller' => 'Users', 'action' => 'home'], ['class' => "glyphicon glyphicon-home iconoMenu", 'title' => 'Inicio']) ?></li>
                     <li><a href="#" id="imprimir-pantalla" class="glyphicon glyphicon-print iconoMenu" title="Imprimir pantalla"></a></li>
 					<li><a href="#" id="exportar-excel" class="glyphicon glyphicon-list-alt iconoMenu" title="Exportar a excel"></a></li>
-					<li><?=  $this->Html->link('', ['controller' => 'Users', 'action' => 'edit', $current_user['id']], ['class' => "glyphicon glyphicon-user iconoMenu", 'title' => 'Modificar mi perfil']) ?></li>
 					<?php if($current_user['role'] == 'Administrador'): ?>
+						<li><?= $this->Html->link('', ['controller' => 'Users', 'action' => 'edit', $current_user['id']], ['class' => "glyphicon glyphicon-user iconoMenu", 'title' => 'Modificar mi perfil']) ?></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Administrativo <span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">
@@ -71,8 +71,6 @@
 								<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
 								<li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
 								<li><?= $this->Html->link('Histórico cambio tasa dólar y euro', ['controller' => 'Historicotasas', 'action' => 'index']) ?></li>
-								<li><?= $this->Html->link('Pagos', ['controller' => 'Bills', 'action' => 'pagosPendientesRevision']) ?></li>
-								<li><?= $this->Html->link('Facturas pendientes de impresión', ['controller' => 'Bills', 'action' => 'facturasPendientesRevision']) ?></li>
 							</ul>
 						</li>
 						<li class="dropdown">
@@ -141,30 +139,7 @@
 								<li><?= $this->Html->link('Eventos del usuario', ['controller' => 'Eventos', 'action' => 'index']) ?></li>
 							</ul>
 						</li>
-												
-						<li><a href="http://138.186.179.63/wiki/index.php/Aplicacion_ventas" id="wiki" title="wiki">Wiki</a></li>
-    
-                        <!-- <?php if ($current_user['username'] == 'angel2703'): ?>
-						
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Docentes <span class="caret"></span></a>
-                                <ul class="dropdown-menu" role="menu">    
-                                        <li><?= $this->Html->link('Secciones', ['controller' => 'Sections', 'action' => 'index']) ?></li>
-                                        <li><?= $this->Html->link('Materias', ['controller' => 'Teachingareas', 'action' => 'index']) ?></li>
-                                </ul>
-                            </li>
-						
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Nómina <span class="caret"></span></a>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li><?= $this->Html->link('Puestos de trabajo', ['controller' => 'Positions', 'action' => 'index']) ?></li>
-                                    <li><?= $this->Html->link('Empleados', ['controller' => 'Employees', 'action' => 'index']) ?></li>
-                                    <li><?= $this->Html->link('Nómina', ['controller' => 'Paysheets', 'action' => 'directPayroll']) ?></li>
-                                </ul>
-                            </li>
-
-						<?php endif; ?> -->
-						
+												   						
                         <?php if (isset($assign)): ?>
                             <form class="navbar-form navbar-left" role="search">
                                 <div class="form-group">
@@ -212,7 +187,6 @@
 						</li>					
                     <?php elseif($current_user['role'] == 'Representante'): ?>
                         <li><?=  $this->Html->link('Actualizar datos', ['controller' => 'Guardiantransactions', 'action' => 'homeScreen']) ?></li>
-						<li><?=  $this->Html->link('Pagos', ['controller' => 'Studenttransactions', 'action' => 'cuotasPendientes']) ?></li>
                     <?php endif; ?>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
@@ -282,6 +256,7 @@
 		}
 		else
 		{
+			console.log('windowsPrint');
 			window.print();
 			return false;
 		}

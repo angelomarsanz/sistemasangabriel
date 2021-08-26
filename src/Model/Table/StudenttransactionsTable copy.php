@@ -62,6 +62,9 @@ class StudenttransactionsTable extends Table
             ->dateTime('payment_date')
             ->requirePresence('payment_date', 'create')
             ->notEmpty('payment_date');
+			
+        $validator
+            ->allowEmpty('ano_escolar');
 
         $validator
             ->requirePresence('transaction_type', 'create')
@@ -84,7 +87,11 @@ class StudenttransactionsTable extends Table
             ->numeric('amount')
             ->requirePresence('amount', 'create')
             ->notEmpty('amount');
-
+			
+       $validator
+            ->numeric('amount_dollar')
+            ->allowEmpty('amount_dollar', 'create');
+            
         return $validator;
     }
 

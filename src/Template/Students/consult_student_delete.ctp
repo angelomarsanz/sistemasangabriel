@@ -78,15 +78,9 @@
             cleanPager();
             
             $("#header-messages").html("Por favor espere...");
+
+            $.redirect('<?php echo Router::url(["controller" => "Students", "action" => "viewStudent"]); ?>', {idStudent : idStudent}); 
 			
-			if ($("#ambiente").val() == "Producción")
-			{                       
-				$.redirect('/sistemasangabriel/students/viewStudent', {idStudent : idStudent}); 
-			}
-			else
-			{
-				$.redirect('/desarrollosistemasangabriel/students/viewStudent', {idStudent : idStudent}); 
-			}
         });
 
 // Final funciones Jquery

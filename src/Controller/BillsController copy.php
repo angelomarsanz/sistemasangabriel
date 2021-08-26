@@ -551,6 +551,8 @@ class BillsController extends AppController
 				{
 					foreach ($facturas as $factura)
 					{
+						// Nota: El problema que se presenta cuando un usuario consulta una factura o va reimprimir y le aparece la factura de otro usuario es
+						// porque no se considera la posibilidad de que haya una factura con número de control mayor
 						if ($factura->user_id != $this->Auth->user('id') && $factura->bill_number < $bill_number)
 						{
 							$facturaOtroCajero = 1;
@@ -564,31 +566,40 @@ class BillsController extends AppController
 						return $this->redirect(['action' => 'imprimirFactura', $bill_number, $idParentsandguardian, $idFactura, $mensaje]);
 					}
 					else
-					{					
-						$facturaAnterior = $facturas->first();
-						
-						if ($facturaAnterior->tipo_documento == "Factura")
-						{
-							$documento = "esta factura";
+					{		
+						// Para solucionar el problema se debe usar un foreach e ir descartando si las facturas son de otro usuario. La que no sea de otro usuario se 
+						// obliga a imprimir
+						foreach ($facturas as $factura)
+						{		
+							if ($factura->user_id == $this->Auth->user('id'))
+							{	
+								$facturaAnterior = $factura;
+							
+								if ($facturaAnterior->tipo_documento == "Factura")
+								{
+									$documento = "esta factura";
+								}
+								elseif (substr($facturaAnterior->tipo_documento, 0, 6) == "Recibo")
+								{
+									$documento = "este recibo";
+								}
+								elseif ($facturaAnterior->tipo_documento == "Nota de crédito")
+								{
+									$documento = "esta nota de crédito";
+								}
+								else
+								{
+									$documento = "esta nota de débito";
+								}
+								
+								$mensajeUsuario = "Estimado usuario " . $documento . " con el Nro. " . $facturaAnterior->bill_number . " se debe imprimir primero y luego podrá continuar con la cobranza";	
+								
+								$idFactura = $facturaAnterior->id;
+								$reimpresion = 0;
+								$idParentsandguardian = $facturaAnterior->parentsandguardian_id;
+								break;
+							}
 						}
-						elseif (substr($facturaAnterior->tipo_documento, 0, 6) == "Recibo")
-						{
-							$documento = "este recibo";
-						}
-						elseif ($facturaAnterior->tipo_documento == "Nota de crédito")
-						{
-							$documento = "esta nota de crédito";
-						}
-						else
-						{
-							$documento = "esta nota de débito";
-						}
-						
-						$mensajeUsuario = "Estimado usuario " . $documento . " con el Nro. " . $facturaAnterior->bill_number . " se debe imprimir primero y luego podrá continuar con la cobranza";	
-						
-						$idFactura = $facturaAnterior->id;
-						$reimpresion = 0;
-						$idParentsandguardian = $facturaAnterior->parentsandguardian_id;
 					}
 				}				
 			}
@@ -761,8 +772,15 @@ class BillsController extends AppController
 					$amountConcept = 0;
 				}
 				elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
-				{				
-					$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
+				{	
+					if ($aConcept->concept == "Matrícula 2020")
+					{
+						$invoiceLine = $aConcept->student_name . " - Diferencia matrícula 2020 - 2021";
+					}
+					else
+					{
+						$invoiceLine = $aConcept->student_name . " - Anticipo matrícula 2021 - 2022";
+					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -775,11 +793,13 @@ class BillsController extends AppController
 				{	
 					if ($aConcept->concept == "Ago " . $currentDate->year)
 					{
-						$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
+						// $invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
+						$invoiceLine = $aConcept->student_name . " - Diferencia Ago 2020 - 2021";
 					}
 					else
 					{
-						$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+						// $invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+						$invoiceLine = $aConcept->student_name . " - Abono Ago 2021 - 2022";
 					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
@@ -908,7 +928,14 @@ class BillsController extends AppController
 						$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
 						$loadIndicator = 1;
 					}
-					$invoiceLine = $aConcept->student_name . " - Inscripción / Dif de Inscripción";
+					if ($aConcept->concept == "Matrícula 2020")
+					{
+						$invoiceLine = $aConcept->student_name . " - Diferencia matrícula 2020 - 2021";
+					}
+					else
+					{
+						$invoiceLine = $aConcept->student_name . " - Anticipo matrícula 2021 - 2022";
+					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;
@@ -926,11 +953,13 @@ class BillsController extends AppController
 					}
 					if ($aConcept->concept == "Ago " . $currentDate->year)
 					{
-						$invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
+						// $invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
+						$invoiceLine = $aConcept->student_name . " - Diferencia Ago 2020 - 2021";
 					}
 					else
 					{
-						$invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+						// $invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
+						$invoiceLine = $aConcept->student_name . " - Abono Ago 2021 - 2022";
 					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
@@ -1034,8 +1063,20 @@ class BillsController extends AppController
 					
         $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento'));
         $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento']);
-    }
+	}
 	
+	public function invoicepdf()
+	{
+		$this->viewBuilder()
+		->className('Dompdf.Pdf')
+		->layout('default')
+		->options(['config' => [
+			'filename' => 'Factura',
+			'render' => 'browser',
+			'orientation' => 'landscape'
+		]]);
+	}
+
     public function invoiceConcept($accountingCode, $invoiceLine = null, $amountConcept = null)
     {
         $this->tbConcepts[$this->conceptCounter] = [];

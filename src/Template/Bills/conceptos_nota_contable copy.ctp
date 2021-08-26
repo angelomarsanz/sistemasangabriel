@@ -131,8 +131,7 @@
     </div>
 </div>
 <script>
-	var tasaCambioActual = <?= $dollarExchangeRate; ?>;
-	var tasaCambioFactura = <?= $facturaConceptos->tasa_cambio; ?>;
+	var tasaCambio = <?= $dollarExchangeRate; ?>;
 
 	function dosDecimales(numero)
 	{
@@ -183,8 +182,8 @@
 					montoNotaNumerico = parseFloat(montoNotaCadena);			
 				}
 				
-				$('#NV-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambioFactura)));
-				$('#MN-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambioFactura)));
+				$('#NV-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambio)));
+				$('#MN-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambio)));
 			});
 		});
 				

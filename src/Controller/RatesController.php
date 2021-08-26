@@ -133,7 +133,7 @@ class RatesController extends AppController
 							}
 						}							
 					}
-				}
+				} 
 			}
 				
 			if ($indicadorError == 0)

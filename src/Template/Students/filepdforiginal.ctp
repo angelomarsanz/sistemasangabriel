@@ -1,14 +1,56 @@
 <style>
+@media screen
+{
+    .volver
+    {
+        display:scroll;
+        position:fixed;
+        top: 5%;
+        left: 1%;
+        opacity: 0.75;
+        text-align: right;
+    }
+    .imprimir 
+    {
+        display:scroll;
+        position:fixed;
+        bottom: 5%;
+        right: 1%;
+        opacity: 0.75;
+        text-align: right;
+    }
+    .botonMenu
+    {
+        margin-bottom: 5 px;
+    }
+    .ui-autocomplete 
+    {
+        z-index: 2000;
+    }
+}
+@media print
+{
+    .noVerImpreso
+    {
+      display:none
+    }
     .saltopagina
     {
         display:block; 
         page-break-before:always;
     }
+}
 </style>
+<div class="page-header volver noVerImpreso"> 
+    <?php if ($accion == 'viewStudent'): ?>    
+        <p><?= $this->Html->link(__('Volver'), ['controller' => $controlador, 'action' => $accion, $student->id], ['class' => 'btn btn-sm btn-primary']) ?></p>
+    <?php else: ?>
+        <p><?= $this->Html->link(__('Volver'), ['controller' => $controlador, 'action' => $accion], ['class' => 'btn btn-sm btn-primary']) ?></p>
+    <?php endif; ?>
+</div>
 <div style="width: 100%;">
     <div style="width: 80%; float: left;">
         <h3 style="text-align: center;">Unidad Educativa Colegio "San Gabriel Arcángel"</h3>
-        <p style="text-align: center;line-height: 5px;">Valencia, <?= $currentDate->format('d/m/Y'); ?></p>
 		<?php $currentYear = $ultimoAnoInscripcion; ?>
 		<?php $nextYear = $currentYear + 1; ?>
         <?php if ($student->new_student == 0): ?>
@@ -16,11 +58,13 @@
         <?php else: ?>
             <p style="text-align: center;line-height: 5px;"><b>Ficha de inscripción, Año Escolar <?= $currentYear . '-' . $nextYear ?></b></p>
         <?php endif; ?>            
-        <p style="text-align: center;line-height: 5px;"><?= $student->level_of_study ?></p>
+        <p style="text-align: center;line-height: 5px;"><b><?= $student->level_of_study ?></b></p>
+        <p style="text-align: center;line-height: 5px;">Valencia, <?= $currentDate->format('d/m/Y'); ?></p>
+        <p>&nbsp;</p>
     </div> 
     <div  style="width: 20%; float: left;">
         <?php if ($student->profile_photo != "" && $student->profile_photo != "Sin foto") : ?>
-            <?= $this->Dompdf->image('../files/students/profile_photo/' . $student->get('profile_photo_dir') . '/'. $student->get('profile_photo'), ['width' => 250, 'height' => 250, 'class' => 'img-thumbnail img-responsive']) ?>
+            <?= $this->Html->image('../files/students/profile_photo/' . $student->get('profile_photo_dir') . '/'. $student->get('profile_photo'), ['width' => 250, 'height' => 250, 'class' => 'img-thumbnail img-responsive']) ?>
         <?php else: ?>
             <div style="text-align: center; width: 200px; height: 200px; border: 3px solid #555;">
                 <p>Foto</p>
@@ -30,11 +74,11 @@
 </div>
 <div style="clear:both; width: 100%;">
     <?php if ($student->new_student == 0): ?>
-        <p style="font-size: 25px;">Conceptos de pagos: Anticipo de matrícula 2020 y abono a agosto 2021.</p>
+        <p style="line-height: 5px;">Conceptos de pagos: Anticipo de matrícula 2020 y abono a agosto 2021.</p>
     <?php endif; ?>    
     <p><b>Alumno:&nbsp;<?= $student->full_name ?></b></p>
 </div>
-<div style="clear: both; width: 100%; border-top: 3px solid #555; font-size: 25px; line-height: 5px;">
+<div style="clear: both; width: 100%; border-top: 3px solid #555; line-height: 5px;">
     <div style="width: 50%; float: left; padding: 1%; text-align: left;">
         <p><b>Sexo:&nbsp;</b><?= h($student->sex) ?></p>
         <p><b>Nacionalidad:&nbsp;</b><?= h($student->nationality) ?></p>
@@ -51,21 +95,21 @@
         <p><b>Observaciones:&nbsp;</b></p><p><?= h($student->observations) ?></p>
     </div>
 </div>
-<div style="clear: both; width: 100%; border-top: 3px solid #555; font-size: 25px; line-height: 5px;">
+<div style="clear: both; width: 100%; border-top: 3px solid #555; line-height: 5px;">
     <br />
     <p><b>Hermanos en el colegio:</b></p>
 </div>
-<div style="clear: left; width: 100%; border-top: 3px solid #555; font-size: 25px; padding: 1%;">
+<div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 5px; padding: 1%;">
     <table style="width:100%;">
         <thead>
-            <tr>
+            <tr style="line-height: 20px;">
                 <th style="width:55%; text-align:left;">Nombre:</th>
                 <th style="width:50%; text-align:left;">Grado:</th>
             </tr>
         </thead>
         <tbody>
             <?php foreach ($brothersPdf as $brothersPdfs): ?>
-                <tr>
+                <tr style="line-height: 20px;">
                     <td><?= $brothersPdfs['nameStudent'] ?></td>
                     <td><?= $brothersPdfs['gradeStudent'] ?></td>
                 </tr>
@@ -73,11 +117,11 @@
         </tbody>
     </table>
 </div>
-<div style="clear: left; width: 100%; border-top: 3px solid #555; font-size: 25px; line-height: 5px;">
+<div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 5px;">
     <br />
     <p><b>Datos de la madre:</b></p>
 </div>
-<div style="clear: left; width: 100%; border-top: 3px solid #555; font-size: 25px;">
+<div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 5px;">
     <div style="width: 50%; float: left; padding: 1%; text-align: left;">
         <p><b>Nombre:&nbsp;</b><?= h($parentsandguardian->surname_mother) . ' ' . h($parentsandguardian->first_name_mother) ?></p>
         <p><b>C.I.:&nbsp;</b><?= h($parentsandguardian->type_of_identification_mother) . ' ' . h($parentsandguardian->identidy_card_mother) ?></p>
@@ -89,11 +133,11 @@
         <p><b>Email:&nbsp;</b><?= h($parentsandguardian->email_mother) ?></p>
     </div>
 </div>
-<div style="clear: left; width: 100%; border-top: 3px solid #555; font-size: 25px; line-height: 5px;">
+<div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 5px;">
     <br />
     <p><b>Datos del padre:</b></p>
 </div>
-<div style="clear: left; width: 100%; border-top: 3px solid #555; font-size: 25px;">
+<div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 5px;">
     <div style="width: 50%; float: left; padding: 1%; text-align: left;">
         <p><b>Nombre:&nbsp;</b><?= h($parentsandguardian->surname_father) . ' ' . h($parentsandguardian->first_name_father) ?></p>
         <p><b>C.I.:&nbsp;</b><?= h($parentsandguardian->type_of_identification_father) . ' ' . h($parentsandguardian->identidy_card_father) ?></p>
@@ -144,20 +188,28 @@
         aumento será trasladado en forma directa a las mensualidades que cancela cada uno por sus representados.</b></p>
 		<p style="text-align: justify;">13. Informarse de las actividades y circulares de forma digital.</p>
     </div>
-    <br />
-    <div style="font-size: 25px;">
-        <p style="text-align: justify;"><b> Yo, ___________________________________, C.I. __________________________ estoy de acuerdo y me comprometo
-        a cumplir con todas las normas señaladas y establecidas por la institución en presente compromiso.</b></p>
+    <p>&nbsp;</p>
+    <div style="line-height: 5px;">
+        <p style="text-align: justify;"><b> Yo, ___________________________________________, C.I. __________________________ </b></p>
+        <p>&nbsp;</p>
+        <p style="text-align: justify;"><b>estoy de acuerdo y me comprometo a cumplir con todas las normas señaladas y</b></p>
+        <p>&nbsp;</p>
+        <p style="text-align: justify;"><b>establecidas por la institución en presente compromiso.</b></p>
+        <br />
+        <br />
+        <br />
         <br />
         <br />
         <br />
         <div style="width: 50%; float: left; padding: 1%; text-align: center;">
-            <p>__________________________</p><p>Representante</p><p>C.I. _________________</p>    
+            <p>__________________________</p><br /><br /><p>Representante</p><br /><br /><p>C.I. _________________</p>    
         </div>
         <div style="width: 50%; float: left; padding: 1%; text-align: center;">
-            <p>__________________________</p><p>Representado</p>    
+            <p>__________________________</p><br /><br /><p>Representado</p>    
         </div>
     </div>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
 </div>
 <?php if ($student->new_student == 0): ?>
     <div class="saltopagina">
@@ -206,3 +258,18 @@
 		el reintegro de los pagos realizados.</p>
     </div>
 <?php endif; ?>
+<div class="imprimir noVerImpreso">
+    <button id="imprimir-ficha" type="button" class="btn btn-success">Imprimir</button>
+</div>
+<script>
+	// Eventos
+	
+    $(document).ready(function()
+    {							
+		$('#imprimir-ficha').click(function(e){
+			
+			e.preventDefault();
+			imprimirPantalla();					
+		});
+	});
+</script>     

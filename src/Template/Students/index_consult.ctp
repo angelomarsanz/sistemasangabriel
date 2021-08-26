@@ -18,7 +18,7 @@
                         <td><?= h($student->full_name) ?></td>
                         <td class="actions">
                             <?= $this->Html->link('Ver', ['action' => 'viewConsult', $student->id, $idFamily, $family], ['class' => 'btn btn-sm btn-info']) ?>
-                            <?= $this->Html->link('Descargar ficha de inscripción', ['action' => 'filepdf', $student->id, '_ext' => 'pdf'], ['class' => 'btn btn-sm btn-info']); ?>
+                            <?= $this->Html->link('Imprimir ficha de inscripción', ['action' => 'filepdf', $student->id, 'Students', 'indexConsult'], ['class' => 'btn btn-sm btn-info']); ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

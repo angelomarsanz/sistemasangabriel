@@ -1,3 +1,15 @@
+Mantenimiento semanal servidor CSGA
+
+cd /home/sgasyst/web
+sudo mv csga2021....tar.gz /Respaldos
+sudo df -h (Verificar el espacio usado en disco)
+sudo du -sh archivo.extension (Verificar el tamaño de un archivo)
+cd /Respaldos
+sudo rm csga2021...tar.gz (Eliminar el backup más antiguo)
+cd /home/sgasyst/web
+tar -czvf csga2021...tar.gz sistema.colegiosangabrielarcangel.com
+sudo scp csga2021...tar.gz root@dapliw.org:/home/admin
+
 --
 
 En febrero se debe considerar nuevo año escolar para la planilla
@@ -8,7 +20,18 @@ Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar desc
 
 ---
 
+Cambios necesarios para el comienzo de inscripción de nuevos alumnos en febrero de cada año
+
+En febrero cuando se inicia el proceso de inscripción de alumnos nuevos, como no se ha establecido
+la tarifa de Matrícula y agosto del próximo año escolar, las cuotas aparecen en cero cuando se va a hacer la
+cobranza y el usuario debe modificarlas al monto de la matrícula y agosto. Al iniciarse el nuevo año escolar, le 
+aparecerá como si debe esa cuota. Se debe idear un mecanismo para que esto no suceda
+
+--
+
 Cambios necesarios para el período de renovación de matrícula (junio de cada año):
+
+	Se modificó la acción add_dollar de RatesController parahacer los tres siguientes tres ajustes:
 
 	Para los estatus recordar que hay un boolean - new_student en la tabla student
 	Ese status se debe cambiar a "0" al iniciar el proceso de renovación de inscripción a aquellos
@@ -24,9 +47,7 @@ Cambios necesarios para el período de renovación de matrícula (junio de cada 
 	En Junio cuando comienza el período de renovación de inscripción, se debe actualizar
 	el campo current_year_registration de la tabla Shools con el año del nuevo período de inscripción
 
-	Esto se debe hacer cuando se cree por primera vez la tarifa de agosto del año siguiente
-
-	También en el inicio de la renovación de matrícula, el programa asignar sección debe validar 
+	Veificar si se hizo: También en el inicio de la renovación de matrícula, el programa asignar sección debe validar 
 	que el current_school_year sea igual current_year_registration, si son diferentes debe abortar la operaciòn 
 	y enviar un mensaje un mensaje de error.
 
@@ -56,13 +77,6 @@ Reporte de Alumnos Egresados : Alumnos egresados / Exalumnos son aquellos que se
 Alumnos Retirados: Son aquellos que en el transcurso de su vida escolar se van del colegio.
 
 ---
-
-16/09/2020 - En febrero cuando se inicia el proceso de inscripción de alumnos nuevos, como no se ha establecido
-la tarifa de Matrícula y agosto del próximo año escolar, las cuotas aparecen en cero cuando se va a hacer la
-cobranza y el usuario debe modificarlas al monto de la matrícula y agosto. Al iniciarse el nuevo año escolar, le 
-aparecerá como si debe esa cuota. Se debe idear un mecanismo para que esto no suceda
-
---
 
 En la tabla transacciones amount_dollar es el monto abonado a la cuota
 
@@ -94,3 +108,18 @@ Servicio educativo se resetea a cero
 
 No se ha encontrado la causa, pero una solución emergente es modificar la línea 160 de StudenttransactionsController para que cuando se esté haciendo una cobranza del servicio educativo el campo original_amount solo se actualice cuando $transaccion->tarifaDolarOriginal sea diferente de $transaccion->tarifaDolar
 
+---
+
+Cuando Lorelys me llame por el problema de que no puede imprimir la factura, hago lo siguiente:
+
+Subo menu.ctp a producción
+Elimino logs/error.log
+Verifico los console.log si se llama a windows.print()
+
+-- 
+
+Al iniciar el año escolar depurar StudenttransactionsController
+
+con las funciones marcarEliminado y EliminarMarcado
+
+--

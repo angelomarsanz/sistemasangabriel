@@ -49,7 +49,8 @@ class StudentsController extends AppController
     }
     
     public function testFunction()
-    { 
+    {
+		$this->log("Something didn't work!"); 
 		/* $contador = 0;
 		$anoBusqueda = 2019;
 		$contadorFotoExtensionCorrecta = 0;
@@ -1234,7 +1235,7 @@ class StudentsController extends AppController
     {
         if ($this->request->is('post')) 
         {
-            return $this->redirect(['action' => 'relationpdf', $_POST['section_id'], '_ext' => 'pdf']);
+            return $this->redirect(['action' => 'relationpdf', $_POST['section_id']]);
         }
 
         $sections = $this->Students->Sections->find('list', ['limit' => 200]);
@@ -1243,15 +1244,7 @@ class StudentsController extends AppController
     }
 
     public function relationpdf($section = null)
-    {
-        $this->viewBuilder()
-            ->className('Dompdf.Pdf')
-            ->layout('default')
-            ->options(['config' => [
-                'filename' => $section,
-                'render' => 'browser',
-            ]]);
-			
+    {		
 		$this->loadModel('Schools');
 
 		$school = $this->Schools->get(2);
@@ -1336,7 +1329,9 @@ class StudentsController extends AppController
 							{
 								if ($studentTransaction->paid_out == 1)
 								{
-									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = '*';    
+									$indicadorPagado = $this->verificarDiferencia($studentTransaction);
+
+									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = $indicadorPagado;    
 								}
 								else
 								{
@@ -1547,8 +1542,10 @@ class StudentsController extends AppController
         
     }
     
-    public function filepdf($id = null, $origen = null)
+    public function filepdf($id = null, $controlador = null, $accion = null)
     {
+		$ultimoAnoInscripcion = 0;
+
 		$this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
@@ -1583,6 +1580,12 @@ class StudentsController extends AppController
 		
 		if ($indicadorDescarga == 1)
 		{
+			$matriculasEstudiante = $this->Students->Studenttransactions->find('all')->where(['student_id' => $id, 'transaction_type' => 'Matrícula'])->order(['id' => 'DESC']);
+
+			$ultimaMatricula = $matriculasEstudiante->first();
+
+			$ultimoAnoInscripcion =  substr($ultimaMatricula->transaction_description, 11, 4);
+
 			$brothers = $this->Students->find('all')->where(['parentsandguardian_id' => $student->parentsandguardian_id, 'id !=' => $id]);
 
 			$brothersArray = $brothers->toArray();
@@ -1599,14 +1602,6 @@ class StudentsController extends AppController
 			endif;
 			
 			$parentsandguardian = $this->Students->Parentsandguardians->get($student->parentsandguardian_id);
-
-			$this->viewBuilder()
-				->className('Dompdf.Pdf')
-				->layout('default')
-				->options(['config' => [
-					'filename' => $student->full_name,
-					'render' => 'download'
-				]]);
 		}
 		else
 		{
@@ -1621,8 +1616,8 @@ class StudentsController extends AppController
 				return $this->redirect(['controller' => 'Students', 'action' => 'index']);
 			}
 		}
-		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate'));
-		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate']);
+		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate', 'ultimoAnoInscripcion', 'controlador', 'accion'));
+		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate', 'ultimoAnoInscripcion', 'controlador', 'accion']);
     }
     
     public function cardboardpdf($id = null)
@@ -1940,9 +1935,9 @@ class StudentsController extends AppController
 											if ($mesesTarifa["anoMes"] == $yearMonth)
 											{
 												$tarifaDolarAnoMes = $mesesTarifa["tarifaDolar"];
-												if ($studentsFors->discount > 0)
+												if ($studentTransaction->porcentaje_descuento > 0)
 												{
-													$tarifaDolarAnoMes = ($tarifaDolarAnoMes * $studentsFors->discount) / 100;
+													$tarifaDolarAnoMes = ($tarifaDolarAnoMes * $studentTransaction->porcentaje_descuento) / 100;
 												}
 												break;
 											}
@@ -2940,7 +2935,7 @@ class StudentsController extends AppController
 		$contadorEstudiantes = 0;
 		$vectorFamilias = [];
 		
-		$estudiantes20 = $this->Students->find('all')->where(['discount' => 20]);
+		$estudiantes20 = $this->Students->find('all')->where(['tipo_descuento' => 'Hijos', 'discount' => 20]);
 
 		foreach ($estudiantes20 as $estudiante)
 		{
@@ -2973,7 +2968,7 @@ class StudentsController extends AppController
 		$contadorEstudiantes = 0;
 		$vectorFamilias = [];
 		
-		$estudiantes20 = $this->Students->find('all')->where(['discount' => 50]);
+		$estudiantes20 = $this->Students->find('all')->where(['tipo_descuento' => 'Hijos', 'discount' => 50]);
 
 		foreach ($estudiantes20 as $estudiante)
 		{
@@ -3590,5 +3585,116 @@ class StudentsController extends AppController
 			
 		$this->set(compact('becados'));
         $this->set('_serialize', ['becados']);
+	}
+
+	public function buscarBecadosAnoAnterior()
+	{
+		$codigoRetorno = 0;
+
+		$transaccionesActualizadas = 0;
+
+		$studentTransactions = new StudenttransactionsController();
+
+		$becadosAnoAnterior = $this->Students->find('all')
+			->where(['descuento_ano_anterior !=' => 0]);
+
+		$contadorBusqueda = $becadosAnoAnterior->count();
+
+		$this->Flash->success(__('Total becados año anterior: ' . $contadorBusqueda));	
+		
+		foreach ($becadosAnoAnterior as $becado)
+		{
+			$codigoRetorno = $studentTransactions->actualizarTransaccionBecado($becado->id, 2019);
+
+			if ($codigoRetorno == 99)
+			{
+				break;
+			}
+			else
+			{
+				$transaccionesActualizadas += $codigoRetorno;
+			} 
+		}	
+		
+		$this->Flash->success(__('Total transacciones actualizadas ' . $transaccionesActualizadas));
+	}
+
+	public function buscarBecadosAnoActual()
+	{
+		$codigoRetorno = 0;
+
+		$transaccionesActualizadas = 0;
+
+		$studentTransactions = new StudenttransactionsController();
+
+		$becadosAnoAnterior = $this->Students->find('all')
+			->where(['discount !=' => 0]);
+
+		$contadorBusqueda = $becadosAnoAnterior->count();
+
+		$this->Flash->success(__('Total becados año anterior: ' . $contadorBusqueda));	
+		
+		foreach ($becadosAnoAnterior as $becado)
+		{
+			$codigoRetorno = $studentTransactions->actualizarTransaccionBecado($becado->id, 2020);
+
+			if ($codigoRetorno == 99)
+			{
+				break;
+			}
+			else
+			{
+				$transaccionesActualizadas += $codigoRetorno;
+			} 
+		}	
+		
+		$this->Flash->success(__('Total transacciones actualizadas ' . $transaccionesActualizadas));
+	}
+
+	public function verificarDiferencia($studentTransaction = null)
+	{
+		$indicadorPagado = '*';
+
+		$mesesTarifas = $this->mesesTarifas(0);
+
+		$ano = $studentTransaction->payment_date->year;
+								
+		$mes = $studentTransaction->payment_date->month;
+																						
+		if ($mes < 10)
+		{
+			$mesCadena = '0' . $mes;
+		}
+		else
+		{
+			$mesCadena = (string) $mes;
+		}
+
+		$anoMes = $ano . $mesCadena;
+						
+		foreach ($mesesTarifas as $mesTarifa)
+		{
+			if ($mesTarifa['anoMes'] == $anoMes)
+			{
+				$tarifaDolar = $mesTarifa['tarifaDolar'];
+
+				if ($studentTransaction->porcentaje_descuento == 0)
+				{
+					$tarifaDolarConDescuento = $tarifaDolar;					
+				}
+				else
+				{
+					$tarifaDolarConDescuento = round(($tarifaDolar * $studentTransaction->porcentaje_descuento) / 100, 2);	
+				}
+
+				if ($studentTransaction->amount_dollar < $tarifaDolarConDescuento)
+				{
+					$indicadorPagado = 'A';
+				}
+				break;
+			}
+		}
+
+		return $indicadorPagado;
 	}
 }

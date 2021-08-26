@@ -4,7 +4,8 @@
 <div class="row">
     <div class="col-md-6 col-md-offset-3">
         <div class="page-header">
-            <h2>Consultar datos de alumnos</h2>
+            <h4>Consultar datos de alumnos con condición distinta a regular</h4>
+			<input type="hidden" id="ambiente" value=<?= $school->ambient ?>>
         </div>
         <div class="row panel panel-default">
             <div class="col-md-12">
@@ -54,7 +55,7 @@
     {
         $('#student').autocomplete(
         {
-            source:'<?php echo Router::url(array("controller" => "Students", "action" => "findStudent")); ?>',
+            source:'<?php echo Router::url(array("controller" => "Students", "action" => "findStudentDelete")); ?>',
             minLength: 3,
             select: function( event, ui ) {
                 log("<tr id=st" + ui.item.id + " class='student'><td>" + ui.item.value + "</td></tr>");
@@ -77,9 +78,15 @@
             cleanPager();
             
             $("#header-messages").html("Por favor espere...");
-                       
-            $.redirect('<?php echo Router::url(["controller" => "Students", "action" => "viewStudent"]); ?>', {idStudent : idStudent}); 
-
+			
+			if ($("#ambiente").val() == "Producción")
+			{                       
+				$.redirect('/sistemasangabriel/students/viewStudent', {idStudent : idStudent}); 
+			}
+			else
+			{
+				$.redirect('/desarrollosistemasangabriel/students/viewStudent', {idStudent : idStudent}); 
+			}
         });
 
 // Final funciones Jquery

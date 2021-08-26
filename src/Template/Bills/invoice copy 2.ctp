@@ -620,7 +620,7 @@
 		<br />
 		<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de $ <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b>
 		como abono para pagar futuras cuotas.</p>
-	</di>
+	</div>
 <?php endif; ?>
 <?php if ($indicadorReintegro == 1): ?>
 	<br />
@@ -670,6 +670,8 @@
 		<?php endforeach; ?>
 	</div>
 <?php endif; ?>
+<button class='nover btn btn-success' onclick='imprimirPantalla()'>Imprimir</button>
+<?= $this->Html->link('Imprimir', ['action' => 'invoicepdf', '_ext' => 'pdf'], ['class' => 'btn btn-success']); ?>
 <script>
     $(document).ready(function()
     {

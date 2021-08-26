@@ -1,3 +1,6 @@
+<?php
+    use Cake\Routing\Router;
+?>
 <div class="page-header">
     <p><?= $this->Html->link(__('Volver'), ['controller' => 'Parentsandguardians', 'action' => 'consultFamily'], ['class' => 'btn btn-sm btn-default']) ?></p>
     <h4>Familia: <?= $family ?></h4>
@@ -16,6 +19,7 @@
 					</div>
 					<div class="modal-body">
 						<p><input type="number" id="username" value=<?= $user->username ?> class="form-control" /></p>
+						<p><input type="password" id="password" value=<?= $user->password ?> class="form-control" /></p>
 					</div>
 					<div class="modal-footer">
 					  <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
@@ -42,14 +46,8 @@
 <script>
     $(document).ready(function() 
     {
-		if ($('#ambiente').val() == 'Producción')
-		{
-			updateUsername = '/sistemasangabriel/users/updateUsername';
-		}
-		else
-		{
-			updateUsername = '/desarrollosistemasangabriel/users/updateUsername';
-		}
+
+		updateUsername = '<?php echo Router::url(["controller" => "Users", "action" => "updateUsername"]); ?>'
 		
         $('#actualizar').click(function(e) 
         {

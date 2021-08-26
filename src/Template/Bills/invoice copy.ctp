@@ -594,7 +594,7 @@
 			<h5>Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></h5>
 			<h3 style="text-align: right;">Recibo de Servicio Educativo Nro. <?= $bill->bill_number ?></h3>		
 	<?php endif; ?>	
-		<h2 style="text-align: center;">Por Bs.S <?= number_format($accountService + $bill->amount, 2, ",", ".") ?>  (<?= number_format(($accountService + $bill->amount_dollar)/$bill->tasa_cambio, 2, ",", ".") ?>  $)</h2>
+		<h2 style="text-align: center;">Por Bs.S <?= number_format($accountService + $bill->amount, 2, ",", ".") ?></h2>
 		<br />
 		<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de Bs.S <b><?= number_format($accountService, 2, ",", ".") ?></b>
 		por concepto de servicio educativo, correspondiente a lo(s) alumno(s):</p>
@@ -607,30 +607,6 @@
 				<?php endforeach; ?>
 			</tbody>
 		</table>
-		<br />
-		<br />
-		<div id="payments">
-			Formas de pago:
-			<table style="width:100%;">
-				<tbody class="nover">
-					<?php foreach ($aPayments as $aPayment): ?>
-						<tr>
-							<td><?= h($aPayment->payment_type) ?></td>
-							<td><?= h($aPayment->bank) ?></td>
-							<td><?= h($aPayment->bancoReceptor) ?></td>
-							<td><?= h($aPayment->account_or_card) ?></td>
-							<td><?= h($aPayment->serial) ?></td>
-							<td><?= h($aPayment->moneda) ?></td>
-							<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
-							<td><?= $aPayment->comentario ?></td>
-						</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-		</div>
-		<br />
-		<br />
-		<br />
 	</div>
 <?php endif; ?>
 <?php if ($indicadorSobrante == 1): ?>
@@ -695,6 +671,7 @@
 	</div>
 <?php endif; ?>
 <button class='nover btn btn-success' onclick='imprimirPantalla()'>Imprimir</button>
+<?= $this->Html->link('Imprimir', ['action' => 'invoicepdf', '_ext' => 'pdf'], ['class' => 'btn btn-success']); ?>
 <script>
     $(document).ready(function()
     {

@@ -88,10 +88,14 @@ class StudenttransactionsTable extends Table
             ->requirePresence('amount', 'create')
             ->notEmpty('amount');
 			
-       $validator
+        $validator
             ->numeric('amount_dollar')
             ->allowEmpty('amount_dollar', 'create');
-            
+
+        $validator
+            ->numeric('porcentaje_descuento')
+            ->allowEmpty('porcentaje_descuento', 'create');            
+
         return $validator;
     }
 

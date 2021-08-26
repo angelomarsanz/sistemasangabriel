@@ -80,6 +80,10 @@ class SalesbooksTable extends Table
             ->allowEmpty('factura_afectada');
 
         $validator
+            ->numeric('descuento_recargo')
+            ->allowEmpty('descuento_recargo');
+
+        $validator
             ->numeric('total_ventas_mas_impuesto')
             ->allowEmpty('total_ventas_mas_impuesto');
 

@@ -2827,9 +2827,6 @@
 										{											
 											if (tarifaDolar != montoDolar && tarifaDolarSinDescuento != montoDolar)
 											{
-
-												console.log('MonthlyPayment ' + monthlyPayment + ' tarifaDolar ' + tarifaDolar + ' montoDolar ' + montoDolar);
-
 												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 												montoAPagarDolar = montoPendienteDolar;
 												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);

@@ -1258,11 +1258,11 @@
 			saldoNotaCredito = saldoNotaCredito + montoPendienteDolar;
 		}
 		
-		// Eliminar este condición cuando se hagan todas las notas de crédito SUNDDE 2019
-		if (monthlyPayment == "Ago 2020" && montoDolar == 40)
+		// Esta condición se utilizó para atender la denuncia de la SUNDDE, está sin efecto. Por esa razón se comentó 
+		/* if (monthlyPayment == "Ago 2020" && montoDolar == 40)
 		{
 			saldoNotaCredito = saldoNotaCredito - 10;
-		}
+		} */
     }
     
     function insertRecordPayments() // Get value from Input and insert record . Function Call when Save/Submit Button Click..
@@ -1944,6 +1944,7 @@
                     tbStudentTransactions[transactionCounter] = new Object();
                     tbStudentTransactions[transactionCounter].studentName = item['dbStudentName'];
                     tbStudentTransactions[transactionCounter].transactionIdentifier = item['dbId'];
+					tbStudentTransactions[transactionCounter].descuentoAlumno = item['dbDescuentoAlumno'];
 					tbStudentTransactions[transactionCounter].tarifaDolarOriginal = item['dbTarifaDolarOriginal'];
 					tbStudentTransactions[transactionCounter].tarifaDolar = item['dbTarifaDolar'];
                     tbStudentTransactions[transactionCounter].monthlyPayment = item['dbMonthlyPayment'];
@@ -2768,7 +2769,16 @@
 							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
 
 							montoDolar = dosDecimales(value2.amount_dollar);
-														
+
+							if (value2.porcentaje_descuento == 0)
+							{
+								porcentajeDescuento = 1;
+							}
+							else
+							{	
+								porcentajeDescuento = dosDecimales((100 - value2.porcentaje_descuento) / 100);
+							}
+
 							if (paidOut == true)
 							{
 								if (montoDolar === null)
@@ -2786,14 +2796,7 @@
 									{
 										tarifaDolarSinDescuento = tarifaDolar;
 										
-										if (anoEscolarMensualidad == anoEscolarActual)
-										{
-											tarifaDolar = dosDecimales(tarifaDolar * discountFamily);
-										}
-										else
-										{
-											tarifaDolar = dosDecimales(tarifaDolar * descuentoAnoAnterior);
-										}
+										tarifaDolar = dosDecimales(tarifaDolar * porcentajeDescuento);
 										
 										if (tarifaDolar == tarifaDolarSinDescuento)
 										{										

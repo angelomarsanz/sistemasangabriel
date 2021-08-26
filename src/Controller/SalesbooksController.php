@@ -308,8 +308,18 @@ class SalesbooksController extends AppController
 			}
 			else
 			{
-				$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid;
-				$salesbook->ventas_exoneradas = $invoicesBill->amount_paid;
+                if ($invoicesBill->amount != 0)
+                {
+                    $salesbook->descuento_recargo = $invoicesBill->amount;
+				    $salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid + $invoicesBill->amount;
+				    $salesbook->ventas_exoneradas = $invoicesBill->amount_paid + $invoicesBill->amount;
+                }
+                else
+                {
+                    $salesbook->descuento_recargo = 0;
+				    $salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid;
+				    $salesbook->ventas_exoneradas = $invoicesBill->amount_paid;
+                }
 			}
 		}
 		else
