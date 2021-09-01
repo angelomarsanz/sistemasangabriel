@@ -312,7 +312,7 @@ class BillsController extends AppController
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar; 
 				
-        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'amountMonthly', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual', 'anoEscolarInscripcion'));
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual', 'anoEscolarInscripcion'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)
@@ -537,6 +537,8 @@ class BillsController extends AppController
 		$mensajeUsuario = "";
 		
 		$facturaOtroCajero = 0;
+
+		$montoReintegro = 0;
 		
 		if (isset($origen))
 		{

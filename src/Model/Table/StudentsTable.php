@@ -300,23 +300,27 @@ class StudentsTable extends Table
     {
 		if ($options['filtersReport'] == 'Nuevos')
 		{
-			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 1]];
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 1], ['Students.balance' => $options['anoEscolarActual']]];
 		}
-		elseif ($options['filtersReport'] == 'Regulares') 
+		if ($options['filtersReport'] == 'Nuevos próximo año escolar')
 		{
-			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 0]];
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 1], ['Students.balance' => $options['proximoAnoEscolar']]];
 		}
-		elseif ($options['filtersReport'] == 'Nuevos y regulares')
+        elseif ($options['filtersReport'] == 'Regulares') 
 		{
-			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular']];
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 0], ['Students.balance' => $options['anoEscolarActual']]];
 		}
-		elseif ($options['filtersReport'] == 'Nuevos próximo año escolar')
+        elseif ($options['filtersReport'] == 'Regulares próximo año escolar') 
 		{
-			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 1]];
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 0], ['Students.balance' => $options['proximoAnoEscolar']]];
 		}
-		else
+        elseif ($options['filtersReport'] == 'Nuevos y regulares')
 		{
-			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition !=' => 'Eliminado']];
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.balance' => $options['anoEscolarActual']]];
+		}
+		elseif ($options['filtersReport'] == 'Todos')
+		{
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition !=' => 'Eliminado'], ['Students.balance' => $options['anoEscolarActual']]];
 		}
 		
 		if ($options['orderReport'] == 'Familia') 

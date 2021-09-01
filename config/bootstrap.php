@@ -230,4 +230,4 @@ Plugin::load('Proffer');
 
 Plugin::load('Dompdf');
 
-// Plugin::load('Cewi/Excel', ['bootstrap' => true, 'routes'=>true]);
+Plugin::load('Cewi/Excel', ['bootstrap' => true, 'routes'=>true]);

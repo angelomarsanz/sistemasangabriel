@@ -594,6 +594,28 @@ class StudentsController extends AppController
 						$indicadorError = $studentTransactions->createQuotasRegular($student->id);
 					}
 				}
+				else
+				{
+					$transactionDescription = 'Matrícula ' . $school->current_year_registration;
+			
+					$studentTransaction = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => $transactionDescription]);
+
+					$results = $studentTransaction->toArray();
+
+					if (!($results))
+					{
+						$transactionDescription = 'Matrícula ' . $school->next_year_registration;
+			
+						$studentTransaction = $this->Students->Studenttransactions->find('all')->where(['student_id' => $student->id, 'transaction_description' => $transactionDescription]);
+	
+						$results = $studentTransaction->toArray();
+	
+						if (!($results))
+						{
+							$indicadorError = $studentTransactions->createQuotasNew($student->id, $school->current_year_registration);
+						}
+					}					
+				}
 				
 				if ($indicadorError == 0)
 				{
@@ -2488,6 +2510,18 @@ class StudentsController extends AppController
             $student = $this->Students->patchEntity($student, $this->request->data);
             
             $student->brothers_in_school = 0;
+
+			if ($student->student_condition == "Nuevo")
+			{
+				$student->student_condition = "Regular";
+				$student->new_student = true;
+				$student->level_of_study = "";
+				$student->section_id = 1;
+				$student->number_of_brothers = 0;
+				$student->balance = 0;	
+				$student->tipo_descuento = "";
+				$student->discount = 0;		
+			}
 		            
             if ($this->Students->save($student)) 
             {			

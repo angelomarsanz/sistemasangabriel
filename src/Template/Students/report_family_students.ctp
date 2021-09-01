@@ -63,16 +63,10 @@
 					if ($familyStudent->student_condition == "Regular"):
 						if ($familyStudent->new_student == 0):
 							$studentCondition = $familyStudent->student_condition;
-							if ($familyStudent->balance == $anoEscolarActual && isset($arraySignedUp[$familyStudent->id])):
-								$lastYearRegistration .= '-' . $arraySignedUp[$familyStudent->id];
-							endif;
 						else:
 							$studentCondition = "Nuevo";
-							if ($familyStudent->balance == $anoEscolarActual && isset($arraySignedUp[$familyStudent->id])):
-								$lastYearRegistration .= '-' . $arraySignedUp[$familyStudent->id];
-							endif;
 						endif;
-
+						$lastYearRegistration .= '-' . $arraySignedUp[$familyStudent->id];
 					else:
 						$studentCondition = $familyStudent->student_condition;
 					endif;

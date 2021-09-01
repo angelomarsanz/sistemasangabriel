@@ -1,0 +1,8 @@
+3.5
+/opt/lampp/htdocs/sistemasangabriel/vendor/cakephp/cakephp/src/Http/Response.php
+/opt/lampp/htdocs/sistemasangabriel/vendor/cakephp/cakephp/src/View/Helper/FormHelper.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Model/Table/StudentsTable.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Students/family_students.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/report_student_general.ctp

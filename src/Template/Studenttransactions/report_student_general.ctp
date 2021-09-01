@@ -1,3 +1,6 @@
+<?php
+use Cake\I18n\Time;
+?>
 <style>
 @media screen
 {
