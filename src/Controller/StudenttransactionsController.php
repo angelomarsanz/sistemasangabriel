@@ -4044,7 +4044,7 @@ class StudenttransactionsController extends AppController
 		{
 			$marcar = 0;
 			
-			$fechaHasta = new Time('2019-09-01 00:00:00');
+			$fechaHasta = new Time('2020-09-01 00:00:00');
 			
 			if ($transaccion->invoiced == 0)
 			{
@@ -4053,22 +4053,22 @@ class StudenttransactionsController extends AppController
 					$marcar = 1;
 					$contadorMensualidades++;
 				}
-				elseif ($transaccion->transaction_type == 'Matrícula' && $transaccion->transaction_description != 'Matrícula 2019' && $transaccion->transaction_description != 'Matrícula 2020' && $transaccion->transaction_description != 'Matrícula 2021')
+				elseif ($transaccion->transaction_type == 'Matrícula' && $transaccion->transaction_description != 'Matrícula 2020' && $transaccion->transaction_description != 'Matrícula 2021')
 				{
 					$marcar = 1;
 					$contadorMatriculas++;
 				}
-				elseif ($transaccion->transaction_type == 'Seguro escolar' && $transaccion->transaction_description != 'Seguro escolar 2019' && $transaccion->transaction_description != 'Seguro escolar 2020' && $transaccion->transaction_description != 'Seguro escolar 2021')
+				elseif ($transaccion->transaction_type == 'Seguro escolar' && $transaccion->transaction_description != 'Seguro escolar 2020' && $transaccion->transaction_description != 'Seguro escolar 2021')
 				{
 					$marcar = 1;
 					$contadorSeguro++;
 				}
-				elseif ($transaccion->transaction_type == 'Servicio educativo' && $transaccion->transaction_description != 'Servicio educativo 2019' && $transaccion->transaction_description != 'Servicio educativo 2020' && $transaccion->transaction_description != 'Servicio educativo 2021')
+				elseif ($transaccion->transaction_type == 'Servicio educativo' && $transaccion->transaction_description != 'Servicio educativo 2020' && $transaccion->transaction_description != 'Servicio educativo 2021')
 				{
 					$marcar = 1;
 					$contadorServicio++;
 				}
-				elseif ($transaccion->transaction_type == 'Thales' && $transaccion->transaction_description != 'Thales 2019' && $transaccion->transaction_description != 'Thales 2020' && $transaccion->transaction_description != 'Thales 2021')
+				elseif ($transaccion->transaction_type == 'Thales')
 				{
 					$marcar = 1;
 					$contadorThales++;
@@ -4077,8 +4077,6 @@ class StudenttransactionsController extends AppController
 				
 				if ($marcar == 1)
 				{
-					$this->Flash->success(__('La Transacción ' . $transaccion->transaction_description . ' con el id ' . $transaccion->id . ' será modificada'));
-
 					$transaccionGet = $this->Studenttransactions->get($transaccion->id);
 				
 					$transaccionGet->invoiced = 1;

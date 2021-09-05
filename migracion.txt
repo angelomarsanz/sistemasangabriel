@@ -6,3 +6,4 @@
 /opt/lampp/htdocs/sistemasangabriel/src/Model/Table/StudentsTable.php
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Students/family_students.ctp
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/report_student_general.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php

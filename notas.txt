@@ -55,9 +55,6 @@ Cambios necesarios para el período de renovación de matrícula (junio de cada 
 
 Cambios necesarios para el período de inicio de nuevo año escolar:
 
-	El programa createInvoice verifique si el current_school_year es igual current_year_registration, si es diferente verificar
-    si la fecha actual corresponde al mes de septiembre (9) y si es positivo asignar current_year_registration a current_school_year. (Falta aquí)
-
 	El programa assignSection verifique si el current_school_year es igual current_year_registration, si es diferente verificar
     si la fecha actual corresponde al mes de septiembre (9) y si es positivo asignar current_year_registration a current_school_year y
 	actualizar las becas. (Listo)
