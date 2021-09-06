@@ -120,3 +120,6 @@ Al iniciar el año escolar depurar StudenttransactionsController
 con las funciones marcarEliminado y EliminarMarcado
 
 --
+
+Representantes a los cuales se les aplicó nota de crédito porque no les correspondía pagar las diferencias de: Matrícula 2020 y agosto 2021. 
+Se debe colocar en cero el "Balance" de ParentsandGuardian y ajustar la cuota. Los ID son: 675, 921, 437, 1126, 1127, 1028, 889, 380, 1008, 998 y 687

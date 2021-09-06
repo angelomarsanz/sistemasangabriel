@@ -122,7 +122,7 @@ class StudentsController extends AppController
             $students = $this->paginate($this->Students);   
         }
 
-        $this->set(compact('students', 'family'));
+        $this->set(compact('family'));
         $this->set('_serialize', ['students', 'family']);
     }
 
@@ -201,7 +201,7 @@ class StudentsController extends AppController
             
         $this->set('students', $this->paginate($query));
 
-        $this->set(compact('students', 'idFamilyP'));
+        $this->set(compact('idFamilyP'));
         $this->set('_serialize', ['students', 'idFamilyp']);
     }
 
@@ -779,8 +779,8 @@ class StudentsController extends AppController
 				$this->Flash->error(__('Estimado representante debe subir un archivo con alguna de estas extensiones: jpg, jpeg, gif o png'));
 			}
         }    
-        $this->set(compact('student', 'parentsandguardian', 'profilePhoto'));
-        $this->set('_serialize', ['student', 'parentsandguardian', 'profilePhoto']);
+        $this->set(compact('student', 'parentsandguardian'));
+        $this->set('_serialize', ['student', 'parentsandguardian']);
     }
 
     

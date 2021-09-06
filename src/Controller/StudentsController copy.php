@@ -2312,27 +2312,34 @@ class StudentsController extends AppController
 		$anoEscolarActual = $school->current_school_year;
 		$proximoAnoEscolar = $anoEscolarActual + 1;
 
-		if ($filtersReport == "Regulares próximo año escolar")
-		{
-			$conceptoRegulares = 'Matrícula ' . $proximoAnoEscolar;
-		}
-		else
-		{
-			$conceptoRegulares = 'Matrícula ' . $anoEscolarActual;
-		}
-				
-		if ($filtersReport == "Nuevos próximo año escolar")
+		if ($filtersReport == "Nuevos")
 		{		
-			$conceptoNuevos = 'Matrícula ' . $proximoAnoEscolar; 
+			$concepto = 'Matrícula ' . $anoEscolarActual;
 		}
-		else
+		elseif ($filtersReport == "Nuevos próximo año escolar")
 		{
-			$conceptoNuevos = 'Matrícula ' . $anoEscolarActual;
+			$concepto = 'Matrícula ' . $proximoAnoEscolar;
+		}
+		elseif ($filtersReport == "Regulares")
+		{
+			$concepto = 'Matrícula ' . $anoEscolarActual;
+		}
+		elseif ($filtersReport == "Regulares próximo año escolar")
+		{
+			$concepto = 'Matrícula ' . $proximoAnoEscolar;
+		}		
+		elseif ($filtersReport == "Nuevos y regulares")
+		{		
+			$concepto = 'Matrícula ' . $anoEscolarActual; 
+		}
+		elseif ($filtersReport == "Todos")
+		{
+			$concepto = 'Matrícula ' . $anoEscolarActual;
 		}
 			
 		$students = TableRegistry::get('Students');
 
-		$arrayResult = $students->find('family', ['filtersReport' => $filtersReport, 'orderReport' => $orderReport]);
+		$arrayResult = $students->find('family', ['filtersReport' => $filtersReport, 'orderReport' => $orderReport, 'anoEscolarActual' => $anoEscolarActual, 'proximoAnoEscolar' => $proximoAnoEscolar]);
 		
 		if ($arrayResult['indicator'] == 1)
 		{
@@ -2355,12 +2362,10 @@ class StudentsController extends AppController
 				if ($familyStudent->new_student == 0)
 				{
 					$accountStudents['Regular']++;
-					$concepto = $conceptoRegulares;
 				}
 				else
 				{
 					$accountStudents['New']++;
-					$concepto = $conceptoNuevos;
 				}
 				
 				$signedUp = $this->Students->Studenttransactions->find('all')
@@ -2378,48 +2383,45 @@ class StudentsController extends AppController
 
 				if ($row)
 				{
-					if ($row->amount_dollar > 0)
+					$arraySignedUp[$familyStudent->id] = 'Pagado';
+					if ($familyStudent->new_student == 1)
 					{
-						$arraySignedUp[$familyStudent->id] = 'Pagado';
-						if ($familyStudent->new_student == 1)
+						if ($orderReport == "Familia")
 						{
-							if ($orderReport == "Familia")
+							if ($accountNewRegistration == 0)
 							{
-								if ($accountNewRegistration == 0)
-								{
-									$familiaAnterior = $familyStudent->parentsandguardian->family;
-									$contadorFamilias++;
-								}
-								if ($familiaAnterior != $familyStudent->parentsandguardian->family)
-								{
-									$familiaAnterior = $familyStudent->parentsandguardian->family;
-									$contadorFamilias++;
-								}
-							}							
-							$accountNewRegistration++;
-						}
-						else
-						{
-							if ($orderReport == "Familia")
+								$familiaAnterior = $familyStudent->parentsandguardian->family;
+								$contadorFamilias++;
+							}
+							if ($familiaAnterior != $familyStudent->parentsandguardian->family)
 							{
-								if ($accountRegularRegistration == 0)
-								{
-									$familiaAnterior = $familyStudent->parentsandguardian->family;
-									$contadorFamilias++;
-								}
-								if ($familiaAnterior != $familyStudent->parentsandguardian->family)
-								{
-									$familiaAnterior = $familyStudent->parentsandguardian->family;
-									$contadorFamilias++;
-								}
-							}												
-							$accountRegularRegistration++;
+								$familiaAnterior = $familyStudent->parentsandguardian->family;
+								$contadorFamilias++;
+							}
 						}							
+						$accountNewRegistration++;
 					}
 					else
 					{
-						$arraySignedUp[$familyStudent->id] = 'No pagado';							
-					}
+						if ($orderReport == "Familia")
+						{
+							if ($accountRegularRegistration == 0)
+							{
+								$familiaAnterior = $familyStudent->parentsandguardian->family;
+								$contadorFamilias++;
+							}
+							if ($familiaAnterior != $familyStudent->parentsandguardian->family)
+							{
+								$familiaAnterior = $familyStudent->parentsandguardian->family;
+								$contadorFamilias++;
+							}
+						}												
+						$accountRegularRegistration++;
+					}							
+				}
+				else
+				{
+					$arraySignedUp[$familyStudent->id] = 'No pagado';
 				}
 			}
 			elseif ($familyStudent->student_condition == "Egresado")
