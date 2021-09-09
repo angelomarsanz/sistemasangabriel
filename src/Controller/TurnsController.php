@@ -62,7 +62,6 @@ class TurnsController extends AppController
    
 		$this->set('turns', $this->paginate($query));
 		
-        $this->set(compact('turns'));
         $this->set('_serialize', ['turns']);
     }
 

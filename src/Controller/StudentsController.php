@@ -101,6 +101,7 @@ class StudentsController extends AppController
      */
     public function index()
     {
+		$family = '';
         if($this->Auth->user('role') == 'Representante')
         {
             $parentsandguardians = $this->Students->Parentsandguardians->find('all')
@@ -119,7 +120,9 @@ class StudentsController extends AppController
         }
         else
         {
-            $students = $this->paginate($this->Students);   
+			$query = $this->Students->find('all')->where([['Students.student_condition' => 'Regular'],
+			['Students.section_id <' => 41]])->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);;
+			$this->set('students', $this->paginate($query));
         }
 
         $this->set(compact('family'));
@@ -151,7 +154,7 @@ class StudentsController extends AppController
 
         $this->set('students', $this->paginate($query));
 
-        $this->set(compact('students', 'idFamily', 'family'));
+        $this->set(compact('idFamily', 'family'));
         $this->set('_serialize', ['students', 'idFamily', 'family']);
     }
 
