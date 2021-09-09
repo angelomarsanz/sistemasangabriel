@@ -3,15 +3,15 @@
 ?>
 <div class="row">
     <div class="col-md-12">
-        <?php if ($family != ''): ?>
-            <div class="page-header">
+        <div class="page-header">
+            <?php if ($family != ''): ?>
                 <h4>Familia: <?= $family ?></h4>
                 <p style="color: #004d99;">Por favor actualice los datos de su(s) hijo(s) o representado(s) y luego imprima la ficha de inscripción</p>
-            </div>
-        <?php else: ?>
-            <br />
-            <h4>Listado de alumnos</h4>
-        <?php endif; ?>
+            <?php else: ?>
+                <br />
+                <h4>Listado de alumnos</h4>
+            <?php endif; ?>
+        </div>
         <?php
         $updateIndicator = 0;
         foreach ($students as $student): ?>
