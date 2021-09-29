@@ -136,7 +136,7 @@
 		</div>
 		<hr>
 		<div style="width:100%; font-size: 9px; line-height: 11px;">
-			<div id="payments">
+			<div id="payments">				
 				Formas de pago:
 				<table style="width:100%;">
 					<tbody class="nover">
@@ -156,6 +156,7 @@
 				</table>
 			</div>
 			<div id="emptyColumn">
+				<p class="nover">Tasa cambio BCV <?= number_format($bill->tasa_cambio, 2, ",", ".") ?></p>
 				<p>Cajero: <?= $usuarioResponsable ?></p>
 			</div>
 			<div id="total">
@@ -259,6 +260,7 @@
 				</table>
 			</div>
 			<div id="emptyColumn">
+				<p class="nover">Tasa cambio BCV <?= number_format($bill->tasa_cambio, 2, ",", ".") ?></p>
 				<p>Cajero: <?= $usuarioResponsable ?></p>
 			</div>
 			<div id="total">

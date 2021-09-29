@@ -62,7 +62,7 @@ class BillsController extends AppController
 
         $this->set('bills', $this->paginate($query));
 
-        $this->set(compact('bills', 'idFamily', 'family'));
+        $this->set(compact('idFamily', 'family'));
         $this->set('_serialize', ['bills', 'idFamily', 'family']);
     }
     

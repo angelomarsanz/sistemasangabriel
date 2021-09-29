@@ -1944,6 +1944,7 @@
                     tbStudentTransactions[transactionCounter] = new Object();
                     tbStudentTransactions[transactionCounter].studentName = item['dbStudentName'];
                     tbStudentTransactions[transactionCounter].transactionIdentifier = item['dbId'];
+					tbStudentTransactions[transactionCounter].descuentoAlumno = item['dbDescuentoAlumno'];
 					tbStudentTransactions[transactionCounter].tarifaDolarOriginal = item['dbTarifaDolarOriginal'];
 					tbStudentTransactions[transactionCounter].tarifaDolar = item['dbTarifaDolar'];
                     tbStudentTransactions[transactionCounter].monthlyPayment = item['dbMonthlyPayment'];
@@ -2768,7 +2769,16 @@
 							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
 
 							montoDolar = dosDecimales(value2.amount_dollar);
-														
+
+							if (value2.porcentaje_descuento == 0)
+							{
+								porcentajeDescuento = 1;
+							}
+							else
+							{	
+								porcentajeDescuento = dosDecimales((100 - value2.porcentaje_descuento) / 100);
+							}
+
 							if (paidOut == true)
 							{
 								if (montoDolar === null)
@@ -2786,14 +2796,7 @@
 									{
 										tarifaDolarSinDescuento = tarifaDolar;
 										
-										if (anoEscolarMensualidad == anoEscolarActual)
-										{
-											tarifaDolar = dosDecimales(tarifaDolar * discountFamily);
-										}
-										else
-										{
-											tarifaDolar = dosDecimales(tarifaDolar * descuentoAnoAnterior);
-										}
+										tarifaDolar = dosDecimales(tarifaDolar * porcentajeDescuento);
 										
 										if (tarifaDolar == tarifaDolarSinDescuento)
 										{										
@@ -2824,6 +2827,9 @@
 										{											
 											if (tarifaDolar != montoDolar && tarifaDolarSinDescuento != montoDolar)
 											{
+
+												console.log('MonthlyPayment ' + monthlyPayment + ' tarifaDolar ' + tarifaDolar + ' montoDolar ' + montoDolar);
+
 												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 												montoAPagarDolar = montoPendienteDolar;
 												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
@@ -2987,7 +2993,7 @@
 									}
 									else
 									{
-										if (monthlyPayment.substring(0, 14) != "Seguro escolar")
+										if (monthlyPayment.substring(0, 14) != "Seguro escolar" && monthlyPayment.substring(0, 9) != "Matrícula")
 										{
 											insertRecord();
 										}
