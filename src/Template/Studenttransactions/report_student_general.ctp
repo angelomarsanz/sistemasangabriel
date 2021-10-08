@@ -186,12 +186,12 @@ use Cake\I18n\Time;
                 <?php if ($studentsFors->student->type_of_identification != 'PN'): ?>
                     <td><?= $studentsFors->student->type_of_identification ?></td>
                 <?php else: ?>
-                    <td></td>
+                    <td><?= $studentsFors->student->parentsandguardian->type_of_identification ?></td>
                 <?php endif; ?>
                 <?php if ($studentsFors->student->type_of_identification != 'PN' && $studentsFors->student->identity_card > '9999'): ?>
                     <td><?= $studentsFors->student->identity_card ?></td>
                 <?php else: ?>
-                    <td></td>
+                    <td><?= $studentsFors->student->parentsandguardian->identidy_card ?></td>
                 <?php endif; ?>
                 <td><?= $studentsFors->student->surname . ' ' . $studentsFors->student->second_surname ?></td>
                 <td><?= $studentsFors->student->first_name . ' ' . $studentsFors->student->second_name ?></td>
