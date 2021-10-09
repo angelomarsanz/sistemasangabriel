@@ -546,6 +546,18 @@
 <div id="pagos"></div>
 <script>
 //  Declaración de variables
+	var crm_processing_modal = function ( msg ) 
+	{
+	    var process_modal ='<div class="modal fade" id="fave_modal" tabindex="-1" role="dialog" aria-labelledby="faveModalLabel" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body houzez_messages_modal">'+msg+'</div></div></div></div></div>';
+    	$('body').append(process_modal);
+        $('#fave_modal').modal();
+    }
+
+	var crm_processing_modal_close = function ( ) 
+	{
+		$('#fave_modal').modal('hide');
+	}
+
     var idFamily = 0;
     var nameFamily = " ";
     var selectFamily = -1;
@@ -2463,6 +2475,38 @@
 		}
 		return cadenaConPuntoDecimal;	
 	}
+	function procesarPago()
+	{
+		if (monedaPago == "$")
+		{
+			montoPagadoDolar = montoPagado;
+			montoPagadoEuro = dosDecimales(montoPagado / tasaDolarEuro);
+			montoPagadoBolivar = dosDecimales(montoPagado * dollarExchangeRate);
+		}
+		else if (monedaPago == "€")
+		{
+			montoPagadoDolar = dosDecimales(montoPagado * tasaDolarEuro);
+			montoPagadoEuro = montoPagado;
+			montoPagadoBolivar = dosDecimales(montoPagado * euro);
+		}
+		else
+		{
+			montoPagadoDolar = dosDecimales(montoPagado / dollarExchangeRate);
+			montoPagadoEuro = dosDecimales(montoPagado / euro);
+			montoPagadoBolivar = montoPagado;
+		}
+	
+		printPayments();
+		
+		alert('Pago registrado con éxito: ' +  monedaPago + ' ' + formatoNumero(montoPagado));
+		
+		accumulatedPayment += dosDecimales(montoPagadoDolar);
+		acumuladoPagadoEuros += dosDecimales(montoPagadoEuro);
+		acumuladoPagadoBolivares += dosDecimales(montoPagadoBolivar);
+
+		actualizarTotales();
+		inicializarCampos();
+	}
 	    
 // Funciones Jquery
 
@@ -3397,37 +3441,42 @@
 				{
 					alert('Estimado usuario los pagos desde Zelle solo deben ser en transferencia');
 					return false;
-				}			
-				
-				if (monedaPago == "$")
+				}	
+
+				if (paymentType == 'Transferencia' || paymentType == 'Deposito')
 				{
-					montoPagadoDolar = montoPagado;
-					montoPagadoEuro = dosDecimales(montoPagado / tasaDolarEuro);
-					montoPagadoBolivar = dosDecimales(montoPagado * dollarExchangeRate);
-				}
-				else if (monedaPago == "€")
-				{
-					montoPagadoDolar = dosDecimales(montoPagado * tasaDolarEuro);
-					montoPagadoEuro = montoPagado;
-					montoPagadoBolivar = dosDecimales(montoPagado * euro);
+					crm_processing_modal('Por favor espere mientras se valida el serial');
+
+					$.post('<?php echo Router::url(["controller" => "Payments", "action" => "verificarSerial"]); ?>', 
+						{
+							"banco" : bank, 
+							"serial" : serial
+						}, null, "json")          
+
+					.done(function(response) 
+					{
+						if (response.success) 
+						{
+							crm_processing_modal_close(); 
+							procesarPago();
+						} 
+						else 
+						{
+							crm_processing_modal_close(); 
+							alert(response.message);
+						}
+					})
+					.fail(function(jqXHR, textStatus, errorThrown) 
+					{
+						crm_processing_modal_close(); 
+						alert ("El serial no pudo ser validado. Código de error " + textStatus);
+					});  
+
 				}
 				else
 				{
-					montoPagadoDolar = dosDecimales(montoPagado / dollarExchangeRate);
-					montoPagadoEuro = dosDecimales(montoPagado / euro);
-					montoPagadoBolivar = montoPagado;
-				}
-			
-                printPayments();
-				
-                alert('Pago registrado con éxito: ' +  monedaPago + ' ' + formatoNumero(montoPagado));
-				
-                accumulatedPayment += dosDecimales(montoPagadoDolar);
-				acumuladoPagadoEuros += dosDecimales(montoPagadoEuro);
-				acumuladoPagadoBolivares += dosDecimales(montoPagadoBolivar);
-
-				actualizarTotales();
-				inicializarCampos();
+					procesarPago();
+				}		
             }
             else
             {

@@ -555,4 +555,27 @@ class PaymentsController extends AppController
 		
         return $resultado;
     }
+	public function busquedaPagosFactura($idFactura = null)
+    {
+        $this->autoRender = false;
+		
+		$resultado = ['codigoRetorno' => 0, 'pagosFactura' => ''];
+		
+		$pagosFactura = $this->Payments->find('all')
+			->where(['bill_id' => $idFactura])
+			->order(['payment_type' => 'ASC', 'orden_moneda' => 'ASC']);
+			
+		$contadorPagos = $pagosFactura->count();
+		
+		if ($contadorPagos > 0)
+		{
+			$resultado['pagosFactura'] = $pagosFactura;	
+		}
+		else
+		{
+			$resultado['codigoRetorno'] = 1;
+		}
+		
+        return $resultado;
+    }
 }

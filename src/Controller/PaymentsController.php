@@ -578,4 +578,51 @@ class PaymentsController extends AppController
 		
         return $resultado;
     }
+	public function verificarSerial()
+    {
+        $this->autoRender = false;
+		$jsondata = [];
+
+        if ($this->request->is('json')) 
+        {
+			
+            if(isset($_POST['banco']))
+            {
+				$banco = $_POST['banco'];
+				if(isset($_POST['serial']))
+				{
+					$serial = $_POST['serial'];
+
+					$pagos = $this->Payments->find('all')
+					->where(['OR' => [['payment_type' => 'Transferencia'], ['payment_type' => 'Depósito']], 'bank' => $banco, 'serial' => $serial, 'annulled' => 0])
+					->order(['id' => 'DESC']);
+
+					$pago = $pagos->first();
+					
+					if ($pago)
+					{
+						$jsondata["success"] = false;
+						$jsondata["message"] = "Serial duplicado";
+					}
+					else
+					{
+						$jsondata["success"] = true;
+						$jsondata["message"] = "Serial válido";
+					}
+				}
+				else
+				{
+					$jsondata["success"] = false;
+					$jsondata["message"] = "Falta el serial de la transaccion";
+				}
+			}
+			else
+			{
+				$jsondata["success"] = false;
+				$jsondata["message"] = "Falta el nombre del banco";
+			}
+			
+			exit(json_encode($jsondata, JSON_FORCE_OBJECT));	
+		}
+	}
 }
