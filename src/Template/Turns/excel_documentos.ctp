@@ -49,6 +49,7 @@
 								<thead>
 									<tr>
 										<th style="text-align: center;">Nro.</th>
+										<th style="text-align: center;">Anulada</th>
 										<th style="text-align: center;">Fecha/hora</th>
 										<th style="text-align: center;">Factura</th>
 										<th style="text-align: center;">Control</th>
@@ -76,6 +77,7 @@
 									<?php foreach ($vectorPagos as $pago): ?>
 										<tr>
 											<td style="text-align: center;"><?= $pago['Nro']; ?></td>
+											<td style="text-align: center;">No</td>
 											<td style="text-align: center;"><?= $pago['fechaHora']->format('d-m-Y H:i:s'); ?></td>
 											<td style="text-align: center;"><?= $pago['nroFactura']; ?></td>
 											<td style="text-align: center;"><?= $pago['nroControl']; ?></td>
@@ -100,7 +102,36 @@
 											<td style="text-align: center;"><?= number_format($pago['totalFacturadoDolar'], 2, ",", ".") ?></td>
 											<td style="text-align: center;"><?= number_format($pago['ncNdDolar'], 2, ",", ".") ?></td>
 											<td style="text-align: center;"><?= number_format($pago['totalCobradoDolar'], 2, ",", ".") ?></td>
-											<td style="text-align: center;"><?= number_format($pago['totalFacturadoDolar'] - $pago['ncNdDolar'] - $pago['totalCobradoDolar'], 2, ",", ".") ?></td>										
+											<td style="text-align: center;"><?= number_format($pago['totalFacturadoDolar'] - $pago['ncNdDolar'] - $pago['totalCobradoDolar'], 2, ",", ".") ?></td>						
+										</tr> 
+										<?php $ultimoNumeroPagos = $pago['Nro']; ?>
+									<?php endforeach; ?>
+									<?php $ultimoNumeroPagos++; ?>
+									<?php foreach ($anuladas as $anulada): ?>
+										<tr>
+											<td style="text-align: center;"><?= $ultimoNumeroPagos++; ?></td>
+											<td style="text-align: center;">Sí</td>
+											<td></td>
+											<td style="text-align: center;"><?= $anulada->bill_number; ?></td>
+											<td style="text-align: center;"><?= $anulada->control_number; ?></td>
+											<td>Factura</td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
 										</tr> 
 									<?php endforeach; ?>
 								</tbody>
@@ -113,6 +144,8 @@
 					<br />
 					<br />
 				</div>
+			</div>
+			<div>
 			</div>
 		</div>
 	</div>

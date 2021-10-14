@@ -1738,6 +1738,8 @@ class TurnsController extends AppController
     public function excelDocumentos($id = null)
     {
 		$payment = new PaymentsController();
+
+		$this->loadModel('Bills');
 		
 		$vectorPagos = []; 
 		
@@ -1859,14 +1861,20 @@ class TurnsController extends AppController
 				$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
 			}						
 		}
+
+		$anuladas = $this->Bills->find('all', 
+			['conditions' => ['date_annulled >=' => $turn->start_date, 'date_annulled <=' => $turn->end_date],
+			'order' => ['Bills.bill_number' => 'ASC']]);
 							
-		$this->set(compact('turn', 'vectorPagos', 'cajero'));
-		$this->set('_serialize', ['turn', 'vectorPagos', 'cajero']);
+		$this->set(compact('turn', 'vectorPagos', 'cajero', 'anuladas'));
+		$this->set('_serialize', ['turn', 'vectorPagos', 'cajero', 'anuladas']);
 	}
 	
     public function excelPagos($id = null)
     {
 		$payment = new PaymentsController();
+
+		$this->loadModel('Bills');
 		
 		$vectorPagos = []; 
 		$contador = 0;
@@ -2000,8 +2008,12 @@ class TurnsController extends AppController
 				}
 			}
 		}
+
+		$anuladas = $this->Bills->find('all', 
+		['conditions' => ['date_annulled >=' => $turn->start_date, 'date_annulled <=' => $turn->end_date],
+		'order' => ['Bills.bill_number' => 'ASC']]);
 										
-		$this->set(compact('turn', 'vectorPagos', 'cajero'));
-		$this->set('_serialize', ['turn', 'vectorPagos', 'cajero']);
+		$this->set(compact('turn', 'vectorPagos', 'cajero', 'anuladas'));
+		$this->set('_serialize', ['turn', 'vectorPagos', 'cajero', 'anuladas']);
 	}	
 }
