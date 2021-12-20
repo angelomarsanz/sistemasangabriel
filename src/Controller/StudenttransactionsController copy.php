@@ -1784,6 +1784,7 @@ class StudenttransactionsController extends AppController
 				'Students.section_id',
 				'Students.sex',
 				'Students.birthdate',
+				'Students.new_student',
 				'Parentsandguardians.type_of_identification',
 				'Parentsandguardians.identidy_card',
 				'Parentsandguardians.surname',

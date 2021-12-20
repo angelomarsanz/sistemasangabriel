@@ -1,3 +1,8 @@
+Se le quitó el saldo al ex-empleado Valderrama Escalona (40), Rincones Sánches (80)
+
+La factura 114194 correspondía imprimir en la 96529, pero se imprimió en una hoja blanca que venía en el papel de la imprenta
+Y la factura 114595 se imprimió en la 96529 y se descontroló la numeración
+
 Mantenimiento semanal servidor CSGA
 
 cd /home/sgasyst/web

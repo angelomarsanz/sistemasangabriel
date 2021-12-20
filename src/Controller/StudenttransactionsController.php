@@ -1762,6 +1762,8 @@ class StudenttransactionsController extends AppController
     {
         $this->loadModel('Schools');
 
+		$this->loadModel('Excels');
+
         $school = $this->Schools->get(2);
 		
 		$concept = 'Matrícula ' . $school->current_school_year;
@@ -1796,6 +1798,50 @@ class StudenttransactionsController extends AppController
 				['Studenttransactions.amount > ' => 0], ['Students.student_condition' => 'Regular']])
 			->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 
+			$ultimoEnvio = $this->Excels->find('all');
+
+			$alumnosAdicionales = [];
+			$encontrado = 0;
+
+			foreach ($studentsFor as $studentsFors)
+			{
+				$nombreAlumnoStudent = $studentsFors->student->surname;
+				
+				if ($studentsFors->student->second_surname != '')
+				{
+					$nombreAlumnoStudent .= ' ' . $studentsFors->student->second_surname;
+				}
+
+				if ($studentsFors->student->first_name != '')
+				{
+					$nombreAlumnoStudent .= ' ' . $studentsFors->student->first_name;
+				}
+
+				if ($studentsFors->student->second_name != '')
+				{
+					$nombreAlumnoStudent .= ' ' . $studentsFors->student->second_name;
+				}
+
+				foreach ($ultimoEnvio as $envio)
+				{
+					$nombreAlumnoEnvio = $envio->col4 . ' ' . $envio->col5;
+
+					if ($nombreAlumnoEnvio == $nombreAlumnoStudent)
+					{
+						$encontrado = 1;
+						break;
+					} 
+				}
+				if ($encontrado == 0)
+				{
+					$alumnosAdicionales[] = $nombreAlumnoStudent;	
+				}
+				else
+				{
+					$encontrado = 0;	
+				}
+			}
+
             $account = $studentsFor->count();
             
             $totalPages = ceil($studentsFor->count() / 20);
@@ -1805,8 +1851,8 @@ class StudenttransactionsController extends AppController
 
             $currentDate = Time::now();
 
-            $this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate'));
-            $this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate']);
+            $this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate', 'alumnosAdicionales'));
+            $this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate', 'alumnosAdicionales']);
 
     }
     

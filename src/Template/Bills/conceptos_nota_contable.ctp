@@ -82,8 +82,8 @@
 										<tr>
 											<td style="width: 20%;"><input disabled='true' class='form-control' value="<?= $concepto->student_name ?>"></td>
 											<td style="width: 10%;"><input disabled='true' class='form-control' value="<?= $concepto->concept ?>"></td>
-											<td style="width: 10%;"><input id=<?= "MD-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format(round($concepto->amount/$facturaConceptos->tasa_cambio), 2, ",", ".") ?>></td>
-											<td style="width: 10%;"><input id=<?= "MF-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format($concepto->amount, 2, ",", ".") ?>></td>
+											<td style="width: 10%;"><input id=<?= "MD-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format(round(($concepto->amount/1000000)/$facturaConceptos->tasa_cambio, 2), 2, ",", ".") ?>></td>
+											<td style="width: 10%;"><input id=<?= "MF-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format(round($concepto->amount/1000000, 2), 2, ",", ".") ?>></td>
 											<td style="width: 10%;"><input id=<?= "SC-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format($concepto->saldo, 2, ",", ".") ?>></td>
 											<td style="width: 10%;"><input id=<?= "ND-" . $concepto->id ?> name="montosNotaDolar[<?= $concepto->id ?>]" class='form-control alternative-decimal-separator monto-nota' value=0></td>
 											<td style="width: 10%;"><input id=<?= "NV-" . $concepto->id ?> name="montosNotaVisible[<?= $concepto->id ?>]" class='form-control alternative-decimal-separator' value=0 disabled='true'></td>

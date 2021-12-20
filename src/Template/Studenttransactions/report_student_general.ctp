@@ -179,42 +179,72 @@ use Cake\I18n\Time;
                 </tr>
             </thead>
             <tbody>
-        <?php foreach ($studentsFor as $studentsFors): ?>
-            <tr>
-                <td style="display: none;" class="noExl"><?= $studentsFors->student->id ?></td>
-                <td></td>
-                <?php if ($studentsFors->student->type_of_identification != 'PN'): ?>
-                    <td><?= $studentsFors->student->type_of_identification ?></td>
-                <?php else: ?>
-                    <td><?= $studentsFors->student->parentsandguardian->type_of_identification ?></td>
-                <?php endif; ?>
-                <?php if ($studentsFors->student->type_of_identification != 'PN' && $studentsFors->student->identity_card > '9999'): ?>
-                    <td><?= $studentsFors->student->identity_card ?></td>
-                <?php else: ?>
-                    <td><?= $studentsFors->student->parentsandguardian->identidy_card ?></td>
-                <?php endif; ?>
-                <td><?= $studentsFors->student->surname . ' ' . $studentsFors->student->second_surname ?></td>
-                <td><?= $studentsFors->student->first_name . ' ' . $studentsFors->student->second_name ?></td>
-                <td><?= $nivel[$studentsFors->student->level_of_study] ?></td>
-                <td><?= $grado[$studentsFors->student->level_of_study] ?></td>
-                <td><?= $seccion[$studentsFors->student->section_id] ?></td>
-                <td><?= $currentDate->format('Ymd') ?></td>
-                <td><?= $studentsFors->student->birthdate->format('Ymd') ?></td>
-                <td><?= $studentsFors->student->parentsandguardian->type_of_identification ?></td>
-                <td><?= $studentsFors->student->parentsandguardian->identidy_card ?></td>
-                <td><?= $studentsFors->student->parentsandguardian->full_name ?></td>
-                <td><?= $accountStudent ?></td>
-                <?php if ($studentsFors->student->new_student == 0): ?>
-                    <td>N</td>                          
-                <?php else: ?>
-                    <td>R</td>
-                <?php endif; ?>
-            </tr>
-            <?php $accountStudent++; ?>
+        <?php foreach ($studentsFor as $studentsFors):
+                $nombreAlumnoStudent = $studentsFors->student->surname;
+				
+				if ($studentsFors->student->second_surname != '')
+				{
+					$nombreAlumnoStudent .= ' ' . $studentsFors->student->second_surname;
+				}
+
+				if ($studentsFors->student->first_name != '')
+				{
+					$nombreAlumnoStudent .= ' ' . $studentsFors->student->first_name;
+				}
+
+				if ($studentsFors->student->second_name != '')
+				{
+					$nombreAlumnoStudent .= ' ' . $studentsFors->student->second_name;
+				}
+
+                $encontrado = 0;
+                
+                foreach ($alumnosAdicionales as $adicional):
+                    if ($nombreAlumnoStudent == $adicional)
+                    {
+                        $encontrado = 1;
+                        break;
+                    }
+                endforeach;
+                if ($encontrado == 1)
+                { ?>
+                    <tr>
+                        <td style="display: none;" class="noExl"><?= $studentsFors->student->id ?></td>
+                        <td></td>
+                        <?php if ($studentsFors->student->type_of_identification != 'PN'): ?>
+                            <td><?= $studentsFors->student->type_of_identification ?></td>
+                        <?php else: ?>
+                            <td><?= $studentsFors->student->parentsandguardian->type_of_identification ?></td>
+                        <?php endif; ?>
+                        <?php if ($studentsFors->student->type_of_identification != 'PN' && $studentsFors->student->identity_card > '9999'): ?>
+                            <td><?= $studentsFors->student->identity_card ?></td>
+                        <?php else: ?>
+                            <td><?= $studentsFors->student->parentsandguardian->identidy_card ?></td>
+                        <?php endif; ?>
+                        <td><?= $studentsFors->student->surname . ' ' . $studentsFors->student->second_surname ?></td>
+                        <td><?= $studentsFors->student->first_name . ' ' . $studentsFors->student->second_name ?></td>
+                        <td><?= $nivel[$studentsFors->student->level_of_study] ?></td>
+                        <td><?= $grado[$studentsFors->student->level_of_study] ?></td>
+                        <td><?= $seccion[$studentsFors->student->section_id] ?></td>
+                        <td><?= $currentDate->format('Ymd') ?></td>
+                        <td><?= $studentsFors->student->birthdate->format('Ymd') ?></td>
+                        <td><?= $studentsFors->student->parentsandguardian->type_of_identification ?></td>
+                        <td><?= $studentsFors->student->parentsandguardian->identidy_card ?></td>
+                        <td><?= $studentsFors->student->parentsandguardian->full_name ?></td>
+                        <td><?= $accountStudent ?></td>
+                        <?php if ($studentsFors->student->new_student == 0): ?>
+                            <td>N</td>                          
+                        <?php else: ?>
+                            <td>R</td>
+                        <?php endif; ?>
+                    </tr>
+                    <?php $accountStudent++;
+                } ?>
         <?php endforeach; ?>
         </tbody>
     </table>
 </div>
+
 <div id="menu-menos" class="menumenos nover">
     <p>
     <a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
