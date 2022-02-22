@@ -53,7 +53,7 @@
 					<button id="establecer-tasa-euro" class="btn btn-success">Establecer</button>
 					<button id="eliminar-tasa-euro" class="btn btn-success noverScreen">Eliminar</button>
 				</div>
-			</div
+			</div>
             <div class="row panel panel-default">
                 <div class="col-md-4">
                     <label for="family">Por favor escriba los apellidos de la familia:</label>

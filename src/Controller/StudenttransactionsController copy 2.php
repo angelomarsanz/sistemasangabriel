@@ -276,6 +276,48 @@ class StudenttransactionsController extends AppController
         {
             $this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
         }
+        else
+        {
+			if ($studenttransaction->transaction_type == 'Matrícula' && $studenttransaction->amount_dollar == 0)
+			{
+				$estudiante = $this->Studenttransactions->Students->get($studenttransaction->student_id);
+
+				if ($estudiante->number_of_brothers == $estudiante->balance && $estudiante->number_of_brothers == $studenttransaction->ano_escolar)
+				{
+					$estudiante->number_of_brothers = 0;
+					$estudiante->balance = 0;
+				}
+				else
+				{
+					$matriculasAnteriores = $this->Studenttransactions->find('all', ['conditions' => ['student_id' => $studenttransaction->student_id, 'transaction_type' => 'Matrícula', 'transaction_description !=' => $studenttransaction->transaction_description, 'amount_dollar >' => 0], 
+					'order' => ['created' => 'DESC'] ]);
+
+					$primeraFila = $matriculasAnteriores->first();
+			
+					if ($primeraFila)
+					{
+
+					}					
+    
+
+
+				$year = substr($studenttransaction->transaction_description, 11, 4);
+				
+				$student = $this->Studenttransactions->Students->get($studenttransaction->student_id);
+
+				if ($student->number_of_brothers == 0)
+				{
+					$student->number_of_brothers = $year;
+				}
+				
+				$student->balance = $year;
+				
+				if (!($this->Studenttransactions->Students->save($student)))
+				{
+					$this->Flash->error(__('Los datos del alumno no pudieron ser actualizados, vuelva a intentar.'));
+				}	
+			}        
+		}
 		return;
     }
 

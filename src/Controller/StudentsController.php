@@ -3618,8 +3618,10 @@ class StudentsController extends AppController
 	}
 	public function reporteBecados()
 	{
+		$this->loadModel('Schools');
+        $school = $this->Schools->get(2);
 		$becados = $this->Students->find('all')
-			->where(['student_condition' => 'Regular', 'discount >' => 0])
+			->where(['balance' => $school->current_school_year, 'student_condition' => 'Regular', 'discount >' => 0])
 			->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
 			
 		$this->set(compact('becados'));
