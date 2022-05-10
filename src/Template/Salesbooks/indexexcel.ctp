@@ -1,3 +1,8 @@
+<?php
+$omitir_numeros_control =
+    [
+    ]; 
+    ?>
 <div class="row">
 <h3>Libro de Ventas</h3>
 </div>
@@ -28,26 +33,39 @@
                 <tbody>
                     <?php
                     foreach ($invoicesMonth as $invoice)
-                    { ?>
-                        <tr>
-                            <td><?= $invoice->id ?></td>
-                            <td><?= $invoice->fecha ?></td>
-                            <td><?= $invoice->tipo_documento ?></td>
-                            <td><?= $invoice->cedula_rif ?></td>
-                            <td><?= $invoice->nombre_razon_social ?></td>
-                            <td><?= $invoice->numero_control ?></td>
-                            <td><?= $invoice->numero_factura ?></td>
-                            <td><?= $invoice->nota_debito ?></td>
-                            <td><?= $invoice->nota_credito ?></td>
-                            <td><?= $invoice->factura_afectada ?></td>
-                            <td><?= number_format($invoice->descuento_recargo, 2, ",", ".") ?></td>
-                            <td><?= number_format($invoice->total_ventas_mas_impuesto, 2, ",", ".") ?></td>
-                            <td><?= number_format($invoice->ventas_exoneradas, 2, ",", ".") ?></td>
-                            <td><?= $invoice->base ?></td>
-                            <td><?= $invoice->alicuota ?></td>
-                            <td><?= $invoice->iva ?></td>
-                        </tr>
-                    <?php 
+                    { 
+                        $indicador_omision = 0;
+                        foreach ($omitir_numeros_control as $control)
+                        {
+                            if ($control == $invoice->numero_control)
+                            {
+                                $indicador_omision = 1;
+                                break;
+                            }
+                        }
+                        if ($indicador_omision == 0)
+                        {
+                        ?>
+                            <tr>
+                                <td><?= $invoice->id ?></td>
+                                <td><?= $invoice->fecha ?></td>
+                                <td><?= $invoice->tipo_documento ?></td>
+                                <td><?= $invoice->cedula_rif ?></td>
+                                <td><?= $invoice->nombre_razon_social ?></td>
+                                <td><?= $invoice->numero_control ?></td>
+                                <td><?= $invoice->numero_factura ?></td>
+                                <td><?= $invoice->nota_debito ?></td>
+                                <td><?= $invoice->nota_credito ?></td>
+                                <td><?= $invoice->factura_afectada ?></td>
+                                <td><?= number_format($invoice->descuento_recargo, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->total_ventas_mas_impuesto, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->ventas_exoneradas, 2, ",", ".") ?></td>
+                                <td><?= $invoice->base ?></td>
+                                <td><?= $invoice->alicuota ?></td>
+                                <td><?= $invoice->iva ?></td>
+                            </tr>
+                        <?php
+                        } 
                     }
                 ?>
                 </tbody>

@@ -174,7 +174,7 @@
 				
 				if (montoNotaCadena.substr(-3, 1) == ',')
 				{
-					montoNotaSinPuntos = montoNotaCadena.replaceAll(".", "");
+					montoNotaSinPuntos = montoNotaCadena.replace(".", "");
 					montoNotaSinComa = montoNotaSinPuntos.replace(",", ".");
 					montoNotaNumerico = parseFloat(montoNotaSinComa);
 				}
@@ -184,29 +184,19 @@
 				}
 
 				montoBolivaresNota = dosDecimales(montoNotaNumerico * tasaCambioFactura);
-
 				montoConcepto = $('#MF-' + $(this).attr('id').substring(3)).val();
-				montoConceptoSinPuntos = montoConcepto.replaceAll(".", "");
-				montoConceptoSinComa = montoConceptoSinPuntos.replace(",", ".");
-				montoConceptoOriginal = parseFloat(montoConceptoSinComa);
+				montoConceptoOriginal = montoConcepto.replace(",", ".");
 
-				console.log('montoBolivaresNota: '+montoBolivaresNota);
-				console.log('MontoConcepto '+montoConcepto);
-				console.log('montoConceptoSinPuntos '+montoConceptoSinPuntos);
-				console.log('MontoConceptoSinComa '+montoConceptoSinComa);
+				console.log('montoNumericoNota: '+montoBolivaresNota);
 				console.log('MontoConceptoOriginal '+montoConceptoOriginal);
 
 				if (montoBolivaresNota > montoConceptoOriginal)
 				{
-					$('#NV-' + $(this).attr('id').substring(3)).val(montoConcepto);
-					$('#MN-' + $(this).attr('id').substring(3)).val(montoConcepto);
+					alert('Monto concepto nota es mayor el monto concepto original');
 				}
-				else
-				{
-					$('#NV-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambioFactura)));
-					$('#MN-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambioFactura)));
-				}
-
+				
+				$('#NV-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambioFactura)));
+				$('#MN-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambioFactura)));
 			});
 		});
 				

@@ -1356,11 +1356,11 @@ class StudentsController extends AppController
 								{
 									$indicadorPagado = $this->verificarDiferencia($studentTransaction);
 
-									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = $indicadorPagado;    
+									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = $indicadorPagado;
 								}
 								else
 								{
-									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = 'P'; 
+									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = 'P';
 								}
 							}
 						}
@@ -3735,7 +3735,7 @@ class StudentsController extends AppController
 				break;
 			}
 		}
-
+		
 		return $indicadorPagado;
 	}
 }

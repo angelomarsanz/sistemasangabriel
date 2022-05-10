@@ -154,17 +154,9 @@ class SalesbooksController extends AppController
 			
             $this->truncateTable();
 
-            // $bills = new BillsController();
+            $bills = new BillsController();
         
-            // $invoicesBills = $bills->indexBills($_POST['month'], $_POST['year']);
-
-            $this->loadModel('Bills');
-
-            $invoicesBills = $this->Bills->find('all', ['conditions' => 
-            [['MONTH(date_and_time)' => $_POST['month']], 
-            ['YEAR(date_and_time)' => $_POST['year']],
-            ['Bills.fiscal' => true]],
-            'order' => ['Bills.id' => 'ASC'] ]);
+            $invoicesBills = $bills->indexBills($_POST['month'], $_POST['year']);
 
             $contador = 0;
 			
@@ -177,22 +169,19 @@ class SalesbooksController extends AppController
 				{
 					$facturaAnterior = $invoicesBill->control_number;
                 }
-                if ($invoicesBill->annulled == false && $invoicesBill->control_number != null && $invoicesBill->control_number != 0)
-                {
-                    $contadorControlFacturas = $invoicesBill->control_number - $facturaAnterior;
-                    if ($contadorControlFacturas > 1 && $facturaAnterior != 0)
-                    {						
-                        while ($contadorControlFacturas > 1)
+                $contadorControlFacturas = $invoicesBill->control_number - $facturaAnterior;
+                if ($contadorControlFacturas > 1 && $facturaAnterior != 0)
+                {						
+                    while ($contadorControlFacturas > 1)
+                    {
+                        $facturaAnterior++;
+                        $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $facturaAnterior);
+                        if ($codigoRetorno == 1)
                         {
-                            $facturaAnterior++;
-                            $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $facturaAnterior);
-                            if ($codigoRetorno == 1)
-                            {
-                                $errorBill = 1;
-                                break;
-                            }
-                            $contadorControlFacturas--;
+                            $errorBill = 1;
+                            break;
                         }
+                        $contadorControlFacturas--;
                     }
                 }
                 $codigoRetorno = $this->crearRegistroLibro($invoicesBill, 0);
@@ -250,19 +239,19 @@ class SalesbooksController extends AppController
 		
 		if ($controlSinFactura > 0)
 		{
-			$salesbook->numero_factura = "";
+			$salesbook->numero_factura = "Sin número";
 			$salesbook->nota_debito = "";
 			$salesbook->nota_credito = "";
 			$salesbook->factura_afectada = "";
 			$salesbook->numero_control = $controlSinFactura;			
         }
-		elseif ($invoicesBill->control_number == 0 || $invoicesBill->control_number === null)
+		elseif ($invoicesBill->control_number == 0)
 		{
 			$salesbook->numero_factura = $invoicesBill->bill_number;
 			$salesbook->nota_debito = "";
 			$salesbook->nota_credito = "";
 			$salesbook->factura_afectada = "";
-			$salesbook->numero_control = "";			
+			$salesbook->numero_control = 'Sin control';			
         }
 		elseif ($invoicesBill->tipo_documento == "Factura")
 		{
@@ -300,7 +289,7 @@ class SalesbooksController extends AppController
 			$salesbook->total_ventas_mas_impuesto = 0;
 			$salesbook->ventas_exoneradas = 0;
 		}        				
-		elseif ($invoicesBill->control_number == 0 || $invoicesBill->control_number === null)
+		elseif ($invoicesBill->control_number == 0)
 		{
 			$salesbook->cedula_rif = "";
 			$salesbook->nombre_razon_social = "ANULADA";

@@ -41,17 +41,11 @@
 			</div>
             <br />
 			<div>				
+				<h3><b>Pagos recibidos:</b></h3>
 				<div style="font-size: 12px; line-height: 14px;">
 					<br />
 					<div class="row">
-						<div class="col-md-12 excel-pagos">
-							<table style="width:100%">
-								<tbody>
-									<tr>
-										<td><b>Pagos recibidos en este turno:</b></td>
-									</tr>
-								</tbody>
-							</table>
+						<div class="col-md-12">
 							<table name="excel_pagos" id="excel-pagos" class="table table-striped table-hover">
 								<thead>
 									<tr>
@@ -201,35 +195,6 @@
 								
 								</tfoot>
 							</table>
-							<table style="width:100%">
-								<tbody>
-									<tr>
-										<td><b>Facturas anuladas en este turno:</b></td>
-									</tr>
-								</tbody>
-							</table>
-							<table name="excel_anulados" id="excel-anulados" class="table table-striped table-hover">
-								<thead>
-									<tr>
-										<th style="text-align: center">Nro</th>
-										<th style="text-align: center">Fecha original de la factura</th>
-										<th style="text-align: center">Factura</th>
-										<th style="text-align: center">Control</th>
-									</tr>
-								</thead>
-								<?php $contadorFacturasAnuladas = 1; ?>
-								<tbody>	
-									<?php foreach ($anuladas as $anulada): ?> 
-										<tr>
-											<td style="text-align: center"><?= $contadorFacturasAnuladas ?></td>
-											<td style="text-align: center"><?= $anulada->date_and_time->format('d/m/Y') ?></td>
-											<td style="text-align: center"><?= $anulada->bill_number ?></td>
-											<td style="text-align: center"><?= $anulada->control_number ?></td>
-										</tr> 
-										<?php $contadorFacturasAnuladas++ ?>
-									<?php endforeach; ?>
-								</tbody>
-							</table>
 						</div>
 					</div>
 					<div class="row">
@@ -245,11 +210,14 @@
     {
 		$("#excel").click(function(){
 			
-			$(".excel-pagos").table2excel({
+			$("#excel-pagos").table2excel({
+		
 				exclude: ".noExl",
+			
 				name: "excel_pagos",
-				filename: 'excel_pagos',
-				fileext: ".xls"
+			
+				filename: $('#excel-pagos').attr('name') 
+		
 			});
 		});
     });

@@ -255,8 +255,18 @@ class StudenttransactionsController extends AppController
 		{
 			$studenttransaction->amount = $studenttransaction->original_amount;
 		}
-								
-		if ($studenttransaction->amount > $studenttransaction->amount_dollar)
+			
+		if ($studenttransaction->amount == 0 && $studenttransaction->amount_dollar == 0)
+		{
+			$studenttransaction->partial_payment = 0;
+			$studenttransaction->paid_out = 0;
+		}
+		elseif ($studenttransaction->amount_dollar == 0)
+		{
+			$studenttransaction->partial_payment = 0;
+			$studenttransaction->paid_out = 0;
+		}
+		elseif ($studenttransaction->amount > $studenttransaction->amount_dollar)
 		{
 			$studenttransaction->partial_payment = 1;
 			$studenttransaction->paid_out = 0;

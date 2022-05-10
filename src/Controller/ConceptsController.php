@@ -207,13 +207,13 @@ class ConceptsController extends AppController
 		
 		if ($tipoNota == "Crédito")
 		{
-			$conceptoFactura->saldo -= round($montoNota/$tasaCambio); 
+			$conceptoFactura->saldo -= $montoNota; 
 		}
 		else
 		{
-			$conceptoFactura->saldo += round($montoNota/$tasaCambio);
+			$conceptoFactura->saldo += $montoNota;
 		}
-		
+
 		if (!($this->Concepts->save($conceptoFactura)))
 		{
 			$codigoRetornoConcepto = 1;	
