@@ -1194,6 +1194,8 @@
 
     function insertRecord() // Get value from Input and insert record . Function Call when Save/Submit Button Click..
     {
+		console.log(studentName+" insertRecord morosoAnoAnterior "+monthlyPayment, morosoAnoAnterior);
+
         var insertStatement = "INSERT OR REPLACE INTO studentTransactions \
         (dbId, \
         dbIdStudent, \
@@ -1360,6 +1362,20 @@
             tx.executeSql(selectWithCondition, [idStudent], function (tx, result) 
             {
                 dataSet = result.rows;
+
+                for (var i = 0, item = null; i < dataSet.length; i++) 
+                {
+                    item = dataSet.item(i);
+
+					if (item['dbMorosoAnoAnterior'] == 1)
+					{
+						if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción regulares')
+						{
+							alert("Este alumno no se debe inscribir hasta que pague la mensualidad de julio");
+							return false;
+						}
+					}						
+				}
                 
                 for (var i = 0, item = null; i < dataSet.length; i++) 
                 {
@@ -1375,14 +1391,11 @@
 								return false;
 							}
                         }
-                        if (item['dbMorosoAnoAnterior'] == 1)
+                        if (item['dbSchoolYearFrom'] < anoEscolarInscripcion && $('#type-invoice').val() == 'Recibo servicio educativo' )
                         {
-							if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción regulares')
-							{
-								alert("Este alumno no se debe inscribir hasta que pague la mensualidad de julio");
-								return false;
-							}
-                        }						
+							alert("Este estudiante debe pagar primero la matrícula");
+							return false;
+						}
                         studentName = item['dbStudentName'];
                     }
                     
@@ -1518,8 +1531,33 @@
     function showDatabase() // Function For Retrive data from Database Display records as list
     {
         var selectAllStatement = "SELECT * FROM studentTransactions";
-        var detailLine = " ";
-        
+		var detailLine = 
+			"<table class='table table-striped table-hover'>"
+			+ "<thead>"
+			+ "<tr>"
+			+ "<th>id</th>"
+			+ "<th>idStudent</th>"
+			+ "<th>Alumno</th>" 
+			+ "<th>Cuota</th>"
+			+ "<th>Becado</th>"
+			+ "<th>MorosoAnoAnterior</th>"
+			+ "<th>tasaCambioDolar</th>"
+			+ "<th>tasaCambioEuro</th>"
+			+ "<th>tarifaDolarOriginal</th>"
+			+ "<th>tarifaDolar</th>"
+			+ "<th>AbonadoDolar</th>"
+			+ "<th>PendienteDolar</th>"
+			+ "<th>APagarDolar</th>"
+			+ "<th>APagarEuro</th>"
+			+ "<th>APagarBolivar</th>"
+			+ "<th>Seleccionada</th>"
+			+ "<th>Pagada</th>"
+			+ "<th>Año escolar</th>"
+			+ "<th>Observacion</th>"
+			+ "</tr>"
+			+ "</thead>"
+			+ "<tbody>";
+
         db.transaction(function (tx) 
         {
             tx.executeSql(selectAllStatement, [], function (tx, result) 
@@ -1529,43 +1567,34 @@
                 for (var i = 0, item = null; i < dataSet.length; i++) 
                 {
                     item = dataSet.item(i);
-                    detailLine += "<li>" + item['dbId'] 
-                    + " id "
-                    + item['dbIdStudent']
-                    + " Alumno " 
-                    + item['dbStudentName']
-                    + " Cuota "
-                    + item['dbMonthlyPayment'] 
-                    + " Becado "
-                    + item['dbScholarship'] 
-                    + " tasaCambioDolar "
-                    + item['dbTasaCambioDolar']
-                    + " tasaCambioEuro "
-                    + item['dbTasaCambioEuro']	
-                    + " tarifaDolarOriginal "
-                    + item['dbTarifaDolarOriginal']					
-                    + " tarifaDolar "
-                    + item['dbTarifaDolar']
-                    + " AbonadoDolar "
-                    + item['dbMontoAbonadoDolar'] 	
-                    + " PendienteDolar "
-                    + item['dbMontoPendienteDolar'] 					
-                    + " APagarDolar "
-                    + item['dbMontoAPagarDolar']
-                    + " APagarEuro "
-                    + item['dbMontoAPagarEuro']
-                    + " APagarBolivar "
-                    + item['dbMontoAPagarBolivar']
-                    + " Seleccionada "
-                    + item['dbInvoiced']
-                    + " Pagada "
-                    + item['dbPaidOut']
-                    + " Año escolar "
-                    + item['dbSchoolYearFrom']
-                    + " Observacion "
-                    + item['dbObservation']
-                    + "</li>";
+                    detailLine += 
+						"<tr>"
+						+ "<td>"+ item['dbId']+ "</td>" 
+						+ "<td>"+ item['dbIdStudent']+ "</td>"
+						+ "<td>"+ item['dbStudentName']+ "</td>"
+						+ "<td>"+ item['dbMonthlyPayment']+ "</td>" 
+						+ "<td>"+ item['dbScholarship']+ "</td>"
+						+ "<td>"+ item['dbMorosoAnoAnterior']+ "</td>"
+						+ "<td>"+ item['dbTasaCambioDolar']+ "</td>"
+						+ "<td>"+ item['dbTasaCambioEuro']+ "</td>"	
+						+ "<td>"+ item['dbTarifaDolarOriginal']+ "</td>"					
+						+ "<td>"+ item['dbTarifaDolar']+ "</td>"
+						+ "<td>"+ item['dbMontoAbonadoDolar']+ "</td>" 	
+						+ "<td>"+ item['dbMontoPendienteDolar']+ "</td>" 					
+						+ "<td>"+ item['dbMontoAPagarDolar']+ "</td>"
+						+ "<td>"+ item['dbMontoAPagarEuro']+ "</td>"
+						+ "<td>"+ item['dbMontoAPagarBolivar']+ "</td>"
+						+ "<td>"+ item['dbInvoiced']+ "</td>"
+						+ "<td>"+ item['dbPaidOut']+ "</td>"
+						+ "<td>"+ item['dbSchoolYearFrom']+ "</td>"
+						+ "<td>"+ item['dbObservation']+ "</td>"
+						+ "</tr>";
                 }
+
+				detailLine += 
+					"</tbody>"
+					+ "</table>";
+
                 $("#results").html(detailLine);
             });
         });
@@ -1573,6 +1602,9 @@
 	
     function ajustarCuotas() 
     {
+		var posicion_elemento = 0;
+		var vector_estudiantes_seleccionados = [];
+
 		if (discountMode == "Porcentaje")
 		{
 			alert("Estimado usuario, no se puede hacer el ajustar la factura si el descuento es un porcentaje. Por favor cambie el descuento a un monto fijo y después haga el ajuste")
@@ -1600,7 +1632,14 @@
                 for (var i = 0, item = null; i < dataSet.length; i++) 
                 {					
                     item = dataSet.item(i);
+					
+					posicion_elemento = $.inArray(item['dbIdStudent'], vector_estudiantes_seleccionados);
 
+					if (posicion_elemento == -1)
+					{ 
+						vector_estudiantes_seleccionados.push(item['dbIdStudent']);
+					}
+					
 					if (saldoPagosRealizados == 0)
 					{
 						updateRecord(item['dbId'], 'false');
@@ -1640,22 +1679,27 @@
 								for (var i = 0, item = null; i < dataSet.length; i++) 
 								{
 									item = dataSet.item(i);
-									
-									if (saldoPagosRealizados >= item['dbMontoPendienteDolar']) 
-									{
-										updateRecord(item['dbId'], 'true');
-										saldoPagosRealizados = dosDecimales(saldoPagosRealizados - item['dbMontoPendienteDolar']);
-										totalBalance = dosDecimales(totalBalance + item['dbMontoPendienteDolar']);
-									}
-									else if (saldoPagosRealizados > 0 && saldoPagosRealizados < item['dbMontoPendienteDolar'])
-									{
-										saldoPagosRealizadosEuros = dosDecimales(saldoPagosRealizados / tasaDolarEuro);
-										saldoPagosRealizadosBolivares = dosDecimales(saldoPagosRealizados * dollarExchangeRate);
-										
-										actualizarPagar(item['dbId'], saldoPagosRealizados, saldoPagosRealizadosEuros, saldoPagosRealizadosBolivares, 'true', 'Abono');
-										totalBalance = totalBalance + saldoPagosRealizados;
-										saldoPagosRealizados = 0;
-										indicadorAjuste = 1;
+
+									posicion_elemento = $.inArray(item['dbIdStudent'], vector_estudiantes_seleccionados);
+
+									if (posicion_elemento != -1)
+									{									
+										if (saldoPagosRealizados >= item['dbMontoPendienteDolar']) 
+										{
+											updateRecord(item['dbId'], 'true');
+											saldoPagosRealizados = dosDecimales(saldoPagosRealizados - item['dbMontoPendienteDolar']);
+											totalBalance = dosDecimales(totalBalance + item['dbMontoPendienteDolar']);
+										}
+										else if (saldoPagosRealizados > 0 && saldoPagosRealizados < item['dbMontoPendienteDolar'])
+										{
+											saldoPagosRealizadosEuros = dosDecimales(saldoPagosRealizados / tasaDolarEuro);
+											saldoPagosRealizadosBolivares = dosDecimales(saldoPagosRealizados * dollarExchangeRate);
+											
+											actualizarPagar(item['dbId'], saldoPagosRealizados, saldoPagosRealizadosEuros, saldoPagosRealizadosBolivares, 'true', 'Abono');
+											totalBalance = totalBalance + saldoPagosRealizados;
+											saldoPagosRealizados = 0;
+											indicadorAjuste = 1;
+										}
 									}
 								}
 								if (saldoPagosRealizados > 0)
@@ -2726,6 +2770,8 @@
 							scholarship = 1;
 							julioExonerado = 1;
 						}
+						console.log(studentName+" value.scholarship", value.scholarship);
+						console.log(studentName+" julioExonerado", julioExonerado);
 						
 						schoolYearFrom = value.schoolYearFrom;
 																		
@@ -2749,6 +2795,8 @@
 						{	
 							discountFamily = (100 - value.discount_family) / 100;
 						}
+
+						console.log(studentName+" value.studentTransactions", value.studentTransactions);
 						
                         $.each(value.studentTransactions, function(key2, value2) 
                         {
@@ -2950,6 +2998,7 @@
 								if (monthlyPayment == julioAnoAnterior && julioExonerado == 0)
 								{
 									morosoAnoAnterior = 1;
+									console.log(studentName+" morosoAnoAnterior", morosoAnoAnterior);
 								}
 							}
 							

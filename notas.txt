@@ -9,8 +9,6 @@ Nro. de facturas a obviar en marzo 2022
 121	07/03/2022	Fact	V - 16531045	MARIA ALEJANDRA RODRÍGUEZ LOZANO	97982	115646
 122	07/03/2022	Fact	V - 11346155	SAUL OSWALDO FIGUEREDO HERRERA	97983	115647
 
-Se le quitó el saldo al ex-empleado Valderrama Escalona (40), Rincones Sánchez (80)
-
 La factura 114194 correspondía imprimir en la 96529, pero se imprimió en una hoja blanca que venía en el papel de la imprenta
 Y la factura 114595 se imprimió en la 96529 y se descontroló la numeración
 
@@ -50,30 +48,26 @@ Cambios necesarios para el período de renovación de matrícula (junio de cada 
 	Se modificó la acción add_dollar de RatesController parahacer los tres siguientes tres ajustes:
 
 	Para los estatus recordar que hay un boolean - new_student en la tabla student
-	Ese status se debe cambiar a "0" al iniciar el proceso de renovación de inscripción a aquellos
-	alumnos regulares que se inscribieron para el período escolar actual. Se debe
-	exceptuar los regulares que se inscribieron a partir de febrero para el
+	Ese status se cambia a "0" al iniciar el proceso de renovación de inscripción a aquellos
+	alumnos regulares que se inscribieron para el período escolar actual. Se
+	omiten los alumnos regulares que se inscribieron a partir de febrero para el
 	próximo período.
 	Es decir un alumno regular tiene el status de new_student en "1" durante todo
 	su primer año en el colegio.
 
 	También al iniciar el proceso de renovación de inscripción (en junio), el campo level_of_study
-	se debe blanquear únicamente a los alumnos que están inscritos en el año escolar actual.
+	blanquea únicamente a los alumnos que están inscritos en el año escolar actual.
 
-	En Junio cuando comienza el período de renovación de inscripción, se debe actualizar
-	el campo current_year_registration de la tabla Shools con el año del nuevo período de inscripción
+	Se actualiza el campo current_year_registration de la tabla Shools con el año del nuevo período de inscripción
 
-	Veificar si se hizo: También en el inicio de la renovación de matrícula, el programa asignar sección debe validar 
-	que el current_school_year sea igual current_year_registration, si son diferentes debe abortar la operaciòn 
+	El programa asignar sección debe validar que el current_school_year sea igual current_year_registration, si son diferentes debe abortar la operaciòn 
 	y enviar un mensaje un mensaje de error.
 
 ---
 
 Cambios necesarios para el período de inicio de nuevo año escolar:
 
-	El programa assignSection verifique si el current_school_year es igual current_year_registration, si es diferente verificar
-    si la fecha actual corresponde al mes de septiembre (9) y si es positivo asignar current_year_registration a current_school_year y
-	actualizar las becas. (Listo)
+	El programa assignSection verifique si el current_school_year es igual current_year_registration, si es diferente verificar si la fecha actual corresponde al mes de septiembre (9) y si es positivo asignar current_year_registration a current_school_year actualizar las becas. 
 
 	Copiar Scholarship a becado_ano_anterior
 	Copiar tipo_descuento a tipo_descuento_ano_anterior
@@ -139,3 +133,5 @@ con las funciones marcarEliminado y EliminarMarcado
 
 Representantes a los cuales se les aplicó nota de crédito porque no les correspondía pagar las diferencias de: Matrícula 2020 y agosto 2021. 
 Se debe colocar en cero el "Balance" de ParentsandGuardian y ajustar la cuota. Los ID son: 675, 921, 437, 1126, 1127, 1028, 889, 380, 1008, 998 y 687
+
+Se le quitó el saldo al ex-empleado Valderrama Escalona (40 $), Rincones Sánchez (80 $), Rangel Madrid (id 687, Monto 80 $)

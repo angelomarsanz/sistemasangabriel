@@ -50,43 +50,36 @@ class StudentsController extends AppController
     
     public function testFunction()
     {
-		$this->log("Something didn't work!"); 
-		/* $contador = 0;
-		$anoBusqueda = 2019;
-		$contadorFotoExtensionCorrecta = 0;
-		$contadorFotoExtensionIncorrecta = 0;
+		$contador_estudiantes_actualizados = 0;
 
 		$estudiantes = $this->Students->find('all')
-			->where(['balance' => $anoBusqueda]);
+			->where(['id >' => 1]);
 			
 		$contadorEstudiantes = $estudiantes->count();
 		
-		$this->Flash->success(__('Estudiantes inscritos en el año ' . $anoBusqueda . ': ' . $contadorEstudiantes));
+		$this->Flash->success(__('Total estudiantes '.$contadorEstudiantes));
 		
 		if ($contadorEstudiantes > 0)
 		{
 			foreach ($estudiantes as $estudiante)
 			{
-				if ($estudiante->profile_photo != "" && $estudiante->profile_photo != " " && $estudiante->profile_photo != "Sin foto")
-				{
-					$extensionFoto = substr(strtolower(strrchr($estudiante->profile_photo, '.')), 1);
-					
-					if ($extensionFoto == false)
-					{
-						// $this->Flash->success(__('id ' . $estudiante->id . ' alumno ' . $estudiante->full_name . ' archivo foto: ' . $estudiante->profile_photo));
-						$contadorFotoExtensionIncorrecta++;
-						echo "<br />" . '  ' . $contadorFotoExtensionIncorrecta . ". " . $estudiante->full_name;
-						// $this->Flash->success(__($contadorFotoExtensionIncorrecta . '. ' . $estudiante->full_name));
-					}
-					else
-					{
-						$contadorFotoExtensionCorrecta++;		
-					}
-				}
+				$estudiante->respaldo_primer_ano_inscripcion = $estudiante->number_of_brothers;
+				$estudiante->respaldo_ultimo_ano_inscripcion = $estudiante->balance;
+				$estudiante->respaldo_seccion_id = $estudiante->section_id;
+				$estudiante->respaldo_nivel_de_estudio = $estudiante->level_of_study;	
+
+				if ($this->Students->save($estudiante)) 
+                {
+					$contador_estudiantes_actualizados++;
+				} 
+                else 
+                {
+                    $this->Flash->error(__('No se pudo actualizar el estudiante con el ID '.$estudiante->id));
+                }
 			}
 		}
-		$this->Flash->success(__('Estudiantes con extensión de foto correcta ' . $contadorFotoExtensionCorrecta));
-		$this->Flash->success(__('Estudiantes con extensión de foto incorrecta ' . $contadorFotoExtensionIncorrecta)); */
+		$this->Flash->success(__('Total estudiantes actualizados '.$contador_estudiantes_actualizados));
+
     }
 	
     public function testFunction2()
@@ -492,6 +485,11 @@ class StudentsController extends AppController
 			{
 				$student->new_student = 0;		
 			}
+
+			$student->respaldo_primer_ano_inscripcion = 0;
+			$student->respaldo_ultimo_ano_inscripcion = 0;
+			$student->respaldo_seccion_id = 1;
+			$student->respaldo_nivel_de_estudio = "";	
 				
             if ($this->Students->save($student)) 
             {
@@ -2831,8 +2829,43 @@ class StudentsController extends AppController
 				202209,
 				202210,
 				202211,
-				202212
-
+				202212,
+				202301,
+				202302,
+				202303,
+				202304,
+				202305,
+				202306,
+				202307,
+				202308,
+				202309,
+				202310,
+				202311,
+				202312,
+				202401,
+				202402,
+				202403,
+				202404,
+				202405,
+				202406,
+				202407,
+				202408,
+				202409,
+				202410,
+				202411,
+				202412,
+				202501,
+				202502,
+				202503,
+				202504,
+				202505,
+				202506,
+				202507,
+				202508,
+				202509,
+				202510,
+				202511,
+				202512
 			];
 				
 		if ($tasaTemporal == 0)

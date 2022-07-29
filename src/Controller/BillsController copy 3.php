@@ -33,18 +33,6 @@ class BillsController extends AppController
 
     public function testFunction()
     {
-        $facturas = $this->Bills->find('all')->where(['turn <' => 1756]);
-		foreach ($facturas as $factura)
-		{
-			if ($factura->id_turno_anulacion > 0)
-			{
-				$factura->id_turno_anulacion = 0;
-				if (!($this->Bills->save($factura))) 
-				{
-					$this->Flash->error(__('No se pudo actualizar la factura con el ID '.$factura->id));
-				}
-			}
-		}
     }
 	
 	public function testFunction2()
@@ -191,7 +179,6 @@ class BillsController extends AppController
 				$bill->user_id = $this->Auth->user('id');
 				$bill->date_and_time = $this->headboard['invoiceDate'];
 				$bill->turn = $this->headboard['idTurn'];
-				$bill->id_turno_anulacion = 0;
 				
 				$bill->bill_number = $billNumber;
 				if ($this->headboard['fiscal'] == 1)
@@ -1238,7 +1225,6 @@ class BillsController extends AppController
 							date_default_timezone_set('America/Caracas');
 							
 							$bill->date_annulled = Time::now();
-							$bill->id_turno_anulacion = $idTurn;
 																			
 							if (!($this->Bills->save($bill))) 
 							{

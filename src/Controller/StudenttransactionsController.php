@@ -40,57 +40,12 @@ class StudenttransactionsController extends AppController
 	
     public function testFunction()
     {
-		/* $transaccionesEncontradas = 0;
-		$transaccionesActualizadas = 0;
-
-		$binnacles = new BinnaclesController;
-
-		$transacciones = $this->Studenttransactions->find('all');
+		$transacciones = $this->Studenttransactions->find('all')
+			->contain(['Students'])
+			->where(['Studenttransactions.transaction_description' => "Matrícula 2022", 'Studenttransactions.amount_dollar' => 0, 'Students.new_student' => 0, 'Students.balance' => '2022']);
 			
-		$transaccionesEncontradas = $transacciones->count();
-
-		$this->Flash->success(__('Total transaccciones encontradas: ' . $transaccionesEncontradas));
-				
-		foreach ($transacciones as $transaccion)
-		{
-			$indicadorDecimal = 0;
-			$decimalAmount = 0;
-			$decimalOriginalAmount = 0;
-			$decimalAmountDollar = 0;
-			$arrayExtra = ['', '', '', '', '', 0, 0, 0, 0, 0];
-
-			$decimalAmount = $transaccion->amount - (int) $transaccion->amount;
-			
-			if ($decimalAmount > 0)
-			{
-				$indicadorDecimal = 1;
-				$arrayExtra[6] = $transaccion->amount;
-			}
-
-			$decimalOriginalAmount = $transaccion->original_amount - (int) $transaccion->original_amount;
-			
-			if ($decimalOriginalAmount > 0)
-			{
-				$indicadorDecimal = 1;
-				$arrayExtra[7] = $transaccion->original_amount;
-			}
-
-			$decimalAmountDollar = $transaccion->amount_dollar - (int) $transaccion->amount_dollar;
-
-			if ($decimalAmountDollar > 0)
-			{
-				$indicadorDecimal = 1;
-				$arrayExtra[8] = $transaccion->amount_dollar;
-			}
-
-			if ($indicadorDecimal == 1)
-			{
-				$arrayExtra[5] = $transaccion->id; 
-				$binnacles->add('controller', 'Studenttransactions', 'testFunction', 'Monto decimal', $arrayExtra );
-				$transaccionesActualizadas++;
-			}
-		}
-		$this->Flash->success(__('Total transaccciones actualizadas: ' . $transaccionesActualizadas)); */
+		$this->set('transacciones', $transacciones);
+		$this->set('_serialize', ['transacciones']);
     }
 
     public function testFunction2()
@@ -229,11 +184,23 @@ class StudenttransactionsController extends AppController
 
 				if ($student->number_of_brothers == 0)
 				{
+					$student->respaldo_primer_ano_inscripcion = 0;
+					$student->respaldo_ultimo_ano_inscripcion = 0;
+					$student->respaldo_seccion_id = 1;
+					$student->respaldo_nivel_de_estudio = "";
+
 					$student->number_of_brothers = $year;
+				}
+				else
+				{
+					$student->respaldo_primer_ano_inscripcion = $student->number_of_brothers;
+					$student->respaldo_ultimo_ano_inscripcion = $student->balance;
+					$student->respaldo_seccion_id = $student->section_id;
+					$student->respaldo_nivel_de_estudio = $student->level_of_study;	
 				}
 				
 				$student->balance = $year;
-				
+
 				if (!($this->Studenttransactions->Students->save($student)))
 				{
 					$this->Flash->error(__('Los datos del alumno no pudieron ser actualizados, vuelva a intentar.'));
@@ -286,6 +253,24 @@ class StudenttransactionsController extends AppController
         {
             $this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
         }
+		else
+		{
+			if ($studenttransaction->transaction_type == 'Matrícula')
+			{			
+				$student = $this->Studenttransactions->Students->get($studenttransaction->student_id);
+
+				$student->number_of_brothers = $student->respaldo_primer_ano_inscripcion;
+				$student->balance = $student->respaldo_ultimo_ano_inscripcion;
+				$student->section_id = $student->respaldo_seccion_id;
+				$student->level_of_study = $student->respaldo_nivel_de_estudio;	
+				
+				if (!($this->Studenttransactions->Students->save($student)))
+				{
+					$this->Flash->error(__('Los datos del alumno no pudieron ser actualizados, vuelva a intentar.'));
+				}	
+			}
+
+		}
 		return;
     }
 

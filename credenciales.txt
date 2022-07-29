@@ -1,0 +1,21 @@
+CSGA NUEVO
+138.186.179.63
+servidor.colegiosangabrielarcangel.com
+ang3l
+AS@nz2703$$
+redetronic2021
+
+Putty llave_angel.ppk
+
+https://servidor.colegiosangabrielarcangel.com:7094/?mipanelweb
+admin (Con acceso a todo):
+Contraseña: V@l3ncia1965$sga*
+
+sgasyst (Producción):
+Col3gioV3n4576$
+
+angeltest (Desarrollo):
+Ang3l*2703$$
+
+sgasyst_sangabriel
+Csgamysql2021$

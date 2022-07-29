@@ -323,7 +323,7 @@ class TurnsController extends AppController
 			$totalGeneralFacturado = 0;
 			$totalFacturasRecibos = 0;
 							
-			$documentosAnulados = $this->Bills->find('all', ['conditions' => ['annulled' => true, 'turn' => $id],
+			$documentosAnulados = $this->Bills->find('all', ['conditions' => ['annulled' => true, 'id_turno_anulacion' => $id],
 				'order' => ['Bills.id' => 'ASC']]);
 				
 			$contadorAnulados = $documentosAnulados->count();
@@ -1600,7 +1600,7 @@ class TurnsController extends AppController
 		$tasaDolar = $turn->tasa_dolar;
 		$tasaEuro = $turn->tasa_euro;
 		
-		$documentosAnulados = $this->Bills->find('all', ['conditions' => ['annulled' => true, 'turn' => $id],
+		$documentosAnulados = $this->Bills->find('all', ['conditions' => ['annulled' => true, 'id_turno_anulacion' => $id],
 			'order' => ['Bills.id' => 'ASC']]);
 			
 		$contadorAnulados = $documentosAnulados->count();
@@ -2009,9 +2009,8 @@ class TurnsController extends AppController
 			}
 		}
 
-		$anuladas = $this->Bills->find('all', 
-		['conditions' => ['date_annulled >=' => $turn->start_date, 'date_annulled <=' => $turn->end_date],
-		'order' => ['Bills.bill_number' => 'ASC']]);
+		$anuladas = $this->Bills->find('all', ['conditions' => ['annulled' => true, 'id_turno_anulacion' => $id],
+		'order' => ['Bills.id' => 'ASC']]);
 										
 		$this->set(compact('turn', 'vectorPagos', 'cajero', 'anuladas'));
 		$this->set('_serialize', ['turn', 'vectorPagos', 'cajero', 'anuladas']);

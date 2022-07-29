@@ -41,7 +41,7 @@
         {
         	usernameUser = $("#username").val();
 
-        	if (usernameUser.toLowerCase() == "angel2703" || usernameUser.toLowerCase() == "titularsistema" || usernameUser.toLowerCase() == "adminsg" || usernameUser.toLowerCase() == "emiguerrero")
+        	if (usernameUser.toLowerCase() == "angel2703" || usernameUser.toLowerCase() == "titularsistema" || usernameUser.toLowerCase() == "adminsg" || usernameUser.toLowerCase() == "emiguerrero" || usernameUser == "16153897")
 //         	if (usernameUser.toLowerCase() == "angel2703")
         	{
         		$('#message').css('color', '#00ace6');
