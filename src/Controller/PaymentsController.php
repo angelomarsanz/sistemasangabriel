@@ -118,7 +118,8 @@ class PaymentsController extends AppController
 		}	
 		$payment->banco_receptor = $pago->bancoReceptor;
 		$payment->comentario = $pago->comentario;
-        $payment->fiscal = $fiscal;        
+        $payment->fiscal = 1;      
+		$payment->monto_igtf_dolar = $pago->monto_igtf_dolar;  
 
         if (!($this->Payments->save($payment))) 
         {
@@ -625,4 +626,99 @@ class PaymentsController extends AppController
 			exit(json_encode($jsondata, JSON_FORCE_OBJECT));	
 		}
 	}
+	public function pagosPedidoFactura($idPedido = null, $idFactura = null, $numeroFactura = null, $idTurno = null, $igtf = null)
+    {	
+		$codigoRetorno = 0;
+		
+		$pagos = $this->Payments->find('all', ['conditions' => ['bill_id' => $idPedido], 'order' => ['payment_type' => 'ASC', 'created' => 'ASC']]);
+		
+		$contadorPagos = $pagos->count();
+		
+		if ($contadorPagos > 0)
+		{
+			foreach ($pagos as $pago)
+			{
+				$nuevoPago = $this->Payments->newEntity();
+				$familia = $pago->name_family;
+				$nuevoPago->bill_id = $idFactura;
+				$nuevoPago->moneda = $pago->moneda;
+				$nuevoPago->orden_moneda = $pago->orden_moneda;
+				$nuevoPago->payment_type = $pago->payment_type;
+				$nuevoPago->bank = $pago->bank;
+				$nuevoPago->banco_receptor = $pago->banco_receptor;
+				$nuevoPago->account_or_card = $pago->account_or_card;
+				$nuevoPago->serial = $pago->serial;
+				$nuevoPago->bill_number = $numeroFactura;
+				$nuevoPago->responsible_user = $this->Auth->user('id');
+				$nuevoPago->turn = $idTurno;
+				$nuevoPago->annulled = 0;
+				$nuevoPago->name_family = $pago->name_family; 
+				$nuevoPago->comentario = $pago->comentario; 
+				$nuevoPago->fiscal = 1;     
+				$nuevoPago->amount = $pago->amount;
+				$nuevoPago->monto_igtf_dolar = $pago->monto_igtf_dolar;
+				if (!($this->Payments->save($nuevoPago))) 
+				{
+					$binnacles = new BinnaclesController;
+					
+					$binnacles->add('controller', 'Payments', 'pagosPedidoFactura', 'El pago correspondiente a la factura con ID ' . $idFactura . ' no fue guardado');
+					
+					$this->Flash->error(__('El pago correspondiente a la factura con ID '.$idFactura.' no fue guardado, vuelva a intentar por favor.'));
+					$codigoRetorno = 1;
+					break;
+				}
+			}
+			if ($codigoRetorno == 0 && $igtf['monto_igtf_dolar'] > 0)
+			{
+				$pago_igtf = $this->Payments->newEntity();
+				$pago_igtf->bill_id = $idFactura;
+				$pago_igtf->payment_type = $igtf["metodo_de_pago"];
+				$pago_igtf->moneda = $igtf["moneda_de_pago"];
+
+				if ($igtf["metodo_de_pago"] == "$")
+				{
+					$pago_igtf->amount = $igtf["monto_igtf_dolar"];
+					$pago_igtf->orden_moneda = 1;
+				}
+				elseif ($igtf["metodo_de_pago"] == "€")
+				{
+					$pago_igtf->amount = $igtf["monto_igtf_euro"];
+					$pago_igtf->orden_moneda = 2;
+				}
+				else
+				{
+					$pago_igtf->amount = $igtf["monto_igtf_bolivar"];
+					$pago_igtf->orden_moneda = 3;
+				}
+				$pago_igtf->bank = $igtf["banco_emisor"];
+				$pago_igtf->account_or_card = $igtf["cuenta_o_tarjeta"];
+				$pago_igtf->serial = $igtf["serial"];
+				$pago_igtf->bill_number = $numeroFactura;
+				$pago_igtf->responsible_user = $this->Auth->user('id');
+				$pago_igtf->turn = $idTurno;
+				$pago_igtf->annulled = 0;
+				$pago_igtf->name_family = $familia;
+				$pago_igtf->banco_receptor = $igtf["banco_receptor"];
+				$pago_igtf->comentario = "";
+				$pago_igtf->fiscal = 1;
+				$pago_igtf->monto_igtf_dolar = $pago_igtf->amount;         
+		
+				if (!($this->Payments->save($pago_igtf))) 
+				{
+					$this->Flash->error(__('El pago no fue guardado, vuelva a intentar por favor.'));
+					$codigoRetorno = 1;
+				}
+			}
+		}
+		else
+		{
+			$binnacles = new BinnaclesController;
+			
+			$binnacles->add('controller', 'Payments', 'pagosPedidoFactura', 'No se encontraron pagos para el pedido con ID '.$idPedido);
+			
+			$this->Flash->error(__('No se encontraron pagos para el pedido con ID '.$idPedido));
+			$codigoRetorno = 1;	
+		}
+		return $codigoRetorno; 
+    }
 }

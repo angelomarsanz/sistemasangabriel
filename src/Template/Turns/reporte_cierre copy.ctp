@@ -272,6 +272,201 @@
 						</div>
 					</div>
 				</div>
+
+				<div>
+					<div class="row">
+						<div class="col-md-12">					
+							<table class="saltopagina">
+								<thead>
+									<tr>
+										<th>&nbsp;</th>
+									</tr>	
+									<tr>
+										<th style="font-size: 18px; line-height: 20px;"><b>PEDIDOS</b></th>
+									</tr>
+									<tr>
+										<th>&nbsp;</th>
+									</tr>	
+									<tr>
+										<th>&nbsp;</th>
+									</tr>	
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="row">
+						<div class="col-md-12">					
+							<table class="table table-striped table-hover">
+								<thead>
+									<tr>
+										<th style="text-align: center;"><b>Familia</b></th>
+										<th style="text-align: center;"><b>Ctrol / Ped</b></th>
+										<th style="text-align: center;"><b>Tipo doc</b></th>
+										<th style="text-align: center;"><b>Ped $</b></th>
+										<th style="text-align: center;"><b>Ped Bs.</b></th>
+										<th style="text-align: center;"><b>Desc / Rec</b></th>
+										<th style="text-align: center;"><b>Tasa $ / €</b></th>
+										<th style="text-align: center;"><b>E $</b></th>
+										<th style="text-align: center;"><b>E €</b></th>
+										<th style="text-align: center;"><b>E Bs.</b></th>
+										<th style="text-align: center;"><b>Zel $</b></th>
+										<th style="text-align: center;"><b>Eur €</b></th>
+										<th style="text-align: center;"><b>TD/TC Bs.</b></th>
+										<th style="text-align: center;"><b>Trans Bs.</b></th>
+										<th style="text-align: center;"><b>Dep Bs.</b></th>
+										<th style="text-align: center;"><b>Chq Bs.</b></th>
+										<th style="text-align: center;"><b>Tot Cob. Bs.</b></th>
+										<th style="text-align: center;"><b>Comp Bs.</b></th>
+										<th style="text-align: center;"><b>Dif Bs.</b></th>
+										<th style="text-align: center;"><b>TCM</b></th>
+									</tr>
+								</thead>
+								<tbody>				
+									<?php $cobradoBolivares = 0;  
+									$totalCobradoBolivares = 0;  
+									$totalFacturaDolar = 0;  
+									$totalFacturaBolivar = 0; 
+									$totalDescuentosRecargosSE = 0;
+									$totalEfectivoDolar = 0;
+									$totalEfectivoEuro = 0;
+									$totalEfectivoBolivar = 0;
+									$totalZelle = 0;
+									$totalEuros = 0;
+									$totalTdbTdc = 0;
+									$totalTransferencias = 0;
+									$totalDepositos = 0;
+									$totalCheques = 0;
+									$compensado = 0;
+									$totalCompensado = 0;
+									$diferencia = 0;
+									$totalDiferencia = 0;
+									foreach ($vectorPagos as $pago): 
+										$transferenciaDestiempo = "";
+										$cuotasAlumnoBecado = "";
+										$cambioMontoCuota = "";
+										if ($pago['tipoDocumento'] == "Pedido"): ?>
+											<tr>
+												<td><?= $pago['familia']; ?></td>
+												<td style="text-align: center;"><?= $pago['nroControl'] . " " . $pago['nroFactura']; ?></td>
+												<td style="text-align: center;">R</td>
+												<td style="text-align: center;"><?= number_format(round($pago['totalFacturaDolar'], 2), 2, ",", ".") ?></td>
+												<td style="text-align: center;"><?= number_format($pago['totalFacturaBolivar'], 2, ",", ".") ?></td>
+												<?php if (isset($pago['descuentoRecargo'])): ?>
+													<td style="text-align: center;"><?= number_format($pago['descuentoRecargo'], 2, ",", ".") ?></td>
+												<?php else: ?>
+													<td style="text-align: center;">0,00</td>
+												<?php endif; ?>
+												<td style="text-align: center;"><?= number_format($pago['tasaDolar'], 2, ",", ".") . " " . number_format($pago['tasaEuro'], 2, ",", ".") ?></td>
+												<td style="text-align: center;"><?= number_format($pago['efectivoDolar'], 2, ",", ".") ?></td>
+												<td style="text-align: center;"><?= number_format($pago['efectivoEuro'], 2, ",", ".") ?></td>
+												<td style="text-align: center;"><?= number_format($pago['efectivoBolivar'], 2, ",", ".") ?></td>
+												<td style="text-align: center;"><?= number_format($pago['zelleDolar'], 2, ",", ".") ?></td>
+												<?php if (isset($pago['euros'])): ?>
+													<td style="text-align: center;"><?= number_format($pago['euros'], 2, ",", ".") ?></td>
+												<?php else: ?>
+													<td style="text-align: center;"><?= "0,00" ?></td>
+												<?php endif; ?>
+												<td style="text-align: center;"><?= number_format($pago['tddTdcBolivar'], 2, ",", ".") ?></td>
+												<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>										
+												<td style="text-align: center;"><?= number_format($pago['depositoBolivar'], 2, ",", ".") ?></td>
+												<td style="text-align: center;"><?= number_format($pago['chequeBolivar'], 2, ",", ".") ?></td>
+												<?php $cobradoBolivares = 
+													round(($pago['efectivoDolar'] + $pago['zelleDolar']) * $pago['tasaDolar'], 2) +
+													round($pago['efectivoEuro'] * $pago['tasaEuro'], 2) +
+													$pago['efectivoBolivar'] + 
+													$pago['tddTdcBolivar'] + 
+													$pago['transferenciaBolivar'] +
+													$pago['depositoBolivar'] +
+													$pago['chequeBolivar']; 
+													if (isset($pago['euros'])): 
+														$cobradoBolivares += round($pago['euros'] * $pago['tasaEuro'], 2); 
+													endif; ?>														
+												<td style="text-align: center;"><?= number_format($cobradoBolivares, 2, ",", ".") ?></td>
+												<?php $compensado = round($pago['compensadoDolar'] * $pago['tasaDolar'], 2); ?>
+												<td style="text-align: center;"><?= number_format($compensado, 2, ",", ".") ?></td>
+												<?php if (isset($pago['descuentoRecargo'])):
+													$diferencia = ($pago['totalFacturaBolivar'] + $pago['descuentoRecargo']) - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));
+												else: 
+													$diferencia = $pago['totalFacturaBolivar'] - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));													
+												endif; ?>
+												<td style="text-align: center;"><?= number_format($diferencia, 2, ",", ".") ?></td>	
+												<?php if (isset($pago['tasaTemporalDolar'])):
+													if ($pago['tasaTemporalDolar'] == 1):
+														$transferenciaDestiempo = "T";
+													endif;
+												endif;
+												if (isset($pago['tasaTemporalEuro'])):
+													if ($pago['tasaTemporalEuro'] == 1):
+														$transferenciaDestiempo = "T";
+													endif;
+												endif;
+												if (isset($pago['cuotasAlumnoBecado'])):
+													if ($pago['cuotasAlumnoBecado'] > 0):
+														$cuotasAlumnoBecado = "C";
+													endif;
+												endif;
+												if (isset($pago['cambioMontoCuota'])):
+													if ($pago['cambioMontoCuota'] == 1):
+														$cambioMontoCuota = "M";
+													endif;
+												endif; ?>
+												<td style="text-align: center;"><?= $transferenciaDestiempo . $cuotasAlumnoBecado . $cambioMontoCuota; ?></td>
+											</tr>
+											<?php $totalFacturaDolar += $pago['totalFacturaDolar']; 
+											$totalFacturaBolivar += $pago['totalFacturaBolivar']; 
+											$totalEfectivoDolar += $pago['efectivoDolar'];
+											if (isset($pago['descuentoRecargo'])): 
+												$totalDescuentosRecargosSE += $pago['descuentoRecargo'];
+											endif;
+											$totalEfectivoEuro += $pago['efectivoEuro'];
+											$totalEfectivoBolivar += $pago['efectivoBolivar'];
+											$totalZelle += $pago['zelleDolar'];
+											if (isset($pago['euros'])): 
+												$totalEuros += $pago['euros'];
+											endif; 
+											$totalTdbTdc += $pago['tddTdcBolivar'];
+											$totalTransferencias += $pago['transferenciaBolivar'];
+											$totalDepositos += $pago['depositoBolivar'];
+											$totalCheques += $pago['chequeBolivar'];
+											$totalCobradoBolivares += $cobradoBolivares;
+											$totalCompensado += $compensado;
+											$totalDiferencia += $diferencia;
+										endif;
+									endforeach; ?>
+									<tr>
+										<td><b>Totales</b></td>
+										<td></td>
+										<td></td>
+										<td style="text-align: center;"><b><?= number_format($totalFacturaDolar, 2, ",", ".") ?></b></td>	
+										<td style="text-align: center;"><b><?= number_format($totalFacturaBolivar, 2, ",", ".") ?></b></td>												
+										<td style="text-align: center;"><b><?= number_format($totalDescuentosRecargosSE, 2, ",", ".") ?></b></td>
+										<td></td>
+										<td style="text-align: center;"><b><?= number_format($totalEfectivoDolar, 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format($totalEfectivoEuro, 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format($totalEfectivoBolivar, 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format($totalZelle, 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format($totalEuros, 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format($totalTdbTdc, 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format($totalTransferencias, 2, ",", ".") ?></b></td>										
+										<td style="text-align: center;"><b><?= number_format($totalDepositos, 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format($totalCheques, 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format($totalCobradoBolivares, 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format($totalCompensado, 2, ",", ".") ?></b></td>
+										<td style="text-align: center;"><b><?= number_format($totalDiferencia, 2, ",", ".") ?></b></td>	
+										<td></td>												
+									</tr>
+									<tr>
+										<td><i>Leyenda: T = Transferencia destiempo, C = Convenio y M = Cambio monto cuota</i></td>
+										<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+										<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>				
 				
 				<div>
 					<div class="row">

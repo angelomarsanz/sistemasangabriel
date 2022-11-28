@@ -1,3 +1,11 @@
+Cálculos del IGTF
+
+Si es solo pago en divisa, en el pago en divisas está incluido el IGTF
+Si es un pago mixto y el pago en bolívares cubre totalmente el monto del IGTF, se registra el pago del IGTF en bolívares
+Si es un pago mixto y el pago en bolívares no cubre el monto del IGTF, el IGTF está incluido en el pago en divisas
+Antes de guardar la factura se hacen los ajustes, ya sea en la rutina de ajuste o al iniciar la función guardarFactura
+El monto del IGTF se guardarán en el pago donde se hizo el cobro del impuesto
+
 Nro. de facturas a obviar en marzo 2022
 
 115	07/03/2022	Fact	V - 9531059	MARIANO ANTONIO SANDOVAL PAEZ	97976	115640

@@ -68,6 +68,7 @@
 								<li><?= $this->Html->link('Recibo inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo inscripción nuevos']) ?></li>
 								<li><?= $this->Html->link('Recibo servicio educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo servicio educativo']) ?></li>																	
 								<li><?= $this->Html->link('Cobrar mensualidades', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
+								<li><?= $this->Html->link('Pedido por factura', ['controller' => 'Bills', 'action' => 'pedidoPorFactura']) ?></li> 
 								<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
 								<li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
 								<li><?= $this->Html->link('Histórico cambio tasa dólar y euro', ['controller' => 'Historicotasas', 'action' => 'index']) ?></li>
@@ -125,10 +126,10 @@
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Contabilidad <span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">    
 								<li><?= $this->Html->link('Consultar factura', ['controller' => 'Bills', 'action' => 'consultBill']) ?></li>
-								<li><?= $this->Html->link('Consultar de recibo', ['controller' => 'Bills', 'action' => 'consultarRecibo']) ?></li>
+								<li><?= $this->Html->link('Consulta de recibo o pedido', ['controller' => 'Bills', 'action' => 'consultarRecibo']) ?></li>
 								<li><?= $this->Html->link('Consultar nota de crédito', ['controller' => 'Bills', 'action' => 'consultarNotaCredito']) ?></li>
 								<li><?= $this->Html->link('Consultar nota de débito', ['controller' => 'Bills', 'action' => 'consultarNotaDebito']) ?></li>
-								<li><?= $this->Html->link('Anular factura', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Anular']) ?></li>
+								<li><?= $this->Html->link('Anular factura, recibo o pedido', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Anular']) ?></li>
 								<li><?= $this->Html->link('Crear nota contable', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'NC']) ?></li>
 								<li><?= $this->Html->link('Recibo reintegro', ['controller' => 'Parentsandguardians', 'action' => 'busquedaReciboReintegro']) ?></li>			
 								<li><?= $this->Html->link('Modificar lote de facturas', ['controller' => 'Controlnumbers', 'action' => 'edit']) ?></li>
@@ -137,6 +138,7 @@
 								<li><?= $this->Html->link('Crear libro de ventas EXCEL', ['controller' => 'Salesbooks', 'action' => 'createBookExcel']) ?></li>
 								<li><?= $this->Html->link('Crear libro de recibos EXCEL', ['controller' => 'Salesbooks', 'action' => 'crearLibroRecibos']) ?></li>
 								<li><?= $this->Html->link('Eventos del usuario', ['controller' => 'Eventos', 'action' => 'index']) ?></li>
+								<li><?= $this->Html->link('Reporte Servicio Educativo', ['controller' => 'Turns', 'action' => 'previoServicioEducativo']) ?></li>
 							</ul>
 						</li>
 												   						

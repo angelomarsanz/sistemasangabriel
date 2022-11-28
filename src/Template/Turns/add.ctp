@@ -1,24 +1,28 @@
-<div class="row">
-    <div class="col-md-6 col-md-offset-3">
-    	<div class="page-header">
-    		<h2>Abrir turno</h2>
-    	</div>
-        <?= $this->Form->create($turn) ?>
-            <fieldset>
-                <?php
-                    echo $this->Form->input('start_date', ['type' => 'hidden', 'id' => 'start-date', 'value' => $startDate]);
-                    echo $this->Form->input('turn', ['label' => 'Turno:', 'options' => [null => ' ', '1' => '1', '2' => '2']]);
-                ?>
-            </fieldset>
-        <?= $this->Form->button(__('Abrir'), ['id' => 'abrir', 'class' => 'btn btn-success']) ?>
-        <?= $this->Form->end() ?>
+<?php
+if (isset($turn)): ?>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="page-header">
+                <h2>Abrir turno</h2>
+            </div>
+            <?= $this->Form->create($turn) ?>
+                <fieldset>
+                    <?php
+                        echo $this->Form->input('start_date', ['type' => 'hidden', 'id' => 'start-date', 'value' => $startDate]);
+                        echo $this->Form->input('turn', ['label' => 'Turno:', 'options' => [null => ' ', '1' => '1', '2' => '2']]);
+                    ?>
+                </fieldset>
+            <?= $this->Form->button(__('Abrir'), ['id' => 'abrir', 'class' => 'btn btn-success']) ?>
+            <?= $this->Form->end() ?>
+        </div>
     </div>
-</div>
+<?php endif; ?>
 <script>
     $(document).ready(function() 
     {
-        $('#turn').focusout(function(e) 
+        $('#turn').change(function(e) 
         {
+            e.preventDefault()
             var r = confirm("Las facturas se emitirán con fecha: " + $("#start-date").val());
             if (r == false)
                 {

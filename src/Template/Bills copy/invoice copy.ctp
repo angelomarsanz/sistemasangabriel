@@ -118,8 +118,8 @@
 					<tr>
 						<th style="width:5%; text-align:left;">Código</th>
 						<th style="width:75%; text-align:left;">Descripción</th>
-						
 						<th style="width:20%; text-align:right;">Precio Bs.</th>
+						<th style="width:5%; text-align:left;"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -130,8 +130,8 @@
 							<td><?= h($vConcept['accountingCode']) ?></td>
 							<td><?= h($vConcept['invoiceLine']) ?></td>
 							<td style="text-align: right;"><?= number_format($vConcept['amountConcept'], 2, ",", ".") ?></td>
+							<td>&nbsp;(E)</td>
 						</tr>
-
 					<?php
 					$counter++;
 					endforeach; ?>
@@ -168,18 +168,26 @@
 					<tr>
 						<td style="width: 50%;">Sub-total:</td>
 						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount_paid), 2, ",", ".") ?></td>
+						<td>&nbsp;(E)</td>
 					</tr>
 					<tr>
 						<td style="width: 50%;">Descuento/Recargo:</td>
 						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount), 2, ",", ".") ?></td>
+						<?php if ($bill->amount > 0): ?>
+							<td>&nbsp;(E)</td>
+						<?php else: ?>
+							<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<?php endif; ?>
 					</tr>
 					<tr>
 						<td style="width: 50%;">IVA 0%:</td>
 						<td style="width: 50%;"></td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 					</tr>
 					<tr>
 						<td style="width: 50%;"><b>Total Bs.:</b></td>
 						<td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid + $bill->amount, 2, ",", ".") ?></b></td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 					</tr>
 				</table>
 			</div>
@@ -229,6 +237,7 @@
 						<th style="width:5%; text-align:left;">Código</th>
 						<th style="width:75%; text-align:left;">Descripción</th>
 						<th style="width:20%; text-align:right;">Precio Bs.</th>
+						<th style="width:5%; text-align:left;"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -237,6 +246,7 @@
 							<td><?= h($vConcept['accountingCode']) ?></td>
 							<td><?= h($vConcept['invoiceLine']) ?></td>
 							<td style="text-align: right;"><?= number_format($vConcept['amountConcept'], 2, ",", ".") ?></td>
+							<td>&nbsp;(E)</td>
 						</tr>
 					<?php endforeach; ?>
 				</tbody>
@@ -272,18 +282,26 @@
 					<tr>
 						<td style="width: 50%;">Sub-total:</td>
 						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount_paid), 2, ",", ".") ?></td>
+						<td>&nbsp;(E)</td>
 					</tr>
 					<tr>
 						<td style="width: 50%;">Descuento/Recargo:</td>
 						<td style="width: 50%; text-align:right;"><?= number_format(($bill->amount), 2, ",", ".") ?></td>
+						<?php if ($bill->amount > 0): ?>
+							<td>&nbsp;(E)</td>
+						<?php else: ?>
+							<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+						<?php endif; ?>
 					</tr>
 					<tr>
 						<td style="width: 50%;">IVA 0%:</td>
 						<td style="width: 50%;"></td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 					</tr>
 					<tr>
 						<td style="width: 50%;"><b>Total Bs.:</b></td>
 						<td style="width: 50%; text-align:right;"><b><?= number_format($bill->amount_paid + $bill->amount, 2, ",", ".") ?></b></td>
+						<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 					</tr>
 				</table>
 			</div>

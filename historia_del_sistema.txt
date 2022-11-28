@@ -1,0 +1,113 @@
+Pendiente:
+- Al reporte de servicio educativo solo tenga acceso Sol
+Para el reporte del seguro, se agregó la columna "Código Colegio San Gabriel" para identificar los alumnos inscritos después del 
+proceso de inscripción regular. Se debe modificar el controlador y el reporte para que haga la comparación usando el código colegio San Gabriel que corresponde al ID del estudiante
+
+22/11/2022
+Módulos modificados IGTF
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/create_invoice.ctp - Listo
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php - Listo
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/PaymentsController.php - Listo
+
+18/11/2022
+Módulos modificados IGTF
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ConceptsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/annul_invoice.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/consultar_recibo.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
+
+11/10/2022
+Se crearon las columnas monto_divisas y monto_igtf en la tabla Bills - Listo
+Se modificó:
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/create_invoice.ctp 
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/invoice.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php - Listo
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ConceptsController.php - Listo
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/PaymentsController.php - Listo
+
+10/11/2022
+Para la nota de entrega:
+Se creó la tabla notas
+Se crearon los módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Model/Entity/Nota.php - Listo
+/opt/lampp/htdocs/sistemasangabriel/src/Model/Table/NotasTable.php - Listo
+Carpeta notas en Template - Listo
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/NotasController.php - Listo
+Se modificaron los módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/create_invoice.ctp - Listo
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php - Listo
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/invoice.ctp - Listo
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/annul_invoice.ctp - Listo
+Está pendiente los cambios del reporte de cierre
+
+09/11/2022
+Para el reporte del seguro, se agregó la columna "Código Colegio San Gabriel" para identificar los alumnos inscritos después del 
+proceso de inscripción regular cada vez que se ejecute el reporte. Este reporte se debe ejecutar al final del día laborable, después de cerrar ambas cajas. Se modificaron los siguientes módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php - Listo
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/report_student_general.ctp
+
+08/11/2022:
+- Emitir un listado de todos los recibos. Contar manualmente todos menos los de servicio educativo y comenzar a numerar los recibos que no
+sean de servicio educativo a partir de la cantidad existente. Ejemplo si hay 73 recibos en total incluyendo servicio educativo y de esos 50 son 
+recibos con otro concepto diferente a servicio educativo, entonces ese tipo de recibos se comienzan a numerar a partir del 51 (Listo)
+Los de servicio educativo siguen con la numeración existente (Listo)
+- Al reporte de servicio educativo solo tenga acceso Sol
+Para el reporte del seguro, se agregó la columna "Código Colegio San Gabriel" para identificar los alumnos inscritos después del 
+proceso de inscripción regular. Se debe modificar el controlador y el reporte para que haga la comparación usando el código colegio San Gabriel que corresponde al ID del estudiante
+
+
+08/11/2022:
+- Emitir un listado de todos los recibos. Contar manualmente todos menos los de servicio educativo y comenzar a numerar los recibos que no
+sean de servicio educativo a partir de la cantidad existente. Ejemplo si hay 73 recibos en total incluyendo servicio educativo y de esos 50 son 
+recibos con otro concepto diferente a servicio educativo, entonces ese tipo de recibos se comienzan a numerar a partir del 51 (Listo)
+Los de servicio educativo siguen con la numeración existente (Listo)
+- Al reporte de servicio educativo solo tenga acceso Sol
+Para el reporte del seguro, se agregó la columna "Código Colegio San Gabriel" para identificar los alumnos inscritos después del 
+proceso de inscripción regular. Se debe modificar el controlador y el reporte para que haga la comparación usando el código colegio San Gabriel que corresponde al ID del estudiante
+
+
+
+24/10/2022
+Se marcó como eliminado el registro Matrícula 2021 correspondiente a la estudiante Camarán Gonzalez Sophia (ID 125). 
+
+17/10/2022
+Se hizo la corrección para que se muestre la alerta cuando se deba algún monto por los conceptos de inscripción. La rutina ya existía, solo que 
+la variable tenía un acento. Se le quitó el 
+Se hizo un reporte provisional que lista los ingresos por matrícula. Este reporte se puede mejorar para listar distintos tipos de conceptos.
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Turns/reporte_ingresos_por_concepto.ctp
+
+12/10/2022
+Se agregó un modal en la vista de cobranzas para que el usuario indique si se va ajustar las cuotas pendientes de pago
+Se re-enumeró el número de control por una pro-forma que estaba en blanco
+
+26/09/2022
+Se hicieron los siguientes ajustes /opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/create_invoice.ctp:
+- Se recalculen los ajustes de matrícula solo para las mensualidades que sean diferentes de agosto
+- Cuando se haya hecho un ajuste en una cuota y se haya pagado totalmente con ese ajuste, se cobrará diferencia, siempre y cuando la suma de original_amount - amount sea mayor a cero
+- Se agregó a la base de datos sqlite la columna dbDeudaConceptosInscripcion. Tendrá el valor de true cuando deba algún concepto de inscripción y enviará un alerta
+
+20/09/2022
+En la tabla transacciones de sqlite se usaba la columna dbInvoiced para indicar si la transacción estaba seleccionada o no para el pago. Se hizo el cambio para no darle más ese uso, sino el que corresponde. Se creó una nueva columna dbSeleccionada y es la que se usa ahora para indicar si la transacción está o no seleccionada para el pago. Falta probar e instalar en producción
+
+Se hicieron los cambios (aún no probados) para recalcular las cuotas atrasadas. Se debe revisar el caso de la cuota de agosto, si se le da el mismo tratamiento que a las demás
+
+19/09/2022
+En /opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/create_invoice.ctp se hicieron los siguientes cambios:
+Cuando la vista sea "Cobrar Mensualidades" se omiten las cuotas servicio educativo y agosto
+
+En la acción createInvoice de /opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php se creó la variable ano_mes_actual que será usada para cobrar a la tarifa actual aquellas cuotas pendientes de meses anteriores
+
+16/09/2022
+Al estudiante Briceño Di Carlo Mario Andrade (id 1441), se eliminaron todas las transacciones y se creó como un
+alumno nuevo
+
+07/09/2022
+Se modificó la acción add del módulo /opt/lampp/htdocs/sistemasangabriel/src/Controller/TurnsController.php
+para que valide si el usuario ya tiene un turno abierto. Esto para solventar que se habrían dos turnos al mismo tiempo
+
+05/08/2022
+La alumna Camarán Gonzalez Sophia, ID 125, se le hizo un ajuste para que ingresara como alumno
+regular para el período 2022 - 2023. Se le cobró todos los concepto de alumno regular.
+En el reporte de relación de mensualidades aparecía como moroso en el año 2021-2022, se le 
+colocó que abono "0" en la matrícula 2021, para que no se mostrara en lo reportes   

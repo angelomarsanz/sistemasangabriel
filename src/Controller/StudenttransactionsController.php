@@ -1789,7 +1789,7 @@ class StudenttransactionsController extends AppController
 				'Parentsandguardians.second_name'])
 			->contain(['Students' => ['Parentsandguardians']])
 			->where([['Studenttransactions.transaction_description' => $concept],
-				['Studenttransactions.amount > ' => 0], ['Students.student_condition' => 'Regular']])
+				['Studenttransactions.amount_dollar > ' => 0], ['Students.student_condition' => 'Regular']])
 			->order(['Students.surname' => 'ASC', 'Students.second_name' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 
 			$ultimoEnvio = $this->Excels->find('all');

@@ -131,6 +131,7 @@
                                             <th scope="col">&nbsp;&nbsp;&nbsp;Grado&nbsp;&nbsp;&nbsp;</th>
                                             <th scope="col">Sección</th>
                                             <th scope="col">Condición</th>
+											<th scope="col">ID</th>
                                         </tr>
                                     </thead>
                                     <tbody id="related-students"></tbody>
@@ -187,7 +188,9 @@
 						</div>
 						<div class="col-md-3">
 							<p>Sub-total alumno $: <b><spam id="student-balance">0</spam></b></p>
-							<p>Sub-total familia $: <b><spam id="total-balance"></spam></b></p> 
+							<p>Sub-total familia $: <b><spam id="total-balance"></spam></b></p>
+							<p>Sub-total IGTF $: <b><spam id="sub_total_igtf"></spam></b></p>
+							<p>Total con IGTF $: <b><spam id="total_con_igtf"></spam></b></p> 
 						</div>  						
 					</div>
                 </div>
@@ -467,6 +470,13 @@
 												<td style="color: red; text-align:center;">0,00</td>
 											</tr>
 											<tr>
+												<td>IGTF 3%</td>
+												<td></td>
+												<td id="igtf_dolar" style="text-align:center;"></td>
+												<td id="igtf_euro" style="color: blue; text-align:center;"></td>
+												<td id="igtf_bolivar" style="color: red; text-align:center;"></td>
+											</tr>
+											<tr>
 												<td>Total</td>
 												<td></td>
 												<td id="total-balance-descuento-dolar" style="text-align:center;"></td>
@@ -538,14 +548,15 @@
         </div>
     </div>
 </div>
-<button id="mostrar-registros" type=submit>Tabla studentTransactions</button>
-<button id="mostrar-pagos" type=submit>Tabla payments</button>
+<button id="mostrar-registros" type=submit>Todas las cuotas</button>
+<button id="mostrar_cuotas_seleccionadas" type=submit>Cuotas seleccionadas</button>
+<button id="mostrar-pagos" type=submit>Pagos</button>
 <button id="prueba-ajuste">Prueba ajuste</button>
 <div id="mensajes"></div>
 <div id="results"></div>
 <div id="pagos"></div>
 <script>
-//  Declaración de variables
+//  Variables globales
 	var crm_processing_modal = function ( msg ) 
 	{
 	    var process_modal ='<div class="modal fade" id="fave_modal" tabindex="-1" role="dialog" aria-labelledby="faveModalLabel" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body houzez_messages_modal">'+msg+'</div></div></div></div></div>';
@@ -574,15 +585,15 @@
 	var descuentoBolivares = 0; 
 	var balanceDescuento = 0;
 	var balanceDescuentoEuros = 0;
-	var balanceDescuentoBolivare = 0;
-	var totalBalanceDescuento = 0
-	var totalBalanceDescuentoEuros = 0
-	var totalBalanceDescuentoBolivares = 0	
+	var balanceDescuentoBolivares = 0;
+	var totalBalanceDescuento = 0;
+	var totalBalanceDescuentoEuros = 0;
+	var totalBalanceDescuentoBolivares = 0;	
 	var totalGeneral = 0;
 	var invoiceDescuento = 0;
     var totalBill = 0;
     var paymentType = " ";
-    var amountPaid = 0;
+    var monto_cuota = 0;
 	var montoPagado = 0;
 	var montoPagadoDolar = 0;
 	var montoPagadoEuro = 0;
@@ -690,7 +701,7 @@
 	var anoEscolarAnterior = <?= $anoEscolarActual - 1 ?>;
 	var anoEscolarInscripcion = <?= $anoEscolarInscripcion ?>;
 	var anoEscolarMensualidad = 0;
-	
+
     var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
     var dataSet;
 
@@ -717,10 +728,39 @@
 	payments.tasaTemporalEuro = 0;
 	payments.cuotasAlumnoBecado = 0;
 	payments.cambioMontoCuota = 0;
+	payments.monto_divisas = 0;
+	payments.monto_igtf = 0;
 
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
     var tbPaymentsMade = new Array();
+	
+	var indicador_recalcular_cuotas = true;
+	var indicador_pedido = false;
+	var ano_mes_actual = <?= $ano_mes_actual ?>;
+	var ano_mes_recalculo_cuotas_atrasadas = "202209";
+	var deuda_conceptos_inscripcion = false;
+	var conceptos_a_omitir = 
+		[
+			"Seguro escolar 2020",
+			"Seguro escolar 2021",
+			"Seguro escolar 2022",
+			"Thales 2021",
+			"Thales 2022" 
+		];
+
+	var porcentaje_calculo_base_igtf = 1; // Cuando no se va a cobrar IGTF debe ser 1
+	var porcentaje_calculo_igtf = 0; // Cuando no se va a cobrar IGTF debe ser 0
+	var base_igtf_dolar = 0;
+	var monto_divisas = 0;
+	var monto_igtf_dolar = 0;
+	var monto_igtf_dolar_pedido = 0;
+	var acumulado_igtf_dolar = 0;
+	var acumulado_igtf_dolar_archivo = 0;
+	var acumulado_igtf_euro = 0;
+	var acumulado_igtf_bolivar = 0;
+	var total_balance_bolivares_igtf = 0;
+	var indicador_igtf_recalculado = 0;
 	
 // Funciones
 
@@ -970,7 +1010,18 @@
         balanceIndicator = 0;
 		saldoNotaCredito = 0;
 		indicadorCompensacion = 0;
-		
+
+		base_igtf_dolar = 0;
+		monto_divisas = 0;
+		monto_igtf_dolar = 0;
+		monto_igtf_dolar_pedido = 0;
+		acumulado_igtf_dolar = 0;
+		acumulado_igtf_dolar_archivo = 0;
+		acumulado_igtf_euro = 0;
+		acumulado_igtf_bolivar = 0;
+		total_balance_bolivares_igtf = 0;
+		indicador_igtf_recalculado = 0;
+
     }
     
     function validateFields()
@@ -1171,6 +1222,8 @@
         dbPartialPayment INTEGER, \
         dbPaidOut INTEGER, \
 		dbSchoolYearFrom INTEGER, \
+		dbSeleccionada INTEGER, \
+		dbDeudaConceptosInscripcion INTEGER, \
         dbObservation VARCHAR(100))";
 
         db.transaction(function (tx) { tx.executeSql(createStatement, [], null, onError); });
@@ -1183,6 +1236,7 @@
 		payMoneda VARCHAR(50), \
         payPaymentType VARCHAR(100), \
         payAmountPaid DECIMAL(15,2), \
+		payMontoIgtfDolar DECIMAL(15,2), \
         payBank VARCHAR(200), \
 		payBancoReceptor VARCHAR(200), \
         payAccountOrCard VARCHAR(50), \
@@ -1194,8 +1248,6 @@
 
     function insertRecord() // Get value from Input and insert record . Function Call when Save/Submit Button Click..
     {
-		console.log(studentName+" insertRecord morosoAnoAnterior "+monthlyPayment, morosoAnoAnterior);
-
         var insertStatement = "INSERT OR REPLACE INTO studentTransactions \
         (dbId, \
         dbIdStudent, \
@@ -1217,7 +1269,9 @@
         dbPartialPayment, \
         dbPaidOut, \
 		dbSchoolYearFrom, \
-        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		dbSeleccionada, \
+		dbDeudaConceptosInscripcion, \
+        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = transactionIdentifier;
         var tpIdStudent = idStudent;
@@ -1239,6 +1293,8 @@
         var tpPartialPayment = partialPayment;
         var tpPaidOut = paidOut;
 		var tpSchoolYearFrom = schoolYearFrom;
+		var tpSeleccionada = false;
+		var tpDeudaConceptosInscripcion = deuda_conceptos_inscripcion;
         var tpObservation = " ";
 
         db.transaction(function (tx) 
@@ -1264,7 +1320,9 @@
             tpPartialPayment,
             tpPaidOut,
 			tpSchoolYearFrom,
-            tpObservation], null, onError); 
+            tpSeleccionada,
+			tpDeudaConceptosInscripcion,
+			tpObservation], null, onError); 
         });
 		
 		if (montoPendienteDolar < 0 && monthlyPayment.substring(0, 18) != "Servicio educativo")
@@ -1286,16 +1344,18 @@
 		payMoneda, \
         payPaymentType, \
         payAmountPaid, \
+		payMontoIgtfDolar, \
         payBank, \
 		payBancoReceptor, \
         payAccountOrCard, \
         paySerial, \
-		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         var tpId = accountant;
 		var tpMoneda = monedaPago;
         var tpPaymentType = paymentType;
         var tpAmountPaid = montoPagado;
+		var tpMontoIgtfDolar = monto_igtf_dolar;
         var tpBank = bank;
 		var tpBancoReceptor = bancoReceptor;
         var tpAccountOrCard = accountOrCard;
@@ -1309,12 +1369,20 @@
 			tpMoneda,
             tpPaymentType, 
             tpAmountPaid,
+			tpMontoIgtfDolar,
             tpBank,
 			tpBancoReceptor,
             tpAccountOrCard,
             tpSerial,
 			tpComentario], null, onError);
         });
+    }
+
+	function actualizarPago(id_pago, pago_monto_igtf_dolar) 
+    {
+        var updateStatement = "UPDATE payments SET payMontoIgtfDolar = ? WHERE payId=?";
+		
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [pago_monto_igtf_dolar, Number(id_pago)], null, onError); });
     }
     
     function deletePayment(locIdPayment) 
@@ -1326,11 +1394,11 @@
         });
     }
  
-    function updateRecord(id, invoiced) 
+    function updateRecord(id, seleccionada) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbInvoiced = ? WHERE dbId=?";
+        var updateStatement = "UPDATE studentTransactions SET dbSeleccionada = ? WHERE dbId=?";
 		
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [invoiced, Number(id)], null, onError); });
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [seleccionada, Number(id)], null, onError); });
     }
     
     function updateInstallment(id, updOriginalMontoDolar, updMontoModificadoDolar, updMontoPendienteDolar, updAPagarDolar, updAPagarEuro, updAPagarBolivar, updObservation) 
@@ -1340,11 +1408,11 @@
         db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), updObservation, Number(id)], null, onError); });
     }
 	
-    function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar, actInvoiced, actObservacion) 
+    function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar, actSeleccionada, actObservacion) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ?, dbInvoiced = ?, dbObservation = ? WHERE dbId=?";
+        var updateStatement = "UPDATE studentTransactions SET dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ?, dbSeleccionada = ?, dbObservation = ? WHERE dbId=?";
         
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(actAPagarDolar), Number(actAPagarEuro), Number(actAPagarBolivar), actInvoiced, actObservacion, Number(id)], null, onError); });
+        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(actAPagarDolar), Number(actAPagarEuro), Number(actAPagarBolivar), actSeleccionada, actObservacion, Number(id)], null, onError); });
     }
 	
     function showRecords() // Function For Retrive data from Database Display records as list
@@ -1363,6 +1431,9 @@
             {
                 dataSet = result.rows;
 
+				let indicador_julio_moroso = 0;
+				let indicador_deuda_conceptos_inscripcion = 0;
+
                 for (var i = 0, item = null; i < dataSet.length; i++) 
                 {
                     item = dataSet.item(i);
@@ -1371,10 +1442,27 @@
 					{
 						if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción regulares')
 						{
-							alert("Este alumno no se debe inscribir hasta que pague la mensualidad de julio");
-							return false;
+							if (indicador_julio_moroso == 0)
+							{
+								indicador_julio_moroso = 1;
+								alert("Este alumno no se debe inscribir hasta que pague la mensualidad de julio");
+							}
 						}
-					}						
+
+					}
+
+					if (item['dbDeudaConceptosInscripcion'] == "true")
+					{
+						if ($('#type-invoice').val() == 'Mensualidades')
+						{
+							if (indicador_deuda_conceptos_inscripcion == 0)
+							{
+								indicador_deuda_conceptos_inscripcion = 1;
+								alert("Adeuda conceptos de inscripción y/o servicio educativo");
+							}
+						}
+					}
+
 				}
                 
                 for (var i = 0, item = null; i < dataSet.length; i++) 
@@ -1403,7 +1491,7 @@
 
                     if (item['dbPaidOut'] == 'false')
                     {
-                        if (item['dbInvoiced'] == "true")
+                        if (item['dbSeleccionada'] == "true")
                         {
 							studentBalance = studentBalance + item['dbMontoAPagarDolar'];
 							detailLine += "<tr id=tra" + item['dbId'] + "> \
@@ -1553,6 +1641,8 @@
 			+ "<th>Seleccionada</th>"
 			+ "<th>Pagada</th>"
 			+ "<th>Año escolar</th>"
+			+ "<th>Seleccionada</th>"
+			+ "<th>DeudaConceptosInscripcion</th>"
 			+ "<th>Observacion</th>"
 			+ "</tr>"
 			+ "</thead>"
@@ -1587,6 +1677,8 @@
 						+ "<td>"+ item['dbInvoiced']+ "</td>"
 						+ "<td>"+ item['dbPaidOut']+ "</td>"
 						+ "<td>"+ item['dbSchoolYearFrom']+ "</td>"
+						+ "<td>"+ item['dbSeleccionada']+ "</td>"
+						+ "<td>"+ item['dbDeudaConceptosInscripcion']+ "</td>"
 						+ "<td>"+ item['dbObservation']+ "</td>"
 						+ "</tr>";
                 }
@@ -1599,7 +1691,83 @@
             });
         });
     }
-	
+
+    function mostrarCuotasSeleccionadas()
+    {
+        var seleccioneConCondicion = "SELECT * FROM studentTransactions WHERE dbSeleccionada = ? ";
+		var detailLine = 
+			"<table class='table table-striped table-hover'>"
+			+ "<thead>"
+			+ "<tr>"
+			+ "<th>id</th>"
+			+ "<th>idStudent</th>"
+			+ "<th>Alumno</th>" 
+			+ "<th>Cuota</th>"
+			+ "<th>Becado</th>"
+			+ "<th>MorosoAnoAnterior</th>"
+			+ "<th>tasaCambioDolar</th>"
+			+ "<th>tasaCambioEuro</th>"
+			+ "<th>tarifaDolarOriginal</th>"
+			+ "<th>tarifaDolar</th>"
+			+ "<th>AbonadoDolar</th>"
+			+ "<th>PendienteDolar</th>"
+			+ "<th>APagarDolar</th>"
+			+ "<th>APagarEuro</th>"
+			+ "<th>APagarBolivar</th>"
+			+ "<th>Seleccionada</th>"
+			+ "<th>Pagada</th>"
+			+ "<th>Año escolar</th>"
+			+ "<th>Seleccionada</th>"
+			+ "<th>DeudaConceptosInscripcion</th>"
+			+ "<th>Observacion</th>"
+			+ "</tr>"
+			+ "</thead>"
+			+ "<tbody>";
+
+        db.transaction(function (tx) 
+        {
+			tx.executeSql(seleccioneConCondicion, [true], function (tx, result)
+            {
+                dataSet = result.rows;
+                
+                for (var i = 0, item = null; i < dataSet.length; i++) 
+                {
+                    item = dataSet.item(i);
+                    detailLine += 
+						"<tr>"
+						+ "<td>"+ item['dbId']+ "</td>" 
+						+ "<td>"+ item['dbIdStudent']+ "</td>"
+						+ "<td>"+ item['dbStudentName']+ "</td>"
+						+ "<td>"+ item['dbMonthlyPayment']+ "</td>" 
+						+ "<td>"+ item['dbScholarship']+ "</td>"
+						+ "<td>"+ item['dbMorosoAnoAnterior']+ "</td>"
+						+ "<td>"+ item['dbTasaCambioDolar']+ "</td>"
+						+ "<td>"+ item['dbTasaCambioEuro']+ "</td>"	
+						+ "<td>"+ item['dbTarifaDolarOriginal']+ "</td>"					
+						+ "<td>"+ item['dbTarifaDolar']+ "</td>"
+						+ "<td>"+ item['dbMontoAbonadoDolar']+ "</td>" 	
+						+ "<td>"+ item['dbMontoPendienteDolar']+ "</td>" 					
+						+ "<td>"+ item['dbMontoAPagarDolar']+ "</td>"
+						+ "<td>"+ item['dbMontoAPagarEuro']+ "</td>"
+						+ "<td>"+ item['dbMontoAPagarBolivar']+ "</td>"
+						+ "<td>"+ item['dbInvoiced']+ "</td>"
+						+ "<td>"+ item['dbPaidOut']+ "</td>"
+						+ "<td>"+ item['dbSchoolYearFrom']+ "</td>"
+						+ "<td>"+ item['dbSeleccionada']+ "</td>"
+						+ "<td>"+ item['dbDeudaConceptosInscripcion']+ "</td>"
+						+ "<td>"+ item['dbObservation']+ "</td>"
+						+ "</tr>";
+                }
+
+				detailLine += 
+					"</tbody>"
+					+ "</table>";
+
+                $("#results").html(detailLine);
+            });
+        });
+    }
+
     function ajustarCuotas() 
     {
 		var posicion_elemento = 0;
@@ -1616,12 +1784,12 @@
         {
             return false;
         }
-		
-		saldoPagosRealizados = dosDecimales(accumulatedPayment + saldoRepresentante - discount);
+
+		saldoPagosRealizados = dosDecimales(accumulatedPayment + saldoRepresentante - discount - acumulado_igtf_dolar);
 		
 		totalBalance = 0;
 				
-        var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbInvoiced = ?";
+        var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbSeleccionada = ?";
         
         db.transaction(function (tx) 
         {
@@ -1724,31 +1892,26 @@
             });
         });
     }
-		
-    function restaurarMontos() 
-    {
-        var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbObservation = ?";
-		        
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(selectAllStatement, ["Abono"], function (tx, result) 
-            {
-                dataSet = result.rows;
-				                
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
-                    item = dataSet.item(i);				
-					actualizarPagar(item['dbId'], item['dbMontoPendienteDolar'], item['dbMontoPendienteDolar'] / tasaDolarEuro, item['dbMontoPendienteDolar'] * dollarExchangeRate, "");
-                }
-				indicadorAjuste = 0;
-            });
-        });
-    }
-	
+			
     function showPayments() 
     {
         var selectAllPayments = "SELECT * FROM payments";
-        var detailLine = " ";
+        var detailLine = 
+			"<table class='table table-striped table-hover'>" 
+			+ "<thead>"
+			+ "<tr>"
+			+ "<th>id</th>"
+            + "<th>Moneda</th>"
+            + "<th>Tipo</th>"
+            + "<th>Pagado</th>" 
+			+ "<th>IGTF</th>"
+            + "<th>Banco</th>"
+            + "<th>Tarjeta</th>"
+            + "<th>Serial</th>"
+            + "<th>Comentario</th>"
+			+ "</tr>"
+			+ "</thead>"
+			+ "<tbody>";
         
         db.transaction(function (tx) 
         {
@@ -1759,25 +1922,25 @@
                 for (var i = 0, item = null; i < dataSet.length; i++) 
                 {
                     item = dataSet.item(i);
-                    detailLine += "<li>" 
-					+ "id "
-                    + item['payId'] 
-                    + " Moneda "
-                    + item['payMoneda']
-                    + " Tipo "
-                    + item['payPaymentType']
-                    + " Pagado " 
-                    + item['payAmountPaid']
-                    + " Banco "
-                    + item['payBank'] 
-                    + " Tarjeta "
-                    + item['payAccountOrCard']
-                    + " Serial "
-                    + item['paySerial']
-                    + " Comentario "
-                    + item['payComentario']					
-                    + "</li>";
+
+                    detailLine += 
+						"<tr>"
+						+ "<td>"+ item['payId'] + "</td>" 
+						+ "<td>"+ item['payMoneda'] + "</td>"
+						+ "<td>"+ item['payPaymentType'] + "</td>" 
+						+ "<td>"+ item['payAmountPaid'] + "</td>"
+						+ "<td>"+ item['payMontoIgtfDolar'] + "</td>"
+						+ "<td>"+ item['payBank'] + "</td>"
+						+ "<td>"+ item['payAccountOrCard'] + "</td>"
+						+ "<td>"+ item['paySerial'] + "</td>"	
+						+ "<td>"+ item['payComentario']	 + "</td>"		
+						+ "</tr>";			
                 }
+
+				detailLine += 
+					"</tbody>"
+					+ "</table>";
+
                 $("#pagos").html(detailLine);
             });
         });
@@ -1821,13 +1984,22 @@
 					accumulatedPayment -= dosDecimales(montoPagadoDolar);	
 					acumuladoPagadoEuros -= dosDecimales(montoPagadoEuro);
 					acumuladoPagadoBolivares -= dosDecimales(montoPagadoBolivar);
+
+					if (indicador_pedido == false)
+					{
+						acumulado_igtf_dolar = dosDecimales(acumulado_igtf_dolar - item['payMontoIgtfDolar']);
+						acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
+						acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+					}
+					monto_divisas = dosDecimales(monto_divisas - item['payMontoIgtfDolar']);
+					acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo - item['payMontoIgtfDolar']);
 					
-					actualizarTotales();						
+					actualizarTotales();		
                 }
             });
         });
     }
-	
+
     function dropTable() // Function Call when Drop Button Click.. Talbe will be dropped from database.
     {
         var dropStatement = "DROP TABLE IF EXISTS studentTransactions";
@@ -1908,7 +2080,7 @@
 	
     function showInvoiceLines()
     {
-        var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbInvoiced = 'true' ORDER BY dbStudentName";
+        var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbSeleccionada = 'true' ORDER BY dbStudentName";
         var detailLine = " ";
         var previousStudentName = " ";
         var currentStudentName = " ";
@@ -1949,7 +2121,7 @@
     {
 		biggestYearFrom = schoolYearFrom;
 		
-        var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbInvoiced = 'true'";
+        var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbSeleccionada = 'true'";
 		var idCuotaAbono = 0;
 		var idCuotaExonerada = 0;
 		var cantidadElementos = 0;
@@ -2079,6 +2251,7 @@
 						tbPaymentsMade[accountPaid].moneda = item['payMoneda'];
                         tbPaymentsMade[accountPaid].paymentType = item['payPaymentType'];
                         tbPaymentsMade[accountPaid].amountPaid = item['payAmountPaid'];
+						tbPaymentsMade[accountPaid].monto_igtf_dolar = item['payMontoIgtfDolar'];
                         tbPaymentsMade[accountPaid].bank = item['payBank'];
 						tbPaymentsMade[accountPaid].bancoReceptor = item['payBancoReceptor'];
                         tbPaymentsMade[accountPaid].accountOrCard = item['payAccountOrCard'];
@@ -2117,13 +2290,21 @@
                     $.each(value, function(userkey, uservalue) 
                     {
                         if (userkey == 'id')
+						{
                             output += "<tr id=fa" + uservalue + " class='family'><td>";
-                        else if (userkey == 'family')
+						}
+						else if (userkey == 'family')
+						{
                             output += uservalue + " (";
+						}
                         else if (userkey == 'surname')
+						{
                             output += uservalue + " ";
+						}
                         else
+						{
                             output += uservalue + ")</td></tr>";
+						}
                     });
                 });
                 $("#header-messages").html("");
@@ -2209,8 +2390,19 @@
 		$("#student-balance").html(formatoNumero(studentBalance));
 		$("#total-balance").html(formatoNumero(totalBalance));
 		
+		let sub_total_igtf = 0;
+
+		if (indicador_pedido == false)
+		{
+			sub_total_igtf = dosDecimales(totalBalance * porcentaje_calculo_igtf);
+		}
+
+		$("#sub_total_igtf").html(formatoNumero(sub_total_igtf));
+		$("#total_con_igtf").html(formatoNumero(dosDecimales(totalBalance + sub_total_igtf)));
+
 		totalBalanceEuros = dosDecimales(totalBalance / tasaDolarEuro);
 		totalBalanceBolivares = dosDecimales(totalBalance * dollarExchangeRate);
+		total_balance_bolivares_igtf = dosDecimales((totalBalance + acumulado_igtf_dolar) * dollarExchangeRate);
 	
 		$("#sub-total-dolar").html(formatoNumero(totalBalance));
 		$("#sub-total-euro").html(formatoNumero(totalBalanceEuros));
@@ -2242,14 +2434,18 @@
 		$("#descuento-recargo-euro").html(formatoNumero(descuentoEuros));
 		$("#descuento-recargo-bolivar").html(formatoNumero(descuentoBolivares));
 
-		balanceDescuento = dosDecimales(totalBalance + discount);
-		totalBalanceDescuento = dosDecimales(totalBalance - saldoRepresentante + discount);
+		$("#igtf_dolar").html(formatoNumero(acumulado_igtf_dolar));
+		$("#igtf_euro").html(formatoNumero(acumulado_igtf_euro));
+		$("#igtf_bolivar").html(formatoNumero(acumulado_igtf_bolivar));
+
+		balanceDescuento = dosDecimales(totalBalance + discount + acumulado_igtf_dolar);
+		totalBalanceDescuento = dosDecimales(totalBalance - saldoRepresentante + discount + acumulado_igtf_dolar);
 
 		balanceDescuentoEuros = dosDecimales(balanceDescuento / tasaDolarEuro);
 		totalBalanceDescuentoEuros = dosDecimales(totalBalanceDescuento / tasaDolarEuro);
 
-		balanceDescuentoBolivares = dosDecimales(totalBalanceBolivares + descuentoBolivares);
-		totalBalanceDescuentoBolivares = dosDecimales(totalBalanceBolivares - saldoRepresentanteBolivares + descuentoBolivares);
+		balanceDescuentoBolivares = dosDecimales(total_balance_bolivares_igtf + descuentoBolivares);
+		totalBalanceDescuentoBolivares = dosDecimales(total_balance_bolivares_igtf - saldoRepresentanteBolivares + descuentoBolivares);
 		
 		$("#total-balance-descuento-dolar").html(formatoNumero(totalBalanceDescuento));
 		$("#total-balance-descuento-euro").html(formatoNumero(totalBalanceDescuentoEuros));
@@ -2384,7 +2580,7 @@
 		
 		payments.discount = descuentoBolivares; 
 		
-		if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
+		if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo' || indicador_pedido == true)
 		{
 			payments.fiscal = 0;
 		}
@@ -2408,9 +2604,135 @@
 		payments.tasaTemporalDolar = tasaTemporalDolar;
 		payments.tasaTemporalEuro = tasaTemporalEuro;
 		payments.cambioMontoCuota = cambioMontoCuota;
+		payments.monto_divisas = monto_divisas;
+		payments.monto_igtf = acumulado_igtf_dolar_archivo;
 		
 		uploadTransactions();
 		loadPayments();
+	}
+
+	function verificar_impuestos(proxima_funcion_a_ejecutar, indicador_sobrante)
+	{
+		if (indicador_igtf_recalculado == 0 && acumulado_igtf_dolar_archivo > 0)
+		{
+			var todos_los_pagos = "SELECT * FROM payments";
+			var pagos_en_divisas = 0;
+			var pagos_en_bolivares = 0;
+			var saldo_igtf_dolar = 0;
+			var saldo_igtf_bolivar = 0;
+			var recalculo_divisas = monto_divisas; 
+			var recalculo_igtf_dolar = acumulado_igtf_dolar;
+			var recalculo_igtf_bolivar = acumulado_igtf_bolivar;
+			
+			db.transaction(function (tx) 
+			{
+				tx.executeSql(todos_los_pagos, [], function (tx, result) 
+				{
+					dataSet = result.rows;
+					
+					for (var i = 0, item = null; i < dataSet.length; i++) 
+					{
+						item = dataSet.item(i);
+						if (item['payMoneda'] == "$" || item['payMoneda'] == "€")
+						{
+							pagos_en_divisas += item['payAmountPaid'];
+						}
+						else
+						{
+							pagos_en_bolivares += item['payAmountPaid'];
+						}
+					}
+
+					if (indicador_sobrante == 0)
+					{
+						recalculo_divisas = pagos_en_divisas;
+						recalculo_igtf_dolar = dosDecimales(pagos_en_divisas * porcentaje_calculo_igtf);
+						recalculo_igtf_bolivar = dosDecimales(recalculo_igtf_dolar * dollarExchangeRate);
+					}
+
+					if (pagos_en_bolivares < recalculo_igtf_bolivar)
+					{
+						if (indicador_sobrante == 0 && indicador_pedido == false)
+						{
+							recalculo_divisas = dosDecimales(pagos_en_divisas/porcentaje_calculo_base_igtf);
+							recalculo_igtf_dolar = dosDecimales((pagos_en_divisas/porcentaje_calculo_base_igtf) * porcentaje_calculo_igtf);
+						}
+						if (indicador_pedido == false)
+						{
+							saldo_igtf_dolar = recalculo_igtf_dolar;
+							for (var i = 0, item = null; i < dataSet.length; i++) 
+							{
+								item = dataSet.item(i);
+								if (item['payMoneda'] == "$" || item['payMoneda'] == "€")
+								{
+									monto_igtf_dolar = dosDecimales(item['payAmountPaid'] * porcentaje_calculo_igtf)
+									if (saldo_igtf_dolar < monto_igtf_dolar)
+									{
+										actualizarPago(item['payId'], saldo_igtf_dolar);
+										saldo_igtf_dolar -= saldo_igtf_dolar; 		
+									}	
+									else
+									{
+										actualizarPago(item['payId'], monto_igtf_dolar);
+										saldo_igtf_dolar -= monto_igtf_dolar; 
+									}
+								}
+								else
+								{
+									actualizarPago(item['payId'], 0);
+								}
+							}
+						} 
+					}
+					else
+					{
+						if (indicador_pedido == false)
+						{
+							saldo_igtf_bolivar = recalculo_igtf_bolivar;
+							for (var i = 0, item = null; i < dataSet.length; i++) 
+							{
+								item = dataSet.item(i);
+								if (item['payMoneda'] == "Bs.")
+								{
+									if (saldo_igtf_bolivar > item['payAmountPaid'])
+									{
+										actualizarPago(item['payId'], item['payAmountPaid']);
+										saldo_igtf_bolivar -= item['payAmountPaid']; 		
+									}	
+									else
+									{
+										actualizarPago(item['payId'], saldo_igtf_bolivar);
+										saldo_igtf_bolivar -= saldo_igtf_bolivar;
+									}	
+								}
+								else
+								{
+									actualizarPago(item['payId'], 0);
+								}
+							}
+						} 
+					}
+					if (indicador_sobrante == 0)
+					{
+						monto_divisas = recalculo_divisas;
+						acumulado_igtf_dolar_archivo = recalculo_igtf_dolar;
+
+						if (indicador_pedido == false)
+						{
+							acumulado_igtf_dolar = recalculo_igtf_dolar;
+							acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
+							acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+						}
+					}
+					indicador_igtf_recalculado = 1;
+					proxima_funcion_a_ejecutar();
+				});
+			});
+		}
+		else
+		{
+			proxima_funcion_a_ejecutar();
+		}
 	}
 	
 	function actualizarDescuentos()
@@ -2478,8 +2800,11 @@
 		
 	function dosDecimales(numero)
 	{
+		/* Procedimiento anterior
 		var result = Math.round(numero * 100) / 100 ;
 		return result;
+		*/
+		return Number(Math.round(numero+'e'+2)+'e-'+2);
 	}
 	
 	function eliminarComa(cadenaRecibida)
@@ -2556,11 +2881,32 @@
 
     $(document).ready(function() 
     {
+		var recalcular = $('<p style="background-color: #a9e0ff; color: red;">¿ Estimado usuario desea cobrar las cuotas atrasadas con la tarifa vigente ?</p>').dialog(
+		{
+			modal: true,
+			buttons: 
+			{
+				"Sí": function() 
+				{
+					indicador_recalcular_cuotas = true;
+					recalcular.dialog('close');
+					
+				},
+				"No":  function() 
+				{
+					indicador_recalcular_cuotas = false;
+					recalcular.dialog('close');
+				}
+			}
+		});
+
 		$('.entero').numeric();
 		
 		$(".alternative-decimal-separator").numeric({ altDecimal: "," });
 		
         $("#mostrar-registros").click(showDatabase);
+
+		$("#mostrar_cuotas_seleccionadas").click(mostrarCuotasSeleccionadas);
         
         $("#mostrar-pagos").click(showPayments);
 
@@ -2569,7 +2915,7 @@
             source:'<?php echo Router::url(array("controller" => "Parentsandguardians", "action" => "findFamily")); ?>',
             minLength: 3,
             select: function( event, ui ) {
-                log("<tr id=fa" + ui.item.id + " class='family'><td>" + ui.item.value + "</td></tr>");
+                log("<tr id=fa" + ui.item.id + " class='family'><td>" + ui.item.value + " - ID "+ ui.item.id + "</td></tr>");
               }
         });
 
@@ -2633,7 +2979,27 @@
                     return false;
                 }
             }
-            
+
+			let factura_fiscal = $('<p style="background-color: #a9e0ff; color: red;">¿ Factura fiscal ?</p>').dialog(
+			{
+				modal: true,
+				buttons: 
+				{
+					"Sí": function() 
+					{
+						indicador_pedido = false;
+						factura_fiscal.dialog('close');
+						
+					},
+					"No":  function() 
+					{
+						indicador_pedido = true;
+						factura_fiscal.dialog('close');
+					}
+				}
+			});
+
+
             idFamily = $(this).attr('id').substring(2);
             
             if (selectFamily > -1)
@@ -2724,6 +3090,7 @@
                     {
 						julioExonerado = 0;
 						morosoAnoAnterior = 0;
+						deuda_conceptos_inscripcion = false;
 						
                         students += "<tr id=st" + value.id + " class='students'>";
                         idStudent = value.id;
@@ -2761,22 +3128,21 @@
 						
 						if (value.scholarship == 0)
 						{
-							students += "<td>Regular</td></tr>";
+							students += "<td>Regular</td>";
+							students += "<td>"+idStudent+"</td></tr>";
 							scholarship = 0;
 						}
 						else
 						{
-							students += "<td>Becado</td></tr>";
+							students += "<td>Becado</td>";
+							students += "<td>"+idStudent+"</td></tr>";
 							scholarship = 1;
 							julioExonerado = 1;
 						}
-						console.log(studentName+" value.scholarship", value.scholarship);
-						console.log(studentName+" julioExonerado", julioExonerado);
 						
 						schoolYearFrom = value.schoolYearFrom;
 																		
 						julioAnoAnterior = "Jul " + anoEscolarInscripcion;
-						console.log('julioAnoAnterior ' + julioAnoAnterior);
 						
 						if (value.descuento_ano_anterior == 0)
 						{
@@ -2796,29 +3162,43 @@
 							discountFamily = (100 - value.discount_family) / 100;
 						}
 
-						console.log(studentName+" value.studentTransactions", value.studentTransactions);
 						
                         $.each(value.studentTransactions, function(key2, value2) 
                         {
+							if (conceptos_a_omitir.includes(value2.transaction_description))
+							{
+								return true;
+							}
+
 							indicadorImpresion = 0;
 							
 							transactionIdentifier = value2.id;
 							
 							paymentDate = value2.payment_date;
-							
-							anoMes = paymentDate.substring(0, 4) + paymentDate.substring(5, 7);
 
+							partialPayment = value2.partial_payment;						
+							paidOut = value2.paid_out;
+
+							let anoMes = paymentDate.substring(0, 4) + paymentDate.substring(5, 7);
+							
 							transactionType = value2.transaction_type;
 							
 							anoEscolarMensualidad = value2.ano_escolar;
 														
 							monthlyPayment = value2.transaction_description;
-							
+
+							monto_cuota = dosDecimales(value2.amount);
+
 							amountMonthly = 0;
 							tarifaDolar = 0;
-							
+
 							if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
 							{
+								if (indicador_recalcular_cuotas == true && anoMes >= ano_mes_recalculo_cuotas_atrasadas && anoMes < ano_mes_actual && paidOut == false)
+								{
+									anoMes = ano_mes_actual;
+								}
+
 								$.each(mesesTarifas, function(key3, value3)											
 								{
 									if (anoMes == value3.anoMes)
@@ -2831,32 +3211,36 @@
 							}
 							else
 							{
-								$.each(otrasTarifas, function(key3, value3)											
+								if (monthlyPayment.substring(0, 18) == "Servicio educativo")
 								{
-									if (monthlyPayment == value3.conceptoAno)
+									tarifaDolar = monto_cuota;
+								}
+								else
+								{
+									$.each(otrasTarifas, function(key3, value3)											
 									{
-										amountMonthly = value3.tarifaBolivar;
-										tarifaDolar = value3.tarifaDolar;
-										return false;
-									}
-								});
+										if (monthlyPayment == value3.conceptoAno)
+										{
+											amountMonthly = value3.tarifaBolivar;
+											tarifaDolar = value3.tarifaDolar;
+											return false;
+										}
+									});
+								}
 							}
 
 							transactionAmount = dosDecimales(value2.amount);
-							
-							amountPaid = dosDecimales(value2.amount);
-						
+												
 							originalAmount = dosDecimales(value2.original_amount);
 							
-							diferenciaOriginalActual = dosDecimales(originalAmount - amountPaid);
-							
-							tarifaDolar = dosDecimales(tarifaDolar - diferenciaOriginalActual);
+							diferenciaOriginalActual = dosDecimales(originalAmount - monto_cuota);
+
+							if (diferenciaOriginalActual > 0)
+							{
+								tarifaDolar = dosDecimales(tarifaDolar - diferenciaOriginalActual);
+							}
 							
 							invoiced = value2.invoiced;
-
-							partialPayment = value2.partial_payment;
-							
-							paidOut = value2.paid_out;
 							
 							studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
 
@@ -2892,7 +3276,7 @@
 										
 										if (tarifaDolar == tarifaDolarSinDescuento)
 										{										
-											if (tarifaDolar != montoDolar)
+											if (tarifaDolar > montoDolar)
 											{
 												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 												montoAPagarDolar = montoPendienteDolar;
@@ -2917,11 +3301,8 @@
 										}
 										else
 										{											
-											if (tarifaDolar != montoDolar && tarifaDolarSinDescuento != montoDolar)
+											if (tarifaDolar > montoDolar && tarifaDolarSinDescuento > montoDolar)
 											{
-
-												console.log('MonthlyPayment ' + monthlyPayment + ' tarifaDolar ' + tarifaDolar + ' montoDolar ' + montoDolar);
-
 												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 												montoAPagarDolar = montoPendienteDolar;
 												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
@@ -2947,8 +3328,12 @@
 									else
 									{
 										if (tarifaDolar != montoDolar && monthlyPayment.substring(0, 18) != "Servicio educativo")
-										{												
+										{
 											montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+											if (montoPendienteDolar > 0 && deuda_conceptos_inscripcion == false)
+											{
+												deuda_conceptos_inscripcion = true;
+											}												
 											montoAPagarDolar = montoPendienteDolar;
 											montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
 											montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);
@@ -2969,12 +3354,20 @@
 							else if (transactionType != 'Mensualidad')
 							{
 								montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+								if (montoPendienteDolar > 0 && deuda_conceptos_inscripcion == false)
+								{
+									deuda_conceptos_inscripcion = true;
+								}
 								montoAPagarDolar = montoPendienteDolar;
 								montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
 								montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
 							}
 							else if (monthlyPayment.substring(0, 3) == "Ago")
 							{
+								if (montoPendienteDolar > 0 && deuda_conceptos_inscripcion == false)
+								{
+									deuda_conceptos_inscripcion = true;
+								}
 								montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 								montoAPagarDolar = montoPendienteDolar;
 								montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
@@ -2998,7 +3391,6 @@
 								if (monthlyPayment == julioAnoAnterior && julioExonerado == 0)
 								{
 									morosoAnoAnterior = 1;
-									console.log(studentName+" morosoAnoAnterior", morosoAnoAnterior);
 								}
 							}
 							
@@ -3014,7 +3406,7 @@
 										}
 									}									
 									else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
-										// monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+										monthlyPayment.substring(0, 14) == "Seguro escolar" ||
 										monthlyPayment.substring(0, 3) == "Ago")
 									{
 
@@ -3045,7 +3437,7 @@
 										}
 									}
 									else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
-										// monthlyPayment.substring(0, 14) == "Seguro escolar" ||
+										monthlyPayment.substring(0, 14) == "Seguro escolar" ||
 										monthlyPayment.substring(0, 3) == "Ago")
 									{
 										insertRecord();
@@ -3086,7 +3478,7 @@
 									}
 									else
 									{
-										if (monthlyPayment.substring(0, 14) != "Seguro escolar" && monthlyPayment.substring(0, 9) != "Matrícula")
+										if (monthlyPayment.substring(0, 14) != "Seguro escolar" && monthlyPayment.substring(0, 9) != "Matrícula" && monthlyPayment.substring(0, 18) != 'Servicio educativo' && monthlyPayment.substring(0, 3) != "Ago")
 										{
 											insertRecord();
 										}
@@ -3399,7 +3791,7 @@
 				return-false
 			}
 			        
-			ajustarCuotas();
+			verificar_impuestos(ajustarCuotas, 0);
         });
 
         $("#accordion").accordion();
@@ -3449,7 +3841,49 @@
                 accountOrCard = $('#account_or_card-' + paymentIdentifier).val();
                 serial = $('#serial-' + paymentIdentifier).val();
 				comentario = $('#comentario-' + paymentIdentifier).val();
-				
+
+				base_igtf_dolar = 0;
+				monto_igtf_dolar = 0;
+				monto_igtf_dolar_pedido = 0;
+
+				if (monedaPago == "$")
+				{
+					base_igtf_dolar = montoPagado;
+				}
+				else if (monedaPago == "€")
+				{
+					base_igtf_dolar = dosDecimales(montoPagado / tasaDolarEuro);
+				}
+
+				if (base_igtf_dolar > 0)
+				{
+					if (base_igtf_dolar > deudaMenosPagado)
+					{
+						base_igtf_dolar = deudaMenosPagado;		
+					}
+					else if (base_igtf_dolar <= acumulado_igtf_dolar)
+					{
+						base_igtf_dolar = 0;							
+					}
+
+					if (indicador_pedido == true)
+					{
+						monto_igtf_dolar_pedido = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
+						monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
+						acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar_pedido);
+
+					}
+					else
+					{
+						monto_igtf_dolar = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
+						acumulado_igtf_dolar = dosDecimales(acumulado_igtf_dolar + monto_igtf_dolar);
+						acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
+						acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+						monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
+						acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar);
+					}
+				}
+
 				if (bank == 'Zelle' && monedaPago != '$')
 				{
 					alert('Estimado usuario los pagos desde Zelle deben ser en dólares');
@@ -3582,7 +4016,7 @@
 							"Dejarlo a favor":  function() 
 							{
 								imprimirReciboSobrante = 1;
-								guardarFactura();
+								verificar_impuestos(guardarFactura, 1);
 							},
 							"Cancelar":  function() 
 							{
@@ -3600,7 +4034,7 @@
 					}
 					else
 					{
-						guardarFactura();
+						verificar_impuestos(guardarFactura, 0);
 					}
 				}
             }   
@@ -3613,7 +4047,7 @@
 				}
 				else
 				{
-					guardarFactura();
+					verificar_impuestos(guardarFactura, 0);
 				}
 			}
         });

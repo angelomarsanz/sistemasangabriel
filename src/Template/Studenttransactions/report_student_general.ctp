@@ -176,6 +176,7 @@ use Cake\I18n\Time;
                     <th scope="col">NOMBRE REPRESENTANTE</th>
                     <th scope="col">NÚMERO ALUMNO</th>
                     <th scope="col">INDICADOR</th>
+                    <th scope="col">CÓDIGO COLEGIO SAN GABRIEL</th>
                 </tr>
             </thead>
             <tbody>
@@ -237,6 +238,7 @@ use Cake\I18n\Time;
                         <?php else: ?>
                             <td>R</td>
                         <?php endif; ?>
+                        <td><?= $studentsFors->student->id ?></td>
                     </tr>
                     <?php $accountStudent++;
                 } ?>

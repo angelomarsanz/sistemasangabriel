@@ -2,8 +2,8 @@ CSGA NUEVO
 138.186.179.63
 servidor.colegiosangabrielarcangel.com
 ang3l
-AS@nz2703$$
 redetronic2021
+AS@nz2703$$
 
 Putty llave_angel.ppk
 

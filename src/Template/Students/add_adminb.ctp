@@ -30,6 +30,9 @@
                                 0 => 'Alumno nuevo ' . $lastYear . '-' . $currentYear, 
 								1 => 'Alumno nuevo ' . $currentYear . '-' . $nextYear]]);
                         ?>
+                        <div id="alerta_verificar_estudiante" class="alert alert-info noverScreen">
+                            <strong>Por favor espere mientras se verifica si existe otro alumno con el mismo apellido y nombre</strong>
+                        </div>
 						<div id='same-names' class='noverScreen fontColor'>
 							<p><b>Estimado usuario, ya existe uno o más estudiantes con nombres similares en la base de datos. A fin de evitar tener registros duplicados, antes de pulsar el botón "Guardar", por favor verifique si el estudiante que está agregando coincide con el(los) que se muestra(n) a continuación:</b></p>
 							<div class="table-responsive">          
@@ -56,11 +59,17 @@
         $('#number-of-brothers').change(function(e) 
         {
 			e.preventDefault();
+
+            $('#alerta_verificar_estudiante').removeClass('noverScreen');
+            $('#save-student').attr('disabled', true);
 		
 			$.post('<?php echo Router::url(["controller" => "Students", "action" => "sameNames"]); ?>', {'surname' : $("#surname").val(), 'firstName' : $("#first-name").val()}, null, "json")				
                      
             .done(function(response) 
             {
+                $('#alerta_verificar_estudiante').addClass('noverScreen');
+                $('#save-student').attr('disabled', false);
+
                 if (response.success) 
                 {              
 					$('#same-names').removeClass('noverScreen');
@@ -106,6 +115,7 @@
 		
         $('#save-student').click(function(e) 
         {
+            $('#save-student').addClass("noverScreen");
             $('#surname').val($.trim($('#surname').val().toUpperCase()));
             $('#first-name').val($.trim($('#first-name').val().toUpperCase()));
         });

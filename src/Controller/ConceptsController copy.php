@@ -136,7 +136,10 @@ class ConceptsController extends AppController
             }
             else
             {
-                $studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber, $tasaCambio);   
+				if ($concept->transaction_identifier != 999999)
+				{
+					$studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber, $tasaCambio);   
+				}
             }
         }
         return;
@@ -204,13 +207,13 @@ class ConceptsController extends AppController
 		
 		if ($tipoNota == "Crédito")
 		{
-			$conceptoFactura->saldo -= round($montoNota/$tasaCambio); 
+			$conceptoFactura->saldo -= $montoNota; 
 		}
 		else
 		{
-			$conceptoFactura->saldo += round($montoNota/$tasaCambio);
+			$conceptoFactura->saldo += $montoNota;
 		}
-		
+
 		if (!($this->Concepts->save($conceptoFactura)))
 		{
 			$codigoRetornoConcepto = 1;	
@@ -275,7 +278,7 @@ class ConceptsController extends AppController
 		return $codigoRetorno;
 	}
 	
-	public function conceptosReciboCredito($idRecibo = null, $monto = null)
+	public function conceptosReciboAdicional($idRecibo = null, $concepto = null, $monto = null)
 	{
 		$codigoRetorno = 0;
 		
@@ -285,36 +288,7 @@ class ConceptsController extends AppController
 		$conceptoNuevo->accounting_code = "001";
 		$conceptoNuevo->student_name = "";
 		$conceptoNuevo->transaction_identifier = 999999;
-		$conceptoNuevo->concept = "Saldo a favor";
-		$conceptoNuevo->amount = $monto;
-		$conceptoNuevo->observation = "";
-		$conceptoNuevo->annulled = 0;
-		$conceptoNuevo->concept_migration = 0;		
-		$conceptoNuevo->saldo = $monto;
-
-		if (!($this->Concepts->save($conceptoNuevo)))
-		{
-			$binnacles = new BinnaclesController;
-			
-			$binnacles->add('controller', 'Concepts', 'conceptosReciboCredito', 'El concepto correspondiente al recibo con ID ' . $idRecibo . ' no fue guardado');
-			
-			$this->Flash->error(__('El concepto del recibo con ID ' . $idRecibo . ' no pudo ser guardado, intente nuevamente'));
-			$codigoRetorno = 1;
-		}
-		
-		return $codigoRetorno;
-	}
-	public function conceptosReciboReintegro($idRecibo = null, $monto = null)
-	{
-		$codigoRetorno = 0;
-		
-		$conceptoNuevo = $this->Concepts->newEntity();
-		$conceptoNuevo->bill_id = $idRecibo;
-		$conceptoNuevo->quantity = 1;
-		$conceptoNuevo->accounting_code = "001";
-		$conceptoNuevo->student_name = "";
-		$conceptoNuevo->transaction_identifier = 999999;
-		$conceptoNuevo->concept = "Reintegro";
+		$conceptoNuevo->concept = $concepto;
 		$conceptoNuevo->amount = $monto;
 		$conceptoNuevo->observation = "";
 		$conceptoNuevo->annulled = 0;

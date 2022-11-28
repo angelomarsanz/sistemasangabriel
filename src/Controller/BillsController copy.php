@@ -33,6 +33,18 @@ class BillsController extends AppController
 
     public function testFunction()
     {
+        $facturas = $this->Bills->find('all')->where(['turn <' => 1756]);
+		foreach ($facturas as $factura)
+		{
+			if ($factura->id_turno_anulacion > 0)
+			{
+				$factura->id_turno_anulacion = 0;
+				if (!($this->Bills->save($factura))) 
+				{
+					$this->Flash->error(__('No se pudo actualizar la factura con el ID '.$factura->id));
+				}
+			}
+		}
     }
 	
 	public function testFunction2()
@@ -62,7 +74,7 @@ class BillsController extends AppController
 
         $this->set('bills', $this->paginate($query));
 
-        $this->set(compact('bills', 'idFamily', 'family'));
+        $this->set(compact('idFamily', 'family'));
         $this->set('_serialize', ['bills', 'idFamily', 'family']);
     }
     
@@ -179,6 +191,7 @@ class BillsController extends AppController
 				$bill->user_id = $this->Auth->user('id');
 				$bill->date_and_time = $this->headboard['invoiceDate'];
 				$bill->turn = $this->headboard['idTurn'];
+				$bill->id_turno_anulacion = 0;
 				
 				$bill->bill_number = $billNumber;
 				if ($this->headboard['fiscal'] == 1)
@@ -279,7 +292,17 @@ class BillsController extends AppController
         date_default_timezone_set('America/Caracas');
         
         $dateTurn = Time::now();
-		
+		if ($dateTurn->month < 10)
+		{
+			$mes_actual = "0".$dateTurn->month; 
+		}
+		else
+		{
+			$mes_actual = $dateTurn->month; 
+		}
+
+		$ano_mes_actual = $dateTurn->year.$mes_actual;
+
 		$this->loadModel('Discounts');
 		$this->loadModel('Bancos');
 		
@@ -312,7 +335,7 @@ class BillsController extends AppController
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar; 
 				
-        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'amountMonthly', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual', 'anoEscolarInscripcion'));
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual', 'anoEscolarInscripcion', 'ano_mes_actual'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)
@@ -533,10 +556,24 @@ class BillsController extends AppController
 		$this->loadModel('Users');
 		
 		$this->loadModel('Monedas');
+
+		$this->loadModel('Schools');
+
+		$school = $this->Schools->get(2);
+
+		$actualAnoInscripcion = $school->current_year_registration;
+		
+		$anteriorAnoInscripcion = $school->previous_year_registration;
+
+		$proximoAnoInscripcion = $school->next_year_registration;
+
+		$proximoAnoInscripcion2 = $school->next_year_registration + 1;
 		
 		$mensajeUsuario = "";
 		
 		$facturaOtroCajero = 0;
+
+		$montoReintegro = 0;
 		
 		if (isset($origen))
 		{
@@ -773,13 +810,17 @@ class BillsController extends AppController
 				}
 				elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
 				{	
-					if ($aConcept->concept == "Matrícula 2020")
+					if ($aConcept->concept == 'Matrícula '.$anteriorAnoInscripcion)
 					{
-						$invoiceLine = $aConcept->student_name . " - Diferencia matrícula 2020 - 2021";
+						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$anteriorAnoInscripcion.' - '.$actualAnoInscripcion;
 					}
-					else
+					elseif ($aConcept->concept == 'Matrícula '.$actualAnoInscripcion)
 					{
-						$invoiceLine = $aConcept->student_name . " - Anticipo matrícula 2021 - 2022";
+						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+					}
+					elseif ($aConcept->concept == 'Matrícula '.$proximoAnoInscripcion)
+					{
+						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
 					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
@@ -791,16 +832,19 @@ class BillsController extends AppController
 				}
 				elseif (substr($aConcept->concept, 0, 3) == "Ago")
 				{	
-					if ($aConcept->concept == "Ago " . $currentDate->year)
+					if ($aConcept->concept == 'Ago '.$actualAnoInscripcion)
 					{
-						// $invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
-						$invoiceLine = $aConcept->student_name . " - Diferencia Ago 2020 - 2021";
+						$invoiceLine = $aConcept->student_name.' - Diferencia Ago '.$anteriorAnoInscripcion.' - '.$actualAnoInscripcion;
 					}
-					else
+					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion)
 					{
-						// $invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
-						$invoiceLine = $aConcept->student_name . " - Abono Ago 2021 - 2022";
+						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
 					}
+					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion2)
+					{
+						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
+					}
+
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -928,13 +972,17 @@ class BillsController extends AppController
 						$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
 						$loadIndicator = 1;
 					}
-					if ($aConcept->concept == "Matrícula 2020")
+					if ($aConcept->concept == 'Matrícula '.$anteriorAnoInscripcion)
 					{
-						$invoiceLine = $aConcept->student_name . " - Diferencia matrícula 2020 - 2021";
+						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$anteriorAnoInscripcion.' - '.$actualAnoInscripcion;
 					}
-					else
+					elseif ($aConcept->concept == 'Matrícula '.$actualAnoInscripcion)
 					{
-						$invoiceLine = $aConcept->student_name . " - Anticipo matrícula 2021 - 2022";
+						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+					}
+					elseif ($aConcept->concept == 'Matrícula '.$proximoAnoInscripcion)
+					{
+						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
 					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
@@ -951,15 +999,17 @@ class BillsController extends AppController
 						$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
 						$loadIndicator = 1;
 					}
-					if ($aConcept->concept == "Ago " . $currentDate->year)
+					if ($aConcept->concept == 'Ago '.$actualAnoInscripcion)
 					{
-						// $invoiceLine = $aConcept->student_name . " - Diferencia " . $aConcept->concept;
-						$invoiceLine = $aConcept->student_name . " - Diferencia Ago 2020 - 2021";
+						$invoiceLine = $aConcept->student_name.' - Diferencia Ago '.$anteriorAnoInscripcion.' - '.$actualAnoInscripcion;
 					}
-					else
+					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion)
 					{
-						// $invoiceLine = $aConcept->student_name . " - Abono " . $aConcept->concept;
-						$invoiceLine = $aConcept->student_name . " - Abono Ago 2021 - 2022";
+						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+					}
+					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion2)
+					{
+						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
 					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
@@ -1198,6 +1248,7 @@ class BillsController extends AppController
 							date_default_timezone_set('America/Caracas');
 							
 							$bill->date_annulled = Time::now();
+							$bill->id_turno_anulacion = $idTurn;
 																			
 							if (!($this->Bills->save($bill))) 
 							{
@@ -1805,8 +1856,8 @@ class BillsController extends AppController
 
         $this->set('facturasFamilia', $this->paginate($busqueda));
 
-        $this->set(compact('facturas', 'idFamilia', 'familia'));
-        $this->set('_serialize', ['bills', 'idFamilia', 'familia']);
+        $this->set(compact('idFamilia', 'familia'));
+        $this->set('_serialize', ['idFamilia', 'familia']);
     }
 	
 	public function conceptosNotaContable($retornoControlador = null, $retornoAccion = null, $idFactura = null, $idFamilia = null, $familia = null)
@@ -1851,7 +1902,7 @@ class BillsController extends AppController
 				$acumuladoNota += $montosNotaContable[$clave];
 			}
 			
-            $numeroNotaContable = $this->agregaNotaContable($facturaConceptos, $tipoNota, $acumuladoNota, $dollarExchangeRate, $euro);
+            $numeroNotaContable = $this->agregaNotaContable($facturaConceptos, $tipoNota, $acumuladoNota, $facturaConceptos->tasa_cambio, $facturaConceptos->tasa_euro);
 			
             if ($numeroNotaContable > 0)
             {
@@ -1875,12 +1926,12 @@ class BillsController extends AppController
 							
 							$transaccionEstudiante = new StudenttransactionsController();
 							
-							$codigoRetornoTransaccion = $transaccionEstudiante->notaTransaccion($concepto->transaction_identifier, $numeroNotaContable, $valor, $tipoNota, $dollarExchangeRate);
+							$codigoRetornoTransaccion = $transaccionEstudiante->notaTransaccion($concepto->transaction_identifier, $numeroNotaContable, $valor, $tipoNota, $facturaConceptos->tasa_cambio);
 
 							if ($codigoRetornoTransaccion == 0)
 							{
 								$conceptosFacturas = new ConceptsController();							
-								$codigoRetornoConcepto = $conceptosFacturas->agregarConceptosNota($clave, $valor, $numeroNotaContable, $tipoNota, $idNota, $dollarExchangeRate);
+								$codigoRetornoConcepto = $conceptosFacturas->agregarConceptosNota($clave, $valor, $numeroNotaContable, $tipoNota, $idNota, $facturaConceptos->tasa_cambio);
 								if ($codigoRetornoConcepto > 0)
 								{
 									break;
@@ -1893,11 +1944,11 @@ class BillsController extends AppController
 						}
                     }
 					$billNumber = $numeroNotaContable;
-                    $idParentsandguardian = $facturaConceptos->parentsandguardian_id;
+
+					$idParentsandguardian = $facturaConceptos->parentsandguardian_id;
 					
 					$parentsandguardian = $this->Bills->Parentsandguardians->get($idParentsandguardian);
-											
-					$parentsandguardian->balance = $parentsandguardian->balance + round($acumuladoNota / $dollarExchangeRate);
+					$parentsandguardian->balance = $parentsandguardian->balance + round($acumuladoNota / $facturaConceptos->tasa_cambio);
 											
 					if (!($this->Bills->Parentsandguardians->save($parentsandguardian)))
 					{

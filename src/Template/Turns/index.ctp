@@ -8,7 +8,8 @@
                 <thead>
 					<tr>
 						<th scope="col">Fecha</th>
-						<th scope="col">Turno</th>
+						<th scope="col">Nro.</th>
+						<th scope="col" style="text-align:center">Turno</th>
 						<th scope="col">Cajero</th>
 						<th scope="col">Estatus</th>
 						<th scope="col" class="actions"></th>
@@ -21,7 +22,8 @@
 					<?php foreach ($turns as $turn): ?>
 						<tr>
 							<td><?= h($turn->start_date->format('d-m-Y')) ?></td>
-							<td><?= h($turn->turn) ?></td>
+							<td><?= h($turn->id) ?></td>
+							<td style="text-align:center"><?= h($turn->turn) ?></td>
 							<td><?= h($turn->user->first_name . ' ' . $turn->user->surname) ?></td>
 							<?php if ($turn->status == 0): ?>
 								<td>Cerrado</td>

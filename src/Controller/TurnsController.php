@@ -152,77 +152,88 @@ class TurnsController extends AppController
         }
         else
         {
-            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder facturar o anular facturas'));    
+            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder facturar o anular facturas, recibos y pedidos'));    
         }
     }
 
     public function add()
     {
-        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-        date_default_timezone_set('America/Caracas');
+		$openTurn = $this->Turns->find('all')->where(['user_id' => $this->Auth->user('id'), 'status' => true]);
         
-        $currentDate = Time::now();
+        $result = $openTurn->toArray(); 
         
-        if ($currentDate->day < 10)
+        if ($result)
         {
-            $startDate = "0" . $currentDate->day;
-        }
-        else
-        {
-            $startDate = $currentDate->day;
-        }
-        if ($currentDate->month < 10)
-        {
-            $startDate .= "/0" . $currentDate->month;
-        }
-        else
-        {
-            $startDate .= "/" . $currentDate->month;
-        }
-        $startDate .= "/" . $currentDate->year;
-        
-        $turn = $this->Turns->newEntity();
-        if ($this->request->is('post')) 
-        {
-            $turn = $this->Turns->patchEntity($turn, $this->request->data);
-            $turn->user_id = $this->Auth->user('id');
-            $turn->start_date = Time::now();
-            $turn->end_date = Time::now();
-            $turn->status = 1;
-            $turn->initial_cash = 0;
-            $turn->cash_received = 0;
-            $turn->cash_paid = 0;
-            $turn->real_cash = 0;
-            $turn->debit_card_amount = 0;
-            $turn->real_debit_card_amount = 0;
-            $turn->credit_card_amount = 0;
-            $turn->real_credit_amount = 0;
-            $turn->transfer_amount = 0;
-            $turn->real_transfer_amount = 0;
-            $turn->deposit_amount = 0;
-            $turn->real_deposit_amount = 0;
-            $turn->check_amount = 0;
-            $turn->real_check_amount = 0;
-            $turn->retention_amount = 0;
-            $turn->real_retention_amount = 0;
-            $turn->total_system = 0;
-            $turn->total_box = 0;
-            $turn->total_difference = 0;
-            $turn->opening_supervisor = 0;
-            $turn->supervisor_close = 0;
-            if ($this->Turns->save($turn)) 
-            {
-                $this->Flash->success(__('El turno ha sido abierto satisfactoriamente'));
-    
-                return $this->redirect(['controller' => 'users', 'action' => 'wait']);
-            } 
-            else 
-            {
-                    $this->Flash->error(__('El turno no pudo ser abierto, intente de nuevo'));
-            }
-        }
-        $this->set(compact('turn', 'startDate'));
-        $this->set('_serialize', ['turn', 'startDate']);
+			$this->Flash->error(__('Usted tiene un turno abierto, por favor ciérrelo primero para poder abrir otro')); 
+		}
+		else
+		{	
+			setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+			date_default_timezone_set('America/Caracas');
+			
+			$currentDate = Time::now();
+			
+			if ($currentDate->day < 10)
+			{
+				$startDate = "0" . $currentDate->day;
+			}
+			else
+			{
+				$startDate = $currentDate->day;
+			}
+			if ($currentDate->month < 10)
+			{
+				$startDate .= "/0" . $currentDate->month;
+			}
+			else
+			{
+				$startDate .= "/" . $currentDate->month;
+			}
+			$startDate .= "/" . $currentDate->year;
+			
+			$turn = $this->Turns->newEntity();
+			if ($this->request->is('post')) 
+			{
+				$turn = $this->Turns->patchEntity($turn, $this->request->data);
+				$turn->user_id = $this->Auth->user('id');
+				$turn->start_date = Time::now();
+				$turn->end_date = Time::now();
+				$turn->status = 1;
+				$turn->initial_cash = 0;
+				$turn->cash_received = 0;
+				$turn->cash_paid = 0;
+				$turn->real_cash = 0;
+				$turn->debit_card_amount = 0;
+				$turn->real_debit_card_amount = 0;
+				$turn->credit_card_amount = 0;
+				$turn->real_credit_amount = 0;
+				$turn->transfer_amount = 0;
+				$turn->real_transfer_amount = 0;
+				$turn->deposit_amount = 0;
+				$turn->real_deposit_amount = 0;
+				$turn->check_amount = 0;
+				$turn->real_check_amount = 0;
+				$turn->retention_amount = 0;
+				$turn->real_retention_amount = 0;
+				$turn->total_system = 0;
+				$turn->total_box = 0;
+				$turn->total_difference = 0;
+				$turn->opening_supervisor = 0;
+				$turn->supervisor_close = 0;
+				if ($this->Turns->save($turn)) 
+				{
+					$this->Flash->success(__('El turno ha sido abierto satisfactoriamente'));
+		
+					return $this->redirect(['controller' => 'users', 'action' => 'wait']);
+				} 
+				else 
+				{
+						$this->Flash->error(__('El turno no pudo ser abierto, intente de nuevo'));
+				}
+			}
+			$this->set(compact('turn', 'startDate'));
+			$this->set('_serialize', ['turn', 'startDate']);	
+		}
     }
 
     /**
@@ -2014,5 +2025,84 @@ class TurnsController extends AppController
 										
 		$this->set(compact('turn', 'vectorPagos', 'cajero', 'anuladas'));
 		$this->set('_serialize', ['turn', 'vectorPagos', 'cajero', 'anuladas']);
-	}	
+	}
+
+	public function previoServicioEducativo()
+    {
+        if ($this->request->is('post')) 
+        {
+			if (isset($_POST["tipo_reporte"]))
+			{
+				if ($_POST["General"])
+				{
+					return $this->redirect(['controller' => 'Turns', 'action' => 'servicioEducativoGeneral', $_POST["mes"], $_POST["ano"]]);
+				}				
+				else
+				{
+					return $this->redirect(['controller' => 'Turns', 'action' => 'servicioEducativoDetallado', $_POST["mes"], $_POST["ano"]]);
+				}
+			}
+        }
+	}
+
+
+
+	public function servicioEducativoGeneral($mes = null, $ano = null)
+	{
+		$this->loadModel('Bills');
+
+		$servicio_educativo = $this->Bills->find('all', 
+		[
+			'contain' => ['Parentsandguardians'],
+			'conditions' => 
+				[
+					'annulled' => false, 
+					'tipo_documento' => "Recibo de servicio educativo", 
+					'MONTH(Bills.created)' => $mes, 
+					'YEAR(Bills.created)' => $ano
+				],
+			'order' => ['Bills.id' => 'ASC']
+		]);
+		$this->set(compact('servicio_educativo', 'mes', 'ano'));
+		$this->set('_serialize', ['servicio_educativo', 'mes', 'ano']);
+	}
+	public function servicioEducativoDetallado($mes = null, $ano = null)
+	{
+		$this->loadModel('Concepts');
+
+		$servicio_educativo = $this->Concepts->find('all', 
+		[
+			'contain' => ['Bills' => ['Parentsandguardians']],
+			'conditions' => 
+				[
+					'Concepts.annulled' => false, 
+					'Bills.tipo_documento' => "Recibo de servicio educativo", 
+					'MONTH(Bills.created)' => $mes, 
+					'YEAR(Bills.created)' => $ano
+				],
+			'order' => ['Bills.id' => 'ASC']
+		]);
+		$this->set(compact('servicio_educativo', 'mes', 'ano'));
+		$this->set('_serialize', ['servicio_educativo', 'mes', 'ano']);
+	}
+	public function reporteIngresosPorConcepto($concepto = null, $ano = null)
+	{
+		$concepto = "Matrícula";
+		$ano = "2022";
+
+		$this->loadModel('Concepts');
+
+		$ingresos = $this->Concepts->find('all', 
+		[
+			'contain' => ['Bills' => ['Parentsandguardians']],
+			'conditions' => 
+				[
+					'Concepts.annulled' => false, 
+					'Concepts.concept' => $concepto." ".$ano, 
+				],
+			'order' => ['Bills.id' => 'ASC']
+		]);
+		$this->set(compact('ingresos', 'concepto', 'ano'));
+		$this->set('_serialize', ['ingresos', 'concepto', 'ano']);
+	}
 }

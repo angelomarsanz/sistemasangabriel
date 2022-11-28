@@ -323,7 +323,7 @@ class SalesbooksController extends AppController
                 {
                     $salesbook->descuento_recargo = $invoicesBill->amount;
 				    $salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid + $invoicesBill->amount;
-				    $salesbook->ventas_exoneradas = $invoicesBill->amount_paid + $invoicesBill->amount;
+				    $salesbook->ventas_exoneradas = $invoicesBill->amount_paid;
                 }
                 else
                 {

@@ -15,6 +15,10 @@ use App\Controller\ConsecutiveinvoicesController;
 
 use App\Controller\ConsecutivereceiptsController;
 
+use App\Controller\RecibosController;
+
+use App\Controller\NotasController;
+
 use App\Controller\ConsecutivocreditosController;
 
 use App\Controller\ConsecutivodebitosController;
@@ -163,11 +167,12 @@ class BillsController extends AppController
      *
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
-    public function add($indicadorFacturaPendiente = null)
+    public function add($indicadorFacturaPendiente = null, $indicador_servicio_educativo = null)
     {
         $consecutiveInvoice = new ConsecutiveinvoicesController();
         
-        $consecutiveReceipt = new ConsecutivereceiptsController();
+		$recibos = new RecibosController();
+		$notas = new NotasController();
 		
 		$billNumber = 0;
 			
@@ -183,7 +188,14 @@ class BillsController extends AppController
 				}
 				else
 				{
-					$billNumber = $consecutiveReceipt->add();
+					if ($indicador_servicio_educativo == 1)
+					{
+						$billNumber = $recibos->add();
+					}
+					else
+					{
+						$billNumber = $notas->add();
+					}
 				}
 				
 				$bill = $this->Bills->newEntity();
@@ -209,7 +221,14 @@ class BillsController extends AppController
 					}
 					else
 					{
-						$bill->tipo_documento = "Recibo de servicio educativo";
+						if ($indicador_servicio_educativo == 1)
+						{
+							$bill->tipo_documento = "Recibo de servicio educativo";
+						}
+						else
+						{
+							$bill->tipo_documento = "Pedido";
+						}
 					}
 				}
 				$bill->school_year = $this->headboard['schoolYear'];
@@ -245,6 +264,8 @@ class BillsController extends AppController
 				$bill->tasa_temporal_euro = $this->headboard['tasaTemporalEuro'];
 				$bill->cuotas_alumno_becado = $this->headboard['cuotasAlumnoBecado'];
 				$bill->cambio_monto_cuota = $this->headboard['cambioMontoCuota'];
+				$bill->monto_divisas = $this->headboard['monto_divisas'];
+				$bill->monto_igtf = $this->headboard['monto_igtf'];
 				
 				if (!($this->Bills->save($bill))) 
 				{
@@ -292,7 +313,17 @@ class BillsController extends AppController
         date_default_timezone_set('America/Caracas');
         
         $dateTurn = Time::now();
-		
+		if ($dateTurn->month < 10)
+		{
+			$mes_actual = "0".$dateTurn->month; 
+		}
+		else
+		{
+			$mes_actual = $dateTurn->month; 
+		}
+
+		$ano_mes_actual = $dateTurn->year.$mes_actual;
+
 		$this->loadModel('Discounts');
 		$this->loadModel('Bancos');
 		
@@ -325,7 +356,7 @@ class BillsController extends AppController
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar; 
 				
-        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual', 'anoEscolarInscripcion'));
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual', 'anoEscolarInscripcion', 'ano_mes_actual'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)
@@ -375,6 +406,7 @@ class BillsController extends AppController
         if ($this->request->is('post')) 
         {
 			$indicadorFacturaPendiente = 0;
+			$indicador_servicio_educativo = 0;
 			
             $this->headboard = $_POST['headboard']; 
             $transactions = json_decode($_POST['studentTransactions']);
@@ -388,12 +420,16 @@ class BillsController extends AppController
 					if (substr($transaction->monthlyPayment, 0, 10) == "Matrícula" || substr($transaction->monthlyPayment, 0, 14) == "Seguro escolar" || substr($transaction->monthlyPayment, 0, 3) == "Ago")
 					{
 						$indicadorFacturaPendiente = 1;
-						break;
 					} 
+					if (substr($transaction->monthlyPayment, 0, 18) == "Servicio educativo")
+					{
+						$indicador_servicio_educativo = 1;
+					} 
+
 				}
 			}
 			
-            $billNumber = $this->add($indicadorFacturaPendiente);
+            $billNumber = $this->add($indicadorFacturaPendiente, $indicador_servicio_educativo);
 
             if ($billNumber > 0)
             {
@@ -578,8 +614,7 @@ class BillsController extends AppController
 				{
 					foreach ($facturas as $factura)
 					{
-						// Nota: El problema que se presenta cuando un usuario consulta una factura o va reimprimir y le aparece la factura de otro usuario es
-						// porque no se considera la posibilidad de que haya una factura con número de control mayor
+						// Nota: El problema que se presenta cuando un usuario consulta una factura o va reimprimir y le aparece la factura de otro usuario es porque no se considera la posibilidad de que haya una factura con número de control mayor
 						if ($factura->user_id != $this->Auth->user('id') && $factura->bill_number < $bill_number)
 						{
 							$facturaOtroCajero = 1;
@@ -594,8 +629,7 @@ class BillsController extends AppController
 					}
 					else
 					{		
-						// Para solucionar el problema se debe usar un foreach e ir descartando si las facturas son de otro usuario. La que no sea de otro usuario se 
-						// obliga a imprimir
+						// Para solucionar el problema se debe usar un foreach e ir descartando si las facturas son de otro usuario. La que no sea de otro usuario se obliga a imprimir
 						foreach ($facturas as $factura)
 						{		
 							if ($factura->user_id == $this->Auth->user('id'))
@@ -609,6 +643,10 @@ class BillsController extends AppController
 								elseif (substr($facturaAnterior->tipo_documento, 0, 6) == "Recibo")
 								{
 									$documento = "este recibo";
+								}
+								elseif ($facturaAnterior->tipo_documento == "Pedido")
+								{
+									$documento = "esta nota";
 								}
 								elseif ($facturaAnterior->tipo_documento == "Nota de crédito")
 								{
@@ -1201,8 +1239,11 @@ class BillsController extends AppController
 		        
         if ($this->request->is('post')) 
         {	
-			$ultimoRegistro = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['bill_number'], 'OR' => [['tipo_documento' => 'Factura'], ['SUBSTRING(tipo_documento, 1, 6) =' => 'Recibo']]], 
-				'order' => ['Bills.created' => 'DESC']]); 
+			$ultimoRegistro = $this->Bills->find('all', 
+				[
+					'conditions' => ['bill_number' => $_POST['bill_number'], 'tipo_documento' => $_POST['tipo_documento']], 
+					'order' => ['Bills.created' => 'DESC']
+				]); 
 								
 			$contadorRegistros = $ultimoRegistro->count();
 			   
@@ -1213,12 +1254,6 @@ class BillsController extends AppController
 				if ($factura->annulled == 1)
 				{
 					$this->Flash->error(__('Esta factura ya está anulada, intente con otra factura'));
-				}
-				elseif ($factura->tipo_documento == "Recibo de sobrante")
-				{
-					$facturaSobrante = $this->Bills->get($factura->id_documento_padre);
-					
-					$this->Flash->error(__('Estimado usuario, para anular este recibo debe anular la factura ' . $facturaSobrante->bill_number . ' que originó el sobrante de caja'));
 				}
 				else
 				{
@@ -1246,11 +1281,11 @@ class BillsController extends AppController
 							}
 							else 
 							{
-								$concepts->edit($idBill, $_POST['bill_number'], $factura->tasa_cambio);
+								$concepts->edit($idBill, $_POST['bill_number'], $factura->tasa_cambio, $factura->tipo_documento, "Anulación");
 								
 								$payments->edit($idBill);
 																
-								$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló la factura Nro. ' . $bill->bill_number);
+								$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló la factura o recibo Nro. ' . $bill->bill_number);
 								
 								if ($bill->id_recibo_sobrante > 0)
 								{
@@ -1269,7 +1304,7 @@ class BillsController extends AppController
 									}
 									else
 									{
-										$concepts->edit($reciboSobrante->id, $reciboSobrante->bill_number, $reciboSobrante->tasa_cambio);
+										$concepts->edit($reciboSobrante->id, $reciboSobrante->bill_number, $reciboSobrante->tasa_cambio, "Anulación");
 																
 										$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló el recibo Nro. ' . $reciboSobrante->bill_number);
 									}
@@ -2045,8 +2080,7 @@ class BillsController extends AppController
             {
 				$contadorRegistros = 0;
 				
-                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['billNumber'], 'SUBSTRING(tipo_documento, 1, 6) =' => 'Recibo'],
-                    'order' => ['Bills.created' => 'DESC']]);
+                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $_POST['billNumber'], 'tipo_documento' => $_POST['tipo_documento']], 'order' => ['Bills.created' => 'DESC']]);
 					
 				$contadorRegistros = $lastRecord->count();
 				   
@@ -2057,7 +2091,7 @@ class BillsController extends AppController
 				}
 				else
 				{
-					$this->Flash->error(__('El recibo Nro. ' . $_POST['billNumber'] . ' no está registrado en el sistema'));
+					$this->Flash->error(__('El recibo o pedido Nro. ' . $_POST['billNumber'] . ' no está registrado en el sistema'));
 				}
             }
         }
@@ -2612,5 +2646,209 @@ class BillsController extends AppController
 	public function actualizarTasasDivisas()
 	{
 		
+	}
+
+    public function pedidoPorFactura()
+    {        
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+		
+        $concepts = new ConceptsController();       
+        $payments = new PaymentsController();
+		$binnacles = new BinnaclesController;
+		$eventos = new EventosController;
+		$consecutiveInvoice = new ConsecutiveinvoicesController();
+
+		$this->loadModel('Turns');
+
+		$turnosAbiertos = $this->Turns->find('all')->where(['user_id' => $this->Auth->user('id'), 'status' => true])->order(['created' => 'DESC']);
+        
+        $contadorTurnos = $turnosAbiertos->count(); 
+        
+        if ($contadorTurnos > 0)
+        {
+			$turnoActual = $turnosAbiertos->first();
+            $fechaTurno = $turnoActual->start_date;
+            $fechaTurnoInvertida = $fechaTurno->year . $fechaTurno->month . $fechaTurno->day;
+            $fechaActual = Time::now();
+            $fechaActualInvertida = $fechaActual->year . $fechaActual->month . $fechaActual->day;
+
+            if ($fechaTurnoInvertida != $fechaActualInvertida)
+            {
+                $this->Flash->error(__('Por favor cierre el turno, porque no coincide con la fecha de hoy y luego abra un turno nuevo')); 
+            }
+        }
+        else
+        {
+            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder sustituir el pedido por factura'));  
+        }
+        
+		$this->loadModel('Bancos');
+
+		if ($this->request->is('post')) 
+        {
+			$ultimoRegistro = $this->Bills->find('all', 
+				[
+					'conditions' => ['bill_number' => $_POST['numero_del_pedido'], 'tipo_documento' => "Pedido"], 
+					'order' => ['Bills.created' => 'DESC']
+				]); 
+								
+			$contadorRegistros = $ultimoRegistro->count();
+				
+			if ($contadorRegistros > 0)
+			{
+				$pedido = $ultimoRegistro->first();			
+
+				if ($pedido->annulled == 1)
+				{
+					$this->Flash->error(__('Este pedido ya fue anulado anteriormente'));
+				}
+				else
+				{						
+					$pedido = $this->Bills->get($pedido->id);
+					$idPedido = $pedido->id;
+					
+					$pedido->annulled = 1;	
+					
+					$pedido->date_annulled = Time::now();
+					$pedido->id_turno_anulacion = $turnoActual->id;
+																	
+					if (!($this->Bills->save($pedido))) 
+					{
+						$this->Flash->error(__('El pedido no pudo ser anulado'));
+					}
+					else 
+					{
+						$concepts->edit($idPedido, $_POST['numero_del_pedido'], $pedido->tasa_cambio, $pedido->tipo_documento, "Sustitución");
+						
+						$payments->edit($idPedido);
+														
+						$eventos->add('controller', 'Bills', 'pedidoPorFactura', 'Se anuló la pedido Nro. '.$pedido->bill_number);
+
+						$nuevaFactura = $this->Bills->newEntity();
+
+						$nuevaFactura->parentsandguardian_id = $pedido->parentsandguardian_id;
+						$nuevaFactura->user_id = $pedido->user_id;
+						$nuevaFactura->date_and_time = $pedido->date_and_time;
+						$nuevaFactura->turn = $turnoActual->id;
+						$nuevaFactura->id_turno_anulacion = 0;						
+						$nuevaFactura->bill_number = $consecutiveInvoice->add();
+						$nuevaFactura->fiscal = 1;
+						$nuevaFactura->tipo_documento = "Factura";
+						$nuevaFactura->school_year = $pedido->school_year;
+						$nuevaFactura->identification = $pedido->identification;
+						$nuevaFactura->client = $pedido->client;
+						$nuevaFactura->tax_phone = $pedido->tax_phone;
+						$nuevaFactura->fiscal_address = $pedido->fiscal_address;					
+						$nuevaFactura->amount = $pedido->amount;
+						$nuevaFactura->amount_paid = $pedido->amount_paid;
+						$nuevaFactura->annulled = 0;
+						$nuevaFactura->date_annulled = 0;
+						$nuevaFactura->invoice_migration = 0;
+						$nuevaFactura->new_family = 0;
+						$nuevaFactura->impresa = 0;
+						$nuevaFactura->id_documento_padre = $pedido->id;
+						$nuevaFactura->id_anticipo = 0;
+						$nuevaFactura->factura_pendiente = $pedido->factura_pendiente;
+						$nuevaFactura->moneda_id = 1;
+						$nuevaFactura->tasa_cambio = $pedido->tasa_cambio;
+						$nuevaFactura->tasa_euro = $pedido->tasa_euro;
+						$nuevaFactura->tasa_dolar_euro = $pedido->tasa_dolar_euro;
+						$nuevaFactura->saldo_compensado_dolar = $pedido->saldo_compensado_dolar;
+						$nuevaFactura->sobrante_dolar = $pedido->sobrante_dolar;
+						$nuevaFactura->tasa_temporal_dolar = $pedido->tasa_temporal_dolar;
+						$nuevaFactura->tasa_temporal_euro = $pedido->tasa_temporal_euro;
+						$nuevaFactura->cuotas_alumno_becado = $pedido->cuotas_alumno_becado;
+						$nuevaFactura->cambio_monto_cuota = $pedido->cambio_monto_cuota;
+						$nuevaFactura->monto_divisas = $pedido->monto_divisas;
+						$nuevaFactura->monto_igtf = $pedido->monto_igtf;
+						if (!($this->Bills->save($nuevaFactura))) 
+						{
+							$this->Flash->error(__('La factura no pudo ser guardada'));
+						}
+						else
+						{
+							$ultimoRegistro = $this->Bills->find('all', 
+							[
+								'conditions' => ['bill_number' => $nuevaFactura->bill_number], 
+								'order' => ['Bills.created' => 'DESC']
+							]); 
+											
+							$factura = $ultimoRegistro->first();	
+							$codigo_retorno_conceptos = $concepts->conceptosPedidoFactura($idPedido, $factura->id);
+
+							if ($codigo_retorno_conceptos == 0)
+							{
+								$codigo_retorno_pagos = $payments->pagosPedidoFactura($idPedido, $factura->id, $factura->bill_number, $turnoActual->id, $_POST);
+								if ($codigo_retorno_conceptos == 0)
+								{
+									return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $factura->id, 0, $factura->parentsandguardian_id, 'pedidoPorFactura', $factura->id]);
+								}
+								else
+								{
+									return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+								}
+							}				
+						}
+					}
+				}
+			}				
+		}
+
+		$banco_emisor = $this->Bancos->find('list', ['limit' => 200, 
+			'conditions' => ['tipo_banco' => 'Emisor'],
+			'order' => ['nombre_banco' => 'ASC'],
+			'keyField' => 'nombre_banco']);
+						
+		$banco_receptor = $this->Bancos->find('list', ['limit' => 200, 
+			'conditions' => ['tipo_banco' => 'Receptor'],
+			'order' => ['nombre_banco' => 'ASC'],
+			'keyField' => 'nombre_banco']);
+						
+        $this->set(compact('banco_emisor', 'banco_receptor'));
+    }
+
+	public function verificarPedido()
+    {
+        $this->autoRender = false;
+		
+        if ($this->request->is('json'))
+		{
+			$jsondata = [];
+			
+			if ($_POST["numero_del_pedido"])
+			{
+				$numero_del_pedido = $_POST["numero_del_pedido"];
+				$pedidos = $this->Bills->find('all')->where(['bill_number' => $numero_del_pedido, 'tipo_documento' => 'Pedido']);
+				if ($pedidos)
+				{
+					$pedido = $pedidos->first();
+					$jsondata["satisfactorio"] = true;
+					$jsondata["mensaje"] = "Se encontró el pedido";
+					$jsondata["monto_igtf_dolar"] = $pedido->monto_igtf;
+
+					$this->loadModel('Monedas');	
+					$moneda = $this->Monedas->get(2);
+					$tasa_cambio_dolar = $moneda->tasa_cambio_dolar; 
+					
+					$moneda = $this->Monedas->get(3);
+					$tasa_cambio_euro = round($moneda->tasa_cambio_dolar/$tasa_cambio_dolar, 2); 
+
+					$jsondata["monto_igtf_euro"] = round($pedido->monto_igtf / $tasa_cambio_euro, 2 );
+					$jsondata["monto_igtf_bolivar"] = round($pedido->monto_igtf * $tasa_cambio_dolar, 2);
+				}
+				else
+				{
+					$jsondata["success"] = false;
+					$jsondata["mensaje"] = "No se encontró el pedido";
+				}
+			}
+			else
+			{
+				$jsondata["success"] = false;
+				$jsondata["mensaje"] = "Debe indicar el número del pedido";
+			}
+			exit(json_encode($jsondata, JSON_FORCE_OBJECT));
+		}
 	}
 }
