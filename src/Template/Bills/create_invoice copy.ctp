@@ -749,11 +749,12 @@
 			"Thales 2022" 
 		];
 
-	var porcentaje_calculo_base_igtf = 1.03; // Cuando no se va a cobrar IGTF debe ser 1
-	var porcentaje_calculo_igtf = 0.03; // Cuando no se va a cobrar IGTF debe ser 0
+	var porcentaje_calculo_base_igtf = 1; // Cuando no se va a cobrar IGTF debe ser 1
+	var porcentaje_calculo_igtf = 0; // Cuando no se va a cobrar IGTF debe ser 0
 	var base_igtf_dolar = 0;
 	var monto_divisas = 0;
 	var monto_igtf_dolar = 0;
+	var monto_igtf_dolar_pedido = 0;
 	var acumulado_igtf_dolar = 0;
 	var acumulado_igtf_dolar_archivo = 0;
 	var acumulado_igtf_euro = 0;
@@ -1013,6 +1014,7 @@
 		base_igtf_dolar = 0;
 		monto_divisas = 0;
 		monto_igtf_dolar = 0;
+		monto_igtf_dolar_pedido = 0;
 		acumulado_igtf_dolar = 0;
 		acumulado_igtf_dolar_archivo = 0;
 		acumulado_igtf_euro = 0;
@@ -2268,10 +2270,6 @@
                 var stringPaymentsMade = JSON.stringify(tbPaymentsMade);
 
                 cleanPager();
-
-				console.log("payments de loadPayments", payments);
-				console.log("tbStudentTransactions de loadPayments", tbStudentTransactions);
-				console.log("tbPaymentsMade de loadPayments", tbPaymentsMade);
 				
                 $.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "recordInvoiceData"]); ?>', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
             });
@@ -2615,13 +2613,16 @@
 
 	function verificar_impuestos(proxima_funcion_a_ejecutar, indicador_sobrante)
 	{
-		if (indicador_igtf_recalculado == 0 && acumulado_igtf_dolar > 0)
+		if (indicador_igtf_recalculado == 0 && acumulado_igtf_dolar_archivo > 0)
 		{
 			var todos_los_pagos = "SELECT * FROM payments";
 			var pagos_en_divisas = 0;
 			var pagos_en_bolivares = 0;
 			var saldo_igtf_dolar = 0;
 			var saldo_igtf_bolivar = 0;
+			var recalculo_divisas = monto_divisas; 
+			var recalculo_igtf_dolar = acumulado_igtf_dolar;
+			var recalculo_igtf_bolivar = acumulado_igtf_bolivar;
 			
 			db.transaction(function (tx) 
 			{
@@ -2644,76 +2645,84 @@
 
 					if (indicador_sobrante == 0)
 					{
-						acumulado_igtf_dolar = dosDecimales(pagos_en_divisas * porcentaje_calculo_igtf);
-						acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
-						acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+						recalculo_divisas = pagos_en_divisas;
+						recalculo_igtf_dolar = dosDecimales(pagos_en_divisas * porcentaje_calculo_igtf);
+						recalculo_igtf_bolivar = dosDecimales(recalculo_igtf_dolar * dollarExchangeRate);
 					}
 
-					if (pagos_en_bolivares < acumulado_igtf_bolivar)
+					if (pagos_en_bolivares < recalculo_igtf_bolivar)
 					{
-						if (indicador_sobrante == 0)
+						if (indicador_sobrante == 0 && indicador_pedido == false)
 						{
-							monto_divisas = dosDecimales(pagos_en_divisas/porcentaje_calculo_base_igtf);
-							acumulado_igtf_dolar = dosDecimales(pagos_en_divisas/porcentaje_calculo_base_igtf * porcentaje_calculo_igtf);
-						}	
-						saldo_igtf_dolar = acumulado_igtf_dolar;
-						for (var i = 0, item = null; i < dataSet.length; i++) 
+							recalculo_divisas = dosDecimales(pagos_en_divisas/porcentaje_calculo_base_igtf);
+							recalculo_igtf_dolar = dosDecimales((pagos_en_divisas/porcentaje_calculo_base_igtf) * porcentaje_calculo_igtf);
+						}
+						if (indicador_pedido == false)
 						{
-							item = dataSet.item(i);
-							if (item['payMoneda'] == "$" || item['payMoneda'] == "€")
+							saldo_igtf_dolar = recalculo_igtf_dolar;
+							for (var i = 0, item = null; i < dataSet.length; i++) 
 							{
-								monto_igtf_dolar = dosDecimales(item['payAmountPaid'] * porcentaje_calculo_igtf)
-								if (saldo_igtf_dolar < monto_igtf_dolar)
+								item = dataSet.item(i);
+								if (item['payMoneda'] == "$" || item['payMoneda'] == "€")
 								{
-									actualizarPago(item['payId'], saldo_igtf_dolar);
-									saldo_igtf_dolar -= saldo_igtf_dolar; 		
-								}	
+									monto_igtf_dolar = dosDecimales(item['payAmountPaid'] * porcentaje_calculo_igtf)
+									if (saldo_igtf_dolar < monto_igtf_dolar)
+									{
+										actualizarPago(item['payId'], saldo_igtf_dolar);
+										saldo_igtf_dolar -= saldo_igtf_dolar; 		
+									}	
+									else
+									{
+										actualizarPago(item['payId'], monto_igtf_dolar);
+										saldo_igtf_dolar -= monto_igtf_dolar; 
+									}
+								}
 								else
 								{
-									actualizarPago(item['payId'], monto_igtf_dolar);
-									saldo_igtf_dolar -= monto_igtf_dolar; 
+									actualizarPago(item['payId'], 0);
 								}
-							}
-							else
-							{
-								actualizarPago(item['payId'], 0);
 							}
 						} 
 					}
 					else
 					{
-						if (indicador_sobrante == 0)
+						if (indicador_pedido == false)
 						{
-							monto_divisas = pagos_en_divisas;
-						}
-						saldo_igtf_bolivar = acumulado_igtf_bolivar;
-						for (var i = 0, item = null; i < dataSet.length; i++) 
-						{
-							item = dataSet.item(i);
-							if (item['payMoneda'] == "Bs.")
+							saldo_igtf_bolivar = recalculo_igtf_bolivar;
+							for (var i = 0, item = null; i < dataSet.length; i++) 
 							{
-								if (saldo_igtf_bolivar > item['payAmountPaid'])
+								item = dataSet.item(i);
+								if (item['payMoneda'] == "Bs.")
 								{
-									actualizarPago(item['payId'], item['payAmountPaid']);
-									saldo_igtf_bolivar -= item['payAmountPaid']; 		
-								}	
+									if (saldo_igtf_bolivar > item['payAmountPaid'])
+									{
+										actualizarPago(item['payId'], item['payAmountPaid']);
+										saldo_igtf_bolivar -= item['payAmountPaid']; 		
+									}	
+									else
+									{
+										actualizarPago(item['payId'], saldo_igtf_bolivar);
+										saldo_igtf_bolivar -= saldo_igtf_bolivar;
+									}	
+								}
 								else
 								{
-									actualizarPago(item['payId'], saldo_igtf_bolivar);
-									saldo_igtf_bolivar -= saldo_igtf_bolivar;
-								}	
-							}
-							else
-							{
-								actualizarPago(item['payId'], 0);
+									actualizarPago(item['payId'], 0);
+								}
 							}
 						} 
 					}
 					if (indicador_sobrante == 0)
 					{
-						acumulado_igtf_dolar_archivo = acumulado_igtf_dolar;
-						acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
-						acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+						monto_divisas = recalculo_divisas;
+						acumulado_igtf_dolar_archivo = recalculo_igtf_dolar;
+
+						if (indicador_pedido == false)
+						{
+							acumulado_igtf_dolar = recalculo_igtf_dolar;
+							acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
+							acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+						}
 					}
 					indicador_igtf_recalculado = 1;
 					proxima_funcion_a_ejecutar();
@@ -3834,6 +3843,8 @@
 				comentario = $('#comentario-' + paymentIdentifier).val();
 
 				base_igtf_dolar = 0;
+				monto_igtf_dolar = 0;
+				monto_igtf_dolar_pedido = 0;
 
 				if (monedaPago == "$")
 				{
@@ -3846,8 +3857,6 @@
 
 				if (base_igtf_dolar > 0)
 				{
-					monto_igtf_dolar = 0;
-
 					if (base_igtf_dolar > deudaMenosPagado)
 					{
 						base_igtf_dolar = deudaMenosPagado;		
@@ -3857,16 +3866,22 @@
 						base_igtf_dolar = 0;							
 					}
 
-					monto_igtf_dolar = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
-
-					if (indicador_pedido == false)
+					if (indicador_pedido == true)
 					{
+						monto_igtf_dolar_pedido = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
+						monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
+						acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar_pedido);
+
+					}
+					else
+					{
+						monto_igtf_dolar = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
 						acumulado_igtf_dolar = dosDecimales(acumulado_igtf_dolar + monto_igtf_dolar);
 						acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
 						acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+						monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
+						acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar);
 					}
-					monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
-					acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar);
 				}
 
 				if (bank == 'Zelle' && monedaPago != '$')

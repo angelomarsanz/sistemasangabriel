@@ -409,7 +409,9 @@ class BillsController extends AppController
 			$indicador_servicio_educativo = 0;
 			
             $this->headboard = $_POST['headboard']; 
-            $transactions = json_decode($_POST['studentTransactions']);
+			$idParentsandguardian = $this->headboard['idParentsandguardians'];
+
+			$transactions = json_decode($_POST['studentTransactions']);
             $payments = json_decode($_POST['paymentsMade']);
             $_POST = [];
 			
@@ -433,14 +435,14 @@ class BillsController extends AppController
 
             if ($billNumber > 0)
             {
-                $lastRecord = $this->Bills->find('all', ['conditions' => ['bill_number' => $billNumber, 'user_id' => $this->Auth->user('id')],
+                $facturas = $this->Bills->find('all', ['conditions' => ['bill_number' => $billNumber, 'user_id' => $this->Auth->user('id')],
                         'order' => ['Bills.id' => 'DESC'] ]);
 
-                if ($lastRecord)
+                if ($facturas)
                 {
-                    $row = $lastRecord->first();
+                    $nueva_factura = $facturas->first();
                     
-                    $billId = $row->id;
+                    $billId = $nueva_factura->id;
 
                     foreach ($transactions as $transaction) 
                     {
@@ -452,9 +454,16 @@ class BillsController extends AppController
                     foreach ($payments as $payment) 
                     {
                         $Payments->add($billId, $billNumber, $payment, $this->headboard['fiscal']);
-                    }
-                    
-                    $idParentsandguardian = $this->headboard['idParentsandguardians'];
+                    }			
+
+					if ($nueva_factura->fiscal == 1 && $nueva_factura->amount < 0 )
+					{ 
+						$vector_retorno = $this->agregaNotaCreditoDescuentos($nueva_factura);
+						if ($vector_retorno["codigo_retorno"] == 1)
+						{
+							$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo crear la nota de crédito del descuento correspondiente a la factura '.$billNumber);
+						} 
+					}
 										
 					if ($this->headboard['saldoCompensado'] > 0 || $this->headboard['sobrante'] > 0)
 					{
@@ -552,8 +561,8 @@ class BillsController extends AppController
 							$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian . ' en la factura ' . $billNumber);
 						}
 					}
-
-                    return $this->redirect(['action' => 'imprimirFactura', $billNumber, $idParentsandguardian, $billId, ""]);
+				
+                   	return $this->redirect(['action' => 'imprimirFactura', $billNumber, $idParentsandguardian, $billId, ""]);
                 }
             }
         }
@@ -632,7 +641,7 @@ class BillsController extends AppController
 						// Para solucionar el problema se debe usar un foreach e ir descartando si las facturas son de otro usuario. La que no sea de otro usuario se obliga a imprimir
 						foreach ($facturas as $factura)
 						{		
-							if ($factura->user_id == $this->Auth->user('id'))
+							if ($factura->user_id == $this->Auth->user('id') && $factura->id < $idFactura)
 							{	
 								$facturaAnterior = $factura;
 							
@@ -684,17 +693,18 @@ class BillsController extends AppController
 		}
 	               
 		$usuario = $this->Users->get($bill->user_id);
-		
+
+		$numeroFacturaAfectada = 0;
+		$controlFacturaAfectada = 0;
+
 		if ($bill->id_documento_padre > 0)
 		{
 			$facturaAfectada = $this->Bills->get($bill->id_documento_padre);
-			$numeroFacturaAfectada = $facturaAfectada->bill_number;
-			$controlFacturaAfectada = $facturaAfectada->control_number;
-		}
-		else
-		{
-			$numeroFacturaAfectada = 0;
-			$controlFacturaAfectada = 0;
+			if ($facturaAfectada->tipo_documento == "Factura")
+			{
+				$numeroFacturaAfectada = $facturaAfectada->bill_number;
+				$controlFacturaAfectada = $facturaAfectada->control_number;	
+			}
 		}
 		
 		$usuarioResponsable = $usuario->first_name . " " . $usuario->surname;
@@ -934,6 +944,16 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
+				elseif ($aConcept->concept == "Descuento por pronto pago")
+				{
+					$invoiceLine = $aConcept->concept;
+					$amountConcept = $aConcept->amount;
+					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+					$loadIndicator = 1;
+					$firstMonthly= " ";
+					$lastInstallment = " ";
+					$amountConcept = 0;
+				}
 				else    
 				{
 					$invoiceLine = $aConcept->student_name . " - " . "Mensualidad: " . substr($aConcept->concept, 0, 3) . " - ";
@@ -1098,6 +1118,16 @@ class BillsController extends AppController
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;
+					$lastInstallment = " ";
+					$amountConcept = 0;
+				}
+				elseif ($aConcept->concept == "Descuento por pronto pago")
+				{
+					$invoiceLine = $aConcept->concept;
+					$amountConcept = $aConcept->amount;
+					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+					$loadIndicator = 1;
+					$firstMonthly= " ";
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
@@ -1971,7 +2001,8 @@ class BillsController extends AppController
 					$billNumber = $numeroNotaContable;
 
 					$idParentsandguardian = $facturaConceptos->parentsandguardian_id;
-					
+
+					/*
 					$parentsandguardian = $this->Bills->Parentsandguardians->get($idParentsandguardian);
 					$parentsandguardian->balance = $parentsandguardian->balance + round($acumuladoNota / $facturaConceptos->tasa_cambio);
 											
@@ -1979,6 +2010,7 @@ class BillsController extends AppController
 					{
 						 $this->Flash->error(__('No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian));
 					}
+					*/
 					
                     return $this->redirect(['action' => 'imprimirFactura', $billNumber, $idParentsandguardian, $idNota]);
                 }
@@ -2780,15 +2812,30 @@ class BillsController extends AppController
 							if ($codigo_retorno_conceptos == 0)
 							{
 								$codigo_retorno_pagos = $payments->pagosPedidoFactura($idPedido, $factura->id, $factura->bill_number, $turnoActual->id, $_POST);
-								if ($codigo_retorno_conceptos == 0)
+								if ($codigo_retorno_pagos == 0)
 								{
+									if ($factura->amount < 0)
+									{
+										$vector_retorno = $this->agregaNotaCreditoDescuentos($factura);
+										if ($vector_retorno["codigo_retorno"] == 1)
+										{
+											$eventos->add('controller', 'Bills', 'pedidoPorFactura', 'No se pudo crear la nota de crédito correspondiente a la factura'.$factura->bill_number);
+											return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+										}
+									}
 									return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $factura->id, 0, $factura->parentsandguardian_id, 'pedidoPorFactura', $factura->id]);
 								}
 								else
 								{
+									$eventos->add('controller', 'Bills', 'pedidoPorFactura', 'No se pudieron crear los pagos correspondientes a la factura'.$factura->bill_number);
 									return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 								}
-							}				
+							}
+							else
+							{
+								$eventos->add('controller', 'Bills', 'pedidoPorFactura', 'No se pudieron crear los conceptos correspondientes a la factura'.$factura->bill_number);
+								return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+							}
 						}
 					}
 				}
@@ -2851,4 +2898,95 @@ class BillsController extends AppController
 			exit(json_encode($jsondata, JSON_FORCE_OBJECT));
 		}
 	}
+    public function agregaNotaCreditoDescuentos($facturaAfectada = null)
+    {	
+		$vector_retorno	 = [];
+		$vector_retorno["codigo_retorno"] = 0;
+		$vector_retorno["numero_nota_credito"] = 0;
+
+		$consecutivoCredito = new ConsecutivocreditosController();
+		$numeroNotaContable = $consecutivoCredito->add();
+		          
+        $notaContable = $this->Bills->newEntity();
+		
+        $notaContable->parentsandguardian_id = $facturaAfectada->parentsandguardian_id;
+		$notaContable->user_id = $this->Auth->user('id');
+		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+        
+        $fechaHoy = Time::now();
+		
+        $notaContable->date_and_time = date_format($fechaHoy, "Y-m-d");
+		
+		$this->loadModel('Turns');
+		
+		$turnos = $this->Turns->find('all')->where(['user_id' => $this->Auth->user('id'), 'status' => true])->order(['created' => 'DESC']);
+					
+		$contadorRegistros = $turnos->count();
+			
+		if ($contadorRegistros > 0)
+		{
+			$ultimoTurno = $turnos->first();
+		}
+		
+        $notaContable->turn = $ultimoTurno->id;
+            
+        $notaContable->bill_number = $numeroNotaContable;
+		
+        $notaContable->fiscal = 1;
+
+        $notaContable->school_year = $facturaAfectada->school_year;
+        $notaContable->identification = $facturaAfectada->identification;
+        $notaContable->client = $facturaAfectada->client;
+        $notaContable->tax_phone = $facturaAfectada->tax_phone;
+        $notaContable->fiscal_address = $facturaAfectada->fiscal_address;
+		$notaContable->amount = 0;
+				
+		$notaContable->amount_paid = $facturaAfectada->amount * -1;
+		$notaContable->annulled = 0;
+		$notaContable->date_annulled = 0;
+		$notaContable->invoice_migration = 0;
+		$notaContable->new_family = 0;
+		$notaContable->impresa = 0;	
+		$notaContable->tipo_documento = "Nota de crédito";	
+		$notaContable->id_documento_padre = $facturaAfectada->id;
+		$notaContable->id_anticipo = 0;
+		$notaContable->factura_pendiente = 0;
+		$notaContable->moneda_id = $facturaAfectada->moneda_id;
+		$notaContable->tasa_cambio = $facturaAfectada->tasa_cambio;
+		$notaContable->tasa_euro = $facturaAfectada->tasa_euro;
+		$notaContable->tasa_dolar_euro = $facturaAfectada->tasa_dolar_euro;
+		$notaContable->saldo_compensado = 0;
+		$notaContable->monto_divisas = 0;
+		$notaContable->monto_igtf = 0;
+		
+        if ($this->Bills->save($notaContable)) 
+        {
+			$notas = $this->Bills->find('all', ['conditions' => ['bill_number' => $numeroNotaContable, 'user_id' => $this->Auth->user('id')],
+			'order' => ['Bills.id' => 'DESC'] ]);
+
+			if ($notas->count() > 0)
+			{
+				$nueva_nota = $notas->first();
+				$conceptos = new ConceptsController();
+				$codigo_retorno_concepto = $conceptos->agregarConceptoNotaCreditoDescuento($nueva_nota);
+				if ($codigo_retorno_concepto > 0)
+				{
+					$vector_retorno["codigo_retorno"] = 1;
+				}
+			}
+			else    
+			{
+				$vector_retorno["codigo_retorno"] = 1;
+				$this->Flash->error(__('No se encontró el registro de la nota de crédito'));
+			}
+		}
+		else
+		{
+			$vector_retorno["codigo_retorno"] = 1;
+            $this->Flash->error(__('No se pudo registrar la nota de crédito correspondiente al descuento'));
+        }
+		return $vector_retorno;
+    }
 }

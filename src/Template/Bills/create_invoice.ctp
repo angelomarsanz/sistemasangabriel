@@ -749,8 +749,8 @@
 			"Thales 2022" 
 		];
 
-	var porcentaje_calculo_base_igtf = 1; // Cuando no se va a cobrar IGTF debe ser 1
-	var porcentaje_calculo_igtf = 0; // Cuando no se va a cobrar IGTF debe ser 0
+	var porcentaje_calculo_base_igtf = 1.03; // Cuando no se va a cobrar IGTF debe ser 1
+	var porcentaje_calculo_igtf = 0.03; // Cuando no se va a cobrar IGTF debe ser 0
 	var base_igtf_dolar = 0;
 	var monto_divisas = 0;
 	var monto_igtf_dolar = 0;

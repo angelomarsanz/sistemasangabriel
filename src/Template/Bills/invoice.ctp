@@ -80,6 +80,8 @@
 		?>
 		<br />
 		<br />
+		<br />
+		<br />
 		<div style="font-size: 9px; line-height: 11px;">
 			<?php if ($bill->annulled == 1): ?>
 				<h1 style="text-align:center;">Factura Anulada <?= $bill->date_annulled->format('d-m-Y') ?></h1>
@@ -189,7 +191,7 @@
 						<td style="width: 50%;"></td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 					</tr>
-					<tr class="nover">
+					<tr>
 						<td style="width: 50%;">IGTF 3%:</td>
 						<td style="width: 50%; text-align:right;"><?= number_format($monto_igtf_bolivar, 2, ",", ".") ?></td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -308,7 +310,7 @@
 						<td style="width: 50%;"></td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 					</tr>
-					<tr class="nover">
+					<tr>
 						<td style="width: 50%;">IGTF 3%:</td>
 						<td style="width: 50%; text-align:right;"><?= number_format($monto_igtf_bolivar, 2, ",", ".") ?></td>
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -475,6 +477,8 @@
 		$monto_divisas_bolivar = round($bill->monto_divisas * $bill->tasa_cambio, 2); 
 		$monto_igtf_bolivar = round($bill->monto_igtf * $bill->tasa_cambio, 2); 
 		?>
+		<br />
+		<br />
 		<br />
 		<br />
 		<div style="font-size: 9px; line-height: 11px;">

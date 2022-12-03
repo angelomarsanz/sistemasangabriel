@@ -485,7 +485,7 @@
 				<tbody>
 					<tr>
 						<td style='width:80%;'>Cliente: <?= $bill->client ?></td>
-						<td style="width:20%; text-align: right;"><b>Pedido Nro. <?= $bill->bill_number ?></b></td>
+						<td style="width:20%; text-align: right;"><b>Pedido Nro. <?= str_pad($bill->bill_number, 6, "0", STR_PAD_LEFT); ?></b></td>
 					</tr>
 					<tr>
 						<td style='width:80%;'>C.I./RIF: <?= $bill->identification ?></td>
@@ -598,7 +598,7 @@
 				<tbody>
 					<tr>
 						<td style='width:80%;'>Cliente: <?= $bill->client ?></td>
-						<td style="width:20%; text-align: right;"><b>Pedido Nro. <?= $bill->bill_number ?></b></td>
+						<td style="width:20%; text-align: right;"><b>Pedido Nro. <?= str_pad($bill->bill_number, 6, "0", STR_PAD_LEFT); ?></b></td>
 					</tr>
 					<tr>
 						<td style='width:80%;'>C.I./RIF: <?= $bill->identification ?></td>

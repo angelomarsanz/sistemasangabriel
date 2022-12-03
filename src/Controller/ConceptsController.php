@@ -355,4 +355,26 @@ class ConceptsController extends AppController
 		}
 		return $codigoRetorno;
 	}
+	public function agregarConceptoNotaCreditoDescuento($nota_credito = null)
+    {
+		$codigoRetornoConcepto = 0;
+		$conceptoNota = $this->Concepts->newEntity();
+		$conceptoNota->bill_id = $nota_credito->id;
+		$conceptoNota->quantity = 1;
+		$conceptoNota->accounting_code = "001";
+		$conceptoNota->student_name = "";
+		$conceptoNota->transaction_identifier = 0;
+		$conceptoNota->concept = "Descuento por pronto pago";
+		$conceptoNota->amount = $nota_credito->amount_paid;
+		$conceptoNota->observation = "";
+		$conceptoNota->annulled = 0;
+		$conceptoNota->concept_migration = 0;
+		$conceptoNota->saldo = $nota_credito->amount_paid;
+		if (!($this->Concepts->save($conceptoNota)))
+		{
+			$codigoRetornoConcepto = 1;
+			$this->Flash->error(__('No se pudo registrar el concepto de la nota de crédito'));
+		}
+        return $codigoRetornoConcepto;
+	}
 }
