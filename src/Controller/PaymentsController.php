@@ -118,7 +118,7 @@ class PaymentsController extends AppController
 		}	
 		$payment->banco_receptor = $pago->bancoReceptor;
 		$payment->comentario = $pago->comentario;
-        $payment->fiscal = 1;      
+        $payment->fiscal = $fiscal;      
 		$payment->monto_igtf_dolar = $pago->monto_igtf_dolar;  
 
         if (!($this->Payments->save($payment))) 
@@ -712,9 +712,9 @@ class PaymentsController extends AppController
 		}
 		else
 		{
-			$binnacles = new BinnaclesController;
+			$eventos = new EventosController;
 			
-			$binnacles->add('controller', 'Payments', 'pagosPedidoFactura', 'No se encontraron pagos para el pedido con ID '.$idPedido);
+			$eventos->add('controller', 'Payments', 'pagosPedidoFactura', 'No se encontraron pagos para el pedido con ID '.$idPedido);
 			
 			$this->Flash->error(__('No se encontraron pagos para el pedido con ID '.$idPedido));
 			$codigoRetorno = 1;	

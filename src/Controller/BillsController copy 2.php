@@ -421,15 +421,13 @@ class BillsController extends AppController
 				{
 					if (substr($transaction->monthlyPayment, 0, 10) == "Matrícula" || substr($transaction->monthlyPayment, 0, 14) == "Seguro escolar" || substr($transaction->monthlyPayment, 0, 3) == "Ago")
 					{
-						if ($this->headboard['indicador_pedido'] == 0)
-						{
-							$indicadorFacturaPendiente = 1;
-						}
+						$indicadorFacturaPendiente = 1;
 					} 
 					if (substr($transaction->monthlyPayment, 0, 18) == "Servicio educativo")
 					{
 						$indicador_servicio_educativo = 1;
 					} 
+
 				}
 			}
 			
@@ -473,15 +471,7 @@ class BillsController extends AppController
 						
 						if ($this->headboard['imprimirReciboSobrante'] > 0)
 						{
-							if ($nueva_factura->fiscal == 1)
-							{
-								$tipo_recibo = "Recibo de sobrante";									
-							}
-							else
-							{
-								$tipo_recibo = "Recibo de sobrante de pedido";
-							}
-							$resultado = $this->reciboAdicional($idParentsandguardian, $parentsandguardian->family, $billId, $tipo_recibo, 2, "Sobrante", $this->headboard['sobrante']); 
+							$resultado = $this->reciboAdicional($idParentsandguardian, $parentsandguardian->family, $billId, "Recibo de sobrante", 2, "Sobrante", $this->headboard['sobrante']); 
 														
 							if ($resultado['codigoRetorno'] == 0)
 							{
@@ -644,7 +634,7 @@ class BillsController extends AppController
 					if ($facturaOtroCajero == 1)
 					{
 						$mensajeUsuario = "Estimado usuario, otro cajero tiene una factura pendiente, espere a que la imprima y luego intente nuevamente imprimir su factura";
-						return $this->redirect(['action' => 'imprimirFactura', $bill_number, $idParentsandguardian, $idFactura, $mensajeUsuario]);
+						return $this->redirect(['action' => 'imprimirFactura', $bill_number, $idParentsandguardian, $idFactura, $mensaje]);
 					}
 					else
 					{		
@@ -1326,55 +1316,7 @@ class BillsController extends AppController
 								$payments->edit($idBill);
 																
 								$eventos->add('controller', 'Bills', 'annulInvoice', 'Se anuló la factura o recibo Nro. ' . $bill->bill_number);
-
-								if ($factura->amount != 0)
-								{
-									$notas_asociadas = $this->Bills->find('all', 
-										[
-											'conditions' => ['id_documento_padre' => $factura->id, 'SUBSTRING(tipo_documento, 1, 4) =' => 'Nota']
-										]);
-
-									if ($notas_asociadas->count() > 0)
-									{
-										foreach ($notas_asociadas as $nota)
-										{
-											$nota_para_anular = $this->Bills->get($nota->id);
-
-											$nota_para_anular->annulled = 1;
-									
-											$nota_para_anular->date_annulled = Time::now();
-																					
-											if ($this->Bills->save($nota_para_anular))
-											{
-												$conceptos_nota = $this->Bills->Concepts->find('all', 
-												[
-													'conditions' => ['bill_id' => $nota->id]
-												]);	
-
-												if ($conceptos_nota->count() > 0)
-												{
-													foreach ($conceptos_nota as $concepto)
-													{
-														$concepto_para_anular = $this->Bills->Concepts->get($concepto->id);
-			
-														$concepto_para_anular->annulled = 1;
-												
-														if (!($this->Bills->Concepts->save($concepto_para_anular)))
-														{		
-															$this->Flash->error(__('El concepto de la nota de crédito con el Nro. '.$nota_para_anular->bill_number.' no pudo ser anulado'));
-															$eventos->add('controller', 'Bills', 'recordInvoiceData', 'El concepto de la nota de crédito con el Nro. '. $nota_para_anular->bill_number.' no pudo ser anulado');
-														}
-													}
-												}
-											}
-											else
-											{
-												$this->Flash->error(__('La nota con el número con el Nro. '.$nota_para_anular->bill_number.' no pudo ser anulada'));
-												$eventos->add('controller', 'Bills', 'recordInvoiceData', 'La nota de crédito con el Nro. '. $nota_para_anular->bill_number.' no pudo ser anulada');
-											}
-										}
-									}  	
-								}
+								
 								if ($bill->id_recibo_sobrante > 0)
 								{
 									$reciboSobrante = $this->Bills->get($bill->id_recibo_sobrante);
@@ -1487,8 +1429,6 @@ class BillsController extends AppController
 										$binnacles->add('controller', 'Bills', 'annulInvoice', 'No se pudo actualizar el saldo del representante con id ' . $idParentsandguardian . ' en la factura ' . $billNumber);
 									}
 								}
-
-
 											
 								return $this->redirect(['action' => 'annulledInvoice', $idBill]);
 							}
@@ -2468,38 +2408,12 @@ class BillsController extends AppController
     public function crearReciboAdicional($idParentsandguardian = null, $idDocumentoPadre = null, $tipoRecibo = null, $moneda = null, $monto = null)
     {       
 		$this->autoRender = false;
-
-		$recibos_de_pedidos =
-			[
-				"Recibo de compra de pedido",
-				"Recibo de reintegro de pedido",
-				"Recibo de sobrante de pedido",
-				"Recibo de vuelto de compra de pedido"
-			];
-
-		$indicador_recibo_de_pedido = 0;
-
+								               
+        $consecutiveReceipt = new ConsecutivereceiptsController();
+		
 		$resultado = ['codigoRetorno' => 0, 'numeroRecibo' => 0];
-
-		foreach ($recibos_de_pedidos as $recibo)
-		{
-			if ($recibo == $tipoRecibo)
-			{
-				$indicador_recibo_de_pedido = 1;
-				break;
-			}
-		}
-
-		if ($indicador_recibo_de_pedido == 1)
-		{
-        	$recibo_pedido = new RecibospedidosController();		
-			$numeroRecibo = $recibo_pedido->add();
-		}
-		else
-		{								               
-        	$consecutiveReceipt = new ConsecutivereceiptsController();		
-			$numeroRecibo = $consecutiveReceipt->add();
-		}
+		
+		$numeroRecibo = $consecutiveReceipt->add();
 		
 		$bill = $this->Bills->newEntity();
 		
@@ -2552,7 +2466,7 @@ class BillsController extends AppController
 			$bill->turn = $ultimoTurno->id;
 			$bill->school_year = $school->current_school_year;
 		
-			if ($tipoRecibo == "Recibo de compra" || $tipoRecibo == "Recibo de compra de pedido")
+			if ($tipoRecibo == "Recibo de compra")
 			{
 				$bill->identification = "J - 075730844";
 				$bill->client = "U.E. Colegio San Gabriel Arcángel";
@@ -2608,34 +2522,10 @@ class BillsController extends AppController
 	public function establecerMontoReintegro($idRepresentante = null, $monto = null)
 	{
 		$contadorRecibosSobrantes = 0;
-
-		$this->loadModel('Turns');
-
-		$turnosAbiertos = $this->Turns->find('all')->where(['user_id' => $this->Auth->user('id'), 'status' => true])->order(['created' => 'DESC']);
-        
-        if ($turnosAbiertos->count() > 0)
-        {
-			$turnoAbierto = $turnosAbiertos->first();
-			$vector_efectivos = $this->calcular_disponibilidad_efectivo($turnoAbierto->id);
-		}
-		else
-		{
-			$this->Flash->error(__('Estimado usuario primero debe abrir un turno antes de hacer un reintegro'));
-			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
-		}
 		
 		if ($this->request->is(['patch', 'post', 'put']))
-        {		
-			if ($_POST["origen"] == "Facturas")
-			{
-				$tipo_recibo = "Recibo de reintegro";
-			}
-			else
-			{
-				$tipo_recibo = "Recibo de reintegro de pedido";
-			}
-							
-			$resultado = $this->reciboAdicional($idRepresentante, "", 0, $tipo_recibo, 2, "Reintegro", $_POST['monto_reintegro']);
+        {						
+			$resultado = $this->reciboAdicional($idRepresentante, "", 0, "Recibo de reintegro", 2, "Reintegro", $_POST['monto_reintegro']);
 			
 			if ($resultado['codigoRetorno'] == 0)
 			{
@@ -2724,23 +2614,18 @@ class BillsController extends AppController
 				$this->Flash->error(__('Estimado usuario no se pudo crear el registro del recibo de reintegro'));
 			}
 		}
-		$this->set(compact('monto', 'vector_efectivos'));
-        $this->set('_serialize', ['monto', 'vector_efectivos']);
+		$this->set(compact('monto'));
+        $this->set('_serialize', ['monto']);
 	}
 
 	public function compra()
 	{
+		$monedas = ["Bs." => "bolivar", "$" => "dolar", "€" => "euro"];
+
 		if ($this->request->is(['patch', 'post', 'put']))
         {
-			if ($_POST["origen"] == "Facturas")
-			{
-				$tipo_recibo = "Recibo de compra";
-			}
-			else
-			{
-				$tipo_recibo = "Recibo de compra de pedido";
-			}
-			$resultado = $this->reciboAdicional(1, "", 0, $tipo_recibo, $_POST['moneda'], "Compra de: " . $_POST['concepto'], $_POST['monto']);
+			$this->Flash->success(__('Origen '.$_POST["origen"]));				
+			$resultado = $this->reciboAdicional(1, "", 0, "Recibo de compra", $_POST['moneda'], "Compra de: " . $_POST['concepto'], $_POST['monto']);
 			if ($resultado['codigoRetorno'] == 0)
 			{
 				return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $resultado['idRecibo'], 0, 1, 'compra']);
@@ -2757,76 +2642,55 @@ class BillsController extends AppController
         if ($turnosAbiertos->count() > 0)
         {
 			$turnoAbierto = $turnosAbiertos->first();
-			$vector_efectivos = $this->calcular_disponibilidad_efectivo($turnoAbierto->id);
+			$this->loadModel('Efectivos');
+
+			$efectivos = $this->Efectivos->find('all')->where(['turn_id' => $turnoAbierto->id]);
+			
+			if ($efectivos->count() > 0)
+			{
+				$vector_efectivos =  [];
+				foreach ($efectivos as $efectivo)
+				{
+					$moneda = "";
+					foreach ($monedas as $indice => $valor)
+					{
+						if ($indice == $efectivo->moneda)
+						{
+							$moneda = $valor; 
+						}
+					} 
+
+					$vector_efectivos[]= ["origen" => $efectivo->origen_efectivo, "moneda" => $moneda, "monto" => $efectivo->monto];
+				}
+			}
+			else
+			{
+				$this->Flash->error(__('No se encontraron registros de efectivo'));
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);				
+			}
 		}
 		else
 		{
 			$this->Flash->error(__('Estimado usuario primero debe abrir un turno antes de hacer una compra'));
 			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 		}
-		$this->set(compact('vector_efectivos'));
-        $this->set('_serialize', ['vector_efectivos']);
+
+		$this->loadModel('Monedas');	
+		$moneda = $this->Monedas->get(2);
+		$tasa_dolar_bolivar = $moneda->tasa_cambio_dolar; 
+		
+		$moneda = $this->Monedas->get(3);
+		$tasa_euro_bolivar = $moneda->tasa_cambio_dolar; 
+
+		$this->set(compact('vector_efectivos', 'tasa_dolar_bolivar', 'tasa_euro_bolivar'));
+		$this->set('_serialize', ['vector_efectivos', 'tasa_dolar_bolivar', 'tasa_euro_bolivar']);
 	}
 	
 	public function vueltoCompra()
 	{
-		$monedas = [1 => "Bs.", 2 => "$", 3 => "€"]; 
-
-		$this->loadModel('Turns');
-		$turnos = $this->Turns->find('all')->where(['user_id' => $this->Auth->user('id'), 'status' => true])->order(['created' => 'DESC']);
-               
-        if ($turnos->count() > 0)
-        {
-			$turno_abierto = $turnos->first();
-		}
-		else
-		{
-			$this->Flash->error(__('Estimado usuario usted no tiene un turno abierto'));
-			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);	
-		}
-
-		$recibos = $this->Bills->Concepts->find('all')
-			->contain(['Bills'])
-			->where(['Bills.turn' => $turno_abierto->id, 'Bills.annulled' => 0, 'SUBSTRING(Bills.tipo_documento, 1, 16) =' => 'Recibo de compra']);
-
-		$opciones_recibos = [];
-		$opciones_recibos[null] = "";
-
-		foreach ($recibos as $recibo)
-		{
-			$moneda_recibo = "";
-			foreach ($monedas as $indice => $valor)
-			{
-				if ($indice == $recibo->bill->moneda_id)
-				{
-					$moneda_recibo = $valor;
-					break;
-				}
-			}
-			$opciones_recibos[$recibo->bill->id] = "Nro. ".$recibo->bill->bill_number." - ".$recibo->concept." - ".$moneda_recibo." ".number_format($recibo->bill->amount_paid, 2, ",", ".");
-		}
-
-
 		if ($this->request->is(['patch', 'post', 'put']))
-        {
-			$tipo_recibo = "Recibo de vuelto de compra";
-			foreach ($recibos as $recibo)
-			{
-				if ($_POST["id_recibo_original"] == $recibo->bill->id)
-				{
-					if ($recibo->bill->tipo_documento == "Recibo de compra")
-					{
-						$tipo_recibo = "Recibo de vuelto de compra";
-					}
-					else
-					{
-						$tipo_recibo = "Recibo de vuelto de compra de pedido";
-					}
-					break;
-				}
-			}
-
-			$resultado = $this->reciboAdicional(1, "", 0, $tipo_recibo, $_POST['moneda'], "Vuelto de compra de: " . $_POST['concepto'], $_POST['monto']);
+        {				
+			$resultado = $this->reciboAdicional(1, "", 0, "Recibo de vuelto de compra", $_POST['moneda'], "Vuelto de compra de: " . $_POST['concepto'], $_POST['monto']);
 			
 			if ($resultado['codigoRetorno'] == 0)
 			{
@@ -2837,8 +2701,6 @@ class BillsController extends AppController
 				$this->Flash->error(__('Estimado usuario no se pudo crear el recibo de compra'));
 			}
 		}
-		$this->set(compact('opciones_recibos'));
-        $this->set('_serialize', ['opciones_recibos']);
 	}
 	public function pagoRealizado()
 	{
@@ -2946,18 +2808,11 @@ class BillsController extends AppController
 														
 						$eventos->add('controller', 'Bills', 'pedidoPorFactura', 'Se anuló la pedido Nro. '.$pedido->bill_number);
 
-						$this->loadModel('Monedas');	
-						$moneda = $this->Monedas->get(2);
-						$tasa_dolar = $moneda->tasa_cambio_dolar; 
-						$moneda = $this->Monedas->get(3);
-						$tasa_euro = $moneda->tasa_cambio_dolar;
-						$tasa_dolar_euro = round($tasa_euro/$tasa_dolar, 2);
-
 						$nuevaFactura = $this->Bills->newEntity();
 
 						$nuevaFactura->parentsandguardian_id = $pedido->parentsandguardian_id;
 						$nuevaFactura->user_id = $pedido->user_id;
-						$nuevaFactura->date_and_time = Time::now();;
+						$nuevaFactura->date_and_time = $pedido->date_and_time;
 						$nuevaFactura->turn = $turnoActual->id;
 						$nuevaFactura->id_turno_anulacion = 0;						
 						$nuevaFactura->bill_number = $consecutiveInvoice->add();
@@ -2967,16 +2822,9 @@ class BillsController extends AppController
 						$nuevaFactura->identification = $pedido->identification;
 						$nuevaFactura->client = $pedido->client;
 						$nuevaFactura->tax_phone = $pedido->tax_phone;
-						$nuevaFactura->fiscal_address = $pedido->fiscal_address;
-						
-						$monto_dolar_descuento = round($pedido->amount/$pedido->tasa_cambio, 2);
-						$nuevo_monto_bolivar_descuento = round($monto_dolar_descuento * $tasa_dolar, 2);
-
-						$monto_dolar_pagado = round($pedido->amount_paid/$pedido->tasa_cambio, 2);
-						$nuevo_monto_bolivar_pagado = round($monto_dolar_pagado * $tasa_dolar, 2);
-
-						$nuevaFactura->amount = $nuevo_monto_bolivar_descuento;
-						$nuevaFactura->amount_paid = $nuevo_monto_bolivar_pagado;
+						$nuevaFactura->fiscal_address = $pedido->fiscal_address;					
+						$nuevaFactura->amount = $pedido->amount;
+						$nuevaFactura->amount_paid = $pedido->amount_paid;
 						$nuevaFactura->annulled = 0;
 						$nuevaFactura->date_annulled = 0;
 						$nuevaFactura->invoice_migration = 0;
@@ -2986,9 +2834,9 @@ class BillsController extends AppController
 						$nuevaFactura->id_anticipo = 0;
 						$nuevaFactura->factura_pendiente = $pedido->factura_pendiente;
 						$nuevaFactura->moneda_id = 1;
-						$nuevaFactura->tasa_cambio = $tasa_dolar;
-						$nuevaFactura->tasa_euro = $tasa_euro;
-						$nuevaFactura->tasa_dolar_euro = $tasa_dolar_euro;
+						$nuevaFactura->tasa_cambio = $pedido->tasa_cambio;
+						$nuevaFactura->tasa_euro = $pedido->tasa_euro;
+						$nuevaFactura->tasa_dolar_euro = $pedido->tasa_dolar_euro;
 						$nuevaFactura->saldo_compensado_dolar = $pedido->saldo_compensado_dolar;
 						$nuevaFactura->sobrante_dolar = $pedido->sobrante_dolar;
 						$nuevaFactura->tasa_temporal_dolar = $pedido->tasa_temporal_dolar;
@@ -3010,7 +2858,7 @@ class BillsController extends AppController
 							]); 
 											
 							$factura = $ultimoRegistro->first();	
-							$codigo_retorno_conceptos = $concepts->conceptosPedidoFactura($idPedido, $factura->id, $pedido->tasa_cambio, $tasa_dolar);
+							$codigo_retorno_conceptos = $concepts->conceptosPedidoFactura($idPedido, $factura->id);
 
 							if ($codigo_retorno_conceptos == 0)
 							{
@@ -3192,176 +3040,5 @@ class BillsController extends AppController
         }
 		return $vector_retorno;
     }
-	public function calcular_disponibilidad_efectivo($idTurno = null)
-	{
-		$vector_retorno = [];
 
-		$efectivo_bolivar_fiscal = 0;
-		$efectivo_dolar_fiscal = 0;
-		$efectivo_euro_fiscal = 0;
-
-		$efectivo_bolivar_compra_fiscal = 0;
-		$efectivo_dolar_compra_fiscal = 0;
-		$efectivo_euro_compra_fiscal = 0;
-		
-		$efectivo_bolivar_vuelto_compra_fiscal = 0;
-		$efectivo_dolar_vuelto_compra_fiscal = 0;
-		$efectivo_euro_vuelto_compra_fiscal = 0;
-		
-		$efectivo_dolar_reintegro_fiscal = 0;
-
-		$efectivo_bolivar_no_fiscal = 0;
-		$efectivo_dolar_no_fiscal = 0;
-		$efectivo_euro_no_fiscal = 0;
-		
-		$efectivo_bolivar_compra_no_fiscal = 0;
-		$efectivo_dolar_compra_no_fiscal = 0;
-		$efectivo_euro_compra_no_fiscal = 0;
-		
-		$efectivo_bolivar_vuelto_compra_no_fiscal = 0;
-		$efectivo_dolar_vuelto_compra_no_fiscal = 0;
-		$efectivo_euro_vuelto_compra_no_fiscal = 0;
-		
-		$efectivo_dolar_reintegro_no_fiscal = 0;
-
-		$vector_efectivos = [];
-
-		$pagos = $this->Bills->Payments->find('all')
-			->contain(['Bills'])
-			->where(['Payments.turn' => $idTurno, 'Payments.annulled' => 0, 'Payments.payment_type' => 'Efectivo', ['OR' => [['Bills.tipo_documento' => 'Pedido'], ['Bills.tipo_documento' => 'Recibo de anticipo'], ['Bills.tipo_documento' => 'Factura']]]]);
-
-		if ($pagos->count() > 0)
-		{
-			foreach ($pagos as $pago)
-			{
-				if ($pago->fiscal == 1)
-				{
-					if ($pago->moneda == "Bs.")
-					{
-						$efectivo_bolivar_fiscal += $pago->amount;
-					}
-					elseif ($pago->moneda == '$')
-					{
-						$efectivo_dolar_fiscal += $pago->amount;
-					}
-					else
-					{
-						$efectivo_euro_fiscal += $pago->amount;
-					}
-				}
-				else
-				{
-					if ($pago->moneda == "Bs.")
-					{
-						$efectivo_bolivar_no_fiscal += $pago->amount;
-					}
-					elseif ($pago->moneda == '$')
-					{
-						$efectivo_dolar_no_fiscal += $pago->amount;
-					}
-					else
-					{
-						$efectivo_euro_no_fiscal += $pago->amount;
-					}
-				}
-			}
-		}
-		$recibos = $this->Bills->find('all')
-			->where(['turn' => $idTurno, 'annulled' => 0, ['OR' => [['SUBSTRING(tipo_documento, 1, 16) =' => 'Recibo de compra'], ['SUBSTRING(tipo_documento, 1, 26) =' => 'Recibo de vuelto de compra'], ['SUBSTRING(tipo_documento, 1, 19) =' => 'Recibo de reintegro']]]]);
-
-		if ($recibos->count() > 0)
-		{
-			foreach ($recibos as $recibo)
-			{
-				if ($recibo->tipo_documento == "Recibo de compra")
-				{
-					if ($recibo->moneda_id == 1)
-					{
-						$efectivo_bolivar_compra_fiscal += $recibo->amount_paid;
-					}
-					elseif ($recibo->moneda_id == 2)
-					{
-						$efectivo_dolar_compra_fiscal += $recibo->amount_paid;
-					}
-					else
-					{
-						$efectivo_euro_compra_fiscal += $recibo->amount_paid;
-					}
-				}
-				elseif ($recibo->tipo_documento == "Recibo de vuelto de compra")
-				{
-					if ($recibo->moneda_id == 1)
-					{
-						$efectivo_bolivar_vuelto_compra_fiscal += $recibo->amount_paid;
-					}
-					elseif ($recibo->moneda_id == 2)
-					{
-						$efectivo_dolar_vuelto_compra_fiscal += $recibo->amount_paid;
-					}
-					else
-					{
-						$efectivo_euro_vuelto_compra_fiscal += $recibo->amount_paid;
-					}
-				}
-				elseif ($recibo->tipo_documento == "Recibo de reintegro")
-				{
-					$efectivo_dolar_reintegro_fiscal += $recibo->amount_paid;
-				}
-				elseif ($recibo->tipo_documento == "Recibo de compra de pedido")
-				{
-					if ($recibo->moneda_id == 1)
-					{
-						$efectivo_bolivar_compra_no_fiscal += $recibo->amount_paid;
-					}
-					elseif ($recibo->moneda_id == 2)
-					{
-						$efectivo_dolar_compra_no_fiscal += $recibo->amount_paid;
-					}
-					else
-					{
-						$efectivo_euro_compra_no_fiscal += $recibo->amount_paid;
-					}
-				}
-				elseif ($recibo->tipo_documento == "Recibo de vuelto de compra de pedido")
-				{
-					if ($recibo->moneda_id == 1)
-					{
-						$efectivo_bolivar_vuelto_compra_no_fiscal += $recibo->amount_paid;
-					}
-					elseif ($recibo->moneda_id == 2)
-					{
-						$efectivo_dolar_vuelto_compra_no_fiscal += $recibo->amount_paid;
-					}
-					else
-					{
-						$efectivo_euro_vuelto_compra_no_fiscal += $recibo->amount_paid;
-					}
-				}
-				elseif ($recibo->tipo_documento == "Recibo de reintegro de pedido")
-				{
-					$efectivo_dolar_reintegro_no_fiscal += $recibo->amount_paid;
-				}
-			}
-		}
-
-		$disponible_bolivar_fiscal = $efectivo_bolivar_fiscal - $efectivo_bolivar_compra_fiscal + $efectivo_bolivar_vuelto_compra_fiscal; 
-		$vector_efectivos[] = ["origen" => "Facturas", "moneda" => "bolivar", "orden" => "1", "monto" => $disponible_bolivar_fiscal];
-
-		$disponible_bolivar_no_fiscal = $efectivo_bolivar_no_fiscal - $efectivo_bolivar_compra_no_fiscal + $efectivo_bolivar_vuelto_compra_no_fiscal;
-		$vector_efectivos[] = ["origen" => "Pedidos", "moneda" => "bolivar", "orden" => "1", "monto" => $disponible_bolivar_no_fiscal];
-
-		$disponible_dolar_fiscal = $efectivo_dolar_fiscal - $efectivo_dolar_compra_fiscal + $efectivo_dolar_vuelto_compra_fiscal - $efectivo_dolar_reintegro_fiscal; 
-		$vector_efectivos[] = ["origen" => "Facturas", "moneda" => "dolar", "orden" => "2", "monto" => $disponible_dolar_fiscal];
-
-		$disponible_dolar_no_fiscal = $efectivo_dolar_no_fiscal - $efectivo_dolar_compra_no_fiscal + $efectivo_dolar_vuelto_compra_no_fiscal  - $efectivo_dolar_reintegro_no_fiscal;
-		$vector_efectivos[] = ["origen" => "Pedidos", "moneda" => "dolar", "orden" => "2", "monto" => $disponible_dolar_no_fiscal];
-
-		$disponible_euro_fiscal = $efectivo_euro_fiscal - $efectivo_euro_compra_fiscal + $efectivo_euro_vuelto_compra_fiscal; 
-		$vector_efectivos[] = ["origen" => "Facturas", "moneda" => "euro", "orden" => "3", "monto" => $disponible_euro_fiscal];
-
-		$disponible_euro_no_fiscal = $efectivo_euro_no_fiscal - $efectivo_euro_compra_no_fiscal + $efectivo_euro_vuelto_compra_no_fiscal;
-		$vector_efectivos[] = ["origen" => "Pedidos", "moneda" => "euro", "orden" => "3", "monto" => $disponible_euro_no_fiscal];
-
-		return $vector_efectivos;
-	}
 }

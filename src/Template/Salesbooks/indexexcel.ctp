@@ -28,6 +28,7 @@ $omitir_numeros_control =
                         <td style=" text-align: center;">Base</td>
                         <td style=" text-align: center;">Alicuota</td>
                         <td style=" text-align: center;">IVA</td>
+                        <td style=" text-align: center;">IGTF</td>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,6 +64,7 @@ $omitir_numeros_control =
                                 <td><?= $invoice->base ?></td>
                                 <td><?= $invoice->alicuota ?></td>
                                 <td><?= $invoice->iva ?></td>
+                                <td><?= number_format($invoice->igtf, 2, ",", ".") ?></td>
                             </tr>
                         <?php
                         } 

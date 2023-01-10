@@ -3,14 +3,18 @@ Pendiente:
 Para el reporte del seguro, se agregó la columna "Código Colegio San Gabriel" para identificar los alumnos inscritos después del 
 proceso de inscripción regular. Se debe modificar el controlador y el reporte para que haga la comparación usando el código colegio San Gabriel que corresponde al ID del estudiante
 Del IGTF:
-- En el momento de guardar la factura se crea la nota de crédito del descuento:
-En el BillsController guiarme por: agregaNotaContable
-En el ConceptsController guiarme por: agregaNotaContable
-La nota de crédito solo debe tener un renglón: Descuento por pronto pago
-En el reporte de cierre:
-- Distribuir las compras entre las facturas y los pedidos
-- Agregar un renglón IGTF en el cuadro principal y en el detalle de la factura
-- Colocar la fecha en las páginas
+- Restringir en el create invoice que solo se puedan dar sobrantes de dolar. Verificando que haya pagos en dólares en la cobranza
+
+07/12/2022
+Módulos modificados IGTG
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/establecer_monto_reintegro.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/invoice.ctp
+
+No-/opt/lampp/htdocs/sistemasangabriel/src/Model/Table/TurnsTable.php
+No-/opt/lampp/htdocs/sistemasangabriel/src/Model/Table/EfectivosTable.php
+No-/opt/lampp/htdocs/sistemasangabriel/src/Model/Entity/Efectivo.php
+No-/opt/lampp/htdocs/sistemasangabriel/src/Controller/EfectivosController.php
 
 22/11/2022
 Módulos modificados IGTF

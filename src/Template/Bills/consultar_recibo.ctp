@@ -14,9 +14,14 @@
                         'Pedido' => 'Pedido',
                         'Recibo de anticipo' => 'Recibo de anticipo',
                         'Recibo de compra' => 'Recibo de compra',
+                        'Recibo de compra de pedido' => 'Recibo de compra de pedido',
                         'Recibo de reintegro' => 'Recibo de reintegro',
+                        'Recibo de reintegro de pedido' => 'Recibo de reintegro de pedido',
                         'Recibo de servicio educativo' => 'Recibo de servicio educativo',
-                        'Recibo de vuelto de compra' => 'Recibo de vuelto de compra',]]); 
+                        'Recibo de sobrante' => 'Recibo de sobrante',
+                        'Recibo de sobrante de pedido' => 'Recibo de sobrante de pedido',
+                        'Recibo de vuelto de compra' => 'Recibo de vuelto de compra',
+                        'Recibo de vuelto de compra de pedido' => 'Recibo de vuelto de compra de pedido']]); 
                     ?>
                 </fieldset>   
                 <?= $this->Form->button(__('Buscar'), ['class' =>'btn btn-success']) ?>

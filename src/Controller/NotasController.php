@@ -18,7 +18,7 @@ class NotasController extends AppController
      */
     public function index()
     {
-        $Notas = $this->paginate($this->Notas);
+        $notas = $this->paginate($this->Notas);
 
         $this->set(compact('notas'));
         $this->set('_serialize', ['notas']);

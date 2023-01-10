@@ -44,6 +44,10 @@ class TurnsTable extends Table
             'foreignKey' => 'user_id',
             'joinType' => 'INNER'
         ]);
+
+        $this->hasMany('Efectivos', [
+            'foreignKey' => 'turn_id'
+        ]);
     }
 
     /**

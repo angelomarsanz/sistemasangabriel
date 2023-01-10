@@ -323,7 +323,7 @@ class SalesbooksController extends AppController
                 {
                     $salesbook->descuento_recargo = $invoicesBill->amount;
 				    $salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid + $invoicesBill->amount;
-				    $salesbook->ventas_exoneradas = $invoicesBill->amount_paid + $invoicesBill->amount;
+				    $salesbook->ventas_exoneradas = $invoicesBill->amount_paid;
                 }
                 else
                 {
@@ -344,6 +344,7 @@ class SalesbooksController extends AppController
 		$salesbook->base = "";
 		$salesbook->alicuota = "16%";
 		$salesbook->iva = 0;
+        $salesbook->igtf = round($invoicesBill->monto_igtf * $invoicesBill->tasa_cambio, 2);
 
 		if (!($this->Salesbooks->save($salesbook))) 
 		{

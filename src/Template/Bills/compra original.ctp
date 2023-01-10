@@ -1,19 +1,18 @@
 <div class="row">
     <div class="col-md-4">
 		<div class="page-header">
-	        <h3>Recibo de vuelto de compra</h3>
+	        <h3>Recibo de compra</h3>
 	    </div>
 	    <?= $this->Form->create() ?>
 	        <fieldset>
 		    	<?php
-					echo $this->Form->input('id_recibo_original', ['id' => 'id_recibo_original', 'label' => 'Este vuelto corresponde al recibo con el Nro.', 'required' => 'required', 'options' => $opciones_recibos]);
-					echo $this->Form->input('concepto', ['type' => 'text', 'label' => 'Concepto:', 'required' => 'required']);
-	                echo $this->Form->input('monto', ['id' => 'monto', 'type' => 'number', 'label' => 'Monto:', 'value' => 0, 'required' => 'required']);
-					echo $this->Form->input('moneda', ['label' => 'Moneda:', 'id' => 'moneda', 'required' => 'required', 'options' => 
+					echo $this->Form->input('moneda', ['label' => 'Moneda:', 'id' => 'moneda', 'options' => 
 						[null => '',
-						'1' => 'Bs.',
 						'2' => '$',
-						'3' => '€',]]);
+						'3' => '€',
+						'1' => 'Bs.']]);
+					echo $this->Form->input('concepto', ['type' => 'text', 'label' => 'Concepto:']);
+	                echo $this->Form->input('monto', ['id' => 'monto', 'type' => 'number', 'label' => 'Monto:', 'value' => 0]);
 		    	?>
 		    </fieldset>
         	<?= $this->Form->button(__('Guardar'), ['id' => 'guardar', 'class' =>'btn btn-success']) ?>

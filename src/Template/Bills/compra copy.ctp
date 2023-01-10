@@ -23,20 +23,8 @@
 				if ($efectivo["origen"] == "Facturas")
 				{
 					$monto = number_format($efectivo["monto"], 2, ",", ".");
-					if ($efectivo["moneda"] == "bolivar")
-					{
-						$moneda = "Bs.";
-					}
-					elseif ($efectivo["moneda"] == "dolar")
-					{
-						$moneda = "$";
-					}
-					else
-					{
-						$moneda = "€";
-					}
 					echo "<div class='col-md-2'>";
-					echo $this->Form->input('facturas_'.$efectivo["moneda"], ['type' => 'text', 'label' => $moneda, 'value' => $monto, 'disabled' => 'disabled']);
+					echo $this->Form->input('facturas_'.$efectivo["moneda"], ['type' => 'text', 'label' => $efectivo["moneda"], 'value' => $monto, 'disabled' => 'disabled']);
 					echo "</div>";
 				}
 			}
@@ -48,20 +36,8 @@
 				if ($efectivo["origen"] == "Pedidos")
 				{
 					$monto = number_format($efectivo["monto"], 2, ",", ".");
-					if ($efectivo["moneda"] == "bolivar")
-					{
-						$moneda = "Bs.";
-					}
-					elseif ($efectivo["moneda"] == "dolar")
-					{
-						$moneda = "$";
-					}
-					else
-					{
-						$moneda = "€";
-					}
 					echo "<div class='col-md-2'>";
-					echo $this->Form->input('pedidos_'.$efectivo["moneda"], ['type' => 'text', 'label' => $moneda, 'value' => $monto, 'disabled' => 'disabled']);
+					echo $this->Form->input('pedidos_'.$efectivo["moneda"], ['type' => 'text', 'label' => $efectivo["moneda"], 'value' => $monto, 'disabled' => 'disabled']);
 					echo "</div>";
 				}
 			}
@@ -81,16 +57,8 @@
 			echo '<div class="row">';
 				echo '<div class="col-md-6">';
 					echo $this->Form->input('concepto', ['id' => 'concepto', 'type' => 'text', 'label' => 'Concepto:', 'required' => 'required']);
-					echo $this->Form->input('monto', ['id' => 'monto', 'type' => 'number', 'label' => 'Monto:', 'value' => 0, 'step' => 0.01,]);
-					echo '<div id="mensaje_monto" class="nover alert alert-danger"></div>';
-					echo $this->Form->input('moneda', ['label' => 'Moneda:', 'id' => 'moneda', 'options' => 
-					[null => '',
-					'1' => 'Bs.',
-					'2' => '$',
-					'3' => '€']]);
 				echo '</div>';
 			echo '</div>';
-			/*
 			echo '<div class="row">';
 				echo '<div class="col-md-2">';
 					echo $this->Form->input('monto_bolivar', ['id' => 'monto_bolivar', 'type' => 'number', 'label' => 'Bs:', 'value' => 0]);
@@ -105,7 +73,6 @@
 					echo '<div id="mensaje_monto_euro" class="nover alert alert-danger"></div>';
 				echo '</div>';
 			echo '<div>';
-			*/
 		?>
 	</fieldset>
 	<div class="row">
@@ -116,39 +83,14 @@
 <?= $this->Form->end() ?>
 <script>
 	var vector_efectivos = <?= json_encode($vector_efectivos, JSON_FORCE_OBJECT) ?>;
+	var tasa_dolar_bolivar = <?= $tasa_dolar_bolivar ?>;
+	var tasa_euro_bolivar = <?= $tasa_euro_bolivar ?>;
+	var cadena_tasa_dolar_euro = (tasa_euro_bolivar / tasa_dolar_bolivar).toFixed(5);
+	var tasa_dolar_euro = parseFloat(cadena_tasa_dolar_euro);
 
 	function dosDecimales(numero)
 	{
 		return Number(Math.round(numero+'e'+2)+'e-'+2);
-	}
-
-	function validar_monto(e)
-	{
-		$("#guardar").attr('disabled', true);
-		$("#mensaje_monto").html("");
-		if ($("#mensaje_monto").hasClass("nover") == false)
-		{
-			$("#mensaje_monto").addClass("nover");
-		}	
-		if (parseFloat($("#monto").val()) == 0)
-		{
-			e.preventDefault();
-			$("#mensaje_monto").html("Monto inválido");
-			$("#mensaje_monto").removeClass("nover");
-		}	
-		else
-		{
-			$.each(vector_efectivos, function(indice, valor) 
-			{
-				if ($("#origen").val() == valor.origen && $("#moneda").val() == valor.orden && parseFloat($("#monto").val()) > valor.monto)
-				{
-					e.preventDefault();
-					$("#mensaje_monto").html("Monto inválido");
-					$("#mensaje_monto").removeClass("nover");
-				}
-			});
-		}
-		$("#guardar").attr('disabled', false);
 	}
 
 	function validar_montos(e)
@@ -212,30 +154,15 @@
 		});
         $('#guardar').on("click", function(e) 
 		{  
-			validar_monto(e);       
+			validar_montos(e);       
 		});
 		$("#concepto").keypress(function(e) 
 		{
 			if(e.which == 13) 
 			{
-				validar_monto(e);
+				validar_montos(e);
 			}
 		});
-		$("#moneda").keypress(function(e) 
-		{
-			if(e.which == 13) 
-			{
-				validar_monto(e);
-			}
-		});
-		$("#monto").keypress(function(e) 
-		{
-			if(e.which == 13) 
-			{
-				validar_monto(e);
-			}
-		});
-		/*
 		$("#monto_bolivar").keypress(function(e) 
 		{
 			if(e.which == 13) 
@@ -257,6 +184,5 @@
 				validar_montos(e);
 			}
 		});
-		*/
 	});
 </script>

@@ -307,7 +307,7 @@ class ConceptsController extends AppController
 		
 		return $codigoRetorno;
 	}
-	public function conceptosPedidoFactura($idPedido = null, $idFactura = null)
+	public function conceptosPedidoFactura($idPedido = null, $idFactura = null, $tasa_dolar_original = null, $tasa_dolar_actual = null)
 	{
 		$codigoRetorno = 0;
 		
@@ -326,7 +326,11 @@ class ConceptsController extends AppController
 				$nuevoConcepto->student_name = $concepto->student_name;
 				$nuevoConcepto->transaction_identifier = $concepto->transaction_identifier;
 				$nuevoConcepto->concept = $concepto->concept;
-				$nuevoConcepto->amount = $concepto->amount;
+
+				$monto_dolar_concepto = round($concepto->amount/$tasa_dolar_original, 2);
+				$nuevo_monto_bolivar_concepto = round($monto_dolar_concepto * $tasa_dolar_actual, 2);
+
+				$nuevoConcepto->amount = $nuevo_monto_bolivar_concepto;
 				$nuevoConcepto->observation = $concepto->observation;
 				$nuevoConcepto->annulled = 0;
 				$nuevoConcepto->concept_migration = 0;		

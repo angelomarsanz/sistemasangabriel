@@ -421,15 +421,13 @@ class BillsController extends AppController
 				{
 					if (substr($transaction->monthlyPayment, 0, 10) == "Matrícula" || substr($transaction->monthlyPayment, 0, 14) == "Seguro escolar" || substr($transaction->monthlyPayment, 0, 3) == "Ago")
 					{
-						if ($this->headboard['indicador_pedido'] == 0)
-						{
-							$indicadorFacturaPendiente = 1;
-						}
+						$indicadorFacturaPendiente = 1;
 					} 
 					if (substr($transaction->monthlyPayment, 0, 18) == "Servicio educativo")
 					{
 						$indicador_servicio_educativo = 1;
 					} 
+
 				}
 			}
 			
@@ -2468,38 +2466,12 @@ class BillsController extends AppController
     public function crearReciboAdicional($idParentsandguardian = null, $idDocumentoPadre = null, $tipoRecibo = null, $moneda = null, $monto = null)
     {       
 		$this->autoRender = false;
-
-		$recibos_de_pedidos =
-			[
-				"Recibo de compra de pedido",
-				"Recibo de reintegro de pedido",
-				"Recibo de sobrante de pedido",
-				"Recibo de vuelto de compra de pedido"
-			];
-
-		$indicador_recibo_de_pedido = 0;
-
+								               
+        $consecutiveReceipt = new ConsecutivereceiptsController();
+		
 		$resultado = ['codigoRetorno' => 0, 'numeroRecibo' => 0];
-
-		foreach ($recibos_de_pedidos as $recibo)
-		{
-			if ($recibo == $tipoRecibo)
-			{
-				$indicador_recibo_de_pedido = 1;
-				break;
-			}
-		}
-
-		if ($indicador_recibo_de_pedido == 1)
-		{
-        	$recibo_pedido = new RecibospedidosController();		
-			$numeroRecibo = $recibo_pedido->add();
-		}
-		else
-		{								               
-        	$consecutiveReceipt = new ConsecutivereceiptsController();		
-			$numeroRecibo = $consecutiveReceipt->add();
-		}
+		
+		$numeroRecibo = $consecutiveReceipt->add();
 		
 		$bill = $this->Bills->newEntity();
 		
