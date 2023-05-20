@@ -2499,36 +2499,84 @@ class StudentsController extends AppController
 		
 		return $arrayMark;
 	}
+
     public function editStatus($id = null, $controller = null, $action = null)
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
 		
         $currentDate = Time::now();
+
+		$this->loadModel('Schools');
+		
+		$school = $this->Schools->get(2);
+			
+		$actual_anio_matricula = $school->current_year_registration;
+
+		$proximo_anio_matricula = $school->next_year_registration;
+
+		$controlador_transacciones = new StudenttransactionsController();
 		
         $student = $this->Students->get($id);
         
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
             $student = $this->Students->patchEntity($student, $this->request->data);
-            
+
+			if ($student->brothers_in_school == 0)
+			{
+				$anio_matricula = $school->current_year_registration;
+			}
+			else
+			{
+				$anio_matricula = $school->next_year_registration;
+			}
+           
             $student->brothers_in_school = 0;
 
 			if ($student->student_condition == "Nuevo")
 			{
 				$student->student_condition = "Regular";
+				$student->scholarship = 0;
+				$student->becado_ano_anterior = 0;
+				$student->tipo_descuento_ano_anterior = "";
+				$student->descuento_ano_anterior = 0;
 				$student->new_student = true;
-				$student->level_of_study = "";
 				$student->section_id = 1;
 				$student->number_of_brothers = 0;
 				$student->balance = 0;	
 				$student->tipo_descuento = "";
-				$student->discount = 0;		
+				$student->discount = 0;	
+				$student->respaldo_primer_ano_inscripcion = 0;	
+				$student->respaldo_ultimo_ano_inscripcion = 0;	
+				$student->respaldo_seccion_id = 0;
+				$student->respaldo_nivel_de_estudio = "";
 			}
 		            
             if ($this->Students->save($student)) 
-            {			
-				$this->Flash->success(__('El estatus del alumno se actualizó correctamente'));
+            {	
+				$indicadorError = 0;
+
+				if ($student->new_student == true)
+				{
+					$concepto_matricula = "Matrícula ".$anio_matricula;
+
+					$transacciones_estudiantes = $this->Students->Studenttransactions->find('all')->where(['student_id' => $id,  'transaction_description' => $concepto_matricula]);
+									
+					if ($transacciones_estudiantes->count() == 0)
+					{
+						$indicadorError = $controlador_transacciones->createQuotasNew($id, $anio_matricula);
+					} 
+				}
+
+				if ($indicadorError == 0)
+				{
+					$this->Flash->success(__('El estatus del alumno se actualizó correctamente'));
+				}
+				else
+				{
+					$this->Flash->error(__('No se pudieron generar las cuotas del estudiante'));
+				}			
 				
                 if (isset($controller))
                 {
@@ -2544,8 +2592,8 @@ class StudentsController extends AppController
                 $this->Flash->error(__('El estatus del alumno no se pudo actualizar'));
             }
         }    
-        $this->set(compact('student'));
-        $this->set('_serialize', ['student']);
+        $this->set(compact('student', 'actual_anio_matricula', 'proximo_anio_matricula'));
+        $this->set('_serialize', ['student', 'actual_anio_matricula', 'proximo_anio_matricula']);
     }
     public function editSection($id = null, $controller = null, $action = null)
     {

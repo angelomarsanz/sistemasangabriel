@@ -579,59 +579,6 @@
 						</div>
 					<?php endif; ?>
 
-					<?php if ($indicadorSobrantes == 1): ?>
-						<div>
-							<div class="row">
-								<div class="col-md-12">					
-									<table>
-										<thead>
-											<tr>
-												<th>&nbsp;</th>
-											</tr>	
-											<tr>
-												<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE SOBRANTES (VUELTOS PENDIENTES POR ENTREGAR):</b></th>
-											</tr>
-										</thead>
-									</table>
-								</div>
-							</div>
-						</div>
-						<div>
-							<div class="row">
-								<div class="col-md-12">					
-									<table class="table table-striped table-hover">
-										<thead>
-											<tr>
-												<th style="text-align: center;"><b>Familia</b></th>
-												<th style="text-align: center;"><b>Recibo</b></th>
-												<th style="text-align: center;"><b>Tipo doc</b></th>
-												<th style="text-align: center;"><b>Monto $.</b></th>
-											</tr>
-										</thead>
-										<tbody>				
-											<?php foreach ($facturas as $factura):  
-												if ($factura->tipo_documento == "Recibo de sobrante"): ?>
-													<tr>
-														<td><?= $factura->parentsandguardian->family ?></td>
-														<td style="text-align: center;"><?= $factura->control_number ?></td>
-														<td><?= $factura->tipo_documento ?></td>
-														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
-													</tr>
-												<?php endif;
-											endforeach; ?>
-											<tr>
-												<td><b>Totales</b></td>
-												<td></td>
-												<td></td>
-												<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					<?php endif; ?>	
-
 					<?php if ($indicadorCompras == 1): ?>
 						<div>
 							<div class="row">
@@ -701,6 +648,59 @@
 						</div>
 					<?php endif; ?>
 					
+					<?php if ($indicadorSobrantes == 1): ?>
+						<div>
+							<div class="row">
+								<div class="col-md-12">					
+									<table>
+										<thead>
+											<tr>
+												<th>&nbsp;</th>
+											</tr>	
+											<tr>
+												<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE SOBRANTES (VUELTOS PENDIENTES POR ENTREGAR):</b></th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+							</div>
+						</div>
+						<div>
+							<div class="row">
+								<div class="col-md-12">					
+									<table class="table table-striped table-hover">
+										<thead>
+											<tr>
+												<th style="text-align: center;"><b>Familia</b></th>
+												<th style="text-align: center;"><b>Recibo</b></th>
+												<th style="text-align: center;"><b>Tipo doc</b></th>
+												<th style="text-align: center;"><b>Monto $.</b></th>
+											</tr>
+										</thead>
+										<tbody>				
+											<?php foreach ($facturas as $factura):  
+												if ($factura->tipo_documento == "Recibo de sobrante"): ?>
+													<tr>
+														<td><?= $factura->parentsandguardian->family ?></td>
+														<td style="text-align: center;"><?= $factura->control_number ?></td>
+														<td><?= $factura->tipo_documento ?></td>
+														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+													</tr>
+												<?php endif;
+											endforeach; ?>
+											<tr>
+												<td><b>Totales</b></td>
+												<td></td>
+												<td></td>
+												<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					<?php endif; ?>	
+
 					<?php if ($indicadorNotasCredito == 1): ?>
 						<div>
 							<div class="row">
@@ -954,10 +954,10 @@
 											foreach ($documentosAnulados as $anulado):  
 												if ($anulado->fiscal == 0):
 													if ($anulado->tipo_documento != "Pedido"
+														&& $anulado->tipo_documento != "Recibo de compra de pedido"
 													 	&& $anulado->tipo_documento != "Recibo de reintegro de pedido"
 													 	&& $anulado->tipo_documento != "Recibo de sobrante de pedido"
-														 && $anulado->tipo_documento != "Recibo de compra de pedido"
-														&& $anulado->tipo_documento != "Recibo de vuelto de compra de pedido"): ?> 
+														&& $anulado->tipo_documento != "Recibo de compra de pedido"): ?> 
 														<tr>
 															<td style="text-align: center;"><?= $anulado->control_number ?></td>
 															<td style="text-align: center;"><?= $anulado->tipo_documento ?></td>
@@ -1352,59 +1352,6 @@
 						</div>
 					<?php endif; ?>
 					
-					<?php if ($indicadorSobrantesPedidos == 1): ?>
-						<div>
-							<div class="row">
-								<div class="col-md-12">					
-									<table>
-										<thead>
-											<tr>
-												<th>&nbsp;</th>
-											</tr>	
-											<tr>
-												<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE SOBRANTES DE PEDIDOS (VUELTOS PENDIENTES POR ENTREGAR):</b></th>
-											</tr>
-										</thead>
-									</table>
-								</div>
-							</div>
-						</div>
-						<div>
-							<div class="row">
-								<div class="col-md-12">					
-									<table class="table table-striped table-hover">
-										<thead>
-											<tr>
-												<th style="text-align: center;"><b>Familia</b></th>
-												<th style="text-align: center;"><b>Recibo</b></th>
-												<th style="text-align: center;"><b>Tipo doc</b></th>
-												<th style="text-align: center;"><b>Monto $.</b></th>
-											</tr>
-										</thead>
-										<tbody>				
-											<?php foreach ($facturas as $factura):  
-												if ($factura->tipo_documento == "Recibo de sobrante de pedido"): ?>
-													<tr>
-														<td><?= $factura->parentsandguardian->family ?></td>
-														<td style="text-align: center;"><?= $factura->control_number ?></td>
-														<td><?= $factura->tipo_documento ?></td>
-														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
-													</tr>
-												<?php endif;
-											endforeach; ?>
-											<tr>
-												<td><b>Totales</b></td>
-												<td></td>
-												<td></td>
-												<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					<?php endif; ?>
-
 					<?php if ($indicadorComprasPedidos == 1): ?>
 						<div>
 							<div class="row">
@@ -1474,7 +1421,7 @@
 						</div>
 					<?php endif; ?>
 
-					<?php if ($indicadorPedidosAnulados == 1): ?>
+					<?php if ($indicadorSobrantesPedidos == 1): ?>
 						<div>
 							<div class="row">
 								<div class="col-md-12">					
@@ -1484,7 +1431,7 @@
 												<th>&nbsp;</th>
 											</tr>	
 											<tr>
-												<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE PEDIDOS ANULADOS:</b></th>
+												<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE SOBRANTES DE PEDIDOS (VUELTOS PENDIENTES POR ENTREGAR):</b></th>
 											</tr>
 										</thead>
 									</table>
@@ -1497,31 +1444,29 @@
 									<table class="table table-striped table-hover">
 										<thead>
 											<tr>
-												<th style="text-align: center;"><b>Fecha</b></th>
 												<th style="text-align: center;"><b>Familia</b></th>
-												<th style="text-align: center;"><b>Nro. Pedido</b></th>
-												<th style="text-align: center;"><b>Monto $</b></th>
-												<th style="text-align: center;"><b>Monto Bs.</b></th>
+												<th style="text-align: center;"><b>Recibo</b></th>
+												<th style="text-align: center;"><b>Tipo doc</b></th>
+												<th style="text-align: center;"><b>Monto $.</b></th>
 											</tr>
 										</thead>
 										<tbody>				
-											<?php 
-											$totalBolivar = 0;
-
-											foreach ($documentosAnulados as $anulado):  
-												if ($anulado->fiscal == 0):
-													if ($anulado->tipo_documento == "Pedido"): ?> 
-														<tr>												
-															<td style="text-align: center;"><?= $anulado->date_and_time->format('d-m-Y') ?></td>
-															<td style="text-align: center;"><?= $anulado->Parentsandguardian->family ?></td>
-															<td style="text-align: center;"><?= $anulado->bill_number ?></td>
-															<td style="text-align: center;">number_format(round($anulado->amount_paid * $anulado->tasa_cambio, 2), 2, ",", ".") ?></td>
-															<td style="text-align: center;"><?= $anulado->amount_paid ?></td>
-														</tr>
-													<?php 
-													endif;
-												endif;
+											<?php foreach ($facturas as $factura):  
+												if ($factura->tipo_documento == "Recibo de sobrante de pedido"): ?>
+													<tr>
+														<td><?= $factura->parentsandguardian->family ?></td>
+														<td style="text-align: center;"><?= $factura->control_number ?></td>
+														<td><?= $factura->tipo_documento ?></td>
+														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+													</tr>
+												<?php endif;
 											endforeach; ?>
+											<tr>
+												<td><b>Totales</b></td>
+												<td></td>
+												<td></td>
+												<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
+											</tr>
 										</tbody>
 									</table>
 								</div>
@@ -1539,7 +1484,7 @@
 												<th>&nbsp;</th>
 											</tr>	
 											<tr>
-												<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS ANULADOS:</b></th>
+												<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE PEDIDOS Y/O RECIBOS ANULADOS:</b></th>
 											</tr>
 										</thead>
 									</table>
@@ -1552,7 +1497,7 @@
 									<table class="table table-striped table-hover">
 										<thead>
 											<tr>
-												<th style="text-align: center;"><b>Nro. Recibo</b></th>
+												<th style="text-align: center;"><b>Pedido o Recibo</b></th>
 												<th style="text-align: center;"><b>Tipo doc</b></th>
 											</tr>
 										</thead>
@@ -1562,10 +1507,11 @@
 
 											foreach ($documentosAnulados as $anulado):  
 												if ($anulado->fiscal == 0):
-													if ($anulado->tipo_documento == "Recibo de reintegro de pedido"
-													 	|| $anulado->tipo_documento == "Recibo de sobrante de pedido"
+													if ($anulado->tipo_documento == "Pedido"
 														|| $anulado->tipo_documento == "Recibo de compra de pedido"
-														|| $anulado->tipo_documento == "Recibo de vuelto de compra de pedido"): ?> 
+													 	|| $anulado->tipo_documento == "Recibo de reintegro de pedido"
+													 	|| $anulado->tipo_documento == "Recibo de sobrante de pedido"
+														|| $anulado->tipo_documento == "Recibo de compra de pedido"): ?> 
 														<tr>
 															<td style="text-align: center;"><?= $anulado->control_number ?></td>
 															<td style="text-align: center;"><?= $anulado->tipo_documento ?></td>

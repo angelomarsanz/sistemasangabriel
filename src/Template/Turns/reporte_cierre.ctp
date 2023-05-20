@@ -22,6 +22,7 @@
 	<br />
     <div class="row">
         <div class="col-md-12">
+			<!-- Encabezado -->
 			<div>
 				<table style="width:100%; font-size: 14px; line-height: 16px;">
 					<tbody>
@@ -49,7 +50,10 @@
 					</tbody>
 				</table>
 			</div>
+
+			<!-- Documentos fiscales -->
 			<div>	
+				<!-- Pagos fiscales -->
 				<div>
 					<div class="row">
 						<div class="col-md-12">					
@@ -177,6 +181,8 @@
 						</div>
 					</div>
 				</div>
+
+				<!-- Resumen general formas de pago -->
 				<div>
 					<div class="row">
 						<div class="col-md-12">					
@@ -273,6 +279,7 @@
 					</div>
 				</div>
 
+				<!-- Detalle de facturas y anticipos de inscripción -->
 				<div>
 					<div class="row">
 						<div class="col-md-12">					
@@ -471,126 +478,7 @@
 						</div>
 					</div>
 				</div>	
-				<?php if ($indicadorCompras == 1): ?>
-					<div>
-						<div class="row">
-							<div class="col-md-12">					
-								<table>
-									<thead>
-										<tr>
-											<th>&nbsp;</th>
-										</tr>	
-										<tr>
-											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE COMPRAS DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
-										</tr>
-									</thead>
-								</table>
-							</div>
-						</div>
-					</div>
-					<div>
-						<div class="row">
-							<div class="col-md-12">					
-								<table class="table table-striped table-hover">
-									<thead>
-										<tr>
-											<th style="text-align: center;"><b>Familia</b></th>
-											<th style="text-align: center;"><b>No Recibo</b></th>
-											<th style="text-align: center;"><b>Tipo doc</b></th>
-											<th style="text-align: center;"><b>Monto $</b></th>
-											<th style="text-align: center;"><b>Monto €</b></th>
-											<th style="text-align: center;"><b>Monto Bs.</b></th>
-										</tr>
-									</thead>
-									<tbody>				
-										<?php $totalDolar = 0;
-										$totalEuro = 0;
-										$totalBolivar = 0;
-										foreach ($facturas as $factura):  
-											if ($factura->tipo_documento == "Recibo de compra"): ?> 
-												<tr>
-													<td><?= $factura->parentsandguardian->family ?></td>
-													<td style="text-align: center;"><?= $factura->bill_number ?></td>
-													<td><?= $factura->tipo_documento ?></td>
-													<?php if ($factura->moneda_id == 1):
-														$totalBolivar += $factura->amount_paid; ?>
-														<td></td><td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
-													<?php elseif ($factura->moneda_id == 2):
-														$totalDolar += $factura->amount_paid; ?>
-														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td><td></td>
-													<?php else:
-														$totalEuro += $factura->amount_paid; ?>
-														<td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td>
-													<?php endif; ?>
-												</tr>
-											<?php endif;
-										endforeach; ?>
-										<tr>
-											<td><b>Totales</b></td>
-											<td></td>
-											<td></td>
-											<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
-											<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>											
-											<td style="text-align: center;"><b><?= number_format($totalBolivar, 2, ",", ".") ?></b></td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-				<?php endif; ?>	
-				<?php if ($indicadorSobrantes == 1): ?>
-					<div>
-						<div class="row">
-							<div class="col-md-12">					
-								<table>
-									<thead>
-										<tr>
-											<th>&nbsp;</th>
-										</tr>	
-										<tr>
-											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE SOBRANTES (VUELTOS PENDIENTES POR ENTREGAR) DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
-										</tr>
-									</thead>
-								</table>
-							</div>
-						</div>
-					</div>
-					<div>
-						<div class="row">
-							<div class="col-md-12">					
-								<table class="table table-striped table-hover">
-									<thead>
-										<tr>
-											<th style="text-align: center;"><b>Familia</b></th>
-											<th style="text-align: center;"><b>Recibo</b></th>
-											<th style="text-align: center;"><b>Tipo doc</b></th>
-											<th style="text-align: center;"><b>Monto $.</b></th>
-										</tr>
-									</thead>
-									<tbody>				
-										<?php foreach ($facturas as $factura):  
-											if ($factura->tipo_documento == "Recibo de sobrante"): ?>
-												<tr>
-													<td><?= $factura->parentsandguardian->family ?></td>
-													<td style="text-align: center;"><?= $factura->control_number ?></td>
-													<td><?= $factura->tipo_documento ?></td>
-													<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
-												</tr>
-											<?php endif;
-										endforeach; ?>
-										<tr>
-											<td><b>Totales</b></td>
-											<td></td>
-											<td></td>
-											<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-				<?php endif; ?>
+
 				<?php if ($indicadorReintegros == 1): ?>
 					<div>
 						<div class="row">
@@ -659,6 +547,129 @@
 						</div>
 					</div>
 				<?php endif; ?>
+
+				<?php if ($indicadorSobrantes == 1): ?>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table>
+									<thead>
+										<tr>
+											<th>&nbsp;</th>
+										</tr>	
+										<tr>
+											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE SOBRANTES (VUELTOS PENDIENTES POR ENTREGAR) DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th style="text-align: center;"><b>Familia</b></th>
+											<th style="text-align: center;"><b>Recibo</b></th>
+											<th style="text-align: center;"><b>Tipo doc</b></th>
+											<th style="text-align: center;"><b>Monto $.</b></th>
+										</tr>
+									</thead>
+									<tbody>				
+										<?php foreach ($facturas as $factura):  
+											if ($factura->tipo_documento == "Recibo de sobrante"): ?>
+												<tr>
+													<td><?= $factura->parentsandguardian->family ?></td>
+													<td style="text-align: center;"><?= $factura->control_number ?></td>
+													<td><?= $factura->tipo_documento ?></td>
+													<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+												</tr>
+											<?php endif;
+										endforeach; ?>
+										<tr>
+											<td><b>Totales</b></td>
+											<td></td>
+											<td></td>
+											<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if ($indicadorCompras == 1): ?>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table>
+									<thead>
+										<tr>
+											<th>&nbsp;</th>
+										</tr>	
+										<tr>
+											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE COMPRAS DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th style="text-align: center;"><b>Familia</b></th>
+											<th style="text-align: center;"><b>No Recibo</b></th>
+											<th style="text-align: center;"><b>Tipo doc</b></th>
+											<th style="text-align: center;"><b>Monto $</b></th>
+											<th style="text-align: center;"><b>Monto €</b></th>
+											<th style="text-align: center;"><b>Monto Bs.</b></th>
+										</tr>
+									</thead>
+									<tbody>				
+										<?php $totalDolar = 0;
+										$totalEuro = 0;
+										$totalBolivar = 0;
+										foreach ($facturas as $factura):  
+											if ($factura->tipo_documento == "Recibo de compra"): ?> 
+												<tr>
+													<td><?= $factura->parentsandguardian->family ?></td>
+													<td style="text-align: center;"><?= $factura->bill_number ?></td>
+													<td><?= $factura->tipo_documento ?></td>
+													<?php if ($factura->moneda_id == 1):
+														$totalBolivar += $factura->amount_paid; ?>
+														<td></td><td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+													<?php elseif ($factura->moneda_id == 2):
+														$totalDolar += $factura->amount_paid; ?>
+														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td><td></td>
+													<?php else:
+														$totalEuro += $factura->amount_paid; ?>
+														<td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td>
+													<?php endif; ?>
+												</tr>
+											<?php endif;
+										endforeach; ?>
+										<tr>
+											<td><b>Totales</b></td>
+											<td></td>
+											<td></td>
+											<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
+											<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>											
+											<td style="text-align: center;"><b><?= number_format($totalBolivar, 2, ",", ".") ?></b></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>	
+
 				<?php if ($indicadorNotasCredito == 1): ?>
 					<div>
 						<div class="row">
@@ -716,6 +727,7 @@
 						</div>
 					</div>
 				<?php endif; ?>
+
 				<?php if ($indicadorNotasDebito == 1): ?>
 					<div>
 						<div class="row">
@@ -773,6 +785,7 @@
 						</div>
 					</div>
 				<?php endif; ?>
+
 				<?php if ($indicadorFacturasRecibos == 1): ?>
 					<div>
 						<div class="row">
@@ -830,6 +843,7 @@
 						</div>
 					</div>
 				<?php endif; ?>
+
 				<?php if ($indicadorFacturasAnuladas == 1): ?>
 					<div>
 						<div class="row">
@@ -875,6 +889,7 @@
 						</div>
 					</div>
 				<?php endif; ?>
+
 				<?php if ($indicadorRecibosAnulados == 1): ?>
 					<div>
 						<div class="row">
@@ -927,6 +942,7 @@
 				<?php endif; ?>
 			</div>
 		
+			<!-- Espacio de firmas de conformidad de los documentos fiscales -->
 			<div>
 				<div class="row">
 					<div class="col-md-12">					
@@ -970,17 +986,150 @@
 				</div>
 			</div>
 
+			<!-- Documentos no fiscales -->
 			<div>
+				<!-- Pedidos -->
+				<?php if (isset($vectorTotalesRecibidosPedidos)): ?>
+					<div class="saltopagina">
+						<div class="row">
+							<div class="col-md-12">					
+								<table>
+									<thead>
+										<tr>
+											<th style="font-size: 18px; line-height: 20px;"><b>PEDIDOS DEL <?= $turn->start_date->format('d-m-Y') ?></b></th>
+										</tr>
+										<tr>
+											<th>&nbsp;</th>
+										</tr>
+										<tr>
+											<th style="font-size: 14px; line-height: 16px;"><b>&nbsp;&nbsp;&nbsp;RECIBIDO EN:</b></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>			
+					<div>
+						<br />
+						<div class="row">
+							<div class="col-md-12">					
+								<table class="table table-striped table-hover">
+									<thead>	
+										<tr>
+											<th><b>Concepto</th>
+											<th style="text-align: center;"><b>Efvo $</b></th>
+											<th style="text-align: center;"><b>Efvo €</b></th>
+											<th style="text-align: center;"><b>Efvo Bs.</b></th>
+											<th style="text-align: center;"><b>Zelle $</b></th>
+											<th style="text-align: center;"><b>Euros €</b></th>
+											<th style="text-align: center;"><b>TDB/TDC Bs.</b></th>
+											<th style="text-align: center;"><b>Trans Bs.</b></th>
+											<th style="text-align: center;"><b>Dep Bs.</b></th>
+											<th style="text-align: center;"><b>Chq Bs.</b></th>
+										</tr>
+									</thead>
+									<tbody>
+										<?php foreach ($vectorTotalesRecibidosPedidos as $clave => $recibido):
+											if ($clave == "Menos reintegros"):
+												$reintegroEfectivoDolar = $recibido['Efectivo $'];
+												$reintegroEfectivoEuro = $recibido['Efectivo €'];
+												$reintegroEfectivoBolivar = $recibido['Efectivo Bs.'];
+												$reintegroZelle = $recibido['Zelle $'];
+												if (isset($recibido['Euros €'])):
+													$reintegroEuros = $recibido['Euros €'];
+												else:
+													$reintegroEuros = 0;
+												endif;
+												$reintegroTdbTdc = $recibido['TDB/TDC Bs.'];
+												$reintegroTransferencia = $recibido['Transferencia Bs.'];
+												$reintegroDeposito = $recibido['Depósito Bs.'];
+												$reintegroCheque = $recibido['Cheque Bs.'];										
+											else:
+												if ($clave == 'Total recibido de ' . $cajero || $clave == "Diferencia"): ?>
+													<tr>
+														<td><?= $clave ?></td>
+														<td></td>
+														<td></td>
+														<td></td>
+														<td></td>
+														<td></td>
+														<td></td>
+														<td></td>
+														<td></td>
+														<td></td>
+													</tr> 
+												<?php elseif ($clave == 'Total facturas + anticipos de inscripción'): ?> 												
+													<tr>
+														<td><b><?= $clave ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Efectivo $'], 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Efectivo €'], 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Efectivo Bs.'], 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Zelle $'], 2, ",", ".") ?></b></td>
+														<?php if (isset($recibido['Euros €'])): ?>
+															<td style="text-align: center;"><b><?= number_format($recibido['Euros €'], 2, ",", ".") ?></b></td>
+														<?php else: ?>
+															<td style="text-align: center;"><b><?= "0,00" ?></b></td>
+														<?php endif; ?>
+														<td style="text-align: center;"><b><?= number_format($recibido['TDB/TDC Bs.'], 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Transferencia Bs.'], 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Depósito Bs.'], 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Cheque Bs.'], 2, ",", ".") ?></b></td>
+													</tr>		
+												<?php elseif ($clave == "Total a recibir de " . $cajero): ?>
+													<tr>
+														<td><b><?= $clave ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Efectivo $'] - $reintegroEfectivoDolar, 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Efectivo €'] - $reintegroEfectivoEuro, 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Efectivo Bs.'] - $reintegroEfectivoBolivar, 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Zelle $'] - $reintegroZelle, 2, ",", ".") ?></b></td>
+														<?php if (isset($recibido['Euros €'])): ?>
+															<td style="text-align: center;"><b><?= number_format($recibido['Euros €'] - $reintegroEuros, 2, ",", ".") ?></b></td>
+														<?php else: ?>
+															<td style="text-align: center;"><b><?= "0,00" ?></b></td>
+														<?php endif; ?>
+														<td style="text-align: center;"><b><?= number_format($recibido['TDB/TDC Bs.'] - $reintegroTdbTdc, 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Transferencia Bs.'] - $reintegroTransferencia, 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Depósito Bs.'] - $reintegroDeposito, 2, ",", ".") ?></b></td>
+														<td style="text-align: center;"><b><?= number_format($recibido['Cheque Bs.'] - $reintegroCheque, 2, ",", ".") ?></b></td>
+													</tr>														
+												<?php else: ?>
+													<tr>
+														<td><?= $clave ?></td>
+														<td style="text-align: center;"><?= number_format($recibido['Efectivo $'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($recibido['Efectivo €'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($recibido['Efectivo Bs.'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($recibido['Zelle $'], 2, ",", ".") ?></td>
+														<?php if (isset($recibido['Euros €'])): ?>
+															<td style="text-align: center;"><?= number_format($recibido['Euros €'], 2, ",", ".") ?></td>
+														<?php else: ?>
+															<td style="text-align: center;"><?= "0,00" ?></td>
+														<?php endif; ?>													
+														<td style="text-align: center;"><?= number_format($recibido['TDB/TDC Bs.'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($recibido['Transferencia Bs.'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($recibido['Depósito Bs.'], 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($recibido['Cheque Bs.'], 2, ",", ".") ?></td>
+													</tr>
+												<?php endif;
+											endif;
+										endforeach; ?>	
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<!-- Detalle de pedidos -->
 				<div>
 					<div class="row">
 						<div class="col-md-12">					
-							<table class="saltopagina">
+							<table>
 								<thead>
 									<tr>
 										<th>&nbsp;</th>
 									</tr>	
 									<tr>
-										<th style="font-size: 18px; line-height: 20px;"><b>PEDIDOS DEL <?= $turn->start_date->format('d-m-Y') ?></b></th>
+										<th style="font-size: 18px; line-height: 20px;"><b>DETALLE DE PEDIDOS DEL <?= $turn->start_date->format('d-m-Y') ?></b></th>
 									</tr>
 									<tr>
 										<th>&nbsp;</th>
@@ -1166,127 +1315,6 @@
 					</div>
 				</div>
 
-				<?php if ($indicadorComprasPedidos == 1): ?>
-					<div>
-						<div class="row">
-							<div class="col-md-12">					
-								<table>
-									<thead>
-										<tr>
-											<th>&nbsp;</th>
-										</tr>	
-										<tr>
-											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE COMPRAS DE PEDIDO DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
-										</tr>
-									</thead>
-								</table>
-							</div>
-						</div>
-					</div>
-					<div>
-						<div class="row">
-							<div class="col-md-12">					
-								<table class="table table-striped table-hover">
-									<thead>
-										<tr>
-											<th style="text-align: center;"><b>Familia</b></th>
-											<th style="text-align: center;"><b>No Recibo</b></th>
-											<th style="text-align: center;"><b>Tipo doc</b></th>
-											<th style="text-align: center;"><b>Monto $</b></th>
-											<th style="text-align: center;"><b>Monto €</b></th>
-											<th style="text-align: center;"><b>Monto Bs.</b></th>
-										</tr>
-									</thead>
-									<tbody>				
-										<?php $totalDolar = 0;
-										$totalEuro = 0;
-										$totalBolivar = 0;
-										foreach ($facturas as $factura):  
-											if ($factura->tipo_documento == "Recibo de compra de pedido"): ?> 
-												<tr>
-													<td><?= $factura->parentsandguardian->family ?></td>
-													<td style="text-align: center;"><?= $factura->bill_number ?></td>
-													<td><?= $factura->tipo_documento ?></td>
-													<?php if ($factura->moneda_id == 1):
-														$totalBolivar += $factura->amount_paid; ?>
-														<td></td><td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
-													<?php elseif ($factura->moneda_id == 2):
-														$totalDolar += $factura->amount_paid; ?>
-														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td><td></td>
-													<?php else:
-														$totalEuro += $factura->amount_paid; ?>
-														<td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td>
-													<?php endif; ?>
-												</tr>
-											<?php endif;
-										endforeach; ?>
-										<tr>
-											<td><b>Totales</b></td>
-											<td></td>
-											<td></td>
-											<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
-											<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>											
-											<td style="text-align: center;"><b><?= number_format($totalBolivar, 2, ",", ".") ?></b></td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-				<?php endif; ?>
-				<?php if ($indicadorSobrantesPedidos == 1): ?>
-					<div>
-						<div class="row">
-							<div class="col-md-12">					
-								<table>
-									<thead>
-										<tr>
-											<th>&nbsp;</th>
-										</tr>	
-										<tr>
-											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE SOBRANTES DE PEDIDOS (VUELTOS PENDIENTES POR ENTREGAR) DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
-										</tr>
-									</thead>
-								</table>
-							</div>
-						</div>
-					</div>
-					<div>
-						<div class="row">
-							<div class="col-md-12">					
-								<table class="table table-striped table-hover">
-									<thead>
-										<tr>
-											<th style="text-align: center;"><b>Familia</b></th>
-											<th style="text-align: center;"><b>Recibo</b></th>
-											<th style="text-align: center;"><b>Tipo doc</b></th>
-											<th style="text-align: center;"><b>Monto $.</b></th>
-										</tr>
-									</thead>
-									<tbody>				
-										<?php foreach ($facturas as $factura):  
-											if ($factura->tipo_documento == "Recibo de sobrante de pedido"): ?>
-												<tr>
-													<td><?= $factura->parentsandguardian->family ?></td>
-													<td style="text-align: center;"><?= $factura->control_number ?></td>
-													<td><?= $factura->tipo_documento ?></td>
-													<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
-												</tr>
-											<?php endif;
-										endforeach; ?>
-										<tr>
-											<td><b>Totales</b></td>
-											<td></td>
-											<td></td>
-											<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-				<?php endif; ?>
-				
 				<?php if ($indicadorReintegrosPedidos == 1): ?>
 					<div>
 						<div class="row">
@@ -1356,7 +1384,7 @@
 					</div>
 				<?php endif; ?>			
 
-				<?php if ($indicadorRecibosAnuladosPedidos == 1): ?>
+				<?php if ($indicadorSobrantesPedidos == 1): ?>
 					<div>
 						<div class="row">
 							<div class="col-md-12">					
@@ -1366,7 +1394,7 @@
 											<th>&nbsp;</th>
 										</tr>	
 										<tr>
-											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE PEDIDOS Y/O RECIBOS ANULADOS EL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
+											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE SOBRANTES DE PEDIDOS (VUELTOS PENDIENTES POR ENTREGAR) DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 										</tr>
 									</thead>
 								</table>
@@ -1379,7 +1407,184 @@
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr>
-											<th style="text-align: center;"><b>Pedido o Recibo</b></th>
+											<th style="text-align: center;"><b>Familia</b></th>
+											<th style="text-align: center;"><b>Recibo</b></th>
+											<th style="text-align: center;"><b>Tipo doc</b></th>
+											<th style="text-align: center;"><b>Monto $.</b></th>
+										</tr>
+									</thead>
+									<tbody>				
+										<?php foreach ($facturas as $factura):  
+											if ($factura->tipo_documento == "Recibo de sobrante de pedido"): ?>
+												<tr>
+													<td><?= $factura->parentsandguardian->family ?></td>
+													<td style="text-align: center;"><?= $factura->control_number ?></td>
+													<td><?= $factura->tipo_documento ?></td>
+													<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+												</tr>
+											<?php endif;
+										endforeach; ?>
+										<tr>
+											<td><b>Totales</b></td>
+											<td></td>
+											<td></td>
+											<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>			
+
+				<?php if ($indicadorComprasPedidos == 1): ?>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table>
+									<thead>
+										<tr>
+											<th>&nbsp;</th>
+										</tr>	
+										<tr>
+											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE COMPRAS DE PEDIDO DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th style="text-align: center;"><b>Familia</b></th>
+											<th style="text-align: center;"><b>No Recibo</b></th>
+											<th style="text-align: center;"><b>Tipo doc</b></th>
+											<th style="text-align: center;"><b>Monto $</b></th>
+											<th style="text-align: center;"><b>Monto €</b></th>
+											<th style="text-align: center;"><b>Monto Bs.</b></th>
+										</tr>
+									</thead>
+									<tbody>				
+										<?php $totalDolar = 0;
+										$totalEuro = 0;
+										$totalBolivar = 0;
+										foreach ($facturas as $factura):  
+											if ($factura->tipo_documento == "Recibo de compra de pedido"): ?> 
+												<tr>
+													<td><?= $factura->parentsandguardian->family ?></td>
+													<td style="text-align: center;"><?= $factura->bill_number ?></td>
+													<td><?= $factura->tipo_documento ?></td>
+													<?php if ($factura->moneda_id == 1):
+														$totalBolivar += $factura->amount_paid; ?>
+														<td></td><td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td>
+													<?php elseif ($factura->moneda_id == 2):
+														$totalDolar += $factura->amount_paid; ?>
+														<td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td><td></td>
+													<?php else:
+														$totalEuro += $factura->amount_paid; ?>
+														<td></td><td style="text-align: center;"><?= number_format($factura->amount_paid, 2, ",", ".") ?></td><td></td>
+													<?php endif; ?>
+												</tr>
+											<?php endif;
+										endforeach; ?>
+										<tr>
+											<td><b>Totales</b></td>
+											<td></td>
+											<td></td>
+											<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
+											<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>											
+											<td style="text-align: center;"><b><?= number_format($totalBolivar, 2, ",", ".") ?></b></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if ($indicadorPedidosAnulados == 1): ?>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table>
+									<thead>
+										<tr>
+											<th>&nbsp;</th>
+										</tr>	
+										<tr>
+											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE PEDIDOS ANULADOS:</b></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th style="text-align: center;"><b>Fecha</b></th>
+											<th style="text-align: center;"><b>Familia</b></th>
+											<th style="text-align: center;"><b>Nro. Pedido</b></th>
+											<th style="text-align: center;"><b>Monto $</b></th>
+											<th style="text-align: center;"><b>Monto Bs.</b></th>
+										</tr>
+									</thead>
+									<tbody>				
+										<?php 
+										$totalBolivar = 0;
+
+										foreach ($documentosAnulados as $anulado):  
+											if ($anulado->fiscal == 0):
+												if ($anulado->tipo_documento == "Pedido"): ?> 
+													<tr>												
+														<td style="text-align: center;"><?= $anulado->date_and_time->format('d-m-Y') ?></td>
+														<td style="text-align: center;"><?= $anulado->parentsandguardian->family ?></td>
+														<td style="text-align: center;"><?= $anulado->bill_number ?></td>
+														<td style="text-align: center;"><?= number_format(round($anulado->amount_paid / $anulado->tasa_cambio, 2), 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($anulado->amount_paid, 2, ",", ".")   ?></td>
+													</tr>
+												<?php 
+												endif;
+											endif;
+										endforeach; ?>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if ($indicadorRecibosAnuladosPedidos == 1): ?>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table>
+									<thead>
+										<tr>
+											<th>&nbsp;</th>
+										</tr>	
+										<tr>
+											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS ANULADOS:</b></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th style="text-align: center;"><b>Nro. Recibo</b></th>
 											<th style="text-align: center;"><b>Tipo doc</b></th>
 										</tr>
 									</thead>
@@ -1389,11 +1594,10 @@
 
 										foreach ($documentosAnulados as $anulado):  
 											if ($anulado->fiscal == 0):
-												if ($anulado->tipo_documento == "Pedido"
-													|| $anulado->tipo_documento == "Recibo de compra de pedido"
-													|| $anulado->tipo_documento == "Recibo de reintegro de pedido"
+												if ($anulado->tipo_documento == "Recibo de reintegro de pedido"
 													|| $anulado->tipo_documento == "Recibo de sobrante de pedido"
-													|| $anulado->tipo_documento == "Recibo de compra de pedido"): ?> 
+													|| $anulado->tipo_documento == "Recibo de compra de pedido"
+													|| $anulado->tipo_documento == "Recibo de vuelto de compra de pedido"): ?> 
 													<tr>
 														<td style="text-align: center;"><?= $anulado->control_number ?></td>
 														<td style="text-align: center;"><?= $anulado->tipo_documento ?></td>
@@ -1409,6 +1613,51 @@
 					</div>
 				<?php endif; ?>
 
+				<!-- Espacio de firmas de conformidad de pedidos -->
+				<div>
+					<div class="row">
+						<div class="col-md-12">					
+							<table>
+								<thead>
+									<tr>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+									</tr>
+									<tr>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+									</tr>
+									<tr>
+										<th>&nbsp;</th>
+										<th>Entregado por:</th>
+										<th>______________________________</th>
+										<th>&nbsp;</th>
+										<th>Recibido por:</th>
+										<th>______________________________</th>
+									</tr>
+									<tr>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+										<th>&nbsp;</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<!-- Servicio educativo -->
 				<div>
 					<div class="row">
 						<div class="col-md-12">					

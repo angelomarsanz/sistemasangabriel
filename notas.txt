@@ -1,5 +1,17 @@
-Cálculos del IGTF
+En la tabla payments, la columna monto_igtf_dolar, realmente no está expresada arbitrariamente en dólares, sino en la moneda en que se hizo el pago
 
+Para emitir el reporte del seguro:
+1. Crear una nueva carpeta con la fecha actual en mis documentos/colegio san gabriel/reporte seguro para guardar todos los archivos del envío
+2. Solicitar a Lorelys el último reporte enviado
+3. Pegarlo al final del archivo reporte_seguro_subida_2022_2023.ods
+4. Truncar la tabla excels en la B.D.
+5. Ejecutar el programa
+6. Descargar y enviar el excel a Lorelys
+
+Facturas cruzadas
+Cuando Lorelys imprima facturas cruzadas y se requiera colocar Nro. de control cero al Nro. de control, debo colocar 999999 y anular en las tablas Bills, Concepts y Payments
+
+Cálculos del IGTF
 Si es solo pago en divisa, en el pago en divisas está incluido el IGTF
 Si es un pago mixto y el pago en bolívares cubre totalmente el monto del IGTF, se registra el pago del IGTF en bolívares
 Si es un pago mixto y el pago en bolívares no cubre el monto del IGTF, el IGTF está incluido en el pago en divisas

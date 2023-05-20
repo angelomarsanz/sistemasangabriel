@@ -674,4 +674,20 @@ class ParentsandguardiansController extends AppController
 			$this->Flash->error(__('Estimado usuario este representante no tiene saldo para reintegrar'));
 		}
 	}
+    public function eliminarRepresentantesNoActivos()
+    {
+        $representantes_sin_estudiantes = [];
+        $representantes = $this->Parentsandguardians->find('all');
+
+        foreach ($representantes as $representante)
+        {
+            $estudiantes_representante = $this->Parentsandguardians->Students->find('all', ['conditions' => ['parentsandguardian_id' => $representante->id]]);
+            if ($estudiantes_representante->count() == 0)
+            {
+                $representantes_sin_estudiantes[] = ['id_representante' => $representante->id, 'nombre_representante' => $representante->full_name];
+            }
+        }
+        $this->set(compact('representantes_sin_estudiantes'));
+        $this->set('_serialize', ['representantes_sin_estudiantes']);
+    }
 }

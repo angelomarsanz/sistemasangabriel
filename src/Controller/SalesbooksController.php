@@ -155,12 +155,24 @@ class SalesbooksController extends AppController
             $this->truncateTable();
 
             $this->loadModel('Bills');
+            $this->loadModel('Concepts');
 
-            $invoicesBills = $this->Bills->find('all', ['conditions' => 
-            [['MONTH(date_and_time)' => $_POST['month']], 
-            ['YEAR(date_and_time)' => $_POST['year']],
-            ['Bills.fiscal' => true]],
-            'order' => ['Bills.id' => 'ASC'] ]);
+            $invoicesBills = $this->Bills->find('all', 
+                [
+                    'conditions' => 
+                    [['MONTH(date_and_time)' => $_POST['month']], 
+                    ['YEAR(date_and_time)' => $_POST['year']],
+                    ['Bills.fiscal' => true]],
+                    'order' => ['Bills.id' => 'ASC'] 
+                ]);
+
+            $conceptos = $this->Concepts->find('all', 
+            [
+                'conditions' => 
+                [['MONTH(created)' => $_POST['month']], 
+                ['YEAR(created)' => $_POST['year']],
+                ['concept' => 'IGTF']]
+            ]);
 
             $contador = 0;
 			
@@ -181,7 +193,7 @@ class SalesbooksController extends AppController
                         while ($contadorControlFacturas > 1)
                         {
                             $controlFacturaAnterior++;
-                            $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $controlFacturaAnterior);
+                            $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $conceptos, $controlFacturaAnterior);
                             if ($codigoRetorno == 1)
                             {
                                 $errorBill = 1;
@@ -191,7 +203,7 @@ class SalesbooksController extends AppController
                         }
                     }
                 }
-                $codigoRetorno = $this->crearRegistroLibro($invoicesBill, 0);
+                $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $conceptos, 0);
                 if ($codigoRetorno == 1)
                 {
                     $errorBill = 1;
@@ -214,12 +226,12 @@ class SalesbooksController extends AppController
 		}
     }
 	
-	public function crearRegistroLibro($invoicesBill = null, $controlFacturaAnterior = null)
+	public function crearRegistroLibro($invoicesBill = null, $conceptos = null, $controlFacturaAnterior = null)
 	{
 		$codigoRetorno = 0;
 		
 		$salesbook = $this->Salesbooks->newEntity();
-		
+	
 		if ($invoicesBill->date_and_time->day < 10)
 		{
 			$dia = "0" . $invoicesBill->date_and_time->day;
@@ -270,6 +282,7 @@ class SalesbooksController extends AppController
 		}
 		elseif ($invoicesBill->tipo_documento == "Nota de débito")
 		{
+            $salesbook->tipo_documento = "ND";
 			$salesbook->numero_factura = "";
 			$salesbook->nota_debito = $invoicesBill->bill_number;
 			$salesbook->nota_credito = "";
@@ -280,6 +293,7 @@ class SalesbooksController extends AppController
 		}				
 		else
 		{
+            $salesbook->tipo_documento = "NC";
 			$salesbook->numero_factura = "";
 			$salesbook->nota_debito = "";
 			$salesbook->nota_credito = $invoicesBill->bill_number;
@@ -308,16 +322,33 @@ class SalesbooksController extends AppController
 			$salesbook->cedula_rif = $invoicesBill->identification;
 			$salesbook->nombre_razon_social = $invoicesBill->client;
 			
-			if ($invoicesBill->tipo_documento == "Nota de crédito")
+			if ($invoicesBill->tipo_documento == "Factura")
 			{
+                $monto_igtf_bolivares = round($invoicesBill->monto_igtf * $invoicesBill->tasa_cambio, 2);
+			    $salesbook->total_ventas_mas_impuesto = round($invoicesBill->amount_paid + $monto_igtf_bolivares, 2);
+			    $salesbook->ventas_exoneradas = $invoicesBill->amount_paid;
+                $salesbook->igtf = $monto_igtf_bolivares;
+			}
+			elseif ($invoicesBill->tipo_documento == "Nota de crédito")
+			{
+                $monto_igtf = 0;
+                foreach ($conceptos as $concepto)
+                {
+                    if ($concepto->bill_id == $invoicesBill->id)
+                    {
+                        $monto_igtf = $concepto->amount;
+                        break;
+                    }
+                }
+
 				$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid * -1;
-				$salesbook->ventas_exoneradas = $invoicesBill->amount_paid * -1;
+				$salesbook->ventas_exoneradas = round($invoicesBill->amount_paid - $monto_igtf, 2) * -1;
+                $salesbook->igtf = $monto_igtf * -1;
 			}
 			else
 			{
-			    $salesbook->total_ventas_mas_impuesto = round($invoicesBill->amount_paid + $invoicesBill->amount, 2);
-			    $salesbook->ventas_exoneradas = round($invoicesBill->amount_paid + $invoicesBill->amount, 2);
-                $salesbook->igtf = round($invoicesBill->monto_igtf * $invoicesBill->tasa_cambio, 2);
+			    $salesbook->total_ventas_mas_impuesto = round($invoicesBill->amount_paid, 2);
+			    $salesbook->ventas_exoneradas = round($invoicesBill->amount_paid, 2);
 			}
 		}
 		else

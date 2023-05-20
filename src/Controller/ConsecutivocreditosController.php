@@ -57,7 +57,7 @@ class ConsecutivocreditosController extends AppController
         if ($this->Consecutivocreditos->save($consecutivoCredito)) 
         {
             $numerosNota = $this->Consecutivocreditos->find('all', ['conditions' => ['usuario_solicitante' => $this->Auth->user('username')],
-                'order' => ['created' => 'DESC'] ]);
+                'order' => ['id' => 'DESC'] ]);
 				
 			$contadorRegistros = $numerosNota->count();
 			

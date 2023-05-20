@@ -232,7 +232,7 @@ class ConceptsController extends AppController
 			$conceptoNota->observation = $conceptoFactura->observation;
 			$conceptoNota->annulled = 0;
 			$conceptoNota->concept_migration = 1;
-			$conceptoNota->saldo = round($montoNota/$tasaCambio);
+			$conceptoNota->saldo = round($montoNota/$tasaCambio, 2);
 			
 			if (!($this->Concepts->save($conceptoNota)))
 			{
@@ -380,5 +380,30 @@ class ConceptsController extends AppController
 			$this->Flash->error(__('No se pudo registrar el concepto de la nota de crédito'));
 		}
         return $codigoRetornoConcepto;
+	}
+
+    public function agregarConceptoNotaIgtf($idNota = null, $montoNotaIgtf = null, $tasaCambio = null)
+    {
+		$codigoRetornoConcepto = 0;
+		
+		$conceptoNota = $this->Concepts->newEntity();
+		$conceptoNota->bill_id = $idNota;
+		$conceptoNota->quantity = 1;
+		$conceptoNota->accounting_code = "001";
+		$conceptoNota->student_name = "";
+		$conceptoNota->transaction_identifier = 0;
+		$conceptoNota->concept = "IGTF";
+		$conceptoNota->amount = round($montoNotaIgtf * $tasaCambio, 2);
+		$conceptoNota->observation = "";
+		$conceptoNota->annulled = 0;
+		$conceptoNota->concept_migration = 1;
+		$conceptoNota->saldo = $montoNotaIgtf;
+		
+		if (!($this->Concepts->save($conceptoNota)))
+		{
+			$codigoRetornoConcepto = 1;
+			$this->Flash->error(__('El concepto de la nota de IGTF no pudo ser guardado, intente nuevamente'));
+		}
+       	return $codigoRetornoConcepto;
 	}
 }

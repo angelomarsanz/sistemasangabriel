@@ -182,9 +182,26 @@ use Cake\I18n\Time;
             <tbody>
         <?php foreach ($studentsFor as $studentsFors):
                 $encontrado = 0;
+
+                $nombreAlumnoStudent = $studentsFors->student->surname;
+				
+				if ($studentsFors->student->second_surname != '')
+				{
+					$nombreAlumnoStudent .= ' ' . $studentsFors->student->second_surname;
+				}
+
+				if ($studentsFors->student->first_name != '')
+				{
+					$nombreAlumnoStudent .= ' ' . $studentsFors->student->first_name;
+				}
+
+				if ($studentsFors->student->second_name != '')
+				{
+					$nombreAlumnoStudent .= ' ' . $studentsFors->student->second_name;
+				}
                
                 foreach ($alumnosAdicionales as $adicional):
-                    if ($studentsFors->student->id == $adicional)
+                    if ($nombreAlumnoStudent == $adicional)
                     {
                         $encontrado = 1;
                         break;

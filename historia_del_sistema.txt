@@ -1,9 +1,158 @@
-Pendiente:
+Pendientes:
 - Al reporte de servicio educativo solo tenga acceso Sol
-Para el reporte del seguro, se agregó la columna "Código Colegio San Gabriel" para identificar los alumnos inscritos después del 
-proceso de inscripción regular. Se debe modificar el controlador y el reporte para que haga la comparación usando el código colegio San Gabriel que corresponde al ID del estudiante
-Del IGTF:
 - Restringir en el create invoice que solo se puedan dar sobrantes de dolar. Verificando que haya pagos en dólares en la cobranza
+Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no fiscal
+- En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
+- En el libro de venta sumar la columna del IGTF
+- Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
+- En la pantalla de bienvenida los alumnos nuevos no se deben ver los costos de los alumnos regulares
+
+16/05/2023
+120673
+
+11/05/2023
+Sol hizo una solicitud de reportes de Cuentas por Cobrar
+1. Reporte general, según el modelo dado. Añadir reporte general por Sección
+2. Reporte histórico: En el mes de julio 2023 se solicita el reporte mensual de morosidad de abril 2023. Se debe listar los representantes que quedaron morosos en abril, no importa que hayan pagado en el mes de julio. Se puede tomar como referencia la fecha de modificación del registro y si tiene el indicador de pagado.
+3. El estado de cuenta del representante: General o detallado de los hijos
+
+21/04/2023
+Para el requerimiento de que el usuario pueda manualmente establecer el monto a abonar, se habilitará como un input la columna "A pagar $" y se agregará un botón "Abono". Este funcionalidad trabajará de manera similar a la de "Ajuste"
+
+21/04/2023
+Para el requerimiento de Cambiar pedido por factura se crearon y modificaron los siguientes módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/pedido_por_factura_planificado.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/PaymentsController.php
+
+20/04/2023
+Factura 120351
+Tasa cambio 24,52
+Lujan Gustavo - 2.819,80
+Lujan Isabel - 2.290,58
+Total 5.110,38
+Transferencia Banesco 5.110,38
+
+--
+NC 400 - Factura afectada 120351
+Tasa cambio 24,52
+Lujan Gustavo - Abril 2023 2.819,80
+Lujan Isabel - Abono abril 2.290,58
+Total 5.110,38
+
+--
+Factura 120499
+Tasa de cambio 24,35
+Lujan Gustavo - Abril 2023 - 2.800,25
+Total 2.800,25
+Transferencia Bs. 2.678,50
+
+--
+NC 401 - Factura afectada 120499
+Tasa cambio dólar 24,35
+Descuento por pronto pago 121,75
+Total 121,75
+
+--
+NC 402 - Factura afectada 120499
+Lujan Gustavo - Abril 2023 2.800,25
+Total 2.800,25
+
+- 
+NC 403
+Tasa de cambio 24,35
+Descuento por pronto pago - 121,75 Bs
+
+-
+Factura 120500 
+Tasa de cambio 24,35
+Lujan Isabel - Abono abril 2023 - 2,431,88 - Equivale a 99,87 $ y queda debiendo 
+Transferencia 2.431,88 Transferenci 2.431,88
+
+Al intentar hacer la nota de crédito a la factura 120500, en la conversión de dólares a bolívares se generaba una diferencia en dólares. Sol indicó que no había problemas con esos decimales
+Daniela hizo la nota de crédito 403, contra la nota de crédito 401. Sol solicitó que se anulara esa nota de crédito 403
+Se le indicó a Sol que por requerimiento de Lorelys se inhabilitó la funcionalidad que afecta el saldo del representante cuando se hacen notas de crédito. Ella dijo que iba a revisar eso y me indicaba si se volvía a habilitar
+
+17/04/2023
+Sol solicitó anular por sistema la NT 366, ya que la factura original Nro. 120372 se trabó en la impresora, el usuario anuló la factura y quedó pendiente la NC
+
+17/04/2023
+$2y$10$me1rTzau6LPWTql7ID5sjeuWGryXnBJbfDfE4O1ROY5ym/bpJKzOi
+
+Familia Quintero Nieves
+Pedido 907, 31/03/2023, Tasa cambio dólar 24,49
+Se anuló para convertirse en factura y nota de crédito por pronto pago
+Quintero, Ivanna - Abril 2023 - 2.816,35 menos 122,45 de descuento por pronto pago. Total factura 2.693,90
+
+Factura 120416, id 39009, 13/04/2023, Tasa cambio dólar 24,48 
+Sustituye al pedido 907
+Quintero Ivanna - Abril 2023 - 2.815,20 más 80,78 de IGTF. Total 2.895,98
+
+NC 375, 13/04/2023 - Tasa cambio dólar 24,48
+Descuento por pronto pago 122,40
+
+Sol indicó unos errores en el reporte de cierre, pero no proceden por lo siguiente: En el renglón "Facturas" solo se acumulan los pagos efectivamente recibidos. La factura era por 115 dólares, pero había un descuento por pronto pago, así que solo se recibieron 110 dólares y no 5 como Sol indicó. El sistema automáticamente generó una NC por 5 dólares por pronto pago, pero no se puede reflejar en el reporte porque se descontaría dos veces los cinco dólares y le sobraría dinero al cajero. Se le reportó esto a Sol e indicó que iba a revisar
+
+El IGTF de esa factura Lorelys lo registró como si el representante lo hubiese pagado en dólares en efectivo, así que ese IGTF si está bien reflejado en esa factura. Se acordó con Sol modificar ese pago en divisas de la factura 120416, por tarjeta de débito y colocar un alerta para evitar que el usuario vuelva a cometer el mismo error
+
+30/03/2023
+Cierre 2574
+Factura 120325
+Tasa cambio 24,48
+MONASTERIO OLAIZOLA SEBASTIAN ALEJANDRO - 2do. Año - Mensualidad: Dic - Ene 2023 - 5.630,40
+MONASTERIO OLAIZOLA SEBASTIAN ALEJANDRO - 2do. Año - Abono: Feb 2023 - 1.499,64
+Sub-total 7.130,04
+IGTF - 213,96
+Total - 7344,00
+Divisas 300 $
+Nota de crédito - 350
+En el reporte de cierre aparecía duplicado el IGTF en el renglón de las notas de crédito
+
+28/03/2023
+Cierre 2568
+Factura 120301
+Tasa 24,39
+CARMONA LEZAMA ROMAN ALESSANDRO - Preparatorio - Mensualidad: Feb - Mar 2023	- 5.609,70	Bs. (E)
+001	CARMONA LEZAMA RODRIGO ALESSANDRO - 5to. Grado - Abono: Feb 2023	- 1.288,06 Bs.	 (E)
+Sub-total 6897,76 Bs
+IGTF 87,80 Bs
+Total - 6.985,56 Bs
+
+NC 349
+CARMONA LEZAMA ROMAN ALESSANDRO - Preparatorio - Mensualidad: Feb - Mar 2023	5.609,70 Bs.	 (E)
+001	CARMONA LEZAMA RODRIGO ALESSANDRO - 5to. Grado - Abono: Feb 2023	1.288,04 Bs.	 (E)
+IGTF 87,80
+Sub-total -  6985,54 Bs
+Total - 6985,54 Bs.
+
+
+Al hacer una factura con abono y después hacer una nota de crédito para anular, el renglón del abono tiene una diferencia de decimales
+Ejemplo: Factura 120301 y NC 349. El monto de la nota de crédito es menor por unos decimales al monto de la factura original
+
+Familia Carmona Lezama
+Primero dijo que el impuesto era 3.6 y luego 3.45
+
+09/03/2023
+En algunas se presentan casos de alumnos que se retiraron y quieren reincorporarse. Normalmente se reincorpora como alumno nuevo. Se hicieron los ajustes para que el cambio se realice por la opción "Alumnos con condición distinta a regular" cuando se selecciona nuevo, se indica que nivel de estudios cursará, se actualiza el registro como un alumno nuevo y se crean las transacciones. Los módulos modificados son:
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Students/edit_status.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+
+28/01/2023
+Por una extraña razón el pedido 258 que se iba a convertir en factura no se le registraron concepto y la conversión quedó incompleta. Se generó la factura sin conceptos. Se tuvieron que hacer ajustes en los registros para normalizar la situación
+17/01/2023
+En la computadora de Lorelys se instaló Windows 10, el navegador no recibe la señal de que ya se haya impreso la factura y no permite continuar el flujo de la cobranza. En el módulo: 
+En /opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/invoice.ctp se agregó un botón para actualizar el indicador de impresión, cuando no se reciba la señal de la impresora
+Este cambio se hizo provisionalmente mientras se encuentra la causa del problema.
+Las posibles causas son:
+- La función de Javascript onafterprint esté obsoleta
+- La red local es muy lenta y la función onafterprint se cansa de esperar
+
+10/01/2022
+En /opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php se creó la función eliminarRepresentantesNoActivos. Se buscan todos los representante y después se verifica si tiene estudiantes. Si no tiene estudiantes, se graba en un vector para su eliminación
+Habría que buscar representantes que tienen estudiantes que se registraron antes de febrero 2022, pero nunca se inscribieron, esos también se eliminarán
+También estudiantes con apellidos de familia repetidos, aunque pueden existir familias con los mismos apellidos, tendría que mostrarse también el nombre completo del representante y la cédula y verificar manualmente
 
 07/12/2022
 Módulos modificados IGTG

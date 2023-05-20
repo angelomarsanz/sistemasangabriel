@@ -17,13 +17,23 @@ class ParentsandguardiansController extends AppController
 
     public function isAuthorized($user)
     {
-        if(isset($user['role']) and $user['role'] === 'Representante')
-        {
-            if(in_array($this->request->action, ['view', 'add', 'edit', 'profilePhoto', 'editPhoto']))
-            {
-                return true;
-            }
-        }
+		if(isset($user['role']))
+		{
+			if ($user['role'] === 'Representante')
+			{
+				if(in_array($this->request->action, ['view', 'add', 'edit', 'profilePhoto', 'editPhoto']))
+				{
+					return true;
+				}
+			}
+			if ($user['role'] === 'Control de estudios')
+			{
+				if(in_array($this->request->action, ['consultFamily', 'viewData', 'view', 'edit', 'findFamily', 'findMother', 'findGuardian']))
+				{
+					return true;
+				}				
+			}
+		}
 
         return parent::isAuthorized($user);
     }        
@@ -412,7 +422,7 @@ class ParentsandguardiansController extends AppController
     {
         if ($this->request->is('ajax')) {
             $this->autoRender = false;
-            $name = $this->request->query['term'];
+            $name = trim($this->request->query['term']);
             $results = $this->Parentsandguardians->find('all', [
                 'conditions' => [['surname_mother LIKE' => $name . '%'], ['guardian !=' => 1]]]);
             $resultsArr = [];
@@ -427,7 +437,7 @@ class ParentsandguardiansController extends AppController
     {
         if ($this->request->is('ajax')) {
             $this->autoRender = false;
-            $name = $this->request->query['term'];
+            $name = trim($this->request->query['term']);
             $results = $this->Parentsandguardians->find('all', [
                 'conditions' => [['surname LIKE' => $name . '%'], ['guardian !=' => 1]]]);
             $resultsArr = [];
@@ -442,7 +452,7 @@ class ParentsandguardiansController extends AppController
     {
         if ($this->request->is('ajax')) {
             $this->autoRender = false;
-            $name = $this->request->query['term'];
+            $name = trim($this->request->query['term']);
             $results = $this->Parentsandguardians->find('all', [
                 'conditions' => [['client LIKE' => $name . '%'], ['guardian !=' => 1]]]);
             $resultsArr = [];

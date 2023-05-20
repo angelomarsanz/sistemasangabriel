@@ -5,3 +5,4 @@
 /webroot/files/*
 /webroot/pdf/*
 /vendor.tar.gz
+/credenciales.txt

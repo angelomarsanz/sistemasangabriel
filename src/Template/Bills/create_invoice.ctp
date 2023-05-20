@@ -152,9 +152,9 @@
 											<th scope="col" style="width:5%"></th>
                                             <th scope="col" style="font-size: 11px; width:15%">Concepto</th>
 											<th scope="col" style="font-size: 11px; width:15%">Cuota($)</th>
-                                            <th scope="col" style="font-size: 11px; width:15%">Abonado($)</th>
+                                            <th scope="col" style="font-size: 11px; width:10%">Abonado($)</th>
 											<th scope="col" style="font-size: 11px; width:10%">Pendiente($)</th>
-											<th scope="col" style="font-size: 11px; width:10%">A pagar($)</th>
+											<th scope="col" style="font-size: 11px; width:15%">A pagar($)</th>
 											<th scope="col" style="color: blue; font-size: 10px; width:10%">A pagar(€)</th>
 											<th scope="col" style="color: red; font-size: 10px; width:10%">A pagar(Bs.)</th>
 											<th scope="col" style="font-size: 11px; width:10%">Observación</th>
@@ -685,6 +685,7 @@
 	var comentario = "";
 	var monedaPagoEliminar = "";
 	var indicadorAjuste = 0;
+	var indicador_abono = 0;
 	var indicadorNoCuotas = 0;
 	var contadorCuotasSeleccionadas = 0;
 	var imprimirReciboSobrante = 0;
@@ -1024,7 +1025,8 @@
 		acumulado_igtf_bolivar = 0;
 		total_balance_bolivares_igtf = 0;
 		indicador_igtf_recalculado = 0;
-
+		indicadorAjuste = 0;
+		indicador_abono = 0;
     }
     
     function validateFields()
@@ -1506,7 +1508,7 @@
 							if (item['dbMontoPendienteDolar'] < 0)
 							{
 								detailLine += 	"<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarDolar']) + "</td> \
+												<td style='background-color:#c2c2d6;'><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + " disabled></td> \
 												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
 												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
 												<td style='background-color:#c2c2d6; color: red;'>Hacer NC</td> \
@@ -1515,7 +1517,7 @@
 							else
 							{
 								detailLine += 	"<td style='background-color:#c2c2d6;'>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
-												<td style='background-color:#c2c2d6;'>" + formatoNumero(item['dbMontoAPagarDolar']) + "</td> \
+												<td style='background-color:#c2c2d6;'><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + " disabled></td> \
 												<td style='background-color:#c2c2d6; color: blue;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
 												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
 												<td style='background-color:#c2c2d6;'>" + item['dbObservation'] + "</td> \
@@ -1546,7 +1548,7 @@
 							if (item['dbMontoPendienteDolar'] < 0)
 							{
 								detailLine += 	"<td style='color: red;'>" + item['dbMontoPendienteDolar'] + "</td> \
-												<td style='color: red;'>" + item['dbMontoAPagarDolar'] + "</td> \
+												<td><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + "></td> \
 												<td style='color: red;'>" + item['dbMontoAPagarEuro'] + "</td> \
 												<td style='color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
 												<td style='color: red;'>Hacer NC</td> \
@@ -1555,7 +1557,7 @@
 							else
 							{
 								detailLine += 	"<td>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
-												<td>" + formatoNumero(item['dbMontoAPagarDolar']) + "</td> \
+												<td><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + "></td> \
 												<td style='color: blue;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
 												<td style='color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
 												<td>" + item['dbObservation'] + "</td> \
@@ -1579,8 +1581,8 @@
                     concept = firstInstallment + ' - ' + lastInstallment;
                     $("#student-balance").html(formatoNumero(studentBalance));
 
-					$("#mark-quotas").html(nextPayment);  
-					
+					$("#mark-quotas").html(nextPayment); 
+										
 					if (indicadorAjuste == 0)
 					{
 						$("#mark-quotas").attr('disabled', false);
@@ -1593,7 +1595,7 @@
 					
 					if (saldoNotaCredito < 0)
 					{
-						$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario no puede facturar hasta que haga una o más notas de crédito (SUNDDE) por un total de " + -1 * saldoNotaCredito + " $</b></spam>");
+						$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario no puede facturar hasta que haga una o más notas de crédito por un total de " + -1 * saldoNotaCredito + " $</b></spam>");
 						$("#botones-cuotas").addClass("noverScreen");
 						$("#print-invoice").attr('disabled', true);
 						$("#ajuste-automatico").attr('disabled', true);
@@ -2636,6 +2638,7 @@
 				{
 					dataSet = result.rows;
 					
+					// Aquí hay un error porque se está considerando que el dólar tiene el mismo valor que el euro. Se debe desglosar y hacer la conversión de monedas de euros a dolares
 					for (var i = 0, item = null; i < dataSet.length; i++) 
 					{
 						item = dataSet.item(i);
@@ -3251,7 +3254,13 @@
 									});
 								}
 							}
-
+							
+							
+							if (tarifaDolar == 0)
+							{
+								tarifaDolar = monto_cuota;
+							}
+							
 							transactionAmount = dosDecimales(value2.amount);
 												
 							originalAmount = dosDecimales(value2.original_amount);
@@ -3301,7 +3310,8 @@
 										{										
 											if (tarifaDolar > montoDolar)
 											{
-												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+												montoDolar = dosDecimales(montoDolar - 5); // Descuento pronto pago
+												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar); 
 												montoAPagarDolar = montoPendienteDolar;
 												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
 												montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
@@ -3326,7 +3336,8 @@
 										{											
 											if (tarifaDolar > montoDolar && tarifaDolarSinDescuento > montoDolar)
 											{
-												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+												montoDolar = dosDecimales(montoDolar - 5); // Descuento pronto pago
+												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar); 
 												montoAPagarDolar = montoPendienteDolar;
 												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
 												montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
@@ -3610,7 +3621,8 @@
             var lastInstallment = " ";
             var flaggedFlag = 0;
 			var blocked_amount = 0;
-			inputCounter = 0;		            
+			let a_pagar_dolar = 0;
+			let inputCounter = 0;		            
             $("#monthly-payment input").each(function (index) 
             {
 				if (inputCounter == 0)
@@ -3635,10 +3647,7 @@
 								lastInstallment = $(this).attr('name');
 								$("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
 								concept = firstInstallment + ' - ' + lastInstallment;
-								studentBalance = dosDecimales(studentBalance + parseFloat($(this).attr('value')));
-								totalBalance = dosDecimales(totalBalance + parseFloat($(this).attr('value')));
 								contadorCuotasSeleccionadas++;
-								actualizarTotales();
 							}
 							else
 							{
@@ -3662,14 +3671,22 @@
 					{
 						$(this).attr('disabled', true);
 						blocked_amount = 1;	
-						inputCounter++;
 					}
-					else
-					{
-						inputCounter++;
-					}
+					inputCounter++;
 				}
 				else if (inputCounter == 3)
+				{
+					if (flaggedFlag == 1 && a_pagar_dolar == 0)
+					{
+						$(this).attr('disabled', true);
+						a_pagar_dolar = 1;	
+						studentBalance = dosDecimales(studentBalance + parseFloat($(this).attr('value')));
+						totalBalance = dosDecimales(totalBalance + parseFloat($(this).attr('value')));
+						actualizarTotales();
+					}
+					inputCounter++;
+				}
+				else if (inputCounter == 4)
 				{
 					inputCounter = 0;
 				}
@@ -3691,6 +3708,8 @@
 			idAmountTransactions = "";
             transactionDescription = " ";
 			inputCounter = 0;
+			let id_monto_abono = "";
+			let monto_abono = "";
 
             $("#monthly-payment input").each(function (index) 
             {
@@ -3698,7 +3717,7 @@
 				{				
 					if($(this).attr('value') != "Pagada")
 					{
-						if($(this).is(':checked'))
+						if ($(this).is(':checked'))
 						{
 							if (firstInstallment == " ")
 							{
@@ -3715,6 +3734,13 @@
 							markedQuotaCounter++;
 					
 							idStudentTransactions = $(this).attr('id');
+
+							id_monto_abono = idStudentTransactions.replace("tr", "a_pagar_dolar_");
+							monto_abono = parseFloat($("#"+id_monto_abono).attr('value'));
+
+							console.log("id_monto_abono", id_monto_abono);
+							console.log("monto_abono", monto_abono);
+
 							transactionDescription = $(this).attr('name');
 							transactionAmount = parseFloat($(this).attr('value'));
 						}
@@ -3727,7 +3753,8 @@
 									indicatorUnmark = 1;
 								}
 								$('#' + idStudentTransactions).attr('checked', false);
-								$('#' + idAmountTransactions).attr('disabled', false);								
+								$('#' + idAmountTransactions).attr('disabled', false);
+								$('#' + id_monto_abono).attr('disabled', false);								
 								uncheckTransaction(idStudentTransactions.substring(2));
 								updateRecord(idStudentTransactions.substring(2), 'false'); 
 								$("#mark-quotas").html(transactionDescription);
@@ -3742,8 +3769,8 @@
 									$("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
 									concept = firstInstallment + ' - ' + lastInstallment;
 								}
-								studentBalance = dosDecimales(studentBalance - transactionAmount);															
-								totalBalance = dosDecimales(totalBalance - transactionAmount);
+								studentBalance = dosDecimales(studentBalance - monto_abono);															
+								totalBalance = dosDecimales(totalBalance - monto_abono);
 								contadorCuotasSeleccionadas--;
 								actualizarTotales();
 								return false;
@@ -3757,7 +3784,7 @@
 					idAmountTransactions = $(this).attr('id');
 					inputCounter++;
 				}
-				else if (inputCounter == 3)
+				else if (inputCounter == 4)
 				{
 					inputCounter = 0;
 				}
@@ -3766,6 +3793,7 @@
 					inputCounter++;
 				}
             });
+
             if (idStudentTransactions == " ")
             {
                 alert("Debe cobrar al menos una cuota para poder reversar");
@@ -3790,17 +3818,23 @@
                         $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + '):');
                         concept = firstInstallment + ' - ' + lastInstallment;
                     }					
-					studentBalance = dosDecimales(studentBalance - transactionAmount);															
-					totalBalance = dosDecimales(totalBalance - transactionAmount);
+					studentBalance = dosDecimales(studentBalance - monto_abono);															
+					totalBalance = dosDecimales(totalBalance - monto_abono);
 					contadorCuotasSeleccionadas--;
 					actualizarTotales();
                 }
             }
         }); 
         
-        $("#ajuste-automatico").click(function(e) 
+		$("#ajuste-automatico").on("click", function(e)
         {
             e.preventDefault();
+
+			if (indicador_abono == 1)
+			{
+				alert("Estimado usuario usted ya hizo un ajuste manual de abonos a las cuotas y no se puede hacer un ajuste automático");
+				return-false				
+			}
 			
 			if (contadorCuotasSeleccionadas == 0)
 			{
@@ -3813,8 +3847,59 @@
 				alert("Estimado usuario la factura ya está cuadrada y no requiere un ajuste");
 				return-false
 			}
-			        
-			verificar_impuestos(ajustarCuotas, 0);
+
+			console.log("indicador_pedido", indicador_pedido);
+			console.log("acumulado_igtf_bolivar", acumulado_igtf_bolivar);
+
+			if (indicador_pedido == 0 && acumulado_igtf_bolivar > 0)
+			{
+				let buscar_todos_los_pagos = "SELECT * FROM payments";
+				let verificacion_pagos_en_bolivares = 0;
+			
+				db.transaction(function (tx) 
+				{
+					tx.executeSql(buscar_todos_los_pagos, [], function (tx, result) 
+					{
+						dataSet = result.rows;				
+						for (var i = 0, item = null; i < dataSet.length; i++) 
+						{
+							item = dataSet.item(i);
+							if (item['payMoneda'] == "Bs.")
+							{
+								verificacion_pagos_en_bolivares += item['payAmountPaid'];
+							}
+						}
+						if (verificacion_pagos_en_bolivares == 0)
+						{
+							let pago_igtf_en_divisas = $('<p style="background-color: #a9e0ff; color: red;">Estimado usuario solo ha registrado pagos en divisas. ¿ Desea agregar un pago en bolívares para cancelar los '+acumulado_igtf_bolivar+' Bs. correspondientes al IGTF ?</p>').dialog(
+							{
+								modal: true,
+								buttons: 
+								{
+									"Sí": function() 
+									{
+										pago_igtf_en_divisas.dialog('close');					
+									},
+									"No":  function() 
+									{
+										pago_igtf_en_divisas.dialog('close');
+										verificar_impuestos(ajustarCuotas, 0);
+									}
+								}
+							});
+						}
+						else
+						{
+							verificar_impuestos(ajustarCuotas, 0);
+						}
+					});
+				});
+			}
+			else
+			{
+				verificar_impuestos(ajustarCuotas, 0);
+			}
+
         });
 
         $("#accordion").accordion();
@@ -4289,32 +4374,106 @@
 			var montoDolarCadena;
 			var adjError = 0;
 			var indicadorChequeado = 0;
+			let monto_pendiente_dolar = 0;
+			let monto_abono_item = 0;
+			let indicador_abono_item = 0;
+			let id_a_pagar_dolar = "";
+			let observacion = "";
 						
             $("#monthly-payment input").each(function (index) 
             {
-				if (adjInputCounter == 1)
+				if (adjInputCounter == 0)
 				{
+					console.log("adjInputCounter 0", adjInputCounter);
+
+					monto_pendiente_dolar = parseFloat($(this).val());
+					adjInputCounter++;
+
+					console.log("adjInputCounter 0 monto_pendiente_dolar", monto_pendiente_dolar);
+
+				}
+				else if (adjInputCounter == 1)
+				{
+					console.log("adjInputCounter 1", adjInputCounter);
+
 					adjMontoModificadoDolar = parseFloat($(this).val());
 					adjIdAmountTransaction = $(this).attr('id');
 					adjInputCounter++;
+
+					console.log("adjInputCounter 1 adjMontoModificadoDolar", adjMontoModificadoDolar);
+					console.log("adjInputCounter 1 adjIdAmountTransaction", adjIdAmountTransaction);
+
 				}
 				else if (adjInputCounter == 2)
 				{
+					console.log("adjInputCounter 2", adjInputCounter);
+
 					adjMontoPagadoDolar = parseFloat($(this).val());
-					adjInputCounter++;					
+					adjInputCounter++;	
+					
+					console.log("adjInputCounter 2 adjMontoPagadoDolar", adjMontoPagadoDolar);
+
 				}
 				else if (adjInputCounter == 3)
 				{
+					console.log("adjInputCounter 3", adjInputCounter);
+
+					id_a_pagar_dolar = $(this).attr('id');
+					monto_abono_item = parseFloat($(this).val());
+
+					console.log("adjInputCounter 3 id_a_pagar_dolar", id_a_pagar_dolar);
+					console.log("adjInputCounter 3 monto_abono_item", monto_abono_item);
+
+					if (monto_pendiente_dolar != monto_abono_item)
+					{
+						indicador_abono_item = 1;
+
+						console.log("adjInputCounter 3 indicador_abono_item", indicador_abono_item);
+					}
+					adjInputCounter++;		
+				}
+				else if (adjInputCounter == 4)
+				{
+					console.log("adjInputCounter 4", adjInputCounter);
+
 					adjOriginalMontoDolar = parseFloat($(this).val());
-					if (adjMontoModificadoDolar != adjOriginalMontoDolar)
+
+					console.log("adjInputCounter 4 adjOriginalMontoDolar", adjOriginalMontoDolar);
+
+					if (adjMontoModificadoDolar != adjOriginalMontoDolar || indicador_abono_item == 1)
 					{					
 						if (adjMontoModificadoDolar > adjMontoPagadoDolar)
 						{
-							adjMontoPendienteDolar = dosDecimales(adjMontoModificadoDolar - adjMontoPagadoDolar);				
-							var adjAPagarDolar = adjMontoPendienteDolar;
-							var adjAPagarEuro = dosDecimales(adjAPagarDolar / tasaDolarEuro);
-							var adjAPagarBolivar = dosDecimales(adjAPagarDolar * dollarExchangeRate);
-							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, adjMontoPendienteDolar, adjAPagarDolar, adjAPagarEuro, adjAPagarBolivar, "");
+							adjMontoPendienteDolar = dosDecimales(adjMontoModificadoDolar - adjMontoPagadoDolar);
+
+							if (indicador_abono_item == 1)
+							{
+								console.log("adjInputCounter 4, indicador_abono_item", indicador_abono_item);
+
+								if (monto_abono_item > adjMontoPendienteDolar)
+								{
+									alert('Error: El abono no puede ser mayor al monto pendiente');
+									$('#' + id_a_pagar_dolar).css('background-color', '#ff5050');
+									adjError = 1;
+									return false;
+								}
+								else
+								{
+									adjAPagarDolar = monto_abono_item;
+									observacion = "Abono";
+									indicador_abono = 1;
+
+									console.log("adjInputCounter 4, adjAPagarDolar", adjAPagarDolar);
+									console.log("adjInputCounter 4, indicador_abono", indicador_abono);
+								}
+							}
+							else
+							{
+								adjAPagarDolar = adjMontoPendienteDolar;
+							}						
+							adjAPagarEuro = dosDecimales(adjAPagarDolar / tasaDolarEuro);
+							adjAPagarBolivar = dosDecimales(adjAPagarDolar * dollarExchangeRate);
+							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, adjMontoPendienteDolar, adjAPagarDolar, adjAPagarEuro, adjAPagarBolivar, observacion);
 							$('#' + adjIdAmountTransaction).css('background-color', '#ffffff');
 							cambioMontoCuota = 1;
 						}
@@ -4339,6 +4498,10 @@
 					adjAmountPaid = 0;
 					adjAmountPayable = 0;
 					adjIdAmountTransaction = '';
+					monto_pendiente_dolar = 0;
+					monto_abono_item = 0;
+					indicador_abono_item = 0;
+					id_a_pagar_dolar = "";
 				}
 				else
 				{

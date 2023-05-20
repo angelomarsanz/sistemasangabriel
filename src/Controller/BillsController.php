@@ -964,6 +964,16 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
+				elseif ($aConcept->concept == "IGTF")
+				{
+					$invoiceLine = $aConcept->concept;
+					$amountConcept = $aConcept->amount;
+					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+					$loadIndicator = 1;
+					$firstMonthly= " ";
+					$lastInstallment = " ";
+					$amountConcept = 0;
+				}
 				else    
 				{
 					$invoiceLine = $aConcept->student_name . " - " . "Mensualidad: " . substr($aConcept->concept, 0, 3) . " - ";
@@ -1132,6 +1142,16 @@ class BillsController extends AppController
 					$amountConcept = 0;
 				}
 				elseif ($aConcept->concept == "Descuento por pronto pago")
+				{
+					$invoiceLine = $aConcept->concept;
+					$amountConcept = $aConcept->amount;
+					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+					$loadIndicator = 1;
+					$firstMonthly= " ";
+					$lastInstallment = " ";
+					$amountConcept = 0;
+				}
+				elseif ($aConcept->concept == "IGTF")
 				{
 					$invoiceLine = $aConcept->concept;
 					$amountConcept = $aConcept->amount;
@@ -1997,6 +2017,8 @@ class BillsController extends AppController
 		
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar;
+
+		$codigoRetornoTransaccion = 0;
 					
 		if ($this->request->is('post')) 
         {	
@@ -2031,6 +2053,7 @@ class BillsController extends AppController
                     $notaContable = $documentosUsuario->first();
                     
                     $idNota = $notaContable->id;
+					$conceptosFacturas = new ConceptsController();	
 
                     foreach ($montosNotaContable as $clave => $valor) 
                     {
@@ -2041,11 +2064,12 @@ class BillsController extends AppController
 							
 							$transaccionEstudiante = new StudenttransactionsController();
 							
-							$codigoRetornoTransaccion = $transaccionEstudiante->notaTransaccion($concepto->transaction_identifier, $numeroNotaContable, $valor, $tipoNota, $facturaConceptos->tasa_cambio);
-
-							if ($codigoRetornoTransaccion == 0)
+							if ($concepto->transaction_identifier > 0)
 							{
-								$conceptosFacturas = new ConceptsController();							
+								$codigoRetornoTransaccion = $transaccionEstudiante->notaTransaccion($concepto->transaction_identifier, $numeroNotaContable, $valor, $tipoNota, $facturaConceptos->tasa_cambio);
+							}
+							if ($codigoRetornoTransaccion == 0)
+							{						
 								$codigoRetornoConcepto = $conceptosFacturas->agregarConceptosNota($clave, $valor, $numeroNotaContable, $tipoNota, $idNota, $facturaConceptos->tasa_cambio);
 								if ($codigoRetornoConcepto > 0)
 								{
@@ -2058,6 +2082,16 @@ class BillsController extends AppController
 							}
 						}
                     }
+
+					if ($facturaConceptos->monto_igtf > 0)
+					{
+						$codigoRetornoConceptoIgtf = $conceptosFacturas->agregarConceptoNotaIgtf($idNota, $facturaConceptos->monto_igtf, $facturaConceptos->tasa_cambio);
+
+						// $codigo_retorno_concepto_pronto_pago = $conceptosFacturas->agregarConceptoNotaCreditoDescuento($notaContable); temporal
+
+						// Aquí actualizo el nuevo campo saldo del IGTF en la factura original
+					}
+
 					$billNumber = $numeroNotaContable;
 
 					$idParentsandguardian = $facturaConceptos->parentsandguardian_id;
@@ -2129,8 +2163,16 @@ class BillsController extends AppController
         $notaContable->tax_phone = $facturaConceptos->tax_phone;
         $notaContable->fiscal_address = $facturaConceptos->fiscal_address;
 		$notaContable->amount = 0;
-				
-		$notaContable->amount_paid = $acumuladoNota;
+
+		// Aquí debo preguntar primero por el saldo del IGTF en la factura original. Si es mayor a cero aplica y verificar el comportamiento cuando es nota de débito
+		
+		$monto_igtf_bolivares = round($facturaConceptos->monto_igtf * $tasaCambio, 2);			
+		$notaContable->amount_paid = round($acumuladoNota + $monto_igtf_bolivares, 2);
+		
+		/*
+		$monto_descuento_positivo = $facturaConceptos->amount * -1;
+		$notaContable->amount_paid = round($acumuladoNota + $monto_descuento_positivo, 2);
+		*/
 		$notaContable->annulled = 0;
 		$notaContable->date_annulled = 0;
 		$notaContable->invoice_migration = 0;
@@ -2163,6 +2205,7 @@ class BillsController extends AppController
         {
             $this->Flash->error(__('La nota de crédito no pudo ser grabada, intente nuevamente'));
         }
+		$notaContable->monto_igtf = 0;
     }
     public function consultarRecibo()
     {
@@ -2922,7 +2965,31 @@ class BillsController extends AppController
 
 				if ($pedido->annulled == 1)
 				{
-					$this->Flash->error(__('Este pedido ya fue anulado anteriormente'));
+					$ultimoRegistro = $this->Bills->find('all', 
+					[
+						'conditions' => ['id_documento_padre' => $pedido->id , 'tipo_documento' => "Factura"], 
+						'order' => ['Bills.created' => 'DESC']
+					]); 
+									
+					$contadorRegistros = $ultimoRegistro->count();
+					
+					if ($contadorRegistros > 0)
+					{
+						$factura_sustituta = $ultimoRegistro->first();
+
+						if ($factura_sustituta->control_number === null || $factura_sustituta->impresa == 0)
+						{
+							$this->Flash->error(__('Este pedido fue anulado, pero no se ha impreso su correspondiente factura. Por favor imprima la factura '.$factura_sustituta->bill_number));
+						}
+						else
+						{
+							$this->Flash->error(__('Este pedido ya fue anulado anteriormente'));
+						}
+					}	
+					else
+					{
+						$this->Flash->error(__('Este pedido ya fue anulado anteriormente'));
+					}
 				}
 				else
 				{						
@@ -3056,6 +3123,211 @@ class BillsController extends AppController
 			'keyField' => 'nombre_banco']);
 						
         $this->set(compact('banco_emisor', 'banco_receptor'));
+    }
+
+    public function pedidoPorFacturaPlanificado()
+    {        
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+		date_default_timezone_set('America/Caracas');
+		
+        $concepts = new ConceptsController();       
+        $payments = new PaymentsController();
+		$binnacles = new BinnaclesController;
+		$eventos = new EventosController;
+		$consecutiveInvoice = new ConsecutiveinvoicesController();
+
+		$this->loadModel('Turns');
+
+		$turnosAbiertos = $this->Turns->find('all')->where(['user_id' => $this->Auth->user('id'), 'status' => true])->order(['created' => 'DESC']);
+        
+        $contadorTurnos = $turnosAbiertos->count(); 
+        
+        if ($contadorTurnos > 0)
+        {
+			$turnoActual = $turnosAbiertos->first();
+            $fechaTurno = $turnoActual->start_date;
+            $fechaTurnoInvertida = $fechaTurno->year . $fechaTurno->month . $fechaTurno->day;
+            $fechaActual = Time::now();
+            $fechaActualInvertida = $fechaActual->year . $fechaActual->month . $fechaActual->day;
+
+            if ($fechaTurnoInvertida != $fechaActualInvertida)
+            {
+                $this->Flash->error(__('Por favor cierre el turno, porque no coincide con la fecha de hoy y luego abra un turno nuevo')); 
+            }
+        }
+        else
+        {
+            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder sustituir el pedido por factura'));  
+        }
+        
+		$this->loadModel('Bancos');
+
+		if ($this->request->is('post')) 
+        {
+			$ultimoRegistro = $this->Bills->find('all', 
+				[
+					'conditions' => ['bill_number' => $_POST['numero_del_pedido'], 'tipo_documento' => "Pedido"], 
+					'order' => ['Bills.created' => 'DESC']
+				]); 
+								
+			$contadorRegistros = $ultimoRegistro->count();
+				
+			if ($contadorRegistros > 0)
+			{
+				$pedido = $ultimoRegistro->first();			
+
+				if ($pedido->annulled == 1)
+				{
+					$ultimoRegistro = $this->Bills->find('all', 
+					[
+						'conditions' => ['id_documento_padre' => $pedido->id , 'tipo_documento' => "Factura"], 
+						'order' => ['Bills.created' => 'DESC']
+					]); 
+									
+					$contadorRegistros = $ultimoRegistro->count();
+					
+					if ($contadorRegistros > 0)
+					{
+						$factura_sustituta = $ultimoRegistro->first();
+
+						if ($factura_sustituta->control_number === null || $factura_sustituta->impresa == 0)
+						{
+							$this->Flash->error(__('Este pedido fue anulado, pero no se ha impreso su correspondiente factura. Por favor imprima la factura '.$factura_sustituta->bill_number));
+						}
+						else
+						{
+							$this->Flash->error(__('Este pedido ya fue anulado anteriormente'));
+						}
+					}	
+					else
+					{
+						$this->Flash->error(__('Este pedido ya fue anulado anteriormente'));
+					}
+				}
+				elseif ($pedido->monto_divisas == 0)
+				{
+					$this->Flash->error(__('Este pedido no tiene pagos en divisas'));
+				}
+				else
+				{						
+					$pedido = $this->Bills->get($pedido->id);
+					$idPedido = $pedido->id;
+					
+					$pedido->annulled = 1;	
+					
+					$pedido->date_annulled = Time::now();
+					$pedido->id_turno_anulacion = $turnoActual->id;
+																	
+					if (!($this->Bills->save($pedido))) 
+					{
+						$this->Flash->error(__('El pedido no pudo ser anulado'));
+					}
+					else 
+					{
+						$concepts->edit($idPedido, $_POST['numero_del_pedido'], $pedido->tasa_cambio, $pedido->tipo_documento, "Sustitución");
+						
+						$payments->edit($idPedido);
+														
+						$eventos->add('controller', 'Bills', 'pedidoPorFactura', 'Se anuló la pedido Nro. '.$pedido->bill_number);
+
+						$this->loadModel('Monedas');	
+						$moneda = $this->Monedas->get(2);
+						$tasa_dolar = $moneda->tasa_cambio_dolar; 
+						$moneda = $this->Monedas->get(3);
+						$tasa_euro = $moneda->tasa_cambio_dolar;
+						$tasa_dolar_euro = round($tasa_euro/$tasa_dolar, 2);
+
+						$nuevaFactura = $this->Bills->newEntity();
+
+						$nuevaFactura->parentsandguardian_id = $pedido->parentsandguardian_id;
+						$nuevaFactura->user_id = $pedido->user_id;
+						$nuevaFactura->date_and_time = Time::now();;
+						$nuevaFactura->turn = $turnoActual->id;
+						$nuevaFactura->id_turno_anulacion = 0;						
+						$nuevaFactura->bill_number = $consecutiveInvoice->add();
+						$nuevaFactura->fiscal = 1;
+						$nuevaFactura->tipo_documento = "Factura";
+						$nuevaFactura->school_year = $pedido->school_year;
+						$nuevaFactura->identification = $pedido->identification;
+						$nuevaFactura->client = $pedido->client;
+						$nuevaFactura->tax_phone = $pedido->tax_phone;
+						$nuevaFactura->fiscal_address = $pedido->fiscal_address;
+						
+						$monto_dolar_descuento = round($pedido->amount/$pedido->tasa_cambio, 2);
+						$nuevo_monto_bolivar_descuento = round($monto_dolar_descuento * $tasa_dolar, 2);
+
+						$monto_dolar_pagado = round($pedido->amount_paid/$pedido->tasa_cambio, 2);
+						$nuevo_monto_bolivar_pagado = round($monto_dolar_pagado * $tasa_dolar, 2);
+
+						$nuevaFactura->amount = $nuevo_monto_bolivar_descuento;
+						$nuevaFactura->amount_paid = $nuevo_monto_bolivar_pagado;
+						$nuevaFactura->annulled = 0;
+						$nuevaFactura->date_annulled = 0;
+						$nuevaFactura->invoice_migration = 0;
+						$nuevaFactura->new_family = 0;
+						$nuevaFactura->impresa = 0;
+						$nuevaFactura->id_documento_padre = $pedido->id;
+						$nuevaFactura->id_anticipo = 0;
+						$nuevaFactura->factura_pendiente = $pedido->factura_pendiente;
+						$nuevaFactura->moneda_id = 1;
+						$nuevaFactura->tasa_cambio = $tasa_dolar;
+						$nuevaFactura->tasa_euro = $tasa_euro;
+						$nuevaFactura->tasa_dolar_euro = $tasa_dolar_euro;
+						$nuevaFactura->saldo_compensado_dolar = $pedido->saldo_compensado_dolar;
+						$nuevaFactura->sobrante_dolar = $pedido->sobrante_dolar;
+						$nuevaFactura->tasa_temporal_dolar = $pedido->tasa_temporal_dolar;
+						$nuevaFactura->tasa_temporal_euro = $pedido->tasa_temporal_euro;
+						$nuevaFactura->cuotas_alumno_becado = $pedido->cuotas_alumno_becado;
+						$nuevaFactura->cambio_monto_cuota = $pedido->cambio_monto_cuota;
+						$nuevaFactura->monto_divisas = $pedido->monto_divisas;
+						$nuevaFactura->monto_igtf = $pedido->monto_igtf;
+						if (!($this->Bills->save($nuevaFactura))) 
+						{
+							$this->Flash->error(__('La factura no pudo ser guardada'));
+						}
+						else
+						{
+							$ultimoRegistro = $this->Bills->find('all', 
+							[
+								'conditions' => ['bill_number' => $nuevaFactura->bill_number], 
+								'order' => ['Bills.created' => 'DESC']
+							]); 
+											
+							$factura = $ultimoRegistro->first();	
+							$codigo_retorno_conceptos = $concepts->conceptosPedidoFactura($idPedido, $factura->id, $pedido->tasa_cambio, $tasa_dolar);
+
+							if ($codigo_retorno_conceptos == 0)
+							{
+								$codigo_retorno_pagos = $payments->pagosPedidoFactura($idPedido, $factura->id, $factura->bill_number, $turnoActual->id, $_POST);
+								if ($codigo_retorno_pagos == 0)
+								{
+									if ($factura->amount < 0)
+									{
+										$vector_retorno = $this->agregaNotaCreditoDescuentos($factura);
+										if ($vector_retorno["codigo_retorno"] == 1)
+										{
+											$eventos->add('controller', 'Bills', 'pedidoPorFactura', 'No se pudo crear la nota de crédito correspondiente a la factura'.$factura->bill_number);
+											return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+										}
+									}
+									return $this->redirect(['controller' => 'Bills', 'action' => 'invoice', $factura->id, 0, $factura->parentsandguardian_id, 'pedidoPorFactura', $factura->id]);
+								}
+								else
+								{
+									$eventos->add('controller', 'Bills', 'pedidoPorFactura', 'No se pudieron crear los pagos correspondientes a la factura'.$factura->bill_number);
+									return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+								}
+							}
+							else
+							{
+								$eventos->add('controller', 'Bills', 'pedidoPorFactura', 'No se pudieron crear los conceptos correspondientes a la factura'.$factura->bill_number);
+								return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+							}
+						}
+					}
+				}
+			}				
+		}
     }
 
 	public function verificarPedido()

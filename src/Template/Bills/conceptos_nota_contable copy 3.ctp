@@ -270,7 +270,7 @@
 			{
 				alert('No se puede emitir una nota contable con monto igual a cero');
 				e.preventDefault();
-			}
+			}	
 		});
 		
 		$('.monto-nota').keypress(function(e) 

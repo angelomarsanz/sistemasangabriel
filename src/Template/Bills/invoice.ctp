@@ -72,6 +72,8 @@
     }
 }
 </style>
+<br />
+<button class='nover btn btn-warning' onclick='imprimir()'>La factura Nro. <?= $bill->bill_number ?> ya se imprimió !</button>
 <?php if ($accountService == 0): ?>
 	<?php if ($bill->fiscal == 1): ?>
 		<?php 
@@ -1115,6 +1117,8 @@
 		<?php endforeach; ?>
 	</div>
 <?php endif; ?>
+<br />
+<br />
 <button class='nover btn btn-success' onclick='imprimirPantalla()'>Imprimir</button>
 <script>
     $(document).ready(function()

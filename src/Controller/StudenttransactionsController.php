@@ -501,32 +501,6 @@ class StudenttransactionsController extends AppController
 		}
 
 		if ($indicadorError == 0)
-		{
-			$studenttransaction = $this->Studenttransactions->newEntity();
-		
-			$studenttransaction->student_id = $studentId;
-			$studenttransaction->amount = 0;
-			$studenttransaction->original_amount = 0;
-			$studenttransaction->invoiced = 0;
-			$studenttransaction->paid_out = 0;
-			$studenttransaction->partial_payment = 0;
-			$studenttransaction->bill_number = 0;
-			$studenttransaction->payment_date = 0;
-			$studenttransaction->transaction_migration = 0;
-			$studenttransaction->amount_dollar = 0;
-			$studenttransaction->ano_escolar = $quotaYear;
-			$studenttransaction->porcentaje_descuento = 0;
-
-            $studenttransaction->transaction_type = 'Thales';
-            $studenttransaction->transaction_description = 'Thales' . ' ' . $quotaYear;
-
-            if (!($this->Studenttransactions->save($studenttransaction)))
-            {
-                $indicadorError = 1;
-            }
-		}
-
-		if ($indicadorError == 0)
 		{				
 			for ($i = 1; $i <= 12; $i++) 
 			{    
@@ -1795,32 +1769,14 @@ class StudenttransactionsController extends AppController
 			$ultimoEnvio = $this->Excels->find('all');
 
 			$alumnosAdicionales = [];
-			$encontrado = 0;
 
 			foreach ($studentsFor as $studentsFors)
 			{
-				$nombreAlumnoStudent = $studentsFors->student->surname;
-				
-				if ($studentsFors->student->second_surname != '')
-				{
-					$nombreAlumnoStudent .= ' ' . $studentsFors->student->second_surname;
-				}
-
-				if ($studentsFors->student->first_name != '')
-				{
-					$nombreAlumnoStudent .= ' ' . $studentsFors->student->first_name;
-				}
-
-				if ($studentsFors->student->second_name != '')
-				{
-					$nombreAlumnoStudent .= ' ' . $studentsFors->student->second_name;
-				}
+				$encontrado = 0;
 
 				foreach ($ultimoEnvio as $envio)
 				{
-					$nombreAlumnoEnvio = $envio->col4 . ' ' . $envio->col5;
-
-					if ($nombreAlumnoEnvio == $nombreAlumnoStudent)
+					if ($studentsFors->student->id == $envio->codigo_colegio)
 					{
 						$encontrado = 1;
 						break;
@@ -1828,11 +1784,7 @@ class StudenttransactionsController extends AppController
 				}
 				if ($encontrado == 0)
 				{
-					$alumnosAdicionales[] = $nombreAlumnoStudent;	
-				}
-				else
-				{
-					$encontrado = 0;	
+					$alumnosAdicionales[] = $studentsFors->student->id;	
 				}
 			}
 
