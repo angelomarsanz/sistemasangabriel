@@ -4218,31 +4218,32 @@ class StudenttransactionsController extends AppController
     {	
 		if ($this->request->is('post')) 
         {
-			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteGeneralMorosidadRepresentantes', $_POST["mes"], $_POST["periodo_escolar"], "General por Representantes", $_POST["telefono"]]);
+			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteGeneralMorosidadR', $_POST["mes"], $_POST["periodo_escolar"], "General por Representantes"]);
         }
 	}
-	
-	public function reporteGeneralMorosidadRepresentantes($mes = null, $periodo_escolar = null, $tipo_reporte = null, $telefono = null)
-	{		
+
+	public function reporteGeneralMorosidadR()
+    {	
+		$this->Flash->error(___('Datos de entrada inválidos'));
+		return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+	}
+
+	/*
+	public function reporteGeneralMorosidadRepresentantes($mes = null, $periodo_escolar = null, $tipo_reporte = null)
+	{
+		if ($mes == null || $periodo_escolar == null || $tipo_reporte == null)
+		{
+			$this->Flash->error(___('Datos de entrada inválidos'));
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+		}
+		
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
                
         $currentDate = Time::now();
 				
-		if ($currentDate->month < 10)
-		{
-			$mes_actual = "0".$currentDate->month; 
-		}
-		else
-		{
-			$mes_actual = $currentDate->month; 
-		}
-
-		$anio_mes_actual = $currentDate->year.$mes_actual;
-
-		$anio_mes_cuota = "";
-
-		$anio_mes_recalculo_cuotas_atrasadas = "202209";
+		$currentYear = $currentDate->year;
+		$currentMonth = $currentDate->month;
 		
 		$this->loadModel('Schools');
 
@@ -4255,23 +4256,6 @@ class StudenttransactionsController extends AppController
 		$controlador_estudiantes = new StudentsController();
         			
 		$mesesTarifas = $controlador_estudiantes->mesesTarifas(0);
-
-		$mes_numero_nombre =
-			[
-				"09" => "Septiembre",
-				"10" => "Octubre",
-				"11" => "Noviembre",
-				"12" => "Diciembre",
-				"01" => "Enero",
-				"02" => "Febrero",
-				"03" => "Marzo",
-				"04" => "Abril",
-				"05" => "Mayo",
-				"06" => "Junio", 
-				"07" => "Julio", 
-			];
-
-		$nombre_mes_reporte = $mes_numero_nombre[$mes];
 
 		$mes_ubicacion_anio = 
 			[
@@ -4290,19 +4274,16 @@ class StudenttransactionsController extends AppController
 
 		$anio = substr($periodo_escolar, 0, 4);
 
-		$anio_correspondiente_mes = $anio + $mes_ubicacion_anio[$mes];
+		$anio_mes = $anio + $mes_ubicacion_anio[$mes];
 														
-		$anio_mes_dia_hasta = $anio_correspondiente_mes."-".$mes."-01";
+		$anio_mes_dia_hasta = $anio_mes."-".$mes."-01";
 
-		$mes_anio_hasta = $mes."/".$anio_correspondiente_mes;
-
-		$total_cuotas_periodo = 0;
+		$mes_anio_hasta = $mes."/".anio_mes;
 								
 		$detalle_morosos = [];
 
-		$vector_morosidad = 
-			["Familia" => "",
-			 "Sep" => 0,
+		$meses_morosidad = 
+			["Sep" => 0,
 			 "Oct" => 0,
 			 "Nov" => 0,
 			 "Dic" => 0,
@@ -4313,53 +4294,32 @@ class StudenttransactionsController extends AppController
 			 "May" => 0,
 			 "Jun" => 0,
 			 "Jul" => 0,
-			 "Total $" => 0,
-			 "Teléfono" => ""];
+			 "Total $" => 0];
 
 		$total_morosos = 0;
 
 		$id_representante_anterior = 0;
 		$indice_vector = "";
 
-		$contador_transacciones = 0;
-
 		$transacciones_estudiantes = $this->Studenttransactions->find('all')
 		->contain(['Students' => ['Parentsandguardians']])
-		->where(['Studenttransactions.invoiced' => 0, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.ano_escolar' => $anio, 'Studenttransactions.payment_date <=' => $anio_mes_dia_hasta, 'SUBSTRING(transaction_description, 1, 3) !=' => 'Ago', 'Students.student_condition' => 'Regular', 'Students.balance' => $anio, 'Students.scholarship' => 0])
+		->where(['Studenttransactions.invoiced' => 0, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.ano_escolar' => substr($periodo_escolar, 0, 4), 'Studenttransactions.payment_date <=' => $anio_mes_dia_hasta, 'SUBSTRING(transaction_description, 1, 3) !=' => 'Ago', 'Students.student_condition' => 'Regular', 'Students.balance' => $anio, 'Students.scholarship' => 0])
 		->order(['Parentsandguardians.family' => 'ASC', 'Parentsandguardians.surname' => 'ASC', 'Parentsandguardians.first_name' => 'ASC', 'Parentsandguardians.id' => 'ASC', 'Studenttransactions.payment_date' => 'ASC']);
 		
 		if ($transacciones_estudiantes->count() == 0)
 		{
-			$this->Flash->error(__('No se encontraron cuotas pendientes'));		
+			$this->Flash->error(___('No se encontraron alumnos regulares'));
+			
 			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 		}
-				
+		
 		foreach ($transacciones_estudiantes as $transaccion)
 		{ 
-			$contador_transacciones++;
-			$anio_transaccion = $transaccion->payment_date->year;
-			$mes_transaccion = $transaccion->payment_date->month;
-			if ($mes_transaccion < 10)
-			{
-				$mes_transaccion = "0".$mes_transaccion;
-			}
-
-			$anio_mes_transaccion = $anio_transaccion.$mes_transaccion;
-
-			if ($anio_mes_transaccion >= $anio_mes_recalculo_cuotas_atrasadas && $anio_mes_transaccion < $anio_mes_actual && $transaccion->paid_out == 0)
-			{
-				$anio_mes_cuota = $anio_mes_actual;
-			}
-			else
-			{
-				$anio_mes_cuota = $anio_mes_transaccion;
-			}
-
-			$monto_cuota = 0;
+			$anio_mes_transaccion = $transaccion->payment_date->year.$transaccion->payment_date->month;
 
 			foreach ($mesesTarifas as $mesesTarifa)
 			{
-				if ($mesesTarifa["anoMes"] == $anio_mes_cuota)
+				if ($mesesTarifa["anoMes"] == $anio_mes_transaccion)
 				{
 					if ($transaccion->student->discount != null)
 					{
@@ -4372,20 +4332,10 @@ class StudenttransactionsController extends AppController
 					break;
 				}
 			}
-		
-			if ($monto_cuota == 0)
-			{
-				$this->Flash->error(__('No se encontraron la tarifa para la mensualidad '.$anio_mes_cuota));
-				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
-			}
-
-			$total_cuotas_periodo += $monto_cuota;
-
-			$saldo_cuota = 0;
 
 			if ($transaccion->paid_out == 0)
 			{													
-				$saldo_cuota = round($monto_cuota - $transaccion->amount_dolar, 2);
+				$saldo_cuota = round($monto_cuota - $studentTransaction->amount_dolar, 2);
 			}
 			else
 			{
@@ -4402,21 +4352,20 @@ class StudenttransactionsController extends AppController
 			{
 				if ($id_representante_anterior != $transaccion->student->parentsandguardian->id)
 				{
-					$familia = trim($transaccion->student->parentsandguardian->family)." (".trim($transaccion->student->parentsandguardian->surname)." ".trim($transaccion->student->parentsandguardian->first_name).")";
+					$indice_vector = $transaccion->student->parentsandguardian->family." (".$transaccion->student->parentsandguardian->surname." ".$transaccion->student->parentsandguardian->first_name.") - Id ".$transaccion->student->parentsandguardian->id;
 	
-					$detalle_morosos[$transaccion->student->parentsandguardian->id] = $vector_morosidad;
-					$detalle_morosos[$transaccion->student->parentsandguardian->id]["Familia"] = $familia;
-					$detalle_morosos[$transaccion->student->parentsandguardian->id]["Teléfono"] = $transaccion->student->parentsandguardian->cell_phone;
+					$detalle_morosos[$indice_vector] = $meses_morosidad;
 					$id_representante_anterior = $transaccion->student->parentsandguardian->id;
 				}
 				
-				$detalle_morosos[$transaccion->student->parentsandguardian->id][substr($transaccion->transaction_description, 0, 3)] += $saldo_cuota; 
-				$detalle_morosos[$transaccion->student->parentsandguardian->id]["Total $"] += $saldo_cuota; 
+				$detalle_morosos[$indice_vector][substr($transaccion->transaction_description, 0, 3)] += $saldo_cuota; 
+				$detalle_morosos[$indice_vector]["Total $"] += $saldo_cuota; 
 
 				$total_morosos += $saldo_cuota;
 			} 
-		}
-					
-		$this->set(compact('school', 'currentDate', 'dollarExchangeRate', 'periodo_escolar', 'mes', 'tipo_reporte', 'mes_anio_hasta', 'nombre_mes_reporte', 'anio_correspondiente_mes', 'detalle_morosos', 'total_cuotas_periodo', 'total_morosos', 'telefono'));
+		}	
+			
+		$this->set(compact('school', 'currentDate', 'dollarExchangeRate', 'periodo_escolar', 'mes', 'tipo_reporte', 'mes_anio_hasta', 'detalle_morosos', 'total_morosos'));
 	}
+	*/
 }
