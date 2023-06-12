@@ -42,25 +42,29 @@
                         <?php if ($student->id > 1): ?> 
                             <tr>
                                 <td><?= h($student->full_name) ?></td>
-                                <td class="actions">
-                                    <?php if($current_user['role'] == 'Representante'): ?>
-                                        <?= $this->Html->link('Actualizar datos', ['controller' => 'Students', 'action' => 'edit', $student->id], ['class' => 'btn btn-sm btn-primary']) ?>
-                                        <?= $this->Html->link('Agregar foto', ['action' => 'editPhoto', $student->id], ['class' => 'btn btn-sm btn-primary']) ?>
-                                        <?= $this->Html->link('Ver datos', ['controller' => 'Students', 'action' => 'view', $student->id], ['class' => 'btn btn-sm btn-primary']) ?>
-                                        <?php
-                                            setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-                                            date_default_timezone_set('America/Caracas');
-                                
-                                            $dateStudent = $student->modified;
-                                            $dateStudentI = $dateStudent->year . $dateStudent->month . $dateStudent->day;
-                                            $currentDate = Time::now();
-                                            $currentDatei = $currentDate->year . $currentDate->month . $currentDate->day;
-                                            if ($updateIndicator == 0):
-                                                echo $this->Html->link('Imprimir ficha de inscripción', ['action' => 'filepdf', $student->id, 'Students', 'index'], ['class' => 'btn btn-sm btn-info']);
-                                            endif;
-                                        ?>
-                                    <?php endif; ?>
-                                </td>
+                                <?php
+                                if ($student->new_student == 1): ?>
+                                    <td class="actions">
+                                        <?php if($current_user['role'] == 'Representante'): ?>
+                                            <?= $this->Html->link('Actualizar datos', ['controller' => 'Students', 'action' => 'edit', $student->id], ['class' => 'btn btn-sm btn-primary']) ?>
+                                            <?= $this->Html->link('Agregar foto', ['action' => 'editPhoto', $student->id], ['class' => 'btn btn-sm btn-primary']) ?>
+                                            <?= $this->Html->link('Ver datos', ['controller' => 'Students', 'action' => 'view', $student->id], ['class' => 'btn btn-sm btn-primary']) ?>
+                                            <?php
+                                                setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+                                                date_default_timezone_set('America/Caracas');
+                                    
+                                                $dateStudent = $student->modified;
+                                                $dateStudentI = $dateStudent->year . $dateStudent->month . $dateStudent->day;
+                                                $currentDate = Time::now();
+                                                $currentDatei = $currentDate->year . $currentDate->month . $currentDate->day;
+                                                if ($updateIndicator == 0):
+                                                    echo $this->Html->link('Imprimir ficha de inscripción', ['action' => 'filepdf', $student->id, 'Students', 'index'], ['class' => 'btn btn-sm btn-info']);
+                                                endif;
+                                            ?>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php
+                                endif; ?>
                             </tr>
                         <?php endif; ?>
                     <?php endforeach; ?>

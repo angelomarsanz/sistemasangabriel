@@ -696,6 +696,7 @@
 	var morosoAnoAnterior = 0;
 	var julioAnoAnterior = "";
 	var julioExonerado = 0;
+	var alumno_nuevo = 0;
 	var diferenciaBolivares = 0;
 	var becadoAnoAnterior = 0;
 	var descuentoAnoAnterior = 0;
@@ -3117,6 +3118,7 @@
 						julioExonerado = 0;
 						morosoAnoAnterior = 0;
 						deuda_conceptos_inscripcion = false;
+						alumno_nuevo = 0;
 						
                         students += "<tr id=st" + value.id + " class='students'>";
                         idStudent = value.id;
@@ -3188,7 +3190,8 @@
 							discountFamily = (100 - value.discount_family) / 100;
 						}
 
-						
+						alumno_nuevo = value.alumno_nuevo;
+
                         $.each(value.studentTransactions, function(key2, value2) 
                         {
 							if (conceptos_a_omitir.includes(value2.transaction_description))
@@ -3254,8 +3257,7 @@
 									});
 								}
 							}
-							
-							
+													
 							if (tarifaDolar == 0)
 							{
 								tarifaDolar = monto_cuota;
@@ -3363,15 +3365,27 @@
 									{
 										if (tarifaDolar != montoDolar && monthlyPayment.substring(0, 18) != "Servicio educativo")
 										{
-											montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
-											if (montoPendienteDolar > 0 && deuda_conceptos_inscripcion == false)
+											if (alumno_nuevo == 1 && schoolYearFrom != anoEscolarMensualidad)
 											{
-												deuda_conceptos_inscripcion = true;
-											}												
-											montoAPagarDolar = montoPendienteDolar;
-											montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
-											montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);
-											paidOut = false;
+												montoDolar = 0;
+												montoPendienteDolar = 0;
+												montoAPagarDolar = 0;
+												montoAPagarEuro = 0;
+												montoAPagarBolivar = 0
+												indicadorImpresion = 1;
+											}
+											else
+											{ 
+												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+												if (montoPendienteDolar > 0 && deuda_conceptos_inscripcion == false)
+												{
+													deuda_conceptos_inscripcion = true;
+												}												
+												montoAPagarDolar = montoPendienteDolar;
+												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
+												montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);
+												paidOut = false;
+											}
 										}
 										else
 										{

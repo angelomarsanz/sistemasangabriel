@@ -448,7 +448,7 @@ class BillsController extends AppController
 
                     foreach ($transactions as $transaction) 
                     {
-                        $Studenttransactions->edit($transaction, $billNumber);
+                        $Studenttransactions->edit($transaction, $billNumber, $nueva_factura->tipo_documento);
 
                         $Concepts->add($billId, $transaction, $this->headboard['fiscal']);
                     }

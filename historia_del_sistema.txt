@@ -7,6 +7,40 @@ Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
 - En la pantalla de bienvenida los alumnos nuevos no se deben ver los costos de los alumnos regulares
 
+04/07/2023
+Para restaurar el registro completo cuando se anula una factura o pedido, se modificaron los siguientes módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ConceptsController.php
+Ya se creó el campo respaldo_registro en la tabla studenttransactions y se está grabando la información cada vez que se hace una cobranza.
+El siguiente paso es crear en el controlador de transacciones una rutina única que se invoque cuando $transaccion->respaldo_registro === null y que esta rutina valide si cada campo existe, si existen todos los campos procede a restaurar el registro completo, de lo contrario se activa un indicador de que no se pudo restaurar el registro completo. Luego en la rutina reverse se verifica el indicador, si está encendido se restaura parcialmente el registro
+
+02/07/2023
+Sol solicitó que en el reporte general de morosidad se agregaran los totales de morosidad por mes. Se modificaron los siguientes módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/reporte_general_morosidad_representantes.ctp
+
+29/05/2023
+Familias con diferencias de mensualidades adelantadas
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/familias_diferencias_mensualidades_adelantadas.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/reporte_familias_diferencias_mensualidades_adelantadas.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+
+26/05/2023
+En los casos cuando un representante ha pagado por adelantado y posteriormente se incrementa el monto de la mensualidad el representante pierde el beneficio del pronto pago si no paga la diferencia antes del día 5 del mes.
+Cuando se factura y luego se reversa, la transacción queda con estatus de "Pagado parcialmente" y al momento de cobrar no se refleja la pérdida del beneficio del pronto pago. Ejemplo el pedido Nro. 1366 de la familia Pérez Brito. Solución crear un campo llamado restauración registro en el cual cada vez que se haga una modificación al registro, guarde los campos modificados y cuando haya una anulación de un pedido o factura se puedan restaurar los campos a su valor anteriores
+
+26/05/2023
+Para evitar que los representantes actualicen los datos de alumnos regulares antes de que comience el proceso de inscripción de alumnos regulares se modificaron estos módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/GuardiantransactionsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Students/index.ctp
+
+25/05/2023
+Para evitar que se le cobren diferencias de inscripción a los alumnos nuevos se modificó
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/create_invoice.ctp
+
 24/05/2023
 Revisar en el reporte de morosidad: Alayeto y Camarán
 
@@ -15,6 +49,12 @@ Sol hizo una solicitud de reportes de Cuentas por Cobrar
 1. Reporte general, según el modelo dado. Añadir reporte general por Sección
 2. Reporte histórico: En el mes de julio 2023 se solicita el reporte mensual de morosidad de abril 2023. Se debe listar los representantes que quedaron morosos en abril, no importa que hayan pagado en el mes de julio. Se puede tomar como referencia la fecha de modificación del registro y si tiene el indicador de pagado.
 3. El estado de cuenta del representante: General o detallado de los hijos
+Modulos modificados:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/general_morosidad_representantes.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/reporte_general_morosidad_representantes.ctp
+
 
 21/04/2023
 Para el requerimiento de que el usuario pueda manualmente establecer el monto a abonar, se habilitará como un input la columna "A pagar $" y se agregará un botón "Abono". Este funcionalidad trabajará de manera similar a la de "Ajuste"

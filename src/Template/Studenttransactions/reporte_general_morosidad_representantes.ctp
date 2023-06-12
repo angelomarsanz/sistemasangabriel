@@ -59,7 +59,7 @@
 <br />
 <div class="row">
 	<div class="col-md-12">
-		<?php if ($tipo_reporte == "General por Representantes"): ?>
+		<?php if ($tipo_reporte == "General de Representantes"): ?>
 			<div>
 				<div style="float: left; width:10%;">
 					<p><img src="<?php echo Router::url(["controller" => "webroot/files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 50 class="img-thumbnail img-responsive logo"/></p>
@@ -68,14 +68,56 @@
 					<h5><b><?= $school->name ?></b></h5>
 					<p>RIF: <?= $school->rif ?></p>
 					<p>Fecha de emisión: <?= $currentDate->format('d/m/Y'); ?></p>
-					<h3 style="text-align: center;"><?= 'Reporte General Morosidad por Representantes al '.$mes_anio_hasta ?></h3>
+					<h3 style="text-align: center;"><?= 'Reporte General Morosidad de Representantes al '.$mes_anio_hasta ?></h3>
+					<h4 style="text-align: left;">Resumen</h4>
 					<p><?= "Monto total mensualidades de septiembre a ".$nombre_mes_reporte." ".$anio_correspondiente_mes.": ".number_format($total_cuotas_periodo, 2, ",", ".")." $" ?></p>
-					<p><?= "Mensualidades pagadas: ".number_format(round($total_cuotas_periodo - $total_morosos, 2), 2, ",", ".")." $" ?></p>
-					<p><?= "Mensualidades pendientes ".number_format(round($total_morosos, 2), 2, ",", ".")." $" ?></p>
-					<p><?= "Porcentaje de morosidad: ".round(($total_morosos/$total_cuotas_periodo)*100, 2)." %" ?></p>
+					<p><?= "Mensualidades pagadas: ".number_format(round($total_cuotas_periodo - $totales_morosidad["Total $"], 2), 2, ",", ".")." $" ?></p>
+					<p><?= "Mensualidades pendientes: ".number_format($totales_morosidad["Total $"], 2, ",", ".")." $" ?></p>
+					<p><?= "Porcentaje de morosidad: ".round(($totales_morosidad["Total $"]/$total_cuotas_periodo)*100, 2)." %" ?></p>
+					<p>Totales de mensualidades pendientes por mes:</p>
+					<table class="table table-striped table-hover">
+						<thead>
+							<tr>
+								<th style="text-align:center;">Sep</th>
+								<th style="text-align:center;">Oct</th>
+								<th style="text-align:center;">Nov</th>
+								<th style="text-align:center;">Dic</th>
+								<th style="text-align:center;">Ene</th>
+								<th style="text-align:center;">Feb</th>
+								<th style="text-align:center;">Mar</th>
+								<th style="text-align:center;">Abr</th>
+								<th style="text-align:center;">May</th>
+								<th style="text-align:center;">Jun</th>
+								<th style="text-align:center;">Jul</th>
+								<th style="text-align:center;">Total $</th>
+								<th style="text-align:center;">Total Bs.</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Sep"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Oct"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Nov"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Dic"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Ene"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Feb"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Mar"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Abr"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["May"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Jun"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Jul"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($totales_morosidad["Total $"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format(round($totales_morosidad["Total $"] * $dollarExchangeRate, 2), 2, ",", ".") ?></td>
+							</tr>
+						</tbody>
+					<table>
 				</div>
 			</div>
 			<div>
+				<?php // debug($vector_cuotas); ?>
+			</div>
+			<div>
+				<h4 style="text-align: left;">Detalle</h4>
 				<table class="table table-striped table-hover">
 					<thead>
 						<tr>
@@ -104,21 +146,25 @@
 					<tfoot>
 						<tr>
 							<td style="text-align:center;"></td>
-							<td style="text-align:center;">Totales</td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"></td>
-							<td style="text-align:center;"><?= number_format($total_morosos, 2, ",", ".") ?></td>
-							<td style="text-align:center;"><?= number_format(round($total_morosos * $dollarExchangeRate, 2), 2, ",", ".") ?></td>
-							<td style="text-align:center;"></td>
+							<td style="text-align:center;"><b>Totales</b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Sep"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Oct"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Nov"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Dic"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Ene"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Feb"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Mar"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Abr"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["May"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Jun"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Jul"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Total $"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format(round($totales_morosidad["Total $"] * $dollarExchangeRate, 2), 2, ",", ".") ?></b></td>
+							<?php
+							if ($telefono == "Sí"): ?>
+								<td></td>
+							<?php
+							endif; ?>
 
 						</tr>
 					</tfoot>

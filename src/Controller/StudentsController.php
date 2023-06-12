@@ -1199,6 +1199,7 @@ class StudentsController extends AppController
 							'discount_family' => $result->discount,
 							'sublevel' => $sections->sublevel,
 							'section' => $sections->section,
+							'alumno_nuevo' => $result->new_student,
 							'studentTransactions' => json_decode($transacciones) 
 						];
                 }

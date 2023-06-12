@@ -156,6 +156,8 @@ class GuardiantransactionsController extends AppController
 
         $idParentsAndGuardian = $row['id'];
 
+        return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'edit', $idParentsAndGuardian, 'Parentsandguardians', 'profilePhoto']);
+
         $this->set(compact('idParentsAndGuardian'));
         $this->set('_serialize', ['idParentsAndGuardian']);
     }

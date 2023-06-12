@@ -119,8 +119,10 @@
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Cuentas por cobrar <span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">    
-								<li><?= $this->Html->link('Reporte de Morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li>
-								<li><?= $this->Html->link('Reporte General de Morosidad Por Representante', ['controller' => 'Studenttransactions', 'action' => 'generalMorosidadRepresentantes']) ?></li>												
+								<li><?= $this->Html->link('Reporte general de morosidad de representantes', ['controller' => 'Studenttransactions', 'action' => 'generalMorosidadRepresentantes']) ?></li>
+								<li><?= $this->Html->link('Reporte de morosidad por grado y sección', ['controller' => 'Studenttransactions', 'action' => 'morosidadGradoSeccion']) ?></li>
+								<li><?= $this->Html->link('Reporte de morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li>
+								<li><?= $this->Html->link('Familias con diferencias de mensualidades adelantadas', ['controller' => 'Studenttransactions', 'action' => 'familiasDiferenciasMensualidadesAdelantadas']) ?></li>												
 							</ul>
 						</li>
 						

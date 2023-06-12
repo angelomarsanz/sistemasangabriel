@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-4">
 		<div class="page-header">
-	        <h4>Reporte General de Morosidad de Representantes</h4>
+	        <h4>Familias con diferencias de mensualidades adelantadas</h4>
 	    </div>
 	    <?= $this->Form->create() ?>
 	        <fieldset>
@@ -24,11 +24,6 @@
 	                    ["" => "",
 						'2022-2023' => '2022-2023']]);
 					echo "<div id='mensaje-periodo-escolar' class='mensaje-usuario'></div>";
-					echo $this->Form->input('telefono', ['label' => 'Mostrar el número de teléfono del representante: ', 'options' => 
-						["" => "",
-						'Sí' => 'Sí',
-						'No' => 'No',]]);
-					echo "<div id='mensaje-telefono' class='mensaje-usuario'></div>"; 
 					echo "<br />"
 		    	?>
 		    </fieldset>

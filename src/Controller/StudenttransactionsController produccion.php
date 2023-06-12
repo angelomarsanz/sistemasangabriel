@@ -4213,4 +4213,440 @@ class StudenttransactionsController extends AppController
 
 		return $codigoRetorno;
 	}
+
+	public function generalMorosidadRepresentantes()
+    {	
+		if ($this->request->is('post')) 
+        {
+			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteGeneralMorosidadRepresentantes', $_POST["mes"], $_POST["periodo_escolar"], "General de Representantes", $_POST["telefono"]]);
+        }
+	}
+	
+	public function reporteGeneralMorosidadRepresentantes($mes = null, $periodo_escolar = null, $tipo_reporte = null, $telefono = null)
+	{	
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+
+		$currentDate = Time::now();
+               	
+		$this->loadModel('Schools');
+
+		$school = $this->Schools->get(2);
+				
+		$this->loadModel('Monedas');	
+		$moneda = $this->Monedas->get(2);
+		$dollarExchangeRate = $moneda->tasa_cambio_dolar; 
+
+		$mes_numero_nombre =
+			[
+				"09" => "Septiembre",
+				"10" => "Octubre",
+				"11" => "Noviembre",
+				"12" => "Diciembre",
+				"01" => "Enero",
+				"02" => "Febrero",
+				"03" => "Marzo",
+				"04" => "Abril",
+				"05" => "Mayo",
+				"06" => "Junio", 
+				"07" => "Julio", 
+			];
+
+		$nombre_mes_reporte = $mes_numero_nombre[$mes];
+
+		$mes_ubicacion_anio = 
+			[
+				"09" => 0,
+				"10" => 0,
+				"11" => 0,
+				"12" => 0,
+				"01" => 1,
+				"02" => 1,
+				"03" => 1,
+				"04" => 1,
+				"05" => 1,
+				"06" => 1,
+				"07" => 1
+			];
+
+		$anio = substr($periodo_escolar, 0, 4);
+
+		$anio_correspondiente_mes = $anio + $mes_ubicacion_anio[$mes];
+														
+		$anio_mes_dia_hasta = $anio_correspondiente_mes."-".$mes."-01";
+
+		$mes_anio_hasta = $mes."/".$anio_correspondiente_mes;
+
+		$total_cuotas_periodo = 0;
+								
+		$detalle_morosos = [];
+
+		$vector_morosidad = 
+			["Familia" => "",
+			 "Sep" => 0,
+			 "Oct" => 0,
+			 "Nov" => 0,
+			 "Dic" => 0,
+			 "Ene" => 0,
+			 "Feb" => 0,
+			 "Mar" => 0,
+			 "Abr" => 0,
+			 "May" => 0,
+			 "Jun" => 0,
+			 "Jul" => 0,
+			 "Total $" => 0,
+			 "Teléfono" => ""];
+
+		$totales_morosidad = 
+			 ["Sep" => 0,
+			  "Oct" => 0,
+			  "Nov" => 0,
+			  "Dic" => 0,
+			  "Ene" => 0,
+			  "Feb" => 0,
+			  "Mar" => 0,
+			  "Abr" => 0,
+			  "May" => 0,
+			  "Jun" => 0,
+			  "Jul" => 0,
+			  "Total $" => 0];
+
+		$id_representante_anterior = 0;
+		$indice_vector = "";
+
+		$contador_transacciones = 0;
+
+		$transacciones_estudiantes = $this->Studenttransactions->find('all')
+		->contain(['Students' => ['Parentsandguardians']])
+		->where(['Studenttransactions.invoiced' => 0, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.ano_escolar' => $anio, 'Studenttransactions.payment_date <=' => $anio_mes_dia_hasta, 'SUBSTRING(transaction_description, 1, 3) !=' => 'Ago', 'Students.student_condition' => 'Regular', 'Students.balance' => $anio, 'Students.scholarship' => 0])
+		->order(['Parentsandguardians.family' => 'ASC', 'Parentsandguardians.surname' => 'ASC', 'Parentsandguardians.first_name' => 'ASC', 'Parentsandguardians.id' => 'ASC', 'Studenttransactions.payment_date' => 'ASC']);
+		
+		if ($transacciones_estudiantes->count() == 0)
+		{
+			$this->Flash->error(__('No se encontraron cuotas pendientes'));		
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+		}
+
+		$vector_cuotas = $this->saldoCuotas($mes, $periodo_escolar, $transacciones_estudiantes); 
+				
+		foreach ($transacciones_estudiantes as $transaccion)
+		{ 
+			$contador_transacciones++;
+			/*
+			if ($contador_transacciones == 1000)
+			{
+				break;
+			}
+			*/
+			$monto_cuota = $vector_cuotas[$transaccion->id]["monto_cuota"];
+			$saldo_cuota = $vector_cuotas[$transaccion->id]["saldo_cuota"];
+
+			$total_cuotas_periodo += $monto_cuota;
+
+			if ($saldo_cuota > 0)
+			{
+				if ($id_representante_anterior != $transaccion->student->parentsandguardian->id)
+				{
+					$familia = trim($transaccion->student->parentsandguardian->family)." (".trim($transaccion->student->parentsandguardian->surname)." ".trim($transaccion->student->parentsandguardian->first_name).")";
+	
+					$detalle_morosos[$transaccion->student->parentsandguardian->id] = $vector_morosidad;
+					$detalle_morosos[$transaccion->student->parentsandguardian->id]["Familia"] = $familia;
+					$detalle_morosos[$transaccion->student->parentsandguardian->id]["Teléfono"] = $transaccion->student->parentsandguardian->cell_phone;
+					$id_representante_anterior = $transaccion->student->parentsandguardian->id;
+				}
+				
+				$detalle_morosos[$transaccion->student->parentsandguardian->id][substr($transaccion->transaction_description, 0, 3)] += $saldo_cuota; 
+				$detalle_morosos[$transaccion->student->parentsandguardian->id]["Total $"] += $saldo_cuota; 
+
+				$totales_morosidad[substr($transaccion->transaction_description, 0, 3)] += $saldo_cuota; 
+				$totales_morosidad["Total $"] += $saldo_cuota; 
+			} 
+		}
+					
+		$this->set(compact('mes', 'periodo_escolar', 'tipo_reporte', 'telefono', 'currentDate', 'school', 'dollarExchangeRate', 'mes_anio_hasta', 'nombre_mes_reporte', 'anio_correspondiente_mes', 'detalle_morosos', 'total_cuotas_periodo', 'totales_morosidad', 'vector_cuotas'));
+	}
+
+	public function saldoCuotas($mes = null, $periodo_escolar = null, $transacciones = null)
+	{	
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+
+		$vector_cuotas = [];
+               
+        $currentDate = Time::now();
+				
+		if ($currentDate->month < 10)
+		{
+			$mes_actual = "0".$currentDate->month; 
+		}
+		else
+		{
+			$mes_actual = $currentDate->month; 
+		}
+
+		$anio_mes_actual = $currentDate->year.$mes_actual;
+
+		$anio_mes_cuota = "";
+
+		$anio_mes_recalculo_cuotas_atrasadas = "202209";
+		
+		$controlador_estudiantes = new StudentsController();
+        			
+		$mesesTarifas = $controlador_estudiantes->mesesTarifas(0);
+
+		$anio = substr($periodo_escolar, 0, 4);
+
+		$monto_cuota;
+		$saldo_cuota;
+
+		foreach ($transacciones as $transaccion)
+		{
+			$monto_cuota = 0;
+			$saldo_cuota = 0;
+
+			$anio_transaccion = $transaccion->payment_date->year;
+			$mes_transaccion = $transaccion->payment_date->month;
+
+			if ($mes_transaccion < 10)
+			{
+				$mes_transaccion = "0".$mes_transaccion;
+			}
+
+			$anio_mes_transaccion = $anio_transaccion.$mes_transaccion;
+
+			if ($anio_mes_transaccion >= $anio_mes_recalculo_cuotas_atrasadas && $anio_mes_transaccion < $anio_mes_actual && $transaccion->paid_out == 0)
+			{
+				$anio_mes_cuota = $anio_mes_actual;
+			}
+			else
+			{
+				$anio_mes_cuota = $anio_mes_transaccion;
+			}
+
+			foreach ($mesesTarifas as $mesesTarifa)
+			{
+				if ($mesesTarifa["anoMes"] == $anio_mes_cuota)
+				{
+					$monto_cuota = round(($mesesTarifa["tarifaDolar"] * (100 - $transaccion->porcentaje_descuento)) / 100, 2);
+					break;
+				}
+			}
+		
+			if ($monto_cuota == 0)
+			{
+				$this->Flash->error(__('No se encontraron la tarifa para la mensualidad '.$anio_mes_cuota));
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+			}
+
+			if ($transaccion->paid_out == 0)
+			{													
+				$saldo_cuota = round($monto_cuota - $transaccion->amount_dollar, 2);
+			}
+			else
+			{
+				$descuento_por_ajuste = round($transaccion->original_amount - $transaccion->amount, 2);
+				$cuota_menos_descuento_por_ajuste = round($monto_cuota - $descuento_por_ajuste, 2); 
+
+				if ($cuota_menos_descuento_por_ajuste > $transaccion->amount_dollar)
+				{
+					$saldo_cuota = round($cuota_menos_descuento_por_ajuste - $transaccion->amount_dollar + 5, 2); // Descuento pronto pago
+				}
+			}
+
+			$vector_cuotas[$transaccion->id] = ["id_estudiante" => $transaccion->student_id, "transaction_description" => $transaccion->	transaction_description, "monto_cuota" => $monto_cuota, "saldo_cuota" => $saldo_cuota];
+		}
+		return $vector_cuotas;
+	}
+
+	public function familiasDiferenciasMensualidadesAdelantadas()
+    {	
+		if ($this->request->is('post')) 
+        {
+			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteFamiliasDiferenciasMensualidadesAdelantadas', $_POST["mes"], $_POST["periodo_escolar"]]);
+        }
+	}
+
+	public function reporteFamiliasDiferenciasMensualidadesAdelantadas($mes = null, $periodo_escolar = null)
+	{		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+               
+        $currentDate = Time::now();
+				
+		if ($currentDate->month < 10)
+		{
+			$mes_actual = "0".$currentDate->month; 
+		}
+		else
+		{
+			$mes_actual = $currentDate->month; 
+		}
+
+		$anio_mes_actual = $currentDate->year.$mes_actual;
+
+		$anio_mes_cuota = "";
+
+		$anio_mes_recalculo_cuotas_atrasadas = "202209";
+		
+		$this->loadModel('Schools');
+
+		$school = $this->Schools->get(2);
+				
+		$this->loadModel('Monedas');	
+		$moneda = $this->Monedas->get(2);
+		$dollarExchangeRate = $moneda->tasa_cambio_dolar; 
+
+		$controlador_estudiantes = new StudentsController();
+        			
+		$mesesTarifas = $controlador_estudiantes->mesesTarifas(0);
+
+		$mes_numero_nombre =
+			[
+				"09" => "Septiembre",
+				"10" => "Octubre",
+				"11" => "Noviembre",
+				"12" => "Diciembre",
+				"01" => "Enero",
+				"02" => "Febrero",
+				"03" => "Marzo",
+				"04" => "Abril",
+				"05" => "Mayo",
+				"06" => "Junio", 
+				"07" => "Julio", 
+			];
+
+		$nombre_mes_reporte = $mes_numero_nombre[$mes];
+
+		$mes_ubicacion_anio = 
+			[
+				"09" => 0,
+				"10" => 0,
+				"11" => 0,
+				"12" => 0,
+				"01" => 1,
+				"02" => 1,
+				"03" => 1,
+				"04" => 1,
+				"05" => 1,
+				"06" => 1,
+				"07" => 1
+			];
+
+		$anio = substr($periodo_escolar, 0, 4);
+
+		$anio_correspondiente_mes = $anio + $mes_ubicacion_anio[$mes];
+														
+		$anio_mes_dia_hasta = $anio_correspondiente_mes."-".$mes."-01";
+
+		$mes_anio_hasta = $mes."/".$anio_correspondiente_mes;
+
+		$total_cuotas_periodo = 0;
+								
+		$detalle_morosos = [];
+
+		$vector_morosidad = 
+			["Familia" => "",
+			 "Sep" => 0,
+			 "Oct" => 0,
+			 "Nov" => 0,
+			 "Dic" => 0,
+			 "Ene" => 0,
+			 "Feb" => 0,
+			 "Mar" => 0,
+			 "Abr" => 0,
+			 "May" => 0,
+			 "Jun" => 0,
+			 "Jul" => 0,
+			 "Total $" => 0,
+			 "Teléfono" => ""];
+
+		$total_morosos = 0;
+
+		$id_representante_anterior = 0;
+		$indice_vector = "";
+
+		$contador_transacciones = 0;
+
+		$transacciones_estudiantes = $this->Studenttransactions->find('all')
+		->contain(['Students' => ['Parentsandguardians']])
+		->where(['Studenttransactions.invoiced' => 0, 'Studenttransactions.transaction_type' => 'Mensualidad', 'Studenttransactions.ano_escolar' => $anio, 'Studenttransactions.payment_date' => $anio_mes_dia_hasta, 'SUBSTRING(Studenttransactions.transaction_description, 1, 3) !=' => 'Ago',  'Studenttransactions.paid_out' => 1, 'Students.student_condition' => 'Regular', 'Students.balance' => $anio, 'Students.scholarship' => 0])
+		->order(['Parentsandguardians.family' => 'ASC', 'Parentsandguardians.surname' => 'ASC', 'Parentsandguardians.first_name' => 'ASC', 'Parentsandguardians.id' => 'ASC', 'Studenttransactions.payment_date' => 'ASC']);
+		
+		if ($transacciones_estudiantes->count() == 0)
+		{
+			$this->Flash->error(__('No se encontraron mensualidades adelantadas'));		
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+		}
+				
+		foreach ($transacciones_estudiantes as $transaccion)
+		{ 
+			$contador_transacciones++;
+			$anio_transaccion = $transaccion->payment_date->year;
+			$mes_transaccion = $transaccion->payment_date->month;
+			if ($mes_transaccion < 10)
+			{
+				$mes_transaccion = "0".$mes_transaccion;
+			}
+
+			$anio_mes_transaccion = $anio_transaccion.$mes_transaccion;
+
+			if ($anio_mes_transaccion >= $anio_mes_recalculo_cuotas_atrasadas && $anio_mes_transaccion < $anio_mes_actual && $transaccion->paid_out == 0)
+			{
+				$anio_mes_cuota = $anio_mes_actual;
+			}
+			else
+			{
+				$anio_mes_cuota = $anio_mes_transaccion;
+			}
+
+			$monto_cuota = 0;
+
+			foreach ($mesesTarifas as $mesesTarifa)
+			{
+				if ($mesesTarifa["anoMes"] == $anio_mes_cuota)
+				{
+					$monto_cuota = round(($mesesTarifa["tarifaDolar"] * (100 - $transaccion->porcentaje_descuento)) / 100, 2);
+					break;
+				}
+			}
+		
+			if ($monto_cuota == 0)
+			{
+				$this->Flash->error(__('No se encontraron la tarifa para la mensualidad '.$anio_mes_cuota));
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+			}
+
+			$total_cuotas_periodo += $monto_cuota;
+
+			$saldo_cuota = 0;
+
+			$descuento_por_ajuste = round($transaccion->original_amount - $transaccion->amount, 2);
+			$cuota_menos_descuento_por_ajuste = round($monto_cuota - $descuento_por_ajuste, 2); 
+
+			if ($cuota_menos_descuento_por_ajuste > $transaccion->amount_dollar)
+			{
+				$saldo_cuota = round($cuota_menos_descuento_por_ajuste - $transaccion->amount_dollar + 5, 2); // Descuento pronto pago
+			}
+			
+			if ($saldo_cuota > 0)
+			{
+				if ($id_representante_anterior != $transaccion->student->parentsandguardian->id)
+				{
+					$familia = trim($transaccion->student->parentsandguardian->family)." (".trim($transaccion->student->parentsandguardian->surname)." ".trim($transaccion->student->parentsandguardian->first_name).")";
+
+					$detalle_morosos[$transaccion->student->parentsandguardian->id] = $vector_morosidad;
+					$detalle_morosos[$transaccion->student->parentsandguardian->id]["Familia"] = $familia;
+					$detalle_morosos[$transaccion->student->parentsandguardian->id]["Teléfono"] = $transaccion->student->parentsandguardian->cell_phone;
+					$id_representante_anterior = $transaccion->student->parentsandguardian->id;
+				}
+				
+				$detalle_morosos[$transaccion->student->parentsandguardian->id][substr($transaccion->transaction_description, 0, 3)] += $saldo_cuota; 
+				$detalle_morosos[$transaccion->student->parentsandguardian->id]["Total $"] += $saldo_cuota; 
+
+				$total_morosos += $saldo_cuota;
+			}
+		}
+					
+		$this->set(compact('school', 'currentDate', 'dollarExchangeRate', 'periodo_escolar', 'mes', 'mes_anio_hasta', 'nombre_mes_reporte', 'anio_correspondiente_mes', 'detalle_morosos', 'total_cuotas_periodo', 'total_morosos'));
+	}
 }

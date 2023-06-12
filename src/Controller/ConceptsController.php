@@ -138,7 +138,7 @@ class ConceptsController extends AppController
             {
 				if ($concept->transaction_identifier != 999999 && $tipo_operacion != "Sustitución")
 				{
-					$studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber, $tasaCambio);   
+					$studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber, $tasaCambio, $tipo_documento);   
 				}
             }
         }
