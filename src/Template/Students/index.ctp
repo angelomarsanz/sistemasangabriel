@@ -6,6 +6,7 @@
         <div class="page-header">
             <?php if ($family != ''): ?>
                 <h4>Familia: <?= $family ?></h4>
+                <?= $this->Html->link('Ver contrato firmado', ['controller' => 'Guardiantransactions', 'action' => 'previoContratoRepresentante', $representante->id, "Students", "index"], ['class' => 'btn btn-sm btn-primary']) ?>
                 <p style="color: #004d99;">Por favor actualice los datos de su(s) hijo(s) o representado(s) y luego imprima la ficha de inscripción</p>
             <?php else: ?>
                 <br />
@@ -43,7 +44,7 @@
                             <tr>
                                 <td><?= h($student->full_name) ?></td>
                                 <?php
-                                if ($student->new_student == 1): ?>
+                                // if ($student->new_student == 1): ?>
                                     <td class="actions">
                                         <?php if($current_user['role'] == 'Representante'): ?>
                                             <?= $this->Html->link('Actualizar datos', ['controller' => 'Students', 'action' => 'edit', $student->id], ['class' => 'btn btn-sm btn-primary']) ?>
@@ -64,7 +65,7 @@
                                         <?php endif; ?>
                                     </td>
                                 <?php
-                                endif; ?>
+                                // endif; ?>
                             </tr>
                         <?php endif; ?>
                     <?php endforeach; ?>

@@ -343,6 +343,7 @@
 									$diferencia = 0;
 									$totalDiferencia = 0;
 									$totalDescuentosRecargosFA = 0;
+
 									foreach ($vectorPagos as $pago): 
 										$transferenciaDestiempo = "";
 										$cuotasAlumnoBecado = "";
@@ -925,6 +926,7 @@
 													&& $anulado->tipo_documento != "Recibo de compra de pedido"
 												 	&& $anulado->tipo_documento != "Recibo de reintegro de pedido"
 												 	&& $anulado->tipo_documento != "Recibo de sobrante de pedido"
+													 && $anulado->tipo_documento != "Recibo de seguro"
 													&& $anulado->tipo_documento != "Recibo de compra de pedido"): ?> 
 														<tr>
 															<td style="text-align: center;"><?= $anulado->control_number ?></td>
@@ -1657,11 +1659,129 @@
 					</div>
 				</div>
 
+				<!-- Recibos de seguro -->
+				<?php if ($indicadorRecibosSeguro == 1): ?>
+					<div class="saltopagina">
+						<div class="row">
+							<div class="col-md-12">					
+								<table>
+									<thead>
+										<tr>
+											<th style="font-size: 18px; line-height: 20px;"><b>RECIBOS DE SEGURO DEL <?= $turn->start_date->format('d-m-Y') ?></b></th>
+										</tr>
+
+										<tr>
+											<th>&nbsp;</th>
+										</tr>	
+										<tr>
+											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS DE SEGURO:</b></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th style="text-align: center;"><b>Fecha</b></th>
+											<th style="text-align: center;"><b>Familia</b></th>
+											<th style="text-align: center;"><b>No Recibo</b></th>
+											<th style="text-align: center;"><b>Tipo doc</b></th>
+											<th style="text-align: center;"><b>Monto $</b></th>
+										</tr>
+									</thead>
+									<tbody>				
+										<?php $totalDolar = 0;
+										foreach ($facturas as $factura):  
+											if ($factura->tipo_documento == "Recibo de seguro"): ?> 
+												<tr>
+													<td style="text-align: center;"><?= $factura->date_and_time->format('d-m-Y') ?></td>
+													<td><?= $factura->parentsandguardian->family ?></td>
+													<td style="text-align: center;"><?= $factura->bill_number ?></td>
+													<td><?= $factura->tipo_documento ?></td>
+													<?php 
+													$monto_recibo_dolar = round($factura->amount_paid/$factura->tasa_cambio, 2);
+													$totalDolar += $monto_recibo_dolar; ?>
+													<td style="text-align: center;"><?= number_format($monto_recibo_dolar, 2, ",", ".") ?></td>
+												</tr>
+											<?php endif;
+										endforeach; ?>
+										<tr>
+											<td><b>Totales</b></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>	
+
+				<?php if ($indicadorRecibosSeguroAnulados == 1): ?>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table>
+									<thead>
+										<tr>
+											<th>&nbsp;</th>
+										</tr>	
+										<tr>
+											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS DE SEGURO ANULADOS:</b></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th style="text-align: center;"><b>Fecha</b></th>
+											<th style="text-align: center;"><b>Familia</b></th>
+											<th style="text-align: center;"><b>Nro. Pedido</b></th>
+											<th style="text-align: center;"><b>Monto $</b></th>
+										</tr>
+									</thead>
+									<tbody>				
+										<?php 
+										$totalBolivar = 0;
+
+										foreach ($documentosAnulados as $anulado):  
+											if ($anulado->fiscal == 0):
+												if ($anulado->tipo_documento == "Recibo de seguro"): ?> 
+													<tr>												
+														<td style="text-align: center;"><?= $anulado->date_and_time->format('d-m-Y') ?></td>
+														<td style="text-align: center;"><?= $anulado->parentsandguardian->family ?></td>
+														<td style="text-align: center;"><?= $anulado->bill_number ?></td>
+														<td style="text-align: center;"><?= number_format(round($anulado->amount_paid/$factura->tasa_cambio, 2), 2, ",", ".") ?></td>
+													</tr>
+												<?php 
+												endif;
+											endif;
+										endforeach; ?>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>
+
 				<!-- Servicio educativo -->
-				<div>
+				<div class="saltopagina">
 					<div class="row">
 						<div class="col-md-12">					
-							<table class="saltopagina">
+							<table>
 								<thead>
 									<tr>
 										<th>&nbsp;</th>

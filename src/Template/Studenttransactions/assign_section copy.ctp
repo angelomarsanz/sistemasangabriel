@@ -194,7 +194,7 @@
             $(".section").html("<option value='A' selected>A</option><option value='B'>B</option><option value='C'>C</option>");
             changeSection();
         });
-        $("#select-level").change(redirectAction());
+        $("#select-level").change(redirectAction);
         $("#printer-section").click(function(e)
         {
             if ($("#printer-section").attr("href") == "#")

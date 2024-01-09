@@ -79,8 +79,8 @@
         <div class="col-sm-12">
             <?php if ($student->new_student == 0): ?>
                 <p><b>Conceptos de pagos:</b></p>
-                <p>Diferencia de Matrícula 2021 - 2022 = 25$ - Diferencia de Agosto 2021 - 2022 =  25$ - Anticipo de Matrícula 2022 - 2023 =  90$</p>
-                <p>Abono a Agosto 2022 - 2023 =  90$ - Seguro Escolar 2022 - 2023 = 20 $. <b>TOTAL A CANCELAR 250 $</b></p>
+                <p>Diferencia de Matrícula 2022 - 2023 = 30$ - Diferencia de Agosto 2022 - 2023 =  30$ - Anticipo de Matrícula 2023 - 2024 =  120$</p>
+                <p>Abono a Agosto 2023 - 2024 =  120$ - Seguro Escolar 2023 - 2024 = 20 $ (Pago único en dólares en efectivo) - <b>TOTAL A CANCELAR 320 $</b></p>
             <?php endif; ?>    
             <br />
         </div>
@@ -180,32 +180,31 @@
         <div class="col-sm-12">
             <p style="text-align: center"><b>Recaudos para la renovación de la matricula:</b></p>
             <div style="border-style: solid; border-width: 1px; padding: 1%;">
-                <p style="text-align: justify;">- Fotocopia de la partida de nacimiento.</p>
-                <p style="text-align: justify;">- Fotocopia de la cédula de identidad (de 5to grado en adelante es indispensable por orden del M.P.P.E.).</p>
+                <p style="text-align: justify;">- Fotocopia de la cédula de identidad (Desde 4to. Grado hasta 2do. Año es indispensable por orden del M.P.P.E.).</p>
                 <p style="text-align: justify;">- Fotografía tipo carnet reciente en digital, la misma debe adjuntarse en el formulario de actualización de datos. Al no registrar la fotografía en digital la planilla de actualización de datos no se puede imprimir.</p>
                 <p style="text-align: justify;">- Traer 1 foto carnet actualizada en físico para anexarla en el historial académico</p>
                 <p style="text-align: justify;">- Factura del mes de julio 2023.</p>
                 <p style="text-align: justify;">- Recibo del Consejo Educativo 2022-2023 (En efectivo).</p>
             </div>
             <p>&nbsp;</p>
-            <p>- <b>Horario de inscripción: 8:00 am - 12:00 m</b> de lunes a viernes.</p>
+            <p>- <b>Horario de inscripción: 8:00 am - 12:30 m</b> de lunes a viernes.</p>
             <p>- Se formaliza la inscripción del alumno cuando:</p>
             <ul>
-                <li>1. Al entregar esta ficha rellena con los datos actualizados.</li>
+                <li>1. Cuando se entrega esta ficha rellena con los datos actualizados.</li>
                 <li>2. Con el pago del mes de Julio 2023.</li>
                 <li>3. Con el pago del Consejo Educativo 2023.</li>            
             </ul>
             <p style="text-align: center"><b>Información:</b></p>
             <p><b>Actualización de datos para la renovación de la matricula:</b></p>
-            <p>1. Solicitamos que  actualice en la plataforma web del Colegio (https://colegiosangabrielarcángel.com) Los cambios de residencia o números telefónicos que pudieron haber ocurrido en el  año escolar. en la sección <b>"Actualización de Datos y Renovación de Matrícula".</b></p>
-            <p>2. Al formar parte de nuestra Comunidad Educativa, agradecemos esté en constante seguimiento del proceso académico (refuerzos diarios, etc.) y de los resultados (mediciones, cortes e informes periódicos) que se envían previo aviso por circulares electrónicas y comprometerse en asistir a reuniones y compromisos previa convocatoria relacionado en pro del progreso de su hijo y representado para mantener una sana convivencia.</p>
-            <p>3. Somos una institución privada creada para brindar un servicio educativo, la cual depende del cumplimiento puntual y efectivo de sus mensualidades.</p>
-            <p>4. Cumpliendo con el compromiso del numeral (12)  relacionado con compromisos administrativos que dice: "Se acuerda que si durante el presente año escolar el Ministerio del Poder Popular para la Educación o el Ejecutivo Nacional a través de decreto, establece un aumento salarial que obligue al colegio ante su personal docente, administrativo y obrero, dicho aumento, será trasladado en forma directa a las mensualidades que cancele cada uno de sus representados".</p>
-            <p>5. Si decide no continuar disfrutando de los servicios de nuestra institución: a) Lo cancelado no se le podrá reintegrar b) El cupo concedido a su representado  no puede ser concedido a otro aspirante a ingresar sin cubrir los lineamientos indicados por nuestra institución.</p>
+            <p>1. Somos una institución privada creada para brindar un servicio educativo, la cual depende del cumplimiento puntual y efectivo de sus mensualidades.</p>
+            <p>2. Solicitamos que actualice en la plataforma web del Colegio: http://colegiosangabrielarcángel.com Los cambios de residencia o números telefónicos que pudieron haber ocurrido en el  año escolar. En la sección: <b>Actualización de Datos y Renovación de Matrícula”.</b></p>
+            <p>3. Al formar parte de nuestra Comunidad Educativa, agradecemos esté en constante seguimiento del proceso académico (refuerzos diarios, etc.) y de los resultados (mediciones, cortes e informes periódicos) que se envían previo aviso por circulares electrónicas y comprometerse en asistir a reuniones y compromisos previa convocatoria con todo relacionado para el progreso de su hijo y representado en pro de una sana convivencia.</p>
+            <p>4. Si decide no continuar disfrutando de los servicios de nuestra institución: a) Lo cancelado no se le podrá reintegrar b) El cupo concedido a su representado no puede ser concedido a otro aspirante a ingresar sin cubrir los lineamientos indicados por nuestra institución.</p>
+            <p>5. Cumpliendo con el compromiso del numeral (12) relacionado con compromisos administrativos que dice: "Se acuerda que si durante el presente año escolar el Ministerio del Poder Popular para la Educación o el Ejecutivo Nacional a través de decreto, establece un aumento salarial que obligue al colegio ante su personal docente, administrativo y obrero, dicho aumento, será trasladado en forma directa a las mensualidades que cancele cada uno de sus representados".</p>
             <p>6. Por medio de la presente se establece que en el monto de las cuotas atrasadas se calculará a la cuota vigente en el día del pago respectivo.</p>
             <p>7. En clases presenciales es obligatorio el Seguro Escolar por lo tanto como padre y representante debe cumplir con dicho requisito.</p>
             <p>8. Esta información debe ser impresa en el revés de la ficha de inscripción, la firmará el padre o representante y entregará en Administración. </p>
-            <p>9. Esta información la encontrará siempre en la página web del colegio SGA, para actualizar y hacer de su conocimiento cambios o novedades con relación a nuestros “Normativos de Sana Convivencia” y “Aspectos Administrativos”.</p>
+            <p>9. Esta información la encontrará siempre en la página web del colegio SGA y familiarícese con nuestros “Normativos de Sana Convivencia” y "Aspectos Administrativos".</p>
             <p>10. Manifiesto estar informado (a)  en conocimiento de lo expresado en el artículo 12 del  M.P.P.E</p>
         </div>
     </div>
@@ -292,9 +291,9 @@
         <?php if ($student->new_student == 0): ?>
             <p style="line-height: 5px;">Conceptos de pagos:</p>
             <ul>
-                <li>Diferencia de Matrícula 2021 - 2022 = 25$ - Diferencia de Agosto 2021 - 2022 =  25$</li>
-                <li>Anticipo de Matrícula 2022 - 2023 =  90$ - Abono a Agosto 2022 - 2023 =  90$</li>
-                <li>Seguro Escolar 2022 - 2023 = 20 $. <b>TOTAL A CANCELAR 250 $</b></li>
+                <li>Diferencia de Matrícula 2022 - 2023 = 30$ - Diferencia de Agosto 2022 - 2023 =  30$</li>
+                <li>Anticipo de Matrícula 2023 - 2024 =  120$ - Abono a Agosto 2023 - 2024 =  120$</li>
+                <li>Seguro Escolar 2023 - 2024 = 20 $ (Pago único en dólares en efectivo) - <b>TOTAL A CANCELAR 320 $</b></b></li>
             </ul>
         <?php endif; ?>    
         <p><b>Alumno:&nbsp;<?= $student->full_name ?></b></p>
@@ -383,32 +382,31 @@
     <div class="saltopagina" style="font-size: 10px;">
         <p style="text-align: center"><b>Recaudos para la renovación de la matricula:</b></p>
         <div style="border-style: solid; border-width: 1px; padding: 1%;">
-            <p style="text-align: justify;">- Fotocopia de la partida de nacimiento.</p>
-            <p style="text-align: justify;">- Fotocopia de la cédula de identidad (de 5to grado en adelante es indispensable por orden del M.P.P.E.).</p>
+            <p style="text-align: justify;">- Fotocopia de la cédula de identidad (Desde 4to. Grado hasta 2do. Año es indispensable por orden del M.P.P.E.).</p>
             <p style="text-align: justify;">- Fotografía tipo carnet reciente en digital, la misma debe adjuntarse en el formulario de actualización de datos. Al no registrar la fotografía en digital la planilla de actualización de datos no se puede imprimir.</p>
             <p style="text-align: justify;">- Traer 1 foto carnet actualizada en físico para anexarla en el historial académico</p>
             <p style="text-align: justify;">- Factura del mes de julio 2023.</p>
             <p style="text-align: justify;">- Recibo del Consejo Educativo 2022-2023 (En efectivo).</p>
         </div>
         <p>&nbsp;</p>
-        <p>- <b>Horario de inscripción: 8:00 am - 12:00 m</b> de lunes a viernes.</p>
+        <p>- <b>Horario de inscripción: 8:00 am - 12:30 m</b> de lunes a viernes.</p>
         <p>- Se formaliza la inscripción del alumno cuando:</p>
         <ul>
-            <li>1. Al entregar esta ficha rellena con los datos actualizados.</li>
+            <li>1. Cuando se entrega esta ficha rellena con los datos actualizados.</li>
             <li>2. Con el pago del mes de Julio 2023.</li>
             <li>3. Con el pago del Consejo Educativo 2023.</li>            
         </ul>
         <p style="text-align: center"><b>Información:</b></p>
         <p><b>Actualización de datos para la renovación de la matricula:</b></p>
-        <p>1. Solicitamos que  actualice en la plataforma web del Colegio (https://colegiosangabrielarcángel.com) Los cambios de residencia o números telefónicos que pudieron haber ocurrido en el  año escolar. en la sección <b>"Actualización de Datos y Renovación de Matrícula".</b></p>
-        <p>2. Al formar parte de nuestra Comunidad Educativa, agradecemos esté en constante seguimiento del proceso académico (refuerzos diarios, etc.) y de los resultados (mediciones, cortes e informes periódicos) que se envían previo aviso por circulares electrónicas y comprometerse en asistir a reuniones y compromisos previa convocatoria relacionado en pro del progreso de su hijo y representado para mantener una sana convivencia.</p>
-        <p>3. Somos una institución privada creada para brindar un servicio educativo, la cual depende del cumplimiento puntual y efectivo de sus mensualidades.</p>
-        <p>4. Cumpliendo con el compromiso del numeral (12)  relacionado con compromisos administrativos que dice: "Se acuerda que si durante el presente año escolar el Ministerio del Poder Popular para la Educación o el Ejecutivo Nacional a través de decreto, establece un aumento salarial que obligue al colegio ante su personal docente, administrativo y obrero, dicho aumento, será trasladado en forma directa a las mensualidades que cancele cada uno de sus representados".</p>
-        <p>5. Si decide no continuar disfrutando de los servicios de nuestra institución: a) Lo cancelado no se le podrá reintegrar b) El cupo concedido a su representado  no puede ser concedido a otro aspirante a ingresar sin cubrir los lineamientos indicados por nuestra institución.</p>
+        <p>1. Somos una institución privada creada para brindar un servicio educativo, la cual depende del cumplimiento puntual y efectivo de sus mensualidades.</p>
+        <p>2. Solicitamos que actualice en la plataforma web del Colegio: http://colegiosangabrielarcángel.com Los cambios de residencia o números telefónicos que pudieron haber ocurrido en el  año escolar. En la sección: <b>Actualización de Datos y Renovación de Matrícula”.</b></p>
+        <p>3. Al formar parte de nuestra Comunidad Educativa, agradecemos esté en constante seguimiento del proceso académico (refuerzos diarios, etc.) y de los resultados (mediciones, cortes e informes periódicos) que se envían previo aviso por circulares electrónicas y comprometerse en asistir a reuniones y compromisos previa convocatoria con todo relacionado para el progreso de su hijo y representado en pro de una sana convivencia.</p>
+        <p>4. Si decide no continuar disfrutando de los servicios de nuestra institución: a) Lo cancelado no se le podrá reintegrar b) El cupo concedido a su representado no puede ser concedido a otro aspirante a ingresar sin cubrir los lineamientos indicados por nuestra institución.</p>
+        <p>5. Cumpliendo con el compromiso del numeral (12) relacionado con compromisos administrativos que dice: "Se acuerda que si durante el presente año escolar el Ministerio del Poder Popular para la Educación o el Ejecutivo Nacional a través de decreto, establece un aumento salarial que obligue al colegio ante su personal docente, administrativo y obrero, dicho aumento, será trasladado en forma directa a las mensualidades que cancele cada uno de sus representados".</p>
         <p>6. Por medio de la presente se establece que en el monto de las cuotas atrasadas se calculará a la cuota vigente en el día del pago respectivo.</p>
         <p>7. En clases presenciales es obligatorio el Seguro Escolar por lo tanto como padre y representante debe cumplir con dicho requisito.</p>
         <p>8. Esta información debe ser impresa en el revés de la ficha de inscripción, la firmará el padre o representante y entregará en Administración. </p>
-        <p>9. Esta información la encontrará siempre en la página web del colegio SGA, para actualizar y hacer de su conocimiento cambios o novedades con relación a nuestros “Normativos de Sana Convivencia” y “Aspectos Administrativos”.</p>
+        <p>9. Esta información la encontrará siempre en la página web del colegio SGA y familiarícese con nuestros “Normativos de Sana Convivencia” y "Aspectos Administrativos".</p>
         <p>10. Manifiesto estar informado (a)  en conocimiento de lo expresado en el artículo 12 del  M.P.P.E</p>
         <p>&nbsp;</p>
         <p></p>

@@ -63,7 +63,6 @@
     <?php $accountPage = 1; ?>
 
     <?php foreach ($studentsFor as $studentsFors): ?> 
-        <?php if ($complement[$studentsFors->id]['swGraduate'] == 1): ?>
             <?php if ($accountStudent == 1): ?>
                 <p style="text-align: right;"><?= 'Página ' . $accountPage . ' de ' . $totalPages ?></p>
                 <?php $accountPage++; ?>
@@ -74,7 +73,7 @@
                     <div style="float: left; width: 90%;">
                         <h5><b><?= $school->name ?></b></h5>
                         <p>RIF: <?= $school->rif ?></p>
-                        <h3 style="text-align: center;">Reporte de Alumnos Egresados al: <?= $currentDate->format('d-m-Y') ?></h3>
+                        <h3 style="text-align: center;">Alumnos que no completaron el proceso de inscripción: <?= $currentYearRegistration ?></h3>
                     </div>
                 </div>
                 <table class="table">
@@ -180,15 +179,14 @@
             <?php endif; ?>
             <?php $accountStudent++; ?>
             <?php $accountLine++; ?>
-        <?php endif; ?>
     <?php endforeach; ?>
     </tbody>
     </table>
 </div>
 <!-- Archivo EXCEL -->
 <div class='noverScreen'>
-    <?php $accountStudent = 1; ?>
-    <table id='egresados' class="table">
+	<?php $accountStudent = 1 ?>
+    <table id='noinscritos' class="table">
         <thead>
             <tr>
                 <th scope="col" style="width: 2%;">Nro.</th>
@@ -204,8 +202,7 @@
         </thead>
         <tbody>
             <?php foreach ($studentsFor as $studentsFors): ?> 
-                <?php if ($complement[$studentsFors->id]['swGraduate'] == 1): ?>
-                    <tr>
+					<tr>
                         <td style="width: 2%;"><?= $accountStudent ?></td>
                         <td style="display: none;" class='noExl'><?= $studentsFors->id ?></td>
                         <td style="width: 20%;"><?= $studentsFors->full_name ?></td>
@@ -222,8 +219,7 @@
                         <td style="width: 20%;"><?= $studentsFors->parentsandguardian->full_name ?></td>
                         <td style="width: 10%;"><?= $studentsFors->parentsandguardian->type_of_identification . '-' . $studentsFors->parentsandguardian->identidy_card ?></td>
                     </tr>
-                    <?php $accountStudent++; ?>
-                <?php endif; ?>
+					<?php $accountStudent++ ?>
             <?php endforeach; ?>
         </tbody>
     </table>
@@ -243,6 +239,7 @@
     </p>
 </div>
 <script>
+yearRegistration = '<?= $currentYearRegistration ?>';
 function myFunction() 
 {
     window.print();
@@ -262,13 +259,13 @@ $(document).ready(function(){
     
     $("#excel").click(function(){
         
-        $("#egresados").table2excel({
+        $("#noinscritos").table2excel({
     
             exclude: ".noExl",
         
-            name: "Alumnos egresados",
+            name: "Alumnos no inscritos " + yearRegistration,
         
-            filename: "alumnos egresados" 
+            filename: "Alumnos no inscritos " + yearRegistration 
     
         });
     });

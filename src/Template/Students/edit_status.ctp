@@ -36,7 +36,7 @@
                                 'Regular' => 'Regular',
                                 'Retirado' => 'Retirado',
                                 'Suspendido' => 'Suspendido']]);
-                            echo "<div id='datos_alumnos_nuevos' class='noverScreen'>";
+                            echo "<div id='datos-alumnos-nuevos' class='noverScreen'>";
                                 echo $this->Form->input('brothers_in_school', ['label' => 'Año escolar: ', 'required' => false, 'options' => 
                                     [null => " ",
                                     0 => $actual_anio_matricula . '-' . $proximo_anio_matricula, 
@@ -74,14 +74,14 @@
         {
             if ($("#student-condition").val() == "Nuevo")
             {
-                $("#datos_alumnos_nuevos").removeClass("noverScreen");
-                $("#brothers_in_school").attr("required", true);
+                $("#datos-alumnos-nuevos").removeClass("noverScreen");
+                $("#brothers-in-school").attr("required", true);
                 $("#level-of-study").attr("required", true);
             }
             else
             {
-                $("#datos_alumnos_nuevos").addClass("noverScreen");
-                $("#brothers_in_school").attr("required", false);
+                $("#datos-alumnos-nuevos").addClass("noverScreen");
+                $("#brothers-in-school").attr("required", false);
                 $("#level-of-study").attr("required", false
                 );                
             }

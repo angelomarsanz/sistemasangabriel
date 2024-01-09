@@ -1,3 +1,10 @@
+<?php
+    /*
+        Cambios:
+        03/08/2023
+        Este es un módulo nuevo que está en pruebas
+    */
+?>
 <style>
 @media screen
 {
@@ -61,7 +68,9 @@
             <thead>
                 <tr>
                     <th scope="col"><b>Nro</b></th>	
+                    <th scope="col"><b>Familia</b></th>
                     <th scope="col"><b>Nombre del representante</b></th>
+                    <th scope="col"><b>Motivo</b></th>
                     <th scope="col"><b>ID del representante</b></th>
                 </tr>
             </thead>
@@ -69,7 +78,9 @@
             <?php foreach ($representantes_sin_estudiantes as $representante): ?>
 				<tr>
 					<td><?= $contador_registros ?></td>
+                    <td><?= $representante['familia'] ?></td>
 					<td><?= $representante['nombre_representante'] ?></td>
+                    <td><?= $representante['motivo'] ?></td>
 					<td><?= $representante['id_representante'] ?></td>
 				</tr>
                 <?php $contador_registros++; ?>

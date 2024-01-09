@@ -50,43 +50,36 @@ class StudentsController extends AppController
     
     public function testFunction()
     {
-		$this->log("Something didn't work!"); 
-		/* $contador = 0;
-		$anoBusqueda = 2019;
-		$contadorFotoExtensionCorrecta = 0;
-		$contadorFotoExtensionIncorrecta = 0;
+		$contador_estudiantes_actualizados = 0;
 
 		$estudiantes = $this->Students->find('all')
-			->where(['balance' => $anoBusqueda]);
+			->where(['id >' => 1]);
 			
 		$contadorEstudiantes = $estudiantes->count();
 		
-		$this->Flash->success(__('Estudiantes inscritos en el año ' . $anoBusqueda . ': ' . $contadorEstudiantes));
+		$this->Flash->success(__('Total estudiantes '.$contadorEstudiantes));
 		
 		if ($contadorEstudiantes > 0)
 		{
 			foreach ($estudiantes as $estudiante)
 			{
-				if ($estudiante->profile_photo != "" && $estudiante->profile_photo != " " && $estudiante->profile_photo != "Sin foto")
-				{
-					$extensionFoto = substr(strtolower(strrchr($estudiante->profile_photo, '.')), 1);
-					
-					if ($extensionFoto == false)
-					{
-						// $this->Flash->success(__('id ' . $estudiante->id . ' alumno ' . $estudiante->full_name . ' archivo foto: ' . $estudiante->profile_photo));
-						$contadorFotoExtensionIncorrecta++;
-						echo "<br />" . '  ' . $contadorFotoExtensionIncorrecta . ". " . $estudiante->full_name;
-						// $this->Flash->success(__($contadorFotoExtensionIncorrecta . '. ' . $estudiante->full_name));
-					}
-					else
-					{
-						$contadorFotoExtensionCorrecta++;		
-					}
-				}
+				$estudiante->respaldo_primer_ano_inscripcion = $estudiante->number_of_brothers;
+				$estudiante->respaldo_ultimo_ano_inscripcion = $estudiante->balance;
+				$estudiante->respaldo_seccion_id = $estudiante->section_id;
+				$estudiante->respaldo_nivel_de_estudio = $estudiante->level_of_study;	
+
+				if ($this->Students->save($estudiante)) 
+                {
+					$contador_estudiantes_actualizados++;
+				} 
+                else 
+                {
+                    $this->Flash->error(__('No se pudo actualizar el estudiante con el ID '.$estudiante->id));
+                }
 			}
 		}
-		$this->Flash->success(__('Estudiantes con extensión de foto correcta ' . $contadorFotoExtensionCorrecta));
-		$this->Flash->success(__('Estudiantes con extensión de foto incorrecta ' . $contadorFotoExtensionIncorrecta)); */
+		$this->Flash->success(__('Total estudiantes actualizados '.$contador_estudiantes_actualizados));
+
     }
 	
     public function testFunction2()
@@ -101,29 +94,38 @@ class StudentsController extends AppController
      */
     public function index()
     {
-        if($this->Auth->user('role') == 'Representante')
+		$family = '';
+
+		if($this->Auth->user('role') == 'Representante')
         {
             $parentsandguardians = $this->Students->Parentsandguardians->find('all')
-                ->where(['Parentsandguardians.user_id =' => $this->Auth->user('id')]);
+                ->where(['Parentsandguardians.user_id =' => $this->Auth->user('id')])
+				->order(['Parentsandguardians.created' => 'DESC']);
 
-            $resultParentsandguardians = $parentsandguardians->toArray();
-            
-            $family = $resultParentsandguardians[0]['family'];
+			if ($parentsandguardians->count() > 0)
+			{
+				$representante = $parentsandguardians->first();
+				$family = $representante->family;
 
-            if ($resultParentsandguardians) 
-            {
-                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['Students.student_condition' => 'Regular'],
-					['Students.section_id <' => 41]]);
-                $this->set('students', $this->paginate($query));
-            }           
+				$query = $this->Students->find('all')->where(['parentsandguardian_id' => $representante->id, 'Students.student_condition' => 'Regular', 'Students.section_id <' => 41]);
+
+				$this->set('students', $this->paginate($query));
+				$this->set(compact('representante', 'family'));
+				$this->set('_serialize', ['students']);	
+			}
+			else
+			{
+				$this->Flash->error(__('No se encontraron estudiantes'));
+			}
         }
         else
         {
-            $students = $this->paginate($this->Students);   
+			$query = $this->Students->find('all')->where([['Students.student_condition' => 'Regular'],
+			['Students.section_id <' => 41]])->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);;
+			$this->set('students', $this->paginate($query));
+			$this->set(compact('family'));
+			$this->set('_serialize', ['students', 'family']);
         }
-
-        $this->set(compact('students', 'family'));
-        $this->set('_serialize', ['students', 'family']);
     }
 
     public function indexAdmin($idFamily = null)
@@ -151,7 +153,7 @@ class StudentsController extends AppController
 
         $this->set('students', $this->paginate($query));
 
-        $this->set(compact('students', 'idFamily', 'family'));
+        $this->set(compact('idFamily', 'family'));
         $this->set('_serialize', ['students', 'idFamily', 'family']);
     }
 
@@ -201,7 +203,7 @@ class StudentsController extends AppController
             
         $this->set('students', $this->paginate($query));
 
-        $this->set(compact('students', 'idFamilyP'));
+        $this->set(compact('idFamilyP'));
         $this->set('_serialize', ['students', 'idFamilyp']);
     }
 
@@ -489,6 +491,11 @@ class StudentsController extends AppController
 			{
 				$student->new_student = 0;		
 			}
+
+			$student->respaldo_primer_ano_inscripcion = 0;
+			$student->respaldo_ultimo_ano_inscripcion = 0;
+			$student->respaldo_seccion_id = 1;
+			$student->respaldo_nivel_de_estudio = "";	
 				
             if ($this->Students->save($student)) 
             {
@@ -779,8 +786,8 @@ class StudentsController extends AppController
 				$this->Flash->error(__('Estimado representante debe subir un archivo con alguna de estas extensiones: jpg, jpeg, gif o png'));
 			}
         }    
-        $this->set(compact('student', 'parentsandguardian', 'profilePhoto'));
-        $this->set('_serialize', ['student', 'parentsandguardian', 'profilePhoto']);
+        $this->set(compact('student', 'parentsandguardian'));
+        $this->set('_serialize', ['student', 'parentsandguardian']);
     }
 
     
@@ -1198,6 +1205,7 @@ class StudentsController extends AppController
 							'discount_family' => $result->discount,
 							'sublevel' => $sections->sublevel,
 							'section' => $sections->section,
+							'alumno_nuevo' => $result->new_student,
 							'studentTransactions' => json_decode($transacciones) 
 						];
                 }
@@ -1260,7 +1268,7 @@ class StudentsController extends AppController
             return $this->redirect(['action' => 'relationpdf', $_POST['section_id']]);
         }
 
-        $sections = $this->Students->Sections->find('list', ['limit' => 200]);
+        $sections = $this->Students->Sections->find('list', ['limit' => 200, 'order'=> ['orden' => 'ASC']]);
         
         $this->set(compact('sections'));
     }
@@ -1353,11 +1361,11 @@ class StudentsController extends AppController
 								{
 									$indicadorPagado = $this->verificarDiferencia($studentTransaction);
 
-									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = $indicadorPagado;    
+									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = $indicadorPagado;
 								}
 								else
 								{
-									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = 'P'; 
+									$monthlyPayments[$accountantManager]['studentTransactions'][]['monthlyPayment'] = 'P';
 								}
 							}
 						}
@@ -1718,50 +1726,34 @@ class StudentsController extends AppController
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
+
+		$anterior_anio_inscripcion = $school->previous_year_registration;
 			
 		$currentYearRegistration = $school->current_year_registration;
-		
+
 		$students = TableRegistry::get('Students');
 
 		$studentsFor = $students->find()
-			->select(
-				['Students.id',
-				'Students.surname',
-				'Students.second_surname',
-				'Students.first_name',
-				'Students.second_name',
-				'Students.level_of_study',
-				'Students.type_of_identification',
-				'Students.identity_card',
-				'Students.section_id',
-				'Students.sex',
-				'Students.birthdate',
-				'Students.student_condition',
-				'Parentsandguardians.type_of_identification',
-				'Parentsandguardians.identidy_card',
-				'Parentsandguardians.surname',
-				'Parentsandguardians.second_surname',
-				'Parentsandguardians.first_name',
-				'Parentsandguardians.second_name',
-				'Sections.id',
-				'Sections.sublevel'])
 			->contain(['Parentsandguardians', 'Sections'])
 			->where([['Students.id >' => 1],
 				['Students.student_condition' => 'Regular'],
-				['Students.balance !=' => $currentYearRegistration]])
+				['Students.balance' => $anterior_anio_inscripcion]])
 			->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
-	  
-		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-		date_default_timezone_set('America/Caracas');
+		
+		$transacciones_estudiantes = TableRegistry::get('Studenttransactions');
 
+		$matriculas_estudiantes = $transacciones_estudiantes->find()
+			->where(['Studenttransactions.transaction_description' => "Matrícula ".$currentYearRegistration,
+				'Studenttransactions.amount_dollar >' => 0]);
+	  
 		$currentDate = Time::now();
 		
 		$accountRecord = $studentsFor->count();
 
 		$totalPages = ceil($accountRecord / 20);
 		
-		$this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate', 'currentYearRegistration'));
-		$this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate', 'currentYearRegistration']);
+		$this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate', 'currentYearRegistration', 'anterior_anio_inscripcion', 'matriculas_estudiantes'));
+		$this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate', 'currentYearRegistration', 'anterior_anio_inscripcion', 'matriculas_estudiantes']);
     }
     public function SublevelLevel($sublevel = null)
     {
@@ -2498,36 +2490,89 @@ class StudentsController extends AppController
 		
 		return $arrayMark;
 	}
+
     public function editStatus($id = null, $controller = null, $action = null)
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
 		
         $currentDate = Time::now();
+
+		$this->loadModel('Schools');
+		
+		$school = $this->Schools->get(2);
+			
+		$actual_anio_matricula = $school->current_year_registration;
+
+		$proximo_anio_matricula = $school->next_year_registration;
+
+		$controlador_transacciones = new StudenttransactionsController();
 		
         $student = $this->Students->get($id);
+
+		$nivel_estudios_actual = $student->level_of_study;
         
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
             $student = $this->Students->patchEntity($student, $this->request->data);
-            
-            $student->brothers_in_school = 0;
 
+			if ($student->brothers_in_school == 0)
+			{
+				$anio_matricula = $school->current_year_registration;
+			}
+			else
+			{
+				$anio_matricula = $school->next_year_registration;
+			}
+           
+			$student->number_of_brothers = 0;
+			
 			if ($student->student_condition == "Nuevo")
 			{
 				$student->student_condition = "Regular";
+				$student->scholarship = 0;
+				$student->becado_ano_anterior = 0;
+				$student->tipo_descuento_ano_anterior = "";
+				$student->descuento_ano_anterior = 0;
 				$student->new_student = true;
-				$student->level_of_study = "";
 				$student->section_id = 1;
-				$student->number_of_brothers = 0;
 				$student->balance = 0;	
 				$student->tipo_descuento = "";
-				$student->discount = 0;		
+				$student->discount = 0;	
+				$student->respaldo_primer_ano_inscripcion = 0;	
+				$student->respaldo_ultimo_ano_inscripcion = 0;	
+				$student->respaldo_seccion_id = 0;
+				$student->respaldo_nivel_de_estudio = "";
+			}
+			else
+			{
+				$student->level_of_study = $nivel_estudios_actual;
 			}
 		            
             if ($this->Students->save($student)) 
-            {			
-				$this->Flash->success(__('El estatus del alumno se actualizó correctamente'));
+            {	
+				$indicadorError = 0;
+
+				if ($student->new_student == true)
+				{
+					$concepto_matricula = "Matrícula ".$anio_matricula;
+
+					$transacciones_estudiantes = $this->Students->Studenttransactions->find('all')->where(['student_id' => $id,  'transaction_description' => $concepto_matricula]);
+									
+					if ($transacciones_estudiantes->count() == 0)
+					{
+						$indicadorError = $controlador_transacciones->createQuotasNew($id, $anio_matricula);
+					} 
+				}
+
+				if ($indicadorError == 0)
+				{
+					$this->Flash->success(__('El estatus del alumno se actualizó correctamente'));
+				}
+				else
+				{
+					$this->Flash->error(__('No se pudieron generar las cuotas del estudiante'));
+				}			
 				
                 if (isset($controller))
                 {
@@ -2543,8 +2588,8 @@ class StudentsController extends AppController
                 $this->Flash->error(__('El estatus del alumno no se pudo actualizar'));
             }
         }    
-        $this->set(compact('student'));
-        $this->set('_serialize', ['student']);
+        $this->set(compact('student', 'actual_anio_matricula', 'proximo_anio_matricula'));
+        $this->set('_serialize', ['student', 'actual_anio_matricula', 'proximo_anio_matricula']);
     }
     public function editSection($id = null, $controller = null, $action = null)
     {
@@ -2828,8 +2873,43 @@ class StudentsController extends AppController
 				202209,
 				202210,
 				202211,
-				202212
-
+				202212,
+				202301,
+				202302,
+				202303,
+				202304,
+				202305,
+				202306,
+				202307,
+				202308,
+				202309,
+				202310,
+				202311,
+				202312,
+				202401,
+				202402,
+				202403,
+				202404,
+				202405,
+				202406,
+				202407,
+				202408,
+				202409,
+				202410,
+				202411,
+				202412,
+				202501,
+				202502,
+				202503,
+				202504,
+				202505,
+				202506,
+				202507,
+				202508,
+				202509,
+				202510,
+				202511,
+				202512
 			];
 				
 		if ($tasaTemporal == 0)
@@ -3615,8 +3695,10 @@ class StudentsController extends AppController
 	}
 	public function reporteBecados()
 	{
+		$this->loadModel('Schools');
+        $school = $this->Schools->get(2);
 		$becados = $this->Students->find('all')
-			->where(['student_condition' => 'Regular', 'discount >' => 0])
+			->where(['balance' => $school->current_school_year, 'student_condition' => 'Regular', 'discount >' => 0])
 			->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
 			
 		$this->set(compact('becados'));
@@ -3730,7 +3812,7 @@ class StudentsController extends AppController
 				break;
 			}
 		}
-
+		
 		return $indicadorPagado;
 	}
 }

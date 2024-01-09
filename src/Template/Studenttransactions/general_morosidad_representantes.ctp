@@ -22,7 +22,8 @@
 					echo "<div id='mensaje-mes' class='mensaje-usuario'></div>";
 	               	echo $this->Form->input('periodo_escolar', ['label' => 'Período escolar: ', 'options' => 
 	                    ["" => "",
-						'2022-2023' => '2022-2023']]);
+						'2022-2023' => '2022-2023',
+						'2023-2024' => '2023-2024']]);
 					echo "<div id='mensaje-periodo-escolar' class='mensaje-usuario'></div>";
 					echo $this->Form->input('telefono', ['label' => 'Mostrar el número de teléfono del representante: ', 'options' => 
 						["" => "",

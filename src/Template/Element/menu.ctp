@@ -62,6 +62,7 @@
 								<li><?= $this->Html->link('Abrir turno', ['controller' => 'Turns', 'action' => 'checkTurnOpen']) ?></li>
 								<li><?= $this->Html->link('Cerrar turno', ['controller' => 'Turns', 'action' => 'checkTurnClose']) ?></li>
 								<li><?= $this->Html->link('Histórico de turnos', ['controller' => 'Turns', 'action' => 'index']) ?></li>
+								<li><?= $this->Html->link('Recibo de seguro', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo de seguro']) ?></li> 
 								<li><?= $this->Html->link('Factura inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Factura inscripción regulares']) ?></li> 
 								<li><?= $this->Html->link('Factura inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Factura inscripción nuevos']) ?></li> 
 								<li><?= $this->Html->link('Recibo inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo inscripción regulares']) ?></li>
@@ -77,7 +78,8 @@
 						</li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Representantes <span class="caret"></span></a>
-							<ul class="dropdown-menu" role="menu">    
+							<ul class="dropdown-menu" role="menu">  
+								<li><?= $this->Html->link('Consulta de contrato de servicio', ['controller' => 'Parentsandguardians', 'action' => 'consultaContratoRepresentante']) ?></li>  
 								<li><?= $this->Html->link('Datos de familia', ['controller' => 'Parentsandguardians', 'action' => 'consultFamily']) ?></li>
 								<li><?= $this->Html->link('Familias - alumnos', ['controller' => 'Students', 'action' => 'familyStudents']) ?></li>
 								<li><?= $this->Html->link('Familias con tres hijos', ['controller' => 'Students', 'action' => 'familiasDescuento20']) ?></li>
@@ -120,8 +122,9 @@
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Cuentas por cobrar <span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">    
 								<li><?= $this->Html->link('Reporte general de morosidad de representantes', ['controller' => 'Studenttransactions', 'action' => 'generalMorosidadRepresentantes']) ?></li>
-								<li><?= $this->Html->link('Reporte de morosidad por grado y sección', ['controller' => 'Studenttransactions', 'action' => 'morosidadGradoSeccion']) ?></li>
+								<!-- <li><?= $this->Html->link('Reporte de morosidad por grado y sección', ['controller' => 'Studenttransactions', 'action' => 'morosidadGradoSeccion']) ?></li> -->
 								<li><?= $this->Html->link('Reporte de morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li>
+								<li><?= $this->Html->link('Reporte de cuentas cobradas y por cobrar', ['controller' => 'Studenttransactions', 'action' => 'cuentasCobradasPorCobrar']) ?></li>
 								<li><?= $this->Html->link('Familias con diferencias de mensualidades adelantadas', ['controller' => 'Studenttransactions', 'action' => 'familiasDiferenciasMensualidadesAdelantadas']) ?></li>												
 							</ul>
 						</li>
@@ -152,6 +155,7 @@
                                     <select id="select-level" name="level_of_study" class="form-control">
                                         <option value=null>Seleccione el grado </option>
                                         <option value=''>Alumnos sin datos actualizados </option>
+										<option value="Maternal">Maternal</option>
                                         <option value="Pre-escolar, pre-kinder">Pre-escolar, pre-kinder</option>                                
                                         <option value='Pre-escolar, kinder'>Pre-escolar, kinder</option>
                                         <option value='Pre-escolar, preparatorio'>Pre-escolar, preparatorio</option>

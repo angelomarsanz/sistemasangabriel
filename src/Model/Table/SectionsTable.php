@@ -88,6 +88,11 @@ class SectionsTable extends Table
             ->integer('registered_students')
             ->requirePresence('registered_students', 'create')
             ->notEmpty('registered_students');
+        
+        $validator
+            ->integer('orden')
+            ->requirePresence('orden', 'create')
+            ->notEmpty('orden');
 
         return $validator;
     }

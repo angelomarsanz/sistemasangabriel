@@ -1,3 +1,7 @@
+<?php
+use Cake\I18n\Time;
+?>
+
 <style>
 @media screen
 {
@@ -62,8 +66,17 @@
     <?php $accountLine = 1; ?>
     <?php $accountPage = 1; ?>
 
-    <?php foreach ($studentsFor as $studentsFors): ?> 
-            <?php if ($accountStudent == 1): ?>
+    <?php 
+    foreach ($studentsFor as $studentsFors): 
+        $indicador_matricula = 0;
+        foreach ($matriculas_estudiantes as $matricula):
+            if ($matricula->student_id == $studentsFors->id):
+                $indicador_matricula = 1;
+                break;
+            endif;
+        endforeach;
+        if ($indicador_matricula == 0):  
+            if ($accountStudent == 1): ?>
                 <p style="text-align: right;"><?= 'Página ' . $accountPage . ' de ' . $totalPages ?></p>
                 <?php $accountPage++; ?>
                 <div>
@@ -108,22 +121,23 @@
                             <td style="width: 20%;"><?= $studentsFors->parentsandguardian->full_name ?></td>
                             <td style="width: 10%;"><?= $studentsFors->parentsandguardian->type_of_identification . '-' . $studentsFors->parentsandguardian->identidy_card ?></td>
                         </tr>
-            <?php else: ?> 
-                    <?php if ($accountLine > 20): ?>
-                        </tbody>
-                        </table>
-                        <p class="saltopagina" style="text-align: right;"><?= 'Página ' . $accountPage . ' de ' . $totalPages ?></p>
-                        <?php $accountPage++; ?>
-                        <div>
-                            <div style="float: left; width:10%;">
-                                <p><?= $this->html->image('../files/schools/profile_photo/' . $school->get('profile_photo_dir') . '/'. $school->get('profile_photo'), ['width' => 200, 'height' => 200, 'class' => 'img-thumbnail img-responsive']) ?></p>
-                            </div>
-                            <div style="float: left; width: 90%;">
-                                <h5><b><?= $school->name ?></b></h5>
-                                <p>RIF: <?= $school->rif ?></p>
-                                <h3 style="text-align: center;">Reporte de Alumnos Egresados al: <?= $currentDate->format('d-m-Y') ?></h3>
-                            </div>
+            <?php 
+            else: 
+                if ($accountLine > 20): ?>
+                    </tbody>
+                    </table>
+                    <p class="saltopagina" style="text-align: right;"><?= 'Página ' . $accountPage . ' de ' . $totalPages ?></p>
+                    <?php $accountPage++; ?>
+                    <div>
+                        <div style="float: left; width:10%;">
+                            <p><?= $this->html->image('../files/schools/profile_photo/' . $school->get('profile_photo_dir') . '/'. $school->get('profile_photo'), ['width' => 200, 'height' => 200, 'class' => 'img-thumbnail img-responsive']) ?></p>
                         </div>
+                        <div style="float: left; width: 90%;">
+                            <h5><b><?= $school->name ?></b></h5>
+                            <p>RIF: <?= $school->rif ?></p>
+                            <h3 style="text-align: center;">Alumnos que no completaron el proceso de inscripción: <?= $currentYearRegistration ?></h3>
+                        </div>
+                    </div>
                         <table class="table">
                             <thead>
                                 <tr>
@@ -156,30 +170,33 @@
                                     <td style="width: 20%;"><?= $studentsFors->parentsandguardian->full_name ?></td>
                                     <td style="width: 10%;"><?= $studentsFors->parentsandguardian->type_of_identification . '-' . $studentsFors->parentsandguardian->identidy_card ?></td>
                                 </tr>
-                        <?php $accountLine = 1; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td style="width: 2%;"><?= $accountStudent ?></td>
-                            <td style="display: none;"><?= $studentsFors->id ?></td>
-                            <td style="width: 20%;"><?= $studentsFors->full_name ?></td>
-                            <?php if ($studentsFors->type_of_identification != 'PN' && $studentsFors->identity_card > '9999'): ?>
-                                <td style="width: 10%;"><?= $studentsFors->type_of_identification . '-' . $studentsFors->identity_card ?></td>
-                            <?php else: ?>
-                                <td style="width: 10%;"><?= $studentsFors->parentsandguardian->type_of_identification . '-' . $studentsFors->parentsandguardian->identidy_card ?></td>
-                            <?php endif; ?>
-                            <td style="width: 2%;"><?= $studentsFors->sex ?></td>
-                            <?php if (isset($studentsFors->birthdate)): ?>
-                                <td style="width: 10%;"><?= $studentsFors->birthdate->format('d-m-Y') ?></td>
-                            <?php endif; ?>
-                            <td style="width: 20%;"><?= $studentsFors->section->sublevel ?></td>
-                            <td style="width: 20%;"><?= $studentsFors->parentsandguardian->full_name ?></td>
+                                <?php $accountLine = 1; ?>
+                <?php 
+                else: ?>
+                    <tr>
+                        <td style="width: 2%;"><?= $accountStudent ?></td>
+                        <td style="display: none;"><?= $studentsFors->id ?></td>
+                        <td style="width: 20%;"><?= $studentsFors->full_name ?></td>
+                        <?php if ($studentsFors->type_of_identification != 'PN' && $studentsFors->identity_card > '9999'): ?>
+                            <td style="width: 10%;"><?= $studentsFors->type_of_identification . '-' . $studentsFors->identity_card ?></td>
+                        <?php else: ?>
                             <td style="width: 10%;"><?= $studentsFors->parentsandguardian->type_of_identification . '-' . $studentsFors->parentsandguardian->identidy_card ?></td>
-                        </tr>
-                    <?php endif; ?>
-            <?php endif; ?>
-            <?php $accountStudent++; ?>
-            <?php $accountLine++; ?>
-    <?php endforeach; ?>
+                        <?php endif; ?>
+                        <td style="width: 2%;"><?= $studentsFors->sex ?></td>
+                        <?php if (isset($studentsFors->birthdate)): ?>
+                            <td style="width: 10%;"><?= $studentsFors->birthdate->format('d-m-Y') ?></td>
+                        <?php endif; ?>
+                        <td style="width: 20%;"><?= $studentsFors->section->sublevel ?></td>
+                        <td style="width: 20%;"><?= $studentsFors->parentsandguardian->full_name ?></td>
+                        <td style="width: 10%;"><?= $studentsFors->parentsandguardian->type_of_identification . '-' . $studentsFors->parentsandguardian->identidy_card ?></td>
+                    </tr>
+                <?php 
+                endif; 
+            endif; 
+            $accountStudent++; 
+            $accountLine++; 
+        endif;
+    endforeach; ?>
     </tbody>
     </table>
 </div>
@@ -201,26 +218,27 @@
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($studentsFor as $studentsFors): ?> 
-					<tr>
-                        <td style="width: 2%;"><?= $accountStudent ?></td>
-                        <td style="display: none;" class='noExl'><?= $studentsFors->id ?></td>
-                        <td style="width: 20%;"><?= $studentsFors->full_name ?></td>
-                        <?php if ($studentsFors->type_of_identification != 'PN' && $studentsFors->identity_card > '9999'): ?>
-                            <td style="width: 10%;"><?= $studentsFors->type_of_identification . '-' . $studentsFors->identity_card ?></td>
-                        <?php else: ?>
-                            <td style="width: 10%;"><?= $studentsFors->parentsandguardian->type_of_identification . '-' . $studentsFors->parentsandguardian->identidy_card ?></td>
-                        <?php endif; ?>
-                        <td style="width: 2%;"><?= $studentsFors->sex ?></td>
-                        <?php if (isset($studentsFors->birthdate)): ?>
-                            <td style="width: 10%;"><?= $studentsFors->birthdate->format('d-m-Y') ?></td>
-                        <?php endif; ?>
-                        <td style="width: 20%;"><?= $studentsFors->section->sublevel ?></td>
-                        <td style="width: 20%;"><?= $studentsFors->parentsandguardian->full_name ?></td>
+            <?php 
+            foreach ($studentsFor as $studentsFors): ?> 
+                <tr>
+                    <td style="width: 2%;"><?= $accountStudent ?></td>
+                    <td style="display: none;" class='noExl'><?= $studentsFors->id ?></td>
+                    <td style="width: 20%;"><?= $studentsFors->full_name ?></td>
+                    <?php if ($studentsFors->type_of_identification != 'PN' && $studentsFors->identity_card > '9999'): ?>
+                        <td style="width: 10%;"><?= $studentsFors->type_of_identification . '-' . $studentsFors->identity_card ?></td>
+                    <?php else: ?>
                         <td style="width: 10%;"><?= $studentsFors->parentsandguardian->type_of_identification . '-' . $studentsFors->parentsandguardian->identidy_card ?></td>
-                    </tr>
-					<?php $accountStudent++ ?>
-            <?php endforeach; ?>
+                    <?php endif; ?>
+                    <td style="width: 2%;"><?= $studentsFors->sex ?></td>
+                    <?php if (isset($studentsFors->birthdate)): ?>
+                        <td style="width: 10%;"><?= $studentsFors->birthdate->format('d-m-Y') ?></td>
+                    <?php endif; ?>
+                    <td style="width: 20%;"><?= $studentsFors->section->sublevel ?></td>
+                    <td style="width: 20%;"><?= $studentsFors->parentsandguardian->full_name ?></td>
+                    <td style="width: 10%;"><?= $studentsFors->parentsandguardian->type_of_identification . '-' . $studentsFors->parentsandguardian->identidy_card ?></td>
+                </tr>
+    			<?php $accountStudent++; 
+            endforeach; ?>
         </tbody>
     </table>
 </div>

@@ -3,17 +3,197 @@ Pendientes:
 - Restringir en el create invoice que solo se puedan dar sobrantes de dolar. Verificando que haya pagos en dólares en la cobranza
 Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no fiscal
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
-- En el libro de venta sumar la columna del IGTF
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
-- En la pantalla de bienvenida los alumnos nuevos no se deben ver los costos de los alumnos regulares
+
+09/01/2023
+- Los becados completos y parciales verificar por monto
+- Sustituir la palabra "descuento" por "porcentaje de beca"
+- En la nota de débito pronto pago en la parte superior izquierda indicar el número de la nota de crédito afectada y en el concepto anteponer la palabra "Anulación" e indicar el número de factura afectada
+- En el reporte de totales generales agregar por niveles: Maternal, pre-escolar, primaria y bachillerato y desglosado tantos pago completos, tantos becas completas y tantos becas parciales.
+- Tambien en el reporte general agregar las columnas: Cuando el alumno aprovechó el pronto pago, cantidad de alumnos que pagaron y cantidad de alumnos que no han pagado. Esas columna deben estar tanto en los totales generales como en los cuatro niveles.
+- En por cobrar hay que considerar los días en los cuales se hace el descuento pronto pago. Tentativamente es los primeros cinco días del mes, pero puede haber sus excepciones como el caso de enero que piensan colocar el período de gracia del 8 al 12 de enero
+
+06/12/2023
+Para crear una nota de crédito eventual "Descuento por pronto pago" puedo reusar la función agregaNotaCreditoDescuentos de BillsController y la función agregarConceptoNotaCreditoDescuento de ConceptsController
+
+27/11/2023
+A la fecha el reporte de relación de mensualidades funciona perfectamente. Solo se arregló el orden del select de los grados agregando el campo "orden" en la tabla section y ordenando la lista por ese campo. Se modificaron los módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Model/Table/SectionsTable.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
+
+15/11/2023
+A la familia MOUSALLI FLORES se le hizo la nota de débito a la nota de crédito 883 del descuento pronto pago porque no procedía, ya que no pagó en el tiempo previsto para el descuento
+
+06/11/2023
+1:908 Uncaught ReferenceError: openDatabase is not defined
+
+01/11/2023 - La estudiante Prado Radics Stefanía quien tiene un descuento del 20% por concepto de hijos, en el mes de septiembre 2023 completó el pago de la mensualidad de marzo 2023. La mensualidad era de 120 con el descuento del 20%, queda en 96. Por alguna razón el sistema le mostraba al usuario que la mensualidad era de 115 y había abonado 91. Hay un error allí, tal vez porque se está forzando que todas las mensualidades atrasadas del período 2022-2023 se cobren en 120. El motivo es que como esa familia no ha formalizado la inscripción aún no tienen el descuento del 20%. Para solventar la situación se hizó un ajuste manual en los registros de las mensualidades de marzo a julio. Se agregó "20.00" en la columna "porcentaje_descuento" primeramente en marzo y luego en los otros meses el 05/12/2023 
+
+24/10/2023
+Se modificó el módulo 
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/conceptos_nota_contable.ctp
+Para que no duplique las notas de crédito cuando el mouse del usuario esté fallando y también se corrigieron algunos errores en la validación de los datos de entrada
+
+20/10/2023
+Se hizo un cambio en los módulos
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
+Para que cuando se seleccione un estudiante que no está inscrito además de verificar la columna "Balance" en la tabla "Student" verifique si en la tabla "Studentttransactions" no tiene el registro de "Matrícula nnnn" correspondiente al actual año de inscripción
+
+11/10/2023
+Cuando se va a crear una nota de crédito o débito, si el mouse del usuario está muy sensible la transacción se dispara dos veces. Se debe revisar y colocar una alerta
+El estudiante Bentancourt Saturno Manuela, por alguna razón en su registro no se actualizó el campo balance con el año 2023 que corresponde al año de la última vez que se inscribió. Para asegurarse de que no vuelva a pasar siempre que se vaya a verificar si se inscribió o no un estudiante verificar tanto el campo balance en el registro maestro del estudiante como el monto abonado en la transacción matrícula
+
+02/10/2023
+Los estudiantes de la familia Pérez Brada se reincorporaron en el período 2023-2024 como nuevos
+Tenían unas cuotas pendientes del año 2022 pero se eliminaron a petición de Lorelys
+
+21/09/2023
+Lorelys reportó el caso del estudiante Caruso Emman que no se pudo cambiar la condición a "Retirado", se hizo el cambio en los módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Students/edit_status.ctp
+
+21/09/2023
+El pedido 2229 de la familia Betancourt Saturno, se le eliminó la condición de "Anulado" por petición de Daniela
+Los hermanos Osorio Luís y Osorio Valentina se reincorporaron y se les cambió la condición alumnos nuevos
+
+19/09/23
+Paez Leon maria fernandez - junio y julio 2023 - 19 dolares julio 20%. Hay un problema que se debe corregir con los alumnos con descuento que tienen cuotas pendientes del período 2022-2023. Se debe restaurar a una fecha anterior al 12 de septiembre y hacer seguimiento
+No se pueden eliminar alumnos
+
+19/09/2023
+Se revisó el reporte
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/report_student_general.ctp
+Y se añadió la sección de maternal
+Según Lorelys el reporte del seguro debe contener todos los estudiantes inscritos, hayan o no pagado el seguro
+
+14/09/2023
+Revisar Julio Moroso y aplicar el mismo procedimiento de "Deuda de conceptos de inscripción"
+
+13/09/2023
+Cuando no coincida el monto total de la factura con el monto total de la nota de crédito por diferencias en la conversión de moneda, comentar el "if" de verificación del monto en el módulo /opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/conceptos_nota_contable.ctp y así se pueda hacer una nota de crédito de ajuste. Para que el monto coincida el usuario debe colocar el monto en dólares con la cantidad de decimales necesarias para que cuadre el monto de la factura con la nota de crédito		
+
+13/09/2023 
+Para agregar la opción maternal en el módulo de asignar sección, se agregó el registro "Maternal" en la tabla "sections" y se modificaron los siguientes módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
+
+13/09/2023
+Por solicitud de Lorelys al estudiante Morales Cavalcanti Federico se le exoneró 45 dólares de la mensualidad de agosto 2023.
+El sistema no le mostró el aviso de que tenía pendiente "Agosto" con un abono, por el error de lógica en el create_invoice. Se debe corregir aplicando el mismo procedimiento del "Seguro escolar"
+
+06/09/2023
+En algunas ocasiones se presentan casos de alumnos que se retiraron y quieren reincorporarse. Normalmente se reincorpora como alumno nuevo. Se hicieron los ajustes para que el cambio se realice por la opción "Alumnos con condición distinta a regular" cuando se selecciona nuevo, se indica que nivel de estudios cursará, se actualiza el registro como un alumno nuevo y se crean las transacciones. Los módulos modificados son:
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Students/edit_status.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+Falta eliminar "logicamente", las transacciones de años anteriores
+
+27/08/2023
+Proyecto: Marcar como "Eliminado" en la columna "estatus_registro" en las tablas "users" y "parentsandguardians" a los representantes inactivos, así como también marcar como "Eliminado" en la columna "student_condition" a los estudiantes inactivos
+Se creo la acción eliminarRepresentantesEstudiantesInactivos en los módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Parentsandguardians/eliminar_representantes_estudiantes_inactivos.ctp
+Ese módulo se debe ejecutar una vez al año cuando comience el proceso de re-inscripción en junio, inmediatamente despues de actualizar la columna "current_year_registration" de la tabla "schools"
+Antes de ejecutarse por primera vez se debe cambiar en todos los registros el valor a "Activo" en la columna "estatus_registro" de las tablas "users" y "parentsandguardians"
+Se creó la acción cambiarEstatusRegistro en los módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Parentsandguardians/cambiar_estatus_registro.ctp
+Se ejecutó en el ambiente de desarrollo y se modificaron 1267 registros en la tabla parentsandguardians. Se comentaron las lineas de actualización de estatus mientras se retoma el proyecto
+
+28/07/2023
+Se anuló el pedido
+carrizo gonzalez
+104394 control   
+
+21/07/2023
+Cuando se intentó cambiar la condición de "Regular" a "Retirado" del alumno Sitzwohl  Tovar Hansel al salvar el registro da error en:
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Students/edit_status.ctp
+El problema se debe a que como se está escogiendo la opción "Retirado" se está enviando al controlador el campo "level_of_study" con un valor null.
+Se verificó colocando un debug de la variable "$student" en la vista
+
+20/07/2023
+El reporte de alumnos becados 100 % se modificó para que se pueda imprimir por período escolar. Módulos modificados:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/scholarship_index.ctp
+
+19/07/2023
+Reporte del seguro
+Módulos modificados:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/report_student_general.ctp
+
+18/07/2023
+Cierre del 07/07/2023
+Se emitió la factura 121263 por 6.722,40
+Se generó una nota de crédito por pronto pago Nro. *657* por 280,10
+Se emitió la nota de cŕedito *658* para reversar la factura 121363 por Bs. 6.722,40 Bs.
+Por error se hizo la nota de débito Nro. 12 a la nota de crédito 658 por 239,76 Bs.
+Para corregir la situación se hizo la nota de crédito Nro. *671* a la nota de cŕedito 658 por 239,76
+Se hizo la nota de débito Nro. 13 a la nota de cŕedito Nro. 657 por 280,10
+Se emitió la factura 121295 por 6.722,40
+Se generó la nota de crédito por pronto pago Nro. *672* por 280,10 
+
+18/07/2023
+Bracho Salazar - No pagó seguro
+
+06/07/2023
+Para el caso del filtro que se debe colocar en el frontend de que solo puedan acceder representantes de alumnos regulares o de alumnos nuevos que fueron aprobados para este año, podría verificarse por la fecha de creación del registro del estudiante o crearse un campo anio_solicitud_cupo si es así el usuario debería tener una opción para eliminar las cuotas viejas o marcarlas como eliminadas y actualizar el campo anio_solicitud_cupo. Por los momentos se colocará que valide que el registro del estudiante se haya sido creado este año.
+Caso Alvarez Villamizar - Ainhoa - id 1804
+En la acción "home" del controlador "Users", después de buscar el registro del representante, busco los estudiantes asociados a ese representante 
+Leo la tabla Schools y ubico año de inscripción actual y el año de inscripción anterior
+Defino un indicador_califica en cero
+Leo los registros de los estudiantes
+Si encuentro un estudiante regular y el balance es igual o mayor al año de inscripción anterior de la tabla Schools enciendo el indicador y salgo del ciclo
+Si encuentro un estudiante nuevo y el año de creación del registro es igual o mayor al año de inscripción actual enciendo el indicador
+Después que salí del ciclo verifico si el indicador está encendido. Si el indicador no está encendido ejecuto $this->Auth->logout();
+
+06/07/2023
+Para el asunto de la factura descuadrada, la causa puede ser alguna de las siguientes opciones:
+- Lorelys imprimía sin márgenes y ahora tiene la opción de márgenes predeterminado. En ese caso quitar los <br> que están al principio del invoice
+- La posiciones de los textos en el papel membretado de factura son diferentes a las de pedido, en ese caso condicionar cuando sea factura o pedido 
+
+29/06/2023 
+Para los reportes de contrato se crearon y/o modificaron los siguientes módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Parentsandguardians/consulta_contrato_representante.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Parentsandguardians/reportes_contrato_servicio.ctp
+En el reporte de contrato aparecen 496 familias y en el de familias - alumnos hay 458 alumnos. Buscando la diferencia la familia Alayeto Sandoval está en el nuevo reporte y en el de familias alumnos no está
+
+
+28/06/2023
+Hasta hoy solo 97 personas han firmado contrato
+
+19/06/2023
+Módulos módificados para el recibo de seguro
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
+
+14/06/2023
+A la mensualidad de junio 2023 de Serrano Morales Paula Victoria, se le forzó que había pagado los 120 dólares porque la profesora
+Leonor le exoneró 15 dólares. A solicitud de Sol
+
+14/06/2023
+Para el proceso de inscripción 2022-2023 se actualizaron los siguientes módulos:
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/GuardiantransactionsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Layout/default.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/home_screen.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/previo_contrato_representante.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/firma_contrato_representante.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Parentsandguardians/profile_photo.ctp
+Agregar librería signature a webroot/js
+Agregar a la tabla parentsandguardian el campo datos_contrato
+Agregar el directorio webroot/files/contratos y colocarle permisos 777
 
 04/07/2023
 Para restaurar el registro completo cuando se anula una factura o pedido, se modificaron los siguientes módulos:
+Ya se creó el campo respaldo_registro en la tabla studenttransactions y se está grabando la información cada vez que se hace una cobranza.
+El siguiente paso es crear en el controlador de transacciones una rutina única que se invoque cuando $transaccion->respaldo_registro === null y que esta rutina valide si cada campo existe, si existen todos los campos procede a restaurar el registro completo, de lo contrario se activa un indicador de que no se pudo restaurar el registro completo. Luego en la rutina reverse se verifica el indicador, si está encendido se restaura parcialmente el registro
+Se hicieron los cambios de restaurar el registro en la vista de testFunction
+Se subió a producción
 /opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php
 /opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
 /opt/lampp/htdocs/sistemasangabriel/src/Controller/ConceptsController.php
-Ya se creó el campo respaldo_registro en la tabla studenttransactions y se está grabando la información cada vez que se hace una cobranza.
-El siguiente paso es crear en el controlador de transacciones una rutina única que se invoque cuando $transaccion->respaldo_registro === null y que esta rutina valide si cada campo existe, si existen todos los campos procede a restaurar el registro completo, de lo contrario se activa un indicador de que no se pudo restaurar el registro completo. Luego en la rutina reverse se verifica el indicador, si está encendido se restaura parcialmente el registro
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/test_function.ctp
 
 02/07/2023
 Sol solicitó que en el reporte general de morosidad se agregaran los totales de morosidad por mes. Se modificaron los siguientes módulos:
@@ -173,12 +353,6 @@ Ejemplo: Factura 120301 y NC 349. El monto de la nota de crédito es menor por u
 Familia Carmona Lezama
 Primero dijo que el impuesto era 3.6 y luego 3.45
 
-09/03/2023
-En algunas se presentan casos de alumnos que se retiraron y quieren reincorporarse. Normalmente se reincorpora como alumno nuevo. Se hicieron los ajustes para que el cambio se realice por la opción "Alumnos con condición distinta a regular" cuando se selecciona nuevo, se indica que nivel de estudios cursará, se actualiza el registro como un alumno nuevo y se crean las transacciones. Los módulos modificados son:
-/opt/lampp/htdocs/sistemasangabriel/src/Template/Students/edit_status.ctp
-/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
-/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
-
 28/01/2023
 Por una extraña razón el pedido 258 que se iba a convertir en factura no se le registraron concepto y la conversión quedó incompleta. Se generó la factura sin conceptos. Se tuvieron que hacer ajustes en los registros para normalizar la situación
 17/01/2023
@@ -190,12 +364,12 @@ Las posibles causas son:
 - La red local es muy lenta y la función onafterprint se cansa de esperar
 
 10/01/2022
-En /opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php se creó la función eliminarRepresentantesNoActivos. Se buscan todos los representante y después se verifica si tiene estudiantes. Si no tiene estudiantes, se graba en un vector para su eliminación
+En /opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php se creó la función eliminarRepresentantesSinEstudiantes. Se buscan todos los representante y después se verifica si tiene estudiantes. Si no tiene estudiantes, se graba en un vector para su eliminación
 Habría que buscar representantes que tienen estudiantes que se registraron antes de febrero 2022, pero nunca se inscribieron, esos también se eliminarán
 También estudiantes con apellidos de familia repetidos, aunque pueden existir familias con los mismos apellidos, tendría que mostrarse también el nombre completo del representante y la cédula y verificar manualmente
 
 07/12/2022
-Módulos modificados IGTG
+Módulos modificados IGTF
 /opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/establecer_monto_reintegro.ctp
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/invoice.ctp
@@ -312,4 +486,168 @@ para que valide si el usuario ya tiene un turno abierto. Esto para solventar que
 La alumna Camarán Gonzalez Sophia, ID 125, se le hizo un ajuste para que ingresara como alumno
 regular para el período 2022 - 2023. Se le cobró todos los concepto de alumno regular.
 En el reporte de relación de mensualidades aparecía como moroso en el año 2021-2022, se le 
-colocó que abono "0" en la matrícula 2021, para que no se mostrara en lo reportes   
+colocó que abono "0" en la matrícula 2021, para que no se mostrara en lo reportes  
+
+Histórico 
+Cuando se hace una nota de crédito indistamente si hace el mismo mes o un mes diferente al de la factura original se usa la misma tasa de cambio de la factura original 
+
+---
+
+En la tabla payments, la columna monto_igtf_dolar, realmente no está expresada arbitrariamente en dólares, sino en la moneda en que se hizo el pago
+
+Para emitir el reporte del seguro:
+1. Crear una nueva carpeta con la fecha actual en mis documentos/colegio san gabriel/Seguro escolar/Periodo... para guardar todos los archivos del envío
+2. Solicitar a Lorelys el último reporte enviado
+3. Pegarlo al final del archivo .ods reporte_seguro_subida_20XX_20XX.ods
+4. Truncar la tabla excels en la B.D.
+5. Importar el archivo .ods a la tabla excels
+6. Ejecutar el programa
+7. Descargar y enviar el excel a Lorelys
+
+Facturas cruzadas
+Cuando Lorelys imprima facturas cruzadas y se requiera colocar Nro. de control cero al Nro. de control, debo colocar 999999 y anular en las tablas Bills, Concepts y Payments
+
+Cálculos del IGTF
+Si es solo pago en divisa, en el pago en divisas está incluido el IGTF
+Si es un pago mixto y el pago en bolívares cubre totalmente el monto del IGTF, se registra el pago del IGTF en bolívares
+Si es un pago mixto y el pago en bolívares no cubre el monto del IGTF, el IGTF está incluido en el pago en divisas
+Antes de guardar la factura se hacen los ajustes, ya sea en la rutina de ajuste o al iniciar la función guardarFactura
+El monto del IGTF se guardarán en el pago donde se hizo el cobro del impuesto
+
+Nro. de facturas a obviar en marzo 2022
+
+115	07/03/2022	Fact	V - 9531059	MARIANO ANTONIO SANDOVAL PAEZ	97976	115640
+116	07/03/2022	Fact	V - 15597131	JUAN JESUS MENDOZA GUEVARA	97977	115641
+117	07/03/2022	Fact	V - 11354172	MIGUELANGEL MORALES CARTA	97978	115642
+118	07/03/2022	Fact	V - 10465379	ANTONIO CANNAVÓ MORELLO	97979	115643
+119	07/03/2022	Fact	V - 13470757	JUAN CARLOS OJEDA PANIZO	97980	115644
+120	07/03/2022	Fact	V - 7106136	VICTOR RAFAEL GONZALEZ RODRIGUEZ	97981	115645
+121	07/03/2022	Fact	V - 16531045	MARIA ALEJANDRA RODRÍGUEZ LOZANO	97982	115646
+122	07/03/2022	Fact	V - 11346155	SAUL OSWALDO FIGUEREDO HERRERA	97983	115647
+
+La factura 114194 correspondía imprimir en la 96529, pero se imprimió en una hoja blanca que venía en el papel de la imprenta
+Y la factura 114595 se imprimió en la 96529 y se descontroló la numeración
+
+Mantenimiento semanal servidor CSGA
+
+cd /home/sgasyst/web
+sudo mv csga2021....tar.gz /Respaldos
+sudo df -h (Verificar el espacio usado en disco)
+sudo du -sh archivo.extension (Verificar el tamaño de un archivo)
+cd /Respaldos
+sudo rm csga2021...tar.gz (Eliminar el backup más antiguo)
+cd /home/sgasyst/web
+tar -czvf csga2021...tar.gz sistema.colegiosangabrielarcangel.com
+sudo scp csga2021...tar.gz root@dapliw.org:/home/admin
+
+--
+
+En febrero se debe considerar nuevo año escolar para la planilla
+
+--
+
+Del filtro de alumnos egresados me falta verificar: becar alumnos y aplicar descuento
+
+---
+
+Cambios necesarios para el comienzo de inscripción de nuevos alumnos en febrero de cada año
+
+En febrero cuando se inicia el proceso de inscripción de alumnos nuevos, como no se ha establecido
+la tarifa de Matrícula y agosto del próximo año escolar, las cuotas aparecen en cero cuando se va a hacer la
+cobranza y el usuario debe modificarlas al monto de la matrícula y agosto. Al iniciarse el nuevo año escolar, le 
+aparecerá como si debe esa cuota. Se debe idear un mecanismo para que esto no suceda
+
+--
+
+Cambios necesarios para el período de renovación de matrícula (junio de cada año):
+
+	Se modificó la acción add_dollar de RatesController parahacer los tres siguientes tres ajustes:
+
+	Para los estatus recordar que hay un boolean - new_student en la tabla student
+	Ese status se cambia a "0" al iniciar el proceso de renovación de inscripción a aquellos
+	alumnos regulares que se inscribieron para el período escolar actual. Se
+	omiten los alumnos regulares que se inscribieron a partir de febrero para el
+	próximo período.
+	Es decir un alumno regular tiene el status de new_student en "1" durante todo
+	su primer año en el colegio.
+
+	También al iniciar el proceso de renovación de inscripción (en junio), el campo level_of_study
+	blanquea únicamente a los alumnos que están inscritos en el año escolar actual.
+
+	Se actualiza el campo current_year_registration de la tabla Shools con el año del nuevo período de inscripción
+
+	El programa asignar sección debe validar que el current_school_year sea igual current_year_registration, si son diferentes debe abortar la operaciòn 
+	y enviar un mensaje un mensaje de error.
+
+---
+
+Cambios necesarios para el período de inicio de nuevo año escolar:
+
+	El programa assignSection verifique si el current_school_year es igual current_year_registration, si es diferente verificar si la fecha actual corresponde al mes de septiembre (9) y si es positivo asignar current_year_registration a current_school_year actualizar las becas. 
+
+	Copiar Scholarship a becado_ano_anterior
+	Copiar tipo_descuento a tipo_descuento_ano_anterior
+	Copiar discount a descuento_ano_anterior
+
+	En el reporte de familias con 3, 4 ó más hijos ignorar a los que no se inscribieron en el año escolar en curso
+
+---
+
+Reporte de Alumnos Egresados : Alumnos egresados / Exalumnos son aquellos que se gradúan de 5to Año.
+
+---
+
+Alumnos Retirados: Son aquellos que en el transcurso de su vida escolar se van del colegio.
+
+---
+
+En la tabla transacciones amount_dollar es el monto abonado a la cuota
+
+---
+
+Problema de que a un usuario le aparece la factura pendiente de impresión de otro usuario, cuando va a consultar o reimprimir una factura:
+
+En xampp\htdocs\sistemasangabriel\src\Template\Layout\default.ctp se invoca la rutina imprimir() del template menu.ctp una vez que el navegador ha enviado a imprimir la factura
+
+En la función imprimir si se está posicionado en la vista bills/invoice se llama a la rutina bills/verificarFacturas 
+
+En la función verificarFacturas se chequea si el usuario activo tiene otra factura por imprimir, si tiene se llama a la acción bills/invoice nuevamente
+
+En la acción bills/invoice se verifica si quien llamó esa acción es verificarFacturas, si no es (Este es el caso cuando se consulta una factura para imprimir o simplemente para consultar), entonces se busca si hay facturas por imprimir de cualquier usuario
+
+Si hay facturas por imprimir de otro usuario y es menor el número de control, se muestra un mensaje de que debe esperar a que el otro usuario imprima la factura
+
+El problema que se presenta en el foreach que está en la línea 554 del BillsController cuando un usuario consulta una factura o va reimprimir y 
+le aparece la factura de otro usuario es porque no se considera la posibilidad de que haya una factura con número de control mayor
+
+Para solucionar el problema se debe usar un foreach en la línea 572 e ir descartando si las facturas son de otro usuario. La que no sea de otro usuario se 
+obliga a imprimir		
+
+Si quien llamó la acción bills/invoice es verificarFacturas y no hay ningún mensaje pendiente por imprimir entonces se muestra el mensaje que debe imprimir esa factura ahora
+
+---
+
+Servicio educativo se resetea a cero
+
+No se ha encontrado la causa, pero una solución emergente es modificar la línea 160 de StudenttransactionsController para que cuando se esté haciendo una cobranza del servicio educativo el campo original_amount solo se actualice cuando $transaccion->tarifaDolarOriginal sea diferente de $transaccion->tarifaDolar
+
+---
+
+Cuando Lorelys me llame por el problema de que no puede imprimir la factura, hago lo siguiente:
+
+Subo menu.ctp a producción
+Elimino logs/error.log
+Verifico los console.log si se llama a windows.print()
+
+-- 
+
+Al iniciar el año escolar depurar StudenttransactionsController
+
+con las funciones marcarEliminado y EliminarMarcado
+
+--
+
+Representantes a los cuales se les aplicó nota de crédito porque no les correspondía pagar las diferencias de: Matrícula 2020 y agosto 2021. 
+Se debe colocar en cero el "Balance" de ParentsandGuardian y ajustar la cuota. Los ID son: 675, 921, 437, 1126, 1127, 1028, 889, 380, 1008, 998 y 687
+
+Se le quitó el saldo al ex-empleado Valderrama Escalona (40 $), Rincones Sánchez (80 $), Rangel Madrid (id 687, Monto 80 $)

@@ -276,7 +276,8 @@ class TurnsController extends AppController
 		else
 		{
 			$this->loadModel('Bills');
-			$this->loadModel('Monedas');	
+			$this->loadModel('Monedas');
+			$this->loadModel('Pagos');	
 			
 			$payment = new PaymentsController();
 			
@@ -302,6 +303,8 @@ class TurnsController extends AppController
 			$indicadorPedidosAnulados = 0;
 			$indicadorRecibosAnuladosPedidos = 0;
 			$codigoRetornoResultado = 0;
+			$indicadorRecibosSeguro = 0;
+			$indicadorRecibosSeguroAnulados = 0;
 
 			$vectorPagos = []; 
 			$contadorNumero = 1;
@@ -357,9 +360,14 @@ class TurnsController extends AppController
 							&& $anulado->tipo_documento != "Recibo de reintegro de pedido" 
 							&& $anulado->tipo_documento != "Recibo de sobrante de pedido"
 							&& $anulado->tipo_documento != "Recibo de compra de pedido" 
+							&& $anulado->tipo_documento != "Recibo de seguro" 
 							&& $anulado->tipo_documento != "Recibo de vuelto de compra de pedido") // Pedidos
 					{ 
 						$indicadorRecibosAnulados = 1;
+					}
+					elseif ($anulado->tipo_documento == "Recibo de seguro")
+					{
+						$indicadorRecibosSeguroAnulados = 1;
 					}
 					elseif ($anulado->tipo_documento == "Pedido")
 					{
@@ -548,6 +556,10 @@ class TurnsController extends AppController
 							$vectorTotalesRecibidosPedidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Efectivo €'] += $factura->amount_paid;	
 						}	
 					}
+					elseif ($factura->tipo_documento == "Recibo de seguro") 
+					{
+						$indicadorRecibosSeguro = 1;
+					}					
 					elseif ($factura->tipo_documento == "Nota de crédito")
 					{
 						$this->loadModel('Concepts');
@@ -1244,7 +1256,7 @@ class TurnsController extends AppController
 				}
 			}
 			
-			$turn->vector_pagos = json_encode($vectorPagos);
+			$turn->vector_pagos = null;
 			$turn->vector_totales_recibidos = json_encode($vectorTotalesRecibidos);
 			$turn->vector_totales_recibidos_pedidos = json_encode($vectorTotalesRecibidosPedidos);
 			$turn->total_formas_pago = json_encode($totalFormasPago);
@@ -1258,7 +1270,20 @@ class TurnsController extends AppController
 			$turn->tasa_euro = $tasaEuro;
 			$turn->tasa_euro_dolar = $tasaDolarEuro;
  			
-            if (!($this->Turns->save($turn)))
+            if ($this->Turns->save($turn))
+			{
+				$pagos = new PagosController();
+				foreach ($vectorPagos as $identificadorFactura => $vectorPago)
+				{
+					$codigoRetornoAgregarPagos = $pagos->agregarPago($id, $identificadorFactura, $vectorPago);
+					if ($codigoRetornoAgregarPagos == 1)
+					{
+						$this->Flash->error(__('No se pudo guardar el pago'));
+						return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+					}
+				}	
+			}
+			else
             {
 				$this->Flash->error(__('No se pudieron guardar los contadores del turno, por favor intente nuevamente'));
                 return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
@@ -1314,7 +1339,9 @@ class TurnsController extends AppController
 				'documentosAnulados',
 				'totalGeneralSobrantes',
 				'totalGeneralReintegrosSobrantes',
-				'vista'));	
+				'vista',
+				'indicadorRecibosSeguro',
+				'indicadorRecibosSeguroAnulados'));	
 				
 			$this->set('_serialize', 
 				['turn',
@@ -1351,7 +1378,9 @@ class TurnsController extends AppController
 				'documentosAnulados',
 				'totalGeneralSobrantes',
 				'totalGeneralReintegrosSobrantes',
-				'vista']);
+				'vista',
+				'indicadorRecibosSeguro',
+				'indicadorRecibosSeguroAnulados']);
 		}
 	}
     
@@ -1901,12 +1930,29 @@ class TurnsController extends AppController
 		$indicadorRecibosAnuladosPedidos = 0;
 		$codigoRetornoResultado = 0;
 		$indicadorDescuentosRecargosRegistrados = 0;
+		$indicadorRecibosSeguro = 0;
+		$indicadorRecibosSeguroAnulados = 0;
+		$vector_pagos = [];
 							
 		$usuario = $this->Turns->Users->get($turn->user_id);
 	
 		$cajero = $usuario->first_name . ' ' . $usuario->surname;
 
-		$vectorPagos = json_decode($turn->vector_pagos, true);
+		if ($turn->vector_pagos === null)
+		{
+			$this->loadModel('Pagos');	
+			$pagos = $this->Pagos->find('all', ['conditions' => ['turn_id' => $id]]);
+			foreach ($pagos as $pago)
+			{
+				$vector_pago = json_decode($pago->vector_pago, true);
+				$vectorPagos[$pago->identificador_factura] = $vector_pago;
+			}
+		}
+		else
+		{
+			$vectorPagos = json_decode($turn->vector_pagos, true);
+		}
+
 		$vectorTotalesRecibidos = json_decode($turn->vector_totales_recibidos, true);
 		$vectorTotalesRecibidosPedidos = json_decode($turn->vector_totales_recibidos_pedidos, true);
 		$totalFormasPago = json_decode($turn->total_formas_pago, true);
@@ -1954,6 +2000,7 @@ class TurnsController extends AppController
 					 	&& $anulado->tipo_documento != "Recibo de reintegro de pedido"
 					 	&& $anulado->tipo_documento != "Recibo de sobrante de pedido"
 						&& $anulado->tipo_documento != "Recibo de compra de pedido"
+						&& $anulado->tipo_documento != "Recibo de seguro"
 						&& $anulado->tipo_documento != "Recibo de vuelto de compra de pedido")
 				{ 
 					$indicadorRecibosAnulados = 1;
@@ -1962,6 +2009,10 @@ class TurnsController extends AppController
 				{
 					$indicadorPedidosAnulados = 1;
 				}
+				elseif ($anulado->tipo_documento == "Recibo de seguro")
+				{
+					$indicadorRecibosSeguroAnulados = 1;
+				}				
 				else
 				{
 					$indicadorRecibosAnuladosPedidos = 1;
@@ -2007,6 +2058,10 @@ class TurnsController extends AppController
 				{
 					$indicadorVueltoCompra = 1;
 				}
+				elseif ($factura->tipo_documento == "Recibo de seguro")
+				{
+					$indicadorRecibosSeguro = 1;
+				}
 				elseif ($factura->tipo_documento == "Nota de crédito")
 				{
 					$indicadorNotasCredito = 1;
@@ -2039,7 +2094,7 @@ class TurnsController extends AppController
 				}
 			}
 		}
-															
+														
 		$this->set(compact
 			('turn',
 			'facturas',
@@ -2072,8 +2127,10 @@ class TurnsController extends AppController
 			'indicadorRecibosAnuladosPedidos',
 			'documentosAnulados',
 			'totalGeneralSobrantes',
-			'totalGeneralReintegrosSobrantes'));	
-			
+			'totalGeneralReintegrosSobrantes',
+			'indicadorRecibosSeguro',
+			'indicadorRecibosSeguroAnulados'));	
+				
 		$this->set('_serialize', 
 			['turn',
 			'facturas',
@@ -2105,7 +2162,9 @@ class TurnsController extends AppController
 			'indicadorRecibosAnuladosPedidos',
 			'documentosAnulados',
 			'totalGeneralSobrantes',
-			'totalGeneralReintegrosSobrantes']);	
+			'totalGeneralReintegrosSobrantes',
+			'indicadorRecibosSeguro',
+			'indicadorRecibosSeguroAnulados']);
 	}
 	
     public function excelDocumentos($id = null)

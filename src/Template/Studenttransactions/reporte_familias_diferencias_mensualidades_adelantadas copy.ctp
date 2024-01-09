@@ -67,7 +67,7 @@
 				<h5><b><?= $school->name ?></b></h5>
 				<p>RIF: <?= $school->rif ?></p>
 				<p>Fecha de emisión: <?= $currentDate->format('d/m/Y'); ?></p>
-				<h3 style="text-align: center;"><?= 'Reporte de Familias con Mensualidades Adelantadas '.$mes_anio_hasta ?></h3>
+				<h3 style="text-align: center;"><?= 'Reporte de Familias con diferencias de Mensualidades Adelantadas al '.$mes_anio_hasta ?></h3>
 			</div>
 		</div>
 		<div>
@@ -75,18 +75,18 @@
 				<thead>
 					<tr>
 						<th style="text-align:center;">Nro.</th>
-						<th style="text-align:center;">Familia</th>
+						<th style="text-align:left;">Familia</th>
 						<th style="text-align:center;">Teléfono</th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php
 					$contador_transacciones = 1;
-					foreach ($familias_mensualidades_adelantadas as $familia): ?>
+					foreach ($detalle_morosos as $moroso): ?>
 						<tr>
 							<td style="text-align:center;"><?= $contador_transacciones ?></td>
-							<td style="text-align:left;"><?= $familia["Familia"] ?></td>
-							<td style="text-align:center;"><?= $familia["Teléfono"] ?></td>
+							<td style="text-align:left;"><?= $moroso["Familia"] ?></td>
+							<td style="text-align:center;"><?= $moroso["Teléfono"] ?></td>
 						</tr>  
 						<?php $contador_transacciones++; ?>
 					<?php 
@@ -96,6 +96,18 @@
 		</div>
 		<br />			
 	</div>
+</div>
+<div id="menu-menos" class="menumenos nover">
+    <p>
+    <a href="#" id="mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger'></a>
+    </p>
+</div>
+<div id="menu-mas" style="display:none;" class="menumas nover">
+    <p>
+        <a href="<?= Router::url(["controller" => "Users", "action" => "wait"]) ?>" id="volver" title="Volver" class='glyphicon glyphicon-chevron-left btn btn-danger'></a>
+        <a href="<?= Router::url(["controller" => "Users", "action" => "wait"]) ?>" id="cerrar" title="Cerrar vista" class='glyphicon glyphicon-remove btn btn-danger'></a>
+         <a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
+    </p>
 </div>
 <script>
 function myFunction() 

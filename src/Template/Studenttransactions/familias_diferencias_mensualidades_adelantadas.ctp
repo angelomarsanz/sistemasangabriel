@@ -20,10 +20,6 @@
 	                    '06' => 'Junio',
 	                    '07' => 'Julio']]); 
 					echo "<div id='mensaje-mes' class='mensaje-usuario'></div>";
-	               	echo $this->Form->input('periodo_escolar', ['label' => 'Período escolar: ', 'options' => 
-	                    ["" => "",
-						'2022-2023' => '2022-2023']]);
-					echo "<div id='mensaje-periodo-escolar' class='mensaje-usuario'></div>";
 					echo "<br />"
 		    	?>
 		    </fieldset>
@@ -48,18 +44,6 @@
 				$("#mensaje-mes").html("Por favor seleccione un mes").css("color", 'red');
 			}
             
-			if ($('#periodo-escolar').val() == "")
-			{
-				indicadorError = 1;
-				$("#mensaje-periodo-escolar").html("Por favor seleccione el período escolar").css("color", 'red');
-			}		
-			
-			if ($('#telefono').val() == "")
-			{
-				indicadorError = 1;
-				$("#mensaje-telefono").html("Por favor seleccione el tipo de reporte").css("color", 'red');
-			}
-
 			if (indicadorError > 0)
 			{
 				alert("Estimado usuario los datos están incompletos. Por favor revise");

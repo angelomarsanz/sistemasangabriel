@@ -76,6 +76,7 @@
 					<tr>
 						<th style="text-align:center;">Nro.</th>
 						<th style="text-align:left;">Familia</th>
+                        <th style="text-align:left;">Saldo</th>
 						<th style="text-align:center;">Teléfono</th>
 					</tr>
 				</thead>
@@ -86,6 +87,7 @@
 						<tr>
 							<td style="text-align:center;"><?= $contador_transacciones ?></td>
 							<td style="text-align:left;"><?= $moroso["Familia"] ?></td>
+                            <td style="text-align:left;"><?= $moroso["Total $"] ?></td>
 							<td style="text-align:center;"><?= $moroso["Teléfono"] ?></td>
 						</tr>  
 						<?php $contador_transacciones++; ?>

@@ -17,6 +17,7 @@
                         'Recibo de compra de pedido' => 'Recibo de compra de pedido',
                         'Recibo de reintegro' => 'Recibo de reintegro',
                         'Recibo de reintegro de pedido' => 'Recibo de reintegro de pedido',
+                        'Recibo de seguro' => 'Recibo de seguro',
                         'Recibo de servicio educativo' => 'Recibo de servicio educativo',
                         'Recibo de sobrante' => 'Recibo de sobrante',
                         'Recibo de sobrante de pedido' => 'Recibo de sobrante de pedido',

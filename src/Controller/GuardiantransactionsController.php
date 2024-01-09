@@ -5,6 +5,8 @@ use App\Controller\AppController;
 
 use App\Controller\BinnaclesController;
 
+use Cake\I18n\Time;
+
 /**
  * Guardiantransactions Controller
  *
@@ -21,7 +23,7 @@ class GuardiantransactionsController extends AppController
     {
         if(isset($user['role']) and $user['role'] === 'Representante')
         {
-            if(in_array($this->request->action, ['index', 'view', 'add', 'edit', 'delete', 'homeScreen']))
+            if(in_array($this->request->action, ['index', 'view', 'add', 'edit', 'delete', 'homeScreen', 'previoContratoRepresentante', 'firmaContratoRepresentante']))
             {
                 return true;
             }
@@ -155,9 +157,10 @@ class GuardiantransactionsController extends AppController
         $row = $lastRecord->first();
 
         $idParentsAndGuardian = $row['id'];
-
-        return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'edit', $idParentsAndGuardian, 'Parentsandguardians', 'profilePhoto']);
-
+        /* Activar esta línea cuando se desea ocultar temporalmente al representante la información de los conceptos de inscripción
+        return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'edit', $idParentsAndGuardian, 'Parentsandguardi
+        ans', 'profilePhoto']);
+        */
         $this->set(compact('idParentsAndGuardian'));
         $this->set('_serialize', ['idParentsAndGuardian']);
     }
@@ -194,4 +197,84 @@ class GuardiantransactionsController extends AppController
 
 		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
 	}
+
+    public function previoContratoRepresentante($idRepresentante = null, $controlador = null, $accion = null)
+    {
+        $this->loadModel('Parentsandguardians');
+
+        $representante = $this->Parentsandguardians->get($idRepresentante, [
+            'contain' => ['Students']
+        ]);
+
+        if ($controlador == null && $accion == null)
+        {
+            if ($representante->datos_contrato != null)
+            {
+                return $this->redirect(['controller' => 'Students', 'action' => 'index']);
+            }
+            else
+            {
+                $this->Flash->success(__('Por favor lea detenidamente el presente contrato y si está de acuerdo proceda a firmarlo'));
+            }
+        }
+        elseif ($controlador == "Users" && $accion == "home")
+        {
+            $this->Flash->success(__('Por favor lea detenidamente el presente contrato y si está de acuerdo proceda a firmarlo'));
+        }
+        else
+        {
+            if ($representante->datos_contrato == null)
+            {
+                $this->Flash->error(__('El contrato no ha sido firmado aún'));
+                return $this->redirect(['controller' => $controlador, 'action' => $accion]);
+            }            
+        }
+        
+        $this->set(compact('representante', 'controlador', 'accion'));
+    }
+
+    public function firmaContratoRepresentante($idRepresentante = null)
+    {
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+				
+        $fecha_hora_actual = Time::now();
+        
+        $this->loadModel('Parentsandguardians');
+
+        $representante = $this->Parentsandguardians->get($idRepresentante, [
+            'contain' => ['Students']
+        ]);
+
+		if ($this->request->is('post')) 
+        {
+            $img = $_POST['base64'];
+            $img = str_replace('data:image/png;base64,', '', $img);
+            $fileData = base64_decode($img);
+            $fileName = uniqid().'.png';
+
+            file_put_contents(WWW_ROOT."files/contratos/".$fileName, $fileData);
+
+            $datos_contrato = 
+			[
+				"imagen_firma" => $fileName,
+				"usuario" => $this->Auth->user('username'),
+				"ip" => $_POST["ip_cliente"],
+                "fecha_hora" => $fecha_hora_actual
+			];
+
+		    $representante->datos_contrato = json_encode($datos_contrato);
+
+            if ($this->Parentsandguardians->save($representante)) 
+            {
+                return $this->redirect(['controller' => 'Students', 'action' => 'index']);
+            } 
+            else 
+            {
+                $this->Flash->error(__('Firma no guardada'));
+            }
+        }
+
+        $this->set(compact('representante', 'idRepresentante'));
+    }
 }

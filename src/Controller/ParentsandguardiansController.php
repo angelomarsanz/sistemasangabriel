@@ -350,9 +350,9 @@ class ParentsandguardiansController extends AppController
 
                 if ($this->Parentsandguardians->Users->save($user))
                 {
-                    $this->Flash->success(__('La foto se agregó exitosamente, por favor actualice los datos de sus hijos o representados'));
+                    $this->Flash->success(__('La foto se agregó exitosamente'));
                     
-                    return $this->redirect(['controller' => 'Students', 'action' => 'index']);
+                    return $this->redirect(['controller' => 'Guardiantransactions', 'action' => 'previoContratoRepresentante', $id]);
                 }
             }
             else 
@@ -674,20 +674,174 @@ class ParentsandguardiansController extends AppController
 			$this->Flash->error(__('Estimado usuario este representante no tiene saldo para reintegrar'));
 		}
 	}
-    public function eliminarRepresentantesNoActivos()
+
+    // Esta función debe ejecutarse inmediatamente después que cambia el valor de la columna "current_year_registration" de la tabla "Schools" en el mes de junio de cada año cuando comienza el proceso de re-inscripción
+
+    public function eliminarRepresentantesEstudiantesInactivos()
     {
-        $representantes_sin_estudiantes = [];
-        $representantes = $this->Parentsandguardians->find('all');
+        $this->loadModel('Schools');
+		$schools = $this->Schools->get(2);
+        $actual_anio_inscripcion = $schools->current_year_registration;
+        $anterior_anio_inscripcion = $actual_anio_inscripcion - 1;
+
+        $representantes_inactivos = [];
+        $representantes = $this->Parentsandguardians->find('all')->where(['Parentsandguardians.id >' => 1 , "Parentsandguardians.estatus_registro" => "Activo"]);
+        $estudiantes = $this->Parentsandguardians->Students->find('all')->where(['Students.id >' => 1 , "Students.student_condition" => "Regular"])->order(['Students.parentsandguardian_id' => 'ASC']);
 
         foreach ($representantes as $representante)
         {
-            $estudiantes_representante = $this->Parentsandguardians->Students->find('all', ['conditions' => ['parentsandguardian_id' => $representante->id]]);
-            if ($estudiantes_representante->count() == 0)
+            $indicador_estudiantes_activos = 0;
+            $texto_indicador_estudiantes = "Sin estudiantes asociados";
+            foreach ($estudiantes as $estudiante)
             {
-                $representantes_sin_estudiantes[] = ['id_representante' => $representante->id, 'nombre_representante' => $representante->full_name];
+                if ($estudiante->parentsandguardian_id == $representante->id)
+                {
+                    if ($estudiante->balance == null || $estudiante->balance == 0)
+                    {
+                        if ($estudiante->created->year >= $actual_anio_inscripcion)
+                        {
+                            $indicador_estudiantes_activos = 1;
+                            break;
+                        } 
+                    }
+                    elseif ($estudiante->balance >= $anterior_anio_inscripcion)
+                    {
+                        $indicador_estudiantes_activos = 1;
+                        break;
+                    }
+                    $texto_indicador_estudiantes = "Con estudiantes inactivos";
+                    // Marcar como "Eliminado" la columna "student_condition" de la tabla "students"
+                }              
             }
+            if ($indicador_estudiantes_activos == 0)
+            {
+                $representantes_sin_estudiantes[] = ['familia' => $representante->family, 'nombre_representante' => $representante->full_name, 'id_representante' => $representante->id, 'motivo' => $texto_indicador_estudiantes];
+            }
+        }
+        foreach ($representantes_sin_estudiantes as $representante)
+        {
+            // Marcar como "Eliminado" la columna "estatus_registro" en las tablas "users" y "parentsandguardians"
         }
         $this->set(compact('representantes_sin_estudiantes'));
         $this->set('_serialize', ['representantes_sin_estudiantes']);
+    }
+
+    public function cambiarEstatusRegistro()
+    {
+        $representantes = $this->Parentsandguardians->find('all')->where(["Parentsandguardians.estatus_registro !=" => "Activo"]);
+
+        $contador_registros_seleccionados = $representantes->count();
+        $contador_registros_modificados = 0;
+
+        foreach ($representantes as $representante)
+        {
+            $representante_a_modificar = $this->Parentsandguardians->get($representante->id);
+            $representante_a_modificar->estatus_registro = "Activo";
+            if (!($this->Parentsandguardians->save($representante_a_modificar))) 
+            {
+                $this->Flash->error(__('El registro con el ID '.$representante_a_modificar->id.' no pudo ser modificado'));
+            }
+            else
+            {
+                $contador_registros_modificados++;
+            } 
+                     
+        }
+        $this->set(compact('contador_registros_seleccionados', 'contador_registros_modificados'));
+    }
+
+    public function consultaContratoRepresentante()
+    {
+        
+    }
+    public function reportesContratoServicio($tipo_reporte = null, $controlador = null, $accion = null)
+    {
+        $this->loadModel('Schools');
+
+		$schools = $this->Schools->get(2);
+
+        $actual_anio_escolar = $schools->current_school_year;
+        $actual_anio_inscripcion = $schools->current_year_registration;
+
+        $vector_representantes = [];
+        $seleccionado = 0;
+        $contador_seleccionados = 0;
+        $impresion = 0;
+        $contador_impresion = 0;
+        /* 
+        Para seleccionar los alumnos regulares chequeo que el campo "balance" sea igual o mayor al valor del campo "current_school_year" de la tabla schools
+        Para seleccionar los alumnos nuevos cheque que el campo "balance" sea igual al valor del campo "current_year_registration" de la tabla schools
+         */
+
+        $estudiantes = $this->Parentsandguardians->Students->find('all', ['contain' => 'Parentsandguardians', 'order' => ['Parentsandguardians.family' => "ASC"], 'conditions' => ['Students.student_condition' => 'Regular', 'Students.balance >=' => $actual_anio_escolar]]);
+
+        foreach ($estudiantes as $estudiante)
+        {
+            $seleccionado = 0;
+            $impresion = 0;
+
+            switch ($tipo_reporte) 
+            {
+                case 1:
+                    $titulo_reporte = "Representantes de estudiantes regulares que han firmado el contrato";
+                    $titulo_total = "Total representantes de estudiantes regulares";
+                    if ($estudiante->new_student == 0)
+                    {
+                        $seleccionado = 1;
+                        if ($estudiante->parentsandguardian->datos_contrato != null)
+                        {
+                            $impresion = 1;
+                        }    
+                    }
+                    break;
+                case 2:
+                    $titulo_reporte = "Representantes de estudiantes regulares que no han firmado el contrato";   
+                    $titulo_total = "Total representantes de estudiantes regulares";
+                    if ($estudiante->new_student == 0)
+                    {
+                        $seleccionado = 1;
+                        if ($estudiante->parentsandguardian->datos_contrato == null)
+                        {
+                            $impresion = 1;
+                        }   
+                    }          
+                    break;
+                case 3:
+                    $titulo_reporte = "Representantes de estudiantes nuevos que han firmado el contrato";
+                    $titulo_total = "Total representantes de estudiantes nuevos";
+                    if ($estudiante->new_student == 1 && $estudiante->balance == $actual_anio_inscripcion)
+                    {
+                        $seleccionado = 1;
+                        if ($estudiante->parentsandguardian->datos_contrato != null)
+                        {
+                            $impresion = 1;
+                        } 
+                    }     
+                    break;
+                case 4:
+                    $titulo_reporte = "Representantes de estudiantes nuevos que no han firmado el contrato";
+                    $titulo_total = "Total representantes de estudiantes nuevos";
+                    if ($estudiante->new_student == 1 && $estudiante->balance == $actual_anio_inscripcion)
+                    {
+                        $seleccionado = 1;
+                        if ($estudiante->parentsandguardian->datos_contrato == null)
+                        {
+                            $impresion = 1;
+                        } 
+                    }     
+                    break;
+            } 
+            if ($seleccionado == 1)
+            {
+                if (!(isset($vector_representantes[$estudiante->parentsandguardian->id])))
+                {
+                    $contador_seleccionados++;
+                    $contador_impresion = $contador_impresion + $impresion;
+                    $vector_representantes[$estudiante->parentsandguardian->id] = ["familia" => $estudiante->parentsandguardian->family, "representante" => $estudiante->parentsandguardian->full_name, "impresion" => $impresion];
+                }
+            }
+        }
+
+        $this->set(compact('tipo_reporte', 'titulo_reporte', 'titulo_total', 'vector_representantes', 'contador_seleccionados', 'contador_impresion'));
     }
 }

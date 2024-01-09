@@ -90,7 +90,8 @@
 									echo $this->Form->input('section_id', ['label' => 'Grado y sección al que está asignado el alumno actualmente', 'options' => $sections]); 										
 								endif;			
 								echo $this->Form->input('level_of_study', ['options' => 
-									[null => " ",
+									[null => "",
+									'Maternal' => 'Maternal',
 									'Pre-escolar, pre-kinder' => 'Pre-escolar, pre-kinder',                                
 									'Pre-escolar, kinder' => 'Pre-escolar, kinder',
 									'Pre-escolar, preparatorio' => 'Pre-escolar, preparatorio',

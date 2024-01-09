@@ -16,7 +16,9 @@
 			<input type="hidden" id="type-invoice" value="<?= $menuOption ?>">
             <div class="row">
                 <div class="col-md-12">
-					<?php if ($menuOption == 'Factura inscripción regulares'): ?>
+					<?php if ($menuOption == 'Recibo de seguro'): ?>
+						<h3><b>Recibo de seguro</b></h3>
+					<?php elseif ($menuOption == 'Factura inscripción regulares'): ?>
 						<h3><b>Factura inscripción alumnos regulares</b></h3>
 					<?php elseif ($menuOption == 'Factura inscripción nuevos'): ?>
 						<h3><b>Factura inscripción alumnos nuevos</b></h3>
@@ -630,7 +632,8 @@
     var idStudent = 0;
     var studentName = " ";
     var scholarship = 0;
-    var studentTransactions = "";
+    var studentTransactionsArray = new Array();
+	var paymentsArray = new Array();
     var transactionIdentifier = 0;
     var monthlyPayment = " ";
 	var tarifaDolar = 0;
@@ -704,10 +707,6 @@
 	var anoEscolarAnterior = <?= $anoEscolarActual - 1 ?>;
 	var anoEscolarInscripcion = <?= $anoEscolarInscripcion ?>;
 	var anoEscolarMensualidad = 0;
-
-    var db = openDatabase("sanGabrielSqlite", "1.0", "San Gabriel Sqlite", 200000000);  // Open SQLite Database
-    var dataSet;
-
     var payments = new Object();
     payments.idTurn = 0;
     payments.idParentsandguardians = 0;
@@ -743,7 +742,6 @@
 	var indicador_pedido = 0;
 	var ano_mes_actual = <?= $ano_mes_actual ?>;
 	var ano_mes_recalculo_cuotas_atrasadas = "202209";
-	var deuda_conceptos_inscripcion = false;
 	var conceptos_a_omitir = 
 		[
 			"Seguro escolar 2020",
@@ -765,8 +763,9 @@
 	var acumulado_igtf_bolivar = 0;
 	var total_balance_bolivares_igtf = 0;
 	var indicador_igtf_recalculado = 0;
+	var estudiantes_condiciones = [];
 	
-// Funciones
+// Funciones Javascript
 
     function log(message) 
     {
@@ -894,8 +893,8 @@
 
     function cleanPager()
     {
-        dropTable();
-        dropPayments();
+		studentTransactionsArray = [];
+		paymentsArray = [];
 
 		$('#family-search').val(" ");
         $('#family').val(" ");
@@ -1176,602 +1175,311 @@
 		}
     }
 
-    function initDataBase()  // Function Call When Page is ready.
-    {
-        try 
-        {
-            if (!window.openDatabase)  // Check browser is supported SQLite or not.
-            {
-                alert('Databases are not supported in this browser.');
-            }
-            else 
-            {
-                createTable();  // If supported then call Function for create table in SQLite
-                createTablePayments();
-            }
-        }
-     
-        catch(e) 
-        {
-            if (e == 2) 
-            {
-                console.log("Invalid database version.");
-            } 
-            else 
-            {
-                console.log("Unknown error " + e + ".");
-            }
-            return;
-        }
-    }
-     
-    function createTable()  // Function for Create Table in SQLite.
-    {
-        var createStatement = "CREATE TABLE IF NOT EXISTS studentTransactions \
-        (dbId INTEGER PRIMARY KEY, \
-        dbIdStudent INTEGER, \
-        dbStudentName VARCHAR(250), \
-        dbMonthlyPayment VARCHAR(100), \
-        dbScholarship INTEGER, \
-		dbDescuentoAlumno DECIMAL(15,2), \
-		dbMorosoAnoAnterior INTEGER, \
-		dbTasaCambioDolar DECIMAL(15,2), \
-		dbTasaCambioEuro DECIMAL(15,2), \
-		dbTarifaDolarOriginal DECIMAL(15,2), \
-		dbTarifaDolar DECIMAL(15,2), \
-		dbMontoAbonadoDolar DECIMAL(15,2), \
-		dbMontoPendienteDolar DECIMAL(15,2), \
-		dbMontoAPagarDolar DECIMAL(15,2), \
-		dbMontoAPagarEuro DECIMAL(15,2), \
-		dbMontoAPagarBolivar DECIMAL(15,2), \
-        dbInvoiced INTEGER, \
-        dbPartialPayment INTEGER, \
-        dbPaidOut INTEGER, \
-		dbSchoolYearFrom INTEGER, \
-		dbSeleccionada INTEGER, \
-		dbDeudaConceptosInscripcion INTEGER, \
-        dbObservation VARCHAR(100))";
-
-        db.transaction(function (tx) { tx.executeSql(createStatement, [], null, onError); });
-    }
-
-    function createTablePayments()  
-    {
-        var createPayments = "CREATE TABLE IF NOT EXISTS payments \
-        (payId INTEGER PRIMARY KEY, \
-		payMoneda VARCHAR(50), \
-        payPaymentType VARCHAR(100), \
-        payAmountPaid DECIMAL(15,2), \
-		payMontoIgtfDolar DECIMAL(15,2), \
-        payBank VARCHAR(200), \
-		payBancoReceptor VARCHAR(200), \
-        payAccountOrCard VARCHAR(50), \
-        paySerial VARCHAR (50), \
-		payComentario VARCHAR(250))";
-
-        db.transaction(function (tx) { tx.executeSql(createPayments, [], null, onError); });
-    }
-
-    function insertRecord() // Get value from Input and insert record . Function Call when Save/Submit Button Click..
-    {
-        var insertStatement = "INSERT OR REPLACE INTO studentTransactions \
-        (dbId, \
-        dbIdStudent, \
-        dbStudentName, \
-        dbMonthlyPayment, \
-        dbScholarship, \
-		dbDescuentoAlumno, \
-		dbMorosoAnoAnterior, \
-		dbTasaCambioDolar, \
-		dbTasaCambioEuro, \
-		dbTarifaDolarOriginal, \
-		dbTarifaDolar, \
-		dbMontoAbonadoDolar, \
-		dbMontoPendienteDolar, \
-		dbMontoAPagarDolar, \
-		dbMontoAPagarEuro, \
-		dbMontoAPagarBolivar, \
-        dbInvoiced, \
-        dbPartialPayment, \
-        dbPaidOut, \
-		dbSchoolYearFrom, \
-		dbSeleccionada, \
-		dbDeudaConceptosInscripcion, \
-        dbObservation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        var tpId = transactionIdentifier;
-        var tpIdStudent = idStudent;
-        var tpStudentName = studentName + " - " + grade;
-        var tpMonthlyPayment = monthlyPayment;
-        var tpScholarship = scholarship;
-		var tpDescuentoAlumno = discountFamily;
-		var tpMorosoAnoAnterior = morosoAnoAnterior;
-		var tpTasaCambioDolar = dollarExchangeRate;
-		var tpTasaCambioEuro = euro;
-		var tpTarifaDolarOriginal = tarifaDolar;
-		var tpTarifaDolar = tarifaDolar;
-		var tpAbonadoDolar = montoDolar;
-		var tpPendienteDolar = montoPendienteDolar;
-		var tpAPagarDolar = montoAPagarDolar;
-		var tpAPagarEuro = montoAPagarEuro;
-		var tpAPagarBolivar = montoAPagarBolivar;
-        var tpInvoiced = invoiced;
-        var tpPartialPayment = partialPayment;
-        var tpPaidOut = paidOut;
-		var tpSchoolYearFrom = schoolYearFrom;
-		var tpSeleccionada = false;
-		var tpDeudaConceptosInscripcion = deuda_conceptos_inscripcion;
-        var tpObservation = " ";
-
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(insertStatement, 
-            [tpId,
-            tpIdStudent,
-            tpStudentName,
-            tpMonthlyPayment,
-            tpScholarship,
-			tpDescuentoAlumno,
-			tpMorosoAnoAnterior,
-			tpTasaCambioDolar,
-			tpTasaCambioEuro,
-			tpTarifaDolarOriginal,
-			tpTarifaDolar,
-			tpAbonadoDolar,
-			tpPendienteDolar,
-			tpAPagarDolar,
-			tpAPagarEuro,
-			tpAPagarBolivar,
-            tpInvoiced,
-            tpPartialPayment,
-            tpPaidOut,
-			tpSchoolYearFrom,
-            tpSeleccionada,
-			tpDeudaConceptosInscripcion,
-			tpObservation], null, onError); 
-        });
+	function insertRecord()
+	{
+		let vector_registro_transacciones = new Array();
+		vector_registro_transacciones = {
+			"dbId" : transactionIdentifier,
+        	"dbIdStudent" : idStudent,
+        	"dbStudentName" : studentName + " - " + grade,
+        	"dbMonthlyPayment" : monthlyPayment,
+        	"dbScholarship" : scholarship,
+			"dbDescuentoAlumno" : discountFamily,
+			"dbMorosoAnoAnterior" : morosoAnoAnterior,
+			"dbTasaCambioDolar" : dollarExchangeRate,
+			"dbTasaCambioEuro" : euro,
+			"dbTarifaDolarOriginal" : tarifaDolar,
+			"dbTarifaDolar" : tarifaDolar,
+			"dbMontoAbonadoDolar" : montoDolar,
+			"dbMontoPendienteDolar" : montoPendienteDolar,
+			"dbMontoAPagarDolar" : montoAPagarDolar,
+			"dbMontoAPagarEuro" : montoAPagarEuro,
+			"dbMontoAPagarBolivar" : montoAPagarBolivar,
+        	"dbInvoiced" : invoiced,
+        	"dbPartialPayment" : partialPayment,
+        	"dbPaidOut" : paidOut,
+			"dbSchoolYearFrom" : schoolYearFrom,
+			"dbSeleccionada" : false,
+        	"dbObservation" : ""	};
+			
+		studentTransactionsArray.push(vector_registro_transacciones);
 		
 		if (montoPendienteDolar < 0 && monthlyPayment.substring(0, 18) != "Servicio educativo")
 		{
 			saldoNotaCredito = saldoNotaCredito + montoPendienteDolar;
 		}
+	}
+
+    function insertRecordPayments() 
+	{
+		let vector_registro_pagos = new Array();
 		
-		// Esta condición se utilizó para atender la denuncia de la SUNDDE, está sin efecto. Por esa razón se comentó 
-		/* if (monthlyPayment == "Ago 2020" && montoDolar == 40)
-		{
-			saldoNotaCredito = saldoNotaCredito - 10;
-		} */
+		vector_registro_pagos = {
+			payId : accountant,
+			payMoneda : monedaPago,
+			payPaymentType : paymentType,
+			payAmountPaid : montoPagado,
+			payMontoIgtfDolar : monto_igtf_dolar,
+			payBank : bank,
+			payBancoReceptor : bancoReceptor,
+			payAccountOrCard : accountOrCard,
+			paySerial : serial,
+			payComentario : comentario }; 
+		
+		paymentsArray.push(vector_registro_pagos);
     }
-    
-    function insertRecordPayments() // Get value from Input and insert record . Function Call when Save/Submit Button Click..
-    {
-        var insertPayments = "INSERT OR REPLACE INTO payments \
-        (payId, \
-		payMoneda, \
-        payPaymentType, \
-        payAmountPaid, \
-		payMontoIgtfDolar, \
-        payBank, \
-		payBancoReceptor, \
-        payAccountOrCard, \
-        paySerial, \
-		payComentario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        var tpId = accountant;
-		var tpMoneda = monedaPago;
-        var tpPaymentType = paymentType;
-        var tpAmountPaid = montoPagado;
-		var tpMontoIgtfDolar = monto_igtf_dolar;
-        var tpBank = bank;
-		var tpBancoReceptor = bancoReceptor;
-        var tpAccountOrCard = accountOrCard;
-        var tpSerial = serial
-		var tpComentario = comentario; 
-
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(insertPayments, 
-            [tpId, 
-			tpMoneda,
-            tpPaymentType, 
-            tpAmountPaid,
-			tpMontoIgtfDolar,
-            tpBank,
-			tpBancoReceptor,
-            tpAccountOrCard,
-            tpSerial,
-			tpComentario], null, onError);
-        });
-    }
-
+		
 	function actualizarPago(id_pago, pago_monto_igtf_dolar) 
     {
-        var updateStatement = "UPDATE payments SET payMontoIgtfDolar = ? WHERE payId=?";
-		
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [pago_monto_igtf_dolar, Number(id_pago)], null, onError); });
+		indice_elemento = paymentsArray.findIndex((objeto => objeto.payId == id_pago));
+		paymentsArray[indice_elemento].payMontoIgtfDolar = pago_monto_igtf_dolar;
     }
     
     function deletePayment(locIdPayment) 
     {
-        var deletePayment = "DELETE FROM payments WHERE payId=?";
-        db.transaction(function (tx) 
-        { 
-            tx.executeSql(deletePayment, [locIdPayment], null, onError);
-        });
-    }
+		indice_elemento = paymentsArray.findIndex((objeto => objeto.payId == locIdPayment));
+		paymentsArray.splice(indice_elemento, 1);
+	}
  
     function updateRecord(id, seleccionada) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbSeleccionada = ? WHERE dbId=?";
-		
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [seleccionada, Number(id)], null, onError); });
-    }
+		indice_elemento = studentTransactionsArray.findIndex((objeto => objeto.dbId == id));
+		studentTransactionsArray[indice_elemento].dbSeleccionada = seleccionada;
+	}
     
     function updateInstallment(id, updOriginalMontoDolar, updMontoModificadoDolar, updMontoPendienteDolar, updAPagarDolar, updAPagarEuro, updAPagarBolivar, updObservation) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbTarifaDolarOriginal = ?, dbTarifaDolar = ?, dbMontoPendienteDolar = ?, dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ?, dbObservation = ? WHERE dbId=?";
-     		
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(updOriginalMontoDolar), Number(updMontoModificadoDolar), Number(updMontoPendienteDolar), Number(updAPagarDolar), Number(updAPagarEuro), Number(updAPagarBolivar), updObservation, Number(id)], null, onError); });
+		indice_elemento = studentTransactionsArray.findIndex((objeto => objeto.dbId == id));
+
+		studentTransactionsArray[indice_elemento].dbTarifaDolarOriginal = updOriginalMontoDolar;
+		studentTransactionsArray[indice_elemento].dbTarifaDolar = updMontoModificadoDolar;
+		studentTransactionsArray[indice_elemento].dbMontoPendienteDolar = updMontoPendienteDolar;
+		studentTransactionsArray[indice_elemento].dbMontoAPagarDolar = updAPagarDolar;
+		studentTransactionsArray[indice_elemento].dbMontoAPagarEuro = updAPagarEuro;
+		studentTransactionsArray[indice_elemento].dbMontoAPagarBolivar = updAPagarBolivar;
+		studentTransactionsArray[indice_elemento].dbObservation = updObservation;
     }
 	
     function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar, actSeleccionada, actObservacion) 
     {
-        var updateStatement = "UPDATE studentTransactions SET dbMontoAPagarDolar = ?, dbMontoAPagarEuro = ?, dbMontoAPagarBolivar = ?, dbSeleccionada = ?, dbObservation = ? WHERE dbId=?";
-        
-        db.transaction(function (tx) { tx.executeSql(updateStatement, [Number(actAPagarDolar), Number(actAPagarEuro), Number(actAPagarBolivar), actSeleccionada, actObservacion, Number(id)], null, onError); });
+		indice_elemento = studentTransactionsArray.findIndex((objeto => objeto.dbId == id));
+
+		studentTransactionsArray[indice_elemento].dbMontoAPagarDolar = actAPagarDolar;
+		studentTransactionsArray[indice_elemento].dbMontoAPagarEuro = actAPagarEuro;
+		studentTransactionsArray[indice_elemento].dbMontoAPagarBolivar = actAPagarBolivar;
+		studentTransactionsArray[indice_elemento].dbSeleccionada = actSeleccionada;
+		studentTransactionsArray[indice_elemento].dbObservation = actObservacion;
     }
-	
-    function showRecords() // Function For Retrive data from Database Display records as list
+
+    function showRecords() 
     {	
-        var selectWithCondition = "SELECT * FROM studentTransactions WHERE dbIdStudent = ?";
         var detailLine = "";
         var nextPayment = "";
         var indicatorPaid = 0;
         var firstInstallment = "";
         var lastInstallment = "";
         studentBalance = 0;
-		     	 			 
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(selectWithCondition, [idStudent], function (tx, result) 
-            {
-                dataSet = result.rows;
 
-				let indicador_julio_moroso = 0;
-				let indicador_deuda_conceptos_inscripcion = 0;
+		let indicador_julio_moroso = 0;
 
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
-                    item = dataSet.item(i);
+		for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+		{
+			item = studentTransactionsArray[i];
 
-					if (item['dbMorosoAnoAnterior'] == 1)
+			if (item['dbIdStudent'] == idStudent)
+			{
+				if (item['dbMorosoAnoAnterior'] == 1)
+				{
+					if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo de seguro')
 					{
-						if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción regulares')
+						if (indicador_julio_moroso == 0)
 						{
-							if (indicador_julio_moroso == 0)
-							{
-								indicador_julio_moroso = 1;
-								alert("Este alumno no se debe inscribir hasta que pague la mensualidad de julio");
-							}
-						}
-
-					}
-
-					if (item['dbDeudaConceptosInscripcion'] == "true")
-					{
-						if ($('#type-invoice').val() == 'Mensualidades')
-						{
-							if (indicador_deuda_conceptos_inscripcion == 0)
-							{
-								indicador_deuda_conceptos_inscripcion = 1;
-								alert("Adeuda conceptos de inscripción y/o servicio educativo");
-							}
+							indicador_julio_moroso = 1;
+							alert("Este alumno no se debe inscribir hasta que pague la mensualidad de julio");
 						}
 					}
 
 				}
-                
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
-                    item = dataSet.item(i);
-					                    
-                    if (i == 0)
-                    {
-                        if (item['dbScholarship'] == 1)
-                        {
-							if ($('#type-invoice').val() == 'Mensualidades')
-							{
-								alert("Este alumno es becado, no se le deben cobrar cuotas");
-								return false;
-							}
-                        }
-                        if (item['dbSchoolYearFrom'] < anoEscolarInscripcion && $('#type-invoice').val() == 'Recibo servicio educativo' )
-                        {
-							alert("Este estudiante debe pagar primero la matrícula");
+			}
+		}
+
+		if (estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] == true)
+		{
+			if ($('#type-invoice').val() == 'Mensualidades')
+			{
+				alert("Debe alguno de los siguientes conceptos: Matrícula, Agosto, seguro o servicio educativo");
+			}
+		}
+		
+		for (var i = 0, item = null, indicador_estudiante_encontrado = 0; i < studentTransactionsArray.length; i++) 
+		{
+			item = studentTransactionsArray[i];
+
+			if (item['dbIdStudent'] == idStudent)
+			{
+				if (indicador_estudiante_encontrado == 0)
+				{
+					if (item['dbScholarship'] == 1)
+					{
+						if ($('#type-invoice').val() == 'Mensualidades')
+						{
+							alert("Este alumno es becado, no se le deben cobrar cuotas");
 							return false;
 						}
-                        studentName = item['dbStudentName'];
-                    }
-                    
-                    monthlyPayment = item['dbMonthlyPayment'];
+					}
+					if (item['dbSchoolYearFrom'] < anoEscolarInscripcion && $('#type-invoice').val() == 'Recibo servicio educativo' )
+					{
+						alert("Este estudiante debe pagar primero la matrícula");
+						return false;
+					}
+					studentName = item['dbStudentName'];
+				}
+				indicador_estudiante_encontrado = 1;
+				
+				monthlyPayment = item['dbMonthlyPayment'];
 
-                    if (item['dbPaidOut'] == 'false')
-                    {
-                        if (item['dbSeleccionada'] == "true")
-                        {
-							studentBalance = studentBalance + item['dbMontoAPagarDolar'];
-							detailLine += "<tr id=tra" + item['dbId'] + "> \
-								<td style='background-color:#c2c2d6;'><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " checked='checked' disabled></td> \
-								<td style='background-color:#c2c2d6;'>" + item['dbMonthlyPayment'] + "</td> \
-								<td style='background-color:#c2c2d6;'><input type='text' id=am" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + formatoNumero(item['dbTarifaDolar']) + " disabled></td> \
-								<td style='background-color:#c2c2d6;'><input type='text' class='form-control amount-paid' value=" + formatoNumero(item['dbMontoAbonadoDolar']) + " disabled></td>";
-		
-							if (item['dbMontoPendienteDolar'] < 0)
-							{
-								detailLine += 	"<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
-												<td style='background-color:#c2c2d6;'><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + " disabled></td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>Hacer NC</td> \
-												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
-							}
-							else
-							{
-								detailLine += 	"<td style='background-color:#c2c2d6;'>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
-												<td style='background-color:#c2c2d6;'><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + " disabled></td> \
-												<td style='background-color:#c2c2d6; color: blue;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
-												<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
-												<td style='background-color:#c2c2d6;'>" + item['dbObservation'] + "</td> \
-												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
-							}
-							
-							$('#uncheck-quotas').attr('disabled', false);
-							
-							if (firstInstallment == "")
-							{
-								firstInstallment = item['dbMonthlyPayment'];
-							}
-							lastInstallment = item['dbMonthlyPayment'];
+				if (item['dbPaidOut'] == false)
+				{					
+					if (item['dbSeleccionada'] == true)
+					{
+						studentBalance = studentBalance + item['dbMontoAPagarDolar'];
+						detailLine += "<tr id=tra" + item['dbId'] + "> \
+							<td style='background-color:#c2c2d6;'><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " checked='checked' disabled></td> \
+							<td style='background-color:#c2c2d6;'>" + item['dbMonthlyPayment'] + "</td> \
+							<td style='background-color:#c2c2d6;'><input type='text' id=am" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + formatoNumero(item['dbTarifaDolar']) + " disabled></td> \
+							<td style='background-color:#c2c2d6;'><input type='text' class='form-control amount-paid' value=" + formatoNumero(item['dbMontoAbonadoDolar']) + " disabled></td>";
+
+						if (item['dbMontoPendienteDolar'] < 0)
+						{
+							detailLine += 	"<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
+											<td style='background-color:#c2c2d6;'><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + " disabled></td> \
+											<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
+											<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
+											<td style='background-color:#c2c2d6; color: red;'>Hacer NC</td> \
+											<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
 						}
 						else
 						{
-							if (indicatorPaid == 0)
-							{
-								nextPayment = monthlyPayment;
-								indicatorPaid = 1;                            
-							}
-							detailLine += "<tr id=tra" + item['dbId'] + "> \
-								<td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " disabled></td> \
-								<td>" + item['dbMonthlyPayment'] + "</td> \
-								<td><input type='text' id=am" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + formatoNumero(item['dbTarifaDolar']) + "></td> \
-								<td><input type='text' class='form-control amount-paid' value=" + formatoNumero(item['dbMontoAbonadoDolar']) + " disabled></td>";
-		
-							if (item['dbMontoPendienteDolar'] < 0)
-							{
-								detailLine += 	"<td style='color: red;'>" + item['dbMontoPendienteDolar'] + "</td> \
-												<td><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + "></td> \
-												<td style='color: red;'>" + item['dbMontoAPagarEuro'] + "</td> \
-												<td style='color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
-												<td style='color: red;'>Hacer NC</td> \
-												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
-							}
-							else
-							{
-								detailLine += 	"<td>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
-												<td><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + "></td> \
-												<td style='color: blue;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
-												<td style='color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
-												<td>" + item['dbObservation'] + "</td> \
-												<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
-							}
+							detailLine += 	"<td style='background-color:#c2c2d6;'>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
+											<td style='background-color:#c2c2d6;'><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + " disabled></td> \
+											<td style='background-color:#c2c2d6; color: blue;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
+											<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
+											<td style='background-color:#c2c2d6;'>" + item['dbObservation'] + "</td> \
+											<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
 						}
-                    }
-                }
-                $("#monthly-payment").html(detailLine);
-				$(".alternative-decimal-separator").numeric({ altDecimal: "," });
-                if (nextPayment == "" && studentBalance == 0)
-                {
-                    disableButtons();
-                    alert('No existen cuotas a pagar de este alumno');
-                }
-                else
-                {
-					habilitaBotones();
-                    $("#student-name").html(studentName);
-                    $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
-                    concept = firstInstallment + ' - ' + lastInstallment;
-                    $("#student-balance").html(formatoNumero(studentBalance));
-
-					$("#mark-quotas").html(nextPayment); 
-										
-					if (indicadorAjuste == 0)
-					{
-						$("#mark-quotas").attr('disabled', false);
-						$("#adjust-fee").attr('disabled', false);
+						
+						$('#uncheck-quotas').attr('disabled', false);
+						
+						if (firstInstallment == "")
+						{
+							firstInstallment = item['dbMonthlyPayment'];
+						}
+						lastInstallment = item['dbMonthlyPayment'];
 					}
 					else
 					{
-						deshabilitarBotonesAjuste();
-					}
-					
-					if (saldoNotaCredito < 0)
-					{
-						$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario no puede facturar hasta que haga una o más notas de crédito por un total de " + -1 * saldoNotaCredito + " $</b></spam>");
-						$("#botones-cuotas").addClass("noverScreen");
-						$("#print-invoice").attr('disabled', true);
-						$("#ajuste-automatico").attr('disabled', true);
-						$(".record-payment").attr('disabled', true);
-					}
-					else if (saldoRepresentante > 0)
-					{
-						if (indicadorCompensacion == 0)
+						if (indicatorPaid == 0)
 						{
-							$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: blue;'><b>Estimado usuario, este representante tiene un saldo a favor/contra de " + saldoRepresentante + " $ ¿Quiere usarlo para compensar el pago de las cuotas?</b></spam>");
-							$("#print-invoice").attr('disabled', true);
-							$("#ajuste-automatico").attr('disabled', true);
-							$(".record-payment").attr('disabled', true);							
-							$("#botones-cuotas").addClass("noverScreen");
-							$("#botones-notas").removeClass("noverScreen");
-							$("#saldo-favor-dolar").html(saldoRepresentanteSigno);
-							$("#saldo-favor-euro").html(formatoNumero(saldoRepresentanteSigno / tasaDolarEuro));
-							$("#saldo-favor-bolivar").html(formatoNumero(saldoRepresentante * dollarExchangeRate));
+							nextPayment = monthlyPayment;
+							indicatorPaid = 1;                            
+						}
+						detailLine += "<tr id=tra" + item['dbId'] + "> \
+							<td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " disabled></td> \
+							<td>" + item['dbMonthlyPayment'] + "</td> \
+							<td><input type='text' id=am" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + formatoNumero(item['dbTarifaDolar']) + "></td> \
+							<td><input type='text' class='form-control amount-paid' value=" + formatoNumero(item['dbMontoAbonadoDolar']) + " disabled></td>";
+
+						if (item['dbMontoPendienteDolar'] < 0)
+						{
+							detailLine += 	"<td style='color: red;'>" + item['dbMontoPendienteDolar'] + "</td> \
+											<td><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + "></td> \
+											<td style='color: red;'>" + item['dbMontoAPagarEuro'] + "</td> \
+											<td style='color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
+											<td style='color: red;'>Hacer NC</td> \
+											<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
+						}
+						else
+						{
+							detailLine += 	"<td>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
+											<td><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + "></td> \
+											<td style='color: blue;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
+											<td style='color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
+											<td>" + item['dbObservation'] + "</td> \
+											<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
 						}
 					}
-                }
-            });
-        });
+				}
+			}
+		}
+		$("#monthly-payment").html(detailLine);
+		$(".alternative-decimal-separator").numeric({ altDecimal: "," });
+		if (nextPayment == "" && studentBalance == 0)
+		{
+			disableButtons();
+			alert('No existen cuotas a pagar de este alumno');
+		}
+		else
+		{
+			habilitaBotones();
+			$("#student-name").html(studentName);
+			$("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
+			concept = firstInstallment + ' - ' + lastInstallment;
+			$("#student-balance").html(formatoNumero(studentBalance));
+
+			$("#mark-quotas").html(nextPayment); 
+								
+			if (indicadorAjuste == 0)
+			{
+				$("#mark-quotas").attr('disabled', false);
+				$("#adjust-fee").attr('disabled', false);
+			}
+			else
+			{
+				deshabilitarBotonesAjuste();
+			}
+			
+			if (saldoNotaCredito < 0)
+			{
+				$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario no puede facturar hasta que haga una o más notas de crédito por un total de " + -1 * saldoNotaCredito + " $</b></spam>");
+				$("#botones-cuotas").addClass("noverScreen");
+				$("#print-invoice").attr('disabled', true);
+				$("#ajuste-automatico").attr('disabled', true);
+				$(".record-payment").attr('disabled', true);
+			}
+			else if (saldoRepresentante > 0)
+			{
+				if (indicadorCompensacion == 0)
+				{
+					$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: blue;'><b>Estimado usuario, este representante tiene un saldo a favor/contra de " + saldoRepresentante + " $ ¿Quiere usarlo para compensar el pago de las cuotas?</b></spam>");
+					$("#print-invoice").attr('disabled', true);
+					$("#ajuste-automatico").attr('disabled', true);
+					$(".record-payment").attr('disabled', true);							
+					$("#botones-cuotas").addClass("noverScreen");
+					$("#botones-notas").removeClass("noverScreen");
+					$("#saldo-favor-dolar").html(saldoRepresentanteSigno);
+					$("#saldo-favor-euro").html(formatoNumero(saldoRepresentanteSigno / tasaDolarEuro));
+					$("#saldo-favor-bolivar").html(formatoNumero(saldoRepresentante * dollarExchangeRate));
+				}
+			}
+		}
+    }
+	
+    function showDatabase() // Para uso del desarrollador
+    {
+		console.log("showDatabase", studentTransactionsArray);
     }
 
-    function showDatabase() // Function For Retrive data from Database Display records as list
+    function mostrarCuotasSeleccionadas() // Para uso del desarrollador
     {
-        var selectAllStatement = "SELECT * FROM studentTransactions";
-		var detailLine = 
-			"<table class='table table-striped table-hover'>"
-			+ "<thead>"
-			+ "<tr>"
-			+ "<th>id</th>"
-			+ "<th>idStudent</th>"
-			+ "<th>Alumno</th>" 
-			+ "<th>Cuota</th>"
-			+ "<th>Becado</th>"
-			+ "<th>MorosoAnoAnterior</th>"
-			+ "<th>tasaCambioDolar</th>"
-			+ "<th>tasaCambioEuro</th>"
-			+ "<th>tarifaDolarOriginal</th>"
-			+ "<th>tarifaDolar</th>"
-			+ "<th>AbonadoDolar</th>"
-			+ "<th>PendienteDolar</th>"
-			+ "<th>APagarDolar</th>"
-			+ "<th>APagarEuro</th>"
-			+ "<th>APagarBolivar</th>"
-			+ "<th>Seleccionada</th>"
-			+ "<th>Pagada</th>"
-			+ "<th>Año escolar</th>"
-			+ "<th>Seleccionada</th>"
-			+ "<th>DeudaConceptosInscripcion</th>"
-			+ "<th>Observacion</th>"
-			+ "</tr>"
-			+ "</thead>"
-			+ "<tbody>";
+		for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+		{					
+			item = studentTransactionsArray[i];
 
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(selectAllStatement, [], function (tx, result) 
-            {
-                dataSet = result.rows;
-                
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
-                    item = dataSet.item(i);
-                    detailLine += 
-						"<tr>"
-						+ "<td>"+ item['dbId']+ "</td>" 
-						+ "<td>"+ item['dbIdStudent']+ "</td>"
-						+ "<td>"+ item['dbStudentName']+ "</td>"
-						+ "<td>"+ item['dbMonthlyPayment']+ "</td>" 
-						+ "<td>"+ item['dbScholarship']+ "</td>"
-						+ "<td>"+ item['dbMorosoAnoAnterior']+ "</td>"
-						+ "<td>"+ item['dbTasaCambioDolar']+ "</td>"
-						+ "<td>"+ item['dbTasaCambioEuro']+ "</td>"	
-						+ "<td>"+ item['dbTarifaDolarOriginal']+ "</td>"					
-						+ "<td>"+ item['dbTarifaDolar']+ "</td>"
-						+ "<td>"+ item['dbMontoAbonadoDolar']+ "</td>" 	
-						+ "<td>"+ item['dbMontoPendienteDolar']+ "</td>" 					
-						+ "<td>"+ item['dbMontoAPagarDolar']+ "</td>"
-						+ "<td>"+ item['dbMontoAPagarEuro']+ "</td>"
-						+ "<td>"+ item['dbMontoAPagarBolivar']+ "</td>"
-						+ "<td>"+ item['dbInvoiced']+ "</td>"
-						+ "<td>"+ item['dbPaidOut']+ "</td>"
-						+ "<td>"+ item['dbSchoolYearFrom']+ "</td>"
-						+ "<td>"+ item['dbSeleccionada']+ "</td>"
-						+ "<td>"+ item['dbDeudaConceptosInscripcion']+ "</td>"
-						+ "<td>"+ item['dbObservation']+ "</td>"
-						+ "</tr>";
-                }
-
-				detailLine += 
-					"</tbody>"
-					+ "</table>";
-
-                $("#results").html(detailLine);
-            });
-        });
-    }
-
-    function mostrarCuotasSeleccionadas()
-    {
-        var seleccioneConCondicion = "SELECT * FROM studentTransactions WHERE dbSeleccionada = ? ";
-		var detailLine = 
-			"<table class='table table-striped table-hover'>"
-			+ "<thead>"
-			+ "<tr>"
-			+ "<th>id</th>"
-			+ "<th>idStudent</th>"
-			+ "<th>Alumno</th>" 
-			+ "<th>Cuota</th>"
-			+ "<th>Becado</th>"
-			+ "<th>MorosoAnoAnterior</th>"
-			+ "<th>tasaCambioDolar</th>"
-			+ "<th>tasaCambioEuro</th>"
-			+ "<th>tarifaDolarOriginal</th>"
-			+ "<th>tarifaDolar</th>"
-			+ "<th>AbonadoDolar</th>"
-			+ "<th>PendienteDolar</th>"
-			+ "<th>APagarDolar</th>"
-			+ "<th>APagarEuro</th>"
-			+ "<th>APagarBolivar</th>"
-			+ "<th>Seleccionada</th>"
-			+ "<th>Pagada</th>"
-			+ "<th>Año escolar</th>"
-			+ "<th>Seleccionada</th>"
-			+ "<th>DeudaConceptosInscripcion</th>"
-			+ "<th>Observacion</th>"
-			+ "</tr>"
-			+ "</thead>"
-			+ "<tbody>";
-
-        db.transaction(function (tx) 
-        {
-			tx.executeSql(seleccioneConCondicion, [true], function (tx, result)
-            {
-                dataSet = result.rows;
-                
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
-                    item = dataSet.item(i);
-                    detailLine += 
-						"<tr>"
-						+ "<td>"+ item['dbId']+ "</td>" 
-						+ "<td>"+ item['dbIdStudent']+ "</td>"
-						+ "<td>"+ item['dbStudentName']+ "</td>"
-						+ "<td>"+ item['dbMonthlyPayment']+ "</td>" 
-						+ "<td>"+ item['dbScholarship']+ "</td>"
-						+ "<td>"+ item['dbMorosoAnoAnterior']+ "</td>"
-						+ "<td>"+ item['dbTasaCambioDolar']+ "</td>"
-						+ "<td>"+ item['dbTasaCambioEuro']+ "</td>"	
-						+ "<td>"+ item['dbTarifaDolarOriginal']+ "</td>"					
-						+ "<td>"+ item['dbTarifaDolar']+ "</td>"
-						+ "<td>"+ item['dbMontoAbonadoDolar']+ "</td>" 	
-						+ "<td>"+ item['dbMontoPendienteDolar']+ "</td>" 					
-						+ "<td>"+ item['dbMontoAPagarDolar']+ "</td>"
-						+ "<td>"+ item['dbMontoAPagarEuro']+ "</td>"
-						+ "<td>"+ item['dbMontoAPagarBolivar']+ "</td>"
-						+ "<td>"+ item['dbInvoiced']+ "</td>"
-						+ "<td>"+ item['dbPaidOut']+ "</td>"
-						+ "<td>"+ item['dbSchoolYearFrom']+ "</td>"
-						+ "<td>"+ item['dbSeleccionada']+ "</td>"
-						+ "<td>"+ item['dbDeudaConceptosInscripcion']+ "</td>"
-						+ "<td>"+ item['dbObservation']+ "</td>"
-						+ "</tr>";
-                }
-
-				detailLine += 
-					"</tbody>"
-					+ "</table>";
-
-                $("#results").html(detailLine);
-            });
-        });
+			if (item['dbSeleccionada'] == true)
+			{
+				console.log("mostrarCuotasSeleccionadas", item);
+			}
+		}
     }
 
     function ajustarCuotas() 
@@ -1794,238 +1502,160 @@
 		saldoPagosRealizados = dosDecimales(accumulatedPayment + saldoRepresentante - discount - acumulado_igtf_dolar);
 		
 		totalBalance = 0;
-				
-        var selectAllStatement = "SELECT * FROM studentTransactions WHERE dbSeleccionada = ?";
-        
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(selectAllStatement, ["true"], function (tx, result) 
-            {
-                dataSet = result.rows;
-				                
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {					
-                    item = dataSet.item(i);
-					
-					posicion_elemento = $.inArray(item['dbIdStudent'], vector_estudiantes_seleccionados);
+				        				                
+		for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+		{					
+			item = studentTransactionsArray[i];
 
-					if (posicion_elemento == -1)
-					{ 
-						vector_estudiantes_seleccionados.push(item['dbIdStudent']);
-					}
+			if (item['dbSeleccionada'] == true)
+			{
+				posicion_elemento = $.inArray(item['dbIdStudent'], vector_estudiantes_seleccionados);
+
+				if (posicion_elemento == -1)
+				{ 
+					vector_estudiantes_seleccionados.push(item['dbIdStudent']);
+				}
+				
+				if (saldoPagosRealizados == 0)
+				{
+					updateRecord(item['dbId'], false);
+				}
+				else if (saldoPagosRealizados < item['dbMontoPendienteDolar'])
+				{
+					saldoPagosRealizadosEuros = dosDecimales(saldoPagosRealizados / tasaDolarEuro);
+					saldoPagosRealizadosBolivares = dosDecimales(saldoPagosRealizados * dollarExchangeRate);
 					
-					if (saldoPagosRealizados == 0)
+					actualizarPagar(item['dbId'], saldoPagosRealizados, saldoPagosRealizadosEuros, saldoPagosRealizadosBolivares, true, 'Abono');
+					totalBalance = totalBalance + saldoPagosRealizados;
+					saldoPagosRealizados = 0;
+					indicadorAjuste = 1;
+				}
+				else
+				{
+					saldoPagosRealizados = dosDecimales(saldoPagosRealizados - item['dbMontoPendienteDolar']);
+					totalBalance = dosDecimales(totalBalance + item['dbMontoPendienteDolar']);
+				}
+			}
+		}
+
+		if (saldoPagosRealizados > 0)
+		{
+			let cuota_no_seleccionada = 0;
+			for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+			{					
+				item = studentTransactionsArray[i];
+				if (item['dbSeleccionada'] == false)
+				{
+					cuota_no_seleccionada = 1;
+					break;
+				}
+			}
+			
+			if (cuota_no_seleccionada == 0)
+			{
+				indicadorNoCuotas = 1;
+				alert("No hay cuotas disponibles para ajustar la factura");
+				return false;
+			}
+			else
+			{               
+				for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+				{					
+					item = studentTransactionsArray[i];
+					if (item['dbSeleccionada'] == false)
 					{
-						updateRecord(item['dbId'], 'false');
+						posicion_elemento = $.inArray(item['dbIdStudent'], vector_estudiantes_seleccionados);
+
+						if (posicion_elemento != -1)
+						{									
+							if (saldoPagosRealizados >= item['dbMontoPendienteDolar']) 
+							{
+								updateRecord(item['dbId'], true);
+								saldoPagosRealizados = dosDecimales(saldoPagosRealizados - item['dbMontoPendienteDolar']);
+								totalBalance = dosDecimales(totalBalance + item['dbMontoPendienteDolar']);
+							}
+							else if (saldoPagosRealizados > 0 && saldoPagosRealizados < item['dbMontoPendienteDolar'])
+							{
+								saldoPagosRealizadosEuros = dosDecimales(saldoPagosRealizados / tasaDolarEuro);
+								saldoPagosRealizadosBolivares = dosDecimales(saldoPagosRealizados * dollarExchangeRate);
+								
+								actualizarPagar(item['dbId'], saldoPagosRealizados, saldoPagosRealizadosEuros, saldoPagosRealizadosBolivares, true, 'Abono');
+								totalBalance = totalBalance + saldoPagosRealizados;
+								saldoPagosRealizados = 0;
+								indicadorAjuste = 1;
+							}
+						}
 					}
-					else if (saldoPagosRealizados < item['dbMontoPendienteDolar'])
-					{
-						saldoPagosRealizadosEuros = dosDecimales(saldoPagosRealizados / tasaDolarEuro);
-						saldoPagosRealizadosBolivares = dosDecimales(saldoPagosRealizados * dollarExchangeRate);
-						
-						actualizarPagar(item['dbId'], saldoPagosRealizados, saldoPagosRealizadosEuros, saldoPagosRealizadosBolivares, 'true', 'Abono');
-						totalBalance = totalBalance + saldoPagosRealizados;
-						saldoPagosRealizados = 0;
-						indicadorAjuste = 1;
-					}
-					else
-					{
-						saldoPagosRealizados = dosDecimales(saldoPagosRealizados - item['dbMontoPendienteDolar']);
-						totalBalance = dosDecimales(totalBalance + item['dbMontoPendienteDolar']);
-					}
-                }
+				}
+
 				if (saldoPagosRealizados > 0)
 				{
-					db.transaction(function (tx) 
-					{
-						tx.executeSql(selectAllStatement, ["false"], function (tx, result) 
-						{
-							dataSet = result.rows;
-							
-							if (dataSet.length == 0)
-							{
-								indicadorNoCuotas = 1;
-								alert("No hay cuotas disponibles para ajustar la factura");
-								return false;
-							}
-							else
-							{               
-								for (var i = 0, item = null; i < dataSet.length; i++) 
-								{
-									item = dataSet.item(i);
-
-									posicion_elemento = $.inArray(item['dbIdStudent'], vector_estudiantes_seleccionados);
-
-									if (posicion_elemento != -1)
-									{									
-										if (saldoPagosRealizados >= item['dbMontoPendienteDolar']) 
-										{
-											updateRecord(item['dbId'], 'true');
-											saldoPagosRealizados = dosDecimales(saldoPagosRealizados - item['dbMontoPendienteDolar']);
-											totalBalance = dosDecimales(totalBalance + item['dbMontoPendienteDolar']);
-										}
-										else if (saldoPagosRealizados > 0 && saldoPagosRealizados < item['dbMontoPendienteDolar'])
-										{
-											saldoPagosRealizadosEuros = dosDecimales(saldoPagosRealizados / tasaDolarEuro);
-											saldoPagosRealizadosBolivares = dosDecimales(saldoPagosRealizados * dollarExchangeRate);
-											
-											actualizarPagar(item['dbId'], saldoPagosRealizados, saldoPagosRealizadosEuros, saldoPagosRealizadosBolivares, 'true', 'Abono');
-											totalBalance = totalBalance + saldoPagosRealizados;
-											saldoPagosRealizados = 0;
-											indicadorAjuste = 1;
-										}
-									}
-								}
-								if (saldoPagosRealizados > 0)
-								{
-									alert("No hay cuotas disponibles para ajustar la factura");
-									return false;
-								}
-								else
-								{
-									showRecords();
-									actualizarTotales();
-								}
-							}
-						});
-					});			
+					alert("No hay cuotas disponibles para ajustar la factura");
+					return false;
 				}
 				else
 				{
 					showRecords();
 					actualizarTotales();
 				}
-            });
-        });
+			}
+		}
+		else
+		{
+			showRecords();
+			actualizarTotales();
+		}
     }
 			
-    function showPayments() 
+    function showPayments() // Para uso del desarrollador
     {
-        var selectAllPayments = "SELECT * FROM payments";
-        var detailLine = 
-			"<table class='table table-striped table-hover'>" 
-			+ "<thead>"
-			+ "<tr>"
-			+ "<th>id</th>"
-            + "<th>Moneda</th>"
-            + "<th>Tipo</th>"
-            + "<th>Pagado</th>" 
-			+ "<th>IGTF</th>"
-            + "<th>Banco</th>"
-            + "<th>Tarjeta</th>"
-            + "<th>Serial</th>"
-            + "<th>Comentario</th>"
-			+ "</tr>"
-			+ "</thead>"
-			+ "<tbody>";
-        
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(selectAllPayments, [], function (tx, result) 
-            {
-                dataSet = result.rows;
-                
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
-                    item = dataSet.item(i);
+		console.log("showPayments", paymentsArray);
+	}
 
-                    detailLine += 
-						"<tr>"
-						+ "<td>"+ item['payId'] + "</td>" 
-						+ "<td>"+ item['payMoneda'] + "</td>"
-						+ "<td>"+ item['payPaymentType'] + "</td>" 
-						+ "<td>"+ item['payAmountPaid'] + "</td>"
-						+ "<td>"+ item['payMontoIgtfDolar'] + "</td>"
-						+ "<td>"+ item['payBank'] + "</td>"
-						+ "<td>"+ item['payAccountOrCard'] + "</td>"
-						+ "<td>"+ item['paySerial'] + "</td>"	
-						+ "<td>"+ item['payComentario']	 + "</td>"		
-						+ "</tr>";			
-                }
-
-				detailLine += 
-					"</tbody>"
-					+ "</table>";
-
-                $("#pagos").html(detailLine);
-            });
-        });
-    }
-	
     function buscarMoneda(idPago) 
     {
-        var selectAllPayments = "SELECT * FROM payments WHERE payId = ?";
         var detailLine = "";
-        
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(selectAllPayments, [idPago], function (tx, result) 
-            {
-                dataSet = result.rows;
-				                
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
-                    item = dataSet.item(i);
-					monedaPagoEliminar = item['payMoneda'];
-													
-					if (monedaPagoEliminar == "$")
-					{
-						montoPagadoDolar = montoPagado;
-						montoPagadoEuro = dosDecimales(montoPagado / tasaDolarEuro);
-						montoPagadoBolivar = dosDecimales(montoPagado * dollarExchangeRate);
-					}
-					else if (monedaPagoEliminar == "€")
-					{
-						montoPagadoDolar = dosDecimales(montoPagado * tasaDolarEuro);
-						montoPagadoEuro = montoPagado;
-						montoPagadoBolivar = dosDecimales(montoPagado * euro);
-					}
-					else
-					{
-						montoPagadoDolar = dosDecimales(montoPagado / dollarExchangeRate);
-						montoPagadoEuro = dosDecimales(montoPagado / euro);
-						montoPagadoBolivar = montoPagado;
-					}
-														
-					accumulatedPayment -= dosDecimales(montoPagadoDolar);	
-					acumuladoPagadoEuros -= dosDecimales(montoPagadoEuro);
-					acumuladoPagadoBolivares -= dosDecimales(montoPagadoBolivar);
 
-					if (indicador_pedido == 0)
-					{
-						acumulado_igtf_dolar = dosDecimales(acumulado_igtf_dolar - item['payMontoIgtfDolar']);
-						acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
-						acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
-					}
-					
-					monto_divisas = dosDecimales(monto_divisas - item['payMontoIgtfDolar']);
-					acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo - item['payMontoIgtfDolar']);
-					
-					actualizarTotales();		
-                }
-            });
-        });
-    }
+		indice_elemento = paymentsArray.findIndex((objeto => objeto.payId == idPago));
 
-    function dropTable() // Function Call when Drop Button Click.. Talbe will be dropped from database.
-    {
-        var dropStatement = "DROP TABLE IF EXISTS studentTransactions";
+		item = paymentsArray[indice_elemento];
+		
+		monedaPagoEliminar = item['payMoneda'];
+										
+		if (monedaPagoEliminar == "$")
+		{
+			montoPagadoDolar = montoPagado;
+			montoPagadoEuro = dosDecimales(montoPagado / tasaDolarEuro);
+			montoPagadoBolivar = dosDecimales(montoPagado * dollarExchangeRate);
+		}
+		else if (monedaPagoEliminar == "€")
+		{
+			montoPagadoDolar = dosDecimales(montoPagado * tasaDolarEuro);
+			montoPagadoEuro = montoPagado;
+			montoPagadoBolivar = dosDecimales(montoPagado * euro);
+		}
+		else
+		{
+			montoPagadoDolar = dosDecimales(montoPagado / dollarExchangeRate);
+			montoPagadoEuro = dosDecimales(montoPagado / euro);
+			montoPagadoBolivar = montoPagado;
+		}
+											
+		accumulatedPayment -= dosDecimales(montoPagadoDolar);	
+		acumuladoPagadoEuros -= dosDecimales(montoPagadoEuro);
+		acumuladoPagadoBolivares -= dosDecimales(montoPagadoBolivar);
 
-        db.transaction(function (tx) { tx.executeSql(dropStatement, [], null, onError); });
-        initDataBase();
-    }
-    
-    function dropPayments() // Function Call when Drop Button Click.. Talbe will be dropped from database.
-    {
-        var dropPayments = "DROP TABLE IF EXISTS payments";
-
-        db.transaction(function (tx) { tx.executeSql(dropPayments, [], null, onError); });
-        initDataBase();
-    }
-
-    function onError(tx, error) // Function for Hendeling Error...
-    {
-        alert(error.message);
+		if (indicador_pedido == 0)
+		{
+			acumulado_igtf_dolar = dosDecimales(acumulado_igtf_dolar - item['payMontoIgtfDolar']);
+			acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
+			acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+		}
+		
+		monto_divisas = dosDecimales(monto_divisas - item['payMontoIgtfDolar']);
+		acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo - item['payMontoIgtfDolar']);
+		
+		actualizarTotales();		
     }
 
     function printPayments()
@@ -2084,205 +1714,164 @@
         $("#bt-06").attr('disabled', true);
         $("#bt-07").attr('disabled', true);
     }
-	
-    function showInvoiceLines()
-    {
-        var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbSeleccionada = 'true' ORDER BY dbStudentName";
-        var detailLine = " ";
-        var previousStudentName = " ";
-        var currentStudentName = " ";
-
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(selectForInvoice, [], function (tx, result) 
-            {
-                dataSet = result.rows;
-                    
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
-                    item = dataSet.item(i);
-                    
-                    if (previousStudentName != item['dbStudentName'])
-                    {
-                        previousStudentName = item['dbStudentName'];
-                        currentStudentName = item['dbStudentName'];
-                    }
-                    else 
-                    {
-                        currentStudentName = " ";
-                    }
-                    decAmount = parseFloat(item['dbAmountPayable']).toFixed(2);
-                    detailLine += "<tr id=fact" + item['dbId'] + ">  \
-                        <td>" + currentStudentName + "</td> \
-                        <td>" + item['dbMonthlyPayment'] + "</td> \
-                        <td id=fac" + item['dbId'] + " value=" + item['dbTransactionAmount'] + ">" + item['dbTransactionAmount'] + "</td> \
-                        <td><input type='number' id=fa" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + decAmount + "></td> \
-                        <td>" + item['dbObservation'] + "</td></tr>";
-                }
-                $("#invoice-lines").html(detailLine);
-            });
-        });
-    }
 
     function uploadTransactions()
     {
 		biggestYearFrom = schoolYearFrom;
 		
-        var selectForInvoice = "SELECT * FROM studentTransactions WHERE dbSeleccionada = 'true'";
 		var idCuotaAbono = 0;
 		var idCuotaExonerada = 0;
-		var cantidadElementos = 0;
 		var diferenciaBolivaresDividida = diferenciaBolivares;
 		var diferenciaUltimoElemento = diferenciaBolivares;
 		var diferenciaBolivaresTotal = diferenciaBolivares;
+		var cantidadElementos = 0;
 		var contadorElementos = 1;
-		
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(selectForInvoice, [], function (tx, result) 
-            {
-                dataSet = result.rows;
-				cantidadElementos = dataSet.length;
+						
+		for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+		{
+			item = studentTransactionsArray[i];
 
-				for (var i = 0, item = null; i < dataSet.length; i++) 
+			if (item['dbSeleccionada'] == true)
+			{
+				cantidadElementos++;
+			}
+		}
+
+		for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+		{
+			item = studentTransactionsArray[i];
+
+			if (item['dbSeleccionada'] == true)
+			{
+				if (item['dbObservation'] == 'Abono')
 				{
-					item = dataSet.item(i);				
-					
-					if (item['dbObservation'] == 'Abono')
-					{
-						idCuotaAbono = item['dbId'];
-					}
-					
-					if (item['dbObservation'] == '(Exonerado)')
-					{
-						idCuotaAbono = item['dbId'];
-						cantidadElementos -= 1;
-					}
+					idCuotaAbono = item['dbId'];
 				}
 				
-				if (cantidadElementos > 1)
+				if (item['dbObservation'] == '(Exonerado)')
 				{
-					diferenciaBolivaresDividida = dosDecimales(diferenciaBolivares / cantidadElementos);
-					diferenciaUltimoElemento = diferenciaBolivaresDividida;
-					
-					diferenciaBolivaresTotal = dosDecimales(diferenciaBolivaresDividida * cantidadElementos);
-					
-					if (diferenciaBolivares != diferenciaBolivaresTotal)
-					{
-						diferenciaUltimoElemento = dosDecimales(diferenciaUltimoElemento + (diferenciaBolivares - diferenciaBolivaresTotal));
-					}
+					idCuotaAbono = item['dbId'];
+					cantidadElementos -= 1;
 				}
-			 
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
-                    item = dataSet.item(i);
-                    tbStudentTransactions[transactionCounter] = new Object();
-                    tbStudentTransactions[transactionCounter].studentName = item['dbStudentName'];
-                    tbStudentTransactions[transactionCounter].transactionIdentifier = item['dbId'];
-					tbStudentTransactions[transactionCounter].descuentoAlumno = item['dbDescuentoAlumno'];
-					tbStudentTransactions[transactionCounter].tarifaDolarOriginal = item['dbTarifaDolarOriginal'];
-					tbStudentTransactions[transactionCounter].tarifaDolar = item['dbTarifaDolar'];
-                    tbStudentTransactions[transactionCounter].monthlyPayment = item['dbMonthlyPayment'];
-					tbStudentTransactions[transactionCounter].montoAPagarDolar = dosDecimales(item['dbMontoAPagarDolar']);
-                    tbStudentTransactions[transactionCounter].montoAPagarEuro = dosDecimales(item['dbMontoAPagarEuro']);
-					
-					if (item['Observation'] == '(Exonerado')
-					{
-						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);	
-					}
-					else if (cantidadElementos == 1)
+			}
+		}
+		
+		if (cantidadElementos > 1)
+		{
+			diferenciaBolivaresDividida = dosDecimales(diferenciaBolivares / cantidadElementos);
+			diferenciaUltimoElemento = diferenciaBolivaresDividida;
+			
+			diferenciaBolivaresTotal = dosDecimales(diferenciaBolivaresDividida * cantidadElementos);
+			
+			if (diferenciaBolivares != diferenciaBolivaresTotal)
+			{
+				diferenciaUltimoElemento = dosDecimales(diferenciaUltimoElemento + (diferenciaBolivares - diferenciaBolivaresTotal));
+			}
+		}
+		
+		for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+		{
+			item = studentTransactionsArray[i];
+
+			if (item['dbSeleccionada'] == true)
+			{
+				tbStudentTransactions[transactionCounter] = new Object();
+				tbStudentTransactions[transactionCounter].studentName = item['dbStudentName'];
+				tbStudentTransactions[transactionCounter].transactionIdentifier = item['dbId'];
+				tbStudentTransactions[transactionCounter].descuentoAlumno = item['dbDescuentoAlumno'];
+				tbStudentTransactions[transactionCounter].tarifaDolarOriginal = item['dbTarifaDolarOriginal'];
+				tbStudentTransactions[transactionCounter].tarifaDolar = item['dbTarifaDolar'];
+				tbStudentTransactions[transactionCounter].monthlyPayment = item['dbMonthlyPayment'];
+				tbStudentTransactions[transactionCounter].montoAPagarDolar = dosDecimales(item['dbMontoAPagarDolar']);
+				tbStudentTransactions[transactionCounter].montoAPagarEuro = dosDecimales(item['dbMontoAPagarEuro']);
+				
+				if (item['Observation'] == '(Exonerado')
+				{
+					tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);	
+				}
+				else if (cantidadElementos == 1)
+				{
+					tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivares);
+				}
+				else if (idCuotaAbono > 0)
+				{
+					if (item['dbId'] == idCuotaAbono)
 					{
 						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivares);
 					}
-					else if (idCuotaAbono > 0)
+					else
 					{
-						if (item['dbId'] == idCuotaAbono)
-						{
-							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivares);
-						}
-						else
-						{
-							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);	
-						}													
+						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);	
+					}													
+				}
+				else
+				{
+					if (contadorElementos == cantidadElementos)
+					{
+						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaUltimoElemento);
 					}
 					else
 					{
-						if (contadorElementos == cantidadElementos)
-						{
-							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaUltimoElemento);
-						}
-						else
-						{
-							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivaresDividida);
-						}
+						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar'] + diferenciaBolivaresDividida);
 					}
-					contadorElementos++;
-										
-                    tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 	
-					
-                    transactionCounter++;
-					
-					if (item['dbMonthlyPayment'].substring(0, 9) == "Matrícula")
-					{
-						biggestYearFrom = parseInt(item['dbMonthlyPayment'].substring(10, 14));
-					}
-					if (item['dbScholarship'] == 1 || item['dbDescuentoAlumno'] < 1)
-					{
-						cuotasAlumnoBecado++;
-					}
-                }
-				biggestYearUntil = biggestYearFrom + 1;
-				payments.schoolYear = "Año escolar " + biggestYearFrom + "-" + biggestYearUntil;
-            });
-        });
+				}
+				contadorElementos++;
+									
+				tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 	
+				
+				transactionCounter++;
+				
+				if (item['dbMonthlyPayment'].substring(0, 9) == "Matrícula")
+				{
+					biggestYearFrom = parseInt(item['dbMonthlyPayment'].substring(10, 14));
+				}
+				if (item['dbScholarship'] == 1 || item['dbDescuentoAlumno'] < 1)
+				{
+					cuotasAlumnoBecado++;
+				}
+			}
+		}
+		biggestYearUntil = biggestYearFrom + 1;
+		payments.schoolYear = "Año escolar " + biggestYearFrom + "-" + biggestYearUntil;
     }
-    
+
     function loadPayments()
-    {
-        var locSelectAllPayments = "SELECT * FROM payments";
+    {                
+		for (var i = 0, item = null; i < paymentsArray.length; i++) 
+		{
+			item = paymentsArray[i];
+			
+			if (item['payPaymentType'] != "Cambio")
+			{
+				tbPaymentsMade[accountPaid] = new Object();
 
-        db.transaction(function (tx) 
-        {
-            tx.executeSql(locSelectAllPayments, [], function (tx, result) 
-            {
-                dataSet = result.rows;
-                
-                for (var i = 0, item = null; i < dataSet.length; i++) 
-                {
-                    item = dataSet.item(i);
-                    
-                    if (item['payPaymentType'] != "Cambio")
-                    {
-                        tbPaymentsMade[accountPaid] = new Object();
-                        tbPaymentsMade[accountPaid].id = item['payId'];
-						tbPaymentsMade[accountPaid].moneda = item['payMoneda'];
-                        tbPaymentsMade[accountPaid].paymentType = item['payPaymentType'];
-                        tbPaymentsMade[accountPaid].amountPaid = item['payAmountPaid'];
-						tbPaymentsMade[accountPaid].monto_igtf_dolar = item['payMontoIgtfDolar'];
-                        tbPaymentsMade[accountPaid].bank = item['payBank'];
-						tbPaymentsMade[accountPaid].bancoReceptor = item['payBancoReceptor'];
-                        tbPaymentsMade[accountPaid].accountOrCard = item['payAccountOrCard'];
-                        tbPaymentsMade[accountPaid].serial = item['paySerial'];
-						tbPaymentsMade[accountPaid].comentario = item['payComentario'];
-                        tbPaymentsMade[accountPaid].idTurn = $("#Turno").attr('value');
-                        tbPaymentsMade[accountPaid].family = nameFamily;
-                        accountPaid++;						
-                    }
-                }
-				
-				payments.cuotasAlumnoBecado = cuotasAlumnoBecado;
-				
-                var stringStudentTransactions = JSON.stringify(tbStudentTransactions);
-                                
-                var stringPaymentsMade = JSON.stringify(tbPaymentsMade);
+				tbPaymentsMade[accountPaid].id = item['payId'];
+				tbPaymentsMade[accountPaid].moneda = item['payMoneda'];
+				tbPaymentsMade[accountPaid].paymentType = item['payPaymentType'];
+				tbPaymentsMade[accountPaid].amountPaid = item['payAmountPaid'];
+				tbPaymentsMade[accountPaid].monto_igtf_dolar = item['payMontoIgtfDolar'];
+				tbPaymentsMade[accountPaid].bank = item['payBank'];
+				tbPaymentsMade[accountPaid].bancoReceptor = item['payBancoReceptor'];
+				tbPaymentsMade[accountPaid].accountOrCard = item['payAccountOrCard'];
+				tbPaymentsMade[accountPaid].serial = item['paySerial'];
+				tbPaymentsMade[accountPaid].comentario = item['payComentario'];
+				tbPaymentsMade[accountPaid].idTurn = $("#Turno").attr('value');
+				tbPaymentsMade[accountPaid].family = nameFamily;
+				accountPaid++;						
+			}
+		}
+		
+		payments.cuotasAlumnoBecado = cuotasAlumnoBecado;
+		
+		var stringStudentTransactions = JSON.stringify(tbStudentTransactions);
+						
+		var stringPaymentsMade = JSON.stringify(tbPaymentsMade);
 
-                cleanPager();
-				
-                $.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "recordInvoiceData"]); ?>', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
-            });
-        });
+		cleanPager();
+		
+		$.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "recordInvoiceData"]); ?>', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
     }
-    
+
     function listFamilies(newFamily)
     {	
         $.post('<?php echo Router::url(["controller" => "Students", "action" => "everyFamily"]); ?>', {"newFamily" : newFamily}, null, "json")
@@ -2587,7 +2176,7 @@
 		
 		payments.discount = descuentoBolivares; 
 		
-		if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo' || indicador_pedido == 1)
+		if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo' || $('#type-invoice').val() == 'Recibo de seguro' || indicador_pedido == 1)
 		{
 			payments.fiscal = 0;
 		}
@@ -2595,6 +2184,7 @@
 		{
 			payments.fiscal = 1;
 		}
+
 		payments.tasaDolar = dollarExchangeRate;
 		payments.tasaEuro = euro;
 		payments.tasaDolarEuro = dosDecimales(tasaDolarEuro);
@@ -2632,129 +2222,122 @@
 			var recalculo_divisas = monto_divisas; 
 			var recalculo_igtf_dolar = acumulado_igtf_dolar;
 			var recalculo_igtf_bolivar = acumulado_igtf_bolivar;
-			
-			db.transaction(function (tx) 
+								
+			// Aquí hay un error porque se está considerando que el dólar tiene el mismo valor que el euro. Se debe desglosar y hacer la conversión de monedas de euros a dolares
+			for (var i = 0, item = null; i < paymentsArray.length; i++) 
 			{
-				tx.executeSql(todos_los_pagos, [], function (tx, result) 
+				item = paymentsArray[i];
+				if (item['payMoneda'] == "$" || item['payMoneda'] == "€")
 				{
-					dataSet = result.rows;
-					
-					// Aquí hay un error porque se está considerando que el dólar tiene el mismo valor que el euro. Se debe desglosar y hacer la conversión de monedas de euros a dolares
-					for (var i = 0, item = null; i < dataSet.length; i++) 
+					pagos_en_divisas += item['payAmountPaid'];
+				}
+				else
+				{
+					pagos_en_bolivares += item['payAmountPaid'];
+				}
+			}
+
+			if (indicador_sobrante == 0)
+			{
+				recalculo_divisas = pagos_en_divisas;
+				recalculo_igtf_dolar = dosDecimales(pagos_en_divisas * porcentaje_calculo_igtf);
+				recalculo_igtf_bolivar = dosDecimales(recalculo_igtf_dolar * dollarExchangeRate);
+			}
+
+			if (pagos_en_bolivares < recalculo_igtf_bolivar)
+			{
+				if (indicador_sobrante == 0 && indicador_pedido == 0)
+				{
+					recalculo_divisas = dosDecimales(pagos_en_divisas/porcentaje_calculo_base_igtf);
+					recalculo_igtf_dolar = dosDecimales((pagos_en_divisas/porcentaje_calculo_base_igtf) * porcentaje_calculo_igtf);
+				}
+
+				if (indicador_pedido == 0)
+				{
+					saldo_igtf_dolar = recalculo_igtf_dolar;
+					for (var i = 0, item = null; i < paymentsArray.length; i++) 
 					{
-						item = dataSet.item(i);
-						if (item['payMoneda'] == "$" || item['payMoneda'] == "€")
+						item = paymentsArray[i];
+						if (item['payMoneda'] == "$")
 						{
-							pagos_en_divisas += item['payAmountPaid'];
+							monto_igtf_dolar = dosDecimales(item['payAmountPaid'] * porcentaje_calculo_igtf)
+							if (saldo_igtf_dolar < monto_igtf_dolar)
+							{
+								actualizarPago(item['payId'], saldo_igtf_dolar);
+								saldo_igtf_dolar -= saldo_igtf_dolar; 		
+							}	
+							else
+							{
+								actualizarPago(item['payId'], monto_igtf_dolar);
+								saldo_igtf_dolar -= monto_igtf_dolar; 
+							}
+						}
+						else if (item['payMoneda'] == "€")
+						{
+							monto_igtf_euro = dosDecimales(item['payAmountPaid'] * porcentaje_calculo_igtf);
+							monto_igtf_dolar = dosDecimales((item['payAmountPaid'] * porcentaje_calculo_igtf) * tasaDolarEuro);
+							saldo_igtf_euro = dosDecimales(saldo_igtf_dolar/tasaDolarEuro);
+							if (saldo_igtf_euro < monto_igtf_euro)
+							{
+								actualizarPago(item['payId'], saldo_igtf_euro);
+								saldo_igtf_dolar -= saldo_igtf_dolar; 		
+							}	
+							else
+							{
+								actualizarPago(item['payId'], monto_igtf_euro);
+								saldo_igtf_dolar -= monto_igtf_dolar; 
+							}
 						}
 						else
 						{
-							pagos_en_bolivares += item['payAmountPaid'];
+							actualizarPago(item['payId'], 0);
 						}
 					}
-
-					if (indicador_sobrante == 0)
+				} 
+			}
+			else
+			{
+				if (indicador_pedido == 0)
+				{
+					saldo_igtf_bolivar = recalculo_igtf_bolivar;
+					for (var i = 0, item = null; i < paymentsArray.length; i++) 
 					{
-						recalculo_divisas = pagos_en_divisas;
-						recalculo_igtf_dolar = dosDecimales(pagos_en_divisas * porcentaje_calculo_igtf);
-						recalculo_igtf_bolivar = dosDecimales(recalculo_igtf_dolar * dollarExchangeRate);
-					}
-
-					if (pagos_en_bolivares < recalculo_igtf_bolivar)
-					{
-						if (indicador_sobrante == 0 && indicador_pedido == 0)
+						item = paymentsArray[i];								
+						
+						if (item['payMoneda'] == "Bs.")
 						{
-							recalculo_divisas = dosDecimales(pagos_en_divisas/porcentaje_calculo_base_igtf);
-							recalculo_igtf_dolar = dosDecimales((pagos_en_divisas/porcentaje_calculo_base_igtf) * porcentaje_calculo_igtf);
-						}
-
-						if (indicador_pedido == 0)
-						{
-							saldo_igtf_dolar = recalculo_igtf_dolar;
-							for (var i = 0, item = null; i < dataSet.length; i++) 
+							if (saldo_igtf_bolivar > item['payAmountPaid'])
 							{
-								item = dataSet.item(i);
-								if (item['payMoneda'] == "$")
-								{
-									monto_igtf_dolar = dosDecimales(item['payAmountPaid'] * porcentaje_calculo_igtf)
-									if (saldo_igtf_dolar < monto_igtf_dolar)
-									{
-										actualizarPago(item['payId'], saldo_igtf_dolar);
-										saldo_igtf_dolar -= saldo_igtf_dolar; 		
-									}	
-									else
-									{
-										actualizarPago(item['payId'], monto_igtf_dolar);
-										saldo_igtf_dolar -= monto_igtf_dolar; 
-									}
-								}
-								else if (item['payMoneda'] == "€")
-								{
-									monto_igtf_euro = dosDecimales(item['payAmountPaid'] * porcentaje_calculo_igtf);
-									monto_igtf_dolar = dosDecimales((item['payAmountPaid'] * porcentaje_calculo_igtf) * tasaDolarEuro);
-									saldo_igtf_euro = dosDecimales(saldo_igtf_dolar/tasaDolarEuro);
-									if (saldo_igtf_euro < monto_igtf_euro)
-									{
-										actualizarPago(item['payId'], saldo_igtf_euro);
-										saldo_igtf_dolar -= saldo_igtf_dolar; 		
-									}	
-									else
-									{
-										actualizarPago(item['payId'], monto_igtf_euro);
-										saldo_igtf_dolar -= monto_igtf_dolar; 
-									}
-								}
-								else
-								{
-									actualizarPago(item['payId'], 0);
-								}
-							}
-						} 
-					}
-					else
-					{
-						if (indicador_pedido == 0)
-						{
-							saldo_igtf_bolivar = recalculo_igtf_bolivar;
-							for (var i = 0, item = null; i < dataSet.length; i++) 
+								actualizarPago(item['payId'], item['payAmountPaid']);
+								saldo_igtf_bolivar -= item['payAmountPaid']; 		
+							}	
+							else
 							{
-								item = dataSet.item(i);
-								if (item['payMoneda'] == "Bs.")
-								{
-									if (saldo_igtf_bolivar > item['payAmountPaid'])
-									{
-										actualizarPago(item['payId'], item['payAmountPaid']);
-										saldo_igtf_bolivar -= item['payAmountPaid']; 		
-									}	
-									else
-									{
-										actualizarPago(item['payId'], saldo_igtf_bolivar);
-										saldo_igtf_bolivar -= saldo_igtf_bolivar;
-									}	
-								}
-								else
-								{
-									actualizarPago(item['payId'], 0);
-								}
-							}
-						} 
-					}
-					if (indicador_sobrante == 0)
-					{
-						monto_divisas = recalculo_divisas;
-						acumulado_igtf_dolar_archivo = recalculo_igtf_dolar;
-
-						if (indicador_pedido == 0)
+								actualizarPago(item['payId'], saldo_igtf_bolivar);
+								saldo_igtf_bolivar -= saldo_igtf_bolivar;
+							}	
+						}
+						else
 						{
-							acumulado_igtf_dolar = recalculo_igtf_dolar;
-							acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
-							acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+							actualizarPago(item['payId'], 0);
 						}
 					}
-					indicador_igtf_recalculado = 1;
-					proxima_funcion_a_ejecutar();
-				});
-			});
+				} 
+			}
+			if (indicador_sobrante == 0)
+			{
+				monto_divisas = recalculo_divisas;
+				acumulado_igtf_dolar_archivo = recalculo_igtf_dolar;
+
+				if (indicador_pedido == 0)
+				{
+					acumulado_igtf_dolar = recalculo_igtf_dolar;
+					acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
+					acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+				}
+			}
+			indicador_igtf_recalculado = 1;
+			proxima_funcion_a_ejecutar();
 		}
 		else
 		{
@@ -2827,10 +2410,6 @@
 		
 	function dosDecimales(numero)
 	{
-		/* Procedimiento anterior
-		var result = Math.round(numero * 100) / 100 ;
-		return result;
-		*/
 		return Number(Math.round(numero+'e'+2)+'e-'+2);
 	}
 	
@@ -2873,6 +2452,48 @@
 	}
 	function procesarPago()
 	{
+		base_igtf_dolar = 0;
+		monto_igtf_dolar = 0;
+		monto_igtf_dolar_pedido = 0;
+
+		if (monedaPago == "$")
+		{
+			base_igtf_dolar = montoPagado;
+		}
+		else if (monedaPago == "€")
+		{
+			base_igtf_dolar = dosDecimales(montoPagado / tasaDolarEuro);
+		}
+
+		if (base_igtf_dolar > 0)
+		{
+			if (base_igtf_dolar > deudaMenosPagado)
+			{
+				base_igtf_dolar = deudaMenosPagado;		
+			}
+			else if (base_igtf_dolar <= acumulado_igtf_dolar)
+			{
+				base_igtf_dolar = 0;							
+			}
+
+			if (indicador_pedido == 1)
+			{
+				monto_igtf_dolar_pedido = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
+				monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
+				acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar_pedido);
+
+			}
+			else
+			{
+				monto_igtf_dolar = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
+				acumulado_igtf_dolar = dosDecimales(acumulado_igtf_dolar + monto_igtf_dolar);
+				acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
+				acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+				monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
+				acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar);
+			}
+		}
+
 		if (monedaPago == "$")
 		{
 			montoPagadoDolar = montoPagado;
@@ -2902,6 +2523,26 @@
 
 		actualizarTotales();
 		inicializarCampos();
+	}
+
+	function descuentoProntoPago(anio_mes_transaccion) // Descuento pronto pago
+	{
+		let descuentos_pronto_pago = 
+			{
+				"202308" : 5.00,
+				"202408" : 10.00
+			};
+
+		for (var anio_mes_descuento in descuentos_pronto_pago) 
+		{
+			let monto_descuento_pronto_pago = 0;
+			if (anio_mes_transaccion <= anio_mes_descuento)
+			{
+				monto_descuento_pronto_pago = descuentos_pronto_pago[anio_mes_descuento];
+				return monto_descuento_pronto_pago;
+			}
+		}
+		return 0;
 	}
 	    
 // Funciones Jquery
@@ -3026,7 +2667,6 @@
 				}
 			});
 
-
             idFamily = $(this).attr('id').substring(2);
             
             if (selectFamily > -1)
@@ -3115,14 +2755,16 @@
                         						
                     $.each(response.data.students, function(key, value) 
                     {
+						idStudent = value.id;
 						julioExonerado = 0;
 						morosoAnoAnterior = 0;
-						deuda_conceptos_inscripcion = false;
 						alumno_nuevo = 0;
+
+						estudiantes_condiciones[idStudent] = [];
+						estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] = false;
 						
-                        students += "<tr id=st" + value.id + " class='students'>";
-                        idStudent = value.id;
-						
+                        students += "<tr id=st" + idStudent + " class='students'>";
+
 						students += "<td>" + value.surname + " ";
 						surname = value.surname;
 						
@@ -3227,6 +2869,10 @@
 								{
 									anoMes = ano_mes_actual;
 								}
+								else if (indicador_recalcular_cuotas == false && anoEscolarMensualidad < anoEscolarActual && paidOut == false )
+								{
+									anoMes = anoEscolarActual + "07";
+								}
 
 								$.each(mesesTarifas, function(key3, value3)											
 								{
@@ -3304,62 +2950,76 @@
 								{						
 									if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
 									{
-										tarifaDolarSinDescuento = tarifaDolar;
-										
-										tarifaDolar = dosDecimales(tarifaDolar * porcentajeDescuento);
-										
-										if (tarifaDolar == tarifaDolarSinDescuento)
-										{										
-											if (tarifaDolar > montoDolar)
-											{
-												montoDolar = dosDecimales(montoDolar - 5); // Descuento pronto pago
-												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar); 
-												montoAPagarDolar = montoPendienteDolar;
-												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
-												montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
-												paidOut = false;
-												
-												if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
+										if (anoEscolarMensualidad >= anoEscolarAnterior) 
+										{
+											tarifaDolarSinDescuento = tarifaDolar;
+											
+											tarifaDolar = dosDecimales(tarifaDolar * porcentajeDescuento);
+											
+											if (tarifaDolar == tarifaDolarSinDescuento)
+											{										
+												if (tarifaDolar > montoDolar)
 												{
-													morosoAnoAnterior = 1;
+													let monto_descuento_pronto_pago = descuentoProntoPago(anoMes);
+													montoDolar = dosDecimales(montoDolar - monto_descuento_pronto_pago);
+													montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar); 
+													montoAPagarDolar = montoPendienteDolar;
+													montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
+													montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
+													paidOut = false;
+													
+													if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
+													{
+														morosoAnoAnterior = 1;
+													}
+												}
+												else
+												{
+													montoDolar = 0;
+													montoPendienteDolar = 0;
+													montoAPagarDolar = 0;
+													montoAPagarEuro = 0;
+													montoAPagarBolivar = 0
+													indicadorImpresion = 1;
 												}
 											}
 											else
-											{
-												montoDolar = 0;
-												montoPendienteDolar = 0;
-												montoAPagarDolar = 0;
-												montoAPagarEuro = 0;
-												montoAPagarBolivar = 0
-												indicadorImpresion = 1;
+											{											
+												if (tarifaDolar > montoDolar && tarifaDolarSinDescuento > montoDolar)
+												{
+													let monto_descuento_pronto_pago = descuentoProntoPago(anoMes);
+													montoDolar = dosDecimales(montoDolar - monto_descuento_pronto_pago);
+													montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar); 
+													montoAPagarDolar = montoPendienteDolar;
+													montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
+													montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
+													paidOut = false;
+													
+													if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
+													{
+														morosoAnoAnterior = 1;
+													}
+												}
+												else
+												{
+													montoDolar = 0;
+													montoPendienteDolar = 0;
+													montoAPagarDolar = 0;
+													montoAPagarEuro = 0;
+													montoAPagarBolivar = 0
+													indicadorImpresion = 1;
+												}
 											}
 										}
 										else
-										{											
-											if (tarifaDolar > montoDolar && tarifaDolarSinDescuento > montoDolar)
-											{
-												montoDolar = dosDecimales(montoDolar - 5); // Descuento pronto pago
-												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar); 
-												montoAPagarDolar = montoPendienteDolar;
-												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
-												montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
-												paidOut = false;
-												
-												if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
-												{
-													morosoAnoAnterior = 1;
-												}
-											}
-											else
-											{
-												montoDolar = 0;
-												montoPendienteDolar = 0;
-												montoAPagarDolar = 0;
-												montoAPagarEuro = 0;
-												montoAPagarBolivar = 0
-												indicadorImpresion = 1;
-											}
-										}
+										{
+											montoDolar = 0;
+											montoPendienteDolar = 0;
+											montoAPagarDolar = 0;
+											montoAPagarEuro = 0;
+											montoAPagarBolivar = 0
+											indicadorImpresion = 1;
+										} 
 									}
 									else
 									{
@@ -3377,9 +3037,9 @@
 											else
 											{ 
 												montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
-												if (montoPendienteDolar > 0 && deuda_conceptos_inscripcion == false)
+												if (montoPendienteDolar > 0 && estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] == false)
 												{
-													deuda_conceptos_inscripcion = true;
+													estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] = true;
 												}												
 												montoAPagarDolar = montoPendienteDolar;
 												montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
@@ -3402,20 +3062,20 @@
 							else if (transactionType != 'Mensualidad')
 							{
 								montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
-								if (montoPendienteDolar > 0 && deuda_conceptos_inscripcion == false)
+								if (montoPendienteDolar > 0 && estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] == false)
 								{
-									deuda_conceptos_inscripcion = true;
-								}
+									estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] = true;
+								}						
 								montoAPagarDolar = montoPendienteDolar;
 								montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
 								montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
 							}
 							else if (monthlyPayment.substring(0, 3) == "Ago")
 							{
-								if (montoPendienteDolar > 0 && deuda_conceptos_inscripcion == false)
+								if (montoPendienteDolar > 0 && estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] == false)
 								{
-									deuda_conceptos_inscripcion = true;
-								}
+									estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] = true;
+								}						
 								montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 								montoAPagarDolar = montoPendienteDolar;
 								montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
@@ -3441,8 +3101,17 @@
 									morosoAnoAnterior = 1;
 								}
 							}
-							
-							if ($('#type-invoice').val() == 'Factura inscripción regulares')
+							if ($('#type-invoice').val() == 'Recibo de seguro')
+							{
+								if (indicadorImpresion == 0)
+								{
+									if (monthlyPayment.substring(0, 14) == "Seguro escolar")
+									{
+										insertRecord();
+									}
+								}
+							} 
+							else if ($('#type-invoice').val() == 'Factura inscripción regulares')
 							{
 								if (indicadorImpresion == 0)
 								{
@@ -3454,7 +3123,6 @@
 										}
 									}									
 									else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
-										monthlyPayment.substring(0, 14) == "Seguro escolar" ||
 										monthlyPayment.substring(0, 3) == "Ago")
 									{
 
@@ -3485,7 +3153,6 @@
 										}
 									}
 									else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
-										monthlyPayment.substring(0, 14) == "Seguro escolar" ||
 										monthlyPayment.substring(0, 3) == "Ago")
 									{
 										insertRecord();
@@ -3651,7 +3318,7 @@
 								$(this).attr('checked', true);
 								idStudentTransactions = $(this).attr('id'); 
 								markTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), 'true'); 
+								updateRecord(idStudentTransactions.substring(2), true); 
 								$('#uncheck-quotas').attr('disabled', false);
 								$('#charge').attr('disabled', false);
 								if (firstInstallment == " ")
@@ -3752,9 +3419,6 @@
 							id_monto_abono = idStudentTransactions.replace("tr", "a_pagar_dolar_");
 							monto_abono = parseFloat($("#"+id_monto_abono).attr('value'));
 
-							console.log("id_monto_abono", id_monto_abono);
-							console.log("monto_abono", monto_abono);
-
 							transactionDescription = $(this).attr('name');
 							transactionAmount = parseFloat($(this).attr('value'));
 						}
@@ -3770,7 +3434,7 @@
 								$('#' + idAmountTransactions).attr('disabled', false);
 								$('#' + id_monto_abono).attr('disabled', false);								
 								uncheckTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), 'false'); 
+								updateRecord(idStudentTransactions.substring(2), false); 
 								$("#mark-quotas").html(transactionDescription);
 								if (markedQuotaCounter == 1)
 								{
@@ -3818,7 +3482,7 @@
                 {
                     $('#' + idStudentTransactions).attr('checked', false);
                     uncheckTransaction(idStudentTransactions.substring(2));
-                    updateRecord(idStudentTransactions.substring(2), 'false'); 
+                    updateRecord(idStudentTransactions.substring(2), false); 
                             
                     $("#mark-quotas").html(transactionDescription);
                     if (markedQuotaCounter == 1)
@@ -3862,52 +3526,41 @@
 				return-false
 			}
 
-			console.log("indicador_pedido", indicador_pedido);
-			console.log("acumulado_igtf_bolivar", acumulado_igtf_bolivar);
-
 			if (indicador_pedido == 0 && acumulado_igtf_bolivar > 0)
 			{
-				let buscar_todos_los_pagos = "SELECT * FROM payments";
 				let verificacion_pagos_en_bolivares = 0;
-			
-				db.transaction(function (tx) 
+
+				for (var i = 0, item = null; i < paymentsArray.length; i++) 
 				{
-					tx.executeSql(buscar_todos_los_pagos, [], function (tx, result) 
+					item = paymentsArray[i];
+					if (item['payMoneda'] == "Bs.")
 					{
-						dataSet = result.rows;				
-						for (var i = 0, item = null; i < dataSet.length; i++) 
+						verificacion_pagos_en_bolivares += item['payAmountPaid'];
+					}
+				}
+				if (verificacion_pagos_en_bolivares == 0)
+				{
+					let pago_igtf_en_divisas = $('<p style="background-color: #a9e0ff; color: red;">Estimado usuario solo ha registrado pagos en divisas. ¿ Desea agregar un pago en bolívares para cancelar los '+acumulado_igtf_bolivar+' Bs. correspondientes al IGTF ?</p>').dialog(
+					{
+						modal: true,
+						buttons: 
 						{
-							item = dataSet.item(i);
-							if (item['payMoneda'] == "Bs.")
+							"Sí": function() 
 							{
-								verificacion_pagos_en_bolivares += item['payAmountPaid'];
+								pago_igtf_en_divisas.dialog('close');					
+							},
+							"No":  function() 
+							{
+								pago_igtf_en_divisas.dialog('close');
+								verificar_impuestos(ajustarCuotas, 0);
 							}
 						}
-						if (verificacion_pagos_en_bolivares == 0)
-						{
-							let pago_igtf_en_divisas = $('<p style="background-color: #a9e0ff; color: red;">Estimado usuario solo ha registrado pagos en divisas. ¿ Desea agregar un pago en bolívares para cancelar los '+acumulado_igtf_bolivar+' Bs. correspondientes al IGTF ?</p>').dialog(
-							{
-								modal: true,
-								buttons: 
-								{
-									"Sí": function() 
-									{
-										pago_igtf_en_divisas.dialog('close');					
-									},
-									"No":  function() 
-									{
-										pago_igtf_en_divisas.dialog('close');
-										verificar_impuestos(ajustarCuotas, 0);
-									}
-								}
-							});
-						}
-						else
-						{
-							verificar_impuestos(ajustarCuotas, 0);
-						}
 					});
-				});
+				}
+				else
+				{
+					verificar_impuestos(ajustarCuotas, 0);
+				}
 			}
 			else
 			{
@@ -3963,48 +3616,6 @@
                 accountOrCard = $('#account_or_card-' + paymentIdentifier).val();
                 serial = $('#serial-' + paymentIdentifier).val();
 				comentario = $('#comentario-' + paymentIdentifier).val();
-
-				base_igtf_dolar = 0;
-				monto_igtf_dolar = 0;
-				monto_igtf_dolar_pedido = 0;
-
-				if (monedaPago == "$")
-				{
-					base_igtf_dolar = montoPagado;
-				}
-				else if (monedaPago == "€")
-				{
-					base_igtf_dolar = dosDecimales(montoPagado / tasaDolarEuro);
-				}
-
-				if (base_igtf_dolar > 0)
-				{
-					if (base_igtf_dolar > deudaMenosPagado)
-					{
-						base_igtf_dolar = deudaMenosPagado;		
-					}
-					else if (base_igtf_dolar <= acumulado_igtf_dolar)
-					{
-						base_igtf_dolar = 0;							
-					}
-
-					if (indicador_pedido == 1)
-					{
-						monto_igtf_dolar_pedido = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
-						monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
-						acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar_pedido);
-
-					}
-					else
-					{
-						monto_igtf_dolar = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
-						acumulado_igtf_dolar = dosDecimales(acumulado_igtf_dolar + monto_igtf_dolar);
-						acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
-						acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
-						monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
-						acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar);
-					}
-				}
 
 				if (bank == 'Zelle' && monedaPago != '$')
 				{
@@ -4398,61 +4009,34 @@
             {
 				if (adjInputCounter == 0)
 				{
-					console.log("adjInputCounter 0", adjInputCounter);
-
 					monto_pendiente_dolar = parseFloat($(this).val());
 					adjInputCounter++;
-
-					console.log("adjInputCounter 0 monto_pendiente_dolar", monto_pendiente_dolar);
-
 				}
 				else if (adjInputCounter == 1)
 				{
-					console.log("adjInputCounter 1", adjInputCounter);
-
 					adjMontoModificadoDolar = parseFloat($(this).val());
 					adjIdAmountTransaction = $(this).attr('id');
 					adjInputCounter++;
-
-					console.log("adjInputCounter 1 adjMontoModificadoDolar", adjMontoModificadoDolar);
-					console.log("adjInputCounter 1 adjIdAmountTransaction", adjIdAmountTransaction);
-
 				}
 				else if (adjInputCounter == 2)
 				{
-					console.log("adjInputCounter 2", adjInputCounter);
-
 					adjMontoPagadoDolar = parseFloat($(this).val());
 					adjInputCounter++;	
-					
-					console.log("adjInputCounter 2 adjMontoPagadoDolar", adjMontoPagadoDolar);
-
 				}
 				else if (adjInputCounter == 3)
 				{
-					console.log("adjInputCounter 3", adjInputCounter);
-
 					id_a_pagar_dolar = $(this).attr('id');
 					monto_abono_item = parseFloat($(this).val());
-
-					console.log("adjInputCounter 3 id_a_pagar_dolar", id_a_pagar_dolar);
-					console.log("adjInputCounter 3 monto_abono_item", monto_abono_item);
 
 					if (monto_pendiente_dolar != monto_abono_item)
 					{
 						indicador_abono_item = 1;
-
-						console.log("adjInputCounter 3 indicador_abono_item", indicador_abono_item);
 					}
 					adjInputCounter++;		
 				}
 				else if (adjInputCounter == 4)
 				{
-					console.log("adjInputCounter 4", adjInputCounter);
-
 					adjOriginalMontoDolar = parseFloat($(this).val());
-
-					console.log("adjInputCounter 4 adjOriginalMontoDolar", adjOriginalMontoDolar);
 
 					if (adjMontoModificadoDolar != adjOriginalMontoDolar || indicador_abono_item == 1)
 					{					
@@ -4462,8 +4046,6 @@
 
 							if (indicador_abono_item == 1)
 							{
-								console.log("adjInputCounter 4, indicador_abono_item", indicador_abono_item);
-
 								if (monto_abono_item > adjMontoPendienteDolar)
 								{
 									alert('Error: El abono no puede ser mayor al monto pendiente');
@@ -4476,9 +4058,6 @@
 									adjAPagarDolar = monto_abono_item;
 									observacion = "Abono";
 									indicador_abono = 1;
-
-									console.log("adjInputCounter 4, adjAPagarDolar", adjAPagarDolar);
-									console.log("adjInputCounter 4, indicador_abono", indicador_abono);
 								}
 							}
 							else

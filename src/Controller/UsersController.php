@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Cake\I18n\Time;
 
 /**
  * Users Controller
@@ -75,6 +76,49 @@ class UsersController extends AppController
 
     public function home()
     {
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+                   
+        $fecha_hora_actual = Time::now();    
+        $campos =
+            [
+                "cell_phone",
+                "address",
+                "family",
+                "client",
+                "type_of_identification_client",
+                "identification_number_client",
+                "fiscal_address",
+                "tax_phone"
+            ];
+        $null_blanco = 0;
+
+        if  ($this->Auth->user('role') == 'Representante')
+        {  
+            $representantes = $this->Users->Parentsandguardians->find('all')
+            ->where(['Parentsandguardians.user_id =' => $this->Auth->user('id')]);
+
+            $representante = $representantes->first();
+
+            if ($representante->datos_contrato == null)
+            {
+                if ($representante->modified->year == $fecha_hora_actual->year)
+                {
+                    foreach ($campos as $campo)
+                    {
+                        if ($representante->$campo == null || $representante->$campo == "")
+                        {
+                            $null_blanco = 1;
+                            break;
+                        }
+                    }
+                    if ($null_blanco == 0)
+                    {
+                        return $this->redirect(['controller' => 'Guardiantransactions', 'action' => 'previoContratoRepresentante', $representante->id, 'Users', 'home']);
+                    }
+                }
+            }
+        }
         $this->render();
     }
 
@@ -342,4 +386,27 @@ class UsersController extends AppController
 			}
         }
 	}
+    public function cambiarEstatusRegistro()
+    {
+        $usuarios = $this->Users->find('all')->where(["Users.estatus_registro !=" => "Activo"]);
+
+        $contador_registros_seleccionados = $usuarios->count();
+        $contador_registros_modificados = 0;
+
+        foreach ($usuarios as $usuario)
+        {
+            $usuario_a_modificar = $this->Users->get($usuario->id);
+            $usuario_a_modificar->estatus_registro = "Activo";
+            if (!($this->Users->save($usuario_a_modificar))) 
+            {
+                $this->Flash->error(__('El registro con el ID '.$usuario_a_modificar->id.' no pudo ser modificado'));
+            }
+            else
+            {
+                $contador_registros_modificados++;
+            } 
+                     
+        }
+        $this->set(compact('contador_registros_seleccionados', 'contador_registros_modificados'));
+    }
 }

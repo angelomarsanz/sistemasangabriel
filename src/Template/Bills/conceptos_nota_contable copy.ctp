@@ -47,11 +47,14 @@
 				<div class="row">
 					<div class="col-md-4">
 						<?php
-							echo $this->Form->input('tipo_nota', ['required' => 'required', 'label' => 'Tipo de nota', 'options' => 
-								[null => '',
+							echo $this->Form->input('tipo_nota', ['label' => 'Tipo de nota', 'options' => 
+								['' => '',
 								'Crédito' => 'Crédito',
 								'Débito' => 'Débito']]);
 						?>
+						<div>
+							<p id="mensaje-error-tipo-nota" class="mensajes-usuario"></p>
+						</div>
 					</div>
 					<div class="col-md-4">
 						<?= 'Tasa de cambio factura original: <b>' . number_format($facturaConceptos->tasa_cambio, 2, ",", ".") . '</b>'?>
@@ -82,12 +85,12 @@
 										<tr>
 											<td style="width: 20%;"><input disabled='true' class='form-control' value="<?= $concepto->student_name ?>"></td>
 											<td style="width: 10%;"><input disabled='true' class='form-control' value="<?= $concepto->concept ?>"></td>
-											<td style="width: 10%;"><input id=<?= "MD-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format(round($concepto->amount/$facturaConceptos->tasa_cambio), 2, ",", ".") ?>></td>
+											<td style="width: 10%;"><input id=<?= "MD-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format(round($concepto->amount/$facturaConceptos->tasa_cambio, 2), 2, ",", ".") ?>></td>
 											<td style="width: 10%;"><input id=<?= "MF-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format($concepto->amount, 2, ",", ".") ?>></td>
-											<td style="width: 10%;"><input id=<?= "SC-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format($concepto->saldo, 2, ",", ".") ?>></td>
+											<td style="width: 10%;"><input id=<?= "SC-" . $concepto->id ?> name="montosConcepto[<?= $concepto->id ?>]" class='form-control' disabled='true' value=<?= number_format(round($concepto->saldo/$facturaConceptos->tasa_cambio, 2), 2, ",", ".") ?>></td>
 											<td style="width: 10%;"><input id=<?= "ND-" . $concepto->id ?> name="montosNotaDolar[<?= $concepto->id ?>]" class='form-control alternative-decimal-separator monto-nota' value=0></td>
 											<td style="width: 10%;"><input id=<?= "NV-" . $concepto->id ?> name="montosNotaVisible[<?= $concepto->id ?>]" class='form-control alternative-decimal-separator' value=0 disabled='true'></td>
-											<td style="width: 10%;"><input id=<?= "MN-" . $concepto->id ?> name="montosNotaContable[<?= $concepto->id ?>]" class='form-control alternative-decimal-separator noverScreen' value=0></td>
+											<td style="width: 0%;"><input id=<?= "MN-" . $concepto->id ?> name="montosNotaContable[<?= $concepto->id ?>]" class='form-control alternative-decimal-separator noverScreen' value=0></td>
 											<td style="width: 20%;" id=<?= "MENSAJE-" . $concepto->id ?> class="mensajes-usuario"></td>
 										</tr>
 									<?php endforeach; ?>
@@ -131,7 +134,8 @@
     </div>
 </div>
 <script>
-	var tasaCambio = <?= $dollarExchangeRate; ?>;
+	var tasaCambioActual = <?= $dollarExchangeRate; ?>;
+	var tasaCambioFactura = <?= $facturaConceptos->tasa_cambio; ?>;
 
 	function dosDecimales(numero)
 	{
@@ -157,44 +161,30 @@
 			num = num.substring(0, num.length - (4 * i + 3)) + '.' + num.substring(num.length - (4 * i + 3));
 		return (((sign) ? '' : '-') + num + ',' + cents);
 	}
-	
-    $(document).ready(function()
-    {
-    	$(".alternative-decimal-separator").numeric({ altDecimal: "," });
-		
-		mesActual = <?= $mesActual ?>;
-		mesFactura = <?= $mesFactura ?>;
-		
-		$('.monto-nota').change(function(e)
-		{
-			$(".monto-nota").each(function (index) 
-			{			
-				montoNotaCadena = $(this).val();
-				
-				if (montoNotaCadena.substr(-3, 1) == ',')
-				{
-					montoNotaSinPuntos = montoNotaCadena.replace(".", "");
-					montoNotaSinComa = montoNotaSinPuntos.replace(",", ".");
-					montoNotaNumerico = parseFloat(montoNotaSinComa);
-				}
-				else
-				{
-					montoNotaNumerico = parseFloat(montoNotaCadena);			
-				}
-				
-				$('#NV-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambio)));
-				$('#MN-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambio)));
+
+	async function validar_datos(e)
+	{	
+  		let promesa_borrar_mensajes = new Promise(function(resolve) {
+			const mensajes_usuario = document.getElementsByClassName('mensajes-usuario');
+			Array.prototype.forEach.call(mensajes_usuario, function(mensaje) {
+				mensaje.innerHTML = '';
 			});
-		});
-				
-		$('#crear-nota').click(function(e) 
-        {
-			acumuladoFactura = 0;
-			acumuladoNota = 0;
-			indicadorError = 0;
-				
-			$('.mensajes-usuario').html("");
-			
+			resolve(true);
+  		});
+
+		await promesa_borrar_mensajes;	
+		
+		acumuladoFactura = 0;
+		acumuladoNota = 0;
+		indicadorError = 0;
+
+		if ($("#tipo-nota").val() == "")
+		{	
+			$("#mensaje-error-tipo-nota").html("Debe seleccionar el tipo de nota").css('color', 'red');
+			indicadorError = 1;
+		}
+		else
+		{		
 			$(".monto-nota").each(function (index) 
 			{			
 				montoFacturaCadena = $('#SC-' + $(this).attr('id').substring(3)).val();
@@ -217,7 +207,9 @@
 				}
 						
 				acumuladoNota += montoNotaNumerico;
-								
+				/* 
+				Cuando no coincida el monto total de la factura con el monto total de la nota de crédito por diferencias en la conversión de moneda, comentar este "if" y así se pueda hacer una nota de crédito de ajuste. Para que el monto coincida el usuario debe colocar el monto en dólares con la cantidad de decimales necesarias para que cuadre el monto de la factura con la nota de crédito				
+				*/
 				if (montoNotaNumerico > montoFacturaNumerico)
 				{
 					if ($("#tipo-nota").val() == "Crédito")
@@ -227,27 +219,74 @@
 						$("#MENSAJE-" + $(this).attr('id').substring(3)).html("El monto del concepto de la nota contable no puede ser mayor al saldo").css('color', 'red');
 
 					}
-				}
-			});
-					
-			if (indicadorError > 0)
-			{
-				alert("Estimado usuario uno o más datos contienen errores, por favor verifique");
-				e.preventDefault();
-			}
-			/* else if (acumuladoNota == acumuladoFactura)
-			{
-				if (mesActual == mesFactura)
+				} 
+				
+			});						
+		}
+		if (indicadorError > 0)
+		{
+			alert("Estimado usuario uno o más datos contienen errores, por favor verifique");
+			$('#crear-nota').css('display', 'block');
+			e.preventDefault();
+		}
+		else if (acumuladoNota == 0)
+		{
+			alert('No se puede emitir una nota contable con monto igual a cero');
+			$('#crear-nota').css('display', 'block');
+			e.preventDefault();
+		}
+	}
+		
+    $(document).ready(function()
+    {
+    	$(".alternative-decimal-separator").numeric({ altDecimal: "," });
+		
+		mesActual = <?= $mesActual ?>;
+		mesFactura = <?= $mesFactura ?>;
+		
+		$('.monto-nota').change(function(e)
+		{
+			$(".monto-nota").each(function (index) 
+			{			
+				montoNotaCadena = $(this).val();
+				
+				if (montoNotaCadena.substr(-3, 1) == ',')
 				{
-					alert('No se puede hacer una nota contable "TOTAL", porque la factura es de este mes');
-					e.preventDefault();
+					montoNotaSinPuntos = montoNotaCadena.replaceAll(".", "");
+					montoNotaSinComa = montoNotaSinPuntos.replace(",", ".");
+					montoNotaNumerico = parseFloat(montoNotaSinComa);
 				}
-			} */
-			else if (acumuladoNota == 0)
-			{
-				alert('No se puede emitir una nota contable con monto igual a cero');
-				e.preventDefault();
-			}	
+				else
+				{
+					montoNotaNumerico = parseFloat(montoNotaCadena);			
+				}
+
+				montoBolivaresNota = dosDecimales(montoNotaNumerico * tasaCambioFactura);
+
+				montoConcepto = $('#MF-' + $(this).attr('id').substring(3)).val();
+				montoConceptoSinPuntos = montoConcepto.replaceAll(".", "");
+				montoConceptoSinComa = montoConceptoSinPuntos.replace(",", ".");
+				montoConceptoOriginal = parseFloat(montoConceptoSinComa);
+
+				if (montoBolivaresNota > montoConceptoOriginal)
+				{
+					$('#NV-' + $(this).attr('id').substring(3)).val(montoConcepto);
+					$('#MN-' + $(this).attr('id').substring(3)).val(montoConcepto);
+				}
+				else
+				{
+					$('#NV-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambioFactura)));
+					$('#MN-' + $(this).attr('id').substring(3)).val(formatoNumero(dosDecimales(montoNotaNumerico * tasaCambioFactura)));
+					console.log("Monto nota contable "+$('#MN-' + $(this).attr('id').substring(3)).val());
+				}
+
+			});
+		});
+				
+		$('#crear-nota').click(function(e) 
+        {
+			$('#crear-nota').css('display', 'none');
+			validar_datos(e);
 		});
 		
 		$('.monto-nota').keypress(function(e) 

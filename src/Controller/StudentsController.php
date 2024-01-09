@@ -95,31 +95,37 @@ class StudentsController extends AppController
     public function index()
     {
 		$family = '';
-        if($this->Auth->user('role') == 'Representante')
+
+		if($this->Auth->user('role') == 'Representante')
         {
             $parentsandguardians = $this->Students->Parentsandguardians->find('all')
-                ->where(['Parentsandguardians.user_id =' => $this->Auth->user('id')]);
+                ->where(['Parentsandguardians.user_id =' => $this->Auth->user('id')])
+				->order(['Parentsandguardians.created' => 'DESC']);
 
-            $resultParentsandguardians = $parentsandguardians->toArray();
-            
-            $family = $resultParentsandguardians[0]['family'];
+			if ($parentsandguardians->count() > 0)
+			{
+				$representante = $parentsandguardians->first();
+				$family = $representante->family;
 
-            if ($resultParentsandguardians) 
-            {
-                $query = $this->Students->find('all')->where([['parentsandguardian_id' => $resultParentsandguardians[0]['id']], ['Students.student_condition' => 'Regular'],
-					['Students.section_id <' => 41]]);
-                $this->set('students', $this->paginate($query));
-            }           
+				$query = $this->Students->find('all')->where(['parentsandguardian_id' => $representante->id, 'Students.student_condition' => 'Regular', 'Students.section_id <' => 41]);
+
+				$this->set('students', $this->paginate($query));
+				$this->set(compact('representante', 'family'));
+				$this->set('_serialize', ['students']);	
+			}
+			else
+			{
+				$this->Flash->error(__('No se encontraron estudiantes'));
+			}
         }
         else
         {
 			$query = $this->Students->find('all')->where([['Students.student_condition' => 'Regular'],
 			['Students.section_id <' => 41]])->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);;
 			$this->set('students', $this->paginate($query));
+			$this->set(compact('family'));
+			$this->set('_serialize', ['students', 'family']);
         }
-
-        $this->set(compact('family'));
-        $this->set('_serialize', ['students', 'family']);
     }
 
     public function indexAdmin($idFamily = null)
@@ -1262,7 +1268,7 @@ class StudentsController extends AppController
             return $this->redirect(['action' => 'relationpdf', $_POST['section_id']]);
         }
 
-        $sections = $this->Students->Sections->find('list', ['limit' => 200]);
+        $sections = $this->Students->Sections->find('list', ['limit' => 200, 'order'=> ['orden' => 'ASC']]);
         
         $this->set(compact('sections'));
     }
@@ -1720,50 +1726,34 @@ class StudentsController extends AppController
         $this->loadModel('Schools');
 
         $school = $this->Schools->get(2);
+
+		$anterior_anio_inscripcion = $school->previous_year_registration;
 			
 		$currentYearRegistration = $school->current_year_registration;
-		
+
 		$students = TableRegistry::get('Students');
 
 		$studentsFor = $students->find()
-			->select(
-				['Students.id',
-				'Students.surname',
-				'Students.second_surname',
-				'Students.first_name',
-				'Students.second_name',
-				'Students.level_of_study',
-				'Students.type_of_identification',
-				'Students.identity_card',
-				'Students.section_id',
-				'Students.sex',
-				'Students.birthdate',
-				'Students.student_condition',
-				'Parentsandguardians.type_of_identification',
-				'Parentsandguardians.identidy_card',
-				'Parentsandguardians.surname',
-				'Parentsandguardians.second_surname',
-				'Parentsandguardians.first_name',
-				'Parentsandguardians.second_name',
-				'Sections.id',
-				'Sections.sublevel'])
 			->contain(['Parentsandguardians', 'Sections'])
 			->where([['Students.id >' => 1],
 				['Students.student_condition' => 'Regular'],
-				['Students.balance !=' => $currentYearRegistration]])
+				['Students.balance' => $anterior_anio_inscripcion]])
 			->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
-	  
-		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-		date_default_timezone_set('America/Caracas');
+		
+		$transacciones_estudiantes = TableRegistry::get('Studenttransactions');
 
+		$matriculas_estudiantes = $transacciones_estudiantes->find()
+			->where(['Studenttransactions.transaction_description' => "Matrícula ".$currentYearRegistration,
+				'Studenttransactions.amount_dollar >' => 0]);
+	  
 		$currentDate = Time::now();
 		
 		$accountRecord = $studentsFor->count();
 
 		$totalPages = ceil($accountRecord / 20);
 		
-		$this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate', 'currentYearRegistration'));
-		$this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate', 'currentYearRegistration']);
+		$this->set(compact('school', 'studentsFor', 'totalPages', 'currentDate', 'currentYearRegistration', 'anterior_anio_inscripcion', 'matriculas_estudiantes'));
+		$this->set('_serialize', ['school', 'studentsFor', 'totalPages', 'currentDate', 'currentYearRegistration', 'anterior_anio_inscripcion', 'matriculas_estudiantes']);
     }
     public function SublevelLevel($sublevel = null)
     {
@@ -2519,6 +2509,8 @@ class StudentsController extends AppController
 		$controlador_transacciones = new StudenttransactionsController();
 		
         $student = $this->Students->get($id);
+
+		$nivel_estudios_actual = $student->level_of_study;
         
         if ($this->request->is(['patch', 'post', 'put'])) 
         {
@@ -2533,8 +2525,8 @@ class StudentsController extends AppController
 				$anio_matricula = $school->next_year_registration;
 			}
            
-            $student->brothers_in_school = 0;
-
+			$student->number_of_brothers = 0;
+			
 			if ($student->student_condition == "Nuevo")
 			{
 				$student->student_condition = "Regular";
@@ -2544,7 +2536,6 @@ class StudentsController extends AppController
 				$student->descuento_ano_anterior = 0;
 				$student->new_student = true;
 				$student->section_id = 1;
-				$student->number_of_brothers = 0;
 				$student->balance = 0;	
 				$student->tipo_descuento = "";
 				$student->discount = 0;	
@@ -2552,6 +2543,10 @@ class StudentsController extends AppController
 				$student->respaldo_ultimo_ano_inscripcion = 0;	
 				$student->respaldo_seccion_id = 0;
 				$student->respaldo_nivel_de_estudio = "";
+			}
+			else
+			{
+				$student->level_of_study = $nivel_estudios_actual;
 			}
 		            
             if ($this->Students->save($student)) 
