@@ -114,7 +114,7 @@ class ConceptsController extends AppController
      * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Network\Exception\NotFoundException When record not found.
      */
-    public function edit($idBill = null, $billNumber = null, $tasaCambio = null)
+    public function edit($idBill = null, $billNumber = null, $tasaCambio = null, $tipo_documento = null, $tipo_operacion = null)
     {
         $this->autoRender = false;
         
@@ -136,9 +136,9 @@ class ConceptsController extends AppController
             }
             else
             {
-				if ($concept->transaction_identifier != 999999)
+				if ($concept->transaction_identifier != 999999 && $tipo_operacion != "Sustitución")
 				{
-					$studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber, $tasaCambio);   
+					$studentTransactions->reverseTransaction($concept->transaction_identifier, $concept->amount, $billNumber, $tasaCambio, $tipo_documento);   
 				}
             }
         }
@@ -232,7 +232,7 @@ class ConceptsController extends AppController
 			$conceptoNota->observation = $conceptoFactura->observation;
 			$conceptoNota->annulled = 0;
 			$conceptoNota->concept_migration = 1;
-			$conceptoNota->saldo = round($montoNota/$tasaCambio);
+			$conceptoNota->saldo = round($montoNota/$tasaCambio, 2);
 			
 			if (!($this->Concepts->save($conceptoNota)))
 			{
@@ -306,5 +306,104 @@ class ConceptsController extends AppController
 		}
 		
 		return $codigoRetorno;
+	}
+	public function conceptosPedidoFactura($idPedido = null, $idFactura = null, $tasa_dolar_original = null, $tasa_dolar_actual = null)
+	{
+		$codigoRetorno = 0;
+		
+		$conceptos = $this->Concepts->find('all', ['conditions' => ['bill_id' => $idPedido], 'order' => ['created' => 'ASC']]);
+
+		$contadorConceptos = $conceptos->count();
+		
+		if ($contadorConceptos > 0)
+		{
+			foreach ($conceptos as $concepto)
+			{
+				$nuevoConcepto = $this->Concepts->newEntity();
+				$nuevoConcepto->bill_id = $idFactura;
+				$nuevoConcepto->quantity = 1;
+				$nuevoConcepto->accounting_code = "001";
+				$nuevoConcepto->student_name = $concepto->student_name;
+				$nuevoConcepto->transaction_identifier = $concepto->transaction_identifier;
+				$nuevoConcepto->concept = $concepto->concept;
+
+				$monto_dolar_concepto = round($concepto->amount/$tasa_dolar_original, 2);
+				$nuevo_monto_bolivar_concepto = round($monto_dolar_concepto * $tasa_dolar_actual, 2);
+
+				$nuevoConcepto->amount = $nuevo_monto_bolivar_concepto;
+				$nuevoConcepto->observation = $concepto->observation;
+				$nuevoConcepto->annulled = 0;
+				$nuevoConcepto->concept_migration = 0;		
+				$nuevoConcepto->saldo = $concepto->saldo;
+
+				if (!($this->Concepts->save($nuevoConcepto)))
+				{
+					$binnacles = new BinnaclesController;
+					
+					$binnacles->add('controller', 'Concepts', 'conceptosPedidoFactura', 'El concepto correspondiente a la factura con ID '.$idFactura.' no fue guardado');
+					
+					$this->Flash->error(__('El concepto de la factura con ID ' . $idFactura.' no pudo ser guardado'));
+					$codigoRetorno = 1;
+					break;
+				}
+			}
+		}
+		else
+		{
+			$binnacles = new BinnaclesController;
+			
+			$binnacles->add('controller', 'Concepts', 'conceptosPedidoFactura', 'No se encontraron conceptos para el pedido con ID '.$idPedido);
+			
+			$this->Flash->error(__('No se encontraron pagos para el pedido con ID '.$idPedido));
+			$codigoRetorno = 1;	
+		}
+		return $codigoRetorno;
+	}
+	public function agregarConceptoNotaCreditoDescuento($nota_credito = null)
+    {
+		$codigoRetornoConcepto = 0;
+		$conceptoNota = $this->Concepts->newEntity();
+		$conceptoNota->bill_id = $nota_credito->id;
+		$conceptoNota->quantity = 1;
+		$conceptoNota->accounting_code = "001";
+		$conceptoNota->student_name = "";
+		$conceptoNota->transaction_identifier = 0;
+		$conceptoNota->concept = "Descuento por pronto pago";
+		$conceptoNota->amount = $nota_credito->amount_paid;
+		$conceptoNota->observation = "";
+		$conceptoNota->annulled = 0;
+		$conceptoNota->concept_migration = 0;
+		$conceptoNota->saldo = $nota_credito->amount_paid;
+		if (!($this->Concepts->save($conceptoNota)))
+		{
+			$codigoRetornoConcepto = 1;
+			$this->Flash->error(__('No se pudo registrar el concepto de la nota de crédito'));
+		}
+        return $codigoRetornoConcepto;
+	}
+
+    public function agregarConceptoNotaIgtf($idNota = null, $montoNotaIgtf = null, $tasaCambio = null)
+    {
+		$codigoRetornoConcepto = 0;
+		
+		$conceptoNota = $this->Concepts->newEntity();
+		$conceptoNota->bill_id = $idNota;
+		$conceptoNota->quantity = 1;
+		$conceptoNota->accounting_code = "001";
+		$conceptoNota->student_name = "";
+		$conceptoNota->transaction_identifier = 0;
+		$conceptoNota->concept = "IGTF";
+		$conceptoNota->amount = round($montoNotaIgtf * $tasaCambio, 2);
+		$conceptoNota->observation = "";
+		$conceptoNota->annulled = 0;
+		$conceptoNota->concept_migration = 1;
+		$conceptoNota->saldo = $montoNotaIgtf;
+		
+		if (!($this->Concepts->save($conceptoNota)))
+		{
+			$codigoRetornoConcepto = 1;
+			$this->Flash->error(__('El concepto de la nota de IGTF no pudo ser guardado, intente nuevamente'));
+		}
+       	return $codigoRetornoConcepto;
 	}
 }

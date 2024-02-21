@@ -30,7 +30,6 @@ class RatesController extends AppController
 
         $this->set('rates', $this->paginate($query));
 
-        $this->set(compact('rates'));
         $this->set('_serialize', ['rates']);
     }
 
@@ -133,7 +132,7 @@ class RatesController extends AppController
 							}
 						}							
 					}
-				}
+				} 
 			}
 				
 			if ($indicadorError == 0)

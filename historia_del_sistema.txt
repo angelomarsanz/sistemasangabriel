@@ -6,12 +6,17 @@ Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
 
 09/01/2023
-- Los becados completos y parciales verificar por monto
-- Sustituir la palabra "descuento" por "porcentaje de beca"
-- En la nota de débito pronto pago en la parte superior izquierda indicar el número de la nota de crédito afectada y en el concepto anteponer la palabra "Anulación" e indicar el número de factura afectada
-- En el reporte de totales generales agregar por niveles: Maternal, pre-escolar, primaria y bachillerato y desglosado tantos pago completos, tantos becas completas y tantos becas parciales.
-- Tambien en el reporte general agregar las columnas: Cuando el alumno aprovechó el pronto pago, cantidad de alumnos que pagaron y cantidad de alumnos que no han pagado. Esas columna deben estar tanto en los totales generales como en los cuatro niveles.
+- Los becados completos y parciales verificar por monto - ok
+- Sustituir la palabra "descuento" por "porcentaje de beca" Ok
+- En todos los reportes agregar la columna de pronto pago - Ok
+- En el reporte general:
+- Agregar las columnas: Cuando el alumno aprovechó el pronto pago, cantidad de alumnos que pagaron y cantidad de alumnos que no han pagado. Esas columna deben estar tanto en los totales generales como en los cuatro niveles. Ok
+- Agregar por niveles: Maternal, pre-escolar, primaria y bachillerato y desglosado tantos pago completos, tantos becas completas y tantos becas parciales. Ok
+- Sol quiere un reporte adicional, pero con acumulados. Debe acordar con ella el diseño del reporte
+- Al final del reporte, en los totales coloca el porcentaje que representa cada monto
 - En por cobrar hay que considerar los días en los cuales se hace el descuento pronto pago. Tentativamente es los primeros cinco días del mes, pero puede haber sus excepciones como el caso de enero que piensan colocar el período de gracia del 8 al 12 de enero
+- En la nota de débito pronto pago en la parte superior izquierda indicar el número de la nota de crédito afectada y en el concepto anteponer la palabra "Anulación" e indicar el número de factura afectada
+
 
 06/12/2023
 Para crear una nota de crédito eventual "Descuento por pronto pago" puedo reusar la función agregaNotaCreditoDescuentos de BillsController y la función agregarConceptoNotaCreditoDescuento de ConceptsController

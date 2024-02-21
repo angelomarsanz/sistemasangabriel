@@ -72,7 +72,8 @@
                     'Mensualidad' => 'Mensualidad',
                     'Seguro escolar' => 'Seguro escolar',
                     'Servicio educativo' => 'Servicio educativo',
-		    'Thales' => 'Thales']]); 
+		    		'Thales' => 'Thales',
+					'Pronto pago' => 'Pronto pago']]); 
                 echo $this->Form->input('rate_month', ['label' => 'A partir del mes: ', 'options' => 
                     [null => '',
                     '01' => 'Enero',
@@ -98,16 +99,7 @@
                 echo $this->Form->input('amount', ['label' => 'Monto']);
 					
 				setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-                date_default_timezone_set('America/Caracas');
-
-				print ("<div id='date-top' class='noverScreen'>");
-				print ('<br />');
-				
-                echo $this->Form->input('date_exception', ['id' => 'date-exception', 'type' => 'date', 
-                    'label' => 'Por favor indique la fecha tope del pago del año escolar completo']);
-					
-				print ('<div>');
-				
+                date_default_timezone_set('America/Caracas');				
             ?>
         </fieldset>
 		<br />
@@ -120,7 +112,7 @@
     {
 		alert('Estimado usuario antes de agregar una nueva tarifa por favor comunicarse con el personal de sistema para que haga un respaldo de la base de datos');
 
-        if ($("#concept").val().substring(0, 11) == "Mensualidad")
+        if ($("#concept").val().substring(0, 11) == "Mensualidad" || $("#concept").val().substring(0, 11) == "Pronto pago")
         {
             $("#rate-month").attr('disabled', false);
 			$("#rate-month").attr('required', true);
@@ -129,10 +121,7 @@
 			$("#rate-year").attr('required', true);
 			
 			$("#amount").attr('disabled', false);
-			$("#amount").attr('required', true);
-			
-			$("#exception").attr('disabled', false);
-			$("#defaulters").attr('disabled', false);
+			$("#amount").attr('required', true);			
         }
         else
         {
@@ -142,10 +131,7 @@
 			$("#rate-year").attr('required', true);
 			
 			$("#amount").attr('disabled', false);
-			$("#amount").attr('required', true);
-			
-			$("#exception").attr('disabled', true);
-			$("#defaulters").attr('disabled', true);
+			$("#amount").attr('required', true);			
 		}
     }
 	
@@ -178,14 +164,10 @@
         $('#concept').change(enableInputs);
 		
 		$('#rate-year').change(verifyConcept);
-		
-		$('#exception').on('click',function(){
-			$('#date-top').toggle('slow');
-		});
-		
+				
 		$("#guardar").click(function(e)
 		{
-			if ($("#concept").val() == "Mensualidad")
+			if ($("#concept").val() == "Mensualidad" || $("#concept").val() == "Pronto pago")
 			{
 				if ($('#rate-month').length) 
 				{
@@ -195,17 +177,8 @@
 				{
 					dateFrom = $('#rate-year').val();		
 				}
-				
-				if( $('#exception').prop('checked')) 
-				{
-					topDate = ' exceptuando a aquellos alumnos que pagaron el año escolar completo antes del ' + $("select[name='date_exception[day]']").val() + '/' + $("select[name='date_exception[month]']").val() + '/' + $("select[name='date_exception[year]']").val();
-				}
-				else
-				{
-					topDate = '';
-				}
-				
-				var rateUpdate = confirm('Por favor confirme que desea ajustar la ' + $('#concept').val() + ' a ' + $('#amount').val() + ' a partir del ' + dateFrom + topDate);
+								
+				var rateUpdate = confirm('Por favor confirme que desea agregar la ' + $('#concept').val() + ' a ' + $('#amount').val() + ' a partir del ' + dateFrom);
 
 				if (rateUpdate == false)
 				{
@@ -213,23 +186,9 @@
 					$.redirect('/sistemasangabriel/rates/index');
 				}
 			}
-			else if ($("#concept").val() == "Diferencia de agosto")
-			{
-				var rateAugust = confirm('Por favor confirme que desea ajustar el monto de la diferencia de agosto ' + $('#rate-year').val() + ' a ' + $('#amount').val());
-
-				if (rateAugust == true)
-				{
-					alert('Estimado usuario la ejecución de este programa durará unos minutos, por favor pulse el botón aceptar y espere a que se le envíe un correo electrónico informándole sobre los resultados del proceso');
-				}
-				else
-				{
-					e.preventDefault();
-					$.redirect('/sistemasangabriel/rates/index');
-				}
-			}
 			else
 			{
-				var rateOther = confirm('Por favor confirme que desea ajustar la tarifa de ' + $('#concept').val() + ' ' + $('#rate-year').val() + ' a ' + $('#amount').val());
+				var rateOther = confirm('Por favor confirme que desea agregar la tarifa de ' + $('#concept').val() + ' ' + $('#rate-year').val() + ' a ' + $('#amount').val());
 
 				if (rateOther == false)
 				{

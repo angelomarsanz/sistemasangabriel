@@ -89,19 +89,14 @@
                     '12' => 'Diciembre']]);
                	echo $this->Form->input('rate_year', ['label' => 'Del año: ', 'options' => 
                     [null => '',
-                    '2017' => '2017',
-                    '2018' => '2018',
-                    '2019' => '2019',
 					'2020' => '2020',
-					'2021' => '2021']]);
+                    '2021' => '2021',
+					'2022' => '2022',
+                    '2023' => '2023',
+                    '2024' => '2024',
+					'2025' => '2025']]);
                 echo $this->Form->input('amount', ['label' => 'Monto']);
 					
-				/* echo $this->Form->input('defaulters', ['type' => 'checkbox', 'id' => 'defaulters',
-                    'label' => 'Ajustar la mensualidad a alumnos morosos', 'disabled' => 'disabled']);
-										
-                echo $this->Form->input('exception', ['type' => 'checkbox', 'id' => 'exception',
-                    'label' => 'Exceptuar alumnos que han pagado el año escolar completo', 'disabled' => 'disabled']);
-				*/
 				setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
                 date_default_timezone_set('America/Caracas');
 

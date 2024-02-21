@@ -59,7 +59,6 @@ $nombreNivel =
 	]; 
 $subtitulo = ""; 
 $indicador_tabla_general = 0;
-$indicadorSaltoPagina = 0;
 $estilosReportes =
 [
 	"Totales generales" =>
@@ -202,10 +201,8 @@ $espaciosColumnas =
 		<?php 
 		foreach ($vector_cuotas as $indiceNivel => $nivel): 
 			$indicador_tabla_general++; 
-			$indicadorSaltoPagina++;
 			if ($tipo_reporte == "Totales generales" && $indicadorConceptos == "Mensualidades"):
-				if ($indicadorSaltoPagina == 3): 
-					$indicadorSaltoPagina = 1 ?>
+				if ($indiceNivel == 5): ?>
 					<div class="saltopagina">
 				<?php
 				else: ?>

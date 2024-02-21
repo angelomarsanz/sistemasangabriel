@@ -4531,14 +4531,6 @@ class StudenttransactionsController extends AppController
                
         $currentDate = Time::now();
 	
-		$descuentos_pronto_pago = 
-			[
-				"202308" => 5.00,
-				"202408" => 10.00
-			];
-
-		$monto_descuento_pronto_pago = 0;
-
 		if ($currentDate->month < 10)
 		{
 			$mes_actual = "0".$currentDate->month; 
@@ -4579,14 +4571,6 @@ class StudenttransactionsController extends AppController
 
 			$anio_mes_transaccion = $anio_transaccion.$mes_transaccion;
 
-			foreach ($descuentos_pronto_pago as $descuento => $anio_mes_descuento)
-			{
-				if ($anio_mes_transaccion <= $anio_mes_descuento)
-				{
-					$monto_descuento_pronto_pago = $descuento;
-				}
-			}
-
 			if ($anio_mes_transaccion >= $anio_mes_recalculo_cuotas_atrasadas && $anio_mes_transaccion < $anio_mes_actual && $transaccion->paid_out == 0)
 			{
 				$anio_mes_cuota = $anio_mes_actual;
@@ -4622,7 +4606,8 @@ class StudenttransactionsController extends AppController
 
 				if ($cuota_menos_descuento_por_ajuste > $transaccion->amount_dollar)
 				{
-					$saldo_cuota = round($cuota_menos_descuento_por_ajuste - $transaccion->amount_dollar + $monto_descuento_pronto_pago, 2); // Descuento pronto pago
+					$monto_descuento_pronto_pago = $this->tarifaProntoPagoCuota($anio_mes_transaccion); 
+					$saldo_cuota = round($cuota_menos_descuento_por_ajuste - $transaccion->amount_dollar + $monto_descuento_pronto_pago, 2);
 				}
 			}
 
@@ -4635,11 +4620,11 @@ class StudenttransactionsController extends AppController
     {	
 		if ($this->request->is('post')) 
         {
-			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteFamiliasDiferenciasMensualidadesAdelantadas', $_POST["mes"], $_POST["periodo_escolar"]]);
+			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteFamiliasDiferenciasMensualidadesAdelantadas', $_POST["mes"]]);
         }
 	}
 
-	public function reporteFamiliasDiferenciasMensualidadesAdelantadas($mes = null, $periodo_escolar = null)
+	public function reporteFamiliasDiferenciasMensualidadesAdelantadas($mes = null)
 	{		
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
@@ -4705,7 +4690,7 @@ class StudenttransactionsController extends AppController
 				"07" => 1
 			];
 
-		$anio = substr($periodo_escolar, 0, 4);
+		$anio = $school->current_school_year;
 
 		$anio_correspondiente_mes = $anio + $mes_ubicacion_anio[$mes];
 														
@@ -4752,10 +4737,12 @@ class StudenttransactionsController extends AppController
 		}
 				
 		foreach ($transacciones_estudiantes as $transaccion)
-		{ 
+		{
+			$monto_descuento_pronto_pago = 0; 
 			$contador_transacciones++;
 			$anio_transaccion = $transaccion->payment_date->year;
 			$mes_transaccion = $transaccion->payment_date->month;
+
 			if ($mes_transaccion < 10)
 			{
 				$mes_transaccion = "0".$mes_transaccion;
@@ -4798,7 +4785,11 @@ class StudenttransactionsController extends AppController
 
 			if ($cuota_menos_descuento_por_ajuste > $transaccion->amount_dollar)
 			{
-				$saldo_cuota = round($cuota_menos_descuento_por_ajuste - $transaccion->amount_dollar + 5, 2); // Descuento pronto pago
+				if ($transaccion->paid_out == 1)
+				{
+					$monto_descuento_pronto_pago = $this->tarifaProntoPagoCuota($anio_mes_transaccion); 
+				}
+				$saldo_cuota = round($cuota_menos_descuento_por_ajuste - $transaccion->amount_dollar + $monto_descuento_pronto_pago, 2); 
 			}
 			
 			if ($saldo_cuota > 0)
@@ -4813,14 +4804,14 @@ class StudenttransactionsController extends AppController
 					$id_representante_anterior = $transaccion->student->parentsandguardian->id;
 				}
 				
-				$detalle_morosos[$transaccion->student->parentsandguardian->id][substr($transaccion->transaction_description, 0, 3)] += $saldo_cuota; 
+				$detalle_morosos[$transaccion->student->parentsandguardian->id][substr($transaccion->transaction_description, 0, 3)] = $saldo_cuota; 
 				$detalle_morosos[$transaccion->student->parentsandguardian->id]["Total $"] += $saldo_cuota; 
 
 				$total_morosos += $saldo_cuota;
 			}
 		}
 					
-		$this->set(compact('school', 'currentDate', 'dollarExchangeRate', 'periodo_escolar', 'mes', 'mes_anio_hasta', 'nombre_mes_reporte', 'anio_correspondiente_mes', 'detalle_morosos', 'total_cuotas_periodo', 'total_morosos'));
+		$this->set(compact('school', 'currentDate', 'dollarExchangeRate', 'mes', 'mes_anio_hasta', 'nombre_mes_reporte', 'anio_correspondiente_mes', 'detalle_morosos', 'total_cuotas_periodo', 'total_morosos'));
 	}
 
 	public function agregarCuotaSeguro()
@@ -4874,5 +4865,871 @@ class StudenttransactionsController extends AppController
 			}
 		}
 		$this->set(compact('transacciones_agregadas'));
+	}
+
+	public function cuentasCobradasPorCobrar()
+    {	
+		if ($this->request->is('post')) 
+        {
+			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteCuentasCobradasPorCobrar', $_POST["tipo_reporte"],  $_POST["concepto"]]);
+        }
+	}
+
+	public function reporteCuentasCobradasPorCobrar($tipo_reporte = null, $concepto = null)
+	{	
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+
+		$currentDate = Time::now();
+
+		if ($currentDate->month < 10)
+		{
+			$mes_actual = "0".$currentDate->month; 
+		}
+		else
+		{
+			$mes_actual = $currentDate->month; 
+		}
+		
+		$anio_mes_actual = $currentDate->year.$mes_actual;
+
+		$anio_mes_cuota = "";
+
+		$anio_mes_recalculo_cuotas_atrasadas = "202209";
+		
+		$controlador_estudiantes = new StudentsController();
+        			
+		$mesesTarifas = $controlador_estudiantes->mesesTarifas(0);
+		$otrasTarifas = $controlador_estudiantes->otrasTarifas(0);
+               	
+		$this->loadModel('Schools');
+
+		$school = $this->Schools->get(2);
+				
+		$this->loadModel('Monedas');	
+		$moneda = $this->Monedas->get(2);
+		$dollarExchangeRate = $moneda->tasa_cambio_dolar; 
+
+		$numero_concepto =
+			[
+				"13" => "Matrícula",
+				"14" => "Seguro escolar",
+				"15" => "Servicio educativo",
+				"09" => "Septiembre",
+				"10" => "Octubre",
+				"11" => "Noviembre",
+				"12" => "Diciembre",
+				"01" => "Enero",
+				"02" => "Febrero",
+				"03" => "Marzo",
+				"04" => "Abril",
+				"05" => "Mayo",
+				"06" => "Junio", 
+				"07" => "Julio", 
+				"08" => "Agosto"
+			];
+
+		$numero_concepto_abreviado =
+			[
+				"13" => "Matrícula",
+				"14" => "Seguro escolar",
+				"15" => "Servicio educativo",
+				"09" => "Sep",
+				"10" => "Oct",
+				"11" => "Nov",
+				"12" => "Dic",
+				"01" => "Ene",
+				"02" => "Feb",
+				"03" => "Mar",
+				"04" => "Abr",
+				"05" => "May",
+				"06" => "Jun", 
+				"07" => "Jul", 
+				"08" => "Ago"
+			];
+
+		$nombre_concepto = $numero_concepto[$concepto];
+		$nombre_concepto_abreviado = $numero_concepto_abreviado[$concepto];
+
+		if ($concepto == "13" || $concepto == "14" || $concepto == "15" || $concepto == "08")
+		{
+			$indicadorConceptos = "Inscripcion";
+		}
+		else
+		{
+			$indicadorConceptos = "Mensualidades";
+		}
+
+		$concepto_ubicacion_anio = 
+			[
+				"13" => 0,
+				"14" => 0,
+				"15" => 0,
+				"09" => 0,
+				"10" => 0,
+				"11" => 0,
+				"12" => 0,
+				"01" => 1,
+				"02" => 1,
+				"03" => 1,
+				"04" => 1,
+				"05" => 1,
+				"06" => 1,
+				"07" => 1,
+				"08" => 1
+			];
+
+		$anio = $school->current_school_year;
+		$proximoAnioEscolar = $anio + 1;
+		$periodoEscolar = "Año escolar ".$anio."-".$proximoAnioEscolar;
+		$vectorCuotasProntoPago = $this->vectorCuotasProntoPago($periodoEscolar);
+
+		$anio_correspondiente_concepto = $anio + $concepto_ubicacion_anio[$concepto];
+														
+		$concepto_anio = $nombre_concepto." ".$anio_correspondiente_concepto;
+
+		$concepto_anio_abreviado = $nombre_concepto_abreviado." ".$anio_correspondiente_concepto;
+
+		$vector_cuotas;
+
+		$contador_transacciones = 0;
+
+		if ($tipo_reporte == "Totales generales")
+		{
+			$orden_reporte = ['Students.discount' => 'ASC'];
+		}
+		elseif ($tipo_reporte == "Por grado")
+		{
+			$orden_reporte = ['Sections.orden' => 'ASC', 'Students.discount' => 'ASC'];
+		}
+		else
+		{
+			$orden_reporte = ['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC',];
+		}
+
+		$nivel_estudios_posicion =
+			[
+				"No asignado" => 1,
+				"Maternal" => 2,
+				"Pre-escolar" => 3,
+				"Primaria" => 4,
+				"Secundaria" => 5
+			];
+
+		$estilosReportes =
+			[
+				"Totales generales" =>
+					[
+						"Inscripcion" => 
+							[
+								"contadorLinea" => "style='display:none;' class='noExl'",
+								"nombreEstudiante" => "style='display:none;' class='noExl'",
+								"nivelEstudios" => "style=text-align:center;",
+								"grado" => "style='display:none;' class='noExl'",
+								"beca" => "style='display:none;' class='noExl'",
+								"cantidadEstudiantes" => "style=text-align:center;",
+								"quePagaron" => "style=text-align:center;",
+								"porPagar" => "style=text-align:center;",
+								"montoACobrar" => "style=text-align:center;",
+								"cobradoCompleto" => "style=text-align:center;",
+								"abono" => "style=text-align:center;",
+								"prontoPago" => "style='display:none;' class='noExl'",
+								"porCobrar" => "style=text-align:center;"
+							],
+						"Mensualidades" =>
+							[
+								"contadorLinea" => "style='display:none;' class='noExl'",
+								"nombreEstudiante" => "style='display:none;' class='noExl'",
+								"nivelEstudios" => "style=text-align:center;",
+								"grado" => "style='display:none;' class='noExl'",
+								"beca" => "style=text-align:center;",
+								"cantidadEstudiantes" => "style=text-align:center;",
+								"quePagaron" => "style=text-align:center;",
+								"porPagar" => "style=text-align:center;",
+								"montoACobrar" => "style=text-align:center;",
+								"cobradoCompleto" => "style=text-align:center;",
+								"abono" => "style=text-align:center;",
+								"prontoPago" => "style=text-align:center;",
+								"porCobrar" => "style=text-align:center;"
+							]
+					],
+				"Por grado" =>
+					[
+						"Inscripcion" => 
+							[
+								"contadorLinea" => "style='display:none;' class='noExl'",
+								"nombreEstudiante" => "style='display:none;' class='noExl'",
+								"nivelEstudios" => "style=text-align:center;",
+								"grado" => "style='display:none;' class='noExl'",
+								"beca" => "style=text-align:center;",
+								"cantidadEstudiantes" => "style='display:none;' class='noExl'",
+								"quePagaron" => "style='display:none;' class='noExl'",
+								"porPagar" => "style='display:none;' class='noExl'",
+								"montoACobrar" => "style=text-align:center;",
+								"cobradoCompleto" => "style=text-align:center;",
+								"abono" => "style=text-align:center;",
+								"prontoPago" => "style='display:none;' class='noExl'",
+								"porCobrar" => "style=text-align:center;"
+							],
+						"Mensualidades" => 
+							[
+								"contadorLinea" => "style='display:none;' class='noExl'",
+								"nombreEstudiante" => "style='display:none;' class='noExl'",
+								"nivelEstudios" => "style=text-align:center;",
+								"grado" => "style='display:none;' class='noExl'",
+								"beca" => "style=text-align:center;",
+								"cantidadEstudiantes" => "style='display:none;' class='noExl'",
+								"quePagaron" => "style='display:none;' class='noExl'",
+								"porPagar" => "style='display:none;' class='noExl'",
+								"montoACobrar" => "style=text-align:center;",
+								"cobradoCompleto" => "style=text-align:center;",
+								"abono" => "style=text-align:center;",
+								"prontoPago" => "style=text-align:center;",
+								"porCobrar" => "style=text-align:center;"
+							],
+					],
+				"Por estudiante" =>
+					[
+						"Inscripcion" => 
+							[
+								"contadorLinea" => "style=text-align:center;",
+								"nombreEstudiante" => "style=text-align:center;",
+								"nivelEstudios" => "style='display:none;' class='noExl'",
+								"grado" => "style=text-align:center;",
+								"beca" => "style=text-align:center;",
+								"cantidadEstudiantes" => "style='display:none;' class='noExl'",
+								"quePagaron" => "style='display:none;' class='noExl'",
+								"porPagar" => "style='display:none;' class='noExl'",
+								"montoACobrar" => "style=text-align:center;",
+								"cobradoCompleto" => "style=text-align:center;",
+								"abono" => "style=text-align:center;",
+								"prontoPago" => "style='display:none;' class='noExl'",
+								"porCobrar" => "style=text-align:center;"
+							],
+						"Mensualidades" => 
+							[
+								"contadorLinea" => "style=text-align:center;",
+								"nombreEstudiante" => "style=text-align:center;",
+								"nivelEstudios" => "style='display:none;' class='noExl'",
+								"grado" => "style=text-align:center;",
+								"beca" => "style=text-align:center;",
+								"cantidadEstudiantes" => "style='display:none;' class='noExl'",
+								"quePagaron" => "style='display:none;' class='noExl'",
+								"porPagar" => "style='display:none;' class='noExl'",
+								"montoACobrar" => "style=text-align:center;",
+								"cobradoCompleto" => "style=text-align:center;",
+								"abono" => "style=text-align:center;",
+								"prontoPago" => "style=text-align:center;",
+								"porCobrar" => "style=text-align:center;"
+							]
+					]
+			];
+
+		$transacciones_estudiantes = $this->Studenttransactions->find('all')
+		->contain(['Students' => ['Sections']])
+		->where(['Studenttransactions.invoiced' => 0, 'Studenttransactions.ano_escolar' => $anio, 'transaction_description' => $concepto_anio_abreviado, 'Students.student_condition' => 'Regular', 'Students.balance' => $anio])
+		->order($orden_reporte);
+		
+		if ($transacciones_estudiantes->count() == 0)
+		{
+			$this->Flash->error(__('No se encontraron cuotas'));		
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+		}
+
+		foreach ($transacciones_estudiantes as $transaccion)
+		{
+			$monto_cuota = 0;
+			$cobrado_completo = 0;
+			$abono = 0;
+			$monto_descuento_pronto_pago = 0;
+			$por_cobrar_cuota = 0;
+
+			if ($transaccion->transaction_type == "Matrícula" || $transaccion->transaction_type == "Seguro escolar" || substr($transaccion->transaction_description, 0, 3) == "Ago")
+			{
+				foreach ($otrasTarifas as $otras)
+				{				
+					if ($otras['conceptoAno'] == $transaccion->transaction_description)
+					{
+						$monto_cuota = $otras['tarifaDolar'];
+						break;
+					}
+				}
+				if ($transaccion->paid_out == 0)
+				{
+					$abono = $transaccion->amount_dollar;													
+					$por_cobrar_cuota = round($monto_cuota - $transaccion->amount_dollar, 2);
+				}
+				else
+				{
+					if ($monto_cuota > $transaccion->amount_dollar)
+					{
+						$abono = $transaccion->amount_dollar;
+						$por_cobrar_cuota = round($monto_cuota - $transaccion->amount_dollar, 2);
+					}
+					else
+					{
+						$cobrado_completo = $transaccion->amount_dollar;
+					}
+				}
+			}
+			elseif ($transaccion->transaction_type == "Servicio educativo")
+			{
+				$monto_cuota = $transaccion->amount;
+				if ($monto_cuota > $transaccion->amount_dollar)
+				{
+					$abono = $transaccion->amount_dollar;
+				}
+				else
+				{
+					$cobrado_completo = $transaccion->amount_dollar;
+				}
+				$por_cobrar_cuota = round($monto_cuota - $transaccion->amount_dollar, 2);
+			}
+			elseif ($transaccion->transaction_type == "Mensualidad" && $transaccion->student->scholarship == 0)
+			{	
+				$monto_descuento_pronto_pago_anticipado = 0;
+				$monto_descuento_pronto_pago = 0;
+
+				$anio_transaccion = $transaccion->payment_date->year;
+				$mes_transaccion = $transaccion->payment_date->month;
+
+				if ($mes_transaccion < 10)
+				{
+					$mes_transaccion = "0".$mes_transaccion;
+				}
+
+				$anio_mes_transaccion = $anio_transaccion.$mes_transaccion;
+
+				if ($anio_mes_transaccion >= $anio_mes_recalculo_cuotas_atrasadas && $anio_mes_transaccion < $anio_mes_actual && $transaccion->paid_out == 0)
+				{
+					$anio_mes_cuota = $anio_mes_actual;
+				}
+				else
+				{
+					$anio_mes_cuota = $anio_mes_transaccion;
+				}
+
+				foreach ($mesesTarifas as $mesesTarifa)
+				{
+					if ($mesesTarifa["anoMes"] == $anio_mes_cuota)
+					{
+						$monto_cuota = round(($mesesTarifa["tarifaDolar"] * (100 - $transaccion->student->discount)) / 100, 2);
+						break;
+					}
+				}
+			
+				if ($monto_cuota == 0)
+				{
+					$this->Flash->error(__('No se encontró la tarifa para la cuota '.$anio_mes_cuota));
+					return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+				}
+
+				if ($transaccion->paid_out == 0)
+				{
+					$abono = $transaccion->amount_dollar;													
+					$por_cobrar_cuota = round($monto_cuota - $transaccion->amount_dollar, 2);
+				}
+				else
+				{
+					$descuento_por_ajuste = round($transaccion->original_amount - $transaccion->amount, 2);
+					$cuota_menos_descuento_por_ajuste = round($monto_cuota - $descuento_por_ajuste, 2); 
+
+					if ($cuota_menos_descuento_por_ajuste > $transaccion->amount_dollar)
+					{
+						$monto_descuento_pronto_pago_anticipado = $this->tarifaProntoPagoCuota($anio_mes_transaccion); 
+						$monto_cuota = $cuota_menos_descuento_por_ajuste;
+						$abono = round($transaccion->amount_dollar - $monto_descuento_pronto_pago_anticipado, 2);
+						$por_cobrar_cuota = round($monto_cuota - $transaccion->amount_dollar + $monto_descuento_pronto_pago_anticipado, 2);
+					}
+					else
+					{
+						if (isset($vectorCuotasProntoPago[$transaccion->id]))
+						{
+							$monto_descuento_pronto_pago = $vectorCuotasProntoPago[$transaccion->id];
+							$cobrado_completo = round($monto_cuota - $monto_descuento_pronto_pago, 2);
+						}
+						else
+						{
+							$cobrado_completo = $monto_cuota;
+						}
+					}
+				}
+			}
+
+			if ($por_cobrar_cuota == 0)
+			{
+				$indicador_que_pagaron = 1;
+				$indicador_por_pagar = 0;
+			}
+			else
+			{
+				$indicador_que_pagaron = 0;
+				$indicador_por_pagar = 1;
+			}
+
+			if ($tipo_reporte == "Totales generales")
+			{
+				if ($indicadorConceptos == "Inscripcion")
+				{
+					$indice_nivel = 0;
+					$indice_beca = 0;
+					if (isset($vector_cuotas[$indice_nivel][$indice_beca]))
+					{
+						$vector_cuotas[$indice_nivel][$indice_beca]["cantidad_estudiantes"]++;
+						$vector_cuotas[$indice_nivel][$indice_beca]["que_pagaron"] += $indicador_que_pagaron;
+						$vector_cuotas[$indice_nivel][$indice_beca]["por_pagar"] += $indicador_por_pagar;
+						$vector_cuotas[$indice_nivel][$indice_beca]["monto_cuota"] += $monto_cuota;
+						$vector_cuotas[$indice_nivel][$indice_beca]["cobrado_completo"] += $cobrado_completo;
+						$vector_cuotas[$indice_nivel][$indice_beca]["abono"] += $abono;
+						$vector_cuotas[$indice_nivel][$indice_beca]["pronto_pago"] += $monto_descuento_pronto_pago;
+						$vector_cuotas[$indice_nivel][$indice_beca]["por_cobrar_cuota"] += $por_cobrar_cuota;						
+					}
+					else
+					{
+						$vector_cuotas[$indice_nivel][$indice_beca] = 
+							[
+								"nombre_estudiante" => "",
+								"nivel_estudios" => "General",
+								"grado" => "",
+								"porcentaje_descuento" => 0,
+								"cantidad_estudiantes" => 1,
+								"que_pagaron" => $indicador_que_pagaron,
+								"por_pagar" => $indicador_por_pagar,
+								"monto_cuota" => $monto_cuota, 
+								"cobrado_completo" => $cobrado_completo,
+								"abono" => $abono,
+								"pronto_pago" => $monto_descuento_pronto_pago,  
+								"por_cobrar_cuota" => $por_cobrar_cuota, 		
+							];
+					}
+
+					$indice_nivel = $nivel_estudios_posicion[$transaccion->student->section->level];
+					
+					if (isset($vector_cuotas[$indice_nivel][$indice_beca]))
+					{
+						$vector_cuotas[$indice_nivel][$indice_beca]["cantidad_estudiantes"]++;
+						$vector_cuotas[$indice_nivel][$indice_beca]["que_pagaron"] += $indicador_que_pagaron;
+						$vector_cuotas[$indice_nivel][$indice_beca]["por_pagar"] += $indicador_por_pagar;
+						$vector_cuotas[$indice_nivel][$indice_beca]["monto_cuota"] += $monto_cuota;
+						$vector_cuotas[$indice_nivel][$indice_beca]["cobrado_completo"] += $cobrado_completo;
+						$vector_cuotas[$indice_nivel][$indice_beca]["abono"] += $abono;
+						$vector_cuotas[$indice_nivel][$indice_beca]["pronto_pago"] += $monto_descuento_pronto_pago;
+						$vector_cuotas[$indice_nivel][$indice_beca]["por_cobrar_cuota"] += $por_cobrar_cuota;						
+					}
+					else
+					{
+						$vector_cuotas[$indice_nivel][$indice_beca] = 
+							[
+								"nombre_estudiante" => "",
+								"nivel_estudios" => $transaccion->student->section->level,
+								"grado" => "",
+								"porcentaje_descuento" => 0,
+								"cantidad_estudiantes" => 1,
+								"que_pagaron" => $indicador_que_pagaron,
+								"por_pagar" => $indicador_por_pagar,
+								"monto_cuota" => $monto_cuota, 
+								"cobrado_completo" => $cobrado_completo,
+								"abono" => $abono,
+								"pronto_pago" => $monto_descuento_pronto_pago,  
+								"por_cobrar_cuota" => $por_cobrar_cuota, 		
+							];
+					}
+				}
+				else
+				{
+					$indice_nivel = 0;
+					$indice_beca = $transaccion->student->discount;
+
+					if (isset($vector_cuotas[$indice_nivel][$indice_beca]))
+					{
+						$vector_cuotas[$indice_nivel][$indice_beca]["cantidad_estudiantes"]++;
+						$vector_cuotas[$indice_nivel][$indice_beca]["que_pagaron"] += $indicador_que_pagaron;
+						$vector_cuotas[$indice_nivel][$indice_beca]["por_pagar"] += $indicador_por_pagar;
+						$vector_cuotas[$indice_nivel][$indice_beca]["monto_cuota"] += $monto_cuota;
+						$vector_cuotas[$indice_nivel][$indice_beca]["cobrado_completo"] += $cobrado_completo;
+						$vector_cuotas[$indice_nivel][$indice_beca]["abono"] += $abono;
+						$vector_cuotas[$indice_nivel][$indice_beca]["pronto_pago"] += $monto_descuento_pronto_pago;  
+						$vector_cuotas[$indice_nivel][$indice_beca]["por_cobrar_cuota"] += $por_cobrar_cuota;	
+					}
+					else
+					{
+						$vector_cuotas[$indice_nivel][$indice_beca] = 
+							[
+								"nombre_estudiante" => "",
+								"nivel_estudios" => "General",
+								"grado" => "",
+								"porcentaje_descuento" => $transaccion->student->discount,
+								"cantidad_estudiantes" => 1,
+								"que_pagaron" => $indicador_que_pagaron,
+								"por_pagar" => $indicador_por_pagar,
+								"monto_cuota" => $monto_cuota, 
+								"cobrado_completo" => $cobrado_completo, 
+								"abono" => $abono,
+								"pronto_pago" => $monto_descuento_pronto_pago,
+								"por_cobrar_cuota" => $por_cobrar_cuota, 		
+							];
+					}
+
+					$indice_nivel = $nivel_estudios_posicion[$transaccion->student->section->level];
+
+					if (isset($vector_cuotas[$indice_nivel][$indice_beca]))
+					{
+						$vector_cuotas[$indice_nivel][$indice_beca]["cantidad_estudiantes"]++;
+						$vector_cuotas[$indice_nivel][$indice_beca]["que_pagaron"] += $indicador_que_pagaron;
+						$vector_cuotas[$indice_nivel][$indice_beca]["por_pagar"] += $indicador_por_pagar;
+						$vector_cuotas[$indice_nivel][$indice_beca]["monto_cuota"] += $monto_cuota;
+						$vector_cuotas[$indice_nivel][$indice_beca]["cobrado_completo"] += $cobrado_completo;
+						$vector_cuotas[$indice_nivel][$indice_beca]["abono"] += $abono;
+						$vector_cuotas[$indice_nivel][$indice_beca]["pronto_pago"] += $monto_descuento_pronto_pago;  
+						$vector_cuotas[$indice_nivel][$indice_beca]["por_cobrar_cuota"] += $por_cobrar_cuota;	
+					}
+					else
+					{
+						$vector_cuotas[$indice_nivel][$indice_beca] = 
+							[
+								"nombre_estudiante" => "",
+								"nivel_estudios" => $transaccion->student->section->level,
+								"grado" => "",
+								"porcentaje_descuento" => $transaccion->student->discount,
+								"cantidad_estudiantes" => 1,
+								"que_pagaron" => $indicador_que_pagaron,
+								"por_pagar" => $indicador_por_pagar,
+								"monto_cuota" => $monto_cuota, 
+								"cobrado_completo" => $cobrado_completo, 
+								"abono" => $abono,
+								"pronto_pago" => $monto_descuento_pronto_pago,
+								"por_cobrar_cuota" => $por_cobrar_cuota, 		
+							];
+					}
+					
+				}
+
+			}
+			elseif ($tipo_reporte == "Por grado")
+			{
+				$indice_grado = $transaccion->student->section->orden;
+				if ($transaccion->student->section->sublevel == "No asignado")
+				{
+					$grado = "Sin asignar sección";
+				}
+				else
+				{
+					$grado = $transaccion->student->section->sublevel." ".$transaccion->student->section->section;
+				}
+
+				if ($indicadorConceptos == "Inscripcion")
+				{
+					$indice_beca = 0;
+					if (isset($vector_cuotas[$indice_grado][$indice_beca]))
+					{
+						$vector_cuotas[$indice_grado][$indice_beca]["cantidad_estudiantes"]++;
+						$vector_cuotas[$indice_grado][$indice_beca]["que_pagaron"] += $indicador_que_pagaron;
+						$vector_cuotas[$indice_grado][$indice_beca]["por_pagar"] += $indicador_por_pagar;
+						$vector_cuotas[$indice_grado][$indice_beca]["monto_cuota"] += $monto_cuota;
+						$vector_cuotas[$indice_grado][$indice_beca]["cobrado_completo"] += $cobrado_completo;
+						$vector_cuotas[$indice_grado][$indice_beca]["abono"] += $abono;
+						$vector_cuotas[$indice_grado][$indice_beca]["pronto_pago"] += $monto_descuento_pronto_pago; 
+						$vector_cuotas[$indice_grado][$indice_beca]["por_cobrar_cuota"] += $por_cobrar_cuota;
+					}
+					else
+					{
+						$vector_cuotas[$indice_grado][$indice_beca] = 
+							[
+								"nombre_estudiante" => "",
+								"nivel_estudios" => $transaccion->student->section->level,
+								"grado" => $grado,
+								"porcentaje_descuento" => 0,
+								"cantidad_estudiantes" => 1,
+								"que_pagaron" => $indicador_que_pagaron,
+								"por_pagar" => $indicador_por_pagar,
+								"monto_cuota" => $monto_cuota, 
+								"cobrado_completo" => $cobrado_completo, 
+								"abono" => $abono,
+								"pronto_pago" => $monto_descuento_pronto_pago,
+								"por_cobrar_cuota" => $por_cobrar_cuota, 		
+							];
+					}
+				}
+				else
+				{
+					$indice_beca = $transaccion->student->discount;
+					if (isset($vector_cuotas[$indice_grado][$indice_beca]))
+					{
+						$vector_cuotas[$indice_grado][$indice_beca]["cantidad_estudiantes"]++;
+						$vector_cuotas[$indice_grado][$indice_beca]["que_pagaron"] += $indicador_que_pagaron;
+						$vector_cuotas[$indice_grado][$indice_beca]["por_pagar"] += $indicador_por_pagar;
+						$vector_cuotas[$indice_grado][$indice_beca]["monto_cuota"] += $monto_cuota;
+						$vector_cuotas[$indice_grado][$indice_beca]["cobrado_completo"] += $cobrado_completo;
+						$vector_cuotas[$indice_grado][$indice_beca]["abono"] += $abono;
+						$vector_cuotas[$indice_grado][$indice_beca]["pronto_pago"] += $monto_descuento_pronto_pago; 
+						$vector_cuotas[$indice_grado][$indice_beca]["por_cobrar_cuota"] += $por_cobrar_cuota;
+					}
+					else
+					{
+						$vector_cuotas[$indice_grado][$indice_beca] = 
+							[
+								"nombre_estudiante" => "",
+								"nivel_estudios" => $transaccion->student->section->level,
+								"grado" => $grado,
+								"porcentaje_descuento" => $transaccion->student->discount,
+								"cantidad_estudiantes" => 1,
+								"que_pagaron" => $indicador_que_pagaron,
+								"por_pagar" => $indicador_por_pagar,
+								"monto_cuota" => $monto_cuota, 
+								"cobrado_completo" => $cobrado_completo, 
+								"abono" => $abono,
+								"pronto_pago" => $monto_descuento_pronto_pago,
+								"por_cobrar_cuota" => $por_cobrar_cuota, 		
+							];
+					}
+				}
+			}
+			else
+			{
+				if ($transaccion->student->section->sublevel == "No asignado")
+				{
+					$grado = "Sin asignar sección";
+				}
+				else
+				{
+					$grado = $transaccion->student->section->sublevel." ".$transaccion->student->section->section;
+				}
+
+				if ($indicadorConceptos == "Inscripcion")
+				{
+					$vector_cuotas[0][] = 
+						[
+							"nombre_estudiante" => $transaccion->student->full_name,
+							"nivel_estudios" => $transaccion->student->section->level, 
+							"grado" => $grado,
+							"porcentaje_descuento" => 0,
+							"cantidad_estudiantes" => 0,
+							"que_pagaron" => 0,
+							"por_pagar" => 0,
+							"monto_cuota" => $monto_cuota, 
+							"cobrado_completo" => $cobrado_completo, 
+							"abono" => $abono,
+							"pronto_pago" => $monto_descuento_pronto_pago,
+							"por_cobrar_cuota" => $por_cobrar_cuota 
+						];
+				}
+				else
+				{
+					$vector_cuotas[0][] = 
+						[
+							"nombre_estudiante" => $transaccion->student->full_name,
+							"nivel_estudios" => $transaccion->student->section->level, 
+							"grado" => $grado,
+							"porcentaje_descuento" => $transaccion->student->discount,
+							"cantidad_estudiantes" => 0,
+							"que_pagaron" => 0,
+							"por_pagar" => 0,
+							"monto_cuota" => $monto_cuota, 
+							"cobrado_completo" => $cobrado_completo, 
+							"abono" => $abono,
+							"pronto_pago" => $monto_descuento_pronto_pago,
+							"por_cobrar_cuota" => $por_cobrar_cuota 
+						];
+				}
+			}
+		}	
+
+		ksort($vector_cuotas);
+
+		$this->set(compact('currentDate', 'tipo_reporte', 'concepto_anio', 'vector_cuotas', 'indicadorConceptos', 'estilosReportes'));
+	}
+
+	/*
+	Esta función retorna un vector con las cuotas de los estudiantes que tienen descuento pronto pago
+	*/
+	public function vectorCuotasProntoPago($periodoEscolar = null)
+	{
+		$this->loadModel('Concepts');
+		$binnacles = new BinnaclesController;
+
+		$vectorNotasCreditoProntoPago = [];
+		$vectorConceptosProntoPago = [];
+		$vectorCuotasProntoPago = [];
+
+		$vectorMeses = 
+			[
+				"Sep "  => "09",
+				"Oct "  => "10",
+				"Nov "  => "11",
+				"Dic "  => "12",
+				"Ene "  => "01",
+				"Feb "  => "02",
+				"Mar "  => "03",
+				"Abr "  => "04",
+				"May "  => "05",
+				"Jun "  => "06",
+				"Jul "  => "07"
+			];
+
+		$facturasPedidosConDescuento = $this->Concepts->find()
+			->contain(['Bills'])
+			->where(['Bills.school_year' => $periodoEscolar,
+					'Bills.annulled' => false,
+					'OR' => [['Bills.tipo_documento' => 'Factura'], ['Bills.tipo_documento' => 'Pedido']],
+					'Bills.amount <' => 0])
+			->order(['Concepts.id' => 'ASC']);
+
+		if ($facturasPedidosConDescuento->count() > 0)
+		{
+			$notasCreditoProntoPago = $this->Concepts->find()
+				->contain(['Bills'])
+				->where(['Bills.school_year' => $periodoEscolar,
+						'Bills.annulled' => false,
+						'Bills.tipo_documento' => 'Nota de crédito',
+						'Concepts.concept' => 'Descuento por pronto pago'])
+				->order(['Concepts.id' => 'ASC']);
+			if ($notasCreditoProntoPago->count() > 0)
+			{
+				$notasDebitoProntoPago = $this->Concepts->find()
+					->contain(['Bills'])
+					->where(['Bills.school_year' => $periodoEscolar,
+							'Bills.annulled' => false,
+							'Bills.tipo_documento' => 'Nota de débito',
+							'OR' => [['Concepts.concept' => 'Descuento por pronto pago'], ['Concepts.concept' => 'Anulación descuento por pronto pago']]])
+					->order(['Concepts.id' => 'ASC']);
+
+				if ($notasDebitoProntoPago->count() > 0)
+				{
+					foreach ($notasCreditoProntoPago as $notaCredito)
+					{
+						$indicadorEncontrado = 0;
+						foreach ($notasDebitoProntoPago as $notaDebito)
+						{
+							if ($notaCredito->bill->id == $notaDebito->bill->id_documento_padre)
+							{
+								$indicadorEncontrado = 1;
+								break;
+							}
+						}
+						if ($indicadorEncontrado == 0)
+						{
+							$vectorNotasCreditoProntoPago[$notaCredito->bill->id_documento_padre] = round($notaCredito->bill->amount_paid / $notaCredito->bill->tasa_cambio, 2);
+						}
+					}
+				}
+				else
+				{
+					foreach ($notasCreditoProntoPago as $notaCredito)
+					{
+						$vectorNotasCreditoProntoPago[$notaCredito->bill->id_documento_padre] = round($notaCredito->bill->amount_paid / $notaCredito->bill->tasa_cambio, 2);
+					}
+				}
+			}
+			foreach($facturasPedidosConDescuento as $facturaPedido)
+			{
+				$nombreCuota = substr($facturaPedido->concept, 0, 4);
+				$anioCuota = "";
+				$numeroMesCuota = "";
+				$anioMesCuota = "";
+				$indiceVector = 0;
+				$tarifaProntoPagoCuota = 0;
+				if (isset($vectorMeses[$nombreCuota]))
+				{
+					$idFacturaPedido = $facturaPedido->bill->id;
+					$idConcepto = $facturaPedido->id; 
+					$anioCuota = substr($facturaPedido->concept, 4, 4);
+					$numeroMesCuota = $vectorMeses[$nombreCuota];
+					$anioMesCuota = $anioCuota.$numeroMesCuota;
+					$indiceVector = $idFacturaPedido.$anioMesCuota.$idConcepto;
+					$tarifaProntoPagoCuota = $this->tarifaProntoPagoCuota($anioMesCuota);
+					if ($tarifaProntoPagoCuota == 0)
+					{
+						$binnacles->add('controller', 'Studenttransactions', 'vectorDescuentosProntoPago', 'No existe tarifa de pronto pago para la cuota '.$anioMesCuota.' correspondiente al concepto con el ID '.$idConcepto);
+					}
+					else					
+					{
+						if ($facturaPedido->bill->tipo_documento == "Pedido")
+						{
+							$vectorConceptosProntoPago[$indiceVector] = 
+							[
+								"idFactura" => $idFacturaPedido,
+								"idConcepto" => $idConcepto,
+								"idTransaccion" => $facturaPedido->transaction_identifier,
+								"montoTotalProntoPagoDolar" => round($facturaPedido->bill->amount / $facturaPedido->bill->tasa_cambio, 2),
+								"tarifaProntoPagoCuota" => $tarifaProntoPagoCuota
+							];
+						}
+						else
+						{
+							if (isset($vectorNotasCreditoProntoPago[$idFacturaPedido]))
+							{
+								$montoTotalProntoPagoDolar = $vectorNotasCreditoProntoPago[$idFacturaPedido];
+								$vectorConceptosProntoPago[$indiceVector] = 
+									[
+										"idFactura" => $idFacturaPedido,
+										"idConcepto" => $idConcepto,
+										"idTransaccion" => $facturaPedido->transaction_identifier,
+										"montoTotalProntoPagoDolar" => $montoTotalProntoPagoDolar,
+										"tarifaProntoPagoCuota" => $tarifaProntoPagoCuota
+									];
+							}
+						}
+					}
+				}
+			}
+			$facturaAnterior = 0;
+			$saldoProntoPago = 0;
+			foreach ($vectorConceptosProntoPago as $concepto)
+			{
+				if ($facturaAnterior != $concepto["idFactura"])
+				{
+					if ($saldoProntoPago > 0)
+					{
+						$binnacles->add('controller', 'Studenttransactions', 'vectorDescuentosProntoPago', 'Quedó un saldo pronto pago mayor a cero: '.$saldoProntoPago.' para la factura o Pedido con ID: '.$concepto["idFactura"]);
+						$saldoProntoPago = 0;
+					}
+					$vectorCuotasProntoPago[$concepto["idTransaccion"]] = $concepto["tarifaProntoPagoCuota"];
+					$saldoProntoPago = round($concepto["montoTotalProntoPagoDolar"] - $concepto["tarifaProntoPagoCuota"], 2);
+					$facturaAnterior = $concepto["idFactura"];
+				}
+				else
+				{
+					if ($saldoProntoPago > 0)
+					{
+						if ($saldoProntoPago >= $concepto["tarifaProntoPagoCuota"])
+						{
+							$vectorCuotasProntoPago[$concepto["idTransaccion"]] = $concepto["tarifaProntoPagoCuota"];
+							$saldoProntoPago = round($saldoProntoPago - $concepto["tarifaProntoPagoCuota"], 2);
+						}
+						else 
+						{
+							$vectorCuotasProntoPago[$concepto["idTransaccion"]] = $saldoProntoPago;
+							$saldoProntoPago = 0;
+						}
+					}
+				}
+			}
+		}
+		
+		return $vectorCuotasProntoPago;
+	}
+	public function tarifaProntoPagoCuota($anioMesCuota) // Descuento pronto pago
+	{
+		$this->loadModel('Rates');
+		$tarifaProntoPagoCuota = 0;
+
+		$tarifasProntoPago = $this->Rates->find()
+			->where(['concept' => 'Pronto pago'])
+			->order(['id' => 'ASC']);
+
+		foreach ($tarifasProntoPago as $tarifa)
+		{
+			$anioMesTarifa = $tarifa->rate_year.$tarifa->rate_month;
+			if ($anioMesTarifa > $anioMesCuota)
+			{
+				break;
+			}
+			else
+			{
+				$tarifaProntoPagoCuota = $tarifa->amount;
+			}
+		}
+
+		return $tarifaProntoPagoCuota;
 	}
 }

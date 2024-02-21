@@ -6,3 +6,7 @@
 /webroot/pdf/*
 /vendor.tar.gz
 /credenciales.txt
+/historia_del_sistema.txt
+/migracion35.txt
+/migracion36.txt
+/PendientesProduccion.txt

@@ -1311,13 +1311,13 @@
 			}
 		}
 		
-		for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+		for (var i = 0, item = null, indicador_estudiante_encontrado = 0; i < studentTransactionsArray.length; i++) 
 		{
 			item = studentTransactionsArray[i];
 
 			if (item['dbIdStudent'] == idStudent)
-			{								
-				if (i == 0)
+			{
+				if (indicador_estudiante_encontrado == 0)
 				{
 					if (item['dbScholarship'] == 1)
 					{
@@ -1334,6 +1334,7 @@
 					}
 					studentName = item['dbStudentName'];
 				}
+				indicador_estudiante_encontrado = 1;
 				
 				monthlyPayment = item['dbMonthlyPayment'];
 

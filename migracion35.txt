@@ -1,4 +1,5 @@
-3.5
+Migración a 3.5
+Módulos modificados
 /opt/lampp/htdocs/sistemasangabriel/vendor/cakephp/cakephp/src/Http/Response.php
 /opt/lampp/htdocs/sistemasangabriel/vendor/cakephp/cakephp/src/View/Helper/FormHelper.php
 /opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php - Ok

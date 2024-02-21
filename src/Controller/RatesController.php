@@ -26,7 +26,7 @@ class RatesController extends AppController
      */
     public function index()
     {
-        $query = $this->Rates->find('all', ['order' => ['Rates.concept' => 'ASC', 'Rates.rate_year' => 'DESC', 'Rates.rate_month' => 'DESC']]);
+        $query = $this->Rates->find('all', ['order' => ['Rates.concept' => 'ASC', 'Rates.rate_year' => 'DESC', 'Rates.rate_month' => 'DESC', 'Rates.id' => 'DESC']]);
 
         $this->set('rates', $this->paginate($query));
 

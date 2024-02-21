@@ -125,7 +125,8 @@
 								<!-- <li><?= $this->Html->link('Reporte de morosidad por grado y sección', ['controller' => 'Studenttransactions', 'action' => 'morosidadGradoSeccion']) ?></li> -->
 								<li><?= $this->Html->link('Reporte de morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li>
 								<li><?= $this->Html->link('Reporte de cuentas cobradas y por cobrar', ['controller' => 'Studenttransactions', 'action' => 'cuentasCobradasPorCobrar']) ?></li>
-								<li><?= $this->Html->link('Familias con diferencias de mensualidades adelantadas', ['controller' => 'Studenttransactions', 'action' => 'familiasDiferenciasMensualidadesAdelantadas']) ?></li>												
+								<li><?= $this->Html->link('Familias con diferencias de mensualidades adelantadas', ['controller' => 'Studenttransactions', 'action' => 'familiasDiferenciasMensualidadesAdelantadas']) ?></li>
+								<li><?= $this->Html->link('Estudiantes nuevos con diferencias de inscripción pendientes', ['controller' => 'Studenttransactions', 'action' => 'reporteEstudiantesNuevosConDiferenciasInscripcion']) ?></li>													
 							</ul>
 						</li>
 						
@@ -190,7 +191,7 @@
 								<li><?= $this->Html->link('Datos de alumnos', ['controller' => 'Students', 'action' => 'consultStudent']) ?></li>
 								<li><?= $this->Html->link('Alumnos con condición distinta a regular', ['controller' => 'Students', 'action' => 'consultStudentDelete']) ?></li>
 								<li><?= $this->Html->link('Alumnos inscritos', ['controller' => 'Studenttransactions', 'action' => 'reportStudentGeneral']) ?></li>             
-								<li><?= $this->Html->link('Alumnos que no completaron en el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
+								<li><?= $this->Html->link('Alumnos que no completaron el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
 								<li><?= $this->Html->link('Alumnos Becados 100%', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
 								<li><?= $this->Html->link('Reporte becados: Beca completa, por hijos y especiales', ['controller' => 'Students', 'action' => 'reporteBecados']) ?></li>
 							</ul>
