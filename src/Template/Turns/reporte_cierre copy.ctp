@@ -343,6 +343,7 @@
 									$diferencia = 0;
 									$totalDiferencia = 0;
 									$totalDescuentosRecargosFA = 0;
+
 									foreach ($vectorPagos as $pago): 
 										$transferenciaDestiempo = "";
 										$cuotasAlumnoBecado = "";
@@ -1704,6 +1705,71 @@
 													<td><?= $factura->tipo_documento ?></td>
 													<?php 
 													$monto_recibo_dolar = round($factura->amount_paid/$factura->tasa_cambio, 2);
+													$totalDolar += $monto_recibo_dolar; ?>
+													<td style="text-align: center;"><?= number_format($monto_recibo_dolar, 2, ",", ".") ?></td>
+												</tr>
+											<?php endif;
+										endforeach; ?>
+										<tr>
+											<td><b>Totales</b></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>	
+
+				<!-- Recibos de consejo educativo -->
+				<?php if ($indicadorRecibosConsejoEducativo == 1): ?>
+					<div class="saltopagina">
+						<div class="row">
+							<div class="col-md-12">					
+								<table>
+									<thead>
+										<tr>
+											<th style="font-size: 18px; line-height: 20px;"><b>RECIBOS DE CONSEJO EDUCATIVO <?= $turn->start_date->format('d-m-Y') ?></b></th>
+										</tr>
+
+										<tr>
+											<th>&nbsp;</th>
+										</tr>	
+										<tr>
+											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS DE CONSEJO EDUCATIVO:</b></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th style="text-align: center;"><b>Fecha</b></th>
+											<th style="text-align: center;"><b>Familia</b></th>
+											<th style="text-align: center;"><b>No Recibo</b></th>
+											<th style="text-align: center;"><b>Tipo doc</b></th>
+											<th style="text-align: center;"><b>Monto $</b></th>
+										</tr>
+									</thead>
+									<tbody>				
+										<?php $totalDolar = 0;
+										foreach ($facturas as $factura):  
+											if ($factura->tipo_documento == "Recibo de consejo educativo"): ?> 
+												<tr>
+													<td style="text-align: center;"><?= $factura->date_and_time->format('d-m-Y') ?></td>
+													<td><?= $factura->parentsandguardian->family ?></td>
+													<td style="text-align: center;"><?= $factura->bill_number ?></td>
+													<td><?= $factura->tipo_documento ?></td>
+													<?php 
+													$monto_recibo_dolar = $factura->amount_paid;
 													$totalDolar += $monto_recibo_dolar; ?>
 													<td style="text-align: center;"><?= number_format($monto_recibo_dolar, 2, ",", ".") ?></td>
 												</tr>

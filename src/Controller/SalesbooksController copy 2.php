@@ -156,7 +156,6 @@ class SalesbooksController extends AppController
 
             $this->loadModel('Bills');
             $this->loadModel('Concepts');
-            $this->loadModel('Payments');
 
             $invoicesBills = $this->Bills->find('all', 
                 [
@@ -173,13 +172,6 @@ class SalesbooksController extends AppController
                 [['MONTH(created)' => $_POST['month']], 
                 ['YEAR(created)' => $_POST['year']],
                 ['concept' => 'IGTF']]
-            ]);
-
-            $pagos = $this->Payments->find('all', 
-            [
-                'conditions' => 
-                [['MONTH(created)' => $_POST['month']], 
-                ['YEAR(created)' => $_POST['year']]]
             ]);
 
             $contador = 0;
@@ -202,7 +194,7 @@ class SalesbooksController extends AppController
                         while ($contadorControlFacturas > 1)
                         {
                             $controlFacturaAnterior++;
-                            $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $conceptos, $pagos, $controlFacturaAnterior);
+                            $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $conceptos, $controlFacturaAnterior);
                             if ($codigoRetorno == 1)
                             {
                                 $errorBill = 1;
@@ -212,7 +204,7 @@ class SalesbooksController extends AppController
                         }
                     }
                 }
-                $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $conceptos, $pagos, 0);
+                $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $conceptos, 0);
                 if ($codigoRetorno == 1)
                 {
                     $errorBill = 1;
@@ -238,15 +230,11 @@ class SalesbooksController extends AppController
 		}
     }
 	
-	public function crearRegistroLibro($invoicesBill = null, $conceptos = null, $pagos = null, $controlFacturaAnterior = null)
+	public function crearRegistroLibro($invoicesBill = null, $conceptos = null, $controlFacturaAnterior = null)
 	{
 		$codigoRetorno = 0;
 		
 		$salesbook = $this->Salesbooks->newEntity();
-
-        $tasaCambio = 0;
-        $montoDivisas = 0;
-        $montoBolivares = 0;
 	
 		if ($invoicesBill->date_and_time->day < 10)
 		{
@@ -383,25 +371,6 @@ class SalesbooksController extends AppController
 		$salesbook->base = "";
 		$salesbook->alicuota = "16%";
 		$salesbook->iva = 0;
-        $salesbook->tasa_cambio = $invoicesBill->tasa_cambio;
-
-        foreach ($pagos as $pago)
-        {
-            if ($pago->bill_id == $invoicesBill->id)
-            {
-                if ($pago->moneda != "Bs.")
-                {
-                    $montoDivisas += $pago->amount;
-                }
-                else
-                {
-                    $montoBolivares += $pago->amount;                    
-                }
-            }
-        }
-
-        $salesbook->monto_divisas = $montoDivisas;
-        $salesbook->monto_bolivares = $montoBolivares;
 
 		if (!($this->Salesbooks->save($salesbook))) 
 		{

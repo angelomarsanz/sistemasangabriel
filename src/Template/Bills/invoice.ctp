@@ -17,6 +17,21 @@
     	width: 25%;
     	float: left;
     }
+	.div-100
+    {
+    	width: 100%;
+    	float: left;
+    }
+	.div-75
+    {
+    	width: 75%;
+    	float: left;
+    }
+	.div-25
+    {
+    	width: 25%;
+    	float: left;
+    }
     #emptyColumn
     {
     	width: 40%;
@@ -47,6 +62,21 @@
 		margin: 5px 0px 5px 0px;
     }
     #payments
+    {
+    	width: 25%;
+    	float: left;
+    }
+	.div-100
+    {
+    	width: 100%;
+    	float: left;
+    }
+	.div-75
+    {
+    	width: 75%;
+    	float: left;
+    }
+	.div-25
     {
     	width: 25%;
     	float: left;
@@ -824,6 +854,180 @@
 				</table>
 			</div>
 			<p>Cajero: <?= $usuarioResponsable ?></p>
+			<br />
+			<br />
+			<br />
+		</div>
+	<?php elseif ($bill->tipo_documento == "Recibo de Consejo Educativo"): 
+		$conceptos = [];
+		$checkedEfectivos = "";
+		$checkedZelles = "";
+		$checkedTransferencias = "";
+		$efectivos = [];
+		$zelles = [];
+		$transferencias = [];
+		$bancosTransferencias = [];
+
+		foreach ($vConcepts as $vConcept): 
+			$conceptos[] = $vConcept['invoiceLine']; 
+		endforeach; 
+		foreach ($aPayments as $aPayment): 
+			if ($aPayment->payment_type == "Efectivo")
+			{
+				$checkedEfectivos = "checked";
+				$efectivos[] = number_format($aPayment->amount, 2, ",", ".")." ".$aPayment->moneda." ";
+			}
+			elseif ($aPayment->bank == "Zelle")
+			{
+				$checkedZelles = "checked";
+				$zelles[] = number_format($aPayment->amount, 2, ",", ".")." ".$aPayment->moneda." ";
+			}
+			elseif ($aPayment->payment_type == "Transferencia")
+			{
+				$checkedTransferencias = "checked";
+				$transferencias[] = number_format($aPayment->amount, 2, ",", ".")." ".$aPayment->moneda." Banco: ".$aPayment->bank." Ref. ".$aPayment->serial." ";
+				$bancosTransferencias[] = $aPayment->bank." Ref. ".$aPayment->serial." ";
+			}
+		endforeach; ?> 	
+		<div class="div-100">
+			<h4 style='text-align: center;'>Consejo Educativo</h4>	
+			<h5 style='text-align: center; margin: 0px;'><?= $school->name ?></h5>
+			<h6 style='text-align: center; margin: 0px;'><?= $school->fiscal_address ?></h6>	
+			<h6 style='text-align: center; margin: 0px;'>J-40490885-4</h6> 
+			<h6><b><?= 'Fecha: '.$bill->date_and_time->format('d-m-Y') ?></b></h6>
+			<?php 
+			if ($bill->annulled == 1): ?>
+				<h3 style="text-align: center;">*** ANULADO ***</H3>
+			<?php
+			endif; ?> 
+			<h3 style="text-align: right;">Recibo Nro. <?= $bill->bill_number ?></h3>		
+			<h3 style="text-align: center;"><b>Por <?= number_format(round($bill->amount_paid * $bill->tasa_cambio, 2), 2, ",", ".")." Bs. (".number_format($bill->amount_paid, 2, ",", ".")." $)" ?></b></h3>
+			
+			<br />
+			<div class="div-75">
+				<p style="text-align: left;">
+					Hemos recibido de: <?= $bill->client." (".$bill->parentsandguardian->family.")" ?>
+				</p>
+			</div>
+			<div class="div-25">
+				<p style="text-align: right;">
+					C.I./RIF <?= $bill->identification ?>
+				</p>
+			</div>
+			<div class="div-100">
+				<p style="text-align: left;">
+					La cantidad de: <?= number_format(round($bill->amount_paid * $bill->tasa_cambio, 2), 2, ",", ".")." Bs." ?>
+				</p>
+			</div>
+			<div class="div-100">
+				<h4 style="text-align: left;">
+					Por concepto de: 
+					<?php 
+					foreach ($conceptos as $concepto):
+						echo $concepto;
+					endforeach; ?>
+				</h4>
+			</div>
+			<br />
+			<div class="div-75">
+				<h4><b>Formas de pago:</b></h4>
+				<p style="margin: 0px;">
+					Efectivo: 
+					<input id="checkbox-efectivos" type="checkbox" <?= $checkedEfectivos ?>>
+				</p>
+				<p style="margin: 0px;">
+					Zelle: 
+					<input id="checkbox-zelles" type="checkbox" <?= $checkedZelles ?>>
+				</p>
+				<p style="margin: 0px;">
+					Transferencia: 
+					<input id="checkbox-transferencia" type="checkbox" <?= $checkedTransferencias ?>>
+					<span>
+						Banco: 
+						<?php 
+						foreach ($bancosTransferencias as $banco):
+							echo $banco;
+						endforeach; ?> 
+				</p>
+				<p>Original</p>
+			</div>
+			<div class="div-25">
+				<p style="text-align: center;">Recibí conforme:</p>
+				<p style="text-align: center;"><?= $inicialesUsuarioResponsable ?></p>
+			</div>
+			<br />
+			<br />
+			<br />
+		</div>
+		<div class="saltopagina">
+			<h4 style='text-align: center;'>Consejo Educativo</h4>	
+			<h5 style='text-align: center; margin: 0px;'><?= $school->name ?></h5>
+			<h6 style='text-align: center; margin: 0px;'><?= $school->fiscal_address ?></h6>	
+			<h6 style='text-align: center; margin: 0px;'>J-40490885-4</h6> 
+			<h6><b><?= 'Fecha: '.$bill->date_and_time->format('d-m-Y') ?></b></h6>
+			<?php 
+			if ($bill->annulled == 1): ?>
+				<h3 style="text-align: center;">*** ANULADO ***</H3>
+			<?php
+			endif; ?> 
+			<h3 style="text-align: right;">Recibo Nro. <?= $bill->bill_number ?></h3>		
+			<h3 style="text-align: center;"><b>Por <?= number_format(round($bill->amount_paid * $bill->tasa_cambio, 2), 2, ",", ".")." Bs. (".number_format($bill->amount_paid, 2, ",", ".")." $)" ?></b></h3>
+			
+			<br />
+			<div class="div-75">
+				<p style="text-align: left;">
+					Hemos recibido de: <?= $bill->client." (".$bill->parentsandguardian->family.")" ?>
+				</p>
+			</div>
+			<div class="div-25">
+				<p style="text-align: right;">
+					C.I./RIF <?= $bill->identification ?>
+				</p>
+			</div>
+			<div class="div-100">
+				<p style="text-align: left;">
+					La cantidad de: <?= number_format(round($bill->amount_paid * $bill->tasa_cambio, 2), 2, ",", ".")." Bs." ?>
+				</p>
+			</div>
+			<div class="div-100">
+				<h4 style="text-align: left;">
+					Por concepto de: 
+					<?php 
+					foreach ($conceptos as $concepto):
+						echo $concepto;
+					endforeach; ?>
+				</h4>
+			</div>
+			<br />
+			<div class="div-75">
+				<h4><b>Formas de pago:</b></h4>
+				<p style="margin: 0px;">
+					Efectivo: 
+					<?php 
+					foreach ($efectivos as $efectivo):
+						echo $efectivo;
+					endforeach; ?>
+				</p>
+				<p style="margin: 0px;">
+					Zelle: 
+					<?php 
+					foreach ($zelles as $zelle):
+						echo $zelle;
+					endforeach; ?>
+				</p>
+				<p style="margin: 0px;">
+					Transferencia: 
+					<?php 
+					foreach ($transferencias as $transferencia):
+						echo $transferencia;
+					endforeach; ?>
+				</p>
+				<p>Copia</p>
+			</div>
+			<div class="div-25">
+				<p style="text-align: center;">Recibí conforme:</p>
+				<p style="text-align: center;"><?= $inicialesUsuarioResponsable ?></p>
+			</div>
 			<br />
 			<br />
 			<br />

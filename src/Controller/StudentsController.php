@@ -1037,12 +1037,20 @@ class StudentsController extends AppController
     
     public function relatedstudents()
     {
+        $this->autoRender = false;
+
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
 
-        $this->autoRender = false;
-        
+		$this->loadModel('Schools');
+
+		$school = $this->Schools->get(2);
+				
+		$anioEscolarActual = $school->current_school_year;
+		$proximoAnioEscolar = $anioEscolarActual + 1;
+      
         $studenttransactions = new StudenttransactionsController();
+		$representantes = new ParentsandguardiansController();
 		
 		$tasaTemporalDolar = 0;
 		$tasaTemporalEuro = 0;
@@ -1052,6 +1060,7 @@ class StudentsController extends AppController
             if(isset($_POST['id']))
             {
                 $parentId = $_POST['id'];
+				$opcionMenu = $_POST['opcionMenu'];
                 $new = $_POST['new'];
 				
 				if (isset($_POST['tasaTemporalDolar']))
@@ -1163,53 +1172,63 @@ class StudentsController extends AppController
 			$jsondata["data"]['meses_tarifas'] = $mesesTarifas;
 			$jsondata["data"]['otras_tarifas'] = $otrasTarifas;
 			
-            $jsondata["data"]["students"] = [];
-            
-            if ($new == 0)
-            {
-                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['new_student' => 0], ['Students.student_condition' => 'Regular']])
-                ->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
-            }
-            elseif ($new == 1)
-            {
-                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['new_student' => 1], ['Students.student_condition' => 'Regular']])
-                ->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
-            }
-            else
-            {
-                $students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['Students.student_condition' => 'Regular']])
-                ->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
-            }
+			if ($opcionMenu == "Recibo Consejo Educativo")
+			{
+				$periodoEscolar = "Ano escolar ".$anioEscolarActual."-".$proximoAnioEscolar; 
+				$conceptoConsejoEducativo = "Consejo educativo ".$anioEscolarActual."-".$proximoAnioEscolar; 
+				$indicadorReciboConsejoEducativo = $representantes->busquedaRecibosConsejoEducativo("Consejo Educativo 2023-2024", $parentsandguardians->id);
+				$jsondata["data"]['indicadorReciboConsejoEducativo'] = $indicadorReciboConsejoEducativo;
+			}
+			else
+			{
+				$jsondata["data"]["students"] = [];
+				
+				if ($new == 0)
+				{
+					$students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['new_student' => 0], ['Students.student_condition' => 'Regular']])
+					->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
+				}
+				elseif ($new == 1)
+				{
+					$students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['new_student' => 1], ['Students.student_condition' => 'Regular']])
+					->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
+				}
+				else
+				{
+					$students = $this->Students->find('all')->where([['parentsandguardian_id' => $parentId], ['Students.student_condition' => 'Regular']])
+					->order(['Students.first_name' => 'ASC', 'Students.surname' => 'ASC']);
+				}
 
-            $results = $students->toArray();
+				$results = $students->toArray();
 
-            if ($results)
-            {
-                foreach ($results as $result)
-                {
-					$sections = $this->Students->Sections->get($result->section_id);
-                    $transacciones = $studenttransactions->responsejson($result->id);
-					
-                    $jsondata["data"]["students"][] = 
-						[
-							'id' => $result->id,
-							'surname' => $result->surname,
-							'second_surname' => $result->second_surname,
-							'first_name' => $result->first_name,
-							'second_name' => $result->second_name,
-							'level_of_study' => $result->level_of_study,
-							'becado_ano_anterior' => $result->becado_ano_anterior,
-							'scholarship' => $result->scholarship,
-							'schoolYearFrom' => $result->balance,
-							'descuento_ano_anterior' => $result->descuento_ano_anterior,
-							'discount_family' => $result->discount,
-							'sublevel' => $sections->sublevel,
-							'section' => $sections->section,
-							'alumno_nuevo' => $result->new_student,
-							'studentTransactions' => json_decode($transacciones) 
-						];
-                }
-            }
+				if ($results)
+				{
+					foreach ($results as $result)
+					{
+						$sections = $this->Students->Sections->get($result->section_id);
+						$transacciones = $studenttransactions->responsejson($result->id);
+						
+						$jsondata["data"]["students"][] = 
+							[
+								'id' => $result->id,
+								'surname' => $result->surname,
+								'second_surname' => $result->second_surname,
+								'first_name' => $result->first_name,
+								'second_name' => $result->second_name,
+								'level_of_study' => $result->level_of_study,
+								'becado_ano_anterior' => $result->becado_ano_anterior,
+								'scholarship' => $result->scholarship,
+								'schoolYearFrom' => $result->balance,
+								'descuento_ano_anterior' => $result->descuento_ano_anterior,
+								'discount_family' => $result->discount,
+								'sublevel' => $sections->sublevel,
+								'section' => $sections->section,
+								'alumno_nuevo' => $result->new_student,
+								'studentTransactions' => json_decode($transacciones) 
+							];
+					}
+				}
+			}
             
             exit(json_encode($jsondata, JSON_FORCE_OBJECT));
         }

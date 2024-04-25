@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-4">
 		<div class="page-header">
-	        <h3>Reporte de Cuentas Cobradas y por Cobrar</h3>
+	        <h3>Cuentas Cobradas y por Cobrar (Acumulado)</h3>
 	    </div>
 	    <?= $this->Form->create() ?>
 	        <fieldset>
@@ -12,11 +12,8 @@
 					   'Por grado' => 'Por grado',
 					   'Por estudiante' => 'Por estudiante']]);
 					echo "<div id='mensaje-tipo-reporte' class='mensajes-usuario'></div>";
-	                echo $this->Form->input('concepto', ['label' => 'Concepto:* ', 'options' => 
+	                echo $this->Form->input('mes_desde', ['label' => 'Desde:* ', 'options' => 
 	                    ["" => "",
-						'13' => 'Matrícula',
-						'14' => 'Seguro escolar',
-						'15' => 'Servicio educativo',
 	                    '09' => 'Septiembre',
 	                    '10' => 'Octubre',
 	                    '11' => 'Noviembre',
@@ -27,10 +24,24 @@
 	                    '04' => 'Abril',
 	                    '05' => 'Mayo',
 	                    '06' => 'Junio',
-	                    '07' => 'Julio',
-						'08' => 'Agosto']]); 
-					echo "<div id='mensaje-concepto' class='mensajes-usuario'></div>";
-					echo "<br />"
+	                    '07' => 'Julio']]); 
+					echo "<div id='mensaje-mes-desde' class='mensajes-usuario'></div>";
+					echo $this->Form->input('mes_hasta', ['label' => 'Hasta:* ', 'options' => 
+					["" => "",
+					'09' => 'Septiembre',
+					'10' => 'Octubre',
+					'11' => 'Noviembre',
+					'12' => 'Diciembre',
+					'01' => 'Enero',
+					'02' => 'Febrero',
+					'03' => 'Marzo',
+					'04' => 'Abril',
+					'05' => 'Mayo',
+					'06' => 'Junio',
+					'07' => 'Julio']]); 
+				echo "<div id='mensaje-mes-hasta' class='mensajes-usuario'></div>";
+				echo "<div id='mensaje-orden-meses' class='mensajes-usuario'></div>";
+				echo "<br />"
 		    	?>
 		    </fieldset>
         	<?= $this->Form->button(__('Crear reporte'), ['id' => 'crear-reporte', 'class' =>'btn btn-success']) ?>
@@ -40,6 +51,21 @@
 	</div>
 </div>
 <script>
+	var ordenMeses = 
+	{
+		"09" : "01",
+		"10" : "02",
+		"11" : "03",
+		"12" : "04",
+		"01" : "05",
+		"02" : "06",
+		"03" : "07",
+		"04" : "08",
+		"05" : "09",
+		"06" : "10",
+		"07" : "11"
+	} 
+
     $(document).ready(function() 
     {
 		$('#crear-reporte').click(function(e) 
@@ -54,15 +80,27 @@
 				$("#mensaje-tipo-reporte").html("Por favor seleccione el tipo de reporte").css("color", 'red');
 			}
 
-            if ($('#concepto').val() == "")
+            if ($('#mes-desde').val() == "")
 			{
 				indicadorError = 1;
-				$("#mensaje-concepto").html("Por favor seleccione un concepto").css("color", 'red');
+				$("#mensaje-mes-desde").html("Por favor seleccione un mes").css("color", 'red');
 			}
-            			
+            
+			if ($('#mes-hasta').val() == "")
+			{
+				indicadorError = 1;
+				$("#mensaje-mes-hasta").html("Por favor seleccione un mes").css("color", 'red');
+			}
+			
+			if (ordenMeses[$('#mes-desde').val()] > ordenMeses[$('#mes-hasta').val()])
+			{
+				indicadorError = 1;
+				$("#mensaje-orden-meses").html("El orden en los meses para el período solicitado está invertido").css("color", 'red');
+			}
+			
 			if (indicadorError > 0)
 			{
-				alert("Estimado usuario los datos están incompletos. Por favor revise");
+				alert("Estimado usuario los datos están incompletos o presentan errores. Por favor revise");
 				e.preventDefault();
 			}
 		});

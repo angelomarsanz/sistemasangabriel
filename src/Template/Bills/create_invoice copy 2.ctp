@@ -1,6 +1,6 @@
 <?php
     use Cake\Routing\Router;
-	if ($menuOption == "Recibo Consejo Educativo"):
+	if ($menuOption == "Recibo consejo educativo"):
 		$accionBusquedaFamilia = "findFamilyConsejoEducativo";
 	else:
 		$accionBusquedaFamilia = "findFamily";
@@ -35,7 +35,7 @@
 						<h3><b>Recibo servicio educativo</b></h3>
 					<?php elseif ($menuOption == 'Mensualidades'): ?>
 						<h3><b>Cobro de mensualidades</b></h3>
-					<?php elseif ($menuOption == 'Recibo Consejo Educativo'): ?>
+					<?php elseif ($menuOption == 'Recibo consejo educativo'): ?>
 						<h3><b>Recibo Consejo Educativo</b></h3>
 					<?php endif; ?>
                     <h5 id="Turno" value=<?= $idTurn ?>>Fecha: <?= $dateTurn->format('d-m-Y') ?>, Turno: <?= $turn ?>, Cajero: <?= $current_user['first_name'] . ' ' . $current_user['surname'] ?></h5>
@@ -781,12 +781,9 @@
 	var total_balance_bolivares_igtf = 0;
 	var indicador_igtf_recalculado = 0;
 	var estudiantes_condiciones = [];
+	var indicadorConsejoEducativo = 0;
 	var mesesTarifas = new Array();
 	var otrasTarifas = new Array();
-	var indicadorConsejoEducativo = 0;
-	var indicadorReciboConsejoEducativo = true;
-	var anioConsejoEducativo = 0;
-	var proximoAnioConsejoEducativo = 0;
 	
 // Funciones Javascript
 
@@ -1050,9 +1047,6 @@
 		indicador_igtf_recalculado = 0;
 		indicadorAjuste = 0;
 		indicador_abono = 0;
-		indicadorReciboConsejoEducativo = true;
-		anioConsejoEducativo = 0;
-		proximoAnioConsejoEducativo = 0;
     }
     
     function validateFields()
@@ -1671,7 +1665,7 @@
 		acumuladoPagadoEuros -= dosDecimales(montoPagadoEuro);
 		acumuladoPagadoBolivares -= dosDecimales(montoPagadoBolivar);
 
-		if (indicador_pedido == 0 && indicadorConsejoEducativo == 0)
+		if (indicador_pedido == 0)
 		{
 			acumulado_igtf_dolar = dosDecimales(acumulado_igtf_dolar - item['payMontoIgtfDolar']);
 			acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
@@ -1753,20 +1747,17 @@
 		var cantidadElementos = 0;
 		var contadorElementos = 1;
 
-		if (indicadorConsejoEducativo == 1)
+		if ($indicadorConsejoEducativo == 1)
 		{
-			tbStudentTransactions[transactionCounter] = new Object();
 			tbStudentTransactions[transactionCounter].studentName = "";
-			tbStudentTransactions[transactionCounter].transactionIdentifier = 999999;
 			tbStudentTransactions[transactionCounter].descuentoAlumno = 0;
 			tbStudentTransactions[transactionCounter].tarifaDolarOriginal = 0;
 			tbStudentTransactions[transactionCounter].tarifaDolar = tarifaDolar;
-			tbStudentTransactions[transactionCounter].monthlyPayment = "Consejo Educativo "+anioConsejoEducativo+"-"+proximoAnioConsejoEducativo;
-			tbStudentTransactions[transactionCounter].montoAPagarDolar = totalBalance;
+			tbStudentTransactions[transactionCounter].monthlyPayment = amountMonthly;
+			tbStudentTransactions[transactionCounter].montoAPagarDolar = studentBalance;
 			tbStudentTransactions[transactionCounter].montoAPagarEuro = totalBalanceEuros;
 			tbStudentTransactions[transactionCounter].montoAPagarBolivar = totalBalanceBolivares;
-			tbStudentTransactions[transactionCounter].observation = ""; 
-			biggestYearFrom = parseInt(anioConsejoEducativo);	
+			tbStudentTransactions[transactionCounter].observation = ""; 	
 		}
 		else
 		{				
@@ -2032,7 +2023,7 @@
 		
 		let sub_total_igtf = 0;
 
-		if (indicador_pedido == 0 && indicadorConsejoEducativo == 0)
+		if (indicador_pedido == 0)
 		{
 			sub_total_igtf = dosDecimales(totalBalance * porcentaje_calculo_igtf);
 		}
@@ -2158,25 +2149,18 @@
 			
 		checkPredeterminado();
 		updateAmount();
-
-		if (indicadorConsejoEducativo == 1)
+		
+		if (contadorCuotasSeleccionadas > 0)
 		{
+			$("#ajuste-automatico").attr('disabled', false);
 			$("#print-invoice").attr('disabled', false);
 		}
 		else
 		{
-			if (contadorCuotasSeleccionadas > 0)
-			{
-				$("#ajuste-automatico").attr('disabled', false);
-				$("#print-invoice").attr('disabled', false);
-			}
-			else
-			{
-				$("#ajuste-automatico").attr('disabled', true);
-				$("#print-invoice").attr('disabled', true);			
-			}
+			$("#ajuste-automatico").attr('disabled', true);
+			$("#print-invoice").attr('disabled', true);			
 		}
-
+		
 		if (totalBalanceDescuento > 0)
 		{
 			activarBotonesPago();
@@ -2199,7 +2183,7 @@
 		payments.fiscalAddress = $('#fiscal-address').val();
 		payments.taxPhone = $('#tax-phone').val();
 
-		if (indicadorConsejoEducativo == 1)
+		if ($('#type-invoice').val() == 'Recibo consejo educativo')
 		{
 			payments.invoiceAmount = totalBalance;
 		}
@@ -2305,13 +2289,13 @@
 
 			if (pagos_en_bolivares < recalculo_igtf_bolivar)
 			{
-				if (indicador_sobrante == 0 && indicador_pedido == 0 && indicadorConsejoEducativo == 0)
+				if (indicador_sobrante == 0 && indicador_pedido == 0)
 				{
 					recalculo_divisas = dosDecimales(pagos_en_divisas/porcentaje_calculo_base_igtf);
 					recalculo_igtf_dolar = dosDecimales((pagos_en_divisas/porcentaje_calculo_base_igtf) * porcentaje_calculo_igtf);
 				}
 
-				if (indicador_pedido == 0 && indicadorConsejoEducativo == 0)
+				if (indicador_pedido == 0)
 				{
 					saldo_igtf_dolar = recalculo_igtf_dolar;
 					for (var i = 0, item = null; i < paymentsArray.length; i++) 
@@ -2356,7 +2340,7 @@
 			}
 			else
 			{
-				if (indicador_pedido == 0 && indicadorConsejoEducativo == 0)
+				if (indicador_pedido == 0)
 				{
 					saldo_igtf_bolivar = recalculo_igtf_bolivar;
 					for (var i = 0, item = null; i < paymentsArray.length; i++) 
@@ -2388,7 +2372,7 @@
 				monto_divisas = recalculo_divisas;
 				acumulado_igtf_dolar_archivo = recalculo_igtf_dolar;
 
-				if (indicador_pedido == 0 && indicadorConsejoEducativo == 0)
+				if (indicador_pedido == 0)
 				{
 					acumulado_igtf_dolar = recalculo_igtf_dolar;
 					acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
@@ -2535,24 +2519,21 @@
 				base_igtf_dolar = 0;							
 			}
 
-			if (indicadorConsejoEducativo == 0)
+			if (indicador_pedido == 1)
 			{
-				if (indicador_pedido == 1)
-				{
-					monto_igtf_dolar_pedido = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
-					monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
-					acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar_pedido);
+				monto_igtf_dolar_pedido = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
+				monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
+				acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar_pedido);
 
-				}
-				else
-				{
-					monto_igtf_dolar = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
-					acumulado_igtf_dolar = dosDecimales(acumulado_igtf_dolar + monto_igtf_dolar);
-					acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
-					acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
-					monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
-					acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar);
-				}
+			}
+			else
+			{
+				monto_igtf_dolar = dosDecimales(base_igtf_dolar * porcentaje_calculo_igtf);
+				acumulado_igtf_dolar = dosDecimales(acumulado_igtf_dolar + monto_igtf_dolar);
+				acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
+				acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
+				monto_divisas = dosDecimales(monto_divisas + base_igtf_dolar);
+				acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo + monto_igtf_dolar);
 			}
 		}
 
@@ -2631,7 +2612,7 @@
 
     $(document).ready(function() 
     {
-		if ($('#type-invoice').val() == 'Recibo Consejo Educativo')
+		if ($('#type-invoice').val() == 'Recibo consejo educativo')
 		{
 			$("#cuadro-periodo-escolar").removeClass("noverScreen");
 			$("#alumnos-relacionados").addClass("noverScreen");
@@ -2739,7 +2720,7 @@
 				}
 			}
 
-			if (indicadorConsejoEducativo == 0)
+			if ($('#type-invoice').val() != 'Recibo consejo educativo')
 			{
 				let factura_fiscal = $('<p style="background-color: #a9e0ff; color: red;">¿ Factura fiscal ?</p>').dialog(
 				{
@@ -2800,18 +2781,18 @@
 					students = " ";
 
 					idParentsandguardians = response.data.parentsandguardian_id;
-
+					
 					reversedDate = response.data.reversedDate;
-
+														
 					dollarExchangeRate = response.data.dollar_exchange_rate;
 					euro = response.data.euro;
 										
 					cadenaTasaDolarEuro = (euro / dollarExchangeRate).toFixed(5);
 					tasaDolarEuro = parseFloat(cadenaTasaDolarEuro);
-
+					
 					saldoRepresentante = response.data.balance;
 					saldoRepresentanteSigno = dosDecimales(saldoRepresentante * -1);
-
+					
 					saldoRepresentanteEuros = dosDecimales(saldoRepresentante / tasaDolarEuro); 
 					saldoRepresentanteSignoEuros = dosDecimales(saldoRepresentanteSigno / tasaDolarEuro);
 
@@ -2823,12 +2804,31 @@
 
 					datosFiscalesCliente(response);
 
-					if (indicadorConsejoEducativo == 1)
+					if ($('#type-invoice').val() == 'Recibo consejo educativo')
 					{
-						indicadorReciboConsejoEducativo = response.data.indicadorReciboConsejoEducativo;
+						if (response.data.indicadorReciboConsejoEducativo == true)
+						{
+							$.each(otrasTarifas, function(key3, value3)											
+							{
+								if (value3.conceptoAno == "Consejo educativo 2023")
+								{
+									amountMonthly = value3.tarifaBolivar;
+									tarifaDolar = value3.tarifaDolar;
+									return false;
+								}
+							});
+							studentBalance = dosDecimales(tarifaDolar);
+							totalBalance = dosDecimales(tarifaDolar);
+							actualizarTotales();
+						}
+						else
+						{
+							alert("Estimado usuario a este representante ya se le cobró el Consejo Educativo de este año escolar");
+							return false
+						}
 					}
 					else
-					{																															
+					{																														
 						$.each(response.data.students, function(key, value) 
 						{
 							idStudent = value.id;
@@ -3603,7 +3603,7 @@
 				return-false
 			}
 
-			if (indicador_pedido == 0 && acumulado_igtf_bolivar > 0 && indicadorConsejoEducativo == 0)
+			if (indicador_pedido == 0 && acumulado_igtf_bolivar > 0)
 			{
 				let verificacion_pagos_en_bolivares = 0;
 
@@ -3801,7 +3801,7 @@
         {	
             e.preventDefault();
 
-			if (contadorCuotasSeleccionadas == 0 && indicadorConsejoEducativo == 0)
+			if (contadorCuotasSeleccionadas == 0)
 			{
 				alert('Estimado usuario debe seleccionar al menos una cuota para poder facturar');
 				return false;				
@@ -4241,56 +4241,9 @@
 		$('#periodo-escolar').change(function(e) 
         {
 			e.preventDefault();
-			studentBalance = 0;
-			totalBalance = 0;
-			actualizarTotales();
-			disableButtons();
-
 			if ($('#periodo-escolar').val() != "")
 			{
-				resultado = validarDatosFiscales();
-			
-				if (resultado > 0)
-				{
-					alert("Estimado usuario uno o más datos fiscales presentan errores. Por favor revise");
-					window.scrollTo(0, 0);
-					return false;
-				}
-				else
-				{
-					anioConsejoEducativo = $('#periodo-escolar').val();
-					proximoAnioConsejoEducativo = parseInt(anioConsejoEducativo) + 1;
-					
-					if ( indicadorReciboConsejoEducativo == true)
-					{
-						var indicadorTarifaEncontrada = 0;
-						$.each(otrasTarifas, function(clave, valor)											
-						{
-							if (valor.conceptoAno == "Consejo Educativo "+anioConsejoEducativo)
-							{
-								amountMonthly = valor.tarifaBolivar;
-								tarifaDolar = valor.tarifaDolar;
-								indicadorTarifaEncontrada = 1;
-								return false;
-							}
-						});
-						if (indicadorTarifaEncontrada == 1)
-						{
-							totalBalance = dosDecimales(tarifaDolar);
-							actualizarTotales();
-						}
-						else
-						{
-							alert("Estimado usuario no se encontró la tarifa para el Consejo Educativo del período: "+anioConsejoEducativo+"-"+proximoAnioConsejoEducativo);
-							return false
-						}
-					}
-					else
-					{
-						alert("Estimado usuario a este representante ya se le cobró el Consejo Educativo del período: "+anioConsejoEducativo+"-"+proximoAnioConsejoEducativo);
-						return false
-					}
-				}
+
 			}
         });
     }); 

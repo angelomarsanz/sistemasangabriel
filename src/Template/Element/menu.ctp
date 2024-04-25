@@ -70,7 +70,8 @@
 								<li><?= $this->Html->link('Recibo servicio educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo servicio educativo']) ?></li>																	
 								<li><?= $this->Html->link('Cobrar mensualidades', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
 								<li><?= $this->Html->link('Pedido por factura', ['controller' => 'Bills', 'action' => 'pedidoPorFactura']) ?></li> 
-								<li><?= $this->Html->link('Pedido por factura planificado (contabilidad)', ['controller' => 'Bills', 'action' => 'pedidoPorFacturaPlanificado']) ?></li> 								
+								<li><?= $this->Html->link('Pedido por factura planificado (contabilidad)', ['controller' => 'Bills', 'action' => 'pedidoPorFacturaPlanificado']) ?></li>
+								<li><?= $this->Html->link('Recibo Consejo Educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo Consejo Educativo']) ?></li>		 								
 								<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
 								<li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
 								<li><?= $this->Html->link('Histórico cambio tasa dólar y euro', ['controller' => 'Historicotasas', 'action' => 'index']) ?></li>
@@ -86,6 +87,7 @@
 								<li><?= $this->Html->link('Familias con cuatro o más hijos', ['controller' => 'Students', 'action' => 'familiasDescuento50']) ?></li> 
 								<!-- <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li> -->
 								<li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>	
+								<li><?= $this->Html->link('Reporte de familias relacionadas', ['controller' => 'Parentsandguardians', 'action' => 'reporteFamiliasRelacionadas']) ?></li>	
 							</ul>
 						</li>
 						<li class="dropdown">
@@ -125,6 +127,7 @@
 								<!-- <li><?= $this->Html->link('Reporte de morosidad por grado y sección', ['controller' => 'Studenttransactions', 'action' => 'morosidadGradoSeccion']) ?></li> -->
 								<li><?= $this->Html->link('Reporte de morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li>
 								<li><?= $this->Html->link('Reporte de cuentas cobradas y por cobrar', ['controller' => 'Studenttransactions', 'action' => 'cuentasCobradasPorCobrar']) ?></li>
+								<li><?= $this->Html->link('Reporte de cuentas cobradas y por cobrar (Acumulado)', ['controller' => 'Studenttransactions', 'action' => 'cuentasCobradasPorCobrarAcumulado']) ?></li>
 								<li><?= $this->Html->link('Familias con diferencias de mensualidades adelantadas', ['controller' => 'Studenttransactions', 'action' => 'familiasDiferenciasMensualidadesAdelantadas']) ?></li>
 								<li><?= $this->Html->link('Estudiantes nuevos con diferencias de inscripción pendientes', ['controller' => 'Studenttransactions', 'action' => 'reporteEstudiantesNuevosConDiferenciasInscripcion']) ?></li>													
 							</ul>

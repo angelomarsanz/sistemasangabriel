@@ -52,6 +52,11 @@ class UsersController extends AppController
             if($user)
             {
                 $this->Auth->setUser($user); 
+                if($this->Auth->user('estatus_registro') == 'Eliminado')
+                {
+                    $this->Flash->error('Datos inválidos');
+                    return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
+                }
                 if($this->Auth->user('role') == 'Representante')
                 {
                     $parentsandguardians = $this->Users->Parentsandguardians->find('all')
@@ -69,7 +74,7 @@ class UsersController extends AppController
             }
             else
             {
-                $this->Flash->error('Datos son invalidos, por favor intente nuevamente', ['key' => 'auth']);
+                $this->Flash->error('Datos inválidos, por favor intente nuevamente', ['key' => 'auth']);
             }
         }
     }
@@ -114,7 +119,13 @@ class UsersController extends AppController
                     }
                     if ($null_blanco == 0)
                     {
-                        return $this->redirect(['controller' => 'Guardiantransactions', 'action' => 'previoContratoRepresentante', $representante->id, 'Users', 'home']);
+                        $guardianTransactions = new GuardiantransactionsController;
+                        $indicadorContrato = $guardianTransactions->indicadorContrato($representante->id);
+                        
+                        if ($indicadorContrato == 1)
+                        {
+                            return $this->redirect(['controller' => 'Guardiantransactions', 'action' => 'previoContratoRepresentante', $representante->id, 'Users', 'home']);
+                        }
                     }
                 }
             }
@@ -397,6 +408,7 @@ class UsersController extends AppController
         {
             $usuario_a_modificar = $this->Users->get($usuario->id);
             $usuario_a_modificar->estatus_registro = "Activo";
+            /*
             if (!($this->Users->save($usuario_a_modificar))) 
             {
                 $this->Flash->error(__('El registro con el ID '.$usuario_a_modificar->id.' no pudo ser modificado'));
@@ -405,7 +417,7 @@ class UsersController extends AppController
             {
                 $contador_registros_modificados++;
             } 
-                     
+            */                
         }
         $this->set(compact('contador_registros_seleccionados', 'contador_registros_modificados'));
     }

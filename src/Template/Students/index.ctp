@@ -6,7 +6,7 @@
         <div class="page-header">
             <?php if ($family != ''): ?>
                 <h4>Familia: <?= $family ?></h4>
-                <?= $this->Html->link('Ver contrato firmado', ['controller' => 'Guardiantransactions', 'action' => 'previoContratoRepresentante', $representante->id, "Students", "index"], ['class' => 'btn btn-sm btn-primary']) ?>
+                <?= $this->Html->link('Ver contrato', ['controller' => 'Guardiantransactions', 'action' => 'previoContratoRepresentante', $representante->id, "Students", "index"], ['class' => 'btn btn-sm btn-primary']) ?>
                 <p style="color: #004d99;">Por favor actualice los datos de su(s) hijo(s) o representado(s) y luego imprima la ficha de inscripción</p>
             <?php else: ?>
                 <br />

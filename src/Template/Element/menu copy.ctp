@@ -70,7 +70,8 @@
 								<li><?= $this->Html->link('Recibo servicio educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo servicio educativo']) ?></li>																	
 								<li><?= $this->Html->link('Cobrar mensualidades', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
 								<li><?= $this->Html->link('Pedido por factura', ['controller' => 'Bills', 'action' => 'pedidoPorFactura']) ?></li> 
-								<li><?= $this->Html->link('Pedido por factura planificado (contabilidad)', ['controller' => 'Bills', 'action' => 'pedidoPorFacturaPlanificado']) ?></li> 								
+								<li><?= $this->Html->link('Pedido por factura planificado (contabilidad)', ['controller' => 'Bills', 'action' => 'pedidoPorFacturaPlanificado']) ?></li>
+								<li><?= $this->Html->link('Recibo Consejo Educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo Consejo Educativo']) ?></li>		 								
 								<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
 								<li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
 								<li><?= $this->Html->link('Histórico cambio tasa dólar y euro', ['controller' => 'Historicotasas', 'action' => 'index']) ?></li>
@@ -124,7 +125,10 @@
 								<li><?= $this->Html->link('Reporte general de morosidad de representantes', ['controller' => 'Studenttransactions', 'action' => 'generalMorosidadRepresentantes']) ?></li>
 								<!-- <li><?= $this->Html->link('Reporte de morosidad por grado y sección', ['controller' => 'Studenttransactions', 'action' => 'morosidadGradoSeccion']) ?></li> -->
 								<li><?= $this->Html->link('Reporte de morosidad', ['controller' => 'Students', 'action' => 'morosidad']) ?></li>
-								<li><?= $this->Html->link('Familias con diferencias de mensualidades adelantadas', ['controller' => 'Studenttransactions', 'action' => 'familiasDiferenciasMensualidadesAdelantadas']) ?></li>												
+								<li><?= $this->Html->link('Reporte de cuentas cobradas y por cobrar', ['controller' => 'Studenttransactions', 'action' => 'cuentasCobradasPorCobrar']) ?></li>
+								<li><?= $this->Html->link('Reporte de cuentas cobradas y por cobrar (Acumulado)', ['controller' => 'Studenttransactions', 'action' => 'cuentasCobradasPorCobrarAcumulado']) ?></li>
+								<li><?= $this->Html->link('Familias con diferencias de mensualidades adelantadas', ['controller' => 'Studenttransactions', 'action' => 'familiasDiferenciasMensualidadesAdelantadas']) ?></li>
+								<li><?= $this->Html->link('Estudiantes nuevos con diferencias de inscripción pendientes', ['controller' => 'Studenttransactions', 'action' => 'reporteEstudiantesNuevosConDiferenciasInscripcion']) ?></li>													
 							</ul>
 						</li>
 						
@@ -189,7 +193,7 @@
 								<li><?= $this->Html->link('Datos de alumnos', ['controller' => 'Students', 'action' => 'consultStudent']) ?></li>
 								<li><?= $this->Html->link('Alumnos con condición distinta a regular', ['controller' => 'Students', 'action' => 'consultStudentDelete']) ?></li>
 								<li><?= $this->Html->link('Alumnos inscritos', ['controller' => 'Studenttransactions', 'action' => 'reportStudentGeneral']) ?></li>             
-								<li><?= $this->Html->link('Alumnos que no completaron en el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
+								<li><?= $this->Html->link('Alumnos que no completaron el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
 								<li><?= $this->Html->link('Alumnos Becados 100%', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
 								<li><?= $this->Html->link('Reporte becados: Beca completa, por hijos y especiales', ['controller' => 'Students', 'action' => 'reporteBecados']) ?></li>
 							</ul>

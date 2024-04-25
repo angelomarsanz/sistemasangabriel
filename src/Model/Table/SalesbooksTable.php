@@ -100,7 +100,23 @@ class SalesbooksTable extends Table
         $validator
             ->numeric('iva')
             ->allowEmpty('iva');
-            
+
+        $validator
+            ->numeric('igtf')
+            ->allowEmpty('igtf');
+
+        $validator
+            ->numeric('tasa_cambio')
+            ->allowEmpty('tasa_cambio');
+
+        $validator
+            ->numeric('monto_divisas')
+            ->allowEmpty('monto_divisas');
+
+        $validator
+            ->numeric('monto_bolivares')
+            ->allowEmpty('monto_bolivares');
+           
         $validator
             ->allowEmpty('right_bill_number');
 

@@ -1910,6 +1910,7 @@ class TurnsController extends AppController
 
 		$this->loadModel('Bills');		
 		$payment = new PaymentsController();
+		$conceptos = new ConceptsController();
 					
 		$indicadorFacturasAnticipos = 0;
 		$indicadorServiciosEducativos = 0;
@@ -1932,6 +1933,7 @@ class TurnsController extends AppController
 		$indicadorDescuentosRecargosRegistrados = 0;
 		$indicadorRecibosSeguro = 0;
 		$indicadorRecibosSeguroAnulados = 0;
+		$indicadorRecibosConsejoEducativo = 0;
 		$vector_pagos = [];
 							
 		$usuario = $this->Turns->Users->get($turn->user_id);
@@ -2025,6 +2027,8 @@ class TurnsController extends AppController
 		$codigoRetornoResultado = $resultado['codigoRetorno'];
 		$facturas = $resultado['facturas'];
 		$pagosFacturas = $resultado['pagosFacturas'];
+
+		$conceptosConsejoEducativo = $conceptos->busquedaConsejoEducativo($id);
 			
 		if ($codigoRetornoResultado != 1)
 		{
@@ -2062,6 +2066,10 @@ class TurnsController extends AppController
 				{
 					$indicadorRecibosSeguro = 1;
 				}
+				elseif ($factura->tipo_documento == "Recibo de Consejo Educativo")
+				{
+					$indicadorRecibosConsejoEducativo = 1;
+				}
 				elseif ($factura->tipo_documento == "Nota de crédito")
 				{
 					$indicadorNotasCredito = 1;
@@ -2098,6 +2106,7 @@ class TurnsController extends AppController
 		$this->set(compact
 			('turn',
 			'facturas',
+			'pagosFacturas',
 			'vectorPagos',
 			'cajero',
 			'vectorTotalesRecibidos',
@@ -2129,11 +2138,14 @@ class TurnsController extends AppController
 			'totalGeneralSobrantes',
 			'totalGeneralReintegrosSobrantes',
 			'indicadorRecibosSeguro',
-			'indicadorRecibosSeguroAnulados'));	
+			'indicadorRecibosSeguroAnulados',
+			'indicadorRecibosConsejoEducativo',
+			'conceptosConsejoEducativo'));	
 				
 		$this->set('_serialize', 
 			['turn',
 			'facturas',
+			'pagosFacturas',
 			'vectorPagos', 
 			'cajero', 
 			'vectorTotalesRecibidos', 
@@ -2164,7 +2176,9 @@ class TurnsController extends AppController
 			'totalGeneralSobrantes',
 			'totalGeneralReintegrosSobrantes',
 			'indicadorRecibosSeguro',
-			'indicadorRecibosSeguroAnulados']);
+			'indicadorRecibosSeguroAnulados',
+			'indicadorRecibosConsejoEducativo',
+			'conceptosConsejoEducativo']);
 	}
 	
     public function excelDocumentos($id = null)

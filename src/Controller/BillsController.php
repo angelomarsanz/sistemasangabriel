@@ -167,11 +167,12 @@ class BillsController extends AppController
      *
      * @return \Cake\Network\Response|void Redirects on successful add, renders view otherwise.
      */
-    public function add($indicadorFacturaPendiente = null, $indicador_servicio_educativo = null, $indicador_seguro = null)
+    public function add($indicadorFacturaPendiente = null, $indicador_servicio_educativo = null, $indicador_seguro = null, $indicadorConsejoEducativo = null)
     {
         $consecutiveInvoice = new ConsecutiveinvoicesController();
 		$recibos = new RecibosController();
 		$seguros = new SegurosController();
+		$consejos = new ConsejosController();
 		$notas = new NotasController();
 		
 		$billNumber = 0;
@@ -195,6 +196,10 @@ class BillsController extends AppController
 					elseif ($indicador_seguro == 1)
 					{
 						$billNumber = $seguros->add();
+					}
+					elseif ($indicadorConsejoEducativo == 1)
+					{
+						$billNumber = $consejos->add();
 					}
 					else
 					{
@@ -232,6 +237,10 @@ class BillsController extends AppController
 						elseif ($indicador_seguro == 1)
 						{
 							$bill->tipo_documento = "Recibo de seguro";	
+						}
+						elseif ($indicadorConsejoEducativo == 1)
+						{
+							$bill->tipo_documento = "Recibo de Consejo Educativo";	
 						}
 						else
 						{
@@ -416,6 +425,7 @@ class BillsController extends AppController
 			$indicadorFacturaPendiente = 0;
 			$indicador_servicio_educativo = 0;
 			$indicador_seguro = 0;
+			$indicadorConsejoEducativo = 0;
 
             $this->headboard = $_POST['headboard']; 
 			$idParentsandguardian = $this->headboard['idParentsandguardians'];
@@ -423,30 +433,37 @@ class BillsController extends AppController
 			$transactions = json_decode($_POST['studentTransactions']);
             $payments = json_decode($_POST['paymentsMade']);
             $_POST = [];
-			
+
 			if ($this->headboard['fiscal'] == 0)
 			{
-				foreach ($transactions as $transaction) 
+				if ($this->headboard['indicadorConsejoEducativo'] == 1)
 				{
-					if (substr($transaction->monthlyPayment, 0, 10) == "Matrícula" || substr($transaction->monthlyPayment, 0, 3) == "Ago")
+					$indicadorConsejoEducativo = 1;
+				}
+				else
+				{
+					foreach ($transactions as $transaction) 
 					{
-						if ($this->headboard['indicador_pedido'] == 0)
+						if (substr($transaction->monthlyPayment, 0, 10) == "Matrícula" || substr($transaction->monthlyPayment, 0, 3) == "Ago")
 						{
-							$indicadorFacturaPendiente = 1;
+							if ($this->headboard['indicador_pedido'] == 0)
+							{
+								$indicadorFacturaPendiente = 1;
+							}
+						} 
+						if (substr($transaction->monthlyPayment, 0, 14) == "Seguro escolar")
+						{
+							$indicador_seguro = 1;
 						}
-					} 
-					if (substr($transaction->monthlyPayment, 0, 14) == "Seguro escolar")
-					{
-						$indicador_seguro = 1;
+						if (substr($transaction->monthlyPayment, 0, 18) == "Servicio educativo")
+						{
+							$indicador_servicio_educativo = 1;
+						} 
 					}
-					if (substr($transaction->monthlyPayment, 0, 18) == "Servicio educativo")
-					{
-						$indicador_servicio_educativo = 1;
-					} 
 				}
 			}
 			
-            $billNumber = $this->add($indicadorFacturaPendiente, $indicador_servicio_educativo, $indicador_seguro);
+            $billNumber = $this->add($indicadorFacturaPendiente, $indicador_servicio_educativo, $indicador_seguro, $indicadorConsejoEducativo);
 
             if ($billNumber > 0)
             {
@@ -459,12 +476,14 @@ class BillsController extends AppController
                     
                     $billId = $nueva_factura->id;
 
-                    foreach ($transactions as $transaction) 
-                    {
-                        $Studenttransactions->edit($transaction, $billNumber, $nueva_factura->tipo_documento);
-
-                        $Concepts->add($billId, $transaction, $this->headboard['fiscal']);
-                    }
+					foreach ($transactions as $transaction) 
+					{
+						if ($indicadorConsejoEducativo == 0)
+						{
+							$Studenttransactions->edit($transaction, $billNumber, $nueva_factura->tipo_documento);
+						}
+						$Concepts->add($billId, $transaction, $this->headboard['fiscal']);
+					}
 
                     foreach ($payments as $payment) 
                     {
@@ -702,8 +721,12 @@ class BillsController extends AppController
 			}
 		}
 		
-        $lastRecord = $this->Bills->find('all', ['conditions' => ['id' => $idFactura],
-            'order' => ['Bills.id' => 'DESC']]);
+        $lastRecord = $this->Bills->find('all', 
+			[
+				'contain' => ['Parentsandguardians'],
+				'conditions' => ['Bills.id' => $idFactura],
+				'order' => ['Bills.id' => 'DESC']
+			]);
 					    
         $bill = $lastRecord->first();
 		
@@ -730,7 +753,8 @@ class BillsController extends AppController
 			}
 		}
 		
-		$usuarioResponsable = $usuario->first_name . " " . $usuario->surname;
+		$usuarioResponsable = $usuario->first_name." ".$usuario->surname;
+		$inicialesUsuarioResponsable = substr($usuario->first_name, 0, 1).".".substr($usuario->surname, 0, 1).".";
 				
         $billId = $bill->id;
 								        
@@ -986,6 +1010,16 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
+				elseif (substr($aConcept->concept, 0, 17) == "Consejo Educativo")
+				{
+					$invoiceLine = $aConcept->concept;
+					$amountConcept = $aConcept->amount;
+					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+					$loadIndicator = 1;
+					$firstMonthly= " ";
+					$lastInstallment = " ";
+					$amountConcept = 0;
+				}
 				else    
 				{
 					$invoiceLine = $aConcept->student_name . " - " . "Mensualidad: " . substr($aConcept->concept, 0, 3) . " - ";
@@ -1172,6 +1206,21 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
+				elseif (substr($aConcept->concept, 0, 17) == "Consejo Educativo")
+				{
+					if ($lastInstallment != " ")
+					{
+						$invoiceLine .= $lastInstallment;
+						$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
+						$loadIndicator = 1;
+					}
+					$invoiceLine = $aConcept->concept;
+					$amountConcept = $aConcept->amount;
+					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+					$LoadIndicator = 1;
+					$lastInstallment = " ";
+					$amountConcept = 0;
+				}
 				elseif ($lastInstallment == " ")
 				{
 					$invoiceLine = $aConcept->student_name . " - " . "Mensualidad: " . substr($aConcept->concept, 0, 3) . " - ";
@@ -1210,8 +1259,8 @@ class BillsController extends AppController
 		
 		$vista = "invoice";
 					
-        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento'));
-        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento']);
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school'));
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school']);
 	}
 	
 	public function invoicepdf()

@@ -29,6 +29,9 @@ $omitir_numeros_control =
                         <td style=" text-align: center;">Alicuota</td>
                         <td style=" text-align: center;">IVA</td>
                         <td style=" text-align: center;">IGTF</td>
+                        <td style=" text-align: center;">Tasa de cambio</td>
+                        <td style=" text-align: center;">Divisas</td>
+                        <td style=" text-align: center;">Bolívares</td>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,6 +68,9 @@ $omitir_numeros_control =
                                 <td><?= $invoice->alicuota ?></td>
                                 <td><?= $invoice->iva ?></td>
                                 <td><?= number_format($invoice->igtf, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->tasa_cambio, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->monto_divisas, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->monto_bolivares, 2, ",", ".") ?></td>
                             </tr>
                         <?php
                         } 

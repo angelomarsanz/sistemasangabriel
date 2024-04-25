@@ -198,7 +198,7 @@ class GuardiantransactionsController extends AppController
 		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
 	}
 
-    public function previoContratoRepresentante($idRepresentante)
+    public function previoContratoRepresentante($idRepresentante = null, $controlador = null, $accion = null)
     {
         $this->loadModel('Parentsandguardians');
 
@@ -206,15 +206,31 @@ class GuardiantransactionsController extends AppController
             'contain' => ['Students']
         ]);
 
-        if ($representante->datos_contrato != null)
+        if ($controlador == null && $accion == null)
         {
-            return $this->redirect(['controller' => 'Students', 'action' => 'index']);
+            if ($representante->datos_contrato != null)
+            {
+                return $this->redirect(['controller' => 'Students', 'action' => 'index']);
+            }
+            else
+            {
+                $this->Flash->success(__('Por favor lea detenidamente el presente contrato y si está de acuerdo proceda a firmarlo'));
+            }
         }
-
-        $this->Flash->success(__('Por favor lea detenidamente el presente contrato y si está de acuerdo proceda a firmarlo'));
-        $this->set(compact('idRepresentante'));
-
-        $this->set(compact('representante', 'idRepresentante'));
+        elseif ($controlador == "Users" && $accion == "home")
+        {
+            $this->Flash->success(__('Por favor lea detenidamente el presente contrato y si está de acuerdo proceda a firmarlo'));
+        }
+        else
+        {
+            if ($representante->datos_contrato == null)
+            {
+                $this->Flash->error(__('El contrato no ha sido firmado aún'));
+                return $this->redirect(['controller' => $controlador, 'action' => $accion]);
+            }            
+        }
+        
+        $this->set(compact('representante', 'controlador', 'accion'));
     }
 
     public function firmaContratoRepresentante($idRepresentante = null)

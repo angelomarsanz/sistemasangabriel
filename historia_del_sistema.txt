@@ -5,6 +5,69 @@ Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
 
+23/04/2024
+Para las pruebas en los cambio de la ficha de inscripción
+Id Alumno 1967 (Miranda Arizaga) - Id Representante 1370 - Id User 1344 - CI - 17397034 
+
+04/04/2024
+Consejo Educativo (Pendiente por hacer)
+En la función relatedStudents del controlador "StudentsController", la acción búsqueda del Consejo Educativo debe ser modificada: En lugar de buscar el pago del literal: "Consejo Educativo 2024", se debe hacer la busqueda de todos los consejos educativos pagados por el usuario, guardarla en un vector y pasarla en el Ajax a Javascript. Después cuando el y colocarla cuando el usuario selecciona el período escolar, buscar en el vector si ese pago existe.
+Inactivar el select "Período escolar" hasta tanto no se haya seleccionado la familia
+
+03/04/2024
+Procedimiento para anular internamente una nota de débito contra una nota de crédito de descuento pronto pago. Después volver a crear la nota de débito y crear nuevamente también la nota de crédito Descuento Pronto pago contra la factura original
+- Colocarle el estatus y fecha de anulado en la nota de débito y el estatus anulado en el concepto de la nota de débito.
+- En el campo "saldo" del concepto de la nota de crédito colocar el mismo saldo en Bs. que tiene en el campo "monto"
+- El usuario vuelva a crear la nota de débito
+- El usuario vuelva a crear la nota de crédito contra la factura, pero antes de imprimir la factura en el registro del concepto borrar el valor en el campo "student_name" y en el campo "concept" colocar: Descuento pronto pago
+- Arreglar la transacción del estudiante para que no le aparezca la deuda del pronto pago
+
+22/03/2024
+Familias que deben unificarse, por ejemplo:
+lozada arjona - id 878 - Rep 13047070 - Padre CARLOS ENRIQUE LOZADA SAMPEDRO 13047070 - Madre MARIANA AUXILIADORA ARJONA RODRIGUEZ 15607927 
+lozada piedraita - id - 1355 - Rep 18868684 - Padre CARLOS ENRIQUE LOZADA SAMPEDRO 13047070 - Madre KAREN SARAI PIEDRAHITA JIMENEZ 18868684
+
+Doukaki Pinto - id 260 - Rep 7068756 - Padre JORGE IGNACIO DOUKAKI PARASQUEVOPOULOU 7068756 - Madre MARIA DEL CARMEN PINTO 8844700
+Doukaki Briceño - id 1099 - Rep 20029532 - Padre JORGE IGNACIO DOUKAKI PARASQUEVOPOULOU 7068756 - Madre YSABEL LETICIA BRICEÑO MARGIOTTA 20029532
+
+Montes de Oca Colina - id 506 - Rep 12183728 - Padre DARIO ALEJANDRO MONTES DE OCA BRANDT 12605646 - Madre YUSMARY COLINA LOYO 12183728
+Montes de Oca Cordova - id 507 - Rep 15981753 - Padre DARIO EDUARDO MONTES DE OCA BRANDT 17072344 - Madre ROSA CORDOVA 15981753 
+
+Arena Martínez - id 103 - user_id 105 - C.I. Usuario 24896926 - C.I. Rep 24896926 - C.I. Padre 20294649 - C.I. Madre 20294649
+Martínez Daza - id 482 - user_id 474 - C.I. Usuario 10119976 - C.I. Rep 10119976 - C.I. Padre 7955179 - C.I. Madre 10119976   
+
+Guerrero Escalona / Valderrama Escalona
+
+Alexandrino primera
+
+19/04/2024
+Módulos modificados para la emisión del Recibo de Consejo educativo
+/opt/lampp/htdocs/sistemasangabriel/src/Model/Entity/Consejo.php - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Model/Table/ConsejosTable.php - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp - OK
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Rates/add_dollar.ctp - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/create_invoice.ctp - OK
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/invoice.ctp - OK
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php - OK
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php - OK
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php - OK
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ConceptsController.php - OK
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/TurnsController.php - OK
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ConsejosController.php - OK
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Turns/reporte_cierre.ctp - OK
+
+17/03/2024
+Se deben hacer los siguientes cambios:
+Cada vez que un alumno pague la matrícula correspondiente al año escolar actual se debe actualizar el campo consejo_educativo de la tabla parentsandguardian a "Sí"
+En la rutina verificarAnioUltimaInscripcion de StudenttransactionsController se debe agregar actualizar a "Sí" el consejo educativo siempre y cuando haya realizado algún abono a la matrícula del año escolar actual
+
+12/03/2024
+Recibo de consejo educativo
+Eliminar el usuario 931 - Ok
+Cambiar a student_condition igual a blanco en el registro 1 de ParentsandGuardian - Ok
+Cambiar en la tabla "users" a "Activo" los registros con estatus "Eliminado" que tienen rol diferente a "Representante"
+1268 representantes eliminados, 1258 Eliminados
+
 09/01/2023
 - Los becados completos y parciales verificar por monto - ok
 - Sustituir la palabra "descuento" por "porcentaje de beca" Ok

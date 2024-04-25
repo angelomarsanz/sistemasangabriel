@@ -14,6 +14,7 @@
 							'Pedido' => 'Pedido',
 							'Recibo de anticipo' => 'Recibo de anticipo',
 							'Recibo de compra' => 'Recibo de compra',
+							'Recibo de Consejo Educativo' => 'Recibo de Consejo Educativo',
 							'Recibo de reintegro' => 'Recibo de reintegro',
 							'Recibo de seguro' => 'Recibo de seguro',
 							'Recibo de servicio educativo' => 'Recibo de servicio educativo',

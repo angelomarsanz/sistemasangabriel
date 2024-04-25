@@ -1724,6 +1724,119 @@
 					</div>
 				<?php endif; ?>	
 
+				<!-- Recibos de consejo educativo -->
+				<?php if ($indicadorRecibosConsejoEducativo == 1): ?> 	
+					<div class="saltopagina">
+						<div class="row">
+							<div class="col-md-12">					
+								<table>
+									<thead>
+										<tr>
+											<th style="font-size: 18px; line-height: 20px;"><b>RECIBOS DE CONSEJO EDUCATIVO <?= $turn->start_date->format('d-m-Y') ?></b></th>
+										</tr>
+
+										<tr>
+											<th>&nbsp;</th>
+										</tr>	
+										<tr>
+											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS DE CONSEJO EDUCATIVO:</b></th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div>
+						<div class="row">
+							<div class="col-md-12">					
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th style="text-align: center;"><b>Fecha</b></th>
+											<th style="text-align: center;"><b>Familia</b></th>
+											<th style="text-align: center;"><b>No Recibo</b></th>
+											<th style="text-align: center;"><b>Tipo doc</b></th>
+											<th style="text-align: center;"><b>Efectivo</b></th>
+											<th style="text-align: center;"><b>Zelle</b></th>
+											<th style="text-align: center;"><b>Transferencia</b></th>
+											<th style="text-align: center;"><b>Monto Total Bs.</b></th>
+										</tr>
+									</thead>
+									<tbody>				
+										<?php $totalBs = 0;
+										foreach ($facturas as $factura):  
+											if ($factura->tipo_documento == "Recibo de Consejo Educativo"): 
+												$efectivos = [];
+												$zelles = [];
+												$transferencias = [];
+												foreach ($pagosFacturas as $pago)
+												{
+													if ($pago->bill_id == $factura->id)
+													{ 
+														if ($pago->payment_type == "Efectivo")
+														{
+															$efectivos[] = number_format($pago->amount, 2, ",", ".")."&nbsp;".$pago->moneda." ";
+														}
+														elseif ($pago->bank == "Zelle")
+														{
+															$zelles[] = number_format($pago->amount, 2, ",", ".")."&nbsp;".$pago->moneda." ";
+														}
+														elseif ($pago->payment_type == "Transferencia")
+														{
+															$transferencias[] = number_format($pago->amount, 2, ",", ".")."&nbsp;".$pago->moneda." ";
+														}
+													}
+												} ?> 
+												<tr>
+													<td style="text-align: center;"><?= $factura->date_and_time->format('d-m-Y') ?></td>
+													<td><?= $factura->parentsandguardian->family ?></td>
+													<td style="text-align: center;"><?= $factura->bill_number ?></td>
+													<td style="text-align: center;"><?= $conceptosConsejoEducativo[$factura->id] ?></td>
+													<td style="text-align: center;">
+														<?php
+														foreach ($efectivos as $efectivo):
+															echo $efectivo;
+														endforeach; ?>
+													</td>
+													<td style="text-align: center;">
+														<?php
+														foreach ($zelles as $zelle):
+															echo $zelle;
+														endforeach; ?>
+													</td>
+													<td style="text-align: center;">
+														<?php
+														foreach ($transferencias as $transferencia):
+															echo $transferencia;
+														endforeach; ?>
+													</td>
+													<?php 
+													$montoReciboBs = round($factura->amount_paid * $factura->tasa_cambio, 2);
+													$totalBs += $montoReciboBs; ?>
+													<td style="text-align: center;"><?= number_format($montoReciboBs, 2, ",", ".")."&nbsp;Bs." ?></td>
+												</tr>
+											<?php endif;
+										endforeach; ?>
+										<tr>
+											<td><b>Totales</b></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td style="text-align: center;"><b><?= number_format($totalBs, 2, ",", ".")."&nbsp;Bs." ?></b></td>
+										</tr>
+									</tbody>
+								</table>
+								<p>Recibido: ______________________________</p>
+								<br />
+								<p>Diferencia: ____________________________</p>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>	
+
 				<?php if ($indicadorRecibosSeguroAnulados == 1): ?>
 					<div>
 						<div class="row">

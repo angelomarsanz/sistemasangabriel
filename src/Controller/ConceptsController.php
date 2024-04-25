@@ -91,11 +91,19 @@ class ConceptsController extends AppController
         $concept->student_name = $transaccion->studentName;
         $concept->transaction_identifier = $transaccion->transactionIdentifier;
         $concept->concept = $transaccion->monthlyPayment;
-        $concept->amount = $transaccion->montoAPagarBolivar;
+		if (substr($transaccion->monthlyPayment, 0, 17) == "Consejo educativo")
+		{
+			$concept->amount = $transaccion->montoAPagarDolar;
+			$concept->saldo = $transaccion->montoAPagarDolar;
+		}
+		else
+		{
+        	$concept->amount = $transaccion->montoAPagarBolivar;
+			$concept->saldo = $transaccion->montoAPagarBolivar;
+		}
         $concept->observation = $transaccion->observation;
         $concept->annulled = 0;
 		$concept->concept_migration = 0;		
-		$concept->saldo = $transaccion->montoAPagarBolivar;
 
         if (!($this->Concepts->save($concept)))
         {
@@ -405,5 +413,25 @@ class ConceptsController extends AppController
 			$this->Flash->error(__('El concepto de la nota de IGTF no pudo ser guardado, intente nuevamente'));
 		}
        	return $codigoRetornoConcepto;
+	}
+	public function busquedaConsejoEducativo($turno = null)
+	{
+		$conceptosConsejoEducativo = [];
+
+		$conceptos = $this->Concepts->find('all')
+			->contain(['Bills'])
+			->where(['Bills.annulled' => 0, 'Bills.turn' => $turno, 'Bills.tipo_documento' => 'Recibo de Consejo Educativo'])
+			->order(['Bills.bill_number' => 'ASC']);
+
+		$contadorConceptos = $conceptos->count();
+
+		if ($contadorConceptos > 0)
+		{
+			foreach ($conceptos as $concepto)
+			{
+				$conceptosConsejoEducativo[$concepto->bill->id] = $concepto->concept;
+			}
+		}
+		return $conceptosConsejoEducativo;
 	}
 }

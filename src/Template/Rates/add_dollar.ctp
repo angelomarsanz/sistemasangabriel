@@ -68,6 +68,7 @@
                 echo $this->Form->input('concept', ['required' => 'required', 'label' => 'Tarifa', 'options' => 
                     [null => '',
 					'Agosto' => 'Agosto',
+                    'Consejo Educativo' => 'Consejo Educativo',
                     'Matrícula' => 'Matrícula',
                     'Mensualidad' => 'Mensualidad',
                     'Seguro escolar' => 'Seguro escolar',
