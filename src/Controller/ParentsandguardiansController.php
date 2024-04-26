@@ -971,7 +971,7 @@ class ParentsandguardiansController extends AppController
 
         $familiasRelacionadasBusqueda = $this->Parentsandguardians->find('all', ['conditions' => 
         [
-            'familias_relacionadas is not null'
+            'familias_relacionadas is null'
         ]]);
 
         $this->set(compact('familiasRelacionadasControl', 'familiasRelacionadasBusqueda'));
@@ -993,6 +993,11 @@ class ParentsandguardiansController extends AppController
                 "0"
             ];
 
+        $familiasRelacionadasBD = $this->Parentsandguardians->find('all', ['conditions' => 
+            [
+                'familias_relacionadas is not null'
+            ]]);
+
         $familiasControl = $this->Parentsandguardians->find('all', ['conditions' => 
             [
                 'id >' => 1,
@@ -1005,15 +1010,15 @@ class ParentsandguardiansController extends AppController
             ]]);
 
         $familiasBusqueda = $this->Parentsandguardians->find('all', ['conditions' => 
-        [
-            'id >' => 1,
-            'estatus_registro' => "Activo",
-            'family !='  => "",
-            'type_of_identification_father !=' => "",
-            'identidy_card_father !=' => "",
-             'type_of_identification_mother !=' => "",
-            'identidy_card_mother !=' => "",
-        ]]);
+            [
+                'id >' => 1,
+                'estatus_registro' => "Activo",
+                'family !='  => "",
+                'type_of_identification_father !=' => "",
+                'identidy_card_father !=' => "",
+                'type_of_identification_mother !=' => "",
+                'identidy_card_mother !=' => "",
+            ]]);
 
         $contadorFamiliasControlProcesadas = 0;
         $contadorFamiliasBusquedaProcesadas = 0;
@@ -1024,7 +1029,19 @@ class ParentsandguardiansController extends AppController
         $contadorFamiliasNoRelacionadasActualizadas = 0;
         $indicadorExcepcionNombrePadre = 0;
         $indicadorExcepcionNombreMadre = 0;
+        $familiasYaRelacionadas = [];
+
         $binnacles = new BinnaclesController;
+
+        foreach ($familiasRelacionadasBD as $familia)
+        {
+            $representante = $this->Parentsandguardians->get($familia->id);
+            $representante->familias_relacionadas = null;
+            if (!($this->Parentsandguardians->save($representante))) 
+            {
+                $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo limpiar el campo familias_relacionadas en el registro con el ID '.$familia->id);
+            }
+        }
 
         foreach ($familiasControl as $control)
         {
@@ -1072,74 +1089,78 @@ class ParentsandguardiansController extends AppController
                 $contadorFamiliasControlProcesadas++;
                 foreach ($familiasBusqueda as $busqueda)
                 {
+                    $indicadorMarcado = 0;
                     $indicadorFamiliaRelacionada = 0;
                     if ($control->id != $busqueda->id)
                     {
-                        $nombrePadreBusqueda = 
-                            trim($busqueda->first_name_father)." ".
-                            trim($busqueda->second_name_father)." ".
-                            trim($busqueda->surname_father)." ".
-                            trim($busqueda->second_surname_father);
+                        if (!(in_array($busqueda->id, $familiasYaRelacionadas)))
+                        {           
+                            $nombrePadreBusqueda = 
+                                trim($busqueda->first_name_father)." ".
+                                trim($busqueda->second_name_father)." ".
+                                trim($busqueda->surname_father)." ".
+                                trim($busqueda->second_surname_father);
 
-                        $nombrePadreBusqueda = $this->eliminarAcentos($nombrePadreBusqueda);
+                            $nombrePadreBusqueda = $this->eliminarAcentos($nombrePadreBusqueda);
 
-                        $identificacionPadreBusqueda = $busqueda->type_of_identification_father.trim($busqueda->identidy_card_father);
+                            $identificacionPadreBusqueda = $busqueda->type_of_identification_father.trim($busqueda->identidy_card_father);
 
-                        $nombreMadreBusqueda = 
-                            trim($busqueda->first_name_mother)." ".
-                            trim($busqueda->second_name_mother)." ".
-                            trim($busqueda->surname_mother)." ".
-                            trim($busqueda->second_surname_mother);
+                            $nombreMadreBusqueda = 
+                                trim($busqueda->first_name_mother)." ".
+                                trim($busqueda->second_name_mother)." ".
+                                trim($busqueda->surname_mother)." ".
+                                trim($busqueda->second_surname_mother);
 
-                        $nombreMadreBusqueda = $this->eliminarAcentos($nombreMadreBusqueda);
+                            $nombreMadreBusqueda = $this->eliminarAcentos($nombreMadreBusqueda);
 
-                        $identificacionMadreBusqueda = $busqueda->type_of_identification_mother.trim($busqueda->identidy_card_mother);
+                            $identificacionMadreBusqueda = $busqueda->type_of_identification_mother.trim($busqueda->identidy_card_mother);
 
-                        if ($nombrePadreBusqueda != "" && $nombreMadreBusqueda != "")
-                        {
-                            $contadorFamiliasBusquedaProcesadas++;
-
-                            if (!(in_array(trim($control->identidy_card_father), $excepcionesCedula)))
+                            if ($nombrePadreBusqueda != "" && $nombreMadreBusqueda != "")
                             {
-                                if ($identificacionPadreControl == $identificacionPadreBusqueda)
+                                $contadorFamiliasBusquedaProcesadas++;
+
+                                if (!(in_array(trim($control->identidy_card_father), $excepcionesCedula)))
                                 {
-                                    $indicadorFamiliaRelacionada = 1;
-                                }
-                            }
-                            if ($indicadorFamiliaRelacionada == 0)
-                            {
-                                if (!(in_array(trim($control->identidy_card_mother), $excepcionesCedula)))
-                                {
-                                    if ($identificacionMadreControl == $identificacionMadreBusqueda)
+                                    if ($identificacionPadreControl == $identificacionPadreBusqueda)
                                     {
                                         $indicadorFamiliaRelacionada = 1;
                                     }
                                 }
-                            }
-                            if ($indicadorFamiliaRelacionada == 0)
-                            { 
-                                if ($indicadorExcepcionNombrePadre == 0)
+                                if ($indicadorFamiliaRelacionada == 0)
                                 {
-                                    if ($nombrePadreControl == $nombrePadreBusqueda)
+                                    if (!(in_array(trim($control->identidy_card_mother), $excepcionesCedula)))
                                     {
-                                        $indicadorFamiliaRelacionada = 1;
+                                        if ($identificacionMadreControl == $identificacionMadreBusqueda)
+                                        {
+                                            $indicadorFamiliaRelacionada = 1;
+                                        }
                                     }
                                 }
-                            }
-                            if ($indicadorFamiliaRelacionada == 0)
-                            {
-                                if ($indicadorExcepcionNombreMadre == 0)
-                                {
-                                    if ($nombreMadreControl == $nombreMadreBusqueda)
+                                if ($indicadorFamiliaRelacionada == 0)
+                                { 
+                                    if ($indicadorExcepcionNombrePadre == 0)
                                     {
-                                        $indicadorFamiliaRelacionada = 1;
+                                        if ($nombrePadreControl == $nombrePadreBusqueda)
+                                        {
+                                            $indicadorFamiliaRelacionada = 1;
+                                        }
                                     }
                                 }
-                            }
-                            if ($indicadorFamiliaRelacionada == 1)
-                            {
-                                $indicadorConFamiliasRelacionadas = 1;
-                                $vectorFamiliasRelacionadas[] = $busqueda->id;
+                                if ($indicadorFamiliaRelacionada == 0)
+                                {
+                                    if ($indicadorExcepcionNombreMadre == 0)
+                                    {
+                                        if ($nombreMadreControl == $nombreMadreBusqueda)
+                                        {
+                                            $indicadorFamiliaRelacionada = 1;
+                                        }
+                                    }
+                                }
+                                if ($indicadorFamiliaRelacionada == 1)
+                                {
+                                    $indicadorConFamiliasRelacionadas = 1;
+                                    $vectorFamiliasRelacionadas[] = $busqueda->id;
+                                }
                             }
                         }
                     }  
@@ -1151,29 +1172,14 @@ class ParentsandguardiansController extends AppController
                     if ($this->Parentsandguardians->save($representante)) 
                     {
                         $contadorFamiliasRelacionadasActualizadas++;
+                        $familiasYaRelacionadas[] = $control->id;
                     }
                     else
                     {
                         $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo actualizar el representante con familias relacionadas con el ID '.$control->id);
                     }
                 }
-                else
-                {
-                    if ($control->familias_relacionadas != null)
-                    {
-                        $representante = $this->Parentsandguardians->get($control->id);
-                        $representante->familias_relacionadas = null;
-                        if ($this->Parentsandguardians->save($representante)) 
-                        {
-                            $contadorFamiliasNoRelacionadasActualizadas++;
-                        }
-                        else
-                        {
-                            $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo actualizar el representante sin familias relacionadas con el ID '.$control->id);
-                        }
-                    }
-                }
-            }              
+            }
         }
         $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'contadorFamiliasControlProcesadas '.$contadorFamiliasControlProcesadas.' contadorFamiliasBusquedaProcesadas '.$contadorFamiliasBusquedaProcesadas.' contadorFamiliasRelacionadasActualizadas '.$contadorFamiliasRelacionadasActualizadas.' contadorFamiliasNoRelacionadasActualizadas '.$contadorFamiliasNoRelacionadasActualizadas);
         return;    
