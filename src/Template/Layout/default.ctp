@@ -26,8 +26,8 @@ $cakeDescription = 'San Gabriel Arcángel';
     </title>
     <?= $this->Html->meta('icon') ?>
 
-    <?= $this->Html->css(['jquery-ui.min', 'bootstrap.min', 'style2']) ?>
-    <?= $this->Html->script(['jquery-3.1.1.min', 'jquery-ui.min', 'bootstrap.min', 'jquery.redirect', 'jquery.numeric.min', 'jquery.table2excel.min', 'signature_pad.umd.min']) ?>
+    <?= $this->Html->css(['jquery-ui.min', 'bootstrap.min', 'style2', 'csga.css?ver='.time()]) ?>
+    <?= $this->Html->script(['jquery-3.1.1.min', 'jquery-ui.min', 'bootstrap.min', 'jquery.redirect', 'jquery.numeric.min', 'jquery.table2excel.min', 'signature_pad.umd.min', 'csga.js?ver='.time()]) ?>
     
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
@@ -41,6 +41,25 @@ $cakeDescription = 'San Gabriel Arcángel';
         <?= $this->fetch('content') ?>
     </div>
     <footer>
+        <div id="alertaSatisfactorio" class="noVerEnPantalla row">
+            <div class="col-xs-12 col-sm-12 col-md-12 alert alert-success alert-dismissible" style="position: fixed; bottom: 0; text-align: center;">
+                <a href="#" class="alertasGenerales close" data-dismiss="success" aria-label="close">&times;</a>
+                <span id="mensajeAlertaSatisfactorio"></span>
+            </div>
+        </div>
+        <div id="alertaAdvertencia" class="noVerEnPantalla row">
+            <div class="col-xs-12 col-sm-12 col-md-12 alert alert-warning alert-dismissible" style="position: fixed; bottom: 0; text-align: center;">
+                <a href="#" class="alertasGenerales close" data-dismiss="warning" aria-label="close">&times;</a>
+                <span id="mensajeAlertaAdvertencia"></span>
+            </div>
+        </div>
+        <div id="alertaPeligro" class="noVerEnPantalla row">
+            <div class="col-xs-12 col-sm-12 col-md-12 alert alert-danger alert-dismissible" style="position: fixed; bottom: 0; text-align: center;">
+                <a href="#" class="alertasGenerales close" data-dismiss="danger" aria-label="close">&times;</a>
+                <span id="mensajeAlertaPeligro"></span>
+            </div>
+        </div>
+
     </footer>
 </body>
 </html>

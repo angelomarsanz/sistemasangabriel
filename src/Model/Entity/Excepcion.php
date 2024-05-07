@@ -7,6 +7,12 @@ use Cake\ORM\Entity;
  * Salesbook Entity
  *
  * @property int $id
+ * @property int $anio
+ * @property int $mes
+ * @property int $identificador_asociado
+ * @property int $consecutivo_identificador
+ * @property int $accion
+ * @property string $numero_control_secuencia
  * @property \Cake\I18n\Time $fecha
  * @property string $tipo_documento
  * @property string $cedula_rif
@@ -26,9 +32,6 @@ use Cake\ORM\Entity;
  * @property float $tasa_cambio
  * @property float $monto_divisas
  * @property float $monto_bolivares
- * @property int $right_bill_number
- * @property int $previous_control_number
- * @property int $id_documento
  * @property \Cake\I18n\Time $created
  * @property \Cake\I18n\Time $modified
  */

@@ -1,0 +1,17 @@
+.iconoMenu
+{
+    padding-left: 10px;
+    color: #9494b8;
+    font-size: 150%;
+}
+.logo
+{
+    padding: 1px;
+    margin: 1px;
+    border: 0;
+    background-color: #b3e0ff;
+}
+.noVerEnPantalla
+{
+    display: none;
+}

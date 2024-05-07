@@ -961,4 +961,373 @@ class ParentsandguardiansController extends AppController
             return false;           
         }
     }
+
+    public function busquedaFamiliasRelacionadas()
+    {
+        $excepcionesNombre =
+            [
+                "NO   APLICA",
+                "NO  APLICA",
+                "NO APLICA",
+                "NOAPLICA",
+                "N/A",
+                "N / A"
+            ];
+
+        $excepcionesCedula =
+            [
+                "0"
+            ];
+
+        $familiasRelacionadasBD = $this->Parentsandguardians->find('all', ['conditions' => 
+            [
+                'familias_relacionadas is not null'
+            ]]);
+
+        $familiasControl = $this->Parentsandguardians->find('all', ['conditions' => 
+            [
+                'id >' => 1,
+                'estatus_registro' => "Activo",
+                'family !='  => "",
+                'type_of_identification_father !=' => "",
+                'identidy_card_father !=' => "",
+                'type_of_identification_mother !=' => "",
+                'identidy_card_mother !=' => "",
+            ]]);
+
+        $familiasBusqueda = $this->Parentsandguardians->find('all', ['conditions' => 
+            [
+                'id >' => 1,
+                'estatus_registro' => "Activo",
+                'family !='  => "",
+                'type_of_identification_father !=' => "",
+                'identidy_card_father !=' => "",
+                'type_of_identification_mother !=' => "",
+                'identidy_card_mother !=' => "",
+            ]]);
+
+        $contadorFamiliasControlProcesadas = 0;
+        $contadorFamiliasBusquedaProcesadas = 0;
+        $indicadorConFamiliasRelacionadas = 0;
+        $indicadorFamiliaRelacionada = 0;
+        $vectorFamiliasRelacionadas = [];
+        $contadorFamiliasRelacionadasActualizadas = 0;
+        $contadorFamiliasNoRelacionadasActualizadas = 0;
+        $indicadorExcepcionNombrePadre = 0;
+        $indicadorExcepcionNombreMadre = 0;
+        $familiasYaRelacionadas = [];
+
+        $binnacles = new BinnaclesController;
+
+        foreach ($familiasRelacionadasBD as $familia)
+        {
+            $representante = $this->Parentsandguardians->get($familia->id);
+            $representante->familias_relacionadas = null;
+            if (!($this->Parentsandguardians->save($representante))) 
+            {
+                $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo limpiar el campo familias_relacionadas en el registro con el ID '.$familia->id);
+            }
+        }
+
+        foreach ($familiasControl as $control)
+        {
+            $indicadorConFamiliasRelacionadas = 0;
+            $vectorFamiliasRelacionadas = [];
+
+            $nombrePadreControl = 
+                trim($control->first_name_father)." ".
+                trim($control->second_name_father)." ".
+                trim($control->surname_father)." ".
+                trim($control->second_surname_father);
+
+            $nombrePadreControl = $this->eliminarAcentos($nombrePadreControl);
+
+            $identificacionPadreControl = $control->type_of_identification_father.trim($control->identidy_card_father);
+
+            $nombreMadreControl = 
+                trim($control->first_name_mother)." ".
+                trim($control->second_name_mother)." ".
+                trim($control->surname_mother)." ".
+                trim($control->second_surname_mother);
+
+            $nombreMadreControl = $this->eliminarAcentos($nombreMadreControl);
+
+            $identificacionMadreControl = $control->type_of_identification_mother.trim($control->identidy_card_mother);
+
+            $indicadorExcepcionNombrePadre = 0;
+            $indicadorExcepcionNombreMadre = 0;
+            foreach ($excepcionesNombre as $excepcion)
+            {
+                $posicionCadena = strpos($nombrePadreControl, $excepcion);
+                if ($posicionCadena !== false)
+                {
+                    $indicadorExcepcionNombrePadre = 1;
+                }
+                $posicionCadena = strpos($nombreMadreControl, $excepcion);
+                if ($posicionCadena !== false)
+                {
+                    $indicadorExcepcionNombreMadre = 1;
+                }
+            }
+
+            if ($nombrePadreControl != "" && $nombreMadreControl != "")
+            {
+                $contadorFamiliasControlProcesadas++;
+                foreach ($familiasBusqueda as $busqueda)
+                {
+                    $indicadorMarcado = 0;
+                    $indicadorFamiliaRelacionada = 0;
+                    if ($control->id != $busqueda->id)
+                    {
+                        if (!(in_array($busqueda->id, $familiasYaRelacionadas)))
+                        {           
+                            $nombrePadreBusqueda = 
+                                trim($busqueda->first_name_father)." ".
+                                trim($busqueda->second_name_father)." ".
+                                trim($busqueda->surname_father)." ".
+                                trim($busqueda->second_surname_father);
+
+                            $nombrePadreBusqueda = $this->eliminarAcentos($nombrePadreBusqueda);
+
+                            $identificacionPadreBusqueda = $busqueda->type_of_identification_father.trim($busqueda->identidy_card_father);
+
+                            $nombreMadreBusqueda = 
+                                trim($busqueda->first_name_mother)." ".
+                                trim($busqueda->second_name_mother)." ".
+                                trim($busqueda->surname_mother)." ".
+                                trim($busqueda->second_surname_mother);
+
+                            $nombreMadreBusqueda = $this->eliminarAcentos($nombreMadreBusqueda);
+
+                            $identificacionMadreBusqueda = $busqueda->type_of_identification_mother.trim($busqueda->identidy_card_mother);
+
+                            if ($nombrePadreBusqueda != "" && $nombreMadreBusqueda != "")
+                            {
+                                $contadorFamiliasBusquedaProcesadas++;
+
+                                if (!(in_array(trim($control->identidy_card_father), $excepcionesCedula)))
+                                {
+                                    if ($identificacionPadreControl == $identificacionPadreBusqueda)
+                                    {
+                                        $indicadorFamiliaRelacionada = 1;
+                                    }
+                                }
+                                if ($indicadorFamiliaRelacionada == 0)
+                                {
+                                    if (!(in_array(trim($control->identidy_card_mother), $excepcionesCedula)))
+                                    {
+                                        if ($identificacionMadreControl == $identificacionMadreBusqueda)
+                                        {
+                                            $indicadorFamiliaRelacionada = 1;
+                                        }
+                                    }
+                                }
+                                if ($indicadorFamiliaRelacionada == 0)
+                                { 
+                                    if ($indicadorExcepcionNombrePadre == 0)
+                                    {
+                                        if ($nombrePadreControl == $nombrePadreBusqueda)
+                                        {
+                                            $indicadorFamiliaRelacionada = 1;
+                                        }
+                                    }
+                                }
+                                if ($indicadorFamiliaRelacionada == 0)
+                                {
+                                    if ($indicadorExcepcionNombreMadre == 0)
+                                    {
+                                        if ($nombreMadreControl == $nombreMadreBusqueda)
+                                        {
+                                            $indicadorFamiliaRelacionada = 1;
+                                        }
+                                    }
+                                }
+                                if ($indicadorFamiliaRelacionada == 1)
+                                {
+                                    $indicadorConFamiliasRelacionadas = 1;
+                                    $vectorFamiliasRelacionadas[] = $busqueda->id;
+                                }
+                            }
+                        }
+                    }  
+                }  
+                if ($indicadorConFamiliasRelacionadas == 1)
+                {
+                    $representante = $this->Parentsandguardians->get($control->id);
+                    $representante->familias_relacionadas = json_encode($vectorFamiliasRelacionadas);
+                    if ($this->Parentsandguardians->save($representante)) 
+                    {
+                        $contadorFamiliasRelacionadasActualizadas++;
+                        $familiasYaRelacionadas[] = $control->id;
+                    }
+                    else
+                    {
+                        $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo actualizar el representante con familias relacionadas con el ID '.$control->id);
+                    }
+                }
+            }
+        }
+        $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'contadorFamiliasControlProcesadas '.$contadorFamiliasControlProcesadas.' contadorFamiliasBusquedaProcesadas '.$contadorFamiliasBusquedaProcesadas.' contadorFamiliasRelacionadasActualizadas '.$contadorFamiliasRelacionadasActualizadas.' contadorFamiliasNoRelacionadasActualizadas '.$contadorFamiliasNoRelacionadasActualizadas);
+        return;    
+    }
+    public function eliminarAcentos($cadena)
+    {
+        $letrasConTilde = 
+            [
+                'Á', 'À', 'Â', 'Ä', 'á', 'à', 'ä', 'â', 'ª',
+                'É', 'È', 'Ê', 'Ë', 'é', 'è', 'ë', 'ê',
+                'Í', 'Ì', 'Ï', 'Î', 'í', 'ì', 'ï', 'î',
+                'Ó', 'Ò', 'Ö', 'Ô', 'ó', 'ò', 'ö', 'ô',
+                'Ú', 'Ù', 'Û', 'Ü', 'ú', 'ù', 'ü', 'û'
+            ];
+
+        $letrasSinTilde =
+            [
+                'A', 'A', 'A', 'A', 'a', 'a', 'a', 'a', 'a',
+                'E', 'E', 'E', 'E', 'e', 'e', 'e', 'e',
+                'I', 'I', 'I', 'I', 'i', 'i', 'i', 'i',
+                'O', 'O', 'O', 'O', 'o', 'o', 'o', 'o',
+                'U', 'U', 'U', 'U', 'u', 'u', 'u', 'u'              
+            ];
+ 
+        $cadena = str_replace($letrasConTilde, $letrasSinTilde, $cadena);
+
+        return $cadena;
+    }
+    public function consejoEducativo($reporte = null)
+    {
+        if (isset($reporte))
+        {
+            if ($reporte == "familiasRelacionadas")
+            {
+                $this->busquedaFamiliasRelacionadas();
+                $familiasRelacionadasControl = $this->Parentsandguardians->find('all', ['conditions' => 
+                [
+                    'familias_relacionadas is not null'
+                ]]);
+        
+                $familiasRelacionadasBusqueda = $this->Parentsandguardians->find('all', ['conditions' => 
+                [
+                    'familias_relacionadas is null'
+                ]]);
+        
+                $this->set(compact('reporte', 'familiasRelacionadasControl', 'familiasRelacionadasBusqueda'));
+            }
+        }
+        else
+        {
+            $reporte = "";
+            $this->set(compact('reporte'));
+        }
+    }
+    public function datosFamilia()
+    {    
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) 
+        {
+            if (isset($_POST['idFamilia']))
+            {
+                $idFamilia = $_POST['idFamilia'];
+                $respuesta = [];
+                $contadorEstudiantes = 0;
+                $consejoExonerado = 0;
+
+                $estudiantes = $this->Parentsandguardians->Students->find('all')
+                ->where(['Parentsandguardians.id' => $idFamilia , 'Students.student_condition' => "Regular"])
+                ->contain(['Parentsandguardians']);
+
+                if ($estudiantes->count() > 0)
+                {
+                    $respuesta["satisfactorio"] = true;
+                    foreach ($estudiantes as $estudiante)
+                    {
+                        if ($contadorEstudiantes == 0)
+                        {
+                            $consejoExonerado = $estudiante->parentsandguardian->consejo_exonerado; 
+                            $respuesta['html'] =
+                                "<br />".
+                                "<h4>Familia: ".$estudiante->parentsandguardian->family." (".$estudiante->parentsandguardian->surname." ".$estudiante->parentsandguardian->first_name.")</h3>".
+                                "<div name='estudiantesFamilia' id='estudianteFamilia' class='container'>".
+                                "<table class='table table-striped table-hover'>".
+                                    "<thead>".
+                                        "<tr>".
+                                            "<th><b>Estudiante</b></th>".
+                                        "</tr>".
+                                    "</thead>".
+                                    "<tbody>";
+                        }
+                        $respuesta['html'] .=
+                                "<tr>".
+                                    "<td>".$estudiante->full_name."</td>".
+                                "<tr>";
+                        $contadorEstudiantes++;
+                    }
+                    if ($contadorEstudiantes > 0)
+                    {
+                        $respuesta['html'] .=
+                                    "</tbody>".
+                                "</table>".
+                            "</div>";	
+                        if ($consejoExonerado > 0)
+                        {
+                            $respuesta['html'] .= "<button type='button' class='exoneracion eliminarExoneracion btn btn-primary'>Eliminar exoneración</button>";
+                        }	
+                        else
+                        {
+                            $respuesta['html'] .= "<button type='button' class='exoneracion exonerarFamilia btn btn-primary'>Exonerar</button>";
+                        }
+                    }
+                }
+                else
+                {
+                    $respuesta["satisfactorio"] = false;
+                    $respuesta["mensajeDeError"] = "La familia no tiene estudiantes asociados";
+                }
+                exit(json_encode($respuesta, JSON_FORCE_OBJECT));
+            }
+        }
+    }
+    public function editarExoneracion()
+    {    
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) 
+        {
+            if (isset($_POST['idFamilia']))
+            {
+                $idFamilia = $_POST['idFamilia'];
+                $accion = $_POST['accion'];
+                $respuesta = [];
+
+                $representante = $this->Parentsandguardians->get($idFamilia);
+
+                if ($accion == "exonerarFamilia")
+                {
+                    $representante->consejo_exonerado = 100;
+                }
+                else
+                {
+                    $representante->consejo_exonerado = 0;
+                }
+
+                if ($this->Parentsandguardians->save($representante)) 
+                {
+                    $respuesta["satisfactorio"] = true;
+                    if ($accion == "exonerarFamilia")
+                    {
+                        $respuesta["mensaje"] = "Se exoneró el consejo educativo exitosamente";
+                    }
+                    else
+                    {
+                        $respuesta["mensaje"] = "Se eliminó la exoneración del Consejo Educativo exitosamente";
+                    }
+                }
+                else
+                {
+                    $respuesta["satisfactorio"] = false;
+                    $respuesta["mensaje"] = "No se pudieron hacer los cambios en la base de datos";
+                }
+                exit(json_encode($respuesta, JSON_FORCE_OBJECT));
+            }
+        }
+    }
 }

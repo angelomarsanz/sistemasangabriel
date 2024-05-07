@@ -20,23 +20,7 @@
 	if (!(isset($reimpresion))):
 		$reimpresion = 0;
 	endif;
-	
 ?>
-<style>
-    .iconoMenu
-    {
-        padding-left: 10px;
-        color: #9494b8;
-        font-size: 150%;
-    }
-    .logo
-    {
-        padding: 1px;
-        margin: 1px;
-        border: 0;
-        background-color: #b3e0ff;
-     }
-</style>
 <nav class="navbar navbar-default navbar-fixed-top" style="background-color: #b3e0ff;">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -87,6 +71,7 @@
 								<li><?= $this->Html->link('Familias con cuatro o más hijos', ['controller' => 'Students', 'action' => 'familiasDescuento50']) ?></li> 
 								<!-- <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li> -->
 								<li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>	
+								<li><?= $this->Html->link('Consejo Educativo', ['controller' => 'Parentsandguardians', 'action' => 'consejoEducativo']) ?></li>	
 							</ul>
 						</li>
 						<li class="dropdown">
@@ -211,6 +196,7 @@
         </div>
     </div>
 </nav>
+
 <script>
 	// Variables globales
 	gVista = "<?= $vista ?>";
@@ -218,12 +204,6 @@
 	gNumeroControl = "<?= $numeroControl ?>";
 	gIndicadorImpresa = "<?= $indicadorImpresa ?>";
 	gReimpresion = "<?= $reimpresion ?>";
-
-	console.log('gVista ' + gVista);
-	console.log('gIdFactura ' + gIdFactura);
-	console.log('gNumeroControl ' + gNumeroControl);
-	console.log('gIndicadorImpresa ' + gIndicadorImpresa);
-	console.log('gReimpresion ' + gReimpresion);
 	
 	// Funciones
 	

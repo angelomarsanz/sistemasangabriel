@@ -157,6 +157,9 @@ class SalesbooksController extends AppController
             $this->loadModel('Bills');
             $this->loadModel('Concepts');
             $this->loadModel('Payments');
+            $this->loadModel('Excepciones');
+
+            $identificadoresExcepciones = [];
 
             $invoicesBills = $this->Bills->find('all', 
                 [
@@ -182,6 +185,27 @@ class SalesbooksController extends AppController
                 ['YEAR(created)' => $_POST['year']]]
             ]);
 
+            $excepciones = $this->Excepciones->find('all', 
+                [
+                    'conditions' => 
+                        [
+                            'anio' => intval($_POST['year']), 
+                            'mes' => intval($_POST['month'])
+                        ],
+                    'order' => ['identificador_asociado' => 'ASC', 'consecutivo_identificador']
+                ]);
+
+            if ($excepciones->count() > 0)
+            {
+                foreach ($excepciones as $excepcion)
+                {
+                    if (!(in_array($excepcion->identificador_asociado, $identificadoresExcepciones)))
+                    {
+                        $identificadoresExcepciones[] = $excepcion->identificador_asociado;
+                    }
+                }
+            }
+
             $contador = 0;
 			
 			$controlFacturaAnterior = 0;
@@ -194,35 +218,48 @@ class SalesbooksController extends AppController
 				{
 					$controlFacturaAnterior = $invoicesBill->control_number;
                 }
-                if ($invoicesBill->annulled == false && $invoicesBill->control_number != null && $invoicesBill->control_number != 0 && $invoicesBill->control_number != 999999)
+                if (in_array($invoicesBill->id, $identificadoresExcepciones))
                 {
-                    $contadorControlFacturas = $invoicesBill->control_number - $controlFacturaAnterior;
-                    if ($contadorControlFacturas > 1 && $controlFacturaAnterior != 0)
-                    {						
-                        while ($contadorControlFacturas > 1)
-                        {
-                            $controlFacturaAnterior++;
-                            $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $conceptos, $pagos, $controlFacturaAnterior);
-                            if ($codigoRetorno == 1)
+                    $resultadoExcepciones = $this->excepcionesLibroVentas($excepciones, $invoicesBill, $conceptos, $pagos, $controlFacturaAnterior);
+                    if ($resultadoExcepciones['codigoRetorno'] > 0)
+                    {
+                        $errorBill = 1;
+                        break;
+                    }
+                    $controlFacturaAnterior = $resultadoExcepciones['controlFacturaAnterior'];
+                }
+                else
+                {
+                    if ($invoicesBill->annulled == false && $invoicesBill->control_number != null && $invoicesBill->control_number != 0 && $invoicesBill->control_number != 999999)
+                    {
+                        $contadorControlFacturas = $invoicesBill->control_number - $controlFacturaAnterior;
+                        if ($contadorControlFacturas > 1 && $controlFacturaAnterior != 0)
+                        {						
+                            while ($contadorControlFacturas > 1)
                             {
-                                $errorBill = 1;
-                                break;
+                                $controlFacturaAnterior++;
+                                $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $conceptos, $pagos, $controlFacturaAnterior);
+                                if ($codigoRetorno == 1)
+                                {
+                                    $errorBill = 1;
+                                    break;
+                                }
+                                $contadorControlFacturas--;
                             }
-                            $contadorControlFacturas--;
                         }
                     }
+                    $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $conceptos, $pagos, 0);
+                    if ($codigoRetorno == 1)
+                    {
+                        $errorBill = 1;
+                        break;
+                    }
+                    if ($invoicesBill->control_number != 999999)
+                    {
+                        $controlFacturaAnterior = $invoicesBill->control_number;				
+                    }
                 }
-                $codigoRetorno = $this->crearRegistroLibro($invoicesBill, $conceptos, $pagos, 0);
-                if ($codigoRetorno == 1)
-                {
-                    $errorBill = 1;
-                    break;
-                }
-                if ($invoicesBill->control_number != 999999)
-                {
-                    $controlFacturaAnterior = $invoicesBill->control_number;				
-                    $contador++;
-                }
+                $contador++;
 			}
 
             if ($errorBill == 0)  
@@ -237,7 +274,71 @@ class SalesbooksController extends AppController
             }
 		}
     }
-	
+
+	public function excepcionesLibroVentas($excepciones = null, $invoicesBill = null, $conceptos = null, $pagos = null, $controlFacturaAnterior = null)
+	{
+        $resultadoExcepciones = [];
+        $resultadoExcepciones['codigoRetorno'] = 0;
+        $resultadoExcepciones['controlFacturaAnterior'] = 0;
+
+        foreach ($excepciones as $excepcion)
+        {
+            if ($excepcion->identificador_asociado == $invoicesBill->id)
+            {
+                if ($excepcion->accion == "Registrar")
+                {
+                    $resultadoExcepciones['codigoRetorno'] = $this->crearRegistroLibro($invoicesBill, $conceptos, $pagos, 0);
+                    if ($resultadoExcepciones['codigoRetorno'] > 0)
+                    {
+                        break;
+                    }
+                }
+                elseif ($excepcion->accion == "Modificar" || $excepcion->accion == "Agregar")
+                {
+                    $resultadoExcepciones['codigoRetorno'] = $this->registrarExcepcion($excepcion);
+                    if ($resultadoExcepciones['codigoRetorno'] > 0)
+                    {
+                        break;
+                    }
+                }
+                $resultadoExcepciones['controlFacturaAnterior'] = $excepcion->numero_control_secuencia;
+            }
+        }
+        return $resultadoExcepciones;
+    }
+
+    public function registrarExcepcion($excepcion)
+    {
+        $codigoRetorno = 0;
+        $salesbook = $this->Salesbooks->newEntity();
+        $salesbook->fecha = $excepcion->fecha;
+        $salesbook->tipo_documento = $excepcion->tipo_documento;
+        $salesbook->cedula_rif = $excepcion->cedula_rif;
+        $salesbook->nombre_razon_social = $excepcion->nombre_razon_social;
+        $salesbook->numero_control = $excepcion->numero_control;
+        $salesbook->numero_factura = $excepcion->numero_factura;
+        $salesbook->nota_debito = $excepcion->nota_debito;
+        $salesbook->nota_credito = $excepcion->nota_credito;
+        $salesbook->factura_afectada = $excepcion->factura_afectada;
+        $salesbook->total_ventas_mas_impuesto = $excepcion->total_ventas_mas_impuesto;
+        $salesbook->descuento_recargo = $excepcion->descuento_recargo;
+        $salesbook->ventas_exoneradas = $excepcion->ventas_exoneradas;
+        $salesbook->base = $excepcion->base;
+        $salesbook->alicuota = $excepcion->alicuota;
+        $salesbook->iva = $excepcion->iva;
+        $salesbook->igft = $excepcion->igft;
+        $salesbook->tasa_cambio = $excepcion->tasa_cambio;
+        $salesbook->monto_divisas = $excepcion->monto_divisas;
+        $salesbook->monto_bolivares = $excepcion->monto_bolivares;
+
+        if (!($this->Salesbooks->save($salesbook))) 
+		{
+			$this->Flash->error(__('La factura: ' . $excepcion->numero_factura . ' no pudo ser grabada en la tabla salesbooks'));
+			$codigoRetorno = 1;
+		}
+        return $codigoRetorno;
+    }
+
 	public function crearRegistroLibro($invoicesBill = null, $conceptos = null, $pagos = null, $controlFacturaAnterior = null)
 	{
 		$codigoRetorno = 0;
@@ -269,6 +370,7 @@ class SalesbooksController extends AppController
 		$salesbook->fecha = $dia . '/' . $mes . '/' . $invoicesBill->date_and_time->year . ' ';
 		
 		$salesbook->tipo_documento = "Fact";
+        $salesbook->id_documento = $invoicesBill->id;
 		
 		$this->loadModel('Bills');
 		
@@ -278,7 +380,9 @@ class SalesbooksController extends AppController
 			$salesbook->nota_debito = "";
 			$salesbook->nota_credito = "";
 			$salesbook->factura_afectada = "";
-			$salesbook->numero_control = $controlFacturaAnterior;			
+			$salesbook->numero_control = $controlFacturaAnterior;
+            $salesbook->id_documento = 0;
+			
         }
 		elseif ($invoicesBill->control_number == 999999 || $invoicesBill->control_number == 0 || $invoicesBill->control_number === null)
 		{

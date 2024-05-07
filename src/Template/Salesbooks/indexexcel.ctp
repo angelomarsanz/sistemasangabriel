@@ -32,6 +32,7 @@ $omitir_numeros_control =
                         <td style=" text-align: center;">Tasa de cambio</td>
                         <td style=" text-align: center;">Divisas</td>
                         <td style=" text-align: center;">Bolívares</td>
+                        <td style=" text-align: center;">ID del Documento</td>
                     </tr>
                 </thead>
                 <tbody>
@@ -71,6 +72,7 @@ $omitir_numeros_control =
                                 <td><?= number_format($invoice->tasa_cambio, 2, ",", ".") ?></td>
                                 <td><?= number_format($invoice->monto_divisas, 2, ",", ".") ?></td>
                                 <td><?= number_format($invoice->monto_bolivares, 2, ",", ".") ?></td>
+                                <td><?= $invoice->id_documento ?></td>
                             </tr>
                         <?php
                         } 

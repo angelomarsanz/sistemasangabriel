@@ -5,6 +5,35 @@ Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
 
+03/05/2024
+Excepciones libro de ventas
+Cuando el contador pida cambios especiales en el libro de ventas se registran los cambios en la tabla "excepciones"
+Entre los datos se debe registrar el año, mes, identificador_asociado, consecutivo_asociado, accion, numero_control_secuencia y los demás datos del libro de ventas.
+En "año" se coloca el año de la factura
+En "mes" se coloca el mes de la factura
+En "identificador_asociado" se coloca el "id" de la factura
+En "consecutivo_asociado" se coloca 1 ó 2 ó 3, etc. Habrá tantos consecutivos como cambios requiera el contador
+En "Acción" se coloca alguna de las siguientes opciones: "Agregar", "Omitir", "Modificar" o "Registrar". 
+En "numero_control_secuencia" se coloca el número de control que desea que quede después de registrar los cambios 
+El punto de partida para el cambio es el id de la factura o nota que se desee omitir, modificar o agregar 
+Si esa factura desde donde se inicia el cambio primero se desea registrar con sus datos originales se crea un registro con la opción "Registrar"
+Ahora si la factura se desea Omitir se crea un registro con la opción "Omitir"
+Luego si se requieren se crean uno o más registros con las opciones "Agregar" y/o "Modificar"
+
+28/04/2024
+Consejo Educativo
+Módulos modificados
+/opt/lampp/htdocs/sistemasangabriel/webroot/css/csga.css - Ok
+/opt/lampp/htdocs/sistemasangabriel/webroot/js/csga.js - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Layout/default.ctp - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Parentsandguardians/consejo_educativo.ctp - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Parentsandguardians/partes/reporte_familias_relacionadas.ctp - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/create_invoice.ctp - Ok
+
+
+
 23/04/2024
 Para las pruebas en los cambio de la ficha de inscripción
 Id Alumno 1967 (Miranda Arizaga) - Id Representante 1370 - Id User 1344 - CI - 17397034 

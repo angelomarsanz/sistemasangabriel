@@ -9,20 +9,28 @@
     <fieldset>
         <legend><?= __('Add Salesbook') ?></legend>
         <?php
-            echo $this->Form->input('invoice_date', ['empty' => true]);
-            echo $this->Form->input('document_type');
-            echo $this->Form->input('identification_client');
-            echo $this->Form->input('name_social_reazon');
-            echo $this->Form->input('bill_number');
-            echo $this->Form->input('control_number');
-            echo $this->Form->input('debit_note');
-            echo $this->Form->input('credit_note');
-            echo $this->Form->input('invoice_affected');
-            echo $this->Form->input('sales_plus_tax');
-            echo $this->Form->input('exonerated_sales');
+            echo $this->Form->input('fecha', ['empty' => true]);
+            echo $this->Form->input('tipo_documento');
+            echo $this->Form->input('cedula_rif');
+            echo $this->Form->input('nombre_razon_social');
+            echo $this->Form->input('numero_control');
+            echo $this->Form->input('numero_factura');
+            echo $this->Form->input('nota_debito');
+            echo $this->Form->input('nota_credito');
+            echo $this->Form->input('factura_afectada');
+            echo $this->Form->input('total_ventas_mas_impuestos');
+            echo $this->Form->input('descuento_recargo');
+            echo $this->Form->input('ventas_exoneradas');
             echo $this->Form->input('base');
-            echo $this->Form->input('aliquot');
+            echo $this->Form->input('aliquota');
             echo $this->Form->input('iva');
+            echo $this->Form->input('igft');
+            echo $this->Form->input('tasa_cambio');
+            echo $this->Form->input('monto_divisas');
+            echo $this->Form->input('monto_bolivares');
+            echo $this->Form->input('right_bill_number');
+            echo $this->Form->input('previous_control_number');
+            echo $this->Form->input('id_documento');
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

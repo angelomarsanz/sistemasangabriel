@@ -1,5 +1,5 @@
 <h3>Reporte de Familias Relacionadas</h3>
-<div name="reporte_familias_relacionadas" id="familias_relacionadas" class="container">
+<div name="reporteFamiliasRelacionadas" id="reporteFamiliasRelacionadas" class="container">
     <table class="table table-striped table-hover">
         <thead>
             <tr>

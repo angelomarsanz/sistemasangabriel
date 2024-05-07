@@ -575,18 +575,6 @@
 <div id="pagos"></div>
 <script>
 //  Variables globales
-	var crm_processing_modal = function ( msg ) 
-	{
-	    var process_modal ='<div class="modal fade" id="fave_modal" tabindex="-1" role="dialog" aria-labelledby="faveModalLabel" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-body houzez_messages_modal">'+msg+'</div></div></div></div></div>';
-    	$('body').append(process_modal);
-        $('#fave_modal').modal();
-    }
-
-	var crm_processing_modal_close = function ( ) 
-	{
-		$('#fave_modal').modal('hide');
-	}
-
     var idFamily = 0;
     var nameFamily = " ";
     var selectFamily = -1;

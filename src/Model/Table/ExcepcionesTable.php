@@ -7,19 +7,19 @@ use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
- * Salesbooks Model
+ * Excepciones Model
  *
- * @method \App\Model\Entity\Salesbook get($primaryKey, $options = [])
- * @method \App\Model\Entity\Salesbook newEntity($data = null, array $options = [])
- * @method \App\Model\Entity\Salesbook[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\Salesbook|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\Salesbook patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\Salesbook[] patchEntities($entities, array $data, array $options = [])
- * @method \App\Model\Entity\Salesbook findOrCreate($search, callable $callback = null)
+ * @method \App\Model\Entity\Excepcion get($primaryKey, $options = [])
+ * @method \App\Model\Entity\Excepcion newEntity($data = null, array $options = [])
+ * @method \App\Model\Entity\Excepcion[] newEntities(array $data, array $options = [])
+ * @method \App\Model\Entity\Excepcion|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method \App\Model\Entity\Excepcion patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
+ * @method \App\Model\Entity\Excepcion[] patchEntities($entities, array $data, array $options = [])
+ * @method \App\Model\Entity\Excepcion findOrCreate($search, callable $callback = null)
  *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
-class SalesbooksTable extends Table
+class ExcepcionesTable extends Table
 {
 
     /**
@@ -32,7 +32,7 @@ class SalesbooksTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('salesbooks');
+        $this->table('excepciones');
         $this->displayField('id');
         $this->primaryKey('id');
 
@@ -52,7 +52,28 @@ class SalesbooksTable extends Table
             ->allowEmpty('id', 'create');
 
         $validator
-            ->date('fecha')
+            ->numeric('anio')
+            ->allowEmpty('anio');
+
+        $validator
+            ->numeric('mes')
+            ->allowEmpty('mes');
+
+        $validator
+            ->numeric('identificador_asociado')
+            ->allowEmpty('identificador_asociado');
+
+        $validator
+            ->numeric('consecutivo_asociado')
+            ->allowEmpty('consecutivo_identificador');
+
+        $validator
+            ->allowEmpty('accion');
+
+        $validator
+            ->allowEmpty('numero_control_secuencia');
+            
+        $validator
             ->allowEmpty('fecha');
 
         $validator
@@ -116,16 +137,6 @@ class SalesbooksTable extends Table
         $validator
             ->numeric('monto_bolivares')
             ->allowEmpty('monto_bolivares');
-           
-        $validator
-            ->allowEmpty('right_bill_number');
-
-        $validator
-            ->allowEmpty('previous_control_number');
-
-        $validator
-            ->numeric('id_documento')
-            ->allowEmpty('id_documento');
 
         return $validator;
     }

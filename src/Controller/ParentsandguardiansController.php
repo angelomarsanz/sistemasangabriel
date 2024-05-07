@@ -961,21 +961,49 @@ class ParentsandguardiansController extends AppController
             return false;           
         }
     }
-    public function reporteFamiliasRelacionadas()
+
+    public function consejoEducativo($reporte = null)
     {
-        $this->busquedaFamiliasRelacionadas();
-        $familiasRelacionadasControl = $this->Parentsandguardians->find('all', ['conditions' => 
-        [
-            'familias_relacionadas is not null'
-        ]]);
+        if (isset($reporte))
+        {
+            /*
+            $this->loadModel('Schools');
+            $schools = $this->Schools->get(2);
+            $actual_anio_escolar = $schools->current_school_year;
+            if ($reporte == "familiasExoneradas")
+            {
+                $familiasExoneradas = $this->Parentsandguardians->Students->find('all')
+                ->where(['Parentsandguardians.status_registro' => 'Activo', 'Parentsandguardians.consejo_exonerado >' => 0, 'Students.student_condition' => "Regular", 'Students.balance' => $actual_anio_escolar])
+                ->contain(['Parentsandguardians']);
 
-        $familiasRelacionadasBusqueda = $this->Parentsandguardians->find('all', ['conditions' => 
-        [
-            'familias_relacionadas is null'
-        ]]);
-
-        $this->set(compact('familiasRelacionadasControl', 'familiasRelacionadasBusqueda'));
+                
+                $this->set(compact('reporte', 'familiasExoneradas'));
+            }
+            */
+            
+            if ($reporte == "familiasRelacionadas")
+            {
+                $this->busquedaFamiliasRelacionadas();
+                $familiasRelacionadasControl = $this->Parentsandguardians->find('all', ['conditions' => 
+                [
+                    'familias_relacionadas is not null'
+                ]]);
+        
+                $familiasRelacionadasBusqueda = $this->Parentsandguardians->find('all', ['conditions' => 
+                [
+                    'familias_relacionadas is null'
+                ]]);
+        
+                $this->set(compact('reporte', 'familiasRelacionadasControl', 'familiasRelacionadasBusqueda'));
+            }
+        }
+        else
+        {
+            $reporte = "";
+            $this->set(compact('reporte'));
+        }
     }
+
     public function busquedaFamiliasRelacionadas()
     {
         $excepcionesNombre =
@@ -1184,6 +1212,7 @@ class ParentsandguardiansController extends AppController
         $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'contadorFamiliasControlProcesadas '.$contadorFamiliasControlProcesadas.' contadorFamiliasBusquedaProcesadas '.$contadorFamiliasBusquedaProcesadas.' contadorFamiliasRelacionadasActualizadas '.$contadorFamiliasRelacionadasActualizadas.' contadorFamiliasNoRelacionadasActualizadas '.$contadorFamiliasNoRelacionadasActualizadas);
         return;    
     }
+    
     public function eliminarAcentos($cadena)
     {
         $letrasConTilde = 
@@ -1207,5 +1236,116 @@ class ParentsandguardiansController extends AppController
         $cadena = str_replace($letrasConTilde, $letrasSinTilde, $cadena);
 
         return $cadena;
+    }
+
+    public function datosFamilia()
+    {    
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) 
+        {
+            if (isset($_POST['idFamilia']))
+            {
+                $idFamilia = $_POST['idFamilia'];
+                $respuesta = [];
+                $contadorEstudiantes = 0;
+                $consejoExonerado = 0;
+
+                $estudiantes = $this->Parentsandguardians->Students->find('all')
+                ->where(['Parentsandguardians.id' => $idFamilia , 'Students.student_condition' => "Regular"])
+                ->contain(['Parentsandguardians']);
+
+                if ($estudiantes->count() > 0)
+                {
+                    $respuesta["satisfactorio"] = true;
+                    foreach ($estudiantes as $estudiante)
+                    {
+                        if ($contadorEstudiantes == 0)
+                        {
+                            $consejoExonerado = $estudiante->parentsandguardian->consejo_exonerado; 
+                            $respuesta['html'] =
+                                "<br />".
+                                "<h4>Familia: ".$estudiante->parentsandguardian->family." (".$estudiante->parentsandguardian->surname." ".$estudiante->parentsandguardian->first_name.")</h3>".
+                                "<div name='estudiantesFamilia' id='estudianteFamilia' class='container'>".
+                                "<table class='table table-striped table-hover'>".
+                                    "<thead>".
+                                        "<tr>".
+                                            "<th><b>Estudiante</b></th>".
+                                        "</tr>".
+                                    "</thead>".
+                                    "<tbody>";
+                        }
+                        $respuesta['html'] .=
+                                "<tr>".
+                                    "<td>".$estudiante->full_name."</td>".
+                                "<tr>";
+                        $contadorEstudiantes++;
+                    }
+                    if ($contadorEstudiantes > 0)
+                    {
+                        $respuesta['html'] .=
+                                    "</tbody>".
+                                "</table>".
+                            "</div>";	
+                        if ($consejoExonerado > 0)
+                        {
+                            $respuesta['html'] .= "<button type='button' class='exoneracion eliminarExoneracion btn btn-primary'>Eliminar exoneración</button>";
+                        }	
+                        else
+                        {
+                            $respuesta['html'] .= "<button type='button' class='exoneracion exonerarFamilia btn btn-primary'>Exonerar</button>";
+                        }
+                    }
+                }
+                else
+                {
+                    $respuesta["satisfactorio"] = false;
+                    $respuesta["mensajeDeError"] = "La familia no tiene estudiantes asociados";
+                }
+                exit(json_encode($respuesta, JSON_FORCE_OBJECT));
+            }
+        }
+    }
+    public function editarExoneracion()
+    {    
+        $this->autoRender = false;
+        if ($this->request->is('ajax')) 
+        {
+            if (isset($_POST['idFamilia']))
+            {
+                $idFamilia = $_POST['idFamilia'];
+                $accion = $_POST['accion'];
+                $respuesta = [];
+
+                $representante = $this->Parentsandguardians->get($idFamilia);
+
+                if ($accion == "exonerarFamilia")
+                {
+                    $representante->consejo_exonerado = 100;
+                }
+                else
+                {
+                    $representante->consejo_exonerado = 0;
+                }
+
+                if ($this->Parentsandguardians->save($representante)) 
+                {
+                    $respuesta["satisfactorio"] = true;
+                    if ($accion == "exonerarFamilia")
+                    {
+                        $respuesta["mensaje"] = "Se exoneró el consejo educativo exitosamente";
+                    }
+                    else
+                    {
+                        $respuesta["mensaje"] = "Se eliminó la exoneración del Consejo Educativo exitosamente";
+                    }
+                }
+                else
+                {
+                    $respuesta["satisfactorio"] = false;
+                    $respuesta["mensaje"] = "No se pudieron hacer los cambios en la base de datos";
+                }
+                exit(json_encode($respuesta, JSON_FORCE_OBJECT));
+            }
+        }
     }
 }
