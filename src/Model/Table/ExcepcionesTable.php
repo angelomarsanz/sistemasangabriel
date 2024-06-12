@@ -127,13 +127,37 @@ class ExcepcionesTable extends Table
             ->allowEmpty('igtf');
 
         $validator
-            ->numeric('tasa_cambio')
-            ->allowEmpty('tasa_cambio');
+            ->numeric('efectivo_bolivares')
+            ->allowEmpty('efectivo_bolivares');
 
         $validator
-            ->numeric('monto_divisas')
-            ->allowEmpty('monto_divisas');
+            ->numeric('transferencia_bolivares')
+            ->allowEmpty('transferencia_bolivares');
 
+        $validator
+            ->numeric('pos_bolivares')
+            ->allowEmpty('pos_bolivares');
+           
+        $validator
+            ->numeric('deposito_bolivares')
+            ->allowEmpty('deposito_bolivares');
+           
+        $validator
+            ->numeric('efectivo_dolares')
+            ->allowEmpty('efectivo_dolares');
+           
+        $validator
+            ->numeric('efectivo_euros')
+            ->allowEmpty('efectivo_euros');
+           
+        $validator
+            ->numeric('zelle')
+            ->allowEmpty('zelle');
+           
+        $validator
+            ->numeric('euros')
+            ->allowEmpty('euros');
+           
         $validator
             ->numeric('monto_bolivares')
             ->allowEmpty('monto_bolivares');

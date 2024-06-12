@@ -37,17 +37,30 @@ class StudenttransactionsController extends AppController
 
         return parent::isAuthorized($user);
     }        
-	
+
     public function testFunction()
     {
+		/*
 		$transaccion = $this->Studenttransactions->get(92058);
 
 		$this->set(compact('transaccion'));
+		*/
 	}
-
+	
     public function testFunction2()
     {
-
+		/*
+		$transacciones = $this->Studenttransactions->find('all')
+		->where(['student_id' => 1350, 'ano_escolar <' => 2023]);
+		foreach($transacciones as $transaccion)
+		{
+			$transaccionEliminar = $this->Studenttransactions->get($transaccion->id);
+			$transaccionEliminar->invoiced = true;
+			if (!($this->Studenttransactions->save($transaccionEliminar))) {
+                $this->Flash->error(__('No se pudo actualizar la transacción con el ID '.$transaccion->id));
+            }
+        }
+		*/
 	}
 	
     public function index()

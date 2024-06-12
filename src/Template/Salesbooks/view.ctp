@@ -1,10 +1,10 @@
+<br /><br />
 <nav class="large-3 medium-4 columns" id="actions-sidebar">
     <ul class="side-nav">
-        <li class="heading"><?= __('Actions') ?></li>
-        <li><?= $this->Html->link(__('Edit Salesbook'), ['action' => 'edit', $salesbook->id]) ?> </li>
-        <li><?= $this->Form->postLink(__('Delete Salesbook'), ['action' => 'delete', $salesbook->id], ['confirm' => __('Are you sure you want to delete # {0}?', $salesbook->id)]) ?> </li>
-        <li><?= $this->Html->link(__('List Salesbooks'), ['action' => 'index']) ?> </li>
-        <li><?= $this->Html->link(__('New Salesbook'), ['action' => 'add']) ?> </li>
+        <li><?= $this->Html->link(__('Editar'), ['action' => 'edit', $salesbook->id]) ?> </li>
+        <li><?= $this->Form->postLink(__('Eliminar'), ['action' => 'delete', $salesbook->id], ['confirm' => __('Está usted seguro que desea eliminar el registro con el ID # {0}?', $salesbook->id)]) ?> </li>
+        <li><?= $this->Html->link(__('Listado de registros del libro de ventas'), ['action' => 'index']) ?> </li>
+        <li><?= $this->Html->link(__('Nuevo registro de libro de ventas'), ['action' => 'add']) ?> </li>
     </ul>
 </nav>
 <div class="salesbooks view large-9 medium-8 columns content">
@@ -83,12 +83,36 @@
             <td><?= $this->Number->format($salesbook->tasa_cambio) ?></td>
         </tr>
         <tr>
-            <th scope="row"><?= __('Monto divisas') ?></th>
-            <td><?= $this->Number->format($salesbook->monto_divisas) ?></td>
+            <th scope="row"><?= __('Efectivo bolívares') ?></th>
+            <td><?= $this->Number->format($salesbook->efectivo_bolivares) ?></td>
         </tr>
         <tr>
-            <th scope="row"><?= __('Monto bolívares') ?></th>
-            <td><?= $this->Number->format($salesbook->monto_bolivares) ?></td>
+            <th scope="row"><?= __('Transferencia bolívares') ?></th>
+            <td><?= $this->Number->format($salesbook->transferencia_bolivares) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('POS bolívares') ?></th>
+            <td><?= $this->Number->format($salesbook->pos_bolivares) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Depósito bolivares') ?></th>
+            <td><?= $this->Number->format($salesbook->deposito_bolívares) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Efectivo dólares') ?></th>
+            <td><?= $this->Number->format($salesbook->efectivo_dolares) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Efectivo euros') ?></th>
+            <td><?= $this->Number->format($salesbook->efectivo_euros) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Zelle') ?></th>
+            <td><?= $this->Number->format($salesbook->zelle) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Euros') ?></th>
+            <td><?= $this->Number->format($salesbook->euros) ?></td>
         </tr>
         <tr>
             <th scope="row"><?= __('right_bill_number') ?></th>

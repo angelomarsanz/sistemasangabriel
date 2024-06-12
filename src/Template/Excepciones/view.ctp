@@ -106,12 +106,36 @@
             <td><?= $this->Number->format($excepcion->tasa_cambio) ?></td>
         </tr>
         <tr>
-            <th scope="row"><?= __('Monto divisas') ?></th>
-            <td><?= $this->Number->format($excepcion->monto_divisas) ?></td>
+            <th scope="row"><?= __('Efectivo bolívares') ?></th>
+            <td><?= $this->Number->format($excepcion->efectivo_bolivares) ?></td>
         </tr>
         <tr>
-            <th scope="row"><?= __('Monto bolívares') ?></th>
-            <td><?= $this->Number->format($excepcion->monto_bolivares) ?></td>
+            <th scope="row"><?= __('Transferencia bolívares') ?></th>
+            <td><?= $this->Number->format($excepcion->transferencia_bolivares) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('POS bolívares') ?></th>
+            <td><?= $this->Number->format($excepcion->pos_bolivares) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Depósito bolivares') ?></th>
+            <td><?= $this->Number->format($excepcion->deposito_bolivares) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Efectivo dólares') ?></th>
+            <td><?= $this->Number->format($excepcion->efectivo_dolares) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Efectivo euros') ?></th>
+            <td><?= $this->Number->format($excepcion->efectivo_euros) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Zelle') ?></th>
+            <td><?= $this->Number->format($excepcion->zelle) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Euros') ?></th>
+            <td><?= $this->Number->format($excepcion->euros) ?></td>
         </tr>
     </table>
     <br /><br />

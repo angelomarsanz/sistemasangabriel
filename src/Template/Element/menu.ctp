@@ -40,6 +40,17 @@
 					<li><a href="#" id="exportar-excel" class="glyphicon glyphicon-list-alt iconoMenu" title="Exportar a excel"></a></li>
 					<?php if($current_user['role'] == 'Administrador'): ?>
 						<li><?= $this->Html->link('', ['controller' => 'Users', 'action' => 'edit', $current_user['id']], ['class' => "glyphicon glyphicon-user iconoMenu", 'title' => 'Modificar mi perfil']) ?></li>
+						<?php 
+						if ($current_user['username'] == "angel2703"): ?>
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Escritorio<span class="caret"></span></a>
+								<ul class="dropdown-menu" role="menu">
+									<li><?= $this->Html->link('Libro de Ventas', ['controller' => 'Salesbooks', 'action' => 'index']) ?></li>
+									<li><?= $this->Html->link('Excepciones libro de ventas', ['controller' => 'Excepciones', 'action' => 'index']) ?></li>
+								</ul>
+							</li>
+						<?php
+						endif ?>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Administrativo <span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">
@@ -71,7 +82,11 @@
 								<li><?= $this->Html->link('Familias con cuatro o más hijos', ['controller' => 'Students', 'action' => 'familiasDescuento50']) ?></li> 
 								<!-- <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li> -->
 								<li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>	
-								<li><?= $this->Html->link('Consejo Educativo', ['controller' => 'Parentsandguardians', 'action' => 'consejoEducativo']) ?></li>	
+								<?php
+								if ($current_user['username'] == "angel2703" || $current_user['username'] == "anaperez" || $current_user['username'] == "emiguerrero"): ?>
+									<li><?= $this->Html->link('Consejo Educativo', ['controller' => 'Parentsandguardians', 'action' => 'consejoEducativo']) ?></li>
+								<?php
+								endif; ?>	
 							</ul>
 						</li>
 						<li class="dropdown">
@@ -134,11 +149,6 @@
 								<li><?= $this->Html->link('Crear libro de recibos EXCEL', ['controller' => 'Salesbooks', 'action' => 'crearLibroRecibos']) ?></li>
 								<li><?= $this->Html->link('Eventos del usuario', ['controller' => 'Eventos', 'action' => 'index']) ?></li>
 								<li><?= $this->Html->link('Reporte Servicio Educativo', ['controller' => 'Turns', 'action' => 'previoServicioEducativo']) ?></li>
-								<?php
-								if ($current_user['username'] == "angel2703"): ?>
-									<li><?= $this->Html->link('Excepciones libro de ventas', ['controller' => 'Excepciones', 'action' => 'index']) ?></li>
-								<?php
-								endif; ?>
 							</ul>
 						</li>
 												   						

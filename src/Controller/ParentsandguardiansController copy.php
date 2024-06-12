@@ -962,6 +962,76 @@ class ParentsandguardiansController extends AppController
         }
     }
 
+    public function consejoEducativo($reporte = null)
+    {
+        if (isset($reporte))
+        {          
+            if ($reporte == "familiasRelacionadas")
+            {
+                $this->busquedaFamiliasRelacionadas();
+                $familiasRelacionadasControl = $this->Parentsandguardians->find('all', ['conditions' => 
+                [
+                    'familias_relacionadas is not null'
+                ]]);
+        
+                $familiasRelacionadasBusqueda = $this->Parentsandguardians->find('all', ['conditions' => 
+                [
+                    'familias_relacionadas is null'
+                ]]);
+        
+                $this->set(compact('reporte', 'familiasRelacionadasControl', 'familiasRelacionadasBusqueda'));
+            }
+            else
+            {
+                $this->loadModel('Schools');
+                $schools = $this->Schools->get(2);
+                $anioEscolarActual = $schools->current_school_year;
+
+                $transaccionesEstudiante = new StudenttransactionsController;
+
+                $transaccionesEstudiante->verificarAnioUltimaInscripcion();
+
+                if ($reporte == "familiasExoneradas")
+                {
+                    $familiasExoneradas = $this->Parentsandguardians->Students->find('all')
+                    ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Parentsandguardians.consejo_exonerado >' => 0, 'Students.student_condition' => "Regular", 'Students.balance' => $anioEscolarActual])
+                    ->contain(['Parentsandguardians', 'Sections'])
+                    ->order(
+                        [
+                            'Students.parentsandguardian_id' => 'ASC',
+                            'Students.surname' => 'ASC',
+                            'Students.second_surname' => 'ASC',
+                            'Students.first_name' => 'ASC',
+                            'Students.second_name' => 'ASC',
+                        ]);
+                    
+                    $this->set(compact('reporte', 'familiasExoneradas'));
+                }
+                elseif ($reporte == "reporteGeneralConsejoEducativo")
+                {
+                    $familiasConsejoEducativo = $this->Parentsandguardians->Students->find('all')
+                    ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Parentsandguardians.consejo_educativo' => "Sí", 'Students.student_condition' => "Regular", 'Students.balance' => $anioEscolarActual])
+                    ->contain(['Parentsandguardians', 'Sections'])
+                    ->order(
+                        [
+                            'Students.parentsandguardian_id' => 'ASC',
+                            'Students.surname' => 'ASC',
+                            'Students.second_surname' => 'ASC',
+                            'Students.first_name' => 'ASC',
+                            'Students.second_name' => 'ASC',
+                        ]);
+                    
+                    $this->set(compact('reporte', 'familiasConsejoEducativo'));
+                }
+            }
+        }
+        else
+        {
+            $reporte = "";
+            $this->set(compact('reporte'));
+        }
+    }
+
     public function busquedaFamiliasRelacionadas()
     {
         $excepcionesNombre =
@@ -1170,6 +1240,7 @@ class ParentsandguardiansController extends AppController
         $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'contadorFamiliasControlProcesadas '.$contadorFamiliasControlProcesadas.' contadorFamiliasBusquedaProcesadas '.$contadorFamiliasBusquedaProcesadas.' contadorFamiliasRelacionadasActualizadas '.$contadorFamiliasRelacionadasActualizadas.' contadorFamiliasNoRelacionadasActualizadas '.$contadorFamiliasNoRelacionadasActualizadas);
         return;    
     }
+    
     public function eliminarAcentos($cadena)
     {
         $letrasConTilde = 
@@ -1194,32 +1265,7 @@ class ParentsandguardiansController extends AppController
 
         return $cadena;
     }
-    public function consejoEducativo($reporte = null)
-    {
-        if (isset($reporte))
-        {
-            if ($reporte == "familiasRelacionadas")
-            {
-                $this->busquedaFamiliasRelacionadas();
-                $familiasRelacionadasControl = $this->Parentsandguardians->find('all', ['conditions' => 
-                [
-                    'familias_relacionadas is not null'
-                ]]);
-        
-                $familiasRelacionadasBusqueda = $this->Parentsandguardians->find('all', ['conditions' => 
-                [
-                    'familias_relacionadas is null'
-                ]]);
-        
-                $this->set(compact('reporte', 'familiasRelacionadasControl', 'familiasRelacionadasBusqueda'));
-            }
-        }
-        else
-        {
-            $reporte = "";
-            $this->set(compact('reporte'));
-        }
-    }
+
     public function datosFamilia()
     {    
         $this->autoRender = false;

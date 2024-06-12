@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use Cake\I18n\Time;
+use Cake\Filesystem\File; 
 
 /**
  * Parentsandguardians Controller
@@ -966,21 +967,14 @@ class ParentsandguardiansController extends AppController
     {
         if (isset($reporte))
         {
-            /*
+            $fechaActual = Time::now();
             $this->loadModel('Schools');
             $schools = $this->Schools->get(2);
-            $actual_anio_escolar = $schools->current_school_year;
-            if ($reporte == "familiasExoneradas")
-            {
-                $familiasExoneradas = $this->Parentsandguardians->Students->find('all')
-                ->where(['Parentsandguardians.status_registro' => 'Activo', 'Parentsandguardians.consejo_exonerado >' => 0, 'Students.student_condition' => "Regular", 'Students.balance' => $actual_anio_escolar])
-                ->contain(['Parentsandguardians']);
+            $anioEscolarActual = $schools->current_school_year;
+            $proximoAnioEscolar = $schools->current_school_year + 1;
+            $periodoEscolarActual = "Año escolar ".$anioEscolarActual."-".$proximoAnioEscolar;
+            $anioEscolar = $anioEscolarActual."-".$proximoAnioEscolar;
 
-                
-                $this->set(compact('reporte', 'familiasExoneradas'));
-            }
-            */
-            
             if ($reporte == "familiasRelacionadas")
             {
                 $this->busquedaFamiliasRelacionadas();
@@ -994,7 +988,64 @@ class ParentsandguardiansController extends AppController
                     'familias_relacionadas is null'
                 ]]);
         
-                $this->set(compact('reporte', 'familiasRelacionadasControl', 'familiasRelacionadasBusqueda'));
+                $this->set(compact('fechaActual', 'anioEscolar', 'reporte', 'familiasRelacionadasControl', 'familiasRelacionadasBusqueda'));
+            }
+            else
+            {
+                $tarifaConsejoEducativo = 0;
+
+                $transaccionesEstudiante = new StudenttransactionsController;
+
+                $transaccionesEstudiante->verificarAnioUltimaInscripcion();
+
+                if ($reporte == "familiasExoneradas")
+                {
+                    $familiasExoneradas = $this->Parentsandguardians->Students->find('all')
+                    ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Parentsandguardians.consejo_exonerado >' => 0, 'Students.student_condition' => "Regular", 'Students.balance' => $anioEscolarActual])
+                    ->contain(['Parentsandguardians', 'Sections'])
+                    ->order(
+                        [
+                            'Parentsandguardians.family' => 'ASC',
+                            'Parentsandguardians.id' => 'ASC',
+                            'Students.surname' => 'ASC',
+                            'Students.second_surname' => 'ASC',
+                            'Students.first_name' => 'ASC',
+                            'Students.second_name' => 'ASC',
+                        ]);
+                    
+                    $this->set(compact('fechaActual', 'anioEscolar', 'reporte', 'familiasExoneradas'));
+                }
+                elseif ($reporte == "reporteGeneralConsejoEducativo")
+                {
+                    $familiasConsejoEducativo = $this->Parentsandguardians->Students->find('all')
+                        ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Parentsandguardians.consejo_educativo' => "Sí", 'Students.student_condition' => "Regular", 'Students.balance' => $anioEscolarActual])
+                        ->contain(['Parentsandguardians', 'Sections'])
+                        ->order(
+                            [
+                                'Parentsandguardians.family' => 'ASC',
+                                'Parentsandguardians.id' => 'ASC',
+                                'Students.surname' => 'ASC',
+                                'Students.second_surname' => 'ASC',
+                                'Students.first_name' => 'ASC',
+                                'Students.second_name' => 'ASC',
+                            ]);
+
+                    $this->loadModel('Bills');
+
+                    $recibosConsejoEducativo = $this->Bills->find('all')
+                        ->where(["tipo_documento" => "Recibo de Consejo Educativo", "school_year" => $periodoEscolarActual, "annulled" => 0 ]);
+                    
+                    $this->loadModel('Rates');
+
+                    $tarifas = $this->Rates->find('all')
+                        ->where(["Concept" => "Consejo Educativo", "rate_year" => $anioEscolarActual]);
+
+                    if ($tarifas->count() > 0)
+                    {
+                        $tarifaConsejoEducativo = $tarifas->first();
+                    }
+                    $this->set(compact('fechaActual', 'anioEscolar', 'reporte', 'familiasConsejoEducativo', 'recibosConsejoEducativo', 'tarifaConsejoEducativo'));
+                }
             }
         }
         else
@@ -1269,7 +1320,7 @@ class ParentsandguardiansController extends AppController
                                 "<table class='table table-striped table-hover'>".
                                     "<thead>".
                                         "<tr>".
-                                            "<th><b>Estudiante</b></th>".
+                                            "<th><b>Estudiante(s)</b></th>".
                                         "</tr>".
                                     "</thead>".
                                     "<tbody>";
@@ -1347,5 +1398,20 @@ class ParentsandguardiansController extends AppController
                 exit(json_encode($respuesta, JSON_FORCE_OBJECT));
             }
         }
+    }
+    public function reactBoton()
+    {
+        $filePath = WWW_ROOT . 'componentes_react/boton/asset-manifest.json';
+        $file = new File($filePath);
+ 
+        $manifest = json_decode($file->read());
+        $file->close();
+ 
+        $maincss = 'main.css';
+        $mainjs = 'main.js';
+ 
+        $css = '/componentes_react/boton' . $manifest->files->$maincss;
+        $js = '/componentes_react/boton' . $manifest->files->$mainjs;
+        $this->set(compact('css', 'js'));
     }
 }

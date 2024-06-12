@@ -24,8 +24,14 @@ use Cake\ORM\Entity;
  * @property float $iva
  * @property float $igft
  * @property float $tasa_cambio
- * @property float $monto_divisas
- * @property float $monto_bolivares
+ * @property float $efectivo_bolivares
+ * @property float $transferencia_bolivares
+ * @property float $pos_bolivares
+ * @property float $deposito_bolivares
+ * @property float $efectivo_dolares
+ * @property float $efectivo_euros
+ * @property float $zelle
+ * @property float $euros
  * @property int $right_bill_number
  * @property int $previous_control_number
  * @property int $id_documento

@@ -48,6 +48,10 @@
 <?php 
 if (isset($reporte))
 {
+    if ($reporte == "familiasExoneradas")
+    {
+        include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_familias_exoneradas.ctp';
+    }
     if ($reporte == "familiasRelacionadas")
     {
         include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_familias_relacionadas.ctp';
@@ -159,6 +163,12 @@ if (isset($reporte))
         {
             editarExoneracion("eliminarExoneracion");
         });
+        $('#familiasExoneradas').on( 'click', function(event) 
+		{
+			event.preventDefault();
+            crm_processing_modal('Por favor espere mientras se emite el reporte...');
+			location.href = rutaPagina+"/familiasExoneradas";
+		});
         $('#familiasRelacionadas').on( 'click', function(event) 
 		{
 			event.preventDefault();
@@ -176,6 +186,18 @@ if (isset($reporte))
                     name: "reporteFamiliasRelacionadas",
                 
                     filename: $('#reporteFamiliasRelacionadas').attr('name') 
+            
+                });
+            }
+            else if (reporte == "familiasExoneradas")
+            {
+                $("#reporteFamiliasExoneradas").table2excel({
+            
+                    exclude: ".noExl",
+                
+                    name: "reporteFamiliasExoneradas",
+                
+                    filename: $('#reporteFamiliasExoneradas').attr('name') 
             
                 });
             }

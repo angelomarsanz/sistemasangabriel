@@ -8,7 +8,7 @@
     <div class="col-xs-12 col-sm-12 col-md-6">
         <?= $this->Form->create($excepcion) ?>
         <fieldset>
-            <legend><?= __('Editar excepción del libro de ventas') ?></legend>
+            <legend><?= __('Agregar excepción del libro de ventas') ?></legend>
             <?php
                 echo $this->Form->input('anio', ["label" => 'Año', 'options' => 
                     [
@@ -61,19 +61,25 @@
                 echo $this->Form->input('nota_debito', ["label" => "Nota de débito"]);
                 echo $this->Form->input('nota_credito', ["label" => "Nota de crédito"]);
                 echo $this->Form->input('factura_afectada', ["label" => "Factura afectada", "placeholder" => "nnnnnn"]);
-                echo $this->Form->input('total_ventas_mas_impuestos', ["label" => "Total ventas más impuestos", "placeholder" => "0.00"]);
-                echo $this->Form->input('descuento_recargo', ["label" => "Descuento/Recargo", "placeholder" => "0.00"]);
-                echo $this->Form->input('ventas_exoneradas', ["label" => "Ventas Exoneradas", "placeholder" => "0.00"]);
+                echo $this->Form->input('total_ventas_mas_impuestos', ["label" => "Total ventas más impuestos"]);
+                echo $this->Form->input('descuento_recargo', ["label" => "Descuento/Recargo"]);
+                echo $this->Form->input('ventas_exoneradas', ["label" => "Ventas Exoneradas"]);
                 echo $this->Form->input('base', ["label" => "Base"]);
                 echo $this->Form->input('alicuota', ["label" => 'Alicuota', 'options' => 
                     [
                         '16%' => '16%'
                     ]]);
-                echo $this->Form->input('iva', ["label" => "IVA", "placeholder" => "0.00"]);
-                echo $this->Form->input('igft', ["label" => "IGFT", "placeholder" => "0.00"]);
-                echo $this->Form->input('tasa_cambio', ["label" => "Tasa de cambio", "placeholder" => "0.00"]);
-                echo $this->Form->input('monto_divisas', ["label" => "Monto en divisas", "placeholder" => "0.00"]);
-                echo $this->Form->input('monto_bolivares', ["label" => "Monto en bolívares", "placeholder" => "0.00"]);
+                echo $this->Form->input('iva', ["label" => "IVA"]);
+                echo $this->Form->input('igft', ["label" => "IGFT"]);
+                echo $this->Form->input('tasa_cambio', ["label" => "Tasa de cambio"]);
+                echo $this->Form->input('efectivo_bolivares', ["label" => "Efectivo bolívares"]);
+                echo $this->Form->input('transferencia_bolivares', ["label" => "Transferencia bolívares"]);
+                echo $this->Form->input('pos_bolivares', ["label" => "POS bolívares"]);
+                echo $this->Form->input('deposito_bolivares', ["label" => "Depósito bolívares"]);
+                echo $this->Form->input('efectivo_dolares', ["label" => "Efectivo dólares"]);
+                echo $this->Form->input('efectivo_euros', ["label" => "Efectivo euros"]);
+                echo $this->Form->input('zelle', ["label" => "zelle"]);
+                echo $this->Form->input('euros', ["label" => "euros"]);
             ?>
         </fieldset>
         <?= $this->Form->button(__('Enviar')) ?>

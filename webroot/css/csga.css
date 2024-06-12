@@ -11,7 +11,17 @@
     border: 0;
     background-color: #b3e0ff;
 }
-.noVerEnPantalla
+@media screen
 {
-    display: none;
+    .noVerEnPantalla
+    {
+        display: none;
+    }
+}
+@media print
+{
+    .noVerImpreso 
+    {
+      display:none
+    }
 }

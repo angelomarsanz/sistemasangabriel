@@ -34,8 +34,13 @@
                         <th style="text-align:center;"><?= $this->Paginator->sort('iva', 'IVA') ?></th>
                         <th style="text-align:center;"><?= $this->Paginator->sort('igft', 'IGFT') ?></th>
                         <th style="text-align:center;"><?= $this->Paginator->sort('tasa_cambio', 'Tasa Cambio') ?></th>
-                        <th style="text-align:center;"><?= $this->Paginator->sort('monto_divisas', 'Monto Divisas') ?></th>
-                        <th style="text-align:center;"><?= $this->Paginator->sort('monto_bolivares', 'Monto Bolívares') ?></th>
+                        <th style="text-align:center;"><?= $this->Paginator->sort('efectivo_bolivares', 'Efectivo Bolívares') ?></th>
+                        <th style="text-align:center;"><?= $this->Paginator->sort('transferencia_bolivares', 'Transferencia Bolívares') ?></th>
+                        <th style="text-align:center;"><?= $this->Paginator->sort('pos_bolivares', 'POS Bolívares') ?></th>
+                        <th style="text-align:center;"><?= $this->Paginator->sort('deposito_bolivares', 'Depósito Bolívares') ?></th>
+                        <th style="text-align:center;"><?= $this->Paginator->sort('efectivo_dolares', 'Efectivo Dólares') ?></th>
+                        <th style="text-align:center;"><?= $this->Paginator->sort('zelle', 'Zelle') ?></th>
+                        <th style="text-align:center;"><?= $this->Paginator->sort('euros', 'Euros') ?></th>
                         <th style="text-align: center;"></th>
                         <th style="text-align: center;"></th>
                         <th style="text-align: center;"></th>
@@ -68,8 +73,14 @@
                         <td><?= $this->Number->format($excepcion->iva) ?></td>
                         <td><?= $this->Number->format($excepcion->igft) ?></td>
                         <td><?= $this->Number->format($excepcion->tasa_cambio) ?></td>
-                        <td><?= $this->Number->format($excepcion->monto_divisas) ?></td>
-                        <td><?= $this->Number->format($excepcion->monto_bolivares) ?></td>
+                        <td><?= $this->Number->format($excepcion->efectivo_bolivares) ?></td>
+                        <td><?= $this->Number->format($excepcion->transferencia_bolivares) ?></td>
+                        <td><?= $this->Number->format($excepcion->pos_bolivares) ?></td>
+                        <td><?= $this->Number->format($excepcion->deposito_bolivares) ?></td>
+                        <td><?= $this->Number->format($excepcion->efectivo_dolares) ?></td>
+                        <td><?= $this->Number->format($excepcion->efectivo_euros) ?></td>
+                        <td><?= $this->Number->format($excepcion->zelle) ?></td>
+                        <td><?= $this->Number->format($excepcion->euros) ?></td>
                         <td style="text-align: center;">
                             <?= $this->Html->link(__('Ver'), ['action' => 'view', $excepcion->id]) ?>
                         </td>

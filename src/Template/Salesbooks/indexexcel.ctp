@@ -30,8 +30,14 @@ $omitir_numeros_control =
                         <td style=" text-align: center;">IVA</td>
                         <td style=" text-align: center;">IGTF</td>
                         <td style=" text-align: center;">Tasa de cambio</td>
-                        <td style=" text-align: center;">Divisas</td>
-                        <td style=" text-align: center;">Bolívares</td>
+                        <td style=" text-align: center;">Efectivo Bolívares ($)</td>
+                        <td style=" text-align: center;">Transferencia Bolívares ($)</td>
+                        <td style=" text-align: center;">POS Bolívares ($)</td>
+                        <td style=" text-align: center;">Depósito Bolívares Convenio ($)</td>
+                        <td style=" text-align: center;">Efectivo Dólares</td>
+                        <td style=" text-align: center;">Efectivo Euros</td>
+                        <td style=" text-align: center;">Zelle</td>
+                        <td style=" text-align: center;">Euros</td>
                         <td style=" text-align: center;">ID del Documento</td>
                     </tr>
                 </thead>
@@ -70,8 +76,14 @@ $omitir_numeros_control =
                                 <td><?= $invoice->iva ?></td>
                                 <td><?= number_format($invoice->igtf, 2, ",", ".") ?></td>
                                 <td><?= number_format($invoice->tasa_cambio, 2, ",", ".") ?></td>
-                                <td><?= number_format($invoice->monto_divisas, 2, ",", ".") ?></td>
-                                <td><?= number_format($invoice->monto_bolivares, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->efectivo_bolivares, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->transferencia_bolivares, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->pos_bolivares, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->deposito_bolivares, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->efectivo_dolares, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->efectivo_euros, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->zelle, 2, ",", ".") ?></td>
+                                <td><?= number_format($invoice->euros, 2, ",", ".") ?></td>
                                 <td><?= $invoice->id_documento ?></td>
                             </tr>
                         <?php

@@ -328,8 +328,14 @@ class SalesbooksController extends AppController
         $salesbook->iva = $excepcion->iva;
         $salesbook->igft = $excepcion->igft;
         $salesbook->tasa_cambio = $excepcion->tasa_cambio;
-        $salesbook->monto_divisas = $excepcion->monto_divisas;
-        $salesbook->monto_bolivares = $excepcion->monto_bolivares;
+        $salesbook->efectivo_bolivares = $excepcion->efectivo_bolivares;
+        $salesbook->transferencia_bolivares = $excepcion->transferencia_bolivares;
+        $salesbook->pos_bolivares = $excepcion->pos_bolivares;
+        $salesbook->deposito_bolivares = $excepcion->deposito_bolivares;
+        $salesbook->efectivo_dolares = $excepcion->efectivo_dolares;
+        $salesbook->efectivo_euros = $excepcion->efectivo_euros;
+        $salesbook->zelle = $excepcion->zelle;
+        $salesbook->euros = $excepcion->euros;
 
         if (!($this->Salesbooks->save($salesbook))) 
 		{
@@ -346,8 +352,14 @@ class SalesbooksController extends AppController
 		$salesbook = $this->Salesbooks->newEntity();
 
         $tasaCambio = 0;
-        $montoDivisas = 0;
-        $montoBolivares = 0;
+        $efectivoBolivares = 0;
+        $transferenciaBolivares = 0;
+        $posBolivares = 0;
+        $depositoBolivares = 0;
+        $efectivoDolares = 0;
+        $efectivoEuros = 0;
+        $zelle = 0;
+        $euros = 0;
 	
 		if ($invoicesBill->date_and_time->day < 10)
 		{
@@ -370,6 +382,16 @@ class SalesbooksController extends AppController
 		$salesbook->fecha = $dia . '/' . $mes . '/' . $invoicesBill->date_and_time->year . ' ';
 		
 		$salesbook->tipo_documento = "Fact";
+        
+        $salesbook->efectivo_bolivares = 0.00;
+        $salesbook->transferencia_bolivares = 0.00;
+        $salesbook->pos_bolivares = 0.00;
+        $salesbook->deposito_bolivares = 0.00;
+        $salesbook->efectivo_dolares = 0.00;
+        $salesbook->efectivo_euros = 0.00;
+        $salesbook->zelle = 0.00;
+        $salesbook->euros = 0.00;
+
         $salesbook->id_documento = $invoicesBill->id;
 		
 		$this->loadModel('Bills');
@@ -489,23 +511,58 @@ class SalesbooksController extends AppController
 		$salesbook->iva = 0;
         $salesbook->tasa_cambio = $invoicesBill->tasa_cambio;
 
-        foreach ($pagos as $pago)
+        if ($salesbook->tipo_documento == "Fact" && $salesbook->nombre_razon_social != "ANULADA")
         {
-            if ($pago->bill_id == $invoicesBill->id)
+            foreach ($pagos as $pago)
             {
-                if ($pago->moneda != "Bs.")
+                if ($pago->bill_id == $invoicesBill->id)
                 {
-                    $montoDivisas += $pago->amount;
-                }
-                else
-                {
-                    $montoBolivares += $pago->amount;                    
+                    if ($pago->payment_type == "Efectivo" && $pago->moneda == "Bs.")
+                    {
+                        $efectivoBolivares += $pago->amount;
+                    }
+                    elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "Bs.")
+                    {
+                        $transferenciaBolivares += $pago->amount;                    
+                    }
+                    elseif ($pago->payment_type == "Tarjeta de débito" || $pago->payment_type == "Tarjeta de crédito")
+                    {
+                        if ($pago->moneda == "Bs.")
+                        {
+                            $posBolivares += $pago->amount;
+                        }    
+                    }
+                    elseif ($pago->payment_type == "Depósito" && $pago->moneda == "Bs.")
+                    {
+                        $depositoBolivares += $pago->amount;    
+                    }
+                    elseif ($pago->payment_type == "Efectivo" && $pago->moneda == "$")
+                    {
+                        $efectivoDolares += $pago->amount; 
+                    }
+                    elseif ($pago->payment_type == "Efectivo" && $pago->moneda == "€")
+                    {
+                        $efectivoEuros += $pago->amount; 
+                    }
+                    elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "$")
+                    {
+                        $zelle += $pago->amount;                    
+                    }
+                    elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "€")
+                    {
+                        $euros += $pago->amount;                    
+                    }
                 }
             }
+            $salesbook->efectivo_bolivares = round($efectivoBolivares / $salesbook->tasa_cambio, 2);
+            $salesbook->transferencia_bolivares = round($transferenciaBolivares / $salesbook->tasa_cambio, 2);
+            $salesbook->pos_bolivares = round($posBolivares / $salesbook->tasa_cambio, 2);
+            $salesbook->deposito_bolivares = round($depositoBolivares / $salesbook->tasa_cambio, 2);
+            $salesbook->efectivo_dolares = $efectivoDolares;
+            $salesbook->efectivo_euros = $efectivoEuros;
+            $salesbook->zelle = $zelle;
+            $salesbook->euros = $euros;
         }
-
-        $salesbook->monto_divisas = $montoDivisas;
-        $salesbook->monto_bolivares = $montoBolivares;
 
 		if (!($this->Salesbooks->save($salesbook))) 
 		{
