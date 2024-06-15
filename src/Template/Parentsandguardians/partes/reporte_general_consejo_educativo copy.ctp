@@ -63,13 +63,10 @@ foreach ($familiasConsejoEducativo as $familia)
     endif;
     $familiaAnterior = $familiaActual;
 } ?>
-<h3 style="text-align:center">Consejo Educativo</h3>
-<h4 style="text-align:center">U.E. Colegio San Gabriel Arcángel, C.A.</h4>
-<h5 style="text-align:center">Av. Río Orinoco, Urb. Valles del Camoruco, Valencia, Estado Carabobo</h5>
-<h6 style="text-align:center">J-40490885-4</h6>
+<h3>Reporte General de Consejo Educativo Correspondiente al Período Escolar <?= $anioEscolar ?></h3>
 <p>Fecha de emisión del reporte: <?= $fechaActual->format('d-m-Y') ?></p>
 <div name="reporteGeneralConsejoEducativo" id="reporteGeneralConsejoEducativo" class="container">
-    <h3 style="text-align:center">Consejo Educativo Período <?= $anioEscolar ?></h3>
+    <h3>Totales Generales</h3>
     <div class="table-responsive"> 
         <table class="table table-striped table-hover">
             <tr>
@@ -85,15 +82,15 @@ foreach ($familiasConsejoEducativo as $familia)
             <tr>           
                 <td><b>Estudiantes con becas completas: </b><?= $this->Number->format($contadorEstudiantesBecasCompletas) ?></td>
                 <td><b>Estudiantes con becas parciales: </b><?= $this->Number->format($contadorEstudiantesBecasParciales) ?></td>
-                <td></td>
+                <td><b>Proyección de cobro familias ($): </b><?= number_format($proyeccionCobroFamilias, 2, ",", ".") ?></td>
             </tr>
             <tr>
                 <td><b>Pendiente por pago familias ($): </b><?= number_format($pendientePorPagoFamilias, 2, ",", ".") ?></td>
                 <td><b>Cobrado familias ($): </b><?= number_format($cobradoFamilias, 2, ",", ".") ?></td>
-                <td><b>Proyección de cobro familias ($): </b><?= number_format($proyeccionCobroFamilias, 2, ",", ".") ?></td>
             </tr>
         </table>
     </div> 
+    <h3>Detalle</h3>
     <div class="table-responsive">
         <table class="table table-striped table-hover">
             <thead>
@@ -105,7 +102,7 @@ foreach ($familiasConsejoEducativo as $familia)
                     <th style="text-align: center;"><b>Grado</b></th>
                     <th style="text-align: center;"><b>Estatus</b></th>
                     <th style="text-align: center;"><b>Beca</b></th>
-                    <th style="text-align: center;"><b>Familia Exonerada + Relacionada</b></th>
+                    <th style="text-align: center;"><b>Familia Exonerada o Relacionada</b></th>
                     <th style="text-align: center;"><b>Cuota Única ($)</b></th>
                     <th style="text-align: center;"><b>Pendiente por Cobrar ($)</b></th>
                     <th style="text-align: center;"><b>Cobrado ($)</b></th>

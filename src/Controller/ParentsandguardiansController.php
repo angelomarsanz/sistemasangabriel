@@ -1401,7 +1401,7 @@ class ParentsandguardiansController extends AppController
     }
     public function reactBoton()
     {
-        $filePath = WWW_ROOT . 'componentes_react/boton/asset-manifest.json';
+        $filePath = WWW_ROOT . 'componentes_react/boton/build/asset-manifest.json';
         $file = new File($filePath);
  
         $manifest = json_decode($file->read());
@@ -1410,8 +1410,8 @@ class ParentsandguardiansController extends AppController
         $maincss = 'main.css';
         $mainjs = 'main.js';
  
-        $css = '/componentes_react/boton' . $manifest->files->$maincss;
-        $js = '/componentes_react/boton' . $manifest->files->$mainjs;
+        $css = '/componentes_react/boton/build' . $manifest->files->$maincss;
+        $js = '/componentes_react/boton/build' . $manifest->files->$mainjs;
         $this->set(compact('css', 'js'));
     }
 }
