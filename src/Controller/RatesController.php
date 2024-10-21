@@ -130,7 +130,35 @@ class RatesController extends AppController
 									$indicadorError = 1;
 								}
 							}
-						}							
+						}	
+                        
+                        $this->loadModel('Parentsandguardians');
+
+                        $representantes = $this->Parentsandguardians->find('all')->where([['id >' => 1, 'estatus_registro' => "Activo",]]);
+							
+						$contadorRegistros = $representantes->count();
+						
+						if ($contadorRegistros > 0)
+						{		
+							foreach ($representantes as $representante)
+							{
+								$representanteBuscado = $this->Parentsandguardians->get($representante->id);
+								
+								$representanteBuscado->datos_contrato_anio_anterior = $representanteBuscado->datos_contrato;
+								$representanteBuscado->datos_contrato = null;
+								
+								if ($this->Parentsandguardians->save($representanteBuscado)) 
+								{
+									$contador++;
+								} 
+								else 
+								{
+									$binnacles->add('controller', 'Rates', 'add', 'El represenante con el ID ' . $representanteBuscado->id . ' no pudo ser actualizado');
+									$indicadorError = 1;
+								}
+							}
+						}	
+
 					}
 				} 
 			}

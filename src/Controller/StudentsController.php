@@ -53,7 +53,8 @@ class StudentsController extends AppController
 		$contador_estudiantes_actualizados = 0;
 
 		$estudiantes = $this->Students->find('all')
-			->where(['id >' => 1]);
+			->contain(['StudenttransactionsParentsandguardians', 'Sections'])
+			->where(['Students.id >' => 1, 'Students.student_condition' => 'Egresado', 'Sections.orden >' => 41]);
 			
 		$contadorEstudiantes = $estudiantes->count();
 		
@@ -107,7 +108,7 @@ class StudentsController extends AppController
 				$representante = $parentsandguardians->first();
 				$family = $representante->family;
 
-				$query = $this->Students->find('all')->where(['parentsandguardian_id' => $representante->id, 'Students.student_condition' => 'Regular', 'Students.section_id <' => 41]);
+				$query = $this->Students->find('all')->contain(['Sections'])->where(['parentsandguardian_id' => $representante->id, 'Students.student_condition' => 'Regular', 'Sections.orden <' => 42]);
 
 				$this->set('students', $this->paginate($query));
 				$this->set(compact('representante', 'family'));
@@ -120,14 +121,133 @@ class StudentsController extends AppController
         }
         else
         {
-			$query = $this->Students->find('all')->where([['Students.student_condition' => 'Regular'],
-			['Students.section_id <' => 41]])->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);;
+			$query = $this->Students->find('all')->contain(['Sections'])->where([['Students.student_condition' => 'Regular'],
+			['Sections.orden <' => 42]])->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);;
 			$this->set('students', $this->paginate($query));
 			$this->set(compact('family'));
 			$this->set('_serialize', ['students', 'family']);
         }
     }
+	
+	public function listadoEstudiantes($idEstudiante = null, $controlador = 'Users', $accion = 'wait')
+	{
+		if ($this->request->is('post'))
+		{
+			if (isset($_POST['id_representante'])) 
+			{
+				if ($_POST['id_representante'] != null)
+				{
+					$idRepresentante = $_POST['id_representante'];
+					$representante = $_POST['representante'];
+					
+					$condiciones = 
+						[
+							'parentsandguardian_id' => $idRepresentante, 
+						];						
 
+					$estudiantes = $this->Students->find('all', ['conditions' => $condiciones]);
+					$contadorEstudiantes = $estudiantes->count();
+
+					$this->set(compact('idRepresentante', 'representante', 'contadorEstudiantes', 'Estudiantes', 'controlador', 'accion'));
+	
+				}
+				else
+				{
+					$this->Flash->error(__('No se indicaron los apellidos de la familia'));
+				}
+			} 
+			elseif (isset($_POST['id_transaccion'])) 
+			{
+				$idEstudiante = $_POST['id_estudiante_modificado'];
+				$estudiante = $_POST['estudiante_modificado'];
+				$periodoEscolar = $_POST['periodo_escolar_modificado'];
+				$estatusCuotas = $_POST['estatus_cuotas_modificado'];
+				$invoiced = [];
+				if (isset($_POST['invoiced']))
+				{
+					$invoiced = $_POST['invoiced'];
+				}
+				$amount =  $_POST['amount'];
+				$originalAmount =  $_POST['original_amount'];
+				$partialPayment =  $_POST['partial_payment'];
+				$paidOut =  $_POST['paid_out'];
+				$amountDollar =  $_POST['amount_dollar'];
+				$porcentajeDescuento =  $_POST['porcentaje_descuento'];
+				$idTransaccion = $_POST['id_transaccion'];
+
+				$modificarCampos = [];
+				$indicadorError = 0;
+
+				foreach ($idTransaccion as $indice => $id)
+				{	
+					if (isset($invoiced[$indice]))
+					{
+						$modificarTransaccion['invoiced'] = 'Cambiar estatus registro';
+					}
+					else
+					{
+						$modificarTransaccion['invoiced'] = 'No cambiar estatus registro';
+					}
+
+					$modificarTransaccion['amount'] = $amount[$indice];
+					$modificarTransaccion['original_amount'] = $originalAmount[$indice];
+					$modificarTransaccion['partial_payment'] = $partialPayment[$indice];
+					$modificarTransaccion['paid_out'] = $paidOut[$indice];
+					$modificarTransaccion['amount_dollar'] = $amountDollar[$indice];
+					$modificarTransaccion['porcentaje_descuento'] = $porcentajeDescuento[$indice];
+					$modificarTransaccion['id'] = $id;
+
+					$codigoRetorno = $this->modificarTransaccion($modificarTransaccion);
+					if ($codigoRetorno > 0)
+					{
+						$indicadorError = 1;
+						$this->Flash->error(__('No se pudieron hacer los cambios en la cuota con el id : '.$id));
+						break;
+					}
+				}
+				if ($indicadorError == 0)
+				{
+					$this->Flash->success(__('El estatus de las cuotas se cambió exitosamente'));
+				}
+
+				$condiciones = 
+				[
+					'student_id' => $idEstudiante, 
+					'ano_escolar' => $periodoEscolar,
+					'invoiced'  => $estatusCuotas		
+				];						
+
+				$transaccionesEstudiante = $this->Studenttransactions->find('all', ['conditions' => $condiciones]);
+				$contadorTransacciones = $transaccionesEstudiante->count();
+
+				$this->set(compact('idEstudiante', 'estudiante', 'periodoEscolar', 'estatusCuotas', 'contadorTransacciones', 'transaccionesEstudiante', 'controlador', 'accion'));
+			}
+			}
+		else
+		{
+			if ($idEstudiante != null)
+			{
+				$registroEstudiante = $this->Studenttransactions->Students->get($idEstudiante);
+				$estudiante = $registroEstudiante->full_name;
+				$this->loadModel('Schools');
+				$school = $this->Schools->get(2);
+				$periodoEscolar = $school->	current_school_year;
+				$estatusCuotas = 0;
+				$transaccionesEstudiante = $this->Studenttransactions->find('all', 
+					['conditions' => 
+						[
+							'student_id' => $idEstudiante, 
+							'ano_escolar' => $periodoEscolar,
+						]
+					]);
+				$contadorTransacciones = $transaccionesEstudiante->count();
+
+				$this->set(compact('idEstudiante', 'estudiante', 'periodoEscolar', 'estatusCuotas', 'contadorTransacciones', 'transaccionesEstudiante', 'controlador', 'accion'));
+			}
+		}
+	
+	}
+	
     public function indexAdmin($idFamily = null)
     {
         if ($this->request->is('post'))
@@ -3237,12 +3357,23 @@ class StudentsController extends AppController
 				$swSignedUp = 0;
 				
 				$scholarship = 0;
-				
-				if ($studentsFors->scholarship == 1)
+
+				if ($anoEscolar == "Año escolar actual")
 				{
-					$scholarship = 1;
+					if ($studentsFors->scholarship == 1)
+					{
+						$scholarship = 1;
+					}
 				}
 				else
+				{
+					if ($studentsFors->becado_ano_anterior == 1)
+					{
+						$scholarship = 1;
+					}
+				}
+
+				if ($scholarship == 0)
 				{				
 					$studentTransactions = $this->Students->Studenttransactions->find('all')->where(['student_id' => $studentsFors->id, 'invoiced' => 0]);
 
@@ -3717,7 +3848,7 @@ class StudentsController extends AppController
 		$this->loadModel('Schools');
         $school = $this->Schools->get(2);
 		$becados = $this->Students->find('all')
-			->where(['balance' => $school->current_school_year, 'student_condition' => 'Regular', 'discount >' => 0])
+			->where(['balance >=' => $school->current_school_year, 'student_condition' => 'Regular', 'discount >' => 0])
 			->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
 			
 		$this->set(compact('becados'));
@@ -3833,5 +3964,16 @@ class StudentsController extends AppController
 		}
 		
 		return $indicadorPagado;
+	}
+	public function estudiantesEgresados()
+    {
+		$contador_estudiantes_actualizados = 0;
+
+		$egresados = $this->Students->find('all')
+			->contain(['Parentsandguardians', 'Sections'])
+			->where(['Students.id >' => 1, 'Students.student_condition' => 'Egresado', 'Students.balance >=' => 2016, 'Sections.orden >' => 41])
+			->order(['Students.balance' => 'ASC', 'Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
+
+		$this->set(compact('egresados'));
 	}
 }

@@ -1,14 +1,14 @@
 <?php
     use Cake\Routing\Router; 
 ?>
-<div class="row">
+<div class="row noVerImpreso">
     <div class="col-xs-12 col-sm-12 col-md-12">
         <div class="page-header">
             <h2>Consejo Educativo</h2>
         </div>
     </div>
 </div>
-<div class="row">
+<div class="row noVerImpreso">
     <div class="col-xs-12 col-sm-12 col-md-8">
         <p>
             Para visualizar los datos de una familia puedes hacer la búsqueda por los apellidos de la "familia" o del "representante" y luego podrás exonerarla del Consejo Educativo o también eliminar la exoneración.
@@ -17,7 +17,7 @@
     <div class="col-xs-12 col-sm-12 col-md-4">
     </div>
 </div>
-<div class="row">
+<div class="row noVerImpreso">
     <div class="col-xs-12 col-sm-12 col-md-4">
         <label for="family">Escriba los apellidos que identifican la familia</label>
         <input type="text" class="form-control" id="family">
@@ -29,20 +29,21 @@
     <div class="col-xs-12 col-sm-12 col-md-4">
     </div>
 </div>
+<!-- En este DIV se muestra la familia para exonerar o eliminar exoneración -->
 <div id="familiaConsejoEducativo" class="noVerEnPantalla row">
     <div id="datosFamilia" class="col-xs-12 col-sm-12 col-md-12">
     </div>
 </div>
 <br />
-<div id="botonesReportes" class="row">
+<div id="botonesReportes" class="row noVerImpreso">
     <div class="col-xs-12 col-sm-12 col-md-4">
-        <button type='button' id="familiasExoneradas" class='btn btn-success' style='margin-bottom: 5%;'>Familias exoneradas</button>
+        <button type='button' id="botonFamiliasExoneradas" class='btn btn-success' style='margin-bottom: 5%;'>Familias exoneradas</button>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-4">
-        <button type='button' id="familiasRelacionadas" class='btn btn-success' style='margin-bottom: 5%;'>Familias relacionadas</button>
+        <button type='button' id="botonFamiliasRelacionadas" class='btn btn-success' style='margin-bottom: 5%;'>Familias relacionadas</button>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-4">
-        <button type='button' id="reporteGeneralConsejoEducativo" class='btn btn-success' style='margin-bottom: 5%;'>Reporte general de Consejo educativo</button>
+        <button type='button' id="botonReporteGeneralConsejoEducativo" class='btn btn-success' style='margin-bottom: 5%;'>Reporte general de Consejo educativo</button>
     </div>
 </div>
 <?php 
@@ -52,17 +53,25 @@ if (isset($reporte))
     {
         include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_familias_exoneradas.ctp';
     }
-    if ($reporte == "familiasRelacionadas")
+    elseif ($reporte == "familiasRelacionadas")
     {
         include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_familias_relacionadas.ctp';
+    }
+    elseif ($reporte == "reporteGeneralConsejoEducativo")
+    {
+        include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_general_consejo_educativo.ctp';
     }
 } ?> 
 <br /><br /><br /><br /><br /><br /><br />
 <script>
     // Variables globales
     var urlBase = window.location.hostname; 
+    console.log("urlBase", urlBase)
+    var urlBaseAjustada = "";
     var nombreRuta = window.location.pathname;
+    console.log("nombreRuta", nombreRuta);
     var rutaPagina = window.location.href;
+    console.log("rutaPagina", rutaPagina);
     var idFamilia = 0;
     var reporte = "<?= $reporte ?>";
     
@@ -137,6 +146,14 @@ if (isset($reporte))
     }
     $(document).ready(function() 
     {
+        if (urlBase == "localhost")
+        {
+            urlBaseAjustada = "http://"+urlBase+"/sistemasangabriel/parentsandguardians/consejo-educativo";
+        }
+        else
+        {
+            urlBaseAjustada = "https://"+urlBase+"/parentsandguardians/consejo-educativo";
+        }
         $('#family').autocomplete(
         {
             source:'<?php echo Router::url(array("controller" => "Parentsandguardians", "action" => "findFamily")); ?>',
@@ -163,18 +180,24 @@ if (isset($reporte))
         {
             editarExoneracion("eliminarExoneracion");
         });
-        $('#familiasExoneradas').on( 'click', function(event) 
+        $('#botonFamiliasExoneradas').on( 'click', function(event) 
 		{
 			event.preventDefault();
             crm_processing_modal('Por favor espere mientras se emite el reporte...');
-			location.href = rutaPagina+"/familiasExoneradas";
+            location.href = urlBaseAjustada+"/familiasExoneradas";
 		});
-        $('#familiasRelacionadas').on( 'click', function(event) 
+        $('#botonFamiliasRelacionadas').on( 'click', function(event) 
 		{
 			event.preventDefault();
             crm_processing_modal('Por favor espere mientras se emite el reporte...');
-			location.href = rutaPagina+"/familiasRelacionadas";
-		});
+            location.href = urlBaseAjustada+"/familiasRelacionadas";
+        });
+        $('#botonReporteGeneralConsejoEducativo').on( 'click', function(event) 
+		{
+			event.preventDefault();
+            crm_processing_modal('Por favor espere mientras se emite el reporte...');
+            location.href = urlBaseAjustada+"/reporteGeneralConsejoEducativo";
+        });
 		$("#exportar-excel").click(function(){
 			
             if (reporte == "familiasRelacionadas")
@@ -198,6 +221,18 @@ if (isset($reporte))
                     name: "reporteFamiliasExoneradas",
                 
                     filename: $('#reporteFamiliasExoneradas').attr('name') 
+            
+                });
+            }
+            else if (reporte == "reporteGeneralConsejoEducativo")
+            {
+                $("#reporteGeneralConsejoEducativo").table2excel({
+            
+                    exclude: ".noExl",
+                
+                    name: "reporteGeneralConsejoEducativo",
+                
+                    filename: $('#reporteGeneralConsejoEducativo').attr('name') 
             
                 });
             }

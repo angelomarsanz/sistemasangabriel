@@ -907,6 +907,14 @@ class BillsController extends AppController
 					{
 						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
 					}
+					if ($aConcept->id == 99425)
+					{
+						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula 2022 - 2023';
+					}
+					if ($aConcept->id == 99427)
+					{
+						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula 2023 - 2024';
+					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -928,6 +936,14 @@ class BillsController extends AppController
 					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion2)
 					{
 						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
+					}
+					if ($aConcept->id == 99426)
+					{
+						$invoiceLine = $aConcept->student_name.' - Diferencia Ago 2022 - 2023';
+					}
+					if ($aConcept->id == 99428)
+					{
+						$invoiceLine = $aConcept->student_name.' - Abono Ago 2023 - 2024';
 					}
 
 					$amountConcept = $aConcept->amount;
@@ -1098,6 +1114,14 @@ class BillsController extends AppController
 					{
 						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
 					}
+					if ($aConcept->id == 99425)
+					{
+						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula 2022 - 2023';
+					}
+					if ($aConcept->id == 99427)
+					{
+						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula 2023 - 2024';
+					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;
@@ -1125,6 +1149,15 @@ class BillsController extends AppController
 					{
 						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
 					}
+					if ($aConcept->id == 99426)
+					{
+						$invoiceLine = $aConcept->student_name.' - Diferencia Ago 2022 - 2023';
+					}
+					if ($aConcept->id == 99428)
+					{
+						$invoiceLine = $aConcept->student_name.' - Abono Ago 2023 - 2024';
+					}
+
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;

@@ -188,7 +188,8 @@ if (isset($tipo_reporte))
                             <th scope="col">FECHA_NACIMIENTO</th>
                             <th scope="col">NACIONALIDAD REPRESENTANTE</th>
                             <th scope="col">CÉDULA REPRESENTANTE</th>
-                            <th scope="col">NOMBRE REPRESENTANTE</th>
+                            <th scope="col">APELLIDOS REPRESENTANTE</th>
+                            <th scope="col">NOMBRES REPRESENTANTE</th>
                             <th scope="col">NÚMERO ALUMNO</th>
                             <th scope="col">INDICADOR</th>
                             <th scope="col">CÓDIGO COLEGIO SAN GABRIEL</th>
@@ -226,10 +227,11 @@ if (isset($tipo_reporte))
                                     <td><?= $grado[$studentsFors->student->level_of_study] ?></td>
                                     <td><?= $seccion[$studentsFors->student->section_id] ?></td>
                                     <td><?= $currentDate->format('Ymd') ?></td>
-                                    <td><?= $studentsFors->student->birthdate->format('Ymd') ?></td>
+                                    <td><?= $studentsFors->student->birthdate->format('dmY') ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->type_of_identification ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->identidy_card ?></td>
-                                    <td><?= $studentsFors->student->parentsandguardian->full_name ?></td>
+                                    <td><?= $studentsFors->student->parentsandguardian->surname.' '.$studentsFors->student->parentsandguardian->second_surname ?></td>
+                                    <td><?= $studentsFors->student->parentsandguardian->first_name.' '.$studentsFors->student->parentsandguardian->second_name ?></td>
                                     <td><?= $accountStudent ?></td>
                                     <?php if ($studentsFors->student->new_student == 0): ?>
                                         <td>N</td>                          

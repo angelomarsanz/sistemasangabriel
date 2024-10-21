@@ -975,6 +975,15 @@ class ParentsandguardiansController extends AppController
             $periodoEscolarActual = "Año escolar ".$anioEscolarActual."-".$proximoAnioEscolar;
             $anioEscolar = $anioEscolarActual."-".$proximoAnioEscolar;
 
+            if ($schools->current_year_registration == $schools->current_school_year)
+            {
+                $condicionBalance =  'Students.balance';
+            }
+            else
+            {
+                $condicionBalance = 'Students.balance >=';
+            }
+
             if ($reporte == "familiasRelacionadas")
             {
                 $this->busquedaFamiliasRelacionadas();
@@ -1001,7 +1010,7 @@ class ParentsandguardiansController extends AppController
                 if ($reporte == "familiasExoneradas")
                 {
                     $familiasExoneradas = $this->Parentsandguardians->Students->find('all')
-                    ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Parentsandguardians.consejo_exonerado >' => 0, 'Students.student_condition' => "Regular", 'Students.balance' => $anioEscolarActual])
+                    ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Parentsandguardians.consejo_exonerado >' => 0, 'Students.student_condition' => "Regular", $condicionBalance => $anioEscolarActual])
                     ->contain(['Parentsandguardians', 'Sections'])
                     ->order(
                         [
@@ -1018,7 +1027,7 @@ class ParentsandguardiansController extends AppController
                 elseif ($reporte == "reporteGeneralConsejoEducativo")
                 {
                     $familiasConsejoEducativo = $this->Parentsandguardians->Students->find('all')
-                        ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Parentsandguardians.consejo_educativo' => "Sí", 'Students.student_condition' => "Regular", 'Students.balance' => $anioEscolarActual])
+                        ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Students.student_condition' => "Regular", $condicionBalance => $anioEscolarActual])
                         ->contain(['Parentsandguardians', 'Sections'])
                         ->order(
                             [
@@ -1399,6 +1408,30 @@ class ParentsandguardiansController extends AppController
             }
         }
     }
+
+    public function activarRegistroRepresentante($idRepresentante = null)
+    {
+        $representante = $this->Parentsandguardians->get(1059);
+        $representante->estatus_registro = 'Activo';
+        if ($this->Parentsandguardians->save($representante)) 
+        {
+            $usuario = $this->Parentsandguardians->Users->get($representante->user_id);
+            $usuario->estatus_registro = 'Activo';
+            if ($this->Parentsandguardians->Users->save($usuario))
+            {
+                $this->Flash->success(__('Los registros del representante y el usuario se activaron exitosamente'));
+            }
+            else
+            {
+                $this->Flash->error(__('No se pudo activar el registro del usuario'));
+            }
+        }
+        else
+        {
+            $this->Flash->error(__('No se pudo activar el registro del representante'));
+        }
+    }
+
     public function reactBoton()
     {
         $filePath = WWW_ROOT . 'componentes_react/boton/build/asset-manifest.json';

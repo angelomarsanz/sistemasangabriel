@@ -17,7 +17,7 @@
         $updateIndicator = 0;
         foreach ($students as $student): ?>
             <?php 
-            if ($student->id > 1 && $student->section_id < 41):  
+            if ($student->id > 1 && $student->section->orden < 42):  
                 if ($student->level_of_study == " " || $student->level_of_study == "" || 
                     $student->nationality == " " || $student->nationality == "" ||
                     $student->place_of_birth == " " || $student->place_of_birth == "" ):

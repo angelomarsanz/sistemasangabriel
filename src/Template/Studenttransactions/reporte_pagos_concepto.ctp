@@ -56,10 +56,10 @@
 <br />
 <br />
 <div>
-	<?php $contador = 0 ?>
-	<?php foreach ($pagosRecibidos as $pagosRecibido): ?>
-		<?php if ($contador == 0): ?>
-			<?php $contador++; ?>
+	<?php 
+	$contador = 0; 
+	foreach ($pagosRecibidos as $pagosRecibido): 
+		if ($contador == 0): ?>
 			<table id="reporte-pagos" name="reporte_pagos" class="table noverScreen">
 				<thead>
 					<tr>
@@ -105,17 +105,18 @@
 					</tr>
 				</thead>
 				<tbody>
-		<?php else: ?>
-			<tr>
-				<td><?= $contador ?></td>								
-				<td><?= $pagosRecibido->student->parentsandguardian->family ?></td>                        
-				<td><?= $pagosRecibido->student->full_name ?></td>
-				<td><?= number_format($pagosRecibido->amount, 2, ",", ".") ?></td>
-				<td class="noExl"><?= $pagosRecibido->id ?></td>				
-			</tr>
-			<?php $contador++; ?>
-		<?php endif; ?>
-	<?php endforeach ?>
+		<?php 
+		endif; 
+		$contador++; ?> 
+		<tr>
+			<td><?= $contador ?></td>								
+			<td><?= $pagosRecibido->student->parentsandguardian->family ?></td>                        
+			<td><?= $pagosRecibido->student->full_name ?></td>
+			<td><?= number_format($pagosRecibido->amount_dollar, 2, ",", ".") ?></td>
+			<td class="noExl"><?= $pagosRecibido->id ?></td>				
+		</tr>
+	<?php 
+	endforeach ?>
 	</tbody>
 	</table>
 	<a href='#' id="excel" title="EXCEL" class='btn btn-success'>Descargar reporte en excel</a>

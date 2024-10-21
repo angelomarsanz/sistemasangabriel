@@ -1955,6 +1955,10 @@ class TurnsController extends AppController
 			$vectorPagos = json_decode($turn->vector_pagos, true);
 		}
 
+		$conceptosTurno = $conceptos->busquedaConceptos($id);
+		$conceptosConsejoEducativo = $conceptosTurno['consejoEducativo'];
+		$conceptosServicioEducativo = $conceptosTurno['servicioEducativo']; 
+
 		$vectorTotalesRecibidos = json_decode($turn->vector_totales_recibidos, true);
 		$vectorTotalesRecibidosPedidos = json_decode($turn->vector_totales_recibidos_pedidos, true);
 		$totalFormasPago = json_decode($turn->total_formas_pago, true);
@@ -2027,8 +2031,7 @@ class TurnsController extends AppController
 		$codigoRetornoResultado = $resultado['codigoRetorno'];
 		$facturas = $resultado['facturas'];
 		$pagosFacturas = $resultado['pagosFacturas'];
-
-		$conceptosConsejoEducativo = $conceptos->busquedaConsejoEducativo($id);
+		$facturasNotas = $resultado['facturasNotas'];
 			
 		if ($codigoRetornoResultado != 1)
 		{
@@ -2107,6 +2110,7 @@ class TurnsController extends AppController
 			('turn',
 			'facturas',
 			'pagosFacturas',
+			'facturasNotas',
 			'vectorPagos',
 			'cajero',
 			'vectorTotalesRecibidos',
@@ -2140,12 +2144,15 @@ class TurnsController extends AppController
 			'indicadorRecibosSeguro',
 			'indicadorRecibosSeguroAnulados',
 			'indicadorRecibosConsejoEducativo',
-			'conceptosConsejoEducativo'));	
+			'conceptosConsejoEducativo',
+			'conceptosServicioEducativo',
+		));	
 				
 		$this->set('_serialize', 
 			['turn',
 			'facturas',
 			'pagosFacturas',
+			'facturasNotas',
 			'vectorPagos', 
 			'cajero', 
 			'vectorTotalesRecibidos', 
@@ -2178,7 +2185,8 @@ class TurnsController extends AppController
 			'indicadorRecibosSeguro',
 			'indicadorRecibosSeguroAnulados',
 			'indicadorRecibosConsejoEducativo',
-			'conceptosConsejoEducativo']);
+			'conceptosConsejoEducativo',
+			'conceptosServicioEducativo']);
 	}
 	
     public function excelDocumentos($id = null)

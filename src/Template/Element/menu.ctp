@@ -38,7 +38,8 @@
                     <li><?=  $this->Html->link('', ['controller' => 'Users', 'action' => 'home'], ['class' => "glyphicon glyphicon-home iconoMenu", 'title' => 'Inicio']) ?></li>
                     <li><a href="#" id="imprimir-pantalla" class="glyphicon glyphicon-print iconoMenu" title="Imprimir pantalla"></a></li>
 					<li><a href="#" id="exportar-excel" class="glyphicon glyphicon-list-alt iconoMenu" title="Exportar a excel"></a></li>
-					<?php if($current_user['role'] == 'Administrador'): ?>
+					<?php 
+					if($current_user['role'] == 'Administrador'): ?>
 						<li><?= $this->Html->link('', ['controller' => 'Users', 'action' => 'edit', $current_user['id']], ['class' => "glyphicon glyphicon-user iconoMenu", 'title' => 'Modificar mi perfil']) ?></li>
 						<?php 
 						if ($current_user['username'] == "angel2703"): ?>
@@ -47,78 +48,110 @@
 								<ul class="dropdown-menu" role="menu">
 									<li><?= $this->Html->link('Libro de Ventas', ['controller' => 'Salesbooks', 'action' => 'index']) ?></li>
 									<li><?= $this->Html->link('Excepciones libro de ventas', ['controller' => 'Excepciones', 'action' => 'index']) ?></li>
+									<li><?= $this->Html->link('Cuotas del estudiante', ['controller' => 'Studenttransactions', 'action' => 'index']) ?></li>
+									<li><?= $this->Html->link('Estudiantes', ['controller' => 'Students', 'action' => 'listadoEstudiantes']) ?></li>
 								</ul>
 							</li>
 						<?php
-						endif ?>
-						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Administrativo <span class="caret"></span></a>
-							<ul class="dropdown-menu" role="menu">
-								<li><?= $this->Html->link('Abrir turno', ['controller' => 'Turns', 'action' => 'checkTurnOpen']) ?></li>
-								<li><?= $this->Html->link('Cerrar turno', ['controller' => 'Turns', 'action' => 'checkTurnClose']) ?></li>
-								<li><?= $this->Html->link('Histórico de turnos', ['controller' => 'Turns', 'action' => 'index']) ?></li>
-								<li><?= $this->Html->link('Recibo de seguro', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo de seguro']) ?></li> 
-								<li><?= $this->Html->link('Factura inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Factura inscripción regulares']) ?></li> 
-								<li><?= $this->Html->link('Factura inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Factura inscripción nuevos']) ?></li> 
-								<li><?= $this->Html->link('Recibo inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo inscripción regulares']) ?></li>
-								<li><?= $this->Html->link('Recibo inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo inscripción nuevos']) ?></li>
-								<li><?= $this->Html->link('Recibo servicio educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo servicio educativo']) ?></li>																	
-								<li><?= $this->Html->link('Cobrar mensualidades', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
-								<li><?= $this->Html->link('Pedido por factura', ['controller' => 'Bills', 'action' => 'pedidoPorFactura']) ?></li> 
-								<li><?= $this->Html->link('Pedido por factura planificado (contabilidad)', ['controller' => 'Bills', 'action' => 'pedidoPorFacturaPlanificado']) ?></li>
-								<li><?= $this->Html->link('Recibo Consejo Educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo Consejo Educativo']) ?></li>		 								
-								<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
-								<li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
-								<li><?= $this->Html->link('Histórico cambio tasa dólar y euro', ['controller' => 'Historicotasas', 'action' => 'index']) ?></li>
-							</ul>
-						</li>
-						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Representantes <span class="caret"></span></a>
-							<ul class="dropdown-menu" role="menu">  
-								<li><?= $this->Html->link('Consulta de contrato de servicio', ['controller' => 'Parentsandguardians', 'action' => 'consultaContratoRepresentante']) ?></li>  
-								<li><?= $this->Html->link('Datos de familia', ['controller' => 'Parentsandguardians', 'action' => 'consultFamily']) ?></li>
-								<li><?= $this->Html->link('Familias - alumnos', ['controller' => 'Students', 'action' => 'familyStudents']) ?></li>
-								<li><?= $this->Html->link('Familias con tres hijos', ['controller' => 'Students', 'action' => 'familiasDescuento20']) ?></li>
-								<li><?= $this->Html->link('Familias con cuatro o más hijos', ['controller' => 'Students', 'action' => 'familiasDescuento50']) ?></li> 
-								<!-- <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li> -->
-								<li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>	
-								<?php
-								if ($current_user['username'] == "angel2703" || $current_user['username'] == "anaperez" || $current_user['username'] == "emiguerrero"): ?>
-									<li><?= $this->Html->link('Consejo Educativo', ['controller' => 'Parentsandguardians', 'action' => 'consejoEducativo']) ?></li>
-								<?php
-								endif; ?>	
-							</ul>
-						</li>
-						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Alumnos <span class="caret"></span></a>
-							<ul class="dropdown-menu" role="menu">    
-								<li><?= $this->Html->link('Registro básico de nuevos alumnos', ['controller' => 'Students', 'action' => 'registerNewStudents']) ?></li>
-								<li><?= $this->Html->link('Datos de alumnos', ['controller' => 'Students', 'action' => 'consultStudent']) ?></li>
-								<li><?= $this->Html->link('Alumnos con condición distinta a regular', ['controller' => 'Students', 'action' => 'consultStudentDelete']) ?></li>
-								<li><?= $this->Html->link('Asignar sección', ['controller' => 'Studenttransactions', 'action' => 'assignSection']) ?></li> 
-								<!-- <li><?= $this->Html->link('Modificar las cuotas del alumno', ['controller' => 'Students', 'action' => 'modifyTransactions']) ?></li> -->
-								<li><?= $this->Html->link('Relación de mensualidades', ['controller' => 'Students', 'action' => 'listMonthlyPayments']) ?></li> 
-								<li><?= $this->Html->link('Alumnos con mensualidades pendientes', ['controller' => 'Students', 'action' => 'defaulters']) ?></li> 
-								<!-- <li><?= $this->Html->link('Pagos de nuevos alumnos', ['controller' => 'Students', 'action' => 'newstudentpdf', "nuevos", '_ext' => 'pdf']) ?></li> --> 
-								<li><?= $this->Html->link('Reporte seguro escolar', ['controller' => 'Studenttransactions', 'action' => 'reportStudentGeneral']) ?></li>             
-								<li><?= $this->Html->link('Alumnos que no completaron en el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
-								<li><?= $this->Html->link('Aplicar descuento a alumnos (familias con tres hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota20']) ?></li>
-								<li><?= $this->Html->link('Aplicar descuento a alumnos (familias con cuatro o más hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota50']) ?></li>
-								<li><?= $this->Html->link('Becar alumno 100%', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
-								<li><?= $this->Html->link('Alumnos Becados 100%', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
-								<li><?= $this->Html->link('Becas especiales', ['controller' => 'Students', 'action' => 'becasEspeciales']) ?></li>
-								<li><?= $this->Html->link('Reporte becados: Beca completa, por hijos y especiales', ['controller' => 'Students', 'action' => 'reporteBecados']) ?></li>
-							</ul>
-						</li>
-												
-						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Compras <span class="caret"></span></a>
-							<ul class="dropdown-menu" role="menu">    
-								<li><?= $this->Html->link('Recibo', ['controller' => 'Bills', 'action' => 'compra']) ?></li>
-								<li><?= $this->Html->link('Vuelto', ['controller' => 'Bills', 'action' => 'vueltoCompra']) ?></li>
-							</ul>
-						</li>
-						
+						endif; 
+						if ($current_user['username'] == "angel2703" || $current_user['username'] == "adminsg" || $current_user['username'] == "daniela"|| $current_user['username'] == "anaperez" || $current_user['username'] == "emiguerrero" ): ?>
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Administrativo <span class="caret"></span></a>
+								<ul class="dropdown-menu" role="menu">
+									<li><?= $this->Html->link('Abrir turno', ['controller' => 'Turns', 'action' => 'checkTurnOpen']) ?></li>
+									<li><?= $this->Html->link('Cerrar turno', ['controller' => 'Turns', 'action' => 'checkTurnClose']) ?></li>
+									<li><?= $this->Html->link('Histórico de turnos', ['controller' => 'Turns', 'action' => 'index']) ?></li>
+									<li><?= $this->Html->link('Recibo de seguro', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo de seguro']) ?></li> 
+									<li><?= $this->Html->link('Factura inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Factura inscripción regulares']) ?></li> 
+									<li><?= $this->Html->link('Factura inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Factura inscripción nuevos']) ?></li> 
+									<li><?= $this->Html->link('Recibo inscripción alumnos regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo inscripción regulares']) ?></li>
+									<li><?= $this->Html->link('Recibo inscripción alumnos nuevos', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo inscripción nuevos']) ?></li>
+									<li><?= $this->Html->link('Recibo servicio educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo servicio educativo']) ?></li>																	
+									<li><?= $this->Html->link('Cobrar mensualidades', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Mensualidades']) ?></li> 
+									<li><?= $this->Html->link('Pedido por factura', ['controller' => 'Bills', 'action' => 'pedidoPorFactura']) ?></li> 
+									<li><?= $this->Html->link('Pedido por factura planificado (contabilidad)', ['controller' => 'Bills', 'action' => 'pedidoPorFacturaPlanificado']) ?></li>
+									<li><?= $this->Html->link('Recibo Consejo Educativo', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Recibo Consejo Educativo']) ?></li>		 								
+									<li><?= $this->Html->link('Cartón de cuotas', ['controller' => 'Parentsandguardians', 'action' => 'consultCardboard']) ?></li> 
+									<li><?= $this->Html->link('Tarifas', ['controller' => 'Rates', 'action' => 'index']) ?></li>
+									<li><?= $this->Html->link('Histórico cambio tasa dólar y euro', ['controller' => 'Historicotasas', 'action' => 'index']) ?></li>
+								</ul>
+							</li>
+
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Representantes <span class="caret"></span></a>
+								<ul class="dropdown-menu" role="menu">  
+									<li><?= $this->Html->link('Consulta de contrato de servicio', ['controller' => 'Parentsandguardians', 'action' => 'consultaContratoRepresentante']) ?></li>  
+									<li><?= $this->Html->link('Datos de familia', ['controller' => 'Parentsandguardians', 'action' => 'consultFamily']) ?></li>
+									<li><?= $this->Html->link('Familias - alumnos', ['controller' => 'Students', 'action' => 'familyStudents']) ?></li>
+									<li><?= $this->Html->link('Familias con tres hijos', ['controller' => 'Students', 'action' => 'familiasDescuento20']) ?></li>
+									<li><?= $this->Html->link('Familias con cuatro o más hijos', ['controller' => 'Students', 'action' => 'familiasDescuento50']) ?></li> 
+									<!-- <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li> -->
+									<li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>	
+									<?php
+									if ($current_user['username'] == "angel2703" || $current_user['username'] == "anaperez" || $current_user['username'] == "emiguerrero"): ?>
+										<li><?= $this->Html->link('Consejo Educativo', ['controller' => 'Parentsandguardians', 'action' => 'consejoEducativo']) ?></li>
+									<?php
+									endif; ?>	
+								</ul>
+							</li>
+
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Alumnos <span class="caret"></span></a>
+								<ul class="dropdown-menu" role="menu">    
+									<li><?= $this->Html->link('Registro básico de nuevos alumnos', ['controller' => 'Students', 'action' => 'registerNewStudents']) ?></li>
+									<li><?= $this->Html->link('Datos de alumnos', ['controller' => 'Students', 'action' => 'consultStudent']) ?></li>
+									<li><?= $this->Html->link('Alumnos con condición distinta a regular', ['controller' => 'Students', 'action' => 'consultStudentDelete']) ?></li>
+									<li><?= $this->Html->link('Asignar sección', ['controller' => 'Studenttransactions', 'action' => 'assignSection']) ?></li> 
+									<!-- <li><?= $this->Html->link('Modificar las cuotas del alumno', ['controller' => 'Students', 'action' => 'modifyTransactions']) ?></li> -->
+									<li><?= $this->Html->link('Relación de mensualidades', ['controller' => 'Students', 'action' => 'listMonthlyPayments']) ?></li> 
+									<li><?= $this->Html->link('Alumnos con mensualidades pendientes', ['controller' => 'Students', 'action' => 'defaulters']) ?></li> 
+									<!-- <li><?= $this->Html->link('Pagos de nuevos alumnos', ['controller' => 'Students', 'action' => 'newstudentpdf', "nuevos", '_ext' => 'pdf']) ?></li> --> 
+									<li><?= $this->Html->link('Reporte seguro escolar', ['controller' => 'Studenttransactions', 'action' => 'reportStudentGeneral']) ?></li>             
+									<li><?= $this->Html->link('Alumnos que no completaron en el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
+									<li><?= $this->Html->link('Aplicar descuento a alumnos (familias con tres hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota20']) ?></li>
+									<li><?= $this->Html->link('Aplicar descuento a alumnos (familias con cuatro o más hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota50']) ?></li>
+									<li><?= $this->Html->link('Becar alumno 100%', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
+									<li><?= $this->Html->link('Alumnos Becados 100%', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
+									<li><?= $this->Html->link('Becas especiales', ['controller' => 'Students', 'action' => 'becasEspeciales']) ?></li>
+									<li><?= $this->Html->link('Reporte becados: Beca completa, por hijos y especiales', ['controller' => 'Students', 'action' => 'reporteBecados']) ?></li>
+								</ul>
+							</li>
+
+							<?php if (isset($assign)): ?>
+								<form class="navbar-form navbar-left" role="search">
+									<div class="form-group">
+										<select id="select-level" name="level_of_study" class="form-control">
+											<option value=null>Seleccione el grado </option>
+											<option value=''>Alumnos sin datos actualizados </option>
+											<option value="Maternal">Maternal</option>
+											<option value="Pre-escolar, pre-kinder">Pre-escolar, pre-kinder</option>                                
+											<option value='Pre-escolar, kinder'>Pre-escolar, kinder</option>
+											<option value='Pre-escolar, preparatorio'>Pre-escolar, preparatorio</option>
+											<option value='Primaria, 1er. grado'>Primaria, 1er. grado</option>
+											<option value='Primaria, 2do. grado'>Primaria, 2do. grado</option>
+											<option value='Primaria, 3er. grado'>Primaria, 3er. grado</option>
+											<option value='Primaria, 4to. grado'>Primaria, 4to. grado</option> 
+											<option value='Primaria, 5to. grado'>Primaria, 5to. grado</option> 
+											<option value='Primaria, 6to. grado'>Primaria, 6to. grado</option>
+											<option value='Secundaria, 1er. año'>Secundaria, 1er. año</option>
+											<option value='Secundaria, 2do. año'>Secundaria, 2do. año</option>
+											<option value='Secundaria, 3er. año'>Secundaria, 3er. año</option>
+											<option value='Secundaria, 4to. año'>Secundaria, 4to. año</option>
+											<option value='Secundaria, 5to. año'>Secundaria, 5to. año</option>
+										</select>
+									</div>
+								</form>
+                        	<?php endif; ?>
+										
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Compras <span class="caret"></span></a>
+								<ul class="dropdown-menu" role="menu">    
+									<li><?= $this->Html->link('Recibo', ['controller' => 'Bills', 'action' => 'compra']) ?></li>
+									<li><?= $this->Html->link('Vuelto', ['controller' => 'Bills', 'action' => 'vueltoCompra']) ?></li>
+								</ul>
+							</li>
+						<?php
+						endif; ?>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Cuentas por cobrar <span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">    
@@ -150,34 +183,9 @@
 								<li><?= $this->Html->link('Eventos del usuario', ['controller' => 'Eventos', 'action' => 'index']) ?></li>
 								<li><?= $this->Html->link('Reporte Servicio Educativo', ['controller' => 'Turns', 'action' => 'previoServicioEducativo']) ?></li>
 							</ul>
-						</li>
-												   						
-                        <?php if (isset($assign)): ?>
-                            <form class="navbar-form navbar-left" role="search">
-                                <div class="form-group">
-                                    <select id="select-level" name="level_of_study" class="form-control">
-                                        <option value=null>Seleccione el grado </option>
-                                        <option value=''>Alumnos sin datos actualizados </option>
-										<option value="Maternal">Maternal</option>
-                                        <option value="Pre-escolar, pre-kinder">Pre-escolar, pre-kinder</option>                                
-                                        <option value='Pre-escolar, kinder'>Pre-escolar, kinder</option>
-                                        <option value='Pre-escolar, preparatorio'>Pre-escolar, preparatorio</option>
-                                        <option value='Primaria, 1er. grado'>Primaria, 1er. grado</option>
-                                        <option value='Primaria, 2do. grado'>Primaria, 2do. grado</option>
-                                        <option value='Primaria, 3er. grado'>Primaria, 3er. grado</option>
-                                        <option value='Primaria, 4to. grado'>Primaria, 4to. grado</option> 
-                                        <option value='Primaria, 5to. grado'>Primaria, 5to. grado</option> 
-                                        <option value='Primaria, 6to. grado'>Primaria, 6to. grado</option>
-                                        <option value='Secundaria, 1er. año'>Secundaria, 1er. año</option>
-                                        <option value='Secundaria, 2do. año'>Secundaria, 2do. año</option>
-                                        <option value='Secundaria, 3er. año'>Secundaria, 3er. año</option>
-                                        <option value='Secundaria, 4to. año'>Secundaria, 4to. año</option>
-                                        <option value='Secundaria, 5to. año'>Secundaria, 5to. año</option>
-                                    </select>
-                                </div>
-                            </form>
-                        <?php endif; ?>
-					<?php elseif($current_user['role'] == 'Control de estudios'): ?>
+						</li>												   						
+					<?php 
+					elseif($current_user['role'] == 'Control de estudios'): ?>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Representantes <span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">    
@@ -198,9 +206,11 @@
 								<li><?= $this->Html->link('Reporte becados: Beca completa, por hijos y especiales', ['controller' => 'Students', 'action' => 'reporteBecados']) ?></li>
 							</ul>
 						</li>					
-                    <?php elseif($current_user['role'] == 'Representante'): ?>
+                    <?php 
+					elseif($current_user['role'] == 'Representante'): ?>
                         <li><?=  $this->Html->link('Actualizar datos', ['controller' => 'Guardiantransactions', 'action' => 'homeScreen']) ?></li>
-                    <?php endif; ?>
+                    <?php 
+					endif; ?>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li>

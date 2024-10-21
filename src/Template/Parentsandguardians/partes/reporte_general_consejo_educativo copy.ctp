@@ -63,10 +63,13 @@ foreach ($familiasConsejoEducativo as $familia)
     endif;
     $familiaAnterior = $familiaActual;
 } ?>
-<h3>Reporte General de Consejo Educativo Correspondiente al Período Escolar <?= $anioEscolar ?></h3>
+<h3 style="text-align:center">Consejo Educativo</h3>
+<h4 style="text-align:center">U.E. Colegio San Gabriel Arcángel, C.A.</h4>
+<h5 style="text-align:center">Av. Río Orinoco, Urb. Valles del Camoruco, Valencia, Estado Carabobo</h5>
+<h6 style="text-align:center">J-40490885-4</h6>
 <p>Fecha de emisión del reporte: <?= $fechaActual->format('d-m-Y') ?></p>
 <div name="reporteGeneralConsejoEducativo" id="reporteGeneralConsejoEducativo" class="container">
-    <h3>Totales Generales</h3>
+    <h3 style="text-align:center">Consejo Educativo Período <?= $anioEscolar ?></h3>
     <div class="table-responsive"> 
         <table class="table table-striped table-hover">
             <tr>
@@ -82,33 +85,63 @@ foreach ($familiasConsejoEducativo as $familia)
             <tr>           
                 <td><b>Estudiantes con becas completas: </b><?= $this->Number->format($contadorEstudiantesBecasCompletas) ?></td>
                 <td><b>Estudiantes con becas parciales: </b><?= $this->Number->format($contadorEstudiantesBecasParciales) ?></td>
-                <td><b>Proyección de cobro familias ($): </b><?= number_format($proyeccionCobroFamilias, 2, ",", ".") ?></td>
+                <td></td>
             </tr>
             <tr>
+                <td><b>Proyección de cobro familias ($): </b><?= number_format($proyeccionCobroFamilias, 2, ",", ".") ?></td>
                 <td><b>Pendiente por pago familias ($): </b><?= number_format($pendientePorPagoFamilias, 2, ",", ".") ?></td>
                 <td><b>Cobrado familias ($): </b><?= number_format($cobradoFamilias, 2, ",", ".") ?></td>
             </tr>
         </table>
     </div> 
-    <h3>Detalle</h3>
     <div class="table-responsive">
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th style="text-align: center;"><b>Nro. Familia</b></th>
-                    <th style="text-align: center;"><b>Nro. Estudiante</b></th>
+                    <th style="text-align: center;"><b>Nro. Flia</b></th>
+                    <th style="text-align: center;"><b>Nro. Estud.</b></th>
                     <th style="text-align: center;"><b>Familia</b></th>
                     <th style="text-align: center;"><b>Estudiante</b></th>
                     <th style="text-align: center;"><b>Grado</b></th>
                     <th style="text-align: center;"><b>Estatus</b></th>
                     <th style="text-align: center;"><b>Beca</b></th>
-                    <th style="text-align: center;"><b>Familia Exonerada o Relacionada</b></th>
+                    <th style="text-align: center;"><b>Flia Exon. + Relac.</b></th>
                     <th style="text-align: center;"><b>Cuota Única ($)</b></th>
-                    <th style="text-align: center;"><b>Pendiente por Cobrar ($)</b></th>
+                    <th style="text-align: center;"><b>Pend. por Cobrar ($)</b></th>
                     <th style="text-align: center;"><b>Cobrado ($)</b></th>
-                    <th style="text-align: center;"><b>Nro. de Recibo</b></th>
+                    <th style="text-align: center;"><b>Nro. Recibo</b></th>
                 </tr>
+                <tr>
+                    <th style="text-align: center;"></b></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th style="text-align: right;"><b><?= number_format($proyeccionCobroFamilias, 2, ",", ".") ?></b></th>
+                    <th style="text-align: right;"><b><?= number_format($pendientePorPagoFamilias, 2, ",", ".") ?></b></th>
+                    <th style="text-align: right;"><b><?= number_format($cobradoFamilias, 2, ",", ".") ?></b></th>
+                    <th></th>
+				</tr>
             </thead>
+            <tfoot>
+				<tr>
+                    <th style="text-align: center;"><b>Totales</b></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th style="text-align: right;"><b><?= number_format($proyeccionCobroFamilias, 2, ",", ".") ?></b></th>
+                    <th style="text-align: right;"><b><?= number_format($pendientePorPagoFamilias, 2, ",", ".") ?></b></th>
+                    <th style="text-align: right;"><b><?= number_format($cobradoFamilias, 2, ",", ".") ?></b></th>
+                    <th></th>
+				</tr>
+			</tfoot>
             <tbody>				
                 <?php
                 $familiaAnterior = "";

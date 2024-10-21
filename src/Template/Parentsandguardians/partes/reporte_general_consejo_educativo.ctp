@@ -37,18 +37,23 @@ foreach ($familiasConsejoEducativo as $familia)
     if ($familiaAnterior != $familiaActual): 
         $contadorFamilias++;
     endif;
+    $familiaExoneradaVinculada = 0;
     $contadorEstudiantes++;
     if ($familiaAnterior != $familiaActual): 
         if ($familia->parentsandguardian->consejo_exonerado > 0): 
             $totalFamiliasExoneradas++;
+            $familiaExoneradaVinculada = 1;
         elseif (isset($idFamiliasRelacionadas[$familia->parentsandguardian->id])): 
             $totalFamiliasRelacionadas++;
+            $familiaExoneradaVinculada = 1;
         endif; 
-        $proyeccionCobroFamilias += $tarifaConsejoEducativo->amount;
-        if (isset($idRepresentantePagos[$familia->parentsandguardian->id])): 
-            $cobradoFamilias += $tarifaConsejoEducativo->amount;               
-        else:
-            $pendientePorPagoFamilias += $tarifaConsejoEducativo->amount;         
+        if ($familiaExoneradaVinculada == 0):
+            $proyeccionCobroFamilias += $tarifaConsejoEducativo->amount;
+            if (isset($idRepresentantePagos[$familia->parentsandguardian->id])): 
+                $cobradoFamilias += $tarifaConsejoEducativo->amount;               
+            else:
+                $pendientePorPagoFamilias += $tarifaConsejoEducativo->amount;         
+            endif;
         endif;
     endif;
     if ($familia->new_student == 0): 
@@ -88,9 +93,9 @@ foreach ($familiasConsejoEducativo as $familia)
                 <td></td>
             </tr>
             <tr>
+                <td><b>Proyección de cobro familias ($): </b><?= number_format($proyeccionCobroFamilias, 2, ",", ".") ?></td>
                 <td><b>Pendiente por pago familias ($): </b><?= number_format($pendientePorPagoFamilias, 2, ",", ".") ?></td>
                 <td><b>Cobrado familias ($): </b><?= number_format($cobradoFamilias, 2, ",", ".") ?></td>
-                <td><b>Proyección de cobro familias ($): </b><?= number_format($proyeccionCobroFamilias, 2, ",", ".") ?></td>
             </tr>
         </table>
     </div> 
@@ -98,20 +103,50 @@ foreach ($familiasConsejoEducativo as $familia)
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th style="text-align: center;"><b>Nro. Familia</b></th>
-                    <th style="text-align: center;"><b>Nro. Estudiante</b></th>
+                    <th style="text-align: center;"><b>Nro. Flia</b></th>
+                    <th style="text-align: center;"><b>Nro. Estud.</b></th>
                     <th style="text-align: center;"><b>Familia</b></th>
                     <th style="text-align: center;"><b>Estudiante</b></th>
                     <th style="text-align: center;"><b>Grado</b></th>
                     <th style="text-align: center;"><b>Estatus</b></th>
                     <th style="text-align: center;"><b>Beca</b></th>
-                    <th style="text-align: center;"><b>Familia Exonerada + Relacionada</b></th>
+                    <th style="text-align: center;"><b>Flia Exon. + Relac.</b></th>
                     <th style="text-align: center;"><b>Cuota Única ($)</b></th>
-                    <th style="text-align: center;"><b>Pendiente por Cobrar ($)</b></th>
+                    <th style="text-align: center;"><b>Pend. por Cobrar ($)</b></th>
                     <th style="text-align: center;"><b>Cobrado ($)</b></th>
-                    <th style="text-align: center;"><b>Nro. de Recibo</b></th>
+                    <th style="text-align: center;"><b>Nro. Recibo</b></th>
                 </tr>
+                <tr>
+                    <th style="text-align: center;"></b></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th style="text-align: right;"><b><?= number_format($proyeccionCobroFamilias, 2, ",", ".") ?></b></th>
+                    <th style="text-align: right;"><b><?= number_format($pendientePorPagoFamilias, 2, ",", ".") ?></b></th>
+                    <th style="text-align: right;"><b><?= number_format($cobradoFamilias, 2, ",", ".") ?></b></th>
+                    <th></th>
+				</tr>
             </thead>
+            <tfoot>
+				<tr>
+                    <th style="text-align: center;"><b>Totales</b></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th style="text-align: right;"><b><?= number_format($proyeccionCobroFamilias, 2, ",", ".") ?></b></th>
+                    <th style="text-align: right;"><b><?= number_format($pendientePorPagoFamilias, 2, ",", ".") ?></b></th>
+                    <th style="text-align: right;"><b><?= number_format($cobradoFamilias, 2, ",", ".") ?></b></th>
+                    <th></th>
+				</tr>
+			</tfoot>
             <tbody>				
                 <?php
                 $familiaAnterior = "";
@@ -119,6 +154,7 @@ foreach ($familiasConsejoEducativo as $familia)
                 $contadorFamilias = 0;
                 $contadorEstudiantes = 0;
                 foreach ($familiasConsejoEducativo as $familia): 
+                    $familiaExoneradaVinculada = 0;
                     $familiaActual = $familia->parentsandguardian->family.$familia->parentsandguardian->id;
                     if ($familiaAnterior != $familiaActual): 
                         $contadorFamilias++;
@@ -162,10 +198,12 @@ foreach ($familiasConsejoEducativo as $familia)
                         <td style="text-align: center;">
                             <?php 
                             if ($familiaAnterior != $familiaActual): 
-                                if (isset($idFamiliasRelacionadas[$familia->parentsandguardian->id])): ?>
+                                if (isset($idFamiliasRelacionadas[$familia->parentsandguardian->id])): 
+                                    $familiaExoneradaVinculada = 1; ?>
                                     Sí
                                 <?php
-                                elseif ($familia->parentsandguardian->consejo_exonerado > 0): ?>
+                                elseif ($familia->parentsandguardian->consejo_exonerado > 0): 
+                                    $familiaExoneradaVinculada = 1; ?>
                                     Sí
                                 <?php
                                 else: ?>
@@ -177,34 +215,50 @@ foreach ($familiasConsejoEducativo as $familia)
                         <td style="text-align: right;">
                             <?php 
                             if ($familiaAnterior != $familiaActual): 
-                                echo number_format($tarifaConsejoEducativo->amount, 2, ",", ".");
-                            endif; ?>
-                        </td>
-                        <td style="text-align: right;">
-                            <?php 
-                            if ($familiaAnterior != $familiaActual): 
-                                if (isset($idRepresentantePagos[$familia->parentsandguardian->id])): 
-                                    echo "0,00";
-                                else:
+                                if ($familiaExoneradaVinculada == 0):
                                     echo number_format($tarifaConsejoEducativo->amount, 2, ",", ".");
+                                else:
+                                    echo '0,00';
                                 endif;
                             endif; ?>
                         </td>
                         <td style="text-align: right;">
                             <?php 
                             if ($familiaAnterior != $familiaActual): 
-                                if (isset($idRepresentantePagos[$familia->parentsandguardian->id])): 
-                                    echo number_format($tarifaConsejoEducativo->amount, 2, ",", ".");
+                                if ($familiaExoneradaVinculada == 0):
+                                    if (isset($idRepresentantePagos[$familia->parentsandguardian->id])): 
+                                        echo "0,00";
+                                    else:
+                                        echo number_format($tarifaConsejoEducativo->amount, 2, ",", ".");
+                                    endif;
                                 else:
-                                    echo "0,00";
+                                    echo '0,00';
+                                endif;
+                            endif; ?>
+                        </td>
+                        <td style="text-align: right;">
+                            <?php 
+                            if ($familiaAnterior != $familiaActual): 
+                                if ($familiaExoneradaVinculada == 0):
+                                    if (isset($idRepresentantePagos[$familia->parentsandguardian->id])): 
+                                        echo number_format($tarifaConsejoEducativo->amount, 2, ",", ".");
+                                    else:
+                                        echo "0,00";
+                                    endif;
+                                else:
+                                    echo '0,00';
                                 endif;
                             endif; ?>
                         </td>
                         <td style="text-align: center;">
                             <?php 
                             if ($familiaAnterior != $familiaActual): 
-                                if (isset($idRepresentantePagos[$familia->parentsandguardian->id])): 
-                                    echo $idRepresentantePagos[$familia->parentsandguardian->id];
+                                if ($familiaExoneradaVinculada == 0):
+                                    if (isset($idRepresentantePagos[$familia->parentsandguardian->id])): 
+                                        echo $idRepresentantePagos[$familia->parentsandguardian->id];
+                                    endif;
+                                else:
+                                    echo '';
                                 endif;
                             endif; ?>
                         </td>

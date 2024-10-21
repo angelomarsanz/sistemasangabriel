@@ -276,7 +276,7 @@ class GuardiantransactionsController extends AppController
 
             if ($this->Parentsandguardians->save($representante)) 
             {
-                return $this->redirect(['controller' => 'Students', 'action' => 'index']);
+                return $this->redirect(['controller' => 'Guardiantransactions', 'action' => 'homeScreen']);
             } 
             else 
             {
@@ -286,6 +286,7 @@ class GuardiantransactionsController extends AppController
 
         $this->set(compact('representante', 'idRepresentante'));
     }
+    // Esta rutina debe corregirse porque en el proceso de re-inscripción que comienza en junio a los alumnos regulares el sistema no les regenera las mensualidades sino hasta después que se han actualizado los datos del alumno. Así que a los alumnos regulares se les debe dar otro tratamiento. Por los momentos se forzó el indicador a "1" por la urgencia de activar la página
     public function indicadorContrato($idRepresentante = null)
     {
         $indicadorContrato = 0;
@@ -307,6 +308,7 @@ class GuardiantransactionsController extends AppController
                 break;
             }
         }
+        $indicadorContrato = 1; // forzado provisionalmente 
         return $indicadorContrato;
     }
 }

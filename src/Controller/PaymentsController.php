@@ -519,8 +519,10 @@ class PaymentsController extends AppController
         $this->autoRender = false;
 
 		$codigoRetorno = 0;
+
+		$facturasNotas = [];
 		
-		$resultado = ['codigoRetorno' => 0, 'facturas' => '', 'pagosFacturas' => ''];
+		$resultado = ['codigoRetorno' => 0, 'facturas' => '', 'pagosFacturas' => '', 'facturasNotas' => ''];
 
 		$facturas = $this->Payments->Bills->find('all')
 			->contain(['Parentsandguardians'])
@@ -543,6 +545,16 @@ class PaymentsController extends AppController
 			if ($contadorPagos > 0)
 			{
 				$resultado['pagosFacturas'] = $pagosFacturas;	
+				foreach($facturas as $factura)
+				{
+					if ($factura->tipo_documento == 'Nota de crédito' || $factura->tipo_documento == 'Nota de débito')
+					{
+						$facturaAfectada = $this->Payments->Bills->get($factura->id_documento_padre);
+
+						$facturasNotas[$facturaAfectada->id] = ['controlAfectada' => $facturaAfectada->control_number, 'numeroAfectada' => $facturaAfectada->bill_number, 'fechaAfectada' => $facturaAfectada->date_and_time];
+					}	
+				}
+				$resultado['facturasNotas'] = $facturasNotas;
 			}
 			else
 			{

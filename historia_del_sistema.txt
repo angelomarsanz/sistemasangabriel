@@ -1,9 +1,125 @@
+Objetivos:
+Atención inmediata a los requerimientos diarios de los usuarios
+Correcciones al sistema actual
+Mejoras al sistema actual
+Integración con Vite React y Vanilla
+Migración a Cakephp 5
+
 Pendientes:
 - Al reporte de servicio educativo solo tenga acceso Sol
 - Restringir en el create invoice que solo se puedan dar sobrantes de dolar. Verificando que haya pagos en dólares en la cobranza
 Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no fiscal
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
+
+15/10/2024
+Matrícula 2024 - Pago parcial - 
+	Student.id 34
+Agosto 2025 - Pago parcial
+	Student.id 1547
+	Student.id 1534
+
+Matrícula 2023 - 
+
+14/10/2024
+Alumnos solventes seguro: 602
+Alumnos no solventes seguro: 25
+Total alumnos: 627
+
+Reporte de familias - alumnos : 627
+
+02/10/2024
+Pedido Nro. 2022 control 2022 id 41618  
+
+
+23/09/2024
+La estudiante Castillo Sequera Isabella tenía beca completa en los períodos 2022-2023 y 2023-2024. Se le eliminó la beca y ahora está mostrando las mensualidades exoneradas de esos períodos. Se eliminaron lógicamente, pero el programa debería validar si tenía beca en esos años anteriores. Es el mismo caso de Perdomo López
+
+19/09/2024
+No deben existir becados con doble beca, eso trae conflictos en el programa
+La familia Gonzalez Floridia que pago unas mensualidades atrasadas del 2024 y uno de los estudiantes tiene descuento del 20% en la tabla transacciones no se actualizó el porcentaje de descuento
+
+17/08/2024
+Las cuotas de mayo a julio de Prado Estefania quien tiene descuento del 20 %, habían sido pagadas con su respectivo descuento, sin embargo aparecía una diferencia por pagar.. Se colocó el porcentaje correspondiente en las tres cuotas: Mayo, junio y julio. Puede ser que el sistema no está actualizando correctamente la columna porcentaje_descuento cuando se hace una cobranza del año anterior. Habría que revisar el programa. Porque lo mismo sucedió con la familia Gonzalez Floridia el 19/09/2024 
+
+Perdomo López en el período 2023-2024 tenía beca completa y para el período 2024 le asignaron una beca parcial de 75 %. El sistema entonces mostraba que debía las cuotas del 2023-2024. El sistema debería buscar en la columna becado_ano_anterior si estaba becado en el año anterior y no mostrar las cuotas, pero eso aparentemente no está funcionando. Para soventar la situación y como el alumno era becado y no pagó ninguna cuota en el año anterior se eliminaron lógicamente las cuotas del año 2023-2024
+
+Lo mismo sucedió con Urrieta González Miguel
+
+16/09/2024
+Cuando Lorelys me pida anular internamente una factura. No la debo anular, simplemente se ingresa por "Modificar el número de control de la factura" y se arregla el orden. Y luego se verifica por "Modificar el lote de la factura" si el número de control que se muestra corresponde con la próxima factura en blanco. 
+
+16/09/2024
+Control 108954 - Factura 124802  - Le tocaba a Abreu Giron se imprimió un pedido. A la final se ajustó para que la factura 124802 correspondiera a la 108955, dejando la 108954 sin factura. El id de la factura 124802 es: 50333. Monto factura 72.804,60 Bs. Pago con TDB
+Se anuló erroneamente la factura con control 108954. Lo correcto era re-enumerar las facturas por la opción "Modificar el número de control de la factura". Se hicieron los ajustes correspondientes en la base de datos para reversar la anulación de la factura
+
+11/09/2024
+Flush cache dns
+Comandos ejecutados
+/etc/init.d/nscd restart
+systemd-resolve --flush-caches
+systemd-resolve --statistics
+lsof -i :53 -S
+resolvectl flush-caches
+resolvectl statistics
+killall -USR2 systemd-resolved
+killall -USR1 systemd-resolved
+journalctl -r -u systemd-resolved
+sudo service nscd restart
+
+En el navegador
+chrome://net-internals/#dns
+
+11/09/2024
+Familia Brito Fernández:
+Patricia 2do año
+Isabela 6to
+
+06/08/2024
+El recibo del seguro escolar se cobra por separado. Los alumnos nuevos que comienzan a inscribirse a partir del mes de febrero no se les cobra el seguro escolar, pero ya en septiembre se les empieza a cobrar.
+
+
+
+01/08/2024
+Se exoneró del Consejo Educativo a las familias: Lozada Arjona y Sequera Silva, ya que los datos para vincular con la otra familia no coincidían
+Se eliminó la exoneración a la familia Rincones Sánchez, ya que tiene dos hijos estudiantes y la exoneración solo aplica para un estudiante
+Se modificó el reporte del Consejo educativo para que cuando el año de inscripción sea diferente al año del período escolar considere los estudiantes inscritos para el período actual y el próximo, ya que en ese momento se está en el proceso de inscripción. Esta validación debería colocarse en todos los reportes para evitar problemas con la información en el período de inscripciones
+
+22/07/2024 
+Familias reactivadas
+Gonzalez Lattuf: idUser 1084, idParentsandguardian 1114, usuario 16786147
+Galano Noguera: idUser 304, idParentsandguardian 308, usuario 12311745
+
+18/07/2024
+Análisis del problema de los cierres del 18/07/2024 tanto de Lorelys como de Daniela
+
+Usuario Familia 				Turno	IdFactura	Control	Factura Monto Bs	Comentarios
+Lorelys	Rodríguez Gonzalez		3392	49018		108402	124307				Se anuló, pero en el reporte de Lorelys aparece como 	
+Daniela												108403	124308		
+Daniela FERRER GUILLEN								108394	124301 	18.917,60	+69,85 IGTF = 18.987,45			
+
+08/07/2024
+Respecto a agregar en la sección de Servicio Educativo del reporte de cierre el nombre y grado del nuevo estudiante, en la acción reporteCierre del controlador Turn al leer $vectorPagos de la tabla pagos, se identifica la primera y la última factura del turno y después se obtienen los conceptos de esa factura y se guardan en un vector. Luego en el reporte cuando se esté imprimiendo se buscan los conceptos del recibo de servicio educativo y se imprimen en el reporte en la misma columna de la familia
+
+Las facturas con control 108402 y 108403 se anularon y se hizo nuevamente la cobranza. Para el libro de ventas de julio 2024 hay que preguntarle a Sol como quiere que queden las facturas
+
+26/06/2024
+Reporte de cierre
+En la computadora de Daniela, tamaño página A4, horizontal, margen predeterminado, escala personalizado 94
+En la computadora de Lorelys, tamaño página A4, horizontal, margen predeterminado, escala personalizado 100
+El título de la segunda hoja, sale en la primera hoja y creo que ahí se descuadra el cierre. 
+
+25/06/2024
+Revisar las dimensiones de la imagen
+Modificar la planilla para no imprimir la imagen
+Monteleone
+24553709
+
+20/06/2024
+Familia Romero 
+9822323
+Familia camillete
+13509012
 
 03/06/2024
 Modulos modificados para del Consejo Educativo
@@ -219,11 +335,12 @@ Por solicitud de Lorelys al estudiante Morales Cavalcanti Federico se le exoner�
 El sistema no le mostró el aviso de que tenía pendiente "Agosto" con un abono, por el error de lógica en el create_invoice. Se debe corregir aplicando el mismo procedimiento del "Seguro escolar"
 
 06/09/2023
-En algunas ocasiones se presentan casos de alumnos que se retiraron y quieren reincorporarse. Normalmente se reincorpora como alumno nuevo. Se hicieron los ajustes para que el cambio se realice por la opción "Alumnos con condición distinta a regular" cuando se selecciona nuevo, se indica que nivel de estudios cursará, se actualiza el registro como un alumno nuevo y se crean las transacciones. Los módulos modificados son:
+En algunas ocasiones se presentan casos de alumnos que se retiraron y quieren reincorporarse. Normalmente se reincorpora como alumno nuevo. Se hicieron los ajustes para que el cambio se realice por la opción "Alumnos con condición distinta a regular" cuando se selecciona nuevo, se indica que nivel de estudios cursará, se actualiza el registro como un alumno nuevo y se crean las transacciones. Falta eliminar "logicamente", las transacciones de años anteriores.
+En el caso que se deba reactivar la familia, deben activarse los registros de las tablas users y parentsandguardians
+Los módulos modificados son:
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Students/edit_status.ctp
 /opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
 /opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
-Falta eliminar "logicamente", las transacciones de años anteriores
 
 27/08/2023
 Proyecto: Marcar como "Eliminado" en la columna "estatus_registro" en las tablas "users" y "parentsandguardians" a los representantes inactivos, así como también marcar como "Eliminado" en la columna "student_condition" a los estudiantes inactivos
@@ -634,12 +751,18 @@ En la tabla payments, la columna monto_igtf_dolar, realmente no está expresada 
 
 Para emitir el reporte del seguro:
 1. Crear una nueva carpeta con la fecha actual en mis documentos/colegio san gabriel/Seguro escolar/Periodo... para guardar todos los archivos del envío
-2. Solicitar a Lorelys el último reporte enviado
-3. Pegarlo al final del archivo .ods reporte_seguro_subida_20XX_20XX.ods
-4. Truncar la tabla excels en la B.D.
-5. Importar el archivo .ods a la tabla excels
-6. Ejecutar el programa
-7. Descargar y enviar el excel a Lorelys
+2. Emitir el reporte de alumnos solventes y pendientes de pago del seguro y apuntar las cantidades totales de alumnos que muestra
+3. Si es la primera vez, simplemente truncar la tabla excels en la BD y comparar con el reporte de seguro escolar por si existe alguna diferencia
+En caso de que ya sea la segunda vez que se va a enviar el reporte, hacer lo siguiente:
+1. Solicitar a Lorelys el último reporte enviado
+2. Pegarlo al final del archivo .ods reporte_seguro_subida_20XX_20XX.ods
+3. Truncar la tabla excels en la B.D.
+4. Importar el archivo .ods a la tabla excels
+4. Ejecutar el programa
+5. Comparar con los resultados con el reporte de seguro escolar
+6. Descargar y enviar el excel a Lorelys
+
+Creo que en la columna "indicador" del reporte del seguro está invertido el indicador: Si el alumno es nuevo debería contener la letra "n" y si es regular la letra "r". Está invertido
 
 Facturas cruzadas
 Cuando Lorelys imprima facturas cruzadas y se requiera colocar Nro. de control cero al Nro. de control, debo colocar 999999 y anular en las tablas Bills, Concepts y Payments
@@ -698,7 +821,10 @@ aparecerá como si debe esa cuota. Se debe idear un mecanismo para que esto no s
 
 Cambios necesarios para el período de renovación de matrícula (junio de cada año):
 
-	Se modificó la acción add_dollar de RatesController parahacer los tres siguientes tres ajustes:
+	Los alumnos nuevos que se están inscribiendo desde febrero no debe resetearse el cambo level_of_study.
+	También hay algo que corregir con ellos respecto al ajuste de la matrícula. Revisar con tiempo
+
+	Se modificó la acción add_dollar de RatesController parahacer los tres siguientes ajustes cuando se agrega por primera vez la matrícula "agosto" del siguiente año escolar:
 
 	Para los estatus recordar que hay un boolean - new_student en la tabla student
 	Ese status se cambia a "0" al iniciar el proceso de renovación de inscripción a aquellos
@@ -715,6 +841,14 @@ Cambios necesarios para el período de renovación de matrícula (junio de cada 
 
 	El programa asignar sección debe validar que el current_school_year sea igual current_year_registration, si son diferentes debe abortar la operaciòn 
 	y enviar un mensaje un mensaje de error.
+
+	En la tabla "parentsandguardians" se copia el contenido de la columna "datos_contrato" en la columna "datos_contrato_anio_anterior" y se establece en null el contenido de la columna "datos_contrato"
+
+	Se elimina el template "previo_contrato_representante_anio_anterior" de "Parentsandguardians". Después se copia el template "previo_contrato_representante" a "previo_contrato_representante_anio_anterior". Luego se blanquean todos los párrafos del archivo "previo_contrato_representante" y se van copiando todas las cláusulas según el modelo de contrato que envíe el colegio.
+
+	En la carpeta "webroot/files" del proyecto se elimina la carpeta "contratos_anio_anterior". Después se copia la carpeta "contratos" a "contratos_anio_anterior". Luego se borran todos las imágenes que hay en la carpeta "contratos" 
+
+	Recordar actualizar las tarifas: Matrícula, agosto, seguro escolar, consejo educativo y cualquier otra tarifa que se cree nueva
 
 ---
 

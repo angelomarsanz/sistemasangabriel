@@ -41,25 +41,24 @@ $cakeDescription = 'San Gabriel Arcángel';
         <?= $this->fetch('content') ?>
     </div>
     <footer>
-        <div id="alertaSatisfactorio" class="noVerEnPantalla row">
+        <div id="alertaSatisfactorio" class="row noVerEnPantalla noVerImpreso">
             <div class="col-xs-12 col-sm-12 col-md-12 alert alert-success alert-dismissible" style="position: fixed; bottom: 0; text-align: center;">
                 <a href="#" class="alertasGenerales close" data-dismiss="success" aria-label="close">&times;</a>
                 <span id="mensajeAlertaSatisfactorio"></span>
             </div>
         </div>
-        <div id="alertaAdvertencia" class="noVerEnPantalla row">
+        <div id="alertaAdvertencia" class="row noVerEnPantalla noVerImpreso">
             <div class="col-xs-12 col-sm-12 col-md-12 alert alert-warning alert-dismissible" style="position: fixed; bottom: 0; text-align: center;">
                 <a href="#" class="alertasGenerales close" data-dismiss="warning" aria-label="close">&times;</a>
                 <span id="mensajeAlertaAdvertencia"></span>
             </div>
         </div>
-        <div id="alertaPeligro" class="noVerEnPantalla row">
+        <div id="alertaPeligro" class="row noVerEnPantalla noVerImpreso">
             <div class="col-xs-12 col-sm-12 col-md-12 alert alert-danger alert-dismissible" style="position: fixed; bottom: 0; text-align: center;">
                 <a href="#" class="alertasGenerales close" data-dismiss="danger" aria-label="close">&times;</a>
                 <span id="mensajeAlertaPeligro"></span>
             </div>
         </div>
-
     </footer>
 </body>
 </html>

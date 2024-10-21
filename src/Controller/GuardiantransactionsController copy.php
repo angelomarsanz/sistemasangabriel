@@ -206,6 +206,8 @@ class GuardiantransactionsController extends AppController
             'contain' => ['Students']
         ]);
 
+        $indicadorContrato = $this->indicadorContrato($idRepresentante);
+
         if ($controlador == null && $accion == null)
         {
             if ($representante->datos_contrato != null)
@@ -214,7 +216,14 @@ class GuardiantransactionsController extends AppController
             }
             else
             {
-                $this->Flash->success(__('Por favor lea detenidamente el presente contrato y si está de acuerdo proceda a firmarlo'));
+                if ($indicadorContrato == 1)
+                {
+                    $this->Flash->success(__('Por favor lea detenidamente el presente contrato y si está de acuerdo proceda a firmarlo'));
+                }
+                else
+                {
+                    return $this->redirect(['controller' => 'Students', 'action' => 'index']);
+                }
             }
         }
         elseif ($controlador == "Users" && $accion == "home")
@@ -276,5 +285,28 @@ class GuardiantransactionsController extends AppController
         }
 
         $this->set(compact('representante', 'idRepresentante'));
+    }
+    public function indicadorContrato($idRepresentante = null)
+    {
+        $indicadorContrato = 0;
+        $this->loadModel('Schools');
+        $schools = $this->Schools->get(2);
+        $this->loadModel('Studenttransactions');
+        $matriculas = $this->Studenttransactions->find('all', 
+            [
+                'contain' => ['Students'],
+                'conditions' => [['Studenttransactions.ano_escolar >=' => $schools->current_year_registration, 'Studenttransactions.transaction_type' => 'Matrícula', 'Students.parentsandguardian_id' => $idRepresentante, 'Students.student_condition' => 'Regular']], 
+                'order' => ['Students.id' => 'ASC']
+            ]);
+        
+        foreach ($matriculas as $matricula)
+        {
+            if ($matricula->ano_escolar == $schools->current_year_registration)
+            {
+                $indicadorContrato = 1;
+                break;
+            }
+        }
+        return $indicadorContrato;
     }
 }

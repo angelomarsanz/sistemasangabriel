@@ -414,13 +414,14 @@ class ConceptsController extends AppController
 		}
        	return $codigoRetornoConcepto;
 	}
-	public function busquedaConsejoEducativo($turno = null)
+	public function busquedaConceptos($turno = null)
 	{
 		$conceptosConsejoEducativo = [];
+		$conceptosServicioEducativo = [];
 
 		$conceptos = $this->Concepts->find('all')
 			->contain(['Bills'])
-			->where(['Bills.annulled' => 0, 'Bills.turn' => $turno, 'Bills.tipo_documento' => 'Recibo de Consejo Educativo'])
+			->where(['Bills.annulled' => 0, 'Bills.turn' => $turno])
 			->order(['Bills.bill_number' => 'ASC']);
 
 		$contadorConceptos = $conceptos->count();
@@ -429,9 +430,17 @@ class ConceptsController extends AppController
 		{
 			foreach ($conceptos as $concepto)
 			{
-				$conceptosConsejoEducativo[$concepto->bill->id] = $concepto->concept;
+				if ($concepto->bill->tipo_documento == 'Recibo de Consejo Educativo')
+				{
+					$conceptosConsejoEducativo[$concepto->bill->id] = $concepto->concept;
+				}
+				if ($concepto->bill->tipo_documento == 'Recibo de servicio educativo')
+				{
+					$conceptosServicioEducativo[] = ['bill_id' => $concepto->bill->id, 'concepto' => $concepto->student_name];
+				}
 			}
 		}
-		return $conceptosConsejoEducativo;
+
+		return $conceptosTurno = ['consejoEducativo' => $conceptosConsejoEducativo, 'servicioEducativo' => $conceptosServicioEducativo];
 	}
 }
