@@ -48,6 +48,8 @@
 								<ul class="dropdown-menu" role="menu">
 									<li><?= $this->Html->link('Libro de Ventas', ['controller' => 'Salesbooks', 'action' => 'index']) ?></li>
 									<li><?= $this->Html->link('Excepciones libro de ventas', ['controller' => 'Excepciones', 'action' => 'index']) ?></li>
+									<li><?= $this->Html->link('Cuotas del estudiante', ['controller' => 'Studenttransactions', 'action' => 'index']) ?></li>
+									<li><?= $this->Html->link('Estudiantes', ['controller' => 'Students', 'action' => 'listadoEstudiantes']) ?></li>
 								</ul>
 							</li>
 						<?php

@@ -2235,6 +2235,7 @@ class StudenttransactionsController extends AppController
 			{
 				$student = $this->Studenttransactions->Students->get($students20s->id);
 				
+				$student->tipo_descuento = '';
 				$student->discount = 0;
 				
 				if (!($this->Studenttransactions->Students->save($student)))
@@ -2249,24 +2250,9 @@ class StudenttransactionsController extends AppController
 		$studentTransactions = TableRegistry::get('Studenttransactions');
 
 		$studentsFor = $studentTransactions->find()
-			->select(
-				['Studenttransactions.id',
-				'Studenttransactions.transaction_type',
-				'Studenttransactions.transaction_description',
-				'Studenttransactions.amount',
-				'Students.id',
-				'Students.surname',
-				'Students.second_surname',
-				'Students.first_name',
-				'Students.second_name',
-				'Students.section_id',
-				'Students.level_of_study',
-				'Students.scholarship',
-				'Parentsandguardians.id',
-				'Parentsandguardians.family'])
 			->contain(['Students' => ['Parentsandguardians']])
 			->where([['Studenttransactions.transaction_description' => $registration],
-				['Studenttransactions.amount >' => 0], ['Students.student_condition' => 'Regular']])
+				['Studenttransactions.amount_dollar >' => 0], ['Students.student_condition' => 'Regular'], ['Students.tipo_descuento' => '']])
 			->order(['Parentsandguardians.id' => 'ASC']);
 			
 		$account = $studentsFor->count();
@@ -2386,6 +2372,7 @@ class StudenttransactionsController extends AppController
 			{
 				$student = $this->Studenttransactions->Students->get($students50s->id);
 				
+				$student->tipo_descuento = '';
 				$student->discount = 0;
 				
 				if (!($this->Studenttransactions->Students->save($student)))
@@ -2400,24 +2387,9 @@ class StudenttransactionsController extends AppController
 		$studentTransactions = TableRegistry::get('Studenttransactions');
 
 		$studentsFor = $studentTransactions->find()
-			->select(
-				['Studenttransactions.id',
-				'Studenttransactions.transaction_type',
-				'Studenttransactions.transaction_description',
-				'Studenttransactions.amount',
-				'Students.id',
-				'Students.surname',
-				'Students.second_surname',
-				'Students.first_name',
-				'Students.second_name',
-				'Students.section_id',
-				'Students.level_of_study',
-				'Students.scholarship',
-				'Parentsandguardians.id',
-				'Parentsandguardians.family'])
 			->contain(['Students' => ['Parentsandguardians']])
 			->where([['Studenttransactions.transaction_description' => $registration],
-				['Studenttransactions.amount >' => 0], ['Students.student_condition' => 'Regular']])
+				['Studenttransactions.amount_dollar >' => 0], ['Students.student_condition' => 'Regular'], ['Students.tipo_descuento' => '']])
 			->order(['Parentsandguardians.id' => 'ASC']);
 			
 		$account = $studentsFor->count();
@@ -6364,6 +6336,7 @@ class StudenttransactionsController extends AppController
 			}
 		}
 	}
+	// Estudiantes egresados del año anterior
 	public function estudiantesEgresados()
     {
 		$transacciones = $this->Studenttransactions->find('all')

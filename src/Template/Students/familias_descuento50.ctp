@@ -46,7 +46,7 @@
             <p>RIF: <?= $school->rif ?></p>
         </div>
     </div>
-    <h3 style="text-align: center;">Familias con cuatro o más hijos</h3>
+    <h3 style="text-align: center;">Familias con Descuento del 50% (Cuatro o más Hijos)</h3>
     <?php $accountStudent = 0; ?>
     <table class="table">
         <thead>
@@ -66,7 +66,7 @@
         </tbody>
     </table>
 
-    <p><?= 'Total familias con tres hijos : ' . $accountStudent ?></p>
+    <p><?= 'Total familias con descuento del 50% : ' . $accountStudent ?></p>
     
     <button title="Imprimir" onclick="myFunction()" class="nover imprimir img-thumbnail img-responsive"><img src='../img/impresora.jpg' width = 25 height = 25 border="0"/></button>
 </div>

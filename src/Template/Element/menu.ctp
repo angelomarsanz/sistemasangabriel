@@ -83,8 +83,8 @@
 									<li><?= $this->Html->link('Consulta de contrato de servicio', ['controller' => 'Parentsandguardians', 'action' => 'consultaContratoRepresentante']) ?></li>  
 									<li><?= $this->Html->link('Datos de familia', ['controller' => 'Parentsandguardians', 'action' => 'consultFamily']) ?></li>
 									<li><?= $this->Html->link('Familias - alumnos', ['controller' => 'Students', 'action' => 'familyStudents']) ?></li>
-									<li><?= $this->Html->link('Familias con tres hijos', ['controller' => 'Students', 'action' => 'familiasDescuento20']) ?></li>
-									<li><?= $this->Html->link('Familias con cuatro o más hijos', ['controller' => 'Students', 'action' => 'familiasDescuento50']) ?></li> 
+									<li><?= $this->Html->link('Familias con descuento del 20% (Tres hijos)', ['controller' => 'Students', 'action' => 'familiasDescuento20']) ?></li>
+									<li><?= $this->Html->link('Familias con descuento del 50% (Cuatro o más hijos)', ['controller' => 'Students', 'action' => 'familiasDescuento50']) ?></li> 
 									<!-- <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li> -->
 									<li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>	
 									<?php
@@ -110,10 +110,10 @@
 									<li><?= $this->Html->link('Alumnos que no completaron en el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
 									<li><?= $this->Html->link('Aplicar descuento a alumnos (familias con tres hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota20']) ?></li>
 									<li><?= $this->Html->link('Aplicar descuento a alumnos (familias con cuatro o más hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota50']) ?></li>
-									<li><?= $this->Html->link('Becar alumno 100%', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
-									<li><?= $this->Html->link('Alumnos Becados 100%', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
+									<li><?= $this->Html->link('Alumnos con beca completa del 100%', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
+									<li><?= $this->Html->link('Becar alumno (beca completa del 100%)', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
 									<li><?= $this->Html->link('Becas especiales', ['controller' => 'Students', 'action' => 'becasEspeciales']) ?></li>
-									<li><?= $this->Html->link('Reporte becados: Beca completa, por hijos y especiales', ['controller' => 'Students', 'action' => 'reporteBecados']) ?></li>
+									<li><?= $this->Html->link('Reporte becados: Beca completa 100%, por hijos y especiales', ['controller' => 'Students', 'action' => 'reporteBecados']) ?></li>
 								</ul>
 							</li>
 

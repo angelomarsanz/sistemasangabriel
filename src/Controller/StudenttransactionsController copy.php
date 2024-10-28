@@ -6364,20 +6364,22 @@ class StudenttransactionsController extends AppController
 			}
 		}
 	}
+	// Estudiantes egresados del año anterior
 	public function estudiantesEgresados()
     {
-		if ($this->request->is('post'))
-	    {
-			if (isset($_POST['periodo_escolar']))
-			{
-				$transacciones = $this->Studenttransactions->find('all')
-					->contain(['Students' => ['Sections']])
-					->where(['Studenttransactions.transaction_description' => 'Jul '.substr($periodo_escolar, 0, 4), 'Students.balance' => 
-					substr($periodo_escolar, 5, 4), 'Students.becado_ano_anterior' => 0, 'Sections.orden >' => 41])
-					->order(['Studenttransactions.amount_dollar' => 'ASC']);
-				
-				$this->set(compact('transacciones'));
-			}
-		}
+		$transacciones = $this->Studenttransactions->find('all')
+			->contain(['Students' => ['Sections']])
+			->where(['Studenttransactions.transaction_description' => 'Jul 2024', 'Students.balance' => '2023', 'Students.becado_ano_anterior' => 0, 'Sections.orden >' => 41])
+			->order(['Studenttransactions.amount_dollar' => 'ASC']);
+		$this->set(compact('transacciones'));
+	}
+	public function pagosParcialesConceptosInscripcion ()
+	{
+		$pagosParcialesConceptosInscripcion = $this->Studenttransactions->find('all')
+			->contain(['Students' => ['Sections']])
+			->where(['Students.balance' => '2024', 'Students.student_condition' => 'Regular', 'Studenttransactions.amount_dollar <' => 190, 'OR' => [['Studenttransactions.transaction_description' => 'Matrícula 2023'], ['Studenttransactions.transaction_description' => 'Matrícula 2024'], ['Studenttransactions.transaction_description' => 'Ago 2024'], ['Studenttransactions.transaction_description' => 'Ago 2025']]])
+			->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
+			
+		$this->set(compact('pagosParcialesConceptosInscripcion'));
 	}
 }

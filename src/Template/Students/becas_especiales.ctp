@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-md-6 col-md-offset-3">
         <div class="page-header">
-            <h2>Becas especiales</h2>
+            <h2>Becas Especiales</h2>
         </div>
         <div class="row panel panel-default">
             <div class="col-md-12">

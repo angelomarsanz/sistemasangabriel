@@ -1192,13 +1192,22 @@
 	function insertRecord()
 	{
 		let vector_registro_transacciones = new Array();
+		let aplicarDescuento = 0;
+		if (anoEscolarMensualidad == anoEscolarActual)
+		{	
+			aplicarDescuento = discountFamily;
+		}
+		else
+		{
+			aplicarDescuento = descuentoAnoAnterior;
+		}
 		vector_registro_transacciones = {
 			"dbId" : transactionIdentifier,
         	"dbIdStudent" : idStudent,
         	"dbStudentName" : studentName + " - " + grade,
         	"dbMonthlyPayment" : monthlyPayment,
         	"dbScholarship" : scholarship,
-			"dbDescuentoAlumno" : discountFamily,
+			"dbDescuentoAlumno" : aplicarDescuento,
 			"dbMorosoAnoAnterior" : morosoAnoAnterior,
 			"dbTasaCambioDolar" : dollarExchangeRate,
 			"dbTasaCambioEuro" : euro,

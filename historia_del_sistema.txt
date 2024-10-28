@@ -1,9 +1,9 @@
 Objetivos:
-Atención inmediata a los requerimientos diarios de los usuarios
-Correcciones al sistema actual
-Mejoras al sistema actual
-Integración con Vite React y Vanilla
-Migración a Cakephp 5
+Integración con Vite React y Vanilla - 23/10/2024
+Migración a Cakephp 5 - 23/10/2024
+Mejoras al sistema actual - 23/10/2024
+Correcciones al sistema actual - 23/10/2024
+Atención inmediata a los requerimientos diarios de los usuarios - 23/10/2024
 
 Pendientes:
 - Al reporte de servicio educativo solo tenga acceso Sol
@@ -11,6 +11,15 @@ Pendientes:
 Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no fiscal
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
+
+25/10/2024
+Frinquello Nicola, tenía en el período 2023-2024 estaba becado 100 %, este año le asignaron una beca especial del 75 %. Se eliminaron las cuotas del año pasado. En espera de confirmación si ya no tendrá beca especial de 75%
+Barbiero Miguelangel. A esta fecha debe mensualidades del período 2023-2024. Y tiene asignada una beca especial de 100 %. En espera de confirmación si las mensualidades del año pasado se le cobrarán y si se elimina la beca del 100%.
+Se debe corregir el programa de eliminar beca: Cuando se pulse eliminar beca, se debe eliminar todas las becas que tenga
+Cuando un alumno ya tenga una beca por ejemplo del 20% por hijo y se le asigne una beca especial o total se le debe alertar al usuario que ya tiene una beca y que si desea continuar
+Además cuando se le asigne una beca a un alumno se debe tomar como referencia el mes actual y a partir de allí en el campo porcentaje_descuento de la tabla transacciones, asignarle el porcentaje de beca que corresponda: 20%, 75%, 100%, etc
+Cuando se elimine una beca, tomando como referencia el mes actual poner el porcentaje_descuento en cero de las mensualidades desde la actual en adelnante
+Cualquier otra excepción con respecto a las mensualidades anteriores cuando se elimine o asigne una beca se le hará un tratamiento manual
 
 15/10/2024
 Matrícula 2024 - Pago parcial - 
@@ -40,7 +49,7 @@ No deben existir becados con doble beca, eso trae conflictos en el programa
 La familia Gonzalez Floridia que pago unas mensualidades atrasadas del 2024 y uno de los estudiantes tiene descuento del 20% en la tabla transacciones no se actualizó el porcentaje de descuento
 
 17/08/2024
-Las cuotas de mayo a julio de Prado Estefania quien tiene descuento del 20 %, habían sido pagadas con su respectivo descuento, sin embargo aparecía una diferencia por pagar.. Se colocó el porcentaje correspondiente en las tres cuotas: Mayo, junio y julio. Puede ser que el sistema no está actualizando correctamente la columna porcentaje_descuento cuando se hace una cobranza del año anterior. Habría que revisar el programa. Porque lo mismo sucedió con la familia Gonzalez Floridia el 19/09/2024 
+Las cuotas de mayo a julio de Prado Estefania quien tiene descuento del 20 %, habían sido pagadas con su respectivo descuento, sin embargo aparecía una diferencia por pagar.. Se colocó el porcentaje correspondiente en las tres cuotas: Mayo, junio y julio. Puede ser que el sistema no está actualizando correctamente la columna porcentaje_descuento cuando se hace una cobranza del año anterior. Habría que revisar el programa. Porque lo mismo sucedió con la familia Gonzalez Floridia el 19/09/2024. Se corrigió el módulo create_invoice para que al momento de preparar los datos de la transacción actualizada que se enviará al servidor, primero se pregunte si la cuota es de este año o del anterior
 
 Perdomo López en el período 2023-2024 tenía beca completa y para el período 2024 le asignaron una beca parcial de 75 %. El sistema entonces mostraba que debía las cuotas del 2023-2024. El sistema debería buscar en la columna becado_ano_anterior si estaba becado en el año anterior y no mostrar las cuotas, pero eso aparentemente no está funcionando. Para soventar la situación y como el alumno era becado y no pagó ninguna cuota en el año anterior se eliminaron lógicamente las cuotas del año 2023-2024
 
