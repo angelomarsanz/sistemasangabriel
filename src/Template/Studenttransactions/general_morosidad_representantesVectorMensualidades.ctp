@@ -27,10 +27,7 @@
 	                    ["" => "",
 						'2023-2024' => '2023-2024',
 						'2024-2025' => '2024-2025']]);
-					echo $this->Form->input('indicador_recalculo', ['label' => 'Desea recalcular las cuotas atrasadas de acuerdo con la tarifa vigente ?: ', 'options' => 
-						["" => "",
-							'Sí' => 'Sí',
-							'No' => 'No',]]);
+					echo $this->Form->input('monto_mensualidad', ['label' => 'Monto de la mensualidad ($): ', 'options' => $vectorMensualidades]);
 					echo $this->Form->input('telefono', ['label' => 'Mostrar el número de teléfono del representante: ', 'options' => 
 						["" => "",
 						'Sí' => 'Sí',

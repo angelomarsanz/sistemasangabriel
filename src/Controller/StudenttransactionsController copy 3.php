@@ -4467,10 +4467,32 @@ class StudenttransactionsController extends AppController
 
 	public function generalMorosidadRepresentantes()
     {	
+		$this->loadModel('Rates');
+						
+		$mensualidades = $this->Rates->find('All', 
+			[ 
+				'conditions' => ['concept' => 'Mensualidad', 'rate_year >' => 2023 ],
+				'order' => ['amount' => 'DESC']
+			]);
+
+		$vectorMensualidades = [];
+
+		foreach ($mensualidades as $mensualidad)
+		{
+			$vectorMensualidades[$mensualidad->amount] = $mensualidad->amount;
+		}
+
 		if ($this->request->is('post')) 
         {
 			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteGeneralMorosidadRepresentantes', $_POST["mes"], $_POST["periodo_escolar"], "General de Representantes", $_POST["indicador_recalculo"], $_POST["telefono"]]);
         }
+
+		$controlador_estudiantes = new StudentsController();
+        			
+		$mesesTarifas = $controlador_estudiantes->mesesTarifas(0);
+
+		$this->set(compact('vectorMensualidades', 'mesesTarifas'));
+
 	}
 
 	public function reporteGeneralMorosidadRepresentantes($mes = null, $periodo_escolar = null, $tipo_reporte = null, $indicador_recalculo = null, $telefono = null)
@@ -4578,7 +4600,7 @@ class StudenttransactionsController extends AppController
 			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 		}
 
-		$vector_cuotas = $this->saldoCuotas($mes, $periodo_escolar, $indicador_recalculo, $transacciones_estudiantes); 
+		$vector_cuotas = $this->saldoCuotas($mes, $periodo_escolar, $monto_mensualidad, $transacciones_estudiantes); 
 				
 		foreach ($transacciones_estudiantes as $transaccion)
 		{ 
@@ -4617,7 +4639,7 @@ class StudenttransactionsController extends AppController
 		$this->set(compact('mes', 'periodo_escolar', 'tipo_reporte', 'telefono', 'currentDate', 'school', 'dollarExchangeRate', 'mes_anio_hasta', 'nombre_mes_reporte', 'anio_correspondiente_mes', 'detalle_morosos', 'total_cuotas_periodo', 'totales_morosidad', 'vector_cuotas'));
 	}
 
-	public function saldoCuotas($mes = null, $periodo_escolar = null, $indicador_recalculo = null, $transacciones = null)
+	public function saldoCuotas($mes = null, $periodo_escolar = null, $monto_mensualidad = null, $transacciones = null)
 	{	
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
@@ -4636,10 +4658,6 @@ class StudenttransactionsController extends AppController
 		}
 
 		$anio_mes_actual = $currentDate->year.$mes_actual;
-
-		$this->loadModel('Schools');
-		$school = $this->Schools->get(2);
-		$anio_escolar_actual = $school->current_school_year;
 
 		$anio_mes_cuota = "";
 
@@ -4669,22 +4687,27 @@ class StudenttransactionsController extends AppController
 			}
 
 			$anio_mes_transaccion = $anio_transaccion.$mes_transaccion;
-			$anio_mes_cuota = $anio_mes_transaccion; 
 
-			if ($indicador_recalculo == 'Sí' && $anio_mes_transaccion >= $anio_mes_recalculo_cuotas_atrasadas && $anio_mes_transaccion < $anio_mes_actual && $transaccion->paid_out == 0)
+			
+			if ($anio_mes_transaccion >= $anio_mes_recalculo_cuotas_atrasadas && $anio_mes_transaccion < $anio_mes_actual && $transaccion->paid_out == 0)
 			{
 				$anio_mes_cuota = $anio_mes_actual;
 			}
-			elseif ($indicador_recalculo == 'No' && $anio_transaccion < $anio_escolar_actual && $transaccion->paid_out == 0)
+			else
 			{
-				$anio_mes_cuota = $anio_escolar_actual.'07';
+				$anio_mes_cuota = $anio_mes_transaccion;
 			}
 
 			foreach ($mesesTarifas as $mesesTarifa)
 			{
 				if ($mesesTarifa["anoMes"] == $anio_mes_cuota)
 				{
-					$monto_cuota = round(($mesesTarifa["tarifaDolar"] * (100 - $transaccion->porcentaje_descuento)) / 100, 2);
+					// $monto_cuota = round(($mesesTarifa["tarifaDolar"] * (100 - $transaccion->porcentaje_descuento)) / 100, 2);
+					$monto_cuota = round((220 * (100 - $transaccion->porcentaje_descuento)) / 100, 2);
+					if ($transaccion->student_id == 723)
+					{
+						$this->Flash->success(__('Estudiante '.$transaccion->student->full_name.' Id_estudiante '.$transaccion->student->id.' Mensualidad '.$transaccion->transaction_description.' Monto '.$transaccion->amount.' Abonado '.$transaccion->amount_dollar.' tarifaDolar '.$mesesTarifa["tarifaDolar"].' monto_cuota '.$monto_cuota));
+					}
 					break;
 				}
 			}

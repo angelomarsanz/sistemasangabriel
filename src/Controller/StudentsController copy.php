@@ -222,7 +222,7 @@ class StudentsController extends AppController
 
 				$this->set(compact('idEstudiante', 'estudiante', 'periodoEscolar', 'estatusCuotas', 'contadorTransacciones', 'transaccionesEstudiante', 'controlador', 'accion'));
 			}
-			}
+		}
 		else
 		{
 			if ($idEstudiante != null)
@@ -3821,7 +3821,14 @@ class StudentsController extends AppController
         {
             $student = $this->Students->patchEntity($student, $this->request->data);
 			
-			if ($student->discount > 0)
+			$student->scholarship = 0;
+
+			if ($student->discount == 100)
+			{
+				$student->scholarship = 1;
+				$student->tipo_descuento = "Becado";
+			}
+			else if ($student->discount > 0 && $student->discount < 100)
 			{
 				$student->tipo_descuento = "Especial";
 			}
@@ -3965,6 +3972,7 @@ class StudentsController extends AppController
 		
 		return $indicadorPagado;
 	}
+	// Todos los estudiantes egresados desde que se implementó el sistema
 	public function estudiantesEgresados()
     {
 		$contador_estudiantes_actualizados = 0;

@@ -12,6 +12,14 @@ Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
 
+28/10/2024
+warning: CRLF será remplazado por LF en historia_del_sistema.txt.
+El archivo tendrá sus finales de línea originales en tu directorio de trabajo
+warning: CRLF será remplazado por LF en src/Template/Students/familias_descuento20.ctp.
+El archivo tendrá sus finales de línea originales en tu directorio de trabajo
+warning: CRLF será remplazado por LF en src/Template/Students/familias_descuento50.ctp.
+El archivo tendrá sus finales de línea originales en tu directorio de trabajo
+
 25/10/2024
 Frinquello Nicola, tenía en el período 2023-2024 estaba becado 100 %, este año le asignaron una beca especial del 75 %. Se eliminaron las cuotas del año pasado. En espera de confirmación si ya no tendrá beca especial de 75%
 Barbiero Miguelangel. A esta fecha debe mensualidades del período 2023-2024. Y tiene asignada una beca especial de 100 %. En espera de confirmación si las mensualidades del año pasado se le cobrarán y si se elimina la beca del 100%.
