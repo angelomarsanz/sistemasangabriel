@@ -2,8 +2,8 @@
 
 <div class="container">
 	<div class="jumbotron">
-    	<h1>Bienvenidos al Sistema San Gabriel Arcángel...</h1>
-    	<p>Por favor escriba en el campo usuario, el número de cédula de la madre del(los) estudiante(s), en contraseña sga40 y pulse el botón Acceder</p>
+    	<h1>¡Bienvenido al Sistema SGA!</h1>
+    	<p>Por favor escriba su usuario, contraseña y pulse el botón "Acceder":</p>
 	</div>
 	<div class="row" style="margin-top:20px">
 	    <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">

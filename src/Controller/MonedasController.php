@@ -14,6 +14,27 @@ use Cake\I18n\Time;
  */
 class MonedasController extends AppController
 {
+    public function beforeFilter(\Cake\Event\Event $event)
+    {
+        parent::beforeFilter($event);
+    }
+
+    public function isAuthorized($user)
+    {
+		if(isset($user['role']))
+		{
+			// Inicio cambios Seniat
+			if ($user['role'] === 'Seniat')
+			{
+				if(in_array($this->request->action, ['actualizarTasa']))
+				{
+					return true;
+				}
+			}
+			// Fin cambios Seniat
+		}
+        return parent::isAuthorized($user);
+    }        
 
     /**
      * Index method

@@ -27,6 +27,11 @@
         <input type="text" class="form-control" id="guardian">
     </div>
     <div class="col-xs-12 col-sm-12 col-md-4">
+        <?php
+            echo $this->Form->input('reporte_general_consejo_educativo', ['label' => 'Reporte general de Consejo educativo: ', 'options' => 
+                ["" => "",
+                ($anioEscolarActual-1) => ($anioEscolarActual-1).'-'.$anioEscolarActual,
+                $anioEscolarActual => $anioEscolarActual.'-'.($anioEscolarActual+1)]]); ?>
     </div>
 </div>
 <!-- En este DIV se muestra la familia para exonerar o eliminar exoneración -->
@@ -43,7 +48,6 @@
         <button type='button' id="botonFamiliasRelacionadas" class='btn btn-success' style='margin-bottom: 5%;'>Familias relacionadas</button>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-4">
-        <button type='button' id="botonReporteGeneralConsejoEducativo" class='btn btn-success' style='margin-bottom: 5%;'>Reporte general de Consejo educativo</button>
     </div>
 </div>
 <?php 
@@ -59,7 +63,14 @@ if (isset($reporte))
     }
     elseif ($reporte == "reporteGeneralConsejoEducativo")
     {
-        include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_general_consejo_educativo.ctp';
+        if ($anioEscolarRequerido < $anioEscolarActual)
+        {
+            include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_general_consejo_educativo_anterior.ctp';
+        }
+        else
+        {
+            include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_general_consejo_educativo.ctp';
+        }
     }
 } ?> 
 <br /><br /><br /><br /><br /><br /><br />
@@ -192,11 +203,11 @@ if (isset($reporte))
             crm_processing_modal('Por favor espere mientras se emite el reporte...');
             location.href = urlBaseAjustada+"/familiasRelacionadas";
         });
-        $('#botonReporteGeneralConsejoEducativo').on( 'click', function(event) 
+        $('#reporte-general-consejo-educativo').on( 'change', function(event) 
 		{
 			event.preventDefault();
             crm_processing_modal('Por favor espere mientras se emite el reporte...');
-            location.href = urlBaseAjustada+"/reporteGeneralConsejoEducativo";
+            location.href = urlBaseAjustada+"/reporteGeneralConsejoEducativo/"+$("#reporte-general-consejo-educativo").val();
         });
 		$("#exportar-excel").click(function(){
 			

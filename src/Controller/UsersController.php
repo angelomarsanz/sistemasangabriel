@@ -27,13 +27,15 @@ class UsersController extends AppController
     {
         if(isset($user['role']))
 		{
-			if ($user['role'] === 'Representante' || $user['role'] === 'Jefe de nómina' || $user['role'] === 'Control de estudios')
+            // Inicio cambios Seniat
+			if ($user['role'] === 'Representante' || $user['role'] === 'Control de estudios' || $user['role'] === 'Seniat')
 			{
-				if(in_array($this->request->action, ['home', 'view', 'edit', 'logout']))
+				if(in_array($this->request->action, ['home', 'view', 'edit', 'logout', 'wait']))
 				{
 					return true;
 				}
 			}
+            // Fin cambios Seniat
 		}
 
         return parent::isAuthorized($user);
@@ -82,9 +84,9 @@ class UsersController extends AppController
     public function home()
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-        date_default_timezone_set('America/Caracas');
-                   
-        $fecha_hora_actual = Time::now();    
+        date_default_timezone_set('America/Caracas');        
+        $fecha_hora_actual = Time::now(); 
+        // Inicio cambios contrato   
         $campos =
             [
                 "cell_phone",
@@ -97,6 +99,11 @@ class UsersController extends AppController
                 "tax_phone"
             ];
         $null_blanco = 0;
+        $guardianTransactions = new GuardiantransactionsController;
+        $indicadorContratoFirmado = 0;
+        $anioContratoFirmado = 0;
+        $indicadorFirmarContrato = 0;
+        $anioFirmarContrato = 0;
 
         if  ($this->Auth->user('role') == 'Representante')
         {  
@@ -105,31 +112,34 @@ class UsersController extends AppController
 
             $representante = $representantes->first();
 
-            if ($representante->datos_contrato == null)
+            if ($representante->vector_contratos != null)
             {
-                if ($representante->modified->year == $fecha_hora_actual->year)
+                $verificacionContratoFirmado = $guardianTransactions->verificacionContratoFirmado($representante);
+                $indicadorContratoFirmado = $verificacionContratoFirmado['indicadorContratoFirmado'];
+                $anioContratoFirmado = $verificacionContratoFirmado['anioContratoFirmado'];
+            }
+
+            $verificacionFirmarContrato = $guardianTransactions->verificacionFirmarContrato($representante->id);
+            $indicadorFirmarContrato = $verificacionFirmarContrato['indicadorFirmarContrato'];
+            $anioFirmarContrato = $verificacionFirmarContrato['anioFirmarContrato'];
+
+            if ($anioFirmarContrato > $anioContratoFirmado)
+            {
+                foreach ($campos as $campo)
                 {
-                    foreach ($campos as $campo)
+                    if ($representante->$campo == null || $representante->$campo == "")
                     {
-                        if ($representante->$campo == null || $representante->$campo == "")
-                        {
-                            $null_blanco = 1;
-                            break;
-                        }
+                        $null_blanco = 1;
+                        break;
                     }
-                    if ($null_blanco == 0)
-                    {
-                        $guardianTransactions = new GuardiantransactionsController;
-                        $indicadorContrato = $guardianTransactions->indicadorContrato($representante->id);
-                        
-                        if ($indicadorContrato == 1)
-                        {
-                            return $this->redirect(['controller' => 'Guardiantransactions', 'action' => 'previoContratoRepresentante', $representante->id, 'Users', 'home']);
-                        }
-                    }
+                }
+                if ($null_blanco == 0)
+                {
+                    return $this->redirect(['controller' => 'Guardiantransactions', 'action' => 'previoContratoRepresentante', $representante->id, 'Users', 'home', $anioFirmarContrato]);
                 }
             }
         }
+        // Fin cambios Contrato
         $this->render();
     }
 
@@ -212,7 +222,7 @@ class UsersController extends AppController
                 else  
                     {   
                     $this->Flash->success(__('Los datos se guardaron correctamente, por favor escriba su usuario, la contraseña y pulsa el botón ACCEDER'));
-                    return $this->redirect(['action' => 'login']);  
+                    return $this->redirect(['action' => 'wait']);  
                     }
                 }
             else 

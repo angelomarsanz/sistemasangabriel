@@ -23,23 +23,69 @@
 }
 </style>
 <br />
+
 <div class="row">
 	<div class="col-md-12">
 		<?php if ($tipo_reporte == "General de Representantes"): ?>
-			<div style="float: left; width: 100%;">
+			<div  name="reporte_general_morosidad_representantes" id="reporte-general-morosidad-representantes" style="float: left; width: 100%;">
 				<h5><b><?= $school->name ?></b></h5>
 				<p>RIF: <?= $school->rif ?></p>
 				<p>Fecha de emisión: <?= $currentDate->format('d/m/Y'); ?></p>
-				<h3 style="text-align: center;"><?= 'Reporte General Morosidad de Representantes al '.$mes_anio_hasta ?></h3>
+				<h3 style="text-align: center;"><?= 'Reporte General Morosidad de Representantes del Año Escolar '.$periodo_escolar ?></h3>
+				<h4 style="text-align: center;"><?= 'Período desde: '.$mes_anio_desde.' hasta '.$mes_anio_hasta ?></h3>
 				<h4 style="text-align: left;">Resumen</h4>
-				<p><?= "Monto total mensualidades de septiembre a ".$nombre_mes_reporte." ".$anio_correspondiente_mes.": ".number_format($total_cuotas_periodo, 2, ",", ".")." $" ?></p>
-				<p><?= "Mensualidades pagadas: ".number_format(round($total_cuotas_periodo - $totales_morosidad["Total $"], 2), 2, ",", ".")." $" ?></p>
-				<p><?= "Mensualidades pendientes: ".number_format($totales_morosidad["Total $"], 2, ",", ".")." $" ?></p>
+				<p><?= "Monto total mensualidades de septiembre a ".$nombre_mes_reporte." ".$anio_correspondiente_mes." y otros conceptos: ".number_format($total_cuotas_periodo, 2, ",", ".")." $" ?></p>
+				<p><?= "Mensualidades y otros conceptos pagados: ".number_format(round($total_cuotas_periodo - $totales_morosidad["Total $"], 2), 2, ",", ".")." $" ?></p>
+				<p><?= "Mensualidades y otros conceptos pendientes: ".number_format($totales_morosidad["Total $"], 2, ",", ".")." $" ?></p>
 				<p><?= "Porcentaje de morosidad: ".round(($totales_morosidad["Total $"]/$total_cuotas_periodo)*100, 2)." %" ?></p>
-				<p>Totales de mensualidades pendientes por mes:</p>
+				<p>Totales de mensualidades y otros conceptos pendientes desglosado:</p>
+
+				<table style="width:100%; font-size: 14px; line-height: 16px;" class="noverScreen">
+					<tbody>
+						<tr>
+							<td><b><?= $school->name ?></b></td>
+						</tr>
+						<tr>
+							<td>RIF: <?= $school->rif ?></td>
+						</tr>
+						<tr>
+							<td>Fecha de emisión: <?= $currentDate->format('d/m/Y'); ?></td>
+						</tr>	
+						<tr>
+							<td><?= 'Reporte General Morosidad de Representantes del Año Escolar '.$periodo_escolar ?></td>
+						</tr>
+						<tr>
+							<td><?= 'Período desde: '.$mes_anio_desde.' hasta '.$mes_anio_hasta ?></td>
+						</tr>
+						<tr>
+							<td>Resumen</td>
+						</tr>							
+						<tr>
+							<td><?= "Mensualidades de septiembre a ".$nombre_mes_reporte." ".$anio_correspondiente_mes." y otros conceptos: ".number_format($total_cuotas_periodo, 2, ",", ".")." $" ?></td>
+						</tr>							
+						<tr>
+							<td><?= "Mensualidades pagadas y otros conceptos: ".number_format(round($total_cuotas_periodo - $totales_morosidad["Total $"], 2), 2, ",", ".")." $" ?></td>
+						</tr>	
+						<tr>
+							<td><?= "Mensualidades pendientes y otros conceptos: ".number_format($totales_morosidad["Total $"], 2, ",", ".")." $" ?></td>
+						</tr>						
+						<tr>
+							<td><?= "Porcentaje de morosidad: ".round(($totales_morosidad["Total $"]/$total_cuotas_periodo)*100, 2)." %" ?></td>
+						</tr>	
+						<tr>
+							<td>&nbsp;</td>
+						</tr>					
+						<tr>
+							<td>Mensualidades y otros conceptos pendientes desglosado:</td>
+						</tr>											
+					</tbody>
+				</table>
 				<table class="table table-striped table-hover">
 					<thead>
 						<tr>
+							<th style="text-align:center;">Dif. Mat/Ago</th>
+							<th style="text-align:center;">SE</th>
+							<th style="text-align:center;">Seg</th>
 							<th style="text-align:center;">Sep</th>
 							<th style="text-align:center;">Oct</th>
 							<th style="text-align:center;">Nov</th>
@@ -51,12 +97,16 @@
 							<th style="text-align:center;">May</th>
 							<th style="text-align:center;">Jun</th>
 							<th style="text-align:center;">Jul</th>
+							<th style="text-align:center;">CE</th>
 							<th style="text-align:center;">Total $</th>
 							<th style="text-align:center;">Total Bs.</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr>
+							<td style="text-align:center;"><?= number_format($totales_morosidad["Dif"], 2, ",", ".") ?></td>
+							<td style="text-align:center;"><?= number_format($totales_morosidad["SE"], 2, ",", ".") ?></td>
+							<td style="text-align:center;"><?= number_format($totales_morosidad["Seg"], 2, ",", ".") ?></td>
 							<td style="text-align:center;"><?= number_format($totales_morosidad["Sep"], 2, ",", ".") ?></td>
 							<td style="text-align:center;"><?= number_format($totales_morosidad["Oct"], 2, ",", ".") ?></td>
 							<td style="text-align:center;"><?= number_format($totales_morosidad["Nov"], 2, ",", ".") ?></td>
@@ -68,19 +118,26 @@
 							<td style="text-align:center;"><?= number_format($totales_morosidad["May"], 2, ",", ".") ?></td>
 							<td style="text-align:center;"><?= number_format($totales_morosidad["Jun"], 2, ",", ".") ?></td>
 							<td style="text-align:center;"><?= number_format($totales_morosidad["Jul"], 2, ",", ".") ?></td>
+							<td style="text-align:center;"><?= number_format($totales_morosidad["CE"], 2, ",", ".") ?></td>
 							<td style="text-align:center;"><?= number_format($totales_morosidad["Total $"], 2, ",", ".") ?></td>
 							<td style="text-align:center;"><?= number_format(round($totales_morosidad["Total $"] * $dollarExchangeRate, 2), 2, ",", ".") ?></td>
+						</tr>
+						<tr>
+							<td>&nbsp;</td>
 						</tr>
 					</tbody>
 				<table>
 			</div>
 			<div style="float: left; width: 100%;">
 				<h4 style="text-align: left;">Detalle</h4>
-				<table  name="reporte_general_morosidad_representantes" id="reporte-general-morosidad-representantes" class="table table-striped table-hover">
+				<table class="table table-striped table-hover">
 					<thead>
 						<tr>
 							<th style="text-align:center;">Nro.</th>
 							<th style="text-align:center;">Familia</th>
+							<th style="text-align:center;">Dif. Mat/Ago</th>
+							<th style="text-align:center;">SE</th>
+							<th style="text-align:center;">Seg</th>
 							<th style="text-align:center;">Sep</th>
 							<th style="text-align:center;">Oct</th>
 							<th style="text-align:center;">Nov</th>
@@ -92,6 +149,7 @@
 							<th style="text-align:center;">May</th>
 							<th style="text-align:center;">Jun</th>
 							<th style="text-align:center;">Jul</th>
+							<th style="text-align:center;">CE</th>
 							<th style="text-align:center;">Total $</th>
 							<th style="text-align:center;">Total Bs.</th>
 							<?php
@@ -105,6 +163,9 @@
 						<tr>
 							<td style="text-align:center;"></td>
 							<td style="text-align:center;"><b>Totales</b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Dif"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["SE"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Seg"], 2, ",", ".") ?></b></td>
 							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Sep"], 2, ",", ".") ?></b></td>
 							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Oct"], 2, ",", ".") ?></b></td>
 							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Nov"], 2, ",", ".") ?></b></td>
@@ -116,6 +177,7 @@
 							<td style="text-align:center;"><b><?= number_format($totales_morosidad["May"], 2, ",", ".") ?></b></td>
 							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Jun"], 2, ",", ".") ?></b></td>
 							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Jul"], 2, ",", ".") ?></b></td>
+							<td style="text-align:center;"><b><?= number_format($totales_morosidad["CE"], 2, ",", ".") ?></b></td>
 							<td style="text-align:center;"><b><?= number_format($totales_morosidad["Total $"], 2, ",", ".") ?></b></td>
 							<td style="text-align:center;"><b><?= number_format(round($totales_morosidad["Total $"] * $dollarExchangeRate, 2), 2, ",", ".") ?></b></td>
 							<?php
@@ -133,6 +195,9 @@
 							<tr>
 								<td style="text-align:center;"><?= $contador_transacciones ?></td>
 								<td style="text-align:left;"><?= $moroso["Familia"] ?></td>
+								<td style="text-align:center;"><?= number_format($moroso["Dif"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($moroso["SE"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($moroso["Seg"], 2, ",", ".") ?></td>
 								<td style="text-align:center;"><?= number_format($moroso["Sep"], 2, ",", ".") ?></td>
 								<td style="text-align:center;"><?= number_format($moroso["Oct"], 2, ",", ".") ?></td>
 								<td style="text-align:center;"><?= number_format($moroso["Nov"], 2, ",", ".") ?></td>
@@ -144,6 +209,7 @@
 								<td style="text-align:center;"><?= number_format($moroso["May"], 2, ",", ".") ?></td>
 								<td style="text-align:center;"><?= number_format($moroso["Jun"], 2, ",", ".") ?></td>
 								<td style="text-align:center;"><?= number_format($moroso["Jul"], 2, ",", ".") ?></td>
+								<td style="text-align:center;"><?= number_format($moroso["CE"], 2, ",", ".") ?></td>
 								<td style="text-align:center;"><?= number_format($moroso["Total $"], 2, ",", ".") ?></td>
 								<td style="text-align:center;"><?= number_format(round($moroso["Total $"] * $dollarExchangeRate, 2), 2, ",", ".") ?></td>
 								<?php

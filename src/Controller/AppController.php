@@ -92,13 +92,46 @@ class AppController extends Controller
         $this->set('current_user', $this->Auth->user());
     }
 
+    /*
+    Inicio cambios Seniat
+    Roles:
+    - Administrador: Juan Carlos y Ángel
+    - Alumno : Alumnos
+    - Propietario: Prof. Ana Pérez
+    - Representante : Representantes
+    - Ventas generales: Lorelys y Daniela
+    - Ventas fiscales: Lorelys y Daniela
+    - Contabilidad general: Emi
+    - Contabilidad fiscal: Emi
+    - Control de estudios: Directora 
+    - Seniat : Fiscal Seniat
+    Fin cambios Seniat
+    */
+
     public function isAuthorized($user)
     {
-        if(isset($user['role']) and $user['role'] === 'Administrador')
-        {
-            return true;
-        }
+        // Inicios cambios Seniat
+        $rolesAccesoGeneral = 
+        [
+            'Administrador',
+            'Contabilidad fiscal',
+            'Contabilidad general',
+            'Propietario',
+            'Ventas fiscales',
+            'Ventas generales'
+        ];
+        // Fin cambios Seniat
 
+        if (isset($user['role']))
+        {
+            foreach ($rolesAccesoGeneral as $rol)
+            {
+                if ($rol == $user['role'])
+                {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 }

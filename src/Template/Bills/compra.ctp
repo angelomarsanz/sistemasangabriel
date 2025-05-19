@@ -77,10 +77,11 @@
 				</div>
 			</div>
 		</div>
-		<?php
-			echo '<div class="row">';
-				echo '<div class="col-md-6">';
-					echo $this->Form->input('concepto', ['id' => 'concepto', 'type' => 'text', 'label' => 'Concepto:', 'required' => 'required']);
+		<div class="row">
+			<div class="col-md-6">
+				<?php
+					echo $this->Form->input('concepto', ['id' => 'concepto', 'type' => 'text', 'label' => 'Concepto:']);
+					echo '<div id="mensaje_concepto" class="nover alert alert-danger"></div>';
 					echo $this->Form->input('monto', ['id' => 'monto', 'type' => 'number', 'label' => 'Monto:', 'value' => 0, 'step' => 0.01,]);
 					echo '<div id="mensaje_monto" class="nover alert alert-danger"></div>';
 					echo $this->Form->input('moneda', ['label' => 'Moneda:', 'id' => 'moneda', 'options' => 
@@ -88,25 +89,10 @@
 					'1' => 'Bs.',
 					'2' => '$',
 					'3' => '€']]);
-				echo '</div>';
-			echo '</div>';
-			/*
-			echo '<div class="row">';
-				echo '<div class="col-md-2">';
-					echo $this->Form->input('monto_bolivar', ['id' => 'monto_bolivar', 'type' => 'number', 'label' => 'Bs:', 'value' => 0]);
-					echo '<div id="mensaje_monto_bolivar" class="nover alert alert-danger"></div>';
-				echo '</div>';
-				echo '<div class="col-md-2">';
-					echo $this->Form->input('monto_dolar', ['id' => 'monto_dolar', 'type' => 'number', 'label' => '$:', 'value' => 0]);
-					echo '<div id="mensaje_monto_dolar" class="nover alert alert-danger"></div>';
-				echo '</div>';
-				echo '<div class="col-md-2">';
-					echo $this->Form->input('monto_dolar', ['id' => 'monto_euro', 'type' => 'number', 'label' => 'euro:', 'value' => 0]);
-					echo '<div id="mensaje_monto_euro" class="nover alert alert-danger"></div>';
-				echo '</div>';
-			echo '<div>';
-			*/
-		?>
+					echo '<div id="mensaje_moneda" class="nover alert alert-danger"></div>';
+				?>
+			</div>
+		</div>
 	</fieldset>
 	<div class="row">
 		<div class="col-md-4">
@@ -122,84 +108,58 @@
 		return Number(Math.round(numero+'e'+2)+'e-'+2);
 	}
 
-	function validar_monto(e)
+	function validar_campos(e)
 	{
-		$("#guardar").attr('disabled', true);
+		console.log('validar_campos');
+		let indicadorError = 0;
+		$("#mensaje_concepto").html("");
 		$("#mensaje_monto").html("");
+		$("#mensaje_moneda").html("");
+		if ($("#mensaje_concepto").hasClass("nover") == false)
+		{
+			$("#mensaje_concepto").addClass("nover");
+		}	
 		if ($("#mensaje_monto").hasClass("nover") == false)
 		{
 			$("#mensaje_monto").addClass("nover");
+		}
+		if ($("#mensaje_moneda").hasClass("nover") == false)
+		{
+			$("#mensaje_moneda").addClass("nover");
+		}
+		if ($("#concepto").val() == null || $("#concepto").val() == '')
+		{
+			$("#mensaje_concepto").html("Debe indicar un concepto");
+			$("#mensaje_concepto").removeClass("nover");
+			indicadorError = 1;
 		}	
 		if (parseFloat($("#monto").val()) == 0)
 		{
-			e.preventDefault();
 			$("#mensaje_monto").html("Monto inválido");
 			$("#mensaje_monto").removeClass("nover");
+			indicadorError = 1;		
 		}	
+		if ($("#moneda").val() == null || $("#moneda").val() == '')
+		{
+			$("#mensaje_moneda").html("Debe indicar el tipo de moneda");
+			$("#mensaje_moneda").removeClass("nover");
+			indicadorError = 1;		
+		}
 		else
 		{
 			$.each(vector_efectivos, function(indice, valor) 
 			{
 				if ($("#origen").val() == valor.origen && $("#moneda").val() == valor.orden && parseFloat($("#monto").val()) > valor.monto)
 				{
-					e.preventDefault();
 					$("#mensaje_monto").html("Monto inválido");
 					$("#mensaje_monto").removeClass("nover");
+					indicadorError = 1;
 				}
 			});
 		}
-		$("#guardar").attr('disabled', false);
+		return indicadorError;
 	}
 
-	function validar_montos(e)
-	{
-		$("#guardar").attr('disabled', true);
-		$("#mensaje_monto_bolivar").html("");
-		if ($("#mensaje_monto_bolivar").hasClass("nover") == false)
-		{
-			$("#mensaje_monto_bolivar").addClass("nover");
-		}		
-		$("#mensaje_monto_dolar").html("");
-		if ($("#mensaje_monto_dolar").hasClass("nover") == false)
-		{
-			$("#mensaje_monto_dolar").addClass("nover");
-		}
-		$("#mensaje_monto_euro").html("");
-		if ($("#mensaje_monto_euro").hasClass("nover") == false)
-		{
-			$("#mensaje_monto_euro").addClass("nover");
-		}
-		$.each(vector_efectivos, function(indice, valor) 
-		{
-			if ($("#origen").val() == valor.origen && valor.moneda == "bolivar" && parseFloat($("#monto_bolivar").val()) > valor.monto)
-			{
-				e.preventDefault();
-				$("#mensaje_monto_bolivar").html("Monto inválido");
-				$("#mensaje_monto_bolivar").removeClass("nover");
-			}
-		});
-		$.each(vector_efectivos, function(indice, valor) 
-		{
-			if ($("#origen").val() == valor.origen && valor.moneda == "dolar" && parseFloat($("#monto_dolar").val()) > valor.monto)
-			{
-				e.preventDefault();
-				$("#mensaje_monto_dolar").html("Monto inválido");
-				$("#mensaje_monto_dolar").removeClass("nover");
-			}
-		});
-		$.each(vector_efectivos, function(indice, valor) 
-		{
-			if ($("#origen").val() == valor.origen && valor.moneda == "euro" && parseFloat($("#monto_euro").val()) > valor.monto)
-			{
-				e.preventDefault();
-				$("#mensaje_monto_euro").html("Monto inválido");
-				$("#mensaje_monto_euro").removeClass("nover");
-			}
-		});
-		let monto_recibo_dolar = dosDecimales((parseFloat($("#monto_bolivar").val()) / tasa_dolar_bolivar) + parseFloat($("#monto_dolar").val()) + (parseFloat($("#monto_euro").val()) / tasa_dolar_euro));
-		$("#monto_recibo_dolar").val(monto_recibo_dolar);
-		$("#guardar").attr('disabled', false);
-	}
     $(document).ready(function() 
     {
 		$('#origen_facturas').on("click", function(e) 
@@ -212,51 +172,34 @@
 		});
         $('#guardar').on("click", function(e) 
 		{  
-			validar_monto(e);       
+			$("#guardar").addClass("nover");
+			let indicadorError = validar_campos();
+			if (indicadorError == 1)
+			{
+				e.preventDefault();
+				$("#guardar").removeClass("nover");
+			}       
 		});
 		$("#concepto").keypress(function(e) 
 		{
 			if(e.which == 13) 
 			{
-				validar_monto(e);
+				validar_campos(e);
 			}
 		});
 		$("#moneda").keypress(function(e) 
 		{
 			if(e.which == 13) 
 			{
-				validar_monto(e);
+				validar_campos(e);
 			}
 		});
 		$("#monto").keypress(function(e) 
 		{
 			if(e.which == 13) 
 			{
-				validar_monto(e);
+				validar_campos(e);
 			}
 		});
-		/*
-		$("#monto_bolivar").keypress(function(e) 
-		{
-			if(e.which == 13) 
-			{
-				validar_montos(e);
-			}
-		});
-		$("#monto_dolar").keypress(function(e) 
-		{
-			if(e.which == 13) 
-			{
-				validar_montos(e);
-			}
-		});
-		$("#monto_euro").keypress(function(e) 
-		{
-			if(e.which == 13) 
-			{
-				validar_montos(e);
-			}
-		});
-		*/
 	});
 </script>

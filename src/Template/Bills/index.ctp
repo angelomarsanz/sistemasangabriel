@@ -1,8 +1,9 @@
+<div id='indexBills'></div>
 <div class="row">
     <div class="col-md-12">
         <div class="page-header">
         <p><?= $this->Html->link(__('Volver'), ['controller' => 'Parentsandguardians', 'action' => 'viewData', $idFamily, $family ], ['class' => 'btn btn-sm btn-default']) ?></p>
-        <h3>Familia:&nbsp;<?= h($family) ?></h3>
+        <h3 id='familia'>Familia:&nbsp;<?= h($family) ?></h3>
         </div>
         <div class="table-responsive">
             <table class="table table-striped table-hover">

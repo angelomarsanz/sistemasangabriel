@@ -431,7 +431,7 @@ class ParentsandguardiansController extends AppController
             $this->autoRender = false;
             $name = trim($this->request->query['term']);
             $results = $this->Parentsandguardians->find('all', [
-                'conditions' => [['family LIKE' => $name . '%'], ['guardian !=' => 1], ['estatus_registro' => 'Activo'], ['consejo_educativo' => 'Sí']]]);
+                'conditions' => [['family LIKE' => $name . '%'], ['guardian !=' => 1], ['estatus_registro' => 'Activo']]]);
             $resultsArr = [];
             foreach ($results as $result) {
 				$resultsArr[] =['label' => $result['family'] . ' (' . $result['surname'] . ' ' . $result['first_name'] . ')', 'value' => $result['family'] . ' (' . $result['surname'] . ' ' . $result['first_name'] . ')', 'id' => $result['id']];
@@ -942,38 +942,98 @@ class ParentsandguardiansController extends AppController
 
         $this->set(compact('tipo_reporte', 'titulo_reporte', 'titulo_total', 'vector_representantes', 'contador_seleccionados', 'contador_impresion'));
     }
-    public function busquedaRecibosConsejoEducativo($conceptoConsejoEducativo = null, $idRepresentante = null)
+    public function busquedaConsejoEducativo($anioEscolarActual = null, $proximoAnioEscolar, $representante = null)
     {
-		$binnacles = new BinnaclesController;
+        $codigoRetorno = 0;
+        $mensajeRespuesta = 'Proceso exitoso';
+        $anioEscolarAnterior = $anioEscolarActual - 1;
+        $periodoEscolarAnterior = $anioEscolarAnterior.'-'.$anioEscolarActual;
+        $periodoEscolarActual = $anioEscolarActual.'-'.$proximoAnioEscolar;
+        $familiasRelacionadas = $representante->familias_relacionadas;
+        $familiasRelacionadasAnterior = $representante->familias_relacionadas_anterior;
+        $idFamiliaPagadoraConsejo = $representante->id_familia_pagadora_consejo;
+        $idFamiliaPagadoraConsejoAnterior = $representante->id_familia_pagadora_consejo_anterior;
+        $consejoExonerado = $representante->consejo_exonerado;
+        $consejoExoneradoAnterior = $representante->consejo_exonerado_anterior;
+
+        $indicadorConsejoAnterior = false;
+        $indicadorConsejoActual = false;
+        $indicadorReciboConsejoAnterior = false;
+        $indicadorReciboConsejoActual = false;
+
+        $this->loadModel('Studenttransactions');
+        $matriculasEstudiantes = $this->Studenttransactions->find('all')
+		->contain(['Students' => ['Parentsandguardians']])
+        ->where(['Studenttransactions.invoiced' => 0, 'Studenttransactions.transaction_type' => 'Matrícula', 'Studenttransactions.amount_dollar >' => 0, 'Students.student_condition' => 'Regular', 'Parentsandguardians.id' => $representante->id]);
+
+        foreach ($matriculasEstudiantes as $matricula)
+        {
+            if ($matricula->ano_escolar == $anioEscolarAnterior)
+            {
+                $indicadorConsejoAnterior = true;
+            }
+            if ($matricula->ano_escolar == $anioEscolarActual)
+            {
+                $indicadorConsejoActual = true;
+            }
+        }
+ 
         $this->loadModel('Concepts');
-        
-        $recibosConsejoEducativo = $this->Concepts->find()
+        $recibosConsejo = $this->Concepts->find()
             ->contain(['Bills'])
             ->where(['Bills.annulled' => false,
-                'Concepts.concept' => $conceptoConsejoEducativo,
-                'Bills.parentsandguardian_id' => $idRepresentante])
+                'SUBSTRING(Concepts.concept, 1, 17) =' => 'Consejo Educativo', 
+                'Bills.parentsandguardian_id' => $representante->id])
             ->order(['Concepts.id' => 'ASC']);
-        if ($recibosConsejoEducativo->count() == 0)
+        if ($recibosConsejo->count() > 0)
         {
-            return true;
+            foreach ($recibosConsejo as $recibo)
+            {
+                if ($recibo->concept == 'Consejo Educativo '.$periodoEscolarAnterior)
+                {
+                    $indicadorReciboConsejoAnterior = true;
+                }
+                if ($recibo->concept == 'Consejo Educativo '.$periodoEscolarActual)
+                {
+                    $indicadorReciboConsejoActual = true;
+                }
+            }
         }
-        else
-        {
-            return false;           
-        }
+        
+        $respuesta = 
+        [
+            "codigoRetorno" => $codigoRetorno,
+            "mensajeRespuesta" => $mensajeRespuesta,
+            "anioEscolarActual" => $anioEscolarActual,
+            "proximoAnioEscolar" => $proximoAnioEscolar,
+            "idRepresentante" => $representante->id,
+            "familiasRelacionadasAnterior" => $familiasRelacionadasAnterior,
+            "familiasRelacionadas" => $familiasRelacionadas,
+            "idFamiliaPagadoraConsejoAnterior" => $idFamiliaPagadoraConsejoAnterior,
+            "idFamiliaPagadoraConsejo" => $idFamiliaPagadoraConsejo,
+            "consejoExoneradoAnterior" => $consejoExoneradoAnterior,
+            "consejoExonerado" => $consejoExonerado,
+            "indicadorConsejoAnterior" => $indicadorConsejoAnterior,
+            "indicadorConsejoActual" => $indicadorConsejoActual,
+            "indicadorReciboConsejoAnterior" => $indicadorReciboConsejoAnterior,
+            "indicadorReciboConsejoActual" => $indicadorReciboConsejoActual        
+        ];
+        return $respuesta;
     }
 
-    public function consejoEducativo($reporte = null)
+    public function consejoEducativo($reporte = null, $anioEscolarRequerido = null)
     {
+        $this->loadModel('Schools');
+        $schools = $this->Schools->get(2);
+        $anioEscolarActual = $schools->current_school_year;
+
         if (isset($reporte))
         {
             $fechaActual = Time::now();
-            $this->loadModel('Schools');
-            $schools = $this->Schools->get(2);
-            $anioEscolarActual = $schools->current_school_year;
-            $proximoAnioEscolar = $schools->current_school_year + 1;
-            $periodoEscolarActual = "Año escolar ".$anioEscolarActual."-".$proximoAnioEscolar;
-            $anioEscolar = $anioEscolarActual."-".$proximoAnioEscolar;
+
+            $proximoAnioEscolarRequerido = $anioEscolarRequerido + 1;
+            $periodoEscolarRequerido = "Año escolar ".$anioEscolarRequerido."-".$proximoAnioEscolarRequerido;
+            $anioEscolar = $anioEscolarRequerido."-".$proximoAnioEscolarRequerido;
 
             if ($schools->current_year_registration == $schools->current_school_year)
             {
@@ -1026,46 +1086,66 @@ class ParentsandguardiansController extends AppController
                 }
                 elseif ($reporte == "reporteGeneralConsejoEducativo")
                 {
-                    $familiasConsejoEducativo = $this->Parentsandguardians->Students->find('all')
-                        ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Students.student_condition' => "Regular", $condicionBalance => $anioEscolarActual])
-                        ->contain(['Parentsandguardians', 'Sections'])
-                        ->order(
-                            [
-                                'Parentsandguardians.family' => 'ASC',
-                                'Parentsandguardians.id' => 'ASC',
-                                'Students.surname' => 'ASC',
-                                'Students.second_surname' => 'ASC',
-                                'Students.first_name' => 'ASC',
-                                'Students.second_name' => 'ASC',
-                            ]);
+                    if ($anioEscolarRequerido < $anioEscolarActual)
+                    {
+                        $this->loadModel('Studenttransactions');
+                        $familiasConsejoEducativo = $this->Studenttransactions->find('all')
+                            ->contain(['Students' => ['Parentsandguardians', 'Sections']])
+                            ->where(["Studenttransactions.transaction_description" => 'Matrícula '.$anioEscolarRequerido, "Studenttransactions.amount_dollar >" => 0, 'Parentsandguardians.estatus_registro' => 'Activo'])
+                            ->order(
+                                [
+                                    'Parentsandguardians.family' => 'ASC',
+                                    'Parentsandguardians.id' => 'ASC',
+                                    'Students.surname' => 'ASC',
+                                    'Students.second_surname' => 'ASC',
+                                    'Students.first_name' => 'ASC',
+                                    'Students.second_name' => 'ASC',
+                        ]);
+                    }
+                    else
+                    {
+                        $familiasConsejoEducativo = $this->Parentsandguardians->Students->find('all')
+                            ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Students.student_condition' => "Regular", $condicionBalance => $anioEscolarRequerido])
+                            ->contain(['Parentsandguardians', 'Sections'])
+                            ->order(
+                                [
+                                    'Parentsandguardians.family' => 'ASC',
+                                    'Parentsandguardians.id' => 'ASC',
+                                    'Students.surname' => 'ASC',
+                                    'Students.second_surname' => 'ASC',
+                                    'Students.first_name' => 'ASC',
+                                    'Students.second_name' => 'ASC',
+                                ]);
+                    }
 
                     $this->loadModel('Bills');
 
                     $recibosConsejoEducativo = $this->Bills->find('all')
-                        ->where(["tipo_documento" => "Recibo de Consejo Educativo", "school_year" => $periodoEscolarActual, "annulled" => 0 ]);
+                        ->where(["tipo_documento" => "Recibo de Consejo Educativo", "school_year" => $periodoEscolarRequerido, "annulled" => 0 ]);
                     
                     $this->loadModel('Rates');
 
                     $tarifas = $this->Rates->find('all')
-                        ->where(["Concept" => "Consejo Educativo", "rate_year" => $anioEscolarActual]);
+                        ->where(["Concept" => "Consejo Educativo", "rate_year" => $anioEscolarRequerido]);
 
                     if ($tarifas->count() > 0)
                     {
                         $tarifaConsejoEducativo = $tarifas->first();
                     }
-                    $this->set(compact('fechaActual', 'anioEscolar', 'reporte', 'familiasConsejoEducativo', 'recibosConsejoEducativo', 'tarifaConsejoEducativo'));
+                    $this->set(compact('fechaActual', 'anioEscolar', 'anioEscolarActual', 'anioEscolarRequerido', 'reporte', 'familiasConsejoEducativo', 'recibosConsejoEducativo', 'tarifaConsejoEducativo'));
                 }
             }
         }
         else
         {
             $reporte = "";
-            $this->set(compact('reporte'));
+            $this->set(compact('reporte', 'anioEscolarActual'));
         }
     }
 
     public function busquedaFamiliasRelacionadas()
     {
+
         $excepcionesNombre =
             [
                 "NO   APLICA",
@@ -1081,9 +1161,15 @@ class ParentsandguardiansController extends AppController
                 "0"
             ];
 
-        $familiasRelacionadasBD = $this->Parentsandguardians->find('all', ['conditions' => 
+        $familiasPagadorasConsejo = $this->Parentsandguardians->find('all', ['conditions' => 
             [
                 'familias_relacionadas is not null'
+            ]]);
+
+
+        $familiasRelacionadas = $this->Parentsandguardians->find('all', ['conditions' => 
+            [
+                'id_familia_pagadora_consejo >' => 0
             ]]);
 
         $familiasControl = $this->Parentsandguardians->find('all', ['conditions' => 
@@ -1108,6 +1194,18 @@ class ParentsandguardiansController extends AppController
                 'identidy_card_mother !=' => "",
             ]]);
 
+        $representantesActivos = [];
+
+        $estudiantes = $this->Parentsandguardians->Students->find('all')->where(['Students.id >' => 1 , "Students.student_condition" => "Regular"])->order(['Students.parentsandguardian_id' => 'ASC', 'Students.id' => 'ASC']);
+
+        foreach ($estudiantes as $estudiante)
+        {
+            if (!(isset($representantesActivos[$estudiante->parentsandguardian_id])))
+            {
+                $representantesActivos[$estudiante->parentsandguardian_id] = $estudiante->parentsandguardian_id;
+            }
+        }
+
         $contadorFamiliasControlProcesadas = 0;
         $contadorFamiliasBusquedaProcesadas = 0;
         $indicadorConFamiliasRelacionadas = 0;
@@ -1121,7 +1219,7 @@ class ParentsandguardiansController extends AppController
 
         $binnacles = new BinnaclesController;
 
-        foreach ($familiasRelacionadasBD as $familia)
+        foreach ($familiasPagadorasConsejo as $familia)
         {
             $representante = $this->Parentsandguardians->get($familia->id);
             $representante->familias_relacionadas = null;
@@ -1131,140 +1229,163 @@ class ParentsandguardiansController extends AppController
             }
         }
 
+        foreach ($familiasRelacionadas as $familia)
+        {
+            $representanteRelacionado = $this->Parentsandguardians->get($familia->id);
+            $representanteRelacionado->id_familia_pagadora_consejo = 0;
+            if (!($this->Parentsandguardians->save($representanteRelacionado))) 
+            {
+                $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo limpiar el campo id_familia_pagadora_consejo en el registro con el ID '.$familia->id);
+            }
+        }
+
         foreach ($familiasControl as $control)
         {
-            $indicadorConFamiliasRelacionadas = 0;
-            $vectorFamiliasRelacionadas = [];
-
-            $nombrePadreControl = 
-                trim($control->first_name_father)." ".
-                trim($control->second_name_father)." ".
-                trim($control->surname_father)." ".
-                trim($control->second_surname_father);
-
-            $nombrePadreControl = $this->eliminarAcentos($nombrePadreControl);
-
-            $identificacionPadreControl = $control->type_of_identification_father.trim($control->identidy_card_father);
-
-            $nombreMadreControl = 
-                trim($control->first_name_mother)." ".
-                trim($control->second_name_mother)." ".
-                trim($control->surname_mother)." ".
-                trim($control->second_surname_mother);
-
-            $nombreMadreControl = $this->eliminarAcentos($nombreMadreControl);
-
-            $identificacionMadreControl = $control->type_of_identification_mother.trim($control->identidy_card_mother);
-
-            $indicadorExcepcionNombrePadre = 0;
-            $indicadorExcepcionNombreMadre = 0;
-            foreach ($excepcionesNombre as $excepcion)
+            if (isset($representantesActivos[$control->id]))
             {
-                $posicionCadena = strpos($nombrePadreControl, $excepcion);
-                if ($posicionCadena !== false)
-                {
-                    $indicadorExcepcionNombrePadre = 1;
-                }
-                $posicionCadena = strpos($nombreMadreControl, $excepcion);
-                if ($posicionCadena !== false)
-                {
-                    $indicadorExcepcionNombreMadre = 1;
-                }
-            }
+                $indicadorConFamiliasRelacionadas = 0;
+                $vectorFamiliasRelacionadas = [];
 
-            if ($nombrePadreControl != "" && $nombreMadreControl != "")
-            {
-                $contadorFamiliasControlProcesadas++;
-                foreach ($familiasBusqueda as $busqueda)
+                $nombrePadreControl = 
+                    trim($control->first_name_father)." ".
+                    trim($control->second_name_father)." ".
+                    trim($control->surname_father)." ".
+                    trim($control->second_surname_father);
+
+                $nombrePadreControl = $this->eliminarAcentos($nombrePadreControl);
+
+                $identificacionPadreControl = $control->type_of_identification_father.trim($control->identidy_card_father);
+
+                $nombreMadreControl = 
+                    trim($control->first_name_mother)." ".
+                    trim($control->second_name_mother)." ".
+                    trim($control->surname_mother)." ".
+                    trim($control->second_surname_mother);
+
+                $nombreMadreControl = $this->eliminarAcentos($nombreMadreControl);
+
+                $identificacionMadreControl = $control->type_of_identification_mother.trim($control->identidy_card_mother);
+
+                $indicadorExcepcionNombrePadre = 0;
+                $indicadorExcepcionNombreMadre = 0;
+                foreach ($excepcionesNombre as $excepcion)
                 {
-                    $indicadorMarcado = 0;
-                    $indicadorFamiliaRelacionada = 0;
-                    if ($control->id != $busqueda->id)
+                    $posicionCadena = strpos($nombrePadreControl, $excepcion);
+                    if ($posicionCadena !== false)
                     {
-                        if (!(in_array($busqueda->id, $familiasYaRelacionadas)))
-                        {           
-                            $nombrePadreBusqueda = 
-                                trim($busqueda->first_name_father)." ".
-                                trim($busqueda->second_name_father)." ".
-                                trim($busqueda->surname_father)." ".
-                                trim($busqueda->second_surname_father);
-
-                            $nombrePadreBusqueda = $this->eliminarAcentos($nombrePadreBusqueda);
-
-                            $identificacionPadreBusqueda = $busqueda->type_of_identification_father.trim($busqueda->identidy_card_father);
-
-                            $nombreMadreBusqueda = 
-                                trim($busqueda->first_name_mother)." ".
-                                trim($busqueda->second_name_mother)." ".
-                                trim($busqueda->surname_mother)." ".
-                                trim($busqueda->second_surname_mother);
-
-                            $nombreMadreBusqueda = $this->eliminarAcentos($nombreMadreBusqueda);
-
-                            $identificacionMadreBusqueda = $busqueda->type_of_identification_mother.trim($busqueda->identidy_card_mother);
-
-                            if ($nombrePadreBusqueda != "" && $nombreMadreBusqueda != "")
-                            {
-                                $contadorFamiliasBusquedaProcesadas++;
-
-                                if (!(in_array(trim($control->identidy_card_father), $excepcionesCedula)))
-                                {
-                                    if ($identificacionPadreControl == $identificacionPadreBusqueda)
-                                    {
-                                        $indicadorFamiliaRelacionada = 1;
-                                    }
-                                }
-                                if ($indicadorFamiliaRelacionada == 0)
-                                {
-                                    if (!(in_array(trim($control->identidy_card_mother), $excepcionesCedula)))
-                                    {
-                                        if ($identificacionMadreControl == $identificacionMadreBusqueda)
-                                        {
-                                            $indicadorFamiliaRelacionada = 1;
-                                        }
-                                    }
-                                }
-                                if ($indicadorFamiliaRelacionada == 0)
-                                { 
-                                    if ($indicadorExcepcionNombrePadre == 0)
-                                    {
-                                        if ($nombrePadreControl == $nombrePadreBusqueda)
-                                        {
-                                            $indicadorFamiliaRelacionada = 1;
-                                        }
-                                    }
-                                }
-                                if ($indicadorFamiliaRelacionada == 0)
-                                {
-                                    if ($indicadorExcepcionNombreMadre == 0)
-                                    {
-                                        if ($nombreMadreControl == $nombreMadreBusqueda)
-                                        {
-                                            $indicadorFamiliaRelacionada = 1;
-                                        }
-                                    }
-                                }
-                                if ($indicadorFamiliaRelacionada == 1)
-                                {
-                                    $indicadorConFamiliasRelacionadas = 1;
-                                    $vectorFamiliasRelacionadas[] = $busqueda->id;
-                                }
-                            }
-                        }
-                    }  
-                }  
-                if ($indicadorConFamiliasRelacionadas == 1)
-                {
-                    $representante = $this->Parentsandguardians->get($control->id);
-                    $representante->familias_relacionadas = json_encode($vectorFamiliasRelacionadas);
-                    if ($this->Parentsandguardians->save($representante)) 
-                    {
-                        $contadorFamiliasRelacionadasActualizadas++;
-                        $familiasYaRelacionadas[] = $control->id;
+                        $indicadorExcepcionNombrePadre = 1;
                     }
-                    else
+                    $posicionCadena = strpos($nombreMadreControl, $excepcion);
+                    if ($posicionCadena !== false)
                     {
-                        $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo actualizar el representante con familias relacionadas con el ID '.$control->id);
+                        $indicadorExcepcionNombreMadre = 1;
+                    }
+                }
+
+                if ($nombrePadreControl != "" && $nombreMadreControl != "")
+                {
+                    $contadorFamiliasControlProcesadas++;
+                    foreach ($familiasBusqueda as $busqueda)
+                    {
+                        if (isset($representantesActivos[$busqueda->id]))
+                        {
+                            $indicadorMarcado = 0;
+                            $indicadorFamiliaRelacionada = 0;
+                            if ($control->id != $busqueda->id)
+                            {
+                                if (!(in_array($busqueda->id, $familiasYaRelacionadas)))
+                                {           
+                                    $nombrePadreBusqueda = 
+                                        trim($busqueda->first_name_father)." ".
+                                        trim($busqueda->second_name_father)." ".
+                                        trim($busqueda->surname_father)." ".
+                                        trim($busqueda->second_surname_father);
+
+                                    $nombrePadreBusqueda = $this->eliminarAcentos($nombrePadreBusqueda);
+
+                                    $identificacionPadreBusqueda = $busqueda->type_of_identification_father.trim($busqueda->identidy_card_father);
+
+                                    $nombreMadreBusqueda = 
+                                        trim($busqueda->first_name_mother)." ".
+                                        trim($busqueda->second_name_mother)." ".
+                                        trim($busqueda->surname_mother)." ".
+                                        trim($busqueda->second_surname_mother);
+
+                                    $nombreMadreBusqueda = $this->eliminarAcentos($nombreMadreBusqueda);
+
+                                    $identificacionMadreBusqueda = $busqueda->type_of_identification_mother.trim($busqueda->identidy_card_mother);
+
+                                    if ($nombrePadreBusqueda != "" && $nombreMadreBusqueda != "")
+                                    {
+                                        $contadorFamiliasBusquedaProcesadas++;
+
+                                        if (!(in_array(trim($control->identidy_card_father), $excepcionesCedula)))
+                                        {
+                                            if ($identificacionPadreControl == $identificacionPadreBusqueda)
+                                            {
+                                                $indicadorFamiliaRelacionada = 1;
+                                            }
+                                        }
+                                        if ($indicadorFamiliaRelacionada == 0)
+                                        {
+                                            if (!(in_array(trim($control->identidy_card_mother), $excepcionesCedula)))
+                                            {
+                                                if ($identificacionMadreControl == $identificacionMadreBusqueda)
+                                                {
+                                                    $indicadorFamiliaRelacionada = 1;
+                                                }
+                                            }
+                                        }
+                                        if ($indicadorFamiliaRelacionada == 0)
+                                        { 
+                                            if ($indicadorExcepcionNombrePadre == 0)
+                                            {
+                                                if ($nombrePadreControl == $nombrePadreBusqueda)
+                                                {
+                                                    $indicadorFamiliaRelacionada = 1;
+                                                }
+                                            }
+                                        }
+                                        if ($indicadorFamiliaRelacionada == 0)
+                                        {
+                                            if ($indicadorExcepcionNombreMadre == 0)
+                                            {
+                                                if ($nombreMadreControl == $nombreMadreBusqueda)
+                                                {
+                                                    $indicadorFamiliaRelacionada = 1;
+                                                }
+                                            }
+                                        }
+                                        if ($indicadorFamiliaRelacionada == 1)
+                                        {
+                                            $indicadorConFamiliasRelacionadas = 1;
+                                            $vectorFamiliasRelacionadas[] = $busqueda->id;
+
+                                            $representanteRelacionado = $this->Parentsandguardians->get($busqueda->id);
+                                            $representanteRelacionado->id_familia_pagadora_consejo = $control->id;
+                                            if (!($this->Parentsandguardians->save($representanteRelacionado))) 
+                                            {
+                                                $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo actualizar el id de la familia pagadora del consejo en el representante con el id'.$control->id);
+                                            }
+                                        }
+                                    }
+                                }
+                            }  
+                        }
+                    }
+                    if ($indicadorConFamiliasRelacionadas == 1)
+                    {
+                        $representante = $this->Parentsandguardians->get($control->id);
+                        $representante->familias_relacionadas = json_encode($vectorFamiliasRelacionadas);
+                        if ($this->Parentsandguardians->save($representante)) 
+                        {
+                            $contadorFamiliasRelacionadasActualizadas++;
+                            $familiasYaRelacionadas[] = $control->id;
+                        }
+                        else
+                        {
+                            $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo actualizar el representante con familias relacionadas con el ID '.$control->id);
+                        }
                     }
                 }
             }
@@ -1408,6 +1529,30 @@ class ParentsandguardiansController extends AppController
             }
         }
     }
+
+    public function activarRegistroRepresentante($idRepresentante = null)
+    {
+        $representante = $this->Parentsandguardians->get(1059);
+        $representante->estatus_registro = 'Activo';
+        if ($this->Parentsandguardians->save($representante)) 
+        {
+            $usuario = $this->Parentsandguardians->Users->get($representante->user_id);
+            $usuario->estatus_registro = 'Activo';
+            if ($this->Parentsandguardians->Users->save($usuario))
+            {
+                $this->Flash->success(__('Los registros del representante y el usuario se activaron exitosamente'));
+            }
+            else
+            {
+                $this->Flash->error(__('No se pudo activar el registro del usuario'));
+            }
+        }
+        else
+        {
+            $this->Flash->error(__('No se pudo activar el registro del representante'));
+        }
+    }
+
     public function reactBoton()
     {
         $filePath = WWW_ROOT . 'componentes_react/boton/build/asset-manifest.json';
@@ -1423,4 +1568,67 @@ class ParentsandguardiansController extends AppController
         $js = '/componentes_react/boton/build' . $manifest->files->$mainjs;
         $this->set(compact('css', 'js'));
     }
+
+    public function pruebasGenerales () 
+    {
+        $this->loadModel('Concepts');
+        
+        $recibosConsejoEducativo = $this->Concepts->find()
+            ->contain(['Bills'])
+            ->where(['Bills.annulled' => false,
+                'Concepts.concept' => 'Consejo Educativo 2023-2024',
+                'Bills.parentsandguardian_id' => 1113])
+            ->order(['Concepts.id' => 'ASC']);        
+        $this->set(compact('recibosConsejoEducativo'));
+    }
+
+    // Ejecutar al iniciar el año escolar. Esta función copia en la tabla "parentsandguardians" los campos del consejo educativo que tienen algún valor a su respectivo campo del año anterior 
+    public function consejoEducativoAnterior ()
+    {
+        $representantes = $this->Parentsandguardians->find('all', [
+            'conditions' => ['id >' => 1, 'estatus_registro' => 'Activo', ]]);
+        foreach ($representantes as $representante)
+        {
+            if ($representante->familias_relacionadas != null || $representante->id_familia_pagadora_consejo || $representante->consejo_exonerado > 0 )
+            {
+                $representanteExonerado = $this->Parentsandguardians->get($representante->id);
+                $representanteExonerado->familias_relacionadas_anterior = $representante->familias_relacionadas;
+                $representanteExonerado->id_familia_pagadora_consejo_anterior = $representante->id_familia_pagadora_consejo;
+                $representanteExonerado->consejo_exonerado_anterior = $representante->consejo_exonerado;
+                if (!($this->Parentsandguardians->save($representanteExonerado))) 
+                {
+                    $this->Flash->error(__('No se pudo actualizar los campos del consejo educativo del año anterior del representante con el ID: '.$representante->id));
+                }
+            }
+        }
+        return;
+    }
+    // Inicio cambios Contrato
+    public function crearColumnaVectorContratos()
+    {
+        $representantes = $this->Parentsandguardians->find('all');
+        $vectorContrato2023 = [];
+        $vectorContrato2024 = [];
+        $vectorContratos = [];
+        foreach ($representantes as $representante)
+        {
+            $registroRepresentante = $this->Parentsandguardians->get($representante->id);
+            if ($representante->datos_contrato_anio_anterior != null)
+            {
+                $vectorContrato2023 = json_decode($representante->datos_contrato_anio_anterior);
+                $vectorContratos[2023] = $vectorContrato2023; 
+            }            
+            if ($representante->datos_contrato != null)
+            {
+                $vectorContrato2024 = json_decode($representante->datos_contrato);
+                $vectorContratos[2024] = $vectorContrato2024; 
+            }   
+            $registroRepresentante->vector_contratos = json_encode($vectorContratos);
+            if (!($this->Parentsandguardians->save($registroRepresentante))) 
+            {
+                $this->Flash->error(__('El padre o representante con el ID: '.$registroRepresentante->id.' no se pudo actualizar'));
+            }         
+        }
+    }
+    // Fin cambios Contrato
 }

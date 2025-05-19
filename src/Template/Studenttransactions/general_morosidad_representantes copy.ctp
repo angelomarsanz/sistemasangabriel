@@ -1,5 +1,8 @@
 <div class="row">
-    <div class="col-md-4">
+<?php
+	// debug($mesesTarifas);
+?>
+<div class="col-md-4">
 		<div class="page-header">
 	        <h4>Reporte General de Morosidad de Representantes</h4>
 	    </div>
@@ -22,9 +25,12 @@
 					echo "<div id='mensaje-mes' class='mensaje-usuario'></div>";
 	               	echo $this->Form->input('periodo_escolar', ['label' => 'Período escolar: ', 'options' => 
 	                    ["" => "",
-						'2022-2023' => '2022-2023',
-						'2023-2024' => '2023-2024']]);
-					echo "<div id='mensaje-periodo-escolar' class='mensaje-usuario'></div>";
+						'2023-2024' => '2023-2024',
+						'2024-2025' => '2024-2025']]);
+					echo $this->Form->input('indicador_recalculo', ['label' => 'Desea recalcular las cuotas atrasadas de acuerdo con la tarifa vigente ?: ', 'options' => 
+						["" => "",
+							'Sí' => 'Sí',
+							'No' => 'No',]]);
 					echo $this->Form->input('telefono', ['label' => 'Mostrar el número de teléfono del representante: ', 'options' => 
 						["" => "",
 						'Sí' => 'Sí',

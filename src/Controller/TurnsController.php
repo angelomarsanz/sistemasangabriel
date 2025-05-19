@@ -9,7 +9,6 @@ use App\Controller\BinnaclesController;
 
 use Cake\I18n\Time;
 
-
 /**
  * Turns Controller
  *
@@ -17,6 +16,24 @@ use Cake\I18n\Time;
  */
 class TurnsController extends AppController
 {
+	public function isAuthorized($user)
+    {
+		if(isset($user['role']))
+		{
+			// Inicio cambios Seniat
+			if ($user['role'] === 'Seniat')
+			{
+				if(in_array($this->request->action, ['checkTurnOpen', 'checkTurnClose', 'index',  'checkTurnInvoice', 'add', 'edit', 'imprimirReporteCierre', 'reporteCierre']))
+				{
+					return true;
+				}
+			}
+			// Fin cambios Seniat
+		}
+
+        return parent::isAuthorized($user);
+    }        
+
 	public function pruebaFuncion()
 	{
 		/* $turn = $this->Turns->get(808);
@@ -152,7 +169,7 @@ class TurnsController extends AppController
         }
         else
         {
-            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder facturar o anular facturas, recibos y pedidos'));    
+            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder facturar'));    
         }
     }
 
@@ -1935,6 +1952,7 @@ class TurnsController extends AppController
 		$indicadorRecibosSeguroAnulados = 0;
 		$indicadorRecibosConsejoEducativo = 0;
 		$vector_pagos = [];
+		$vectorPagos = [];
 							
 		$usuario = $this->Turns->Users->get($turn->user_id);
 	

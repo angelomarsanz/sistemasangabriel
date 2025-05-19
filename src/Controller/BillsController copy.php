@@ -240,7 +240,7 @@ class BillsController extends AppController
 						}
 						elseif ($indicadorConsejoEducativo == 1)
 						{
-							$bill->tipo_documento = "Recibo de consejo educativo";	
+							$bill->tipo_documento = "Recibo de Consejo Educativo";	
 						}
 						else
 						{
@@ -721,8 +721,12 @@ class BillsController extends AppController
 			}
 		}
 		
-        $lastRecord = $this->Bills->find('all', ['conditions' => ['id' => $idFactura],
-            'order' => ['Bills.id' => 'DESC']]);
+        $lastRecord = $this->Bills->find('all', 
+			[
+				'contain' => ['Parentsandguardians'],
+				'conditions' => ['Bills.id' => $idFactura],
+				'order' => ['Bills.id' => 'DESC']
+			]);
 					    
         $bill = $lastRecord->first();
 		
@@ -749,7 +753,8 @@ class BillsController extends AppController
 			}
 		}
 		
-		$usuarioResponsable = $usuario->first_name . " " . $usuario->surname;
+		$usuarioResponsable = $usuario->first_name." ".$usuario->surname;
+		$inicialesUsuarioResponsable = substr($usuario->first_name, 0, 1).".".substr($usuario->surname, 0, 1).".";
 				
         $billId = $bill->id;
 								        
@@ -896,12 +901,28 @@ class BillsController extends AppController
 					}
 					elseif ($aConcept->concept == 'Matrícula '.$actualAnoInscripcion)
 					{
-						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						if ($aConcept->observation == 'Diferencia')
+						{
+							$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						}
+						else
+						{
+							$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						}
 					}
 					elseif ($aConcept->concept == 'Matrícula '.$proximoAnoInscripcion)
 					{
 						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
 					}
+					if ($aConcept->id == 99425 || $aConcept->id == 98166  || $aConcept->id == 98168)
+					{
+						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula 2022 - 2023';
+					}
+					if ($aConcept->id == 99427 || $aConcept->id ==  98170 || $aConcept->id == 98172)
+					{
+						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula 2023 - 2024';
+					}
+					
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -918,11 +939,26 @@ class BillsController extends AppController
 					}
 					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion)
 					{
-						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						if ($aConcept->observation == 'Diferencia')
+						{
+							$invoiceLine = $aConcept->student_name.' - Diferencia Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						}
+						else
+						{
+							$invoiceLine = $aConcept->student_name.' - Abono Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						}
 					}
 					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion2)
 					{
 						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
+					}
+					if ($aConcept->id == 99426 || $aConcept->id == 98167 || $aConcept->id == 98169)
+					{
+						$invoiceLine = $aConcept->student_name.' - Diferencia Ago 2022 - 2023';
+					}
+					if ($aConcept->id == 99428 || $aConcept->id == 98171 || $aConcept->id == 98173)
+					{
+						$invoiceLine = $aConcept->student_name.' - Abono Ago 2023 - 2024';
 					}
 
 					$amountConcept = $aConcept->amount;
@@ -1005,7 +1041,7 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
-				elseif (substr($aConcept->concept, 0, 17) == "Consejo educativo")
+				elseif (substr($aConcept->concept, 0, 17) == "Consejo Educativo")
 				{
 					$invoiceLine = $aConcept->concept;
 					$amountConcept = $aConcept->amount;
@@ -1087,12 +1123,28 @@ class BillsController extends AppController
 					}
 					elseif ($aConcept->concept == 'Matrícula '.$actualAnoInscripcion)
 					{
-						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						if ($aConcept->observation == 'Diferencia')
+						{
+							$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						}
+						else
+						{
+							$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						}
 					}
 					elseif ($aConcept->concept == 'Matrícula '.$proximoAnoInscripcion)
 					{
 						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
 					}
+					if ($aConcept->id == 99425 || $aConcept->id == 98166  || $aConcept->id == 98168)
+					{
+						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula 2022 - 2023';
+					}
+					if ($aConcept->id == 99427 || $aConcept->id ==  98170 || $aConcept->id == 98172)
+					{
+						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula 2023 - 2024';
+					}
+
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;
@@ -1114,12 +1166,28 @@ class BillsController extends AppController
 					}
 					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion)
 					{
-						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						if ($aConcept->observation == 'Diferencia')
+						{
+							$invoiceLine = $aConcept->student_name.' - Diferencia Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						}
+						else
+						{
+							$invoiceLine = $aConcept->student_name.' - Abono Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
+						}
 					}
 					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion2)
 					{
 						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
 					}
+					if ($aConcept->id == 99426 || $aConcept->id == 98167 || $aConcept->id == 98169)
+					{
+						$invoiceLine = $aConcept->student_name.' - Diferencia Ago 2022 - 2023';
+					}
+					if ($aConcept->id == 99428 || $aConcept->id == 98171 || $aConcept->id == 98173)
+					{
+						$invoiceLine = $aConcept->student_name.' - Abono Ago 2023 - 2024';
+					}
+
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;
@@ -1201,7 +1269,7 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
-				elseif (substr($aConcept->concept, 0, 17) == "Consejo educativo")
+				elseif (substr($aConcept->concept, 0, 17) == "Consejo Educativo")
 				{
 					if ($lastInstallment != " ")
 					{
@@ -1254,8 +1322,8 @@ class BillsController extends AppController
 		
 		$vista = "invoice";
 					
-        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento'));
-        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento']);
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school'));
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school']);
 	}
 	
 	public function invoicepdf()

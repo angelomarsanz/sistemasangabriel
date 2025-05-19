@@ -13,9 +13,13 @@
 						<th scope="col">Cajero</th>
 						<th scope="col">Estatus</th>
 						<th scope="col" class="actions"></th>
-						<th scope="col" class="actions"></th>
-						<th scope="col" class="actions"></th>
-						<th scope="col" class="actions"></th>
+						<?php
+						if ($current_user['role'] == 'Administrador' || $current_user['role'] == 'Propietario' || $current_user['role'] == 'Ventas generales' || $current_user['role'] == 'Contabilidad general' ): ?>
+							<th scope="col" class="actions"></th>
+							<th scope="col" class="actions"></th>
+							<th scope="col" class="actions"></th>
+						<?php
+						endif ?>
 					</tr>
 				</thead>
 				<tbody>
@@ -41,6 +45,8 @@
 									endif;
 								?>
 							</td>
+							<?php
+								if ($current_user['role'] == 'Administrador' || $current_user['role'] == 'Propietario' || $current_user['role'] == 'Ventas generales' || $current_user['role'] == 'Contabilidad general' ): ?>
 							<td class="actions">
 								<?php 
 									if ($turn->status == 0):
@@ -68,6 +74,8 @@
 									endif;
 								?>
 							</td>
+							<?php 
+							endif ; ?>
 						</tr>
 					<?php endforeach; ?>
 				</tbody>

@@ -1,9 +1,11 @@
 Objetivos:
-Integración con Vite React y Vanilla - 23/10/2024
-Migración a Cakephp 5 - 23/10/2024
-Mejoras al sistema actual - 23/10/2024
-Correcciones al sistema actual - 23/10/2024
-Atención inmediata a los requerimientos diarios de los usuarios - 23/10/2024
+
+1. Mantenimiento - 14/03/2025
+2. Seniat - 17/02/2025
+3. Inventario - 06/02/2025 
+4. Migración a Cakephp5 y Bootstrap5 - 02/03/2025
+
+cd /media/angelomarsanz/Mis\ documentos/Colegio\ San\ Gabriel/vite
 
 Pendientes:
 - Al reporte de servicio educativo solo tenga acceso Sol
@@ -11,6 +13,199 @@ Pendientes:
 Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no fiscal
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
+
+19/05/2025
+Era un pedido y se imprimió en el papel fiscal 112576
+ortega gajardo
+pedido 5391
+control factua 112576
+
+16/05/2025
+Usuario: Sol
+Requerimiento: En algunas facturas de años anteriores no se muestra el concepto
+Factura: 118506, Control: 100846, id: 35633, concepto: Ago 2023
+Factura: 118495, Control: 100835, id: 35621, concepto: Matrícula 2021, Ago 2022, Matrícula 2022 
+"Diferencias de inscripción"
+En las facturas de inscripción para determinar si es anticipo o diferencia, en el campo concept de la tabla concepts, se está colocando la palabra "Diferencia" para los cuotas de "Matrícula nnnn" y "Ago nnnn". Ahora el período escolar se determinará por el año del concepto, osea: Matrícula nnnn ó Ago nnnn. 
+
+11/05/2025
+Consulta Deuda Representante
+Cédulas para pruebas:
+16153897
+12103708
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/consulta_deuda_representante.ctp
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
+
+06/05/2025
+Requerimientos Ana P
+Familia Apóstol Flores, 
+id Representante 1381
+id Usuario 1355, cédula 24571213
+estudiantes
+Mateo Apóstol, id 1986, inscrito 2024
+Moisés Apóstol, id 2084, no ha actualizado los datos
+vector_contratos contiene los años 2023 y 2024
+{"2023":{"imagen_firma":"65eb110319387.png","usuario":"24571213","ip":"45.7.140.191, 45.7.140.191","fecha_hora":"2024-03-08T09:22:11-04:00"},"2024":{"imagen_firma":"667449c5104cd.png","usuario":"24553709","ip":"190.120.254.239, 190.120.254.239","fecha_hora":"2024-06-20T11:24:53-04:00"}}
+
+
+Requerimientos Sol:
+22/04/2025
+Pasar correo indicando que se está esperando que el Seniat pruebe el sistema
+Consulta individual de deuda representante. Para el representante, solo las deudas de matrícula, agosto y mensualidades
+Para Cobranzas, todas las deudas: Matrícula, agosto, mensualidades, servicio educativo, seguro y consejo
+Se desplega por año y luego cada año se desplega
+Para el servicio educativo, colocar "exonerado" a aquellos a cuales no se les vaya a cobrar.
+Desglosar los que se les cobra completo y su deuda
+Y por separado los que se les cobra una cantidad menor
+
+Requerimientos Lorelys:
+02/04/2025 
+Contratos 
+Familia Fava Cedeño 17904705
+
+Seniat
+Pruebas 
+Factura Nro. 
+
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/AppController.php - Ok - ok
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/UsersController.php - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/TurnsController.php - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Turns/edit.ctp - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Turns/reporte_cierre.ctp - Ok - Ok 
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Users/login.ctp - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Users/home.ctp - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Users/add.ctp - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Users/edit.ctp - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/create_invoice.ctp - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/invoice.ctp - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/PaymentsController.php - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/MonedasController.php - Ok - Ok
+
+Contrato
+El 24/04/2025 se instaló la nueva rutina de contratos. A partir de esa fecha monitorear la firma de contrato de los nuevos estudiantes
+Pruebas
+Familia Ojeda Loreto
+users, cédula 16231734, id 992, 
+Parentsandguardians, id, 1022
+Estudiante Ojeda Rafael, id 1419, inscrito para el 2024
+Nuevo estudiante Ojeda Ángel, id 2077, inscrito para el 2024
+Nuevo estudiante Ojeda Julio, id 2078, inscrito para el 2025
+
+Seguimiento en producción
+Nuevo estudiante Mauricio Caballero, id 20257
+Id representante 1431
+Id Usuario 1406, cédula 19641447  
+
+Firma del año 2023 que no se movió
+6490fce065026.png
+Representante María Ortega, familia Castellano Ortega, id 188
+Id user 187, cédula 12603814
+
+
+Ya está todo codificado sin probar.
+En el ambiente de desarrollo primero se debe ejecutar la acción que carga el vector de contrato: ParentsandguardiansController->crearColumnaVectorContratos y luego proceder a hacer pruebas unitarias. Una vez que se haya probado en el ambiente de desarrollo, proceder en el ambiente de producción a agregar la columna vector_contratos en la base de datos, ejecutar la acción ParentsandguardiansController->crear_columna_vector_contratos y hacer pruebas unitarias
+
+La llamada a previoContratoRepresentante tiene los parámetros "Controlador" y "Accion" en null cuando es invocado desde: 
+- La acción editPhoto de ParentsandguardiansController
+- La accion profilePhoto de ParentsandguardiansController
+
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/UsersController.php - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Model/Table/ParentsandguardiansTable.php - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Parentsandguardians/crear_columna_vector_contratos.ctp - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/GuardiantransactionsController.php - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/previo_contrato_representante.ctp - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/contrato_representante_2023.ctp - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/contrato_representante_2024.ctp - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/contrato_representante_2025.ctp - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/pie_contrato_representante.ctp - Ok - Ok
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/firma_contrato_representante.ctp - Ok - Ok
+
+
+31/03/2025
+Estudiante CARLOTA MIRANDA SIERRALTA LEICHNER id : 2067
+Representante HERIKA LEICHNER id: 1439 usuario: 1414 cédula: 14915112
+
+Se inscribió equivocadamente para el período 2025-2026 y era para el período 2024-2025. Se hicieron los ajustes manuales en la base de datos
+
+
+Funciones que se deben ejecutar al iniciar el año escolar. En el mes de agosto 2025, revisar todas las funciones que deben ejecutarse al inicio del año escolar e integrarlas en una sola función
+parentsandguardians/consejoEducativoAnterior
+
+
+18/03/2025
+Ángel una tarjeta fue crédito mercantil 7469 el día 10-03
+Y la otra fue el 28-02 termina en 4825 
+
+17/03/2025
+Lozada Daniela
+Cédula: 19217235
+user_id: 1402
+parentsandguardian_id: 1427
+student_id: 2053
+
+
+
+28/02/2025
+royel contro debió haber salido 111730 - 127053 y se imprimió en la 111734
+monteleone 111731 - 127054 y no se ha impreso
+111732, 111733 y 111734 
+
+Familia Gudiño - ID - 1434
+
+24/02/2025
+Factura anulada ID Nro. 53654, Nro. 126929, Control 111606 - José Rafael Prince Duno
+
+11/02/2025
+Familias relacionadas 2023 modificadas
+Doukaki Pinto (260)
+  familias_relacionadas_anterior: [1099]
+  id_familia_pagadora_consejo_anterior: 0
+
+Doukaki Briceño (1099)
+  familias_relacionadas_anterior: null
+  id_familia_pagadora_consejo_anterior: 260
+
+Valderrama Escalona (998)
+  familias_relacionadas_anterior: [1057]
+  id_familia_pagadora_consejo_anterior: 0
+
+Guerrero Escalona (1057)
+  familias_relacionadas_anterior: null
+  id_familia_pagadora_consejo_anterior: 998
+
+28/01/2025
+Corrección consejo educativo
+Tomar backup de la base de datos
+Agregar columna id_familia_pagadora_consejo
+Resetear cache base de datos
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/ParentsandguardiansController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Model/Table/ParentsandguardiansTable.php
+/opt/lampp/htdocs/sistemasangabriel/src/Model/Entity/Parentsandguardian.php
+
+21/01/2025
+Alumno Frinquello Nicola, aparece en el reporte de "Relación de mensualidades con la letra "A", en lugar de "*". El tiene una beca especial de 75%. Id del estudiante 458, 3er. Año A
+
+ABOU ATTIEH FREITAS MARIA ESMIR - 20% - 5to. Año A
+ALAYETO SANDOVAL CYNTHIA VALESKA - 50 % - 5to. Grado B
+
+17/01/2025
+Fatal error: Allowed memory size of 268435456 bytes exhausted (tried to allocate 8192 bytes) in /home/sgasyst/web/sistema.colegiosangabrielarcangel.com/public_html/vendor/cakephp/cakephp/src/ORM/ResultSet.php on line 525
+
+Fatal error: Allowed memory size of 268435456 bytes exhausted (tried to allocate 32768 bytes) in /home/sgasyst/web/sistema.colegiosangabrielarcangel.com/public_html/vendor/cakephp/cakephp/src/Error/FatalErrorException.php on line 1
+
+10/12/2024
+totalBalanceDescuento
+
+08/11/2024
+Factura 121236 - control - 104136 - id - 41090
 
 28/10/2024
 warning: CRLF será remplazado por LF en historia_del_sistema.txt.
@@ -64,7 +259,7 @@ Perdomo López en el período 2023-2024 tenía beca completa y para el período 
 Lo mismo sucedió con Urrieta González Miguel
 
 16/09/2024
-Cuando Lorelys me pida anular internamente una factura. No la debo anular, simplemente se ingresa por "Modificar el número de control de la factura" y se arregla el orden. Y luego se verifica por "Modificar el lote de la factura" si el número de control que se muestra corresponde con la próxima factura en blanco. 
+Cuando Lorelys me pida anular internamente una factura. No la debo anular, simplemente se ingresa por "Modificar el número de control de la factura" y se arregla el orden. Y luego se verifica por "Modificar el lote de la factura" si el número de control que se muestra corresponde con la próxima factura en blanco. No siempre es así !!!
 
 16/09/2024
 Control 108954 - Factura 124802  - Le tocaba a Abreu Giron se imprimió un pedido. A la final se ajustó para que la factura 124802 correspondiera a la 108955, dejando la 108954 sin factura. El id de la factura 124802 es: 50333. Monto factura 72.804,60 Bs. Pago con TDB

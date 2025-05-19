@@ -82,6 +82,7 @@
         <?= $this->Form->create("form", ["id" => "form"]) ?>
             <fieldset>
                 <input type="hidden" name="id_representante" value="<?= $idRepresentante ?>">
+                <input type="hidden" name="anio_firmar_contrato" value="<?= $anioFirmarContrato ?>">
                 <input type="hidden" name="base64" value="" id="base64">
                 <input type="hidden" name="ip_cliente" value="<?= $direccion_ip ?>" id="ip_cliente">
             </fieldset>

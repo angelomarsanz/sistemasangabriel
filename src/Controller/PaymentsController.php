@@ -12,6 +12,28 @@ use App\Controller\BinnaclesController;
  */
 class PaymentsController extends AppController
 {
+    public function beforeFilter(\Cake\Event\Event $event)
+    {
+        parent::beforeFilter($event);
+    }
+
+    public function isAuthorized($user)
+    {
+		if(isset($user['role']))
+		{
+			// Inicio cambios Seniat
+			if ($user['role'] === 'Seniat')
+			{
+				if(in_array($this->request->action, ['verificarSerial']))
+				{
+					return true;
+				}
+			}
+			// Fin cambios Seniat
+		}
+        return parent::isAuthorized($user);
+    }        
+
 	public function pruebaFuncion()
 	{
 		$this->loadModel('Turns');

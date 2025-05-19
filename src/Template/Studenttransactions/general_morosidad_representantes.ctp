@@ -27,10 +27,17 @@
 	                    ["" => "",
 						'2023-2024' => '2023-2024',
 						'2024-2025' => '2024-2025']]);
+					echo "<div id='mensaje-periodo-escolar' class='mensaje-usuario'></div>";
 					echo $this->Form->input('indicador_recalculo', ['label' => 'Desea recalcular las cuotas atrasadas de acuerdo con la tarifa vigente ?: ', 'options' => 
 						["" => "",
 							'Sí' => 'Sí',
 							'No' => 'No',]]);
+					echo "<div id='mensaje-indicador-recalculo' class='mensaje-usuario'></div>";
+					echo $this->Form->input('consejo_educativo', ['label' => 'Desea mostrar la deuda de Consejo Educativo ?: ', 'options' => 
+					["" => "",
+						'Sí' => 'Sí',
+						'No' => 'No',]]);
+					echo "<div id='mensaje-consejo-educativo' class='mensaje-usuario'></div>";
 					echo $this->Form->input('telefono', ['label' => 'Mostrar el número de teléfono del representante: ', 'options' => 
 						["" => "",
 						'Sí' => 'Sí',
@@ -64,7 +71,19 @@
 			{
 				indicadorError = 1;
 				$("#mensaje-periodo-escolar").html("Por favor seleccione el período escolar").css("color", 'red');
-			}		
+			}	
+			
+			if ($('#indicador-recalculo').val() == "")
+			{
+				indicadorError = 1;
+				$("#mensaje-indicador-recalculo").html("Por favor seleccione si desea recalcular las cuotas atrasadas").css("color", 'red');
+			}	
+			
+			if ($('#consejo-educativo').val() == "")
+			{
+				indicadorError = 1;
+				$("#mensaje-consejo-educativo").html("Por favor seleccione si desea mostrar la deuda de consejo educativo").css("color", 'red');
+			}	
 			
 			if ($('#telefono').val() == "")
 			{

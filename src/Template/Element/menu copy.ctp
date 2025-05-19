@@ -39,13 +39,14 @@
                     <li><a href="#" id="imprimir-pantalla" class="glyphicon glyphicon-print iconoMenu" title="Imprimir pantalla"></a></li>
 					<li><a href="#" id="exportar-excel" class="glyphicon glyphicon-list-alt iconoMenu" title="Exportar a excel"></a></li>
 					<?php 
-					if($current_user['role'] == 'Administrador'): ?>
+					if ($current_user['role'] == 'Administrador' || $current_user['role'] == 'Seniat'): ?>
 						<li><?= $this->Html->link('', ['controller' => 'Users', 'action' => 'edit', $current_user['id']], ['class' => "glyphicon glyphicon-user iconoMenu", 'title' => 'Modificar mi perfil']) ?></li>
 						<?php 
 						if ($current_user['username'] == "angel2703"): ?>
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Escritorio<span class="caret"></span></a>
 								<ul class="dropdown-menu" role="menu">
+									<li><?= $this->Html->link('Usuarios', ['controller' => 'Users', 'action' => 'index']) ?></li>
 									<li><?= $this->Html->link('Libro de Ventas', ['controller' => 'Salesbooks', 'action' => 'index']) ?></li>
 									<li><?= $this->Html->link('Excepciones libro de ventas', ['controller' => 'Excepciones', 'action' => 'index']) ?></li>
 									<li><?= $this->Html->link('Cuotas del estudiante', ['controller' => 'Studenttransactions', 'action' => 'index']) ?></li>
@@ -83,12 +84,12 @@
 									<li><?= $this->Html->link('Consulta de contrato de servicio', ['controller' => 'Parentsandguardians', 'action' => 'consultaContratoRepresentante']) ?></li>  
 									<li><?= $this->Html->link('Datos de familia', ['controller' => 'Parentsandguardians', 'action' => 'consultFamily']) ?></li>
 									<li><?= $this->Html->link('Familias - alumnos', ['controller' => 'Students', 'action' => 'familyStudents']) ?></li>
-									<li><?= $this->Html->link('Familias con tres hijos', ['controller' => 'Students', 'action' => 'familiasDescuento20']) ?></li>
-									<li><?= $this->Html->link('Familias con cuatro o más hijos', ['controller' => 'Students', 'action' => 'familiasDescuento50']) ?></li> 
+									<li><?= $this->Html->link('Familias con descuento del 20% (Tres hijos)', ['controller' => 'Students', 'action' => 'familiasDescuento20']) ?></li>
+									<li><?= $this->Html->link('Familias con descuento del 50% (Cuatro o más hijos)', ['controller' => 'Students', 'action' => 'familiasDescuento50']) ?></li> 
 									<!-- <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li> -->
 									<li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>	
 									<?php
-									if ($current_user['username'] == "angel2703" || $current_user['username'] == "anaperez" || $current_user['username'] == "emiguerrero"): ?>
+									if ($current_user['username'] == "angel2703" || $current_user['username'] == "anaperez" || $current_user['username'] == "emiguerrero" || $current_user['username'] == "adminsg"): ?>
 										<li><?= $this->Html->link('Consejo Educativo', ['controller' => 'Parentsandguardians', 'action' => 'consejoEducativo']) ?></li>
 									<?php
 									endif; ?>	
@@ -110,10 +111,10 @@
 									<li><?= $this->Html->link('Alumnos que no completaron en el proceso de inscripción', ['controller' => 'Students', 'action' => 'reportGraduateStudents']) ?></li>
 									<li><?= $this->Html->link('Aplicar descuento a alumnos (familias con tres hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota20']) ?></li>
 									<li><?= $this->Html->link('Aplicar descuento a alumnos (familias con cuatro o más hijos)', ['controller' => 'Studenttransactions', 'action' => 'discountQuota50']) ?></li>
-									<li><?= $this->Html->link('Becar alumno 100%', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
-									<li><?= $this->Html->link('Alumnos Becados 100%', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
+									<li><?= $this->Html->link('Alumnos con beca completa del 100%', ['controller' => 'Studenttransactions', 'action' => 'scholarshipIndex']) ?></li>
+									<li><?= $this->Html->link('Becar alumno (beca completa del 100%)', ['controller' => 'Students', 'action' => 'searchScholarship']) ?></li>
 									<li><?= $this->Html->link('Becas especiales', ['controller' => 'Students', 'action' => 'becasEspeciales']) ?></li>
-									<li><?= $this->Html->link('Reporte becados: Beca completa, por hijos y especiales', ['controller' => 'Students', 'action' => 'reporteBecados']) ?></li>
+									<li><?= $this->Html->link('Reporte becados: Beca completa 100%, por hijos y especiales', ['controller' => 'Students', 'action' => 'reporteBecados']) ?></li>
 								</ul>
 							</li>
 
@@ -161,7 +162,10 @@
 								<li><?= $this->Html->link('Reporte de cuentas cobradas y por cobrar', ['controller' => 'Studenttransactions', 'action' => 'cuentasCobradasPorCobrar']) ?></li>
 								<li><?= $this->Html->link('Reporte de cuentas cobradas y por cobrar (Acumulado)', ['controller' => 'Studenttransactions', 'action' => 'cuentasCobradasPorCobrarAcumulado']) ?></li>
 								<li><?= $this->Html->link('Familias con diferencias de mensualidades adelantadas', ['controller' => 'Studenttransactions', 'action' => 'familiasDiferenciasMensualidadesAdelantadas']) ?></li>
-								<li><?= $this->Html->link('Estudiantes nuevos con diferencias de inscripción pendientes', ['controller' => 'Studenttransactions', 'action' => 'reporteEstudiantesNuevosConDiferenciasInscripcion']) ?></li>													
+								<li><?= $this->Html->link('Estudiantes con diferencias de inscripción pendientes', ['controller' => 'Studenttransactions', 'action' => 'reporteEstudiantesDiferenciasInscripcion']) ?></li>
+								<li><?= $this->Html->link('Estudiantes con Servicio Educativo Pendiente', ['controller' => 'Studenttransactions', 'action' => 'reporteServicioEducativoPendiente']) ?></li>	
+								<li><?= $this->Html->link('Consejo Educativo Pendiente', ['controller' => 'Studenttransactions', 'action' => 'consejoEducativoPorCobrar']) ?></li>															
+														
 							</ul>
 						</li>
 						

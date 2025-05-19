@@ -278,7 +278,14 @@ class ParentsandguardiansTable extends Table
         $validator
             ->requirePresence('new_guardian', 'create')
             ->notEmpty('new_guardian');
-			
+
+        $validator
+            ->integer('id_familia_pagadora_consejo')
+            ->allowEmpty('id_familia_pagadora_consejo', 'create');
+
+        $validator
+            ->allowEmpty('vector_contratos');
+
         return $validator;
     }
 
