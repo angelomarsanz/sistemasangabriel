@@ -2627,7 +2627,7 @@
 		let descuentos_pronto_pago = 
 			{
 				"202308" : 5.00,
-				"202408" : 10.00
+				"202508" : 10.00
 			};
 
 		for (var anio_mes_descuento in descuentos_pronto_pago) 

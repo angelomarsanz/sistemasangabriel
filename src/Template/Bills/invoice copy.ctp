@@ -1,3 +1,7 @@
+<?php 
+    use Cake\Routing\Router;
+?>
+
 <style>
 @media screen
 {
@@ -118,21 +122,32 @@
 			<?php if ($bill->annulled == 1): ?>
 				<h1 style="text-align:center;">Factura Anulada <?= $bill->date_annulled->format('d-m-Y') ?></h1>
 			<?php endif; ?>
+			<div class="nover" style="width:20%; float: left;">
+				<a href="<?php echo Router::url(["controller" => "Users", "action" => "home"]); ?>"><img src="<?php echo Router::url(["controller" => "webroot/files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 60 class="img-thumbnail img-responsive logo"/></a>
+			</div>
+			<div class="nover" style="width:80%; float: left;">
+				<div style='text-align: center'>
+					<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
+				</div>
+				<div style='text-align: center'>
+					<h5>Av. Río Orinoco, Urb. Valles del Camoruco, Valencia, Estado Carabobo, teléfono , Rif: J-40490885-4</h5>
+				</div>
+			</div>
 			<table style="width:100%">
 				<tbody>
 					<tr>
 						<td style='width:80%;'>Cliente: <?= $bill->client ?></td>
 						<?php if ($bill->tipo_documento == "Nota de crédito"): ?>
-							<td style="width:20%; text-align: right;"><b>Nota de crédito Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Nota de crédito Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php elseif ($bill->tipo_documento == "Nota de débito"): ?>
-							<td style="width:20%; text-align: right;"><b>Nota de débito Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Nota de débito Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php else: ?>
-							<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php endif; ?>
 					</tr>
 					<tr>
 						<td style='width:80%;'>C.I./RIF: <?= $bill->identification ?></td>
-						<td style="width:20%; text-align: right;">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
+						<td style="width:20%; text-align: right;">Fecha: <?= $bill->date_and_time->format("d-m-Y h:i:s a") ?></td>
 					</tr>
 					<tr>
 						<td style='width:80%;'>Teléfono: <?= $bill->tax_phone ?></td>
@@ -180,33 +195,32 @@
 		<div style="width:100%; font-size: 9px; line-height: 11px;">
 			<div id="payments">				
 				Formas de pago:
-				<table style="width:100%;">
-					<tbody class="nover">
-						<?php foreach ($aPayments as $aPayment): ?>
-							<tr>
-								<td>
-									<?php
-									if ($aPayment->payment_type == 'Retención de impuesto'): 
-										echo h('ISLR');
-									else:
-										echo h($aPayment->payment_type);
-									endif ?>
-								</td>
-								<td><?= h($aPayment->bank) ?></td>
-								<td><?= h($aPayment->bancoReceptor) ?></td>
-								<td><?= h($aPayment->account_or_card) ?></td>
-								<td><?= h($aPayment->serial) ?></td>
-								<td><?= h($aPayment->moneda) ?></td>
-								<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
-								<td><?= $aPayment->comentario ?></td>
-							</tr>
+				<table style="width:100%;" class="nover">
+					<tbody>
+						<?php foreach ($aPayments as $aPayment): 
+							if ($aPayment->payment_type != 'Retención de impuesto'): ?> 
+								<tr>
+									<td><?= h($aPayment->payment_type) ?></td>
+									<td><?= h($aPayment->bank) ?></td>
+									<td><?= h($aPayment->bancoReceptor) ?></td>
+									<td><?= h($aPayment->account_or_card) ?></td>
+									<td><?= h($aPayment->serial) ?></td>
+									<td><?= h($aPayment->moneda) ?></td>
+									<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
+									<td><?= $aPayment->comentario ?></td>
+								</tr>
+							<?php
+							endif; ?>
 						<?php endforeach; ?>
 					</tbody>
 				</table>
 				<?php
 				foreach ($aPayments as $aPayment): 
 					if ($aPayment->payment_type == 'Retención de impuesto'): ?>
-						<div class='noVerEnPantalla'><?= 'ISLR '.$aPayment->moneda.' '.number_format($aPayment->amount, 2, ",", "."); ?></div>
+						<div  class="nover">
+							<br />
+							<?= 'ISLR '.$aPayment->moneda.' '.number_format($aPayment->amount, 2, ",", "."); ?>
+						</div>
 					<?php
 					endif;
 				endforeach; ?>
@@ -246,26 +260,41 @@
 				</table>
 			</div>
 		</div>
+		<div class='nover' style='text-align: center; font-size: 10px; line-height: 11px;'>
+			<br /><br /><br /><br /><br /><br /><br /><br />
+			IMPRENTA DIGITAL, C.A. Nro. RIF: J-nnnnnnn-n, Nro. Providencia SENIAT/nn.	Nro de Control desde el Nro. 00-000nnn hasta el Nro. 00-00nnn
+		</div>
 		<?php $countSubtraction = 30 - $counter; ?>
 		<div style="font-size: 9px; line-height: 11px;">
 			<?php for ($i = 1; $i <= $countSubtraction; $i++): ?>
 				<br />
 			<?php endfor; ?>
+			<div class="nover" style="width:20%; float: left;">
+				<a href="<?php echo Router::url(["controller" => "Users", "action" => "home"]); ?>"><img src="<?php echo Router::url(["controller" => "webroot/files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 60 class="img-thumbnail img-responsive logo"/></a>
+			</div>
+			<div class="nover" style="width:80%; float: left;">
+				<div style='text-align: center'>
+					<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
+				</div>
+				<div style='text-align: center'>
+					<h5>Av. Río Orinoco, Urb. Valles del Camoruco, Valencia, Estado Carabobo, teléfono , Rif: J-40490885-4</h5>
+				</div>
+			</div>
 			<table style="width:100%">
 				<tbody>
 					<tr>
 						<td style='width:70%;'>Cliente: <?= $bill->client ?></td>
 						<?php if ($bill->tipo_documento == "Nota de crédito"): ?>
-							<td style="width:20%; text-align: right;"><b>Nota de crédito Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Nota de crédito Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php elseif ($bill->tipo_documento == "Nota de débito"): ?>
-							<td style="width:20%; text-align: right;"><b>Nota de débito Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Nota de débito Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php else: ?>
-							<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php endif; ?>
 					</tr>
 					<tr>
 						<td style='width:80%;'>C.I./RIF: <?= $bill->identification ?></td>
-						<td style="width:20%; text-align: right;">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
+						<td style="width:20%; text-align: right;">Fecha: <?= $bill->date_and_time->format("d-m-Y h:i:s a") ?></td>
 					</tr>
 					<tr>
 						<td style='width:80%;'>Teléfono: <?= $bill->tax_phone ?></td>
@@ -309,33 +338,40 @@
 		<div style="width:100%; line-height: 11px;"> 
 			<div id="payments" style="font-size: 8px;">
 				Formas de pago:
-				<table style="width:100%;">
+				<table style="width:100%;" class="nover">
 					<tbody>
-						<?php foreach ($aPayments as $aPayment): ?>
-							<tr>
-								<td>
-									<?php
-									if ($aPayment->payment_type == 'Retención de impuesto'): 
-										echo 'ISLR';
-									else:
-										echo h($aPayment->payment_type);
-									endif ?>
-								</td>
-								<td><?= h($aPayment->bank) ?></td>
-								<td><?= h($aPayment->bancoReceptor) ?></td>
-								<td><?= h($aPayment->account_or_card) ?></td>
-								<td><?= h($aPayment->serial) ?></td>
-								<td><?= h($aPayment->moneda) ?></td>
-								<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
-								<td><?= $aPayment->comentario ?></td>
-							</tr>
-						<?php endforeach; ?>
+						<?php 
+						foreach ($aPayments as $aPayment):
+							if ($aPayment->payment_type != 'Retención de impuesto'): ?> 
+								<tr>
+									<td><?= h($aPayment->payment_type) ?></td>
+									<td><?= h($aPayment->bank) ?></td>
+									<td><?= h($aPayment->bancoReceptor) ?></td>
+									<td><?= h($aPayment->account_or_card) ?></td>
+									<td><?= h($aPayment->serial) ?></td>
+									<td><?= h($aPayment->moneda) ?></td>
+									<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
+									<td><?= $aPayment->comentario ?></td>
+								</tr>
+							<?php
+							endif; 
+						endforeach; ?>
 					</tbody>
 				</table>
+				<?php
+				foreach ($aPayments as $aPayment): 
+					if ($aPayment->payment_type == 'Retención de impuesto'): ?>
+						<div>
+							<br />
+							<?= 'ISLR '.$aPayment->moneda.' '.number_format($aPayment->amount, 2, ",", "."); ?>
+						</div>
+					<?php
+					endif;
+				endforeach; ?>
 			</div>
 			<div id="emptyColumn" style="font-size: 8px;">
-				<p>Monto en divisas al cambio Bs.: <?= number_format($monto_divisas_bolivar, 2, ",", ".") ?></p>  
-				<p>Tasa cambio BCV <?= number_format($bill->tasa_cambio, 2, ",", ".") ?></p>
+				<p class="nover">Monto en divisas al cambio Bs.: <?= number_format($monto_divisas_bolivar, 2, ",", ".") ?></p>  
+				<p class="nover">Tasa cambio BCV <?= number_format($bill->tasa_cambio, 2, ",", ".") ?></p>
 				<p>Cajero: <?= $usuarioResponsable ?></p>
 			</div>
 			<div id="total" style="font-size: 9px;">
@@ -366,6 +402,10 @@
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 					</tr>
 				</table>
+			</div>
+			<div class='nover' style='text-align: center; font-size: 10px; line-height: 11px;'>
+				<br /><br /><br /><br /><br /><br /><br /><br />
+				IMPRENTA DIGITAL, C.A. Nro. RIF: J-nnnnnnn-n, Nro. Providencia SENIAT/nn.	Nro de Control desde el Nro. 00-000nnn hasta el Nro. 00-00nnn
 			</div>
 		</div>
 	<?php elseif ($indicadorAnticipo == 1): ?>

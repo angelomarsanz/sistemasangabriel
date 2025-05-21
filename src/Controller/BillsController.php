@@ -663,6 +663,10 @@ class BillsController extends AppController
 		$facturaOtroCajero = 0;
 
 		$montoReintegro = 0;
+
+		$periodoEscolarFactura = '';
+
+		$conceptoInscripcion = '';
 		
 		if (isset($origen))
 		{
@@ -741,6 +745,8 @@ class BillsController extends AppController
 			]);
 					    
         $bill = $lastRecord->first();
+
+		$periodoEscolarFactura = substr($bill->school_year, 13);
 		
 		if (isset($origen))
 		{
@@ -858,6 +864,7 @@ class BillsController extends AppController
 		$montoVueltoCompra = 0;		
         $previousAcccountingCode = " ";
 		$indicadorAnticipo = 0;
+		$conceptoInscripcion = '';
  
         $loadIndicator = 0;
 		
@@ -907,34 +914,7 @@ class BillsController extends AppController
 				}
 				elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
 				{	
-					if ($aConcept->concept == 'Matrícula '.$anteriorAnoInscripcion)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$anteriorAnoInscripcion.' - '.$actualAnoInscripcion;
-					}
-					elseif ($aConcept->concept == 'Matrícula '.$actualAnoInscripcion)
-					{
-						if ($aConcept->observation == 'Diferencia')
-						{
-							$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-					}
-					elseif ($aConcept->concept == 'Matrícula '.$proximoAnoInscripcion)
-					{
-						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
-					}
-					if ($aConcept->id == 99425 || $aConcept->id == 98166  || $aConcept->id == 98168)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula 2022 - 2023';
-					}
-					if ($aConcept->id == 99427 || $aConcept->id ==  98170 || $aConcept->id == 98172)
-					{
-						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula 2023 - 2024';
-					}
-					
+					$invoiceLine = generarConceptosInscripcion($periodoEscolarFactura, $aConcept, 'Matrícula');
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -1334,8 +1314,9 @@ class BillsController extends AppController
 		
 		$vista = "invoice";
 					
-        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school'));
-        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school']);
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school', 'periodoEscolarFactura'));
+
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school', 'periodoEscolarFactura']);
 	}
 	
 	public function invoicepdf()
@@ -3770,5 +3751,40 @@ class BillsController extends AppController
 		$vector_efectivos[] = ["origen" => "Pedidos", "moneda" => "euro", "orden" => "3", "monto" => $disponible_euro_no_fiscal];
 
 		return $vector_efectivos;
+	}
+	public function generarConceptosInscripcion($periodoEscolarFactura = null, $aConcept = null, $tipoConcepto = null)
+	{
+		$anioInicioPeriodoActual = substr($periodoEscolarFactura, 0, 4);
+		$anioInicioPeriodoAnterior = $anioInicioPeriodoActual - 1;
+		$anioFinPeriodoActual = substr($periodoEscolarFactura, 5, 4);
+		$anioFinPeriodoAnterior = $anioFinPeriodoActual - 1;
+		$conceptoInscripcion = '';
+		
+		if ($tipoConcepto == 'Matrícula')
+		{
+			if ($aConcept->concept == 'Matrícula '.$anioInicioPeriodoActual)
+			{
+				if ($anioInicioPeriodoActual >= 2024)
+				{
+					if ($aConcept->observation == 'Diferencia')
+					{
+						$conceptoInscripcion = $aConcept->student_name.' - Diferencia matrícula '.$periodoEscolarFactura;
+					}
+					else
+					{
+						$conceptoInscripcion = $aConcept->student_name.' - Anticipo matrícula '.$periodoEscolarFactura;
+					} 
+				}
+				else
+				{
+					$conceptoInscripcion = $aConcept->student_name.' - Anticipo matrícula '.$periodoEscolarFactura;
+				}
+			}
+			elseif ($aConcept->concept == 'Matrícula '.$anioInicioPeriodoAnterior)
+			{	
+				$conceptoInscripcion = $aConcept->student_name.' - Diferencia matrícula '.$anioInicioPeriodoAnterior.'-'.$anioFinPeriodoAnterior;
+			}
+		}
+		return $conceptoInscripcion;
 	}
 }

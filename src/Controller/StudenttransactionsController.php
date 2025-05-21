@@ -6834,6 +6834,9 @@ class StudenttransactionsController extends AppController
 				$contadorCuotasRegistradas = 0;
 				$anoTransaccion = 0;
 				$mesTransaccion = 0;
+				$tarifaCuotaSinDescuento = 0;
+				$montoPagadoNeto = 0;
+				$montoDescuentoProntoPago = 0;
 				
 				$condiciones = 
 					[
@@ -6863,7 +6866,10 @@ class StudenttransactionsController extends AppController
 						$pendienteCuota = 0;
 						$anoTransaccion = 0;
 						$mesTransaccion = 0;
-
+						$tarifaCuotaSinDescuento = 0;
+						$montoPagadoNeto = 0;
+						$montoDescuentoProntoPago = 0;
+		
 						$registroEstudiante = $this->Studenttransactions->Students->get($idEstudiante);
 
 						$this->loadModel('Monedas');
@@ -6939,6 +6945,7 @@ class StudenttransactionsController extends AppController
 							{
 								$porcentajeDescuentoDecimal = round((100 - $porcentajeDescuento)/100, 2);
 							}
+							$tarifaCuotaSinDescuento = $tarifaCuota;
 							$tarifaCuota = round($tarifaCuota * $porcentajeDescuentoDecimal, 2);
 						}
 						else
@@ -6973,7 +6980,28 @@ class StudenttransactionsController extends AppController
 						if ($registrarCuota == 1)
 						{
 							$contadorCuotasRegistradas++;
-							$pendienteCuota = round($tarifaCuota - $transaccion->amount_dollar, 2);
+							$montoPagadoNeto = $transaccion->amount_dollar;
+							if ($transaccion->paid_out == 1)
+							{
+								if ($tarifaCuota == $tarifaCuotaSinDescuento)
+								{
+									if ($tarifaCuota > $transaccion->amount_dollar)
+									{
+										$montoDescuentoProntoPago = descuentoProntoPago($anioMesTransaccion);
+										$montoPagadoNeto = round($transaccion->amount_dollar - $montoDescuentoProntoPago, 2);
+									}	
+								}
+								else
+								{
+									if ($tarifaCuota > $transaccion->amount_dollar && $tarifaCuotaSinDescuento > $transaccion->amount_dollar)
+									{
+										$montoDescuentoProntoPago = descuentoProntoPago($anioMesTransaccion);
+										$montoPagadoNeto = round($transaccion->amount_dollar - $montoDescuentoProntoPago, 2);
+									}	
+								}
+							}
+
+							$pendienteCuota = round($tarifaCuota - $montoPagadoNeto, 2);
 							$totalDeudaEstudiante = round($totalDeudaEstudiante + $pendienteCuota, 2);
 							$vectorTransacciones[] = 
 								[
@@ -7007,4 +7035,22 @@ class StudenttransactionsController extends AppController
 			$this->set(compact('idUsuario', 'rolUsuario', 'idRepresentante', 'controlador', 'accion'));
 		}
     }
+	public function descuentoProntoPago($anioMesTransaccion)
+	{
+		$anioMesdescuentos = 
+			[
+				"202308" => 5.00,
+				"202508" => 10.00
+			];
+		$montoDescuentoProntoPago = 0;
+
+		foreach ($anioMesDescuentos as $indice => $anioMesDescuento)
+		{
+			if ($anioMesTransaccion <= $anioMesDescuento)
+			{
+				$montoDescuentoProntoPago = $anioMesDescuento;
+			}
+		}
+		return $montoDescuentoProntoPago;
+	}
 }

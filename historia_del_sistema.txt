@@ -14,11 +14,17 @@ Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
 
+Agenda:
+- Pantalla actualización de datos 2025-2026 - 21/05/2025
+- Consulta deuda representante - 21/05/2025
+- Seniat - 21/05/2025
+- Consulta facturas conceptos de inscripción años anteriores - 
+
 19/05/2025
 Era un pedido y se imprimió en el papel fiscal 112576
 ortega gajardo
 pedido 5391
-control factua 112576
+control factura 112576
 
 16/05/2025
 Usuario: Sol
@@ -33,10 +39,14 @@ Consulta Deuda Representante
 Cédulas para pruebas:
 16153897
 12103708
+Prueba consulta deuda familia con mensualidad adelantadas
+Estudiante 1792, familia 1256, Fuentes Merchán, usuario 1230, cédula 15979001
+
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/consulta_deuda_representante.ctp
 /opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
-/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.
+/opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/create_invoice.ctp
 
 06/05/2025
 Requerimientos Ana P

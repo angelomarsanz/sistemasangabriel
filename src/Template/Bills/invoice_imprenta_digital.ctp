@@ -1,3 +1,7 @@
+<?php 
+    use Cake\Routing\Router;
+?>
+
 <style>
 @media screen
 {
@@ -118,21 +122,32 @@
 			<?php if ($bill->annulled == 1): ?>
 				<h1 style="text-align:center;">Factura Anulada <?= $bill->date_annulled->format('d-m-Y') ?></h1>
 			<?php endif; ?>
+			<div class="nover" style="width:20%; float: left;">
+				<a href="<?php echo Router::url(["controller" => "Users", "action" => "home"]); ?>"><img src="<?php echo Router::url(["controller" => "webroot/files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 60 class="img-thumbnail img-responsive logo"/></a>
+			</div>
+			<div class="nover" style="width:80%; float: left;">
+				<div style='text-align: center'>
+					<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
+				</div>
+				<div style='text-align: center'>
+					<h5>Av. Río Orinoco, Urb. Valles del Camoruco, Valencia, Estado Carabobo, teléfono , Rif: J-40490885-4</h5>
+				</div>
+			</div>
 			<table style="width:100%">
 				<tbody>
 					<tr>
 						<td style='width:80%;'>Cliente: <?= $bill->client ?></td>
 						<?php if ($bill->tipo_documento == "Nota de crédito"): ?>
-							<td style="width:20%; text-align: right;"><b>Nota de crédito Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Nota de crédito Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php elseif ($bill->tipo_documento == "Nota de débito"): ?>
-							<td style="width:20%; text-align: right;"><b>Nota de débito Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Nota de débito Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php else: ?>
-							<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php endif; ?>
 					</tr>
 					<tr>
 						<td style='width:80%;'>C.I./RIF: <?= $bill->identification ?></td>
-						<td style="width:20%; text-align: right;">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
+						<td style="width:20%; text-align: right;">Fecha: <?= $bill->date_and_time->format("d-m-Y h:i:s a") ?></td>
 					</tr>
 					<tr>
 						<td style='width:80%;'>Teléfono: <?= $bill->tax_phone ?></td>
@@ -245,26 +260,41 @@
 				</table>
 			</div>
 		</div>
+		<div class='nover' style='text-align: center; font-size: 10px; line-height: 11px;'>
+			<br /><br /><br /><br /><br /><br /><br /><br />
+			IMPRENTA DIGITAL, C.A. Nro. RIF: J-nnnnnnn-n, Nro. Providencia SENIAT/nn.	Nro de Control desde el Nro. 00-000nnn hasta el Nro. 00-00nnn
+		</div>
 		<?php $countSubtraction = 30 - $counter; ?>
 		<div style="font-size: 9px; line-height: 11px;">
 			<?php for ($i = 1; $i <= $countSubtraction; $i++): ?>
 				<br />
 			<?php endfor; ?>
+			<div class="nover" style="width:20%; float: left;">
+				<a href="<?php echo Router::url(["controller" => "Users", "action" => "home"]); ?>"><img src="<?php echo Router::url(["controller" => "webroot/files", "action" => "schools"]) . '/profile_photo/f0c3559c-c419-42ee-b586-e16819cf7416/logo1.png'; ?>" width = 50 height = 60 class="img-thumbnail img-responsive logo"/></a>
+			</div>
+			<div class="nover" style="width:80%; float: left;">
+				<div style='text-align: center'>
+					<h3>U.E. "Colegio San Gabriel Arcángel", C.A.</h3>
+				</div>
+				<div style='text-align: center'>
+					<h5>Av. Río Orinoco, Urb. Valles del Camoruco, Valencia, Estado Carabobo, teléfono , Rif: J-40490885-4</h5>
+				</div>
+			</div>
 			<table style="width:100%">
 				<tbody>
 					<tr>
 						<td style='width:70%;'>Cliente: <?= $bill->client ?></td>
 						<?php if ($bill->tipo_documento == "Nota de crédito"): ?>
-							<td style="width:20%; text-align: right;"><b>Nota de crédito Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Nota de crédito Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php elseif ($bill->tipo_documento == "Nota de débito"): ?>
-							<td style="width:20%; text-align: right;"><b>Nota de débito Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Nota de débito Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php else: ?>
-							<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?></b></td>
+							<td style="width:20%; text-align: right;"><b>Factura Nro. <?= $bill->bill_number ?><span class='nover'> Nro. Control 00-<?= $bill->control_number ?></span></b></td>
 						<?php endif; ?>
 					</tr>
 					<tr>
 						<td style='width:80%;'>C.I./RIF: <?= $bill->identification ?></td>
-						<td style="width:20%; text-align: right;">Fecha: <?= $bill->date_and_time->format('d-m-Y') ?></td>
+						<td style="width:20%; text-align: right;">Fecha: <?= $bill->date_and_time->format("d-m-Y h:i:s a") ?></td>
 					</tr>
 					<tr>
 						<td style='width:80%;'>Teléfono: <?= $bill->tax_phone ?></td>
@@ -372,6 +402,10 @@
 						<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 					</tr>
 				</table>
+			</div>
+			<div class='nover' style='text-align: center; font-size: 10px; line-height: 11px;'>
+				<br /><br /><br /><br /><br /><br /><br /><br />
+				IMPRENTA DIGITAL, C.A. Nro. RIF: J-nnnnnnn-n, Nro. Providencia SENIAT/nn.	Nro de Control desde el Nro. 00-000nnn hasta el Nro. 00-00nnn
 			</div>
 		</div>
 	<?php elseif ($indicadorAnticipo == 1): ?>

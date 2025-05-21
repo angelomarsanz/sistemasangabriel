@@ -67,6 +67,15 @@ class BillsController extends AppController
 					return true;
 				}				
 			}
+			// Inicio cambios Seniat
+			elseif ($user['role'] === 'Seniat')
+			{
+				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion']))
+				{
+					return true;
+				}				
+			}
+			// Fin cambios Seniat
 		}
         return parent::isAuthorized($user);
     }        
@@ -174,7 +183,10 @@ class BillsController extends AppController
 		$seguros = new SegurosController();
 		$consejos = new ConsejosController();
 		$notas = new NotasController();
-		
+		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
+        date_default_timezone_set('America/Caracas');
+		$fechaHoraActual = Time::now();
+        		
 		$billNumber = 0;
 			
 		$codigoRetorno = $this->reciboFactura($this->headboard['idParentsandguardians']);
@@ -210,7 +222,7 @@ class BillsController extends AppController
 				$bill = $this->Bills->newEntity();
 				$bill->parentsandguardian_id = $this->headboard['idParentsandguardians'];
 				$bill->user_id = $this->Auth->user('id');
-				$bill->date_and_time = $this->headboard['invoiceDate'];
+				$bill->date_and_time = $fechaHoraActual;
 				$bill->turn = $this->headboard['idTurn'];
 				$bill->id_turno_anulacion = 0;
 				

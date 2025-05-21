@@ -89,6 +89,7 @@
 								<!-- <li><?= $this->Html->link('Resumen de alumnos por familia', ['controller' => 'Studenttransactions', 'action' => 'reportFamilyStudents']) ?></li> -->
 								<li><?= $this->Html->link('Rubros padres y/o representantes', ['controller' => 'Parentsandguardians', 'action' => 'officeManager']) ?></li>	
 								<li><?= $this->Html->link('Consejo Educativo', ['controller' => 'Parentsandguardians', 'action' => 'consejoEducativo']) ?></li>
+								<li><?=  $this->Html->link('Consultar deuda', ['controller' => 'Studenttransactions', 'action' => 'consultaDeudaRepresentante', $current_user['id'],  $current_user['role'], 0]) ?></li>
 							</ul>
 						</li>
 
@@ -316,7 +317,7 @@
 					endif; 
 					if ($current_user['role'] == 'Representante'): ?>
                         <li><?=  $this->Html->link('Actualizar datos', ['controller' => 'Guardiantransactions', 'action' => 'homeScreen']) ?></li>
-						<li><?=  $this->Html->link('Consultar deuda', ['controller' => 'Studenttransactions', 'action' => 'consultaDeudaRepresentante', $current_user['id'],  $current_user['role'], 0]) ?></li>
+						<!-- <li><?=  $this->Html->link('Consultar deuda', ['controller' => 'Studenttransactions', 'action' => 'consultaDeudaRepresentante', $current_user['id'],  $current_user['role'], 0]) ?></li> -->
                     <?php 
 					endif; 
 					// Inicio cambios Seniat
