@@ -914,7 +914,7 @@ class BillsController extends AppController
 				}
 				elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
 				{	
-					$invoiceLine = generarConceptosInscripcion($periodoEscolarFactura, $aConcept, 'Matrícula');
+					$invoiceLine = $this->generarConceptosInscripcion($periodoEscolarFactura, $aConcept, 'Matrícula');
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -922,6 +922,7 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 					$indicadorAnticipo = 1;
+					$invoiceLine = '1111111111111';
 				}
 				elseif (substr($aConcept->concept, 0, 3) == "Ago")
 				{	
@@ -1109,34 +1110,7 @@ class BillsController extends AppController
 						$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
 						$loadIndicator = 1;
 					}
-					if ($aConcept->concept == 'Matrícula '.$anteriorAnoInscripcion)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$anteriorAnoInscripcion.' - '.$actualAnoInscripcion;
-					}
-					elseif ($aConcept->concept == 'Matrícula '.$actualAnoInscripcion)
-					{
-						if ($aConcept->observation == 'Diferencia')
-						{
-							$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-					}
-					elseif ($aConcept->concept == 'Matrícula '.$proximoAnoInscripcion)
-					{
-						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
-					}
-					if ($aConcept->id == 99425 || $aConcept->id == 98166  || $aConcept->id == 98168)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula 2022 - 2023';
-					}
-					if ($aConcept->id == 99427 || $aConcept->id ==  98170 || $aConcept->id == 98172)
-					{
-						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula 2023 - 2024';
-					}
-
+					$invoiceLine = $this->generarConceptosInscripcion($periodoEscolarFactura, $aConcept, 'Matrícula');
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;
