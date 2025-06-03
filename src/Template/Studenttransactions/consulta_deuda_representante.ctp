@@ -3,21 +3,18 @@
 ?>
 <?php 
 $idEstudiante = isset($idEstudiante) ? $idEstudiante : null;
-$periodoEscolar = isset($periodoEscolar) ? $periodoEscolar : null;
 $controlador = isset($controlador) ? $controlador : null;
 $accion = isset($accion) ? $accion : null;
 ?>
 <div id='consulta-deuda-representante'></div>
-<?php 
-if ($idRepresentante > 0): ?>
-    <div id='ruta-programa' class='noVerEnPantalla'><?php echo Router::url(array("controller" => "Students", "action" => "buscarEstudiantesRepresentante", $idRepresentante)); ?></div>
-<?php
-else: ?>
-    <div id='ruta-programa' class='noVerEnPantalla'><?php echo Router::url(array("controller" => "Students", "action" => "findStudent")); ?></div>
-<?php
-endif; ?>
-
-<div class="row">
+<div id='vector-estudiantes' class='noVerEnPantalla noVerImpreso'><?php echo json_encode($vectorEstudiantes); ?></div>
+<div id='id-usuario' class='noVerEnPantalla noVerImpreso'><?= $idUsuario ?></div>
+<div id='rol-usuario' class='noVerEnPantalla noVerImpreso'><?= $rolUsuario ?></div>
+<div id='ruta-busqueda-familia' class='noVerEnPantalla noVerImpreso'><?php echo Router::url(array("controller" => "Parentsandguardians", "action" => "findFamily")); ?></div>
+<div id='ruta-busqueda-representante' class='noVerEnPantalla noVerImpreso'><?php echo Router::url(array("controller" => "Parentsandguardians", "action" => "findGuardian")); ?></div>
+<div id='ruta-consulta-deuda-representante' class='noVerEnPantalla noVerImpreso'><?php echo Router::url(array("controller" => "Studenttransactions", "action" => "consultaDeudaRepresentante")); ?></div>
+<div id='ruta-busqueda-estudiantes-representante' class='noVerEnPantalla noVerImpreso'><?php echo Router::url(array("controller" => "Students", "action" => "buscarEstudiantesRepresentante", $idRepresentante)); ?></div>
+<div class="row noVerImpreso">
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
         <div class="page-header">
             <h3>Consultar Deuda</h3>
@@ -25,45 +22,119 @@ endif; ?>
         </div>
     </div>
 </div>
-<?= $this->Form->create() ?>
-    <fieldset>
-        <div class='row'>
-            <input type='hidden' name='id_usuario' id='id-usuario' value=<?= $idUsuario ?>>
-            <input type='hidden' name='rol_usuario' id='rol-usuario' value=<?= $rolUsuario ?>>
-            <input type='hidden' name='id_representante' id='id-representante' value=<?= $idRepresentante ?>>
-            <input type='hidden' name='id_estudiante' id='id-estudiante' value=<?= $idEstudiante ?>>
-            <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
-                <label for="estudiante">Escriba el primer apellido del alumno</label>
-                <br />
-                <input type="text" class="form-control" name="estudiante" id="estudiante" value='<?= isset($estudiante) ? $estudiante : ''; ?>'>
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
-                <?php
-                echo $this->Form->input('periodo_escolar', ['label' => 'Período escolar: ', 'value' => $periodoEscolar, 'options' => 
-                    [
-                        '2023' => '2023-2024',
-                        '2024' => '2024-2025',
-                        '2025' => '2025-2026',
-                    ]]); ?>
-            </div>
-        </div>
-    </fieldset>
-    <div class='row'>
-        <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
-            <?= $this->Form->button(__('Consulta'), ['class' =>'btn btn-success']) ?>
+<?php
+if ($rolUsuario != 'Representante')
+{ ?>
+    <div class="row noVerImpreso">
+        <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+            <label for="familia">Escriba los apellidos que identifican la familia:</label>
+            <br />
+            <input type="text" class="form-control" id="familia">
+            <br />
+            <label for="representante">Si desconoce los apellidos de la familia, entonces escriba el primer apellido del representante:</label>
+            <br />
+            <input type="text" class="form-control" id="representante">
+            <br />
         </div>
     </div>
-<?= $this->Form->end() ?>
-<?php 
-if (isset($estudiante)): ?>
-    <h3><?= $estudiante ?></h3>
-    <h4>Deuda a la fecha: <?= number_format($totalDeudaEstudiante, 2, ",", ".") ?></h4>
-    <h4>Cuotas del período escolar : <?= $periodoEscolar.'-'.($periodoEscolar + 1) ?></h4>
+<?php
+} 
+if ($rolUsuario != 'Representante' && $idRepresentante > 0)
+{ ?>
+    <h4><?= 'Familia: '.$representante->family ?></h4>
+    <h5><?= 'Representante: '.$representante->full_name ?></h5>
+<?php
+} ?> 
+<h3><br>Total deuda de la familia $(USD): &nbsp;&nbsp;<?= number_format($totalDeudaRepresentante, 2, ",", ".") ?><br/></h3>
+<hr />
+<h5>Estudiantes:</h5>
+<?php
+$contadorEstudiantes = 0;
+$etiquetaNombre = '';
+$etiquetaPeriodoEscolar = '';
+$etiquetaDeudaTotalEstudianteAnio = '';
+
+foreach ($vectorEstudiantes as $indiceEstudiante => $estudiante)
+{ 
+    $ultimoAnioInscripcionEstudiante = $estudiante['ultimo_anio_inscripcion_estudiante']; 
+    if ($contadorEstudiantes == 0)
+    { 
+        $etiquetaNombre = 'Nombre:';
+        $etiquetaPeriodoEscolar = 'Período escolar:';
+        $etiquetaDeudaTotalEstudianteAnio = 'Deuda:';
+    }
+    else
+    {
+        $etiquetaNombre = ' ';                
+        $etiquetaPeriodoEscolar = ' ';
+        $etiquetaDeudaTotalEstudianteAnio = ' ';
+    } 
+    $contadorEstudiantes++;
+    ?>
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+            <label for="estudiante"><?= $etiquetaNombre ?></label>
+            <input type="text" class="form-control" name="estudiante" id="estudiante" value="<?= $estudiante['nombre_estudiante'] ?>" disabled>    
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+            <?php
+            echo $this->Form->input('periodo_escolar['.$indiceEstudiante.']', ['class' => 'periodo-escolar', 'label' => $etiquetaPeriodoEscolar, 'value' => $ultimoAnioInscripcionEstudiante, 'options' => 
+                [
+                    '2023' => '2023-2024',
+                    '2024' => '2024-2025',
+                    '2025' => '2025-2026',
+                ]]); ?>
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+            <label for="total-deuda-estudiante-anio"><?= $etiquetaDeudaTotalEstudianteAnio ?></label>
+            <input type="text" class="form-control" name="total_deuda_estudiante_anio" id="<?= 'total-deuda-estudiante-anio-'.$indiceEstudiante ?>" value="<?= $estudiante['anios'][$ultimoAnioInscripcionEstudiante]['total_deuda_estudiante_anio'] ?>" disabled>    
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 noVerImpreso" style='margin-top: 2.2rem'>
+            <button id="<?= 'ver-detalle-'.$indiceEstudiante ?>" class="btn btn-success ver-detalle" >Ver detalle</button>
+        </div>
+        <input type='hidden' id='<?= 'indicador-detalle-'.$indiceEstudiante ?>' name='<?= 'indicador_detalle-'.$indiceEstudiante ?>' value='0'>
+    </div>
+    <div id='<?= 'detalle-cuotas-'.$indiceEstudiante ?>'></div>
     <?php
-    if (isset($contadorCuotasRegistradas)):
-        if ($contadorCuotasRegistradas > 0): ?> 
-            <?= $this->Form->create() ?>
-                <fieldset>
+    foreach ($estudiante['anios'] as $indiceAnio => $anio)
+    { 
+        $inicioPeriodoEscolarDetalle = $indiceAnio; 
+        $finPeriodoEscolarDetalle = $indiceAnio + 1; ?>
+        <div id="<?= 'cuotas-'.$indiceEstudiante.'-'.$indiceAnio ?>" class='row noVerEnPantalla noVerImpreso'>
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <h5>Detalle de las cuotas del período escolar <?= $inicioPeriodoEscolarDetalle.'-'.$finPeriodoEscolarDetalle ?></h5>
+                <?php
+                if ($rolUsuario == 'Representante')
+                { ?>
+                    <div class="flex-container">
+                        <?php
+                        foreach ($anio['cuotas_anio_escolar'] as $indiceCuota => $cuota)
+                        { 
+                            $idCuota = 'cuota-'.$cuota['id'];
+                            $nombreCuota = 'cuota_'.$cuota['id']; 
+                            $indicadorCuotaNoVencida = $cuota['indicadorCuotaNoVencida']; ?>
+                            <div>
+                                <?php
+                                    if ($indicadorCuotaNoVencida == 0)
+                                    { ?>
+                                        <label for="<?= $idCuota ?>"><?= $cuota['cuota'] ?></label>
+                                        <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                                    <?php
+                                    }
+                                    else 
+                                    { ?>
+                                        <label for="<?= $idCuota ?>" style='color: #a4a4c1;' ><?= $cuota['cuota'] ?></label>
+                                        <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" style='color: #a4a4c1;' value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                                    <?php
+                                    } ?>
+                            </div>
+                        <?php
+                        } ?> 
+                    </div>
+                <?php
+                }
+                else
+                { ?>
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead>
@@ -80,40 +151,40 @@ if (isset($estudiante)): ?>
                             <tbody>
                                 <?php 
                                 $contador = 1;
-                                foreach ($vectorTransacciones as $transaccion): ?> 
+                                foreach ($anio['cuotas_anio_escolar'] as $indiceCuota => $cuota)
+                                { ?> 
                                     <tr>
                                         <td class='noVerEnPantalla' style='text-align: center;'>
-                                            <?= $transaccion['id'] ?>
+                                            <?= $cuota['id'] ?>
                                         </td>
                                         <td style='text-align: left;'>
-                                            <?= $transaccion['cuota'] ?>
+                                            <?= $cuota['cuota'] ?>
                                         </td>
                                         <td style='text-align: center;'>
-                                            <input type="number" id=<?= 'amount_'.$contador ?> name='amount[<?= $contador ?>]' value=<?= $transaccion['tarifaCuota'] ?> step='0.01' class='form-control' disabled>
+                                            <input type="number" id=<?= 'amount_'.$contador ?> name='amount[<?= $contador ?>]' value=<?= $cuota['tarifaCuota'] ?> step='0.01' class='form-control' disabled>
                                         </td>
                                         <td style='text-align: center;'>
-                                            <input type="number" id=<?= 'amount_dollar_'.$contador ?> name='amount_dollar[<?= $contador ?>]' value=<?= $transaccion['montoAbonado'] ?> step='0.01' class='form-control' disabled>
+                                            <input type="number" id=<?= 'amount_dollar_'.$contador ?> name='amount_dollar[<?= $contador ?>]' value=<?= $cuota['montoAbonado'] ?> step='0.01' class='form-control' disabled>
                                         </td>
                                         <td style='text-align: center;'>
-                                            <input type="number" id=<?= 'pendiente_dollar_'.$contador ?> name='pendiente_dollar[<?= $contador ?>]' value=<?= $transaccion['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                                            <input type="number" id=<?= 'pendiente_dollar_'.$contador ?> name='pendiente_dollar[<?= $contador ?>]' value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
                                         </td>
                                         <td style='text-align: center;'>
-                                            <input type="number" id=<?= 'porcentaje_descuento_'.$contador ?> name='porcentaje_descuento[<?= $contador ?>]' value=<?= $transaccion['porcentajeDescuento'] ?> step='0.01' class='form-control' disabled>
+                                            <input type="number" id=<?= 'porcentaje_descuento_'.$contador ?> name='porcentaje_descuento[<?= $contador ?>]' value=<?= $cuota['porcentajeDescuento'] ?> step='0.01' class='form-control' disabled>
                                         </td>
                                     </tr>
                                     <?php
                                     $contador++;
-                                endforeach; ?>
+                                } ?>
                             </tbody>
                         </table>
                     </div>
-                </fieldset>
-            <?= $this->Form->end() ?>
-        <?php
-        else: ?>
-            <p>No se encontraron cuotas para el estudiante</p>
-        <?php
-        endif;
-    endif; ?>
-<?php
-endif; ?>
+                <?php
+                } ?>
+            </div>
+        </div>
+    <?php
+    }
+} ?>
+<br />
+<?php // debug($vectorEstudiantes); ?>

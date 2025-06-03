@@ -6,7 +6,7 @@ use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
-class ProveedoresTable extends Table
+class ProveedorsTable extends Table
 {
     /**
      * Initialize method
@@ -18,7 +18,8 @@ class ProveedoresTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('proveedores');
+
+        $this->table('proveedors');
         $this->displayField('id');
         $this->primaryKey('id');
 

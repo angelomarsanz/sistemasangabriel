@@ -1,9 +1,15 @@
 Objetivos:
 
-1. Mantenimiento - 14/03/2025
-2. Seniat - 17/02/2025
-3. Inventario - 06/02/2025 
-4. Migración a Cakephp5 y Bootstrap5 - 02/03/2025
+Agenda:
+- Cakephp5 - 22/05/2025
+- Seniat - 21/05/2025
+- Inventario - 03706/2025
+- Pantalla actualización de datos 2025-2026 - 21/05/2025
+- Consulta deuda representante - 21/05/2025
+- Consulta facturas conceptos de inscripción años anteriores - 21/05/2025
+- Reporte de morosidad becados hijos
+- Columnas vector_becas_anteriores, descuentos_anteriores
+- Servicio educativo: Columna servicio_educativo_exonerado
 
 cd /media/angelomarsanz/Mis\ documentos/Colegio\ San\ Gabriel/vite
 
@@ -14,14 +20,9 @@ Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
 
-Agenda:
-- Cakephp5 - 22/05/2025
-- Seniat - 21/05/2025
-- Inventario - 
-- Pantalla actualización de datos 2025-2026 - 21/05/2025
-- Consulta deuda representante - 21/05/2025
-- Consulta facturas conceptos de inscripción años anteriores - 21/05/2025
-- Reporte de morosidad becados hijos
+03/06/2025
+Inventario
+Se crea la tabla clientes y proveedores dependientes de la tabla usuario. Cuando se quiera saber el id del cliente, proveedor, representante, empleado, etc se conecta con la tabla usuarios y la respectiva opción contain de la tabla. 
 
 19/05/2025
 Era un pedido y se imprimió en el papel fiscal 112576
@@ -36,6 +37,8 @@ Factura: 118506, Control: 100846, id: 35633, concepto: Ago 2023
 Factura: 118495, Control: 100835, id: 35621, concepto: Matrícula 2021, Ago 2022, Matrícula 2022 
 "Diferencias de inscripción"
 En las facturas de inscripción para determinar si es anticipo o diferencia, en el campo concept de la tabla concepts, se está colocando la palabra "Diferencia" para los cuotas de "Matrícula nnnn" y "Ago nnnn". Ahora el período escolar se determinará por el año del concepto, osea: Matrícula nnnn ó Ago nnnn. 
+Módulos modificados:
+
 
 11/05/2025
 Consulta Deuda Representante
@@ -44,6 +47,10 @@ Cédulas para pruebas:
 12103708
 Prueba consulta deuda familia con mensualidad adelantadas
 Estudiante 1792, familia 1256, Fuentes Merchán, usuario 1230, cédula 15979001
+Pruebas con la familia Mendoza Ramírez
+Id ParentsandGuardian 35, id User 38, Cédula 17067450
+Familia Abreu Carmona
+id Representante 1172, id usuario 1146, cédula 14392238
 
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/consulta_deuda_representante.ctp

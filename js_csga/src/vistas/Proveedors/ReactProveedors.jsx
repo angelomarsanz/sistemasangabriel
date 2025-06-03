@@ -2,7 +2,7 @@ import { React, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useState } from 'react';
 
-export const IndexProveedores = () => { 
+export const ReactProveedors = () => { 
   const [count, setCount] = useState(0)
 
   return (
@@ -17,15 +17,15 @@ export const IndexProveedores = () => {
   )
 }
 
-let indexProveedores = document.getElementById('indexProveedores');
+let reactProveedors = document.getElementById('reactProveedors');
 
-if (indexProveedores != null) 
+if (reactProveedors != null) 
 {
-  const root = createRoot(indexProveedores);
+  const root = createRoot(reactProveedors);
 
   root.render(
     <StrictMode>
-      <IndexProveedores />
+      <ReactProveedors />
     </StrictMode>
     );
 }

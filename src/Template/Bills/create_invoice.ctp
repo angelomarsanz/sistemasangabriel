@@ -2624,15 +2624,16 @@
 
 	function descuentoProntoPago(anio_mes_transaccion) // Descuento pronto pago
 	{
-		let descuentos_pronto_pago = 
+		var descuentos_pronto_pago = 
 			{
+				"202208" : 0.00,
 				"202308" : 5.00,
 				"202508" : 10.00
 			};
 
+		var monto_descuento_pronto_pago = 0;
 		for (var anio_mes_descuento in descuentos_pronto_pago) 
 		{
-			let monto_descuento_pronto_pago = 0;
 			if (anio_mes_transaccion <= anio_mes_descuento)
 			{
 				monto_descuento_pronto_pago = descuentos_pronto_pago[anio_mes_descuento];

@@ -1,1 +1,0 @@
-export { IndexProveedores } from "./IndexProveedores";

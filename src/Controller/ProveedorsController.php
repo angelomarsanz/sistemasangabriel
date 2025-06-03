@@ -4,11 +4,11 @@ namespace App\Controller;
 use App\Controller\AppController;
 
 /**
- * Proveedores Controller
+ * Proveedors Controller
  *
- * @property \App\Model\Table\ProveedoresTable $Proveedores
+ * @property \App\Model\Table\ProveedorsTable $Proveedors
  */
-class ProveedoresController extends AppController
+class ProveedorsController extends AppController
 {
 
     /**
@@ -18,10 +18,10 @@ class ProveedoresController extends AppController
      */
     public function index()
     {
-        $proveedores = $this->paginate($this->Proveedores);
+        $proveedors = $this->paginate($this->Proveedors);
 
-        $this->set(compact('proveedores'));
-        $this->set('_serialize', ['proveedores']);
+        $this->set(compact('proveedors'));
+        $this->set('_serialize', ['proveedors']);
     }
 
     /**
@@ -33,7 +33,7 @@ class ProveedoresController extends AppController
      */
     public function view($id = null)
     {
-        $proveedore = $this->Proveedores->get($id, [
+        $proveedore = $this->Proveedors->get($id, [
             'contain' => []
         ]);
 
@@ -50,13 +50,13 @@ class ProveedoresController extends AppController
     {
         $this->autoRender = false;
 
-        $proveedore = $this->Proveedores->newEntity();
+        $proveedore = $this->Proveedors->newEntity();
         $proveedore->requesting_user = $this->Auth->user('username');
         
-        if ($this->Proveedores->save($proveedore)) 
+        if ($this->Proveedors->save($proveedore)) 
         {
-            $lastRecord = $this->Proveedores->find('all', ['conditions' => ['requesting_user' => $this->Auth->user('username')],
-                'order' => ['Proveedores.created' => 'DESC'] ]);
+            $lastRecord = $this->Proveedors->find('all', ['conditions' => ['requesting_user' => $this->Auth->user('username')],
+                'order' => ['Proveedors.created' => 'DESC'] ]);
 
             $row = $lastRecord->first();
                 
@@ -79,12 +79,12 @@ class ProveedoresController extends AppController
      */
     public function edit($id = null)
     {
-        $proveedore = $this->Proveedores->get($id, [
+        $proveedore = $this->Proveedors->get($id, [
             'contain' => []
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $proveedore = $this->Proveedores->patchEntity($proveedore, $this->request->data);
-            if ($this->Proveedores->save($proveedore)) {
+            $proveedore = $this->Proveedors->patchEntity($proveedore, $this->request->data);
+            if ($this->Proveedors->save($proveedore)) {
                 $this->Flash->success(__('The proveedore has been saved.'));
 
                 return $this->redirect(['action' => 'index']);
@@ -106,13 +106,17 @@ class ProveedoresController extends AppController
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $proveedore = $this->Proveedores->get($id);
-        if ($this->Proveedores->delete($proveedore)) {
+        $proveedore = $this->Proveedors->get($id);
+        if ($this->Proveedors->delete($proveedore)) {
             $this->Flash->success(__('The proveedore has been deleted.'));
         } else {
             $this->Flash->error(__('The proveedore could not be deleted. Please, try again.'));
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+    public function reactProveedors()
+    {
+
     }
 }

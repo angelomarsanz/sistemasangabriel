@@ -121,7 +121,7 @@ class StudenttransactionsController extends AppController
 				$porcentajeDescuento =  $_POST['porcentaje_descuento'];
 				$idTransaccion = $_POST['id_transaccion'];
 
-				$modificarCampos = [];
+				$modificarTransaccion = [];
 				$indicadorError = 0;
 
 				foreach ($idTransaccion as $indice => $id)
@@ -6806,239 +6806,363 @@ class StudenttransactionsController extends AppController
 
     public function consultaDeudaRepresentante($idUsuario = null, $rolUsuario = null, $idRepresentante = null, $idEstudiante = null, $controlador = 'Users', $accion = 'wait')
     {
-		if ($this->request->is('post'))
-	    {
-			if (isset($_POST['id_estudiante'])) 
+		$this->loadModel('Parentsandguardians');
+		$representante = '';
+		$contadorTransaccionesEncontradas = 0;
+		$vectorEstudiantes = [];
+		$totalDeudaRepresentante = 0;
+
+		if ($rolUsuario == 'Representante')
+		{
+			$representantes = $this->Parentsandguardians->find('all')->where(['user_id' => $idUsuario]);
+			$representante = $representantes->first();
+			$idRepresentante = $representante->id;
+		}
+		else
+		{
+			if ($idRepresentante > 0)
 			{
-				$this->loadModel('Schools');
-				$school = $this->Schools->get(2);
-				$anioEscolarActual = $school->current_school_year;
-				$idUsuario = $_POST['id_usuario'];
-				$rolUsuario = $_POST['rol_usuario'];
-				$idRepresentante = $_POST['id_representante'];
-				$idEstudiante = $_POST['id_estudiante'];
-				$estudiante = $_POST['estudiante'];
-				$periodoEscolar = $_POST['periodo_escolar'];
-				$registrarCuota = 0;
-				$porcentajeDescuento = 0;
-				$porcentajeDescuentoDecimal = 0;
-				$anioMesTransaccion = '';
-				$tarifaCuota = 0;
-				$diferenciaOriginalMonto = 0;
-				$pendienteCuota = 0;
-				$registroEstudiante = '';
-				$totalDeudaEstudiante = 0;
-				$vectorTransacciones = [];
-				$mesesTarifas = '';
-				$otrasTarifas = '';
-				$contadorCuotasRegistradas = 0;
-				$anoTransaccion = 0;
-				$mesTransaccion = 0;
-				$tarifaCuotaSinDescuento = 0;
-				$montoPagadoNeto = 0;
-				$montoDescuentoProntoPago = 0;
-				
-				$condiciones = 
-					[
-						'student_id' => $idEstudiante, 
-						'ano_escolar' => $periodoEscolar,
-						'invoiced'  => 0 		
-					];						
+				$representante = $this->Parentsandguardians->get($idRepresentante);	
+			}
+		}
+		if ($idRepresentante > 0)
+		{
+			$transaccionesEstudiantes = '';
+			$contadorTransaccionesEncontradas = 0;
+			$vectorAnios = [];
+			$cuotasAnioEscolar = [];
+			$idEstudianteAnterior = 0;
+			$idEstudianteActual = 0;
+			$anioEscolarAnterior = 0;
+			$anioEscolarActual = 0;
+			$nombreEstudianteAnterior = 0;
+			$nombreEstudianteActual = 0;
+			$contadorTransacciones = 0;
+			$totalDeudaEstudiante = 0;
+			$totalDeudaEstudianteAnio = 0;
+			$primerAnioInscripcionEstudiante = '';
+			$ultimoAnioInscripcionEstudiante = '';
+			$aniosEstudiante = [];
 
-				$transaccionesEstudiante = $this->Studenttransactions->find('all', ['conditions' => $condiciones]);
-				$contadorTransacciones = $transaccionesEstudiante->count();
+			$this->loadModel('Schools');
+			$school = $this->Schools->get(2);
+			$anioEscolarActual = $school->current_school_year;
+			$anioEscolarAnterior = $anioEscolarActual - 1;
 
-				if ($contadorTransacciones > 0)
+			$this->loadModel('Monedas');
+			$moneda = $this->Monedas->get(2);
+			$tasaCambioDolar = $moneda->tasa_cambio_dolar;
+			$controladorEstudiantes = new StudentsController();
+			$mesesTarifas = $controladorEstudiantes->mesesTarifas($tasaCambioDolar);	
+			$otrasTarifas = $controladorEstudiantes->otrasTarifas($tasaCambioDolar);
+
+			$condiciones = 
+			[
+				'Studenttransactions.invoiced'  => 0,
+				'Studenttransactions.ano_escolar >=' => $anioEscolarAnterior,
+				'Students.parentsandguardian_id' => $idRepresentante,
+				'Students.student_condition' => 'Regular'  		
+			];				
+
+			$transaccionesEstudiante = $this->Studenttransactions->find('all', ['conditions' => $condiciones]);
+
+			$transaccionesEstudiantes = $this->Studenttransactions->find('all')
+				->contain(['Students' => ['Sections']])
+				->where($condiciones)
+				->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC', 'Students.id' => 'ASC', 'Studenttransactions.ano_escolar' => 'ASC', 'Studenttransactions.id' => 'ASC']);
+			
+			$contadorTransaccionesEncontradas = $transaccionesEstudiantes->count();
+
+			if ($contadorTransaccionesEncontradas > 0)
+			{
+				foreach ($transaccionesEstudiantes as $indice => $transaccion)
 				{
-					$contadorCuotasRegistradas = 0;
-					$ajustesTarifaCuota =
-						[
-							'Ago 2025' => -10
-						];
-					foreach ($transaccionesEstudiante as $indice => $transaccion)
+					$idEstudianteActual = $transaccion->student->id;
+					$nombreEstudianteActual = $transaccion->student->full_name;
+					$anioEscolarActual = $transaccion->ano_escolar;
+
+					if ($contadorTransacciones == 0)
 					{
-						$registrarCuota = 0;
-						$porcentajeDescuento = 0;
-						$porcentajeDescuentoDecimal = 0;
-						$anioMesTransaccion = '';
-						$tarifaCuota = 0;
-						$diferenciaOriginalMonto = 0;
-						$pendienteCuota = 0;
-						$anoTransaccion = 0;
-						$mesTransaccion = 0;
-						$tarifaCuotaSinDescuento = 0;
-						$montoPagadoNeto = 0;
-						$montoDescuentoProntoPago = 0;
-		
-						$registroEstudiante = $this->Studenttransactions->Students->get($idEstudiante);
-
-						$this->loadModel('Monedas');
-					
-						$moneda = $this->Monedas->get(2);
-						$tasaCambioDolar = $moneda->tasa_cambio_dolar;
-
-						$controladorEstudiantes = new StudentsController();
-
-						$mesesTarifas = $controladorEstudiantes->mesesTarifas($tasaCambioDolar);	
-
-						$otrasTarifas = $controladorEstudiantes->otrasTarifas($tasaCambioDolar);
-
-						if ($rolUsuario == 'Representante')
-						{
-							if ($transaccion->transaction_type == 'Matrícula' || $transaccion->transaction_type == 'Mensualidad')
-							{
-								$registrarCuota = 1; 
-							}
-						}
-						else
-						{ 
-							$registrarCuota = 1;
-						} 
-
-						if ($transaccion->transaction_type == 'Mensualidad' && substr($transaccion->transaction_description, 0, 3) != 'Ago')
-						{
-							$anioTransaccion = $transaccion->payment_date->year;
-
-							if ($transaccion->payment_date->month < 10)
-							{
-								$mesTransaccion = '0'.$transaccion->payment_date->month;
-							}
-							else
-							{
-								$mesTransaccion = $transaccion->payment_date->month;
-							}
-							$anioMesTransaccion = $anioTransaccion.$mesTransaccion;
-
-							foreach ($mesesTarifas as $indice => $mesTarifa)
-							{
-								if ($anioMesTransaccion == $mesTarifa['anoMes'])
-								{
-									$tarifaCuota = $mesTarifa['tarifaDolar'];
-									break;
-								}
-							}    
-							$diferenciaOriginalMonto = round($transaccion->original_amount - $transaccion->amount, 2);
-							if ($diferenciaOriginalMonto > 0)
-							{
-								$tarifaCuota = round($tarifaCuota - $diferenciaOriginalMonto, 2);
-							}
-							if ($transaccion->paid_out == 1)
-							{ 
-								$porcentajeDescuento = $transaccion->porcentaje_descuento;
-							}
-							else
-							{
-								if ($transaccion->ano_escolar < $anioEscolarActual)
-								{
-									$porcentajeDescuento = $registroEstudiante->descuento_ano_anterior;
-								}
-								elseif ($transaccion->ano_escolar == $anioEscolarActual)
-								{
-									$porcentajeDescuento = $registroEstudiante->discount;
-								}
-							}
-							if ($porcentajeDescuento == 0)
-							{
-								$porcentajeDescuentoDecimal = 1;
-							}
-							else
-							{
-								$porcentajeDescuentoDecimal = round((100 - $porcentajeDescuento)/100, 2);
-							}
-							$tarifaCuotaSinDescuento = $tarifaCuota;
-							$tarifaCuota = round($tarifaCuota * $porcentajeDescuentoDecimal, 2);
-						}
-						else
-						{
-							if (substr($transaccion->transaction_description, 0, 18) == 'Servicio educativo')
-							{
-								$tarifaCuota = $transaccion->amount;
-							}
-							else
-							{
-								foreach ($otrasTarifas as $indice => $otraTarifa)
-								{
-									if ($transaccion->transaction_description == $otraTarifa['conceptoAno'])
-									{
-										$tarifaCuota = $otraTarifa['tarifaDolar'];
-										break;
-									}
-								}
-							}
-							$diferenciaOriginalMonto = round($transaccion->original_amount - $transaccion->amount, 2);
-							if ($diferenciaOriginalMonto > 0)
-							{
-								$tarifaCuota = round($tarifaCuota - $diferenciaOriginalMonto, 2);
-							}
-						}
-
-						if (isset($ajustesTarifaCuota[$transaccion->transaction_description]))
-						{
-							$tarifaCuota = round($tarifaCuota + $ajustesTarifaCuota[$transaccion->transaction_description]);
-						}
-						
-						if ($registrarCuota == 1)
-						{
-							$contadorCuotasRegistradas++;
-							$montoPagadoNeto = $transaccion->amount_dollar;
-							if ($transaccion->paid_out == 1)
-							{
-								if ($tarifaCuota == $tarifaCuotaSinDescuento)
-								{
-									if ($tarifaCuota > $transaccion->amount_dollar)
-									{
-										$montoDescuentoProntoPago = descuentoProntoPago($anioMesTransaccion);
-										$montoPagadoNeto = round($transaccion->amount_dollar - $montoDescuentoProntoPago, 2);
-									}	
-								}
-								else
-								{
-									if ($tarifaCuota > $transaccion->amount_dollar && $tarifaCuotaSinDescuento > $transaccion->amount_dollar)
-									{
-										$montoDescuentoProntoPago = descuentoProntoPago($anioMesTransaccion);
-										$montoPagadoNeto = round($transaccion->amount_dollar - $montoDescuentoProntoPago, 2);
-									}	
-								}
-							}
-
-							$pendienteCuota = round($tarifaCuota - $montoPagadoNeto, 2);
-							$totalDeudaEstudiante = round($totalDeudaEstudiante + $pendienteCuota, 2);
-							$vectorTransacciones[] = 
-								[
-									'id' => $transaccion->id,
-									'cuota' => $transaccion->transaction_description,
-									'tarifaCuota' => $tarifaCuota,
-									'montoAbonado' => $transaccion->amount_dollar,
-									'pendienteCuota' => $pendienteCuota,
-									'porcentajeDescuento' => $porcentajeDescuento
-								];
-						}
+						$idEstudianteAnterior = $idEstudianteActual;
+						$nombreEstudianteAnterior = $nombreEstudianteActual;
+						$anioEscolarAnterior = $anioEscolarActual;
+						$primerAnioInscripcionEstudiante = $anioEscolarActual;
+						$ultimoAnioInscripcionEstudiante = $anioEscolarActual;
+						$aniosEstudiante[] = $anioEscolarActual;
 					}
-				}
+					$contadorTransacciones++;
+					if ($idEstudianteAnterior != $idEstudianteActual)
+					{
+						$vectorAnios[$anioEscolarAnterior] = 
+							[	
+								'total_deuda_estudiante_anio' => $totalDeudaEstudianteAnio,
+								'cuotas_anio_escolar' => $cuotasAnioEscolar
+							];
+						$vectorEstudiantes[$idEstudianteAnterior] = 
+							[
+								'nombre_estudiante' => $nombreEstudianteAnterior,
+								'total_deuda_estudiante' => $totalDeudaEstudiante,
+								'primer_anio_inscripcion_estudiante' => $primerAnioInscripcionEstudiante,
+								'ultimo_anio_inscripcion_estudiante' => $ultimoAnioInscripcionEstudiante,
+								'anios_estudiante' => $aniosEstudiante,
+								'anios' => $vectorAnios
+							];	
+						$totalDeudaEstudiante = 0;
+						$totalDeudaEstudianteAnio = 0;
+						$vectorAnios = [];
+						$cuotasAnioEscolar = [];
+						$aniosEstudiante = [];
+						$idEstudianteAnterior = $idEstudianteActual;
+						$nombreEstudianteAnterior = $nombreEstudianteActual;
+						$anioEscolarAnterior = $anioEscolarActual;
+						$primerAnioInscripcionEstudiante = $anioEscolarActual;
+						$ultimoAnioInscripcionEstudiante = $anioEscolarActual;
+						$aniosEstudiante[] = $anioEscolarActual;
+					}
+					if ($anioEscolarAnterior != $anioEscolarActual)
+					{
+						$vectorAnios[$anioEscolarAnterior] = 
+							[	
+								'total_deuda_estudiante_anio' => $totalDeudaEstudianteAnio,
+								'cuotas_anio_escolar' => $cuotasAnioEscolar
+							];
+						$totalDeudaEstudianteAnio = 0;
+						$cuotasAnioEscolar = [];
+						$anioEscolarAnterior = $anioEscolarActual;
+						$ultimoAnioInscripcionEstudiante = $anioEscolarActual;
+						$aniosEstudiante[] = $anioEscolarActual;
+					}
 
-				$this->set(compact('idUsuario', 'rolUsuario', 'idRepresentante', 'idEstudiante', 'estudiante', 'periodoEscolar', 'anioEscolarActual', 'registroEstudiante', 'mesesTarifas', 'otrasTarifas', 'contadorCuotasRegistradas', 'vectorTransacciones', 'totalDeudaEstudiante', 'controlador', 'accion'));
+					$respuestaProcesarTransaccion = $this->procesarTransaccion($rolUsuario, $anioEscolarActual, $transaccion, $mesesTarifas, $otrasTarifas, $totalDeudaRepresentante, $totalDeudaEstudiante, $totalDeudaEstudianteAnio, $cuotasAnioEscolar);
+					
+					$totalDeudaRepresentante = $respuestaProcesarTransaccion['total_deuda_representante'];
+					$totalDeudaEstudiante = $respuestaProcesarTransaccion['total_deuda_estudiante'];
+					$totalDeudaEstudianteAnio = $respuestaProcesarTransaccion['total_deuda_estudiante_anio'];
+					$cuotasAnioEscolar = $respuestaProcesarTransaccion['cuotas_anio_escolar'];
+				}
+				$vectorAnios[$anioEscolarAnterior] = 
+					[	
+						'total_deuda_estudiante_anio' => $totalDeudaEstudianteAnio,
+						'cuotas_anio_escolar' => $cuotasAnioEscolar
+					];
+				$vectorEstudiantes[$idEstudianteAnterior] = 
+					[
+						'nombre_estudiante' => $nombreEstudianteAnterior,
+						'total_deuda_estudiante' => $totalDeudaEstudiante,
+						'primer_anio_inscripcion_estudiante' => $primerAnioInscripcionEstudiante,
+						'ultimo_anio_inscripcion_estudiante' => $ultimoAnioInscripcionEstudiante,
+						'anios_estudiante' => $aniosEstudiante,
+						'anios' => $vectorAnios
+					];
+			}
+		}
+		$this->set(compact('idUsuario', 'rolUsuario', 'idRepresentante', 'representante', 'contadorTransaccionesEncontradas', 'vectorEstudiantes', 'totalDeudaRepresentante', 'controlador', 'accion'));
+    }
+
+	public function procesarTransaccion($rolUsuario = null, $anioEscolarActual = null, $transaccion = null, $mesesTarifas = null, $otrasTarifas = null, $totalDeudaRepresentante = null, $totalDeudaEstudiante = null, $totalDeudaEstudianteAnio = null, $cuotasAnioEscolar = null)
+	{		
+		$ajustesTarifaCuota =
+			[
+				'Ago 2025' => -10
+			];
+		
+		$registrarCuota = 0;
+		$porcentajeDescuento = 0;
+		$porcentajeDescuentoDecimal = 0;
+		$anioMesTransaccion = '';
+		$tarifaCuota = 0;
+		$diferenciaOriginalMonto = 0;
+		$pendienteCuota = 0;
+		$anoTransaccion = 0;
+		$mesTransaccion = 0;
+		$tarifaCuotaSinDescuento = 0;
+		$montoPagadoNeto = 0;
+		$montoDescuentoProntoPago = 0;
+		$anioActual = '';
+		$mesActual = '';
+		$anioMesActual = '';
+		$indicadorCuotaNoVencida = 0;
+		$pendienteCuotaActual = 0;
+
+		$fechaHoraActual = Time::now();
+		$anioActual = $fechaHoraActual->year;
+		if ($fechaHoraActual->month < 10)
+		{
+			$mesActual = '0'.$fechaHoraActual->month;
+		}
+		else
+		{
+			$mesActual = $fechaHoraActual->month;
+		}
+		$anioMesActual = $anioActual.$mesActual;
+
+
+		if ($rolUsuario == 'Representante')
+		{
+			if ($transaccion->transaction_type == 'Matrícula' || $transaccion->transaction_type == 'Mensualidad')
+			{
+				$registrarCuota = 1; 
+			}
+		}
+		else
+		{ 
+			if ($transaccion->transaction_type == 'Matrícula' || $transaccion->transaction_type == 'Mensualidad')
+			{
+				$registrarCuota = 1; 
+			}
+		} 
+
+		if ($transaccion->transaction_type == 'Mensualidad' && substr($transaccion->transaction_description, 0, 3) != 'Ago')
+		{
+			$anioTransaccion = $transaccion->payment_date->year;
+
+			if ($transaccion->payment_date->month < 10)
+			{
+				$mesTransaccion = '0'.$transaccion->payment_date->month;
 			}
 			else
 			{
-				$this->Flash->error(__('No se indicó el nombre del estudiante'));
+				$mesTransaccion = $transaccion->payment_date->month;
 			}
-       	}
+			$anioMesTransaccion = $anioTransaccion.$mesTransaccion;
+
+			foreach ($mesesTarifas as $indice => $mesTarifa)
+			{
+				if ($anioMesTransaccion == $mesTarifa['anoMes'])
+				{
+					$tarifaCuota = $mesTarifa['tarifaDolar'];
+					break;
+				}
+			}    
+			$diferenciaOriginalMonto = round($transaccion->original_amount - $transaccion->amount, 2);
+			if ($diferenciaOriginalMonto > 0)
+			{
+				$tarifaCuota = round($tarifaCuota - $diferenciaOriginalMonto, 2);
+			}
+			if ($transaccion->paid_out == 1)
+			{ 
+				$porcentajeDescuento = $transaccion->porcentaje_descuento;
+			}
+			else
+			{
+				if ($transaccion->ano_escolar < $anioEscolarActual)
+				{
+					$porcentajeDescuento = $transaccion->student->descuento_ano_anterior;
+				}
+				elseif ($transaccion->ano_escolar == $anioEscolarActual)
+				{
+					$porcentajeDescuento = $transaccion->student->discount;
+				}
+			}
+			if ($porcentajeDescuento == 0)
+			{
+				$porcentajeDescuentoDecimal = 1;
+			}
+			else
+			{
+				$porcentajeDescuentoDecimal = round((100 - $porcentajeDescuento)/100, 2);
+			}
+			$tarifaCuotaSinDescuento = $tarifaCuota;
+			$tarifaCuota = round($tarifaCuota * $porcentajeDescuentoDecimal, 2);
+		}
 		else
 		{
-			if ($rolUsuario == 'Representante')
+			if (substr($transaccion->transaction_description, 0, 18) == 'Servicio educativo')
 			{
-				$this->loadModel('Parentsandguardians');
-				$representantes = $this->Parentsandguardians->find('all')->where(['user_id' => $idUsuario]);
-				$representante = $representantes->first();
-				$idRepresentante = $representante->id;
+				$tarifaCuota = $transaccion->amount;
 			}
-			$this->set(compact('idUsuario', 'rolUsuario', 'idRepresentante', 'controlador', 'accion'));
+			else
+			{
+				foreach ($otrasTarifas as $indice => $otraTarifa)
+				{
+					if ($transaccion->transaction_description == $otraTarifa['conceptoAno'])
+					{
+						$tarifaCuota = $otraTarifa['tarifaDolar'];
+						break;
+					}
+				}
+			}
+			$diferenciaOriginalMonto = round($transaccion->original_amount - $transaccion->amount, 2);
+			if ($diferenciaOriginalMonto > 0)
+			{
+				$tarifaCuota = round($tarifaCuota - $diferenciaOriginalMonto, 2);
+			}
 		}
-    }
+
+		if (isset($ajustesTarifaCuota[$transaccion->transaction_description]))
+		{
+			$tarifaCuota = round($tarifaCuota + $ajustesTarifaCuota[$transaccion->transaction_description]);
+		}
+		
+		if ($registrarCuota == 1)
+		{
+			$montoPagadoNeto = $transaccion->amount_dollar;
+			if ($transaccion->paid_out == 1)
+			{
+				if ($tarifaCuota == $tarifaCuotaSinDescuento)
+				{
+					if ($tarifaCuota > $transaccion->amount_dollar)
+					{
+						$montoDescuentoProntoPago = descuentoProntoPago($anioMesTransaccion);
+						$montoPagadoNeto = round($transaccion->amount_dollar - $montoDescuentoProntoPago, 2);
+					}	
+				}
+				else
+				{
+					if ($tarifaCuota > $transaccion->amount_dollar && $tarifaCuotaSinDescuento > $transaccion->amount_dollar)
+					{
+						$montoDescuentoProntoPago = descuentoProntoPago($anioMesTransaccion);
+						$montoPagadoNeto = round($transaccion->amount_dollar - $montoDescuentoProntoPago, 2);
+					}	
+				}
+			}
+
+			$pendienteCuota = round($tarifaCuota - $montoPagadoNeto, 2);
+			if ($pendienteCuota < 0)
+			{
+				$pendienteCuota = 0;
+			}
+			$pendienteCuotaActual = $pendienteCuota;
+			if ($transaccion->transaction_type == 'Mensualidad' && substr($transaccion->transaction_description, 0, 3) != 'Ago')
+			{
+				if ($anioMesTransaccion > $anioMesActual && $pendienteCuotaActual > 0)
+				{
+					$pendienteCuotaActual = 0;
+					$indicadorCuotaNoVencida = 1;
+				}
+			}
+
+			$cuotasAnioEscolar[] = 
+				[
+					'id' => $transaccion->id,
+					'cuota' => $transaccion->transaction_description,
+					'tarifaCuota' => $tarifaCuota,
+					'montoAbonado' => $transaccion->amount_dollar,
+					'pendienteCuota' => $pendienteCuota,
+					'porcentajeDescuento' => $porcentajeDescuento,
+					'indicadorCuotaNoVencida' => $indicadorCuotaNoVencida
+				];
+
+			$totalDeudaRepresentante = round($totalDeudaRepresentante + $pendienteCuotaActual, 2);
+			$totalDeudaEstudiante = round($totalDeudaEstudiante + $pendienteCuotaActual, 2);
+			$totalDeudaEstudianteAnio = round($totalDeudaEstudianteAnio + $pendienteCuotaActual, 2);
+	
+		}
+		$respuesta =
+			[
+				'total_deuda_representante' => $totalDeudaRepresentante,
+				'total_deuda_estudiante' => $totalDeudaEstudiante,
+				'total_deuda_estudiante_anio' => $totalDeudaEstudianteAnio,
+				'cuotas_anio_escolar' => $cuotasAnioEscolar
+			];
+		return $respuesta;
+	}
+
 	public function descuentoProntoPago($anioMesTransaccion)
 	{
 		$anioMesdescuentos = 
 			[
+				"202208" => 0,
 				"202308" => 5.00,
 				"202508" => 10.00
 			];
