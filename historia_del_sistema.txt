@@ -1,15 +1,18 @@
 Objetivos:
 
 Agenda:
-- Cakephp5 - 22/05/2025
-- Seniat - 21/05/2025
-- Inventario - 03706/2025
+- Cakephp5 - 08/06/2025:
+	Se conectó la base de datos, pero al hacer la importación en el ambiente dev.colegio por phpmyadmin da error, hacer la importación vía Comandos
+- Seniat - 03/06/2025
+- Inventario - 03/06/2025
 - Pantalla actualización de datos 2025-2026 - 21/05/2025
 - Consulta deuda representante - 21/05/2025
-- Consulta facturas conceptos de inscripción años anteriores - 21/05/2025
+- Consulta facturas conceptos de inscripción años anteriores - 03/06/2025
 - Reporte de morosidad becados hijos
 - Columnas vector_becas_anteriores, descuentos_anteriores
 - Servicio educativo: Columna servicio_educativo_exonerado
+- Eliminar del menú de Lorelys: Anular Factura
+- En el reporte de cierre, restar las facturas anuladas
 
 cd /media/angelomarsanz/Mis\ documentos/Colegio\ San\ Gabriel/vite
 
@@ -38,7 +41,9 @@ Factura: 118495, Control: 100835, id: 35621, concepto: Matrícula 2021, Ago 2022
 "Diferencias de inscripción"
 En las facturas de inscripción para determinar si es anticipo o diferencia, en el campo concept de la tabla concepts, se está colocando la palabra "Diferencia" para los cuotas de "Matrícula nnnn" y "Ago nnnn". Ahora el período escolar se determinará por el año del concepto, osea: Matrícula nnnn ó Ago nnnn. 
 Módulos modificados:
-
+/opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php
+Se codificó y probó matrícula
+Se codificó Agosto, falta probar
 
 11/05/2025
 Consulta Deuda Representante

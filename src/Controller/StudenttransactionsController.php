@@ -4676,7 +4676,7 @@ class StudenttransactionsController extends AppController
 
 		if ($consejo_educativo == 'Sí')
 		{
-			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad);
+			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, 'Todos');
 
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];
@@ -4898,6 +4898,7 @@ class StudenttransactionsController extends AppController
 
 			$periodo_escolar = $_POST['periodo_escolar'];
 			$anio = substr($periodo_escolar, 0, 4);
+			$grados = $_POST['grados'];
 			$telefono = $_POST['telefono'];
 			$detalle_morosos = [];
 			$total_cuotas_periodo = 0;
@@ -4915,7 +4916,7 @@ class StudenttransactionsController extends AppController
 				 "Total $" => 0
 				];
 
-			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad);
+			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $grados);
 
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];
@@ -4929,7 +4930,7 @@ class StudenttransactionsController extends AppController
 		}
 	}
 
-	public function vectorConsejoEducativo($anio = null, $anioEscolarActual = null, $periodo_escolar = null, $total_cuotas_periodo = null, $detalle_morosos = null, $vector_morosidad = null, $totales_morosidad = null)
+	public function vectorConsejoEducativo($anio = null, $anioEscolarActual = null, $periodo_escolar = null, $total_cuotas_periodo = null, $detalle_morosos = null, $vector_morosidad = null, $totales_morosidad = null, $grados = null)
 	{
 		$this->loadModel('Rates');
 		$tarifaConsejoEducativo = 0;
@@ -4945,16 +4946,58 @@ class StudenttransactionsController extends AppController
 
 		if ($anio < $anioEscolarActual)
 		{
-			$matriculas_estudiantes = $this->Studenttransactions->find('all')
-			->contain(['Students' => ['Parentsandguardians', 'Sections']])
-			->where(['Studenttransactions.invoiced' => 0, 'Studenttransactions.transaction_description' => 'Matrícula '.$anio, 'Students.balance >=' => $anio, 'Parentsandguardians.estatus_registro' => 'Activo']);
+			if ($grados == 'Todos')
+			{
+				$condiciones = 
+					[
+						'Studenttransactions.invoiced' => 0, 
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio, 
+						'Students.balance >=' => $anio, 
+						'Parentsandguardians.estatus_registro' => 'Activo'
+					];
+			}
+			else
+			{
+				$condiciones = 
+					[
+						'Studenttransactions.invoiced' => 0, 
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio, 
+						'Students.balance >=' => $anio, 
+						'Parentsandguardians.estatus_registro' => 'Activo',
+						'Sections.orden >' => 41
+					];			
+			}
 		}
 		else
 		{
-			$matriculas_estudiantes = $this->Studenttransactions->find('all')
-			->contain(['Students' => ['Parentsandguardians', 'Sections']])
-			->where(['Studenttransactions.invoiced' => 0, 'Studenttransactions.transaction_description' => 'Matrícula '.$anio, 'Students.balance' => $anio, 'Students.student_condition' => 'Regular', 'Parentsandguardians.estatus_registro' => 'Activo']);
+			if ($grados == 'Todos')
+			{
+				$condiciones = 
+					[
+						'Studenttransactions.invoiced' => 0, 
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio, 
+						'Students.balance' => $anio, 
+						'Students.student_condition' => 'Regular', 
+						'Parentsandguardians.estatus_registro' => 'Activo'
+					];
+			}
+			else
+			{
+				$condiciones = 
+					[
+						'Studenttransactions.invoiced' => 0, 
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio, 
+						'Students.balance' => $anio, 
+						'Students.student_condition' => 'Regular', 
+						'Parentsandguardians.estatus_registro' => 'Activo',
+						'Sections.orden >' => 41
+					];
+			}		
 		}
+
+		$matriculas_estudiantes = $this->Studenttransactions->find('all')
+			->contain(['Students' => ['Parentsandguardians', 'Sections']])
+			->where($condiciones);
 		
 		if ($matriculas_estudiantes->count() == 0)
 		{

@@ -136,12 +136,6 @@ else: ?>
 							["" => "",
 							$periodoEscolarAnterior => $periodoEscolarAnterior,
 							$periodoEscolarActual => $periodoEscolarActual]]);
-						echo $this->Form->input('grados', ['label' => 'Grados: ', 'required', 'options' => 
-							[
-								"" => "",
-								'Todos' => 'Todos',
-								'5to. Año' => '5to. Año'
-							]]);
 						echo $this->Form->input('telefono', ['label' => 'Mostrar el número de teléfono del representante: ', 'required', 'options' => 
 						["" => "",
 						'Sí' => 'Sí',
