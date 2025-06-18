@@ -173,7 +173,7 @@
 								<li><?= $this->Html->link('Consulta de recibo o pedido', ['controller' => 'Bills', 'action' => 'consultarRecibo']) ?></li>
 								<li><?= $this->Html->link('Consultar nota de crédito', ['controller' => 'Bills', 'action' => 'consultarNotaCredito']) ?></li>
 								<li><?= $this->Html->link('Consultar nota de débito', ['controller' => 'Bills', 'action' => 'consultarNotaDebito']) ?></li>
-								<li><?= $this->Html->link('Anular factura, recibo o pedido', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Anular']) ?></li>
+								<li><?= $this->Html->link('Anular recibo o pedido', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Anular']) ?></li>
 								<li><?= $this->Html->link('Crear nota contable', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'NC']) ?></li>
 								<li><?= $this->Html->link('Recibo reintegro', ['controller' => 'Parentsandguardians', 'action' => 'busquedaReciboReintegro']) ?></li>			
 								<li><?= $this->Html->link('Modificar lote de facturas', ['controller' => 'Controlnumbers', 'action' => 'edit']) ?></li>

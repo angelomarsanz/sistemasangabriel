@@ -20,7 +20,6 @@ use Cake\ORM\TableRegistry;
  */
 class StudentsController extends AppController
 {
-	
     public function beforeFilter(\Cake\Event\Event $event)
     {
         parent::beforeFilter($event);
@@ -32,23 +31,31 @@ class StudentsController extends AppController
 		{
 			if ($user['role'] === 'Representante')
 			{
-				if(in_array($this->request->action, ['index', 'view', 'edit', 'filepdf', 'profilePhoto', 'editPhoto']))
+				if(in_array($this->request->action, ['index', 'view', 'edit', 'filepdf', 'profilePhoto', 'editPhoto', 'buscarEstudiantesRepresentante']))
 				{
 					return true;
 				}
 			}
-			if ($user['role'] === 'Control de estudios')
+			elseif ($user['role'] === 'Control de estudios')
 			{
 				if(in_array($this->request->action, ['familyStudents', 'reportFamilyStudents', 'familiasDescuento20', 'familiasDescuento50', 'consultStudent', 'viewStudent', 'edit', 'editStatus', 'reporteBecados', 'reportGraduateStudents', 'consultStudentDelete', 'indexConsult', 'viewConsult', 'filepdf', 'findStudent', 'findStudentDelete']))
 				{
 					return true;
 				}				
 			}
+			// Inicio cambios Seniat
+			elseif ($user['role'] === 'Seniat')
+			{
+				if(in_array($this->request->action, ['everyFamily', 'relatedStudents' ]))
+				{
+					return true;
+				}				
+			}
+			// Fin cambios Seniat
         }
 				
         return parent::isAuthorized($user);
     }
-	
     
     public function testFunction()
     {
@@ -1117,7 +1124,7 @@ class StudentsController extends AppController
         }
     } 
 
-    public function everyfamily()
+    public function everyFamily()
     {
         $this->autoRender = false;
 
@@ -1157,7 +1164,7 @@ class StudentsController extends AppController
         }
     }
     
-    public function relatedstudents()
+    public function relatedStudents()
     {
         $this->autoRender = false;
 
@@ -1842,6 +1849,21 @@ class StudentsController extends AppController
             $resultsArr = [];
             foreach ($results as $result) {
                  $resultsArr[] = ['label' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'value' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'id' => $result['id']];
+            }
+			exit(json_encode($resultsArr, JSON_FORCE_OBJECT));
+        }
+    }
+    public function buscarEstudiantesRepresentante($idRepresentante = null)
+    {
+        if ($this->request->is('ajax')) {
+            $this->autoRender = false;
+            $name = trim($this->request->query['term']);
+            $results = $this->Students->find('all', [
+                'conditions' => [['surname LIKE' => $name . '%'], ['Students.student_condition' => 'Regular'], ['Students.parentsandguardian_id' => $idRepresentante]],
+				'order' => ['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]]);
+            $resultsArr = [];
+            foreach ($results as $result) {
+                 $resultsArr[] = ['label' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'value' => $result['surname'] . ' ' . $result['second_surname'] . ' ' . $result['first_name'] . ' ' . $result['second_name'], 'id' => $result['id'], 'idRepresentante' => $idRepresentante];
             }
 			exit(json_encode($resultsArr, JSON_FORCE_OBJECT));
         }
@@ -2942,6 +2964,7 @@ class StudentsController extends AppController
 				201610,
 				201611,
 				201612,
+				
 				201701,
 				201702,
 				201703,
@@ -2954,6 +2977,7 @@ class StudentsController extends AppController
 				201710,
 				201711,
 				201712,
+				
 				201801,
 				201802,
 				201803,
@@ -2966,6 +2990,7 @@ class StudentsController extends AppController
 				201810,
 				201811,
 				201812,
+				
 				201901,
 				201902,
 				201903,
@@ -2978,6 +3003,7 @@ class StudentsController extends AppController
 				201910,
 				201911,
 				201912,
+				
 				202001,
 				202002,
 				202003,
@@ -2990,6 +3016,7 @@ class StudentsController extends AppController
 				202010,
 				202011,
 				202012,
+				
 				202101,
 				202102,
 				202103,
@@ -3002,6 +3029,7 @@ class StudentsController extends AppController
 				202110,
 				202111,
 				202112,
+				
 				202201,
 				202202,
 				202203,
@@ -3014,6 +3042,7 @@ class StudentsController extends AppController
 				202210,
 				202211,
 				202212,
+				
 				202301,
 				202302,
 				202303,
@@ -3026,6 +3055,7 @@ class StudentsController extends AppController
 				202310,
 				202311,
 				202312,
+				
 				202401,
 				202402,
 				202403,
@@ -3038,6 +3068,7 @@ class StudentsController extends AppController
 				202410,
 				202411,
 				202412,
+				
 				202501,
 				202502,
 				202503,
@@ -3049,7 +3080,73 @@ class StudentsController extends AppController
 				202509,
 				202510,
 				202511,
-				202512
+				202512,
+				
+				202601,
+				202602,
+				202603,
+				202604,
+				202605,
+				202606,
+				202607,
+				202608,
+				202609,
+				202610,
+				202611,
+				202612,
+
+				202701,
+				202702,
+				202703,
+				202704,
+				202705,
+				202706,
+				202707,
+				202708,
+				202709,
+				202710,
+				202711,
+				202712,
+
+				202801,
+				202802,
+				202803,
+				202804,
+				202805,
+				202806,
+				202807,
+				202808,
+				202809,
+				202810,
+				202811,
+				202812,
+
+				202901,
+				202902,
+				202903,
+				202904,
+				202905,
+				202906,
+				202907,
+				202908,
+				202909,
+				202910,
+				202911,
+				202912,
+
+				203001,
+				203002,
+				203003,
+				203004,
+				203005,
+				203006,
+				203007,
+				203008,
+				203009,
+				203010,
+				203011,
+				203012,
+
 			];
 				
 		if ($tasaTemporal == 0)
@@ -3562,7 +3659,7 @@ class StudentsController extends AppController
 			
 		$this->set(compact('school', 'defaulters', 'tDefaulters', 'totalDebt', 'currentDate', 'ano', 'mes', 'tipoReporte', 'detalleMorosos', 'totalMoroso'));
 	}
-    public function relatedstudentsPrueba()
+    public function relatedStudentsPrueba()
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
@@ -3985,10 +4082,5 @@ class StudentsController extends AppController
 			->order(['Students.balance' => 'ASC', 'Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
 
 		$this->set(compact('egresados'));
-	}
-	public function pruebaReact()
-	{
-		$this->autoRender = false;
-		echo 'Hola mundo';
 	}
 }

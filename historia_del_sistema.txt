@@ -1,18 +1,44 @@
 Objetivos:
 
 Agenda:
-- Cakephp5 - 08/06/2025:
-	Se conectó la base de datos, pero al hacer la importación en el ambiente dev.colegio por phpmyadmin da error, hacer la importación vía Comandos
-- Seniat - 03/06/2025
-- Inventario - 03/06/2025
-- Pantalla actualización de datos 2025-2026 - 21/05/2025
-- Consulta deuda representante - 21/05/2025
-- Consulta facturas conceptos de inscripción años anteriores - 03/06/2025
-- Reporte de morosidad becados hijos
-- Columnas vector_becas_anteriores, descuentos_anteriores
-- Servicio educativo: Columna servicio_educativo_exonerado
-- Eliminar del menú de Lorelys: Anular Factura
-- En el reporte de cierre, restar las facturas anuladas
+1) Cakephp5 - 08/06/2025:
+	- Se conectó la base de datos y se restauró la base de datos del ambiente de producción - 10-06-2025
+2) Seniat - 08/06/2025
+	- En el ambiente de desarrollo se autorizó en BillsController la acción consultaNotaDebito
+3) Inventario - 08/06/2025
+	- Se subieron al ambiente de producción: Los modelos, las vistas y los controladores.
+	- Todas las tablas están creadas en el ambiente de producción. Falta revisar los campos contra los modelos en la aplicación y agregar el campo estatus_registro
+	- Nota especial: Se crea la tabla clientes y proveedores dependientes de la tabla usuario. Cuando se quiera saber el id del cliente, proveedor, representante, empleado, etc se conecta con la tabla usuarios y la respectiva opción contain de la tabla. 
+4) Consulta facturas conceptos de inscripción años anteriores - 08/06/2025 - Listo para subir al ambiente de producción
+5) Pantalla actualización de datos 2025-2026 - 13/06/2025
+	- Se hicieron los cambios preliminares en la pantalla de inicio
+		- Representantes seleccionados para pruebas
+			- Familia exonerada de diferencias de inscripción: Ruiz Aguilar, id_parentsanduardian: 750, id_usuario: 731, 731, cédula: 16153897
+			- Familia que no ha pagado la diferencia de inscripción: AMOLDONI AMEZQUETA rodrigo 3er. año, id_estudiante: 598 , id_parentsanduardian: 393, id_usuario: 388, cédula: 12107803
+			{"2023":{"imagen_firma":"649ade6678512.png","usuario":"12107803","ip":"190.120.253.162, 190.120.253.162","fecha_hora":"2023-06-27T09:04:38-04:00"},"2024":{"imagen_firma":"6675ba319db7a.png","usuario":"12107803","ip":"190.120.253.164, 190.120.253.164","fecha_hora":"2024-06-21T13:36:49-04:00"}}
+			- Familia que ha pagado la diferencia: Familia Mendoza Ramírez, Id ParentsandGuardian 35, id User 38, Cédula 17067450  
+	- Módulos modificados
+		- /opt/lampp/htdocs/sistemasangabriel/src/Controller/GuardiantransactionsController.php - Ok
+		- /opt/lampp/htdocs/sistemasangabriel/src/Controller/StudentsController.php - Ok
+		- /opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php - Ok
+		- /opt/lampp/htdocs/sistemasangabriel/src/Template/Rates/add_dollar.ctp - OK
+		- /opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/home_screen.ctp - Ok
+		- /opt/lampp/htdocs/sistemasangabriel/src/Template/Students/filepdf.ctp - Ok
+	- Se iniciaron los cambios en la ficha de inscripción
+6) Servicio educativo: Columna servicio_educativo_exonerado - 09/06/2025
+	- Estudiante de referencia para las pruebas: Morales Mayaudon 
+7) Consulta deuda representante - Diferencias trabajadores - Separar los conceptos de inscripción - 15/06/2025
+	Módulos modificados:
+	- /opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+	- /opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/consulta_deuda_representante.ctp
+8) Columnas vector_becas_anteriores, descuentos_anteriores -> Urgente antes de que comience el proceso de inscripción
+9) En el reporte de cierre, crear una nota de anulación de pedido, similar a la nota de crédito que se usa para reversar una factura. Pero no se va a imprimir. En el reporte de cierre al igual que el cuadro resumen aparecera el pedido y luego en otra fila "Menos notas de anulación de pedido" - 11/06/2025
+	- Se creó el controlador, entidad, tabla y vista: NotaAnulacionPedidos
+10) En el cuadro resumen en la columna de depósitos: cuando es pago por punto de ventas los cuatro últimos números de la tarjeta 11/06/2025
+	- Debo cargar los últimos números de la tarjeta en el vector $vectorPagos
+11) Al iniciar el proceso de inscripción en junio de cada año, a los alumnos regulares se les muestra el contrato del año que está terminando y debería ser el contrato del año que va a iniciar. Se forzó provisionalmente el año 2025
+12) Verificar en los alumnos nuevos si se inicia un ciclo sin final firmar contrato - actualizar datos
+13) A los hijos de los trabajadores del colegio exonerar el pago de la diferencia de inscripción
 
 cd /media/angelomarsanz/Mis\ documentos/Colegio\ San\ Gabriel/vite
 
@@ -22,6 +48,11 @@ Pendientes:
 Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no fiscal
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
+
+16/06/2025
+Alumno nuevo, Acosta Reverón Paula Nohemí, id_estudiante: 2073, id_representante: 1444, id_user: 1419, cédula: 19476317
+Alumno regular, Ruiz Angel, para 4to. Año, id_estudiante: 1120, id_representante: 750, id_usuario: 731, cédula: 16153897 
+{"2023":{"imagen_firma":"6666ef4fa09a4.png","usuario":"16153897","ip":"190.120.254.173, 190.120.254.173","fecha_hora":"2024-06-10T08:19:27-04:00"},"2024":{"imagen_firma":"666edcb96ba25.png","usuario":"16153897","ip":"190.120.254.138, 190.120.254.138","fecha_hora":"2024-06-16T08:38:17-04:00"}}
 
 03/06/2025
 Inventario
@@ -56,6 +87,8 @@ Pruebas con la familia Mendoza Ramírez
 Id ParentsandGuardian 35, id User 38, Cédula 17067450
 Familia Abreu Carmona
 id Representante 1172, id usuario 1146, cédula 14392238
+Familia SITZWOHL TOVAR
+id_representante: 1074, id_usuario: 1044, cédula 11685127
 
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
 /opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/consulta_deuda_representante.ctp

@@ -152,17 +152,39 @@ class GuardiantransactionsController extends AppController
     }
     public function homeScreen()
     {
-        $lastRecord = $this->Guardiantransactions->Parentsandguardians->find('all', ['conditions' => ['user_id' => $this->Auth->user('id')], 'order' => ['Parentsandguardians.created' => 'DESC'] ]);
-                
-        $row = $lastRecord->first();
+        $this->loadModel('Schools');
+        $school = $this->Schools->get(2);
+        $anioInicioPeriodoActual = $school->current_school_year;
+        $indicadorExoneradoDiferenciasInscripcion = 'No';
+        $indicadorDeudaInscripcion = 'No';
 
-        $idParentsAndGuardian = $row['id'];
+        $representantes = $this->Guardiantransactions->Parentsandguardians->find('all', 
+            [
+                'conditions' => 
+                    [
+                        'Parentsandguardians.user_id' => $this->Auth->user('id'),
+                    ], 
+                'order' => ['Parentsandguardians.created' => 'DESC'] 
+            ]);
+                
+        $representante = $representantes->first();
+
+        $idParentsAndGuardian = $representante->id;
+
+        $controladorTransaccionesEstudiantes = new StudenttransactionsController();
+
+        $respuestaBuscarDeudasInscripcion = $controladorTransaccionesEstudiantes->buscarDeudasInscripcion($representante, $anioInicioPeriodoActual);
+
+        $indicadorExoneradoDiferenciasInscripcion = $respuestaBuscarDeudasInscripcion['indicadorExoneradoDiferenciasInscripcion'];
+        $indicadorDeudaInscripcion = $respuestaBuscarDeudasInscripcion['indicadorDeudaInscripcion'];
+ 
         /* Activar esta línea cuando se desea ocultar temporalmente al representante la información de los conceptos de inscripción
         return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'edit', $idParentsAndGuardian, 'Parentsandguardi
         ans', 'profilePhoto']);
         */
-        $this->set(compact('idParentsAndGuardian'));
-        $this->set('_serialize', ['idParentsAndGuardian']);
+
+        $this->set(compact('idParentsAndGuardian', 'indicadorExoneradoDiferenciasInscripcion', 'indicadorDeudaInscripcion'));
+        $this->set('_serialize', ['idParentsAndGuardian', 'indicadorExoneradoDiferenciasInscripcion', 'indicadorDeudaInscripcion']);
     }
     public function monetaryReconversion()
     {				
@@ -332,6 +354,10 @@ class GuardiantransactionsController extends AppController
                 }
             }
         }
+        /* 
+        Se forza 2025 para el caso de los alumnos regulares que no han actualizado los datos y al no actualizar los datos no se generan las transacciones correspondientes al período 2025. Se debe idear una lógica para estos casos
+        */
+        $anioFirmarContrato = 2025; 
         $verificacionFirmarContrato = 
             [
                 'indicadorFirmarContrato' => $indicadorFirmarContrato,

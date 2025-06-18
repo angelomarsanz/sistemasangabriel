@@ -70,7 +70,7 @@ class BillsController extends AppController
 			// Inicio cambios Seniat
 			elseif ($user['role'] === 'Seniat')
 			{
-				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion']))
+				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito']))
 				{
 					return true;
 				}				
@@ -663,6 +663,10 @@ class BillsController extends AppController
 		$facturaOtroCajero = 0;
 
 		$montoReintegro = 0;
+
+		$periodoEscolarFactura = '';
+
+		$conceptoInscripcion = '';
 		
 		if (isset($origen))
 		{
@@ -741,6 +745,8 @@ class BillsController extends AppController
 			]);
 					    
         $bill = $lastRecord->first();
+
+		$periodoEscolarFactura = substr($bill->school_year, 13);
 		
 		if (isset($origen))
 		{
@@ -858,6 +864,7 @@ class BillsController extends AppController
 		$montoVueltoCompra = 0;		
         $previousAcccountingCode = " ";
 		$indicadorAnticipo = 0;
+		$conceptoInscripcion = '';
  
         $loadIndicator = 0;
 		
@@ -907,34 +914,7 @@ class BillsController extends AppController
 				}
 				elseif (substr($aConcept->concept, 0, 10) == "Matrícula")
 				{	
-					if ($aConcept->concept == 'Matrícula '.$anteriorAnoInscripcion)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$anteriorAnoInscripcion.' - '.$actualAnoInscripcion;
-					}
-					elseif ($aConcept->concept == 'Matrícula '.$actualAnoInscripcion)
-					{
-						if ($aConcept->observation == 'Diferencia')
-						{
-							$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-					}
-					elseif ($aConcept->concept == 'Matrícula '.$proximoAnoInscripcion)
-					{
-						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
-					}
-					if ($aConcept->id == 99425 || $aConcept->id == 98166  || $aConcept->id == 98168)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula 2022 - 2023';
-					}
-					if ($aConcept->id == 99427 || $aConcept->id ==  98170 || $aConcept->id == 98172)
-					{
-						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula 2023 - 2024';
-					}
-					
+					$invoiceLine = $this->generarConceptosInscripcion($periodoEscolarFactura, $aConcept, 'Matrícula');
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -945,34 +925,7 @@ class BillsController extends AppController
 				}
 				elseif (substr($aConcept->concept, 0, 3) == "Ago")
 				{	
-					if ($aConcept->concept == 'Ago '.$actualAnoInscripcion)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia Ago '.$anteriorAnoInscripcion.' - '.$actualAnoInscripcion;
-					}
-					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion)
-					{
-						if ($aConcept->observation == 'Diferencia')
-						{
-							$invoiceLine = $aConcept->student_name.' - Diferencia Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name.' - Abono Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-					}
-					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion2)
-					{
-						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
-					}
-					if ($aConcept->id == 99426 || $aConcept->id == 98167 || $aConcept->id == 98169)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia Ago 2022 - 2023';
-					}
-					if ($aConcept->id == 99428 || $aConcept->id == 98171 || $aConcept->id == 98173)
-					{
-						$invoiceLine = $aConcept->student_name.' - Abono Ago 2023 - 2024';
-					}
-
+					$invoiceLine = $this->generarConceptosInscripcion($periodoEscolarFactura, $aConcept, 'Agosto');
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -1129,34 +1082,7 @@ class BillsController extends AppController
 						$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
 						$loadIndicator = 1;
 					}
-					if ($aConcept->concept == 'Matrícula '.$anteriorAnoInscripcion)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$anteriorAnoInscripcion.' - '.$actualAnoInscripcion;
-					}
-					elseif ($aConcept->concept == 'Matrícula '.$actualAnoInscripcion)
-					{
-						if ($aConcept->observation == 'Diferencia')
-						{
-							$invoiceLine = $aConcept->student_name.' - Diferencia matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-					}
-					elseif ($aConcept->concept == 'Matrícula '.$proximoAnoInscripcion)
-					{
-						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
-					}
-					if ($aConcept->id == 99425 || $aConcept->id == 98166  || $aConcept->id == 98168)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia matrícula 2022 - 2023';
-					}
-					if ($aConcept->id == 99427 || $aConcept->id ==  98170 || $aConcept->id == 98172)
-					{
-						$invoiceLine = $aConcept->student_name.' - Anticipo matrícula 2023 - 2024';
-					}
-
+					$invoiceLine = $this->generarConceptosInscripcion($periodoEscolarFactura, $aConcept, 'Matrícula');
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;
@@ -1172,33 +1098,7 @@ class BillsController extends AppController
 						$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
 						$loadIndicator = 1;
 					}
-					if ($aConcept->concept == 'Ago '.$actualAnoInscripcion)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia Ago '.$anteriorAnoInscripcion.' - '.$actualAnoInscripcion;
-					}
-					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion)
-					{
-						if ($aConcept->observation == 'Diferencia')
-						{
-							$invoiceLine = $aConcept->student_name.' - Diferencia Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-						else
-						{
-							$invoiceLine = $aConcept->student_name.' - Abono Ago '.$actualAnoInscripcion.' - '.$proximoAnoInscripcion;
-						}
-					}
-					elseif ($aConcept->concept == 'Ago '.$proximoAnoInscripcion2)
-					{
-						$invoiceLine = $aConcept->student_name.' - Abono Ago '.$proximoAnoInscripcion.' - '.$proximoAnoInscripcion2;
-					}
-					if ($aConcept->id == 99426 || $aConcept->id == 98167 || $aConcept->id == 98169)
-					{
-						$invoiceLine = $aConcept->student_name.' - Diferencia Ago 2022 - 2023';
-					}
-					if ($aConcept->id == 99428 || $aConcept->id == 98171 || $aConcept->id == 98173)
-					{
-						$invoiceLine = $aConcept->student_name.' - Abono Ago 2023 - 2024';
-					}
+					$invoiceLine = $this->generarConceptosInscripcion($periodoEscolarFactura, $aConcept, 'Agosto');
 
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
@@ -1334,8 +1234,9 @@ class BillsController extends AppController
 		
 		$vista = "invoice";
 					
-        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school'));
-        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school']);
+        $this->set(compact('bill', 'vConcepts', 'aPayments', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school', 'periodoEscolarFactura'));
+
+        $this->set('_serialize', ['bill', 'vConcepts', 'aPayments', 'invoiceLineReceipt', 'studentReceipt', 'accountService', 'billId', 'vista', 'numeroControl', 'indicadorImpresa', 'usuarioResponsable', 'inicialesUsuarioResponsable', 'reimpresion', 'indicadorAnticipo', 'numeroFacturaAfectada', 'controlFacturaAfectada', 'idParentsandguardian', 'mensajeUsuario', 'indicadorSobrante', 'montoSobrante', 'indicadorReintegro', 'montoReintegro', 'indicadorCompra', 'montoCompra', 'indicadorVueltoCompra', 'montoVueltoCompra', 'monedaDocumento', 'school', 'periodoEscolarFactura']);
 	}
 	
 	public function invoicepdf()
@@ -3770,5 +3671,66 @@ class BillsController extends AppController
 		$vector_efectivos[] = ["origen" => "Pedidos", "moneda" => "euro", "orden" => "3", "monto" => $disponible_euro_no_fiscal];
 
 		return $vector_efectivos;
+	}
+	public function generarConceptosInscripcion($periodoEscolarFactura = null, $aConcept = null, $tipoConcepto = null)
+	{
+		$anioInicioPeriodoActualFactura = substr($periodoEscolarFactura, 0, 4);
+		$anioInicioPeriodoAnteriorFactura = $anioInicioPeriodoActualFactura - 1;
+
+		$anioFinPeriodoActualFactura = substr($periodoEscolarFactura, 5, 4);
+		$anioFinPeriodoAnteriorFactura = $anioFinPeriodoActualFactura - 1;
+		$conceptoInscripcion = '';
+		
+		if ($tipoConcepto == 'Matrícula')
+		{
+			if ($aConcept->concept == 'Matrícula '.$anioInicioPeriodoActualFactura)
+			{
+				if ($anioInicioPeriodoActual >= 2024)
+				{
+					if ($aConcept->observation == 'Diferencia')
+					{
+						$conceptoInscripcion = $aConcept->student_name.' - Diferencia matrícula '.$periodoEscolarFactura;
+					}
+					else
+					{
+						$conceptoInscripcion = $aConcept->student_name.' - Anticipo matrícula '.$periodoEscolarFactura;
+					} 
+				}
+				else
+				{
+					$conceptoInscripcion = $aConcept->student_name.' - Anticipo matrícula '.$periodoEscolarFactura;
+				}
+			}
+			elseif ($aConcept->concept == 'Matrícula '.$anioInicioPeriodoAnteriorFactura)
+			{	
+				$conceptoInscripcion = $aConcept->student_name.' - Diferencia matrícula '.$anioInicioPeriodoAnteriorFactura.'-'.$anioFinPeriodoAnteriorFactura;
+			}
+		}
+		elseif ($tipoConcepto == 'Agosto')
+		{
+			if ($aConcept->concept == 'Ago '.$anioFinPeriodoActualFactura)
+			{
+				if ($anioInicioPeriodoActual >= 2024)
+				{
+					if ($aConcept->observation == 'Diferencia')
+					{
+						$conceptoInscripcion = $aConcept->student_name.' - Diferencia agosto '.$periodoEscolarFactura;
+					}
+					else
+					{
+						$conceptoInscripcion = $aConcept->student_name.' - Anticipo agosto '.$periodoEscolarFactura;
+					} 
+				}
+				else
+				{
+					$conceptoInscripcion = $aConcept->student_name.' - Anticipo agosto '.$periodoEscolarFactura;
+				}
+			}
+			elseif ($aConcept->concept == 'Ago '.$anioFinPeriodoAnteriorFactura)
+			{	
+				$conceptoInscripcion = $aConcept->student_name.' - Diferencia agosto '.$anioInicioPeriodoAnteriorFactura.'-'.$anioFinPeriodoAnteriorFactura;
+			}
+		}
+		return $conceptoInscripcion;
 	}
 }

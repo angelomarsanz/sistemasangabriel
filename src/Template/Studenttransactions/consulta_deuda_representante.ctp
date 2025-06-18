@@ -102,33 +102,68 @@ foreach ($vectorEstudiantes as $indiceEstudiante => $estudiante)
         $finPeriodoEscolarDetalle = $indiceAnio + 1; ?>
         <div id="<?= 'cuotas-'.$indiceEstudiante.'-'.$indiceAnio ?>" class='row noVerEnPantalla noVerImpreso'>
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <h5>Detalle de las cuotas del período escolar <?= $inicioPeriodoEscolarDetalle.'-'.$finPeriodoEscolarDetalle ?></h5>
                 <?php
                 if ($rolUsuario == 'Representante')
                 { ?>
+                    <h4>Inscripción <?= $inicioPeriodoEscolarDetalle.'-'.$finPeriodoEscolarDetalle ?></h4>
                     <div class="flex-container">
                         <?php
                         foreach ($anio['cuotas_anio_escolar'] as $indiceCuota => $cuota)
                         { 
-                            $idCuota = 'cuota-'.$cuota['id'];
-                            $nombreCuota = 'cuota_'.$cuota['id']; 
-                            $indicadorCuotaNoVencida = $cuota['indicadorCuotaNoVencida']; ?>
-                            <div>
-                                <?php
-                                    if ($indicadorCuotaNoVencida == 0)
-                                    { ?>
-                                        <label for="<?= $idCuota ?>"><?= $cuota['cuota'] ?></label>
-                                        <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                            if ($cuota['tipoCuota'] == 'Anticipo matrícula' || $cuota['tipoCuota'] == 'Diferencia matrícula' || 
+                                $cuota['tipoCuota'] == 'Abono agosto' || $cuota['tipoCuota'] == 'Diferencia agosto')
+                            {
+                                $idCuota = 'cuota-'.$cuota['id'];
+                                $nombreCuota = 'cuota_'.$cuota['id']; 
+                                $indicadorCuotaVencida = $cuota['indicadorCuotaVencida']; ?>
+                                <div>
                                     <?php
-                                    }
-                                    else 
-                                    { ?>
-                                        <label for="<?= $idCuota ?>" style='color: #a4a4c1;' ><?= $cuota['cuota'] ?></label>
-                                        <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" style='color: #a4a4c1;' value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
-                                    <?php
-                                    } ?>
-                            </div>
+                                        if ($indicadorCuotaVencida == 1)
+                                        { ?>
+                                            <label for="<?= $idCuota ?>"><?= $cuota['cuota'] ?></label>
+                                            <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                                        <?php
+                                        }
+                                        else 
+                                        { ?>
+                                            <label for="<?= $idCuota ?>" style='color: #a4a4c1;' ><?= $cuota['cuota'] ?></label>
+                                            <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" style='color: #a4a4c1;' value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                                        <?php
+                                        } ?>
+                                </div>
+                            <?php
+                            }
+                        } ?> 
+                    </div>
+                    <hr />
+                    <h4>Detalle de las cuotas del período escolar <?= $inicioPeriodoEscolarDetalle.'-'.$finPeriodoEscolarDetalle.' (Mensualidad)' ?></h4>
+                    <div class="flex-container">
                         <?php
+                        foreach ($anio['cuotas_anio_escolar'] as $indiceCuota => $cuota)
+                        { 
+                            if ($cuota['tipoCuota'] != 'Anticipo matrícula' && $cuota['tipoCuota'] != 'Diferencia matrícula' && 
+                            $cuota['tipoCuota'] != 'Abono agosto' && $cuota['tipoCuota'] != 'Diferencia agosto')
+                            {
+                                $idCuota = 'cuota-'.$cuota['id'];
+                                $nombreCuota = 'cuota_'.$cuota['id']; 
+                                $indicadorCuotaVencida = $cuota['indicadorCuotaVencida']; ?>
+                                <div>
+                                    <?php
+                                        if ($indicadorCuotaVencida == 1)
+                                        { ?>
+                                            <label for="<?= $idCuota ?>"><?= $cuota['cuota'] ?></label>
+                                            <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                                        <?php
+                                        }
+                                        else 
+                                        { ?>
+                                            <label for="<?= $idCuota ?>" style='color: #a4a4c1;' ><?= $cuota['cuota'] ?></label>
+                                            <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" style='color: #a4a4c1;' value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                                        <?php
+                                        } ?>
+                                </div>
+                            <?php
+                            }
                         } ?> 
                     </div>
                 <?php

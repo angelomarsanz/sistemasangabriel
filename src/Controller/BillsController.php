@@ -70,7 +70,7 @@ class BillsController extends AppController
 			// Inicio cambios Seniat
 			elseif ($user['role'] === 'Seniat')
 			{
-				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito']))
+				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito']))
 				{
 					return true;
 				}				
@@ -3685,7 +3685,7 @@ class BillsController extends AppController
 		{
 			if ($aConcept->concept == 'Matrícula '.$anioInicioPeriodoActualFactura)
 			{
-				if ($anioInicioPeriodoActual >= 2024)
+				if ($anioInicioPeriodoActualFactura >= 2024)
 				{
 					if ($aConcept->observation == 'Diferencia')
 					{
@@ -3710,7 +3710,7 @@ class BillsController extends AppController
 		{
 			if ($aConcept->concept == 'Ago '.$anioFinPeriodoActualFactura)
 			{
-				if ($anioInicioPeriodoActual >= 2024)
+				if ($anioInicioPeriodoActualFactura >= 2024)
 				{
 					if ($aConcept->observation == 'Diferencia')
 					{
@@ -3718,12 +3718,12 @@ class BillsController extends AppController
 					}
 					else
 					{
-						$conceptoInscripcion = $aConcept->student_name.' - Anticipo agosto '.$periodoEscolarFactura;
+						$conceptoInscripcion = $aConcept->student_name.' - Abono agosto '.$periodoEscolarFactura;
 					} 
 				}
 				else
 				{
-					$conceptoInscripcion = $aConcept->student_name.' - Anticipo agosto '.$periodoEscolarFactura;
+					$conceptoInscripcion = $aConcept->student_name.' - Abono agosto '.$periodoEscolarFactura;
 				}
 			}
 			elseif ($aConcept->concept == 'Ago '.$anioFinPeriodoAnteriorFactura)

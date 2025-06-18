@@ -15,12 +15,28 @@
 			<p>3) <b>Diferencia de matrícula y diferencia agosto:</b> si existe un aumento de mensualidad dentro del año escolar se aplica la diferencia en la inscripción.</p>
 			<p>4) <b>Es obligatorio la actualización de datos, la firma digital del contrato de prestación de servicios y la descarga de la planilla.</b></p>
 			<p>5) Para realizar la inscripción de los alumnos regulares en el período escolar 2025-2026 el pago a realizar es:</p>
-			<!-- <p>- Diferencia de Matrícula 2023 - 2024 = 70 $</p> -->
-			<!-- <p>- Diferencia de Agosto 2023 - 2024 = 70 $</p> -->
-			<p>- Anticipo de Matrícula 2025 – 2026 = 220 $</p>
+			<?php
+			if ($indicadorDeudaInscripcion == 1)
+			{ ?>
+				<p>- Diferencia de Matrícula 2024 - 2025 = 30 $</p> 
+				<p>- Diferencia de Agosto 2024 - 2025 = 20 $</p> 
+			<?php
+			} ?>
+			<p>- Anticipo de Matrícula 2025 - 2026 = 220 $</p>
 			<p>- Abono a Agosto 2025 - 2026 = 220 $</p>
-			<p>- Seguro escolar 2025 - 2026 = $ <b>(Pago único en dólares en efectivo)</b></p>
-			<p><b>- Total a cancelar $</b></p>
+			<p>- Seguro escolar 2025 - 2026 = 25$ <b>(Pago único en dólares en efectivo)</b></p>
+			<?php
+			if ($indicadorDeudaInscripcion == 1)
+			{ ?>
+				<p><b>- Total a cancelar 515 $</b></p>
+			<?php
+			}
+			else
+			{ ?>
+				<p><b>- Total a cancelar $ 465</b></p>
+			<?php
+			} 
+			?>
 			<?= $this->Html->link('Continuar', ['controller' => 'Parentsandguardians', 'action' => 'edit', $idParentsAndGuardian, 'Parentsandguardians', 'profilePhoto'], ['class' => 'btn btn-success']); ?>
 		</div>
     </div>

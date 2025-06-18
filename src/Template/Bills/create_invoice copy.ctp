@@ -7,6 +7,12 @@
 	endif;
 	$anoEscolarAnterior = $anoEscolarActual - 1;
 	$proximoAnoEscolar = $anoEscolarActual + 1;
+	// Inicio cambios Seniat
+	$tipo_usuario = 0;
+	if ($current_user['role'] == 'Seniat' || $current_user['role'] == 'Ventas fiscales' || $current_user['role'] == 'Contabilidad fiscal' ):
+		$tipo_usuario = 1;
+	endif;
+	// Fin cambios Seniat
 ?>
 <style>
 @media screen
@@ -794,6 +800,7 @@
 	var observacionTransaccion = '';
 	var ordenGrado = 0;
 	var aCobrarRetencion = 0;
+	var tipoUsuario = <?= $tipo_usuario ?>;
 	
 // Funciones Javascript
 
@@ -2617,15 +2624,16 @@
 
 	function descuentoProntoPago(anio_mes_transaccion) // Descuento pronto pago
 	{
-		let descuentos_pronto_pago = 
+		var descuentos_pronto_pago = 
 			{
+				"202208" : 0.00,
 				"202308" : 5.00,
-				"202408" : 10.00
+				"202508" : 10.00
 			};
 
+		var monto_descuento_pronto_pago = 0;
 		for (var anio_mes_descuento in descuentos_pronto_pago) 
 		{
-			let monto_descuento_pronto_pago = 0;
 			if (anio_mes_transaccion <= anio_mes_descuento)
 			{
 				monto_descuento_pronto_pago = descuentos_pronto_pago[anio_mes_descuento];
@@ -2766,7 +2774,7 @@
 				}
 			}
 
-			if (indicadorConsejoEducativo == 0)
+			if (indicadorConsejoEducativo == 0 && tipoUsuario == 0)
 			{
 				let factura_fiscal = $('<p style="background-color: #a9e0ff; color: red;">¿ Factura fiscal ?</p>').dialog(
 				{
@@ -3874,7 +3882,7 @@
 			}
 			else if (deudaMenosPagado > 0)
 			{
-				alert('Estimado usuario debe registrar más pagos para completar el total de la factura/recibo u hacer un ajuste');
+				alert('Estimado usuario debe registrar más pagos para completar el total de la factura o hacer un ajuste');
 				return false;
 			}
             else if (deudaMenosPagado < 0)

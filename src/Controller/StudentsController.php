@@ -1069,8 +1069,6 @@ class StudentsController extends AppController
             ->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
 
         $this->set('students', $this->paginate($query));
-
-        $this->set(compact('students'));
         $this->set('_serialize', ['students']);
     }
     public function studentScholarship($studentId = null, $parentId = null)
@@ -1736,6 +1734,10 @@ class StudentsController extends AppController
         $student = $this->Students->get($id);
 		
 		$indicadorDescarga = 0;
+
+		$anioInicioPeriodoActual = $school->current_school_year;
+        $indicadorExoneradoDiferenciasInscripcion = 'No';
+        $indicadorDeudaInscripcion = 'No';
 		
 		if ($student->profile_photo != "" && $student->profile_photo != " " && $student->profile_photo != "Sin foto")
 		{
@@ -1779,6 +1781,11 @@ class StudentsController extends AppController
 			endif;
 			
 			$parentsandguardian = $this->Students->Parentsandguardians->get($student->parentsandguardian_id);
+
+			$controladorTransaccionesEstudiantes = new StudenttransactionsController();
+			$respuestaBuscarDeudasInscripcion = $controladorTransaccionesEstudiantes->buscarDeudasInscripcion($parentsandguardian, $anioInicioPeriodoActual);
+			$indicadorExoneradoDiferenciasInscripcion = $respuestaBuscarDeudasInscripcion['indicadorExoneradoDiferenciasInscripcion'];
+			$indicadorDeudaInscripcion = $respuestaBuscarDeudasInscripcion['indicadorDeudaInscripcion'];
 		}
 		else
 		{
@@ -1793,8 +1800,8 @@ class StudentsController extends AppController
 				return $this->redirect(['controller' => 'Students', 'action' => 'index']);
 			}
 		}
-		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate', 'ultimoAnoInscripcion', 'controlador', 'accion'));
-		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate', 'ultimoAnoInscripcion', 'controlador', 'accion']);
+		$this->set(compact('student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate', 'ultimoAnoInscripcion', 'controlador', 'accion', 'indicadorExoneradoDiferenciasInscripcion', 'indicadorDeudaInscripcion'));
+		$this->set('_serialize', ['student', 'brothersPdf', 'parentsandguardian', 'currentYearRegistration', 'currentDate', 'ultimoAnoInscripcion', 'controlador', 'accion', 'indicadorExoneradoDiferenciasInscripcion', 'indicadorDeudaInscripcion']);
     }
     
     public function cardboardpdf($id = null)

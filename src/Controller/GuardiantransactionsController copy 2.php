@@ -152,17 +152,69 @@ class GuardiantransactionsController extends AppController
     }
     public function homeScreen()
     {
-        $lastRecord = $this->Guardiantransactions->Parentsandguardians->find('all', ['conditions' => ['user_id' => $this->Auth->user('id')], 'order' => ['Parentsandguardians.created' => 'DESC'] ]);
-                
-        $row = $lastRecord->first();
+        $this->loadModel('Schools');
+        $school = $this->Schools->get(2);
+        $anioInicioPeriodoActual = $school->current_school_year;
+        $indicadorExoneradoDiferenciasInscripcion = 'No';
+        $indicadorDeudaInscripcion = 'No';
 
-        $idParentsAndGuardian = $row['id'];
+        $representantes = $this->Guardiantransactions->Parentsandguardians->find('all', 
+            [
+                'conditions' => 
+                    [
+                        'Parentsandguardians.user_id' => $this->Auth->user('id'),
+                    ], 
+                'order' => ['Parentsandguardians.created' => 'DESC'] 
+            ]);
+                
+        $representante = $representantes->first();
+
+        $idParentsAndGuardian = $representante->id;
+
+        $controladorTransaccionesEstudiantes = new StudenttransactionsController();
+
+        $this->loadModel('Studenttransactions');
+		$transacciones = $this->Studenttransactions->find('all')
+        ->contain(['Students'])
+        ->where(
+            [
+                'Studenttransactions.ano_escolar' => $anioInicioPeriodoActual,
+                'Studenttransactions.amount_dollar >' => 0,
+                'Students.parentsandguardian_id' => $idParentsAndGuardian,
+                'Students.student_condition' => 'Regular',
+                'Students.balance' => $anioInicioPeriodoActual
+            ]);		
+
+        foreach ($transacciones as $indiceTransaccion => $transaccion)
+        {
+            $indicadorProcesarTransaccion = 0;
+            if ($transaccion->transaction_type == 'Matrícula')
+            {
+                $indicadorProcesarTransaccion = 1;
+            }
+            elseif ($transaccion->transaction_type == 'Mensualidad' && substr($transaccion->transaction_description, 0, 3) == "Ago")
+            {
+                $indicadorProcesarTransaccion = 1;
+            }
+            if ($indicadorProcesarTransaccion == 1)
+            {
+                $respuestaProcesarMatriculaAgosto = $controladorTransaccionesEstudiantes->procesarMatriculaAgosto($transaccion, $representante->user_id); 
+                $indicadorExoneradoDiferenciasInscripcion = $respuestaProcesarMatriculaAgosto['indicadorExoneradoDiferenciasInscripcion'];
+                $indicadorDeudaInscripcion = $respuestaProcesarMatriculaAgosto['indicadorDeudaInscripcion'];
+                if ($indicadorDeudaInscripcion == 'Sí')
+                {
+                    break;
+                }
+            }
+        }
+ 
         /* Activar esta línea cuando se desea ocultar temporalmente al representante la información de los conceptos de inscripción
         return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'edit', $idParentsAndGuardian, 'Parentsandguardi
         ans', 'profilePhoto']);
         */
-        $this->set(compact('idParentsAndGuardian'));
-        $this->set('_serialize', ['idParentsAndGuardian']);
+
+        $this->set(compact('idParentsAndGuardian', 'indicadorExoneradoDiferenciasInscripcion', 'indicadorDeudaInscripcion'));
+        $this->set('_serialize', ['idParentsAndGuardian', 'indicadorExoneradoDiferenciasInscripcion', 'indicadorDeudaInscripcion']);
     }
     public function monetaryReconversion()
     {				
@@ -198,52 +250,61 @@ class GuardiantransactionsController extends AppController
 		return $this->redirect(['controller' => 'Users', 'action' => 'logout']);
 	}
 
-    public function previoContratoRepresentante($idRepresentante = null, $controlador = null, $accion = null)
+    public function previoContratoRepresentante($idRepresentante = null, $controlador = null, $accion = null, $anioFirmarContrato = null)
     {
         $this->loadModel('Parentsandguardians');
-        $anioContrato = 0;
 
         $representante = $this->Parentsandguardians->get($idRepresentante, [
             'contain' => ['Students']
         ]);
 
-        $indicadorContrato = $this->indicadorContrato($idRepresentante);
+        $indicadorFirmarContrato = 0;
+        $indicadorContratoFirmado = 0;
+        $anioContratoFirmado = 0;
+        $imagenFirma = '';
 
-        if ($controlador == null && $accion == null)
+        if ($controlador == "Users" && $accion == "home")
         {
-            if ($representante->datos_contrato != null)
+            $this->Flash->success(__('Por favor lea detenidamente el presente contrato y si está de acuerdo proceda a firmarlo'));
+        }
+        else
+        {
+            $verificacionFirmarContrato = $this->verificacionFirmarContrato($idRepresentante);
+            $indicadorFirmarContrato = $verificacionFirmarContrato['indicadorFirmarContrato'];
+            $anioFirmarContrato = $verificacionFirmarContrato['anioFirmarContrato'];
+
+            if ($representante->vector_contratos != null)
             {
-                return $this->redirect(['controller' => 'Students', 'action' => 'index']);
+                $verificacionContratoFirmado = $this->verificacionContratoFirmado($representante);
+                $indicadorContratoFirmado = $verificacionContratoFirmado['indicadorContratoFirmado'];
+                $anioContratoFirmado = $verificacionContratoFirmado['anioContratoFirmado'];
+                $imagenFirma = $verificacionContratoFirmado['imagenFirma'];
             }
-            else
+
+            if ($controlador == null && $accion == null)
             {
-                if ($indicadorContrato == 1)
+                if ($anioFirmarContrato > $anioContratoFirmado)
                 {
                     $this->Flash->success(__('Por favor lea detenidamente el presente contrato y si está de acuerdo proceda a firmarlo'));
                 }
                 else
                 {
                     return $this->redirect(['controller' => 'Students', 'action' => 'index']);
-                }
+                } 
+            }
+            else
+            {
+                if ($indicadorContratoFirmado == 0)
+                {
+                    $this->Flash->error(__('El contrato no ha sido firmado aún'));
+                    return $this->redirect(['controller' => $controlador, 'action' => $accion]);
+                }            
             }
         }
-        elseif ($controlador == "Users" && $accion == "home")
-        {
-            $this->Flash->success(__('Por favor lea detenidamente el presente contrato y si está de acuerdo proceda a firmarlo'));
-        }
-        else
-        {
-            if ($representante->datos_contrato == null)
-            {
-                $this->Flash->error(__('El contrato no ha sido firmado aún'));
-                return $this->redirect(['controller' => $controlador, 'action' => $accion]);
-            }            
-        }
-        
-        $this->set(compact('representante', 'controlador', 'accion'));
+        $this->set(compact('representante', 'controlador', 'accion', 'indicadorFirmarContrato', 'anioFirmarContrato', 'indicadorContratoFirmado', 'anioContratoFirmado', 'imagenFirma'));
     }
 
-    public function firmaContratoRepresentante($idRepresentante = null)
+    public function firmaContratoRepresentante($idRepresentante = null, $anioFirmarContrato = null)
     {
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
@@ -256,28 +317,36 @@ class GuardiantransactionsController extends AppController
             'contain' => ['Students']
         ]);
 
+        $vector_contratos = [];
+
 		if ($this->request->is('post')) 
         {
+            $anioFirmarContrato = $_POST['anio_firmar_contrato'];
             $img = $_POST['base64'];
             $img = str_replace('data:image/png;base64,', '', $img);
             $fileData = base64_decode($img);
             $fileName = uniqid().'.png';
 
-            file_put_contents(WWW_ROOT."files/contratos/".$fileName, $fileData);
+            file_put_contents(WWW_ROOT."files/contratos/".$anioFirmarContrato.'/'.$fileName, $fileData);
 
-            $datos_contrato = 
-			[
-				"imagen_firma" => $fileName,
-				"usuario" => $this->Auth->user('username'),
-				"ip" => $_POST["ip_cliente"],
-                "fecha_hora" => $fecha_hora_actual
-			];
+            if ($representante->vector_contratos != null)
+            {
+                $vector_contratos = json_decode($representante->vector_contratos, true);
+            }
+            
+            $vector_contratos[$anioFirmarContrato] = 
+                [
+                    "imagen_firma" => $fileName,
+                    "usuario" => $this->Auth->user('username'),
+                    "ip" => $_POST["ip_cliente"],
+                    "fecha_hora" => $fecha_hora_actual
+                ];            
 
-		    $representante->datos_contrato = json_encode($datos_contrato);
+		    $representante->vector_contratos = json_encode($vector_contratos);
 
             if ($this->Parentsandguardians->save($representante)) 
             {
-                return $this->redirect(['controller' => 'Guardiantransactions', 'action' => 'homeScreen']);
+                return $this->redirect(['controller' => 'Students', 'action' => 'index']);
             } 
             else 
             {
@@ -285,32 +354,71 @@ class GuardiantransactionsController extends AppController
             }
         }
 
-        $this->set(compact('representante', 'idRepresentante'));
+        $this->set(compact('representante', 'idRepresentante', 'anioFirmarContrato'));
     }
     
-    // Esta rutina debe corregirse porque en el proceso de re-inscripción que comienza en junio a los alumnos regulares el sistema no les regenera las mensualidades sino hasta después que se han actualizado los datos del alumno. Así que a los alumnos regulares se les debe dar otro tratamiento. Por los momentos se forzó el indicador a "1" por la urgencia de activar la página
-    public function indicadorContrato($idRepresentante = null)
+    public function verificacionFirmarContrato($idRepresentante = null)
     {
-        $indicadorContrato = 0;
+        $indicadorFirmarContrato = 0;
+        $anioFirmarContrato = 0;
+        $verificacionFirmarContrato = [];
         $this->loadModel('Schools');
         $schools = $this->Schools->get(2);
         $this->loadModel('Studenttransactions');
+
         $matriculas = $this->Studenttransactions->find('all', 
             [
                 'contain' => ['Students'],
-                'conditions' => [['Studenttransactions.ano_escolar >=' => $schools->current_year_registration, 'Studenttransactions.transaction_type' => 'Matrícula', 'Students.parentsandguardian_id' => $idRepresentante, 'Students.student_condition' => 'Regular']], 
+                'conditions' => [['Studenttransactions.ano_escolar >=' => $schools->previous_year_registration, 'Studenttransactions.transaction_type' => 'Matrícula', 'Students.parentsandguardian_id' => $idRepresentante, 'Students.student_condition' => 'Regular']], 
                 'order' => ['Students.id' => 'ASC']
             ]);
         
         foreach ($matriculas as $matricula)
         {
-            if ($matricula->ano_escolar == $schools->current_year_registration)
+            if ($matricula->ano_escolar >= $schools->previous_year_registration)
             {
-                $indicadorContrato = 1;
-                break;
+                if ($matricula->ano_escolar > $anioFirmarContrato)
+                {
+                    $indicadorFirmarContrato = 1;
+                    $anioFirmarContrato = $matricula->ano_escolar;
+                }
             }
         }
-        $indicadorContrato = 1; // forzado provisionalmente 
-        return $indicadorContrato;
+        $verificacionFirmarContrato = 
+            [
+                'indicadorFirmarContrato' => $indicadorFirmarContrato,
+                'anioFirmarContrato' => $anioFirmarContrato
+            ]; 
+        return $verificacionFirmarContrato;
+    }
+    public function verificacionContratoFirmado($representante = null) 
+    {
+        $indicadorContratoFirmado = 0;
+        $anioContratoFirmado = 0;
+        $imagenFirma = '';
+        $verificacionContratoFirmado = [];
+
+        $this->loadModel('Schools');
+
+        $schools = $this->Schools->get(2);
+
+        $anioActualInscripción = $schools->current_year_registration;
+
+        $vectorContratos = json_decode($representante->vector_contratos); 
+        foreach ($vectorContratos as $indice => $vector)
+        {
+            if ($indice >= $anioActualInscripción)
+            {
+                $indicadorContratoFirmado = 1;
+                $anioContratoFirmado = $indice;
+                $imagenFirma = $vector->imagen_firma;
+            }
+        }
+
+        $verificacionContratoFirmado['indicadorContratoFirmado'] = $indicadorContratoFirmado;
+        $verificacionContratoFirmado['anioContratoFirmado'] = $anioContratoFirmado;
+        $verificacionContratoFirmado['imagenFirma'] = $imagenFirma;
+        
+        return $verificacionContratoFirmado;
     }
 }
