@@ -1419,19 +1419,19 @@
 
 					// Contenido para la celda que cambia
 					let observationOrNC = item['dbMontoPendienteDolar'] < 0 ?
-						`<td style="font-size: 12px; ${bgColorStyle} color: red;">Hacer NC</td>` :
-						`<td style="font-size: 12px; ${bgColorStyle}">${item['dbObservation']}</td>`;
+						`<td style="font-size: 11px; ${bgColorStyle} color: red;">Hacer NC</td>` :
+						`<td style="font-size: 11px; ${bgColorStyle}">${item['dbObservation']}</td>`;
 
 
 					// Bloque HTML de las últimas columnas (antes lastColumnsContent)
 					// Ahora se construye directamente con la lógica ternaria para la celda específica
 					let dynamicLastColumnsContent = `
-						<td style="font-size: 12px; ${bgColorStyle}${item['dbMontoPendienteDolar'] < 0 ? ' color: red;' : ''}">${formatoNumero(item['dbMontoPendienteDolar'])}</td>
+						<td style="font-size: 11px; ${bgColorStyle}${item['dbMontoPendienteDolar'] < 0 ? ' color: red;' : ''}">${formatoNumero(item['dbMontoPendienteDolar'])}</td>
 						<td style="${bgColorStyle}">
-							<input type="text" id="a_pagar_dolar_${item['dbId']}" class="form-control modifiable-fee alternative-decimal-separator" value="${item['dbMontoAPagarDolar']}" style="font-size: 12px;" ${amInputDisabled}>
+							<input type="text" id="a_pagar_dolar_${item['dbId']}" class="form-control modifiable-fee alternative-decimal-separator" value="${item['dbMontoAPagarDolar']}" style="font-size: 11px;" ${amInputDisabled}>
 						</td>
-						<td style="font-size: 12px; ${bgColorStyle} color: blue;">${formatoNumero(item['dbMontoAPagarEuro'])}</td>
-						<td style="font-size: 12px; ${bgColorStyle} color: red;">${formatoNumero(item['dbMontoAPagarBolivar'])}</td>
+						<td style="font-size: 11px; ${bgColorStyle} color: blue;">${formatoNumero(item['dbMontoAPagarEuro'])}</td>
+						<td style="font-size: 11px; ${bgColorStyle} color: red;">${formatoNumero(item['dbMontoAPagarBolivar'])}</td>
 						${observationOrNC} 
 						<td style="${bgColorStyle}">
 							<input
@@ -1463,14 +1463,14 @@
 									disabled
 								>
 							</td>
-							<td style="font-size: 12px; ${bgColorStyle}">${item['dbMonthlyPayment']}</td>
+							<td style="font-size: 11px; ${bgColorStyle}">${item['dbMonthlyPayment']}</td>
 							<td style="${bgColorStyle}">
 								<input
 									type="text"
 									id="am${item['dbId']}"
 									class="form-control modifiable-fee alternative-decimal-separator"
 									value="${formatoNumero(item['dbTarifaDolar'])}"
-									style="font-size: 12px;"
+									style="font-size: 11px;"
 									${amInputDisabled}
 								>
 							</td>
@@ -1479,7 +1479,7 @@
 									type="text"
 									class="form-control amount-paid"
 									value="${formatoNumero(item['dbMontoAbonadoDolar'])}"
-									style="font-size: 12px;"
+									style="font-size: 11px;"
 									disabled
 								>
 							</td>
@@ -2693,116 +2693,6 @@
 		$('#tax-phone').val(taxPhone);
 		$('#email').val(customerEmail);
 	}
-
-	/**
-	 * Función que maneja la lógica para actualizar la exoneración del servicio educativo.
-	 * Se llama cuando un checkbox con la clase 'exose' cambia de estado.
-	 *
-	 * @param {jQuery} checkboxExose El objeto jQuery del checkbox que fue clickeado.
-	 * @param {boolean} estadoActualCheckbox El estado actual del checkbox (true si está marcado, false si está desmarcado).
-	 */
-	function actualizarExoneracionServicioEducativo(checkboxExose, estadoActualCheckbox)
-	{
-		// Captura el estado del checkbox ANTES de cualquier confirmación o operación.
-		// Esto es vital para revertir el estado si la operación falla o se cancela.
-		const estadoInicialCheckbox = !estadoActualCheckbox;
-
-		let mensajeConfirmacion = '';
-		let valorExoneracion = 0; // Por defecto para desmarcar
-
-		if (estadoActualCheckbox)
-		{ // Si el checkbox se acaba de marcar (para exonerar)
-			mensajeConfirmacion = '¿Está seguro que desea exonerar el servicio educativo?';
-			valorExoneracion = 100; // Valor para exonerar
-		}
-		else
-		{ // Si el checkbox se acaba de desmarcar (para eliminar exoneración)
-			mensajeConfirmacion = '¿Está seguro que desea eliminar la exoneración del servicio educativo?';
-			valorExoneracion = 0; // Valor para eliminar la exoneración
-		}
-
-		// Mostrar alerta de confirmación
-		if (confirm(mensajeConfirmacion))
-		{
-			// El usuario hizo clic en "Sí"
-
-			// 1. Obtener el ID del estudiante
-			const idCompletoCheckbox = checkboxExose.attr('id'); // Ej: "exose-123-456"
-			const partesId = idCompletoCheckbox.split('-'); // ["exose", "123", "456"]
-			const idEstudiante = partesId[1]; // "123"
-
-			// 2. Mostrar modal de procesamiento
-			if (typeof crm_processing_modal === 'function')
-			{
-				crm_processing_modal('Por favor espere mientras se procesa la solicitud...');
-			}
-			else
-			{
-				console.log('Procesando solicitud...');
-			}
-
-			// 3. Realizar la petición AJAX tipo PUT
-			$.ajax({
-				url: '<?php echo Router::url(["controller" => "Students", "action" => "actualizarExoneracionServicioEducativo"]); ?>',
-				type: 'PUT',
-				dataType: 'json',
-				contentType: 'application/json',
-				data: JSON.stringify({
-					id_estudiante: idEstudiante,
-					valor_exoneracion: valorExoneracion
-				})
-			})
-			.done(function(respuesta)
-			{ // Usamos 'respuesta' para coincidir con el backend
-				if (typeof crm_processing_modal_close === 'function')
-				{
-					crm_processing_modal_close();
-				}
-
-				if (respuesta.exito)
-				{ // Ahora verificamos 'exito' del backend
-					let mensajeExito = '';
-					if (estadoActualCheckbox)
-					{
-						mensajeExito = 'La exoneración se realizó satisfactoriamente.';
-					}
-					else
-					{
-						mensajeExito = 'Se eliminó la exoneración satisfactoriamente.';
-					}
-					alert(mensajeExito);
-					$.redirect('<?php echo Router::url(["controller" => "Users", "action" => "wait"]); ?>');
-				}
-				else
-				{
-					// Si la respuesta no es 'exito' (hubo un error en el servidor)
-					alert(respuesta.mensaje || 'Ocurrió un error desconocido al procesar la solicitud.'); // Ahora usamos 'mensaje' del backend
-					// Revertir el estado del checkbox al original porque la operación falló
-					checkboxExose.prop('checked', estadoInicialCheckbox);
-				}
-			})
-			.fail(function(jqXHR, textStatus, errorThrown)
-			{
-				if (typeof crm_processing_modal_close === 'function')
-				{
-					crm_processing_modal_close();
-				}
-				// Si la petición falla (error de red, etc.), revertir el estado del checkbox
-				checkboxExose.prop('checked', estadoInicialCheckbox);
-				alert("La solicitud no pudo ser procesada. Código de error: " + textStatus + (errorThrown ? " - " + errorThrown : ""));
-			});
-
-		}
-		else
-		{
-			// El usuario hizo clic en "No" en la confirmación
-			// Revertir el estado del checkbox a su valor original
-			checkboxExose.prop('checked', estadoInicialCheckbox);
-
-			// Redireccionar inmediatamente
-			$.redirect('<?php echo Router::url(["controller" => "Users", "action" => "wait"]); ?>');
-		}
-	}
 	    
 // Funciones Jquery
 
@@ -3330,26 +3220,7 @@
 								}
 								else if (transactionType != 'Mensualidad')
 								{
-									if (monthlyPayment.substring(0, 18) == "Servicio educativo")
-									{
-										if (servicioEducativoExoneradoTransaccion > 0)
-										{
-											montoPendienteDolar = 0;
-										}
-										else if (partialPayment == 1)
-										{
-											montoPendienteDolar = dosDecimales(transactionAmount - montoDolar);
-										}
-										else
-										{
-											montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
-										}
-									}
-									else
-									{
-										montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
-									}
-
+									montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 									if (montoPendienteDolar > 0 && estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] == false)
 									{
 										estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] = true;
@@ -3660,7 +3531,7 @@
 					}
 					inputCounter++;
 				}
-				else if (inputCounter == 5)
+				else if (inputCounter == 4)
 				{
 					inputCounter = 0;
 				}
@@ -3755,7 +3626,7 @@
 					idAmountTransactions = $(this).attr('id');
 					inputCounter++;
 				}
-				else if (inputCounter == 5)
+				else if (inputCounter == 4)
 				{
 					inputCounter = 0;
 				}
@@ -4586,16 +4457,6 @@
 			$('.check-bolivar').prop('checked', true);
 			aCobrarBolivares();
 		});
-
-		$(document).on('change', '.exose', function()
-		{
-			const checkboxExose = $(this); // El checkbox que fue clickeado (objeto jQuery)
-			const estadoActualCheckbox = checkboxExose.is(':checked'); // true si está marcado, false si está desmarcado
-
-			// Llamar a la función principal pasando el checkbox y su estado actual
-			actualizarExoneracionServicioEducativo(checkboxExose, estadoActualCheckbox);
-		});
-
     }); 
 
 </script>

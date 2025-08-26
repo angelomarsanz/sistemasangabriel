@@ -817,7 +817,9 @@ class TurnsController extends AppController
 						'cuotasAlumnoBecado' => $factura->cuotas_alumno_becado,
 						'cambioMontoCuota' => $factura->cambio_monto_cuota,
 						'montoIgtfFacturaDolar' => $factura->monto_igtf,
-						'montoIgtfFacturaBolivar' => round($factura->monto_igtf * $factura->tasa_cambio, 2)];		
+						'montoIgtfFacturaBolivar' => round($factura->monto_igtf * $factura->tasa_cambio, 2),
+						'numeroTarjeta' => ''
+					];		
 					$contadorNumero++;
 				}
 			}
@@ -963,6 +965,7 @@ class TurnsController extends AppController
 						$monto_igtf = $pago->monto_igtf_dolar;
 						$monto_sin_igtf = round($pago->amount - $monto_igtf, 2);
 
+						$vectorPagos[$pago->bill->id]['numeroTarjeta'] = $pago->account_or_card;
 						$vectorPagos[$pago->bill->id]['tddTdcBolivar'] += $monto_sin_igtf;
 						$vectorPagos[$pago->bill->id]['IGTFtddTdcBolivar'] += $monto_igtf;
 
@@ -1008,6 +1011,7 @@ class TurnsController extends AppController
 						$monto_igtf = $pago->monto_igtf_dolar;
 						$monto_sin_igtf = round($pago->amount - $monto_igtf, 2);					
 
+						$vectorPagos[$pago->bill->id]['numeroTarjeta'] = $pago->account_or_card;
 						$vectorPagos[$pago->bill->id]['tddTdcBolivar'] += $monto_sin_igtf;
 						$vectorPagos[$pago->bill->id]['IGTFtddTdcBolivar'] += $monto_igtf;
 						$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
@@ -1951,12 +1955,12 @@ class TurnsController extends AppController
 		$indicadorRecibosSeguro = 0;
 		$indicadorRecibosSeguroAnulados = 0;
 		$indicadorRecibosConsejoEducativo = 0;
-		$vector_pagos = [];
 		$vectorPagos = [];
 							
 		$usuario = $this->Turns->Users->get($turn->user_id);
 	
 		$cajero = $usuario->first_name . ' ' . $usuario->surname;
+		$rolCajero = $usuario->role;
 
 		if ($turn->vector_pagos === null)
 		{
@@ -2164,6 +2168,7 @@ class TurnsController extends AppController
 			'indicadorRecibosConsejoEducativo',
 			'conceptosConsejoEducativo',
 			'conceptosServicioEducativo',
+			'rolCajero'
 		));	
 				
 		$this->set('_serialize', 
@@ -2204,7 +2209,9 @@ class TurnsController extends AppController
 			'indicadorRecibosSeguroAnulados',
 			'indicadorRecibosConsejoEducativo',
 			'conceptosConsejoEducativo',
-			'conceptosServicioEducativo']);
+			'conceptosServicioEducativo',
+			'rolCajero'
+		]);
 	}
 	
     public function excelDocumentos($id = null)

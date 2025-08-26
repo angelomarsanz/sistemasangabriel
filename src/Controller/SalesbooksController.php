@@ -12,6 +12,22 @@ use App\Controller\BillsController;
  */
 class SalesbooksController extends AppController
 {
+    public function isAuthorized($user)
+    {
+		if(isset($user['role']))
+		{
+			// Inicio cambios Seniat
+			if ($user['role'] === 'Seniat')
+			{
+				if (in_array($this->request->action, ['createBookExcel', 'downloadBook', 'indexexcel']))
+				{
+					return true;
+				}				
+			}
+			// Fin cambios Seniat
+		}
+        return parent::isAuthorized($user);
+    }    
     public function testFunction()
     {
         /* $month = "07";

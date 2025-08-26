@@ -1951,12 +1951,12 @@ class TurnsController extends AppController
 		$indicadorRecibosSeguro = 0;
 		$indicadorRecibosSeguroAnulados = 0;
 		$indicadorRecibosConsejoEducativo = 0;
-		$vector_pagos = [];
 		$vectorPagos = [];
 							
 		$usuario = $this->Turns->Users->get($turn->user_id);
 	
 		$cajero = $usuario->first_name . ' ' . $usuario->surname;
+		$rolCajero = $usuario->role;
 
 		if ($turn->vector_pagos === null)
 		{
@@ -2164,6 +2164,7 @@ class TurnsController extends AppController
 			'indicadorRecibosConsejoEducativo',
 			'conceptosConsejoEducativo',
 			'conceptosServicioEducativo',
+			'rolCajero'
 		));	
 				
 		$this->set('_serialize', 
@@ -2204,7 +2205,9 @@ class TurnsController extends AppController
 			'indicadorRecibosSeguroAnulados',
 			'indicadorRecibosConsejoEducativo',
 			'conceptosConsejoEducativo',
-			'conceptosServicioEducativo']);
+			'conceptosServicioEducativo',
+			'rolCajero'
+		]);
 	}
 	
     public function excelDocumentos($id = null)

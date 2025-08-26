@@ -5,7 +5,7 @@
     <div class="col-md-6 col-md-offset-3">
         <div class="page-header">
             <h2>Crear nota contable</h2>
-            <p>Por favor escriba los apellidos que identifican la familia a la cual se le aplicará la nota de crédito...</p>
+            <p>La búsqueda de la factura original se puede hacer por los apellidos que identifican la familia o por el número de factura, como usted prefiera...</p>
         </div>
         <div class="row panel panel-default">
             <div class="col-md-12">
@@ -13,10 +13,12 @@
 					<fieldset>
 					   	<?php
 							echo $this->Form->input('familia', ['name' => 'familia', 'label' => 'Apellidos que identifican la familia']);
+							echo $this->Form->input('Factura', ['name' => 'factura', 'label' => 'Factura']);
 						?>
 						<div class="mensajes-usuario" id="mensaje-factura"></div>
 						<br />
 					</fieldset>
+					<?= $this->Form->button(__('Buscar factura'), ['id' => 'buscar-factura', 'class' =>'btn btn-success']) ?>
 				<?= $this->Form->end() ?>
 				<br />
             </div>

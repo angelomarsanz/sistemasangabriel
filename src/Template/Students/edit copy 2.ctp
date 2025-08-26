@@ -3,11 +3,18 @@
 ?>
 <div class="container">
 	<?php if ($indicadorJulioPendiente == 1): ?>
-		<br /><br />
-		<div class="alert alert-warning alert-dismissible">
-			<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-			<strong>Aviso!</strong> Hemos verificado que posee una o más cuotas a pagar del año en curso. Por favor continúe con el proceso de actualización de datos y tenga en cuenta que al momento de cancelar la inscripción también debe consignar el pago de la(s) cuota(s) de este año escolar que termina.
+	<div class="jumbotron" id="aviso">
+		<h3><b>Importante</b></h3>      
+		<p>Aviso ! Hemos verificado que posee cuotas a pagar del año en curso, le recordamos que debe cancelar junto con los conceptos de inscripción las cuotas de este año escolar.</p>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-primary" id="cerrar-aviso">Cerrar</button>
 		</div>
+	</div>
+	<div class="alert alert-warning alert-dismissible">
+  		<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  		<strong>Aviso!</strong> Hemos verificado que posee cuotas a pagar del año en curso, le recordamos que debe cancelar junto con los conceptos de inscripción las cuotas de este año escolar.
+	</div>
+	</div>
 	<?php endif; ?>
 	<div class="modal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">

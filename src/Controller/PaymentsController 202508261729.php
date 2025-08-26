@@ -2,8 +2,9 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
-
 use App\Controller\BinnaclesController;
+use Cake\I18n\Time;
+use Cake\Event\Event;
 
 /**
  * Payments Controller
@@ -12,6 +13,32 @@ use App\Controller\BinnaclesController;
  */
 class PaymentsController extends AppController
 {
+    public function beforeFilter(Event $event)
+    {
+        parent::beforeFilter($event);
+        // Si la solicitud es una petición de AJAX, usa el layout 'ajax'
+        if ($this->request->is('ajax')) {
+            $this->viewBuilder()->setLayout('ajax');
+        }
+    }
+
+    public function isAuthorized($user)
+    {
+		if(isset($user['role']))
+		{
+			// Inicio cambios Seniat
+			if ($user['role'] === 'Seniat')
+			{
+				if(in_array($this->request->action, ['verificarSerial']))
+				{
+					return true;
+				}
+			}
+			// Fin cambios Seniat
+		}
+        return parent::isAuthorized($user);
+    }        
+
 	public function pruebaFuncion()
 	{
 		$this->loadModel('Turns');
@@ -745,4 +772,233 @@ class PaymentsController extends AppController
 		}
 		return $codigoRetorno; 
     }
+	public function datosReporteFormasDePago()
+	{
+		// Esta función no necesita una vista, por lo que deshabilitamos el renderizado.
+		$this->viewBuilder()->setLayout('ajax');
+		$this->autoRender = false;
+
+		// Validar que la solicitud sea AJAX
+		if (!$this->request->is('ajax')) {
+			$this->response->withStatus(403);
+			return $this->response->withStringBody(json_encode(['success' => false, 'message' => 'Acceso denegado.']));
+		}
+
+		// Obtener los filtros enviados desde el cliente
+		$filters = $this->request->getData();
+		
+		// Cargar los modelos necesarios para la consulta
+		$this->loadModel('Bills');
+		$this->loadModel('Parentsandguardians');
+		$this->loadModel('Students');
+		
+		// Construir el query base, uniendo las tablas
+		$query = $this->Payments->find('all')
+			->contain([
+				'Bills',
+				'Bills.Parentsandguardians',
+				'Bills.Parentsandguardians.Students' => function ($q) {
+					return $q->where(['Students.student_condition' => 'Regular']);
+				}
+			])
+			->where([
+				'Payments.annulled' => 0, // Suponemos que 0 es no anulado
+				'Bills.annulled' => 0,
+			]);
+
+		$contadorQueryOriginal = $query->count();
+		
+		// Aplicar filtros de fecha y año
+		$year = $filters['year'];
+		if (!empty($filters['months'])) {
+			$monthConditions = [];
+			foreach ($filters['months'] as $month) {
+				if ($month === 'all') {
+					$monthConditions = [];
+					break;
+				}
+				$monthConditions[] = ['MONTH(Bills.date_and_time)' => $month];
+			}
+			if (!empty($monthConditions)) {
+				$query->where(['OR' => $monthConditions]);
+			}
+		}
+		$query->where(['YEAR(Bills.date_and_time)' => $year]);
+		
+		$contadorQueryAnioMes = $query->count();
+
+		// Aplicar filtro de tipo de documento
+		if ($filters['documentType'] === 'facturas') {
+			$query->where(['Bills.tipo_documento' => 'Factura']);
+		} else { // pedidos
+			$query->where([
+				'OR' => [
+					['Bills.tipo_documento' => 'Pedido'],
+					['Bills.tipo_documento' => 'Recibo de anticipo']
+				]
+			]);
+		}
+
+		// Aplicar filtro de tipo de persona
+		if ($filters['personType'] === 'juridica') {
+			$query->where(['OR' => [
+				['Bills.identification LIKE' => 'J -%'],
+				['Bills.identification LIKE' => 'G -%']
+			]]);
+		} else { // natural
+			$query->where(['OR' => [
+				['Bills.identification LIKE' => 'V -%'],
+				['Bills.identification LIKE' => 'E -%'],
+				['Bills.identification LIKE' => 'P -%']
+			]]);
+		}
+
+		$contadorQueryTipoPersona = $query->count();
+		
+		// Aplicar filtro de formas de pago
+		$paymentConditions = [];
+		foreach ($filters['paymentForms'] as $form) {
+			switch ($form) {
+				case 'efectivo_dolar':
+					$paymentConditions[] = ['Payments.payment_type' => 'Efectivo', 'Payments.moneda' => '$'];
+					break;
+				case 'efectivo_euro':
+					$paymentConditions[] = ['Payments.payment_type' => 'Efectivo', 'Payments.moneda' => '€'];
+					break;
+				case 'efectivo_bolivar':
+					$paymentConditions[] = ['Payments.payment_type' => 'Efectivo', 'Payments.moneda' => 'Bs.'];
+					break;
+				case 'punto_venta':
+					$paymentConditions[] = ['OR' => [['Payments.payment_type' => 'Tarjeta de débito'], ['Payments.payment_type' => 'Tarjeta de crédito']], 'Payments.moneda' => 'Bs.'];
+					break;
+				case 'zelle':
+					$paymentConditions[] = ['Payments.payment_type' => 'Transferencia', 'Payments.bank' => 'Zelle'];
+					break;
+				case 'euros_transf':
+					$paymentConditions[] = ['Payments.payment_type' => 'Transferencia', 'Payments.bank' => 'Euros'];
+					break;
+				case 'transferencia_bs':
+					// 👉 Corrección para transferencias en bolívares
+					$paymentConditions[] = ['Payments.payment_type' => 'Transferencia', 'Payments.moneda' => 'Bs.'];
+					break;
+				case 'todas':
+					// Si se selecciona 'todas', no se agrega ninguna condición específica
+					break;
+			}
+		}
+
+		if (!empty($paymentConditions)) {
+			$query->where(['OR' => $paymentConditions]);
+		}
+
+		if (!empty($paymentConditions)) {
+			// Aquí está el cambio crucial
+			$query->where(['OR' => $paymentConditions]);
+		}
+
+		// Aplicar ordenamiento
+		if ($filters['orderBy'] === 'familia') {
+			$query->order(['Parentsandguardians.family' => 'ASC']);
+		} else { // factura
+			$query->order(['Bills.bill_number' => 'ASC']);
+		}
+
+		// Obtener los resultados y procesarlos
+		$results = $query->toArray();
+		$reportData = [];
+		$totals = ['totalGeneral' => 0];
+		$cantidad = 0;
+		
+		// Agrupar los pagos por factura para un mejor procesamiento
+		$groupedByBill = [];
+		foreach ($results as $payment) {
+			$billId = $payment->bill->id;
+			if (!isset($groupedByBill[$billId])) {
+				$groupedByBill[$billId] = $payment->bill;
+				$groupedByBill[$billId]['payments'] = [];
+			}
+			$groupedByBill[$billId]['payments'][] = $payment;
+		}
+
+		foreach ($groupedByBill as $bill) {
+			$cantidad++;
+			foreach ($bill->payments as $payment) {
+				// Lógica para el resumen de totales
+				$paymentLabel = $this->getPaymentLabel($payment);
+				if (!isset($totals[$paymentLabel])) {
+					$totals[$paymentLabel] = 0;
+				}
+				$totals[$paymentLabel] += $payment->amount;
+				$totals['totalGeneral'] += $payment->amount;
+
+				// Lógica para el detalle del reporte
+				$representative = $bill->parentsandguardian;
+				$students = [];
+				if (!empty($representative->students)) {
+					foreach ($representative->students as $student) {
+						$students[] = $student->first_name . ' ' . $student->second_name;
+					}
+				}
+				
+				$reportData[] = [
+					'familia' => $representative->family . ' (' . $representative->first_name . ' ' . $representative->surname . ')',
+					'students' => $students,
+					'facturaControl' => $bill->bill_number . ' / ' . $bill->control_number,
+					'cedulaRif' => $bill->identification,
+					'razonSocial' => $bill->client,
+					'fechaFactura' => date_format($bill->date_and_time, 'd-m-Y'),
+					'formaPago' => $paymentLabel,
+					'monto' => $payment->amount
+				];
+			}
+		}
+
+		// Formato final de la respuesta
+		$response = [
+			'success' => true,
+			'data' => [
+				'filters' => $filters,
+				'cantidad' => $cantidad,
+				'totals' => $totals,
+				'details' => $reportData,
+				'contadorQueryOriginal' => $contadorQueryOriginal,
+				'year' => $year,
+				'monthConditions' => $monthConditions,
+				'contadorQueryAnioMes' => $contadorQueryAnioMes,
+				'contadorQueryTipoPersona' => $contadorQueryTipoPersona
+
+			]
+		];
+
+		return $this->response->withType('application/json')->withStringBody(json_encode($response));
+	}
+
+	/**
+	 * Helper para obtener la etiqueta de la forma de pago
+	 * @param object $payment
+	 * @return string
+	 */
+	private function getPaymentLabel($payment)
+	{
+		if ($payment->payment_type === 'Efectivo') {
+			return "Efectivo {$payment->moneda}";
+		}
+
+		if ($payment->payment_type === 'Transferencia') {
+			if ($payment->bank === 'Zelle') {
+				return "Zelle $";
+			} elseif ($payment->bank === 'Euros') {
+				return "Euros €";
+			} else {
+				return "Transferencia Bs.";
+			}
+		}
+
+		if ($payment->payment_type === 'Tarjeta de débito' || $payment->payment_type === 'Tarjeta de crédito') {
+			return "Punto de venta Bs.";
+		}
+
+		return $payment->payment_type;
+	}
+
 }

@@ -1,6 +1,5 @@
 <?php
 namespace App\Controller;
-use Cake\Event\Event;
 
 use App\Controller\AppController;
 
@@ -11,20 +10,6 @@ use App\Controller\AppController;
  */
 class SchoolsController extends AppController
 {
-
-    /**
-     * Antes de cada acción, establece el diseño 'ajax' para las llamadas de AJAX.
-     */
-    
-    public function beforeFilter(Event $event)
-    {
-        parent::beforeFilter($event);
-        // Si la solicitud es una petición de AJAX, usa el layout 'ajax'
-        if ($this->request->is('ajax')) {
-            $this->viewBuilder()->setLayout('ajax');
-        }
-    }
-    
     public function infoPhp()
     {
         phpinfo();
@@ -125,51 +110,5 @@ class SchoolsController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
-    }
-    /**
-     * Función para obtener el registro de un colegio por su ID y devolverlo en formato JSON.
-     * Esta función está diseñada para ser llamada vía AJAX.
-     * @return \Cake\Http\Response|void
-     */
-    public function obtenerRegistroDelColegio()
-    {
-        // Esta acción solo debe responder a peticiones AJAX POST
-        
-        if ($this->request->is('post')) {
-            $datos = [
-                'returnCode' => 1, // Por defecto, el código de retorno es 1 (error)
-                'message' => 'Ocurrió un error desconocido.',
-                'registro' => null
-            ];
-
-            try {
-                // Busca el registro del colegio con el ID 2
-                $schoolRecord = $this->Schools->get(2, [
-                    'contain' => []
-                ]);
-
-                // Si se encuentra el registro
-                if ($schoolRecord) {
-                    $datos['returnCode'] = 0; // Éxito
-                    $datos['message'] = 'Registro obtenido con éxito.';
-                    $datos['registro'] = $schoolRecord;
-                } else {
-                    $datos['message'] = 'No se encontró el registro del colegio.';
-                }
-            } catch (\Exception $e) {
-                // Captura cualquier excepción y proporciona un mensaje de error detallado
-                $datos['message'] = 'Error en el servidor: ' . $e->getMessage();
-            }
-
-            // Establece la vista como JSON y serializa la respuesta
-            
-            $this->viewBuilder()->setClassName('Json');
-            $this->set(compact('datos'));
-            $this->set('_serialize', ['datos']);
-            
-        }
-        
-        // Si no es una petición POST, se redirige o se muestra un error,
-        // dependiendo de la lógica del controlador. Por simplicidad, no hacemos nada.
     }
 }

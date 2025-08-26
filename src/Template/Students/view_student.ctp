@@ -111,7 +111,7 @@
         </p>
     </div>
 	<?php if(isset($current_user['role'])): ?>
-		<?php if($current_user['role'] == 'Administrador'): ?>
+		<?php if($current_user['role'] == 'Administrador' || $current_user['role'] == 'Ventas generales' || $current_user['role'] == 'Ventas generales'): ?>
 			<div id="menu-mas-alumno" style="display:none;" class="menumas">
 				<p>
 				<?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'edit', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-edit btn btn-sm btn-danger', 'title' => 'Modificar alumno']) ?>

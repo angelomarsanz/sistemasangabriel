@@ -1,0 +1,65 @@
+Actualización a debian 12
+
+Hola. Me alegra que quieras actualizar tu sistema. El proceso no es tan difícil, pero requiere seguir los pasos con cuidado.
+
+Antes que nada, quiero aclarar algo: la versión actual de Debian no es la 2, sino la Debian 12, con nombre clave "Bookworm". Es la versión más reciente con soporte a largo plazo.
+
+Tu instalación dual con Windows no debería verse afectada por la actualización de Debian, ya que las dos están en particiones de disco separadas. Sin embargo, es vital que sigas las instrucciones con precisión para evitar cualquier problema.
+
+El Proceso de Actualización
+Este proceso se realiza directamente desde la terminal y es la forma oficial de actualizar el sistema operativo sin tener que reinstalarlo.
+
+Paso 1: ¡Haz una copia de seguridad!
+Este es el paso más importante. Antes de hacer cualquier cambio, haz una copia de seguridad de todos tus archivos importantes. El proceso de actualización es seguro, pero es mejor estar preparado para cualquier eventualidad.
+
+Paso 2: Actualiza tu sistema Debian 10
+Asegúrate de que todos los paquetes de tu actual versión de Debian (Buster) estén completamente actualizados antes de empezar la migración.
+
+Bash
+
+sudo apt update
+sudo apt upgrade
+Paso 3: Modifica los repositorios
+Debes indicarle a tu sistema que ahora quieres obtener los paquetes de la nueva versión.
+
+Abre el archivo de repositorios principal con un editor de texto:
+
+Bash
+
+sudo nano /etc/apt/sources.list
+Busca todas las líneas que tengan la palabra buster y cámbialas por bookworm. Por ejemplo, una línea que diga deb http://deb.debian.org/debian/ buster main debe quedar como deb http://deb.debian.org/debian/ bookworm main.
+
+Guarda los cambios y sal del editor.
+
+Paso 4: La primera parte de la actualización
+Ahora, ejecuta los siguientes comandos para iniciar el proceso de actualización.
+
+Bash
+
+sudo apt update
+sudo apt upgrade --without-new-virtuals
+Este comando descargará e instalará los paquetes que no tienen nuevas dependencias. Responde y a la pregunta de confirmación.
+
+Paso 5: La actualización final
+Una vez que el paso anterior haya terminado, ejecuta el comando final. Es el más importante y gestiona todos los cambios de dependencias.
+
+Bash
+
+sudo apt full-upgrade
+Durante este proceso, el sistema podría hacerte preguntas sobre si quieres conservar o reemplazar archivos de configuración. Si no estás seguro, la opción predeterminada es generalmente la más segura.
+
+Paso 6: Limpieza final
+Después de que el comando full-upgrade haya terminado, reinicia tu equipo para cargar el nuevo sistema operativo.
+
+Bash
+
+sudo reboot
+Una vez que el sistema se inicie, puedes limpiar los paquetes antiguos que ya no son necesarios.
+
+Bash
+
+sudo apt autoremove
+sudo apt clean
+¡Felicidades! Ahora tu sistema debería estar ejecutando Debian 12. Este proceso puede tardar un tiempo considerable, así que asegúrate de tener una conexión a internet estable y de no apagar el equipo hasta que termine.
+
+Has parado esta respuesta

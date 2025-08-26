@@ -8,9 +8,15 @@
 	$anoEscolarAnterior = $anoEscolarActual - 1;
 	$proximoAnoEscolar = $anoEscolarActual + 1;
 	// Inicio cambios Seniat
+	/*
 	$tipo_usuario = 0;
 	if ($current_user['role'] == 'Seniat' || $current_user['role'] == 'Ventas fiscales' || $current_user['role'] == 'Contabilidad fiscal' ):
 		$tipo_usuario = 1;
+	endif;
+	*/
+	$indicador_pedido = 1;
+	if ($current_user['role'] == 'Seniat'):
+		$indicador_pedido = 0;
 	endif;
 	// Fin cambios Seniat
 ?>
@@ -175,15 +181,16 @@
                                 <table class="table table-striped table-hover" >
                                     <thead>
                                         <tr>
-											<th scope="col" style="width:5%"></th>
-                                            <th scope="col" style="font-size: 11px; width:15%">Concepto</th>
-											<th scope="col" style="font-size: 11px; width:15%">Cuota($)</th>
-                                            <th scope="col" style="font-size: 11px; width:10%">Abonado($)</th>
-											<th scope="col" style="font-size: 11px; width:10%">Pendiente($)</th>
-											<th scope="col" style="font-size: 11px; width:15%">A pagar($)</th>
-											<th scope="col" style="color: blue; font-size: 10px; width:10%">A pagar(€)</th>
-											<th scope="col" style="color: red; font-size: 10px; width:10%">A pagar(Bs.)</th>
-											<th scope="col" style="font-size: 11px; width:10%">Observación</th>
+											<th scope="col" style="width:3%"></th>
+                                            <th scope="col" style="font-size: 9px; width:15%">Concepto</th>
+											<th scope="col" style="font-size: 9px; width:12%">Cuota($)</th>
+                                            <th scope="col" style="font-size: 9px; width:12%">Abonado($)</th>
+											<th scope="col" style="font-size: 9px; width:8%">Pendiente($)</th>
+											<th scope="col" style="font-size: 9px; width:12%">A pagar($)</th>
+											<th scope="col" style="color: blue; font-size: 9px; width:8%">A pagar(€)</th>
+											<th scope="col" style="color: red; font-size: 9px; width:8%">A pagar(Bs.)</th>
+											<th scope="col" style="font-size: 9px; width:10%">Observación</th>
+											<th scope="col" style="font-size: 9px; width:3%">Exo</th>
 											<th scope="col" class="noverScreen"></th>
                                         </tr>
                                     </thead>
@@ -321,36 +328,38 @@
 										</div>
 									</div>
 								</div>
-                                <h3>Depósito</h3>
-								<div>
-									<div class="row">
-										 <label class="check-dolar" for="check1">
-											<spam><input type="checkbox" class="check-dolar" checked='checked'> Dólar&nbsp;&nbsp;&nbsp;</spam>
-										</label>
-										 <label class="check-euro" for="check1">
-											<spam style="color: blue;"><input type="checkbox" class="check-euro"> Euro&nbsp;&nbsp;&nbsp;</spam>
-										</label>
-										 <label class="check-bolivar" for="check1">
-											<spam style="color: red;"><input type="checkbox" class="check-bolivar"> Bolívar&nbsp;&nbsp;&nbsp;</spam>
-										</label>
-									</div>
-									<div class="row">
-										<div class="col-md-6">
-											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-04', 'class' => 'alternative-decimal-separator']) ?>
-											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-04', 'options' => $bancosEmisor]); ?>
-											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-04', 'options' => $bancosReceptor]); ?>
-											<?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-04']) ?>
+                                <!-- 
+									<h3>Depósito</h3>
+									<div>
+										<div class="row">
+											<label class="check-dolar" for="check1">
+												<spam><input type="checkbox" class="check-dolar" checked='checked'> Dólar&nbsp;&nbsp;&nbsp;</spam>
+											</label>
+											<label class="check-euro" for="check1">
+												<spam style="color: blue;"><input type="checkbox" class="check-euro"> Euro&nbsp;&nbsp;&nbsp;</spam>
+											</label>
+											<label class="check-bolivar" for="check1">
+												<spam style="color: red;"><input type="checkbox" class="check-bolivar"> Bolívar&nbsp;&nbsp;&nbsp;</spam>
+											</label>
 										</div>
-										<div class="col-md-6">
-											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-04']) ?>
-											<div class="form-group">
-												<label for="comentario-04">Comentario:</label>
-												<textarea class="form-control" rows="3" id="comentario-04"></textarea>
+										<div class="row">
+											<div class="col-md-6">
+												<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-04', 'class' => 'alternative-decimal-separator']) ?>
+												<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-04', 'options' => $bancosEmisor]); ?>
+												<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-04', 'options' => $bancosReceptor]); ?>
+												<?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-04']) ?>
 											</div>
-											<button id="bt-04" class="record-payment btn btn-success" disabled>Registrar pago</button>
+											<div class="col-md-6">
+												<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-04']) ?>
+												<div class="form-group">
+													<label for="comentario-04">Comentario:</label>
+													<textarea class="form-control" rows="3" id="comentario-04"></textarea>
+												</div>
+												<button id="bt-04" class="record-payment btn btn-success" disabled>Registrar pago</button>
+											</div>
 										</div>
-									</div>
-								</div>								
+									</div>			
+								-->					
                                 <h3>Transferencia</h3>
 								<div>
 									<div class="row">
@@ -753,7 +762,6 @@
     var tbPaymentsMade = new Array();
 	
 	var indicador_recalcular_cuotas = true;
-	var indicador_pedido = 0;
 	var ano_mes_actual = <?= $ano_mes_actual ?>;
 	var ano_mes_recalculo_cuotas_atrasadas = "202209";
 	var conceptos_a_omitir = 
@@ -800,7 +808,10 @@
 	var observacionTransaccion = '';
 	var ordenGrado = 0;
 	var aCobrarRetencion = 0;
-	var tipoUsuario = <?= $tipo_usuario ?>;
+	var servicioEducativoExonerado = 0;
+	var servicioEducativoExoneradoTransaccion = 0;
+	var indicador_pedido = "<?= $indicador_pedido ?>";
+
 	
 // Funciones Javascript
 
@@ -1050,7 +1061,6 @@
         balanceIndicator = 0;
 		saldoNotaCredito = 0;
 		indicadorCompensacion = 0;
-		indicador_pedido = 0;
 
 		base_igtf_dolar = 0;
 		monto_divisas = 0;
@@ -1261,7 +1271,8 @@
         	"dbPaidOut" : paidOut,
 			"dbSchoolYearFrom" : schoolYearFrom,
 			"dbSeleccionada" : false,
-        	"dbObservation" : observacionRecibida	};
+        	"dbObservation" : observacionRecibida,
+			"dbServicioEducativoExoneradoTransaccion" : servicioEducativoExoneradoTransaccion	};
 			
 		studentTransactionsArray.push(vector_registro_transacciones);
 		
@@ -1401,72 +1412,94 @@
 
 				if (item['dbPaidOut'] == false)
 				{					
-					if (item['dbSeleccionada'] == true)
-					{
-						studentBalance = studentBalance + item['dbMontoAPagarDolar'];
-						detailLine += "<tr id=tra" + item['dbId'] + "> \
-							<td style='background-color:#c2c2d6;'><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " checked='checked' disabled></td> \
-							<td style='background-color:#c2c2d6;'>" + item['dbMonthlyPayment'] + "</td> \
-							<td style='background-color:#c2c2d6;'><input type='text' id=am" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + formatoNumero(item['dbTarifaDolar']) + " disabled></td> \
-							<td style='background-color:#c2c2d6;'><input type='text' class='form-control amount-paid' value=" + formatoNumero(item['dbMontoAbonadoDolar']) + " disabled></td>";
+					// Variables para determinar el estado y los estilos
+					let isSelected = item['dbSeleccionada'] === true; // Asegurarse que es booleano para claridad
+					let bgColorStyle = isSelected ? 'background-color:#c2c2d6;' : '';
+					let initialCheckboxChecked = isSelected ? 'checked="checked"' : '';
+					// El disabled para tr${item['dbId']} es siempre true, así que se pone directamente en el HTML
+					let amInputDisabled = isSelected ? 'disabled' : '';
 
-						if (item['dbMontoPendienteDolar'] < 0)
-						{
-							detailLine += 	"<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
-											<td style='background-color:#c2c2d6;'><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + " disabled></td> \
-											<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
-											<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
-											<td style='background-color:#c2c2d6; color: red;'>Hacer NC</td> \
-											<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
-						}
-						else
-						{
-							detailLine += 	"<td style='background-color:#c2c2d6;'>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
-											<td style='background-color:#c2c2d6;'><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + " disabled></td> \
-											<td style='background-color:#c2c2d6; color: blue;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
-											<td style='background-color:#c2c2d6; color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
-											<td style='background-color:#c2c2d6;'>" + item['dbObservation'] + "</td> \
-											<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
-						}
-						
+					// Contenido para la celda que cambia
+					let observationOrNC = item['dbMontoPendienteDolar'] < 0 ?
+						`<td style="font-size: 12px; ${bgColorStyle} color: red;">Hacer NC</td>` :
+						`<td style="font-size: 12px; ${bgColorStyle}">${item['dbObservation']}</td>`;
+
+
+					// Bloque HTML de las últimas columnas (antes lastColumnsContent)
+					// Ahora se construye directamente con la lógica ternaria para la celda específica
+					let dynamicLastColumnsContent = `
+						<td style="font-size: 12px; ${bgColorStyle}${item['dbMontoPendienteDolar'] < 0 ? ' color: red;' : ''}">${formatoNumero(item['dbMontoPendienteDolar'])}</td>
+						<td style="${bgColorStyle}">
+							<input type="text" id="a_pagar_dolar_${item['dbId']}" class="form-control modifiable-fee alternative-decimal-separator" value="${item['dbMontoAPagarDolar']}" style="font-size: 12px;" ${amInputDisabled}>
+						</td>
+						<td style="font-size: 12px; ${bgColorStyle} color: blue;">${formatoNumero(item['dbMontoAPagarEuro'])}</td>
+						<td style="font-size: 12px; ${bgColorStyle} color: red;">${formatoNumero(item['dbMontoAPagarBolivar'])}</td>
+						${observationOrNC} 
+						<td style="${bgColorStyle}">
+							<input
+								type="checkbox"
+								id="exose-${item['dbIdStudent']}-${item['dbId']}"
+								name="exose_${item['dbIdStudent']}_${item['dbId']}"
+								class="exose"
+								value="${item['dbMonthlyPayment'].substring(0, 18) !== 'Servicio educativo' ? 0 : item['dbServicioEducativoExoneradoTransaccion']}"
+								${item['dbServicioEducativoExoneradoTransaccion'] > 0 ? 'checked' : ''}
+								${item['dbMonthlyPayment'].substring(0, 18) !== 'Servicio educativo' ? 'disabled' : ''}
+							>
+						</td>
+						<td>
+							<input type="number" class="form-control original-amount noverScreen" value="${item['dbTarifaDolar']}">
+						</td>
+					`;
+
+
+					// Bloque HTML principal unificado (se mantiene igual, solo cambia la variable insertada)
+					detailLine += `
+						<tr id="tra${item['dbId']}">
+							<td style="${bgColorStyle}">
+								<input
+									type="checkbox"
+									id="tr${item['dbId']}"
+									name="${item['dbMonthlyPayment']}"
+									value="${item['dbMontoPendienteDolar']}"
+									${initialCheckboxChecked}
+									disabled
+								>
+							</td>
+							<td style="font-size: 12px; ${bgColorStyle}">${item['dbMonthlyPayment']}</td>
+							<td style="${bgColorStyle}">
+								<input
+									type="text"
+									id="am${item['dbId']}"
+									class="form-control modifiable-fee alternative-decimal-separator"
+									value="${formatoNumero(item['dbTarifaDolar'])}"
+									style="font-size: 12px;"
+									${amInputDisabled}
+								>
+							</td>
+							<td style="${bgColorStyle}">
+								<input
+									type="text"
+									class="form-control amount-paid"
+									value="${formatoNumero(item['dbMontoAbonadoDolar'])}"
+									style="font-size: 12px;"
+									disabled
+								>
+							</td>
+							${dynamicLastColumnsContent}
+						</tr>`;
+
+					// Lógica de `if (item['dbSeleccionada'] == true)` que no afecta al HTML directamente
+					if (isSelected) {
+						studentBalance = studentBalance + item['dbMontoAPagarDolar'];
 						$('#uncheck-quotas').attr('disabled', false);
-						
-						if (firstInstallment == "")
-						{
+						if (firstInstallment === "") {
 							firstInstallment = item['dbMonthlyPayment'];
 						}
 						lastInstallment = item['dbMonthlyPayment'];
-					}
-					else
-					{
-						if (indicatorPaid == 0)
-						{
+					} else {
+						if (indicatorPaid === 0) {
 							nextPayment = monthlyPayment;
-							indicatorPaid = 1;                            
-						}
-						detailLine += "<tr id=tra" + item['dbId'] + "> \
-							<td><input type='checkbox' id=tr" + item['dbId'] + " name='" + item['dbMonthlyPayment'] + "' value=" + item['dbMontoPendienteDolar'] + " disabled></td> \
-							<td>" + item['dbMonthlyPayment'] + "</td> \
-							<td><input type='text' id=am" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + formatoNumero(item['dbTarifaDolar']) + "></td> \
-							<td><input type='text' class='form-control amount-paid' value=" + formatoNumero(item['dbMontoAbonadoDolar']) + " disabled></td>";
-
-						if (item['dbMontoPendienteDolar'] < 0)
-						{
-							detailLine += 	"<td style='color: red;'>" + item['dbMontoPendienteDolar'] + "</td> \
-											<td><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + "></td> \
-											<td style='color: red;'>" + item['dbMontoAPagarEuro'] + "</td> \
-											<td style='color: red;'>" + item['dbMontoAPagarBolivar'] + "</td> \
-											<td style='color: red;'>Hacer NC</td> \
-											<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
-						}
-						else
-						{
-							detailLine += 	"<td>" + formatoNumero(item['dbMontoPendienteDolar']) + "</td> \
-											<td><input type='text' id=a_pagar_dolar_" + item['dbId'] + " class='form-control modifiable-fee alternative-decimal-separator' value=" + item['dbMontoAPagarDolar'] + "></td> \
-											<td style='color: blue;'>" + formatoNumero(item['dbMontoAPagarEuro']) + "</td> \
-											<td style='color: red;'>" + formatoNumero(item['dbMontoAPagarBolivar']) + "</td> \
-											<td>" + item['dbObservation'] + "</td> \
-											<td><input type='number' class='form-control original-amount noverScreen' value=" + item['dbTarifaDolar'] + "></td><td></td></tr>";
+							indicatorPaid = 1;
 						}
 					}
 				}
@@ -2662,6 +2695,116 @@
 		$('#tax-phone').val(taxPhone);
 		$('#email').val(customerEmail);
 	}
+
+	/**
+	 * Función que maneja la lógica para actualizar la exoneración del servicio educativo.
+	 * Se llama cuando un checkbox con la clase 'exose' cambia de estado.
+	 *
+	 * @param {jQuery} checkboxExose El objeto jQuery del checkbox que fue clickeado.
+	 * @param {boolean} estadoActualCheckbox El estado actual del checkbox (true si está marcado, false si está desmarcado).
+	 */
+	function actualizarExoneracionServicioEducativo(checkboxExose, estadoActualCheckbox)
+	{
+		// Captura el estado del checkbox ANTES de cualquier confirmación o operación.
+		// Esto es vital para revertir el estado si la operación falla o se cancela.
+		const estadoInicialCheckbox = !estadoActualCheckbox;
+
+		let mensajeConfirmacion = '';
+		let valorExoneracion = 0; // Por defecto para desmarcar
+
+		if (estadoActualCheckbox)
+		{ // Si el checkbox se acaba de marcar (para exonerar)
+			mensajeConfirmacion = '¿Está seguro que desea exonerar el servicio educativo?';
+			valorExoneracion = 100; // Valor para exonerar
+		}
+		else
+		{ // Si el checkbox se acaba de desmarcar (para eliminar exoneración)
+			mensajeConfirmacion = '¿Está seguro que desea eliminar la exoneración del servicio educativo?';
+			valorExoneracion = 0; // Valor para eliminar la exoneración
+		}
+
+		// Mostrar alerta de confirmación
+		if (confirm(mensajeConfirmacion))
+		{
+			// El usuario hizo clic en "Sí"
+
+			// 1. Obtener el ID del estudiante
+			const idCompletoCheckbox = checkboxExose.attr('id'); // Ej: "exose-123-456"
+			const partesId = idCompletoCheckbox.split('-'); // ["exose", "123", "456"]
+			const idEstudiante = partesId[1]; // "123"
+
+			// 2. Mostrar modal de procesamiento
+			if (typeof crm_processing_modal === 'function')
+			{
+				crm_processing_modal('Por favor espere mientras se procesa la solicitud...');
+			}
+			else
+			{
+				console.log('Procesando solicitud...');
+			}
+
+			// 3. Realizar la petición AJAX tipo PUT
+			$.ajax({
+				url: '<?php echo Router::url(["controller" => "Students", "action" => "actualizarExoneracionServicioEducativo"]); ?>',
+				type: 'PUT',
+				dataType: 'json',
+				contentType: 'application/json',
+				data: JSON.stringify({
+					id_estudiante: idEstudiante,
+					valor_exoneracion: valorExoneracion
+				})
+			})
+			.done(function(respuesta)
+			{ // Usamos 'respuesta' para coincidir con el backend
+				if (typeof crm_processing_modal_close === 'function')
+				{
+					crm_processing_modal_close();
+				}
+
+				if (respuesta.exito)
+				{ // Ahora verificamos 'exito' del backend
+					let mensajeExito = '';
+					if (estadoActualCheckbox)
+					{
+						mensajeExito = 'La exoneración se realizó satisfactoriamente.';
+					}
+					else
+					{
+						mensajeExito = 'Se eliminó la exoneración satisfactoriamente.';
+					}
+					alert(mensajeExito);
+					$.redirect('<?php echo Router::url(["controller" => "Users", "action" => "wait"]); ?>');
+				}
+				else
+				{
+					// Si la respuesta no es 'exito' (hubo un error en el servidor)
+					alert(respuesta.mensaje || 'Ocurrió un error desconocido al procesar la solicitud.'); // Ahora usamos 'mensaje' del backend
+					// Revertir el estado del checkbox al original porque la operación falló
+					checkboxExose.prop('checked', estadoInicialCheckbox);
+				}
+			})
+			.fail(function(jqXHR, textStatus, errorThrown)
+			{
+				if (typeof crm_processing_modal_close === 'function')
+				{
+					crm_processing_modal_close();
+				}
+				// Si la petición falla (error de red, etc.), revertir el estado del checkbox
+				checkboxExose.prop('checked', estadoInicialCheckbox);
+				alert("La solicitud no pudo ser procesada. Código de error: " + textStatus + (errorThrown ? " - " + errorThrown : ""));
+			});
+
+		}
+		else
+		{
+			// El usuario hizo clic en "No" en la confirmación
+			// Revertir el estado del checkbox a su valor original
+			checkboxExose.prop('checked', estadoInicialCheckbox);
+
+			// Redireccionar inmediatamente
+			$.redirect('<?php echo Router::url(["controller" => "Users", "action" => "wait"]); ?>');
+		}
+	}
 	    
 // Funciones Jquery
 
@@ -2773,29 +2916,6 @@
 					return false;
 				}
 			}
-
-			if (indicadorConsejoEducativo == 0 && tipoUsuario == 0)
-			{
-				let factura_fiscal = $('<p style="background-color: #a9e0ff; color: red;">¿ Factura fiscal ?</p>').dialog(
-				{
-					modal: true,
-					buttons: 
-					{
-						"Sí": function() 
-						{
-							indicador_pedido = 0;
-							factura_fiscal.dialog('close');
-							
-						},
-						"No":  function() 
-						{
-							indicador_pedido = 1;
-							factura_fiscal.dialog('close');
-						}
-					}
-				});
-			}
-
 			idFamily = $(this).attr('id').substring(2);
 			
 			if (selectFamily > -1)
@@ -2880,6 +3000,7 @@
 							julioExonerado = 0;
 							morosoAnoAnterior = 0;
 							alumno_nuevo = 0;
+							servicioEducativoExonerado = 0;
 
 							estudiantes_condiciones[idStudent] = [];
 							estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] = false;
@@ -2957,6 +3078,8 @@
 
 							alumno_nuevo = value.alumno_nuevo;
 
+							servicioEducativoExonerado = value.servicio_educativo_exonerado;
+
 							$.each(value.studentTransactions, function(key2, value2) 
 							{
 								if (conceptos_a_omitir.includes(value2.transaction_description))
@@ -2988,6 +3111,15 @@
 								amountMonthly = 0;
 								tarifaDolar = 0;
 
+								if (monthlyPayment.substring(0, 18) == "Servicio educativo")
+								{
+									servicioEducativoExoneradoTransaccion = servicioEducativoExonerado;
+								}
+								else
+								{
+									servicioEducativoExoneradoTransaccion = 0;
+								}
+								
 								if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
 								{
 									if (indicador_recalcular_cuotas == true && anoMes >= ano_mes_recalculo_cuotas_atrasadas && anoMes < ano_mes_actual && paidOut == false)
@@ -3012,22 +3144,15 @@
 								}
 								else
 								{
-									if (monthlyPayment.substring(0, 18) == "Servicio educativo")
+									$.each(otrasTarifas, function(key3, value3)											
 									{
-										tarifaDolar = monto_cuota;
-									}
-									else
-									{
-										$.each(otrasTarifas, function(key3, value3)											
+										if (monthlyPayment == value3.conceptoAno)
 										{
-											if (monthlyPayment == value3.conceptoAno)
-											{
-												amountMonthly = value3.tarifaBolivar;
-												tarifaDolar = value3.tarifaDolar;
-												return false;
-											}
-										});
-									}
+											amountMonthly = value3.tarifaBolivar;
+											tarifaDolar = value3.tarifaDolar;
+											return false;
+										}
+									});
 								}
 														
 								if (tarifaDolar == 0)
@@ -3207,7 +3332,26 @@
 								}
 								else if (transactionType != 'Mensualidad')
 								{
-									montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+									if (monthlyPayment.substring(0, 18) == "Servicio educativo")
+									{
+										if (servicioEducativoExoneradoTransaccion > 0)
+										{
+											montoPendienteDolar = 0;
+										}
+										else if (partialPayment == 1)
+										{
+											montoPendienteDolar = dosDecimales(transactionAmount - montoDolar);
+										}
+										else
+										{
+											montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+										}
+									}
+									else
+									{
+										montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+									}
+
 									if (montoPendienteDolar > 0 && estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] == false)
 									{
 										estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] = true;
@@ -3518,7 +3662,7 @@
 					}
 					inputCounter++;
 				}
-				else if (inputCounter == 4)
+				else if (inputCounter == 5)
 				{
 					inputCounter = 0;
 				}
@@ -3613,7 +3757,7 @@
 					idAmountTransactions = $(this).attr('id');
 					inputCounter++;
 				}
-				else if (inputCounter == 4)
+				else if (inputCounter == 5)
 				{
 					inputCounter = 0;
 				}
@@ -4444,6 +4588,16 @@
 			$('.check-bolivar').prop('checked', true);
 			aCobrarBolivares();
 		});
+
+		$(document).on('change', '.exose', function()
+		{
+			const checkboxExose = $(this); // El checkbox que fue clickeado (objeto jQuery)
+			const estadoActualCheckbox = checkboxExose.is(':checked'); // true si está marcado, false si está desmarcado
+
+			// Llamar a la función principal pasando el checkbox y su estado actual
+			actualizarExoneracionServicioEducativo(checkboxExose, estadoActualCheckbox);
+		});
+
     }); 
 
 </script>

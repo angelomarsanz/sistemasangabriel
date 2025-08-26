@@ -70,7 +70,7 @@ class BillsController extends AppController
 			// Inicio cambios Seniat
 			elseif ($user['role'] === 'Seniat')
 			{
-				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito']))
+				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito', 'notaContable', 'listaFacturasFamilia', 'conceptosNotaContable']))
 				{
 					return true;
 				}				

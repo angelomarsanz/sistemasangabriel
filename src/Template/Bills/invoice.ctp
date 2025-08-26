@@ -889,6 +889,53 @@
 			<br />
 			<br />
 		</div>
+		<br /><br /><br />
+		<div>
+			<h5><?= " Fecha: ".$bill->date_and_time->format('d-m-Y').", ".$bill->school_year ?></h5>
+			<?php 
+			if ($bill->annulled == 1): ?>
+				<h3 style="text-align: center;">*** ANULADO ***</H3>
+			<?php
+			endif; ?> 
+			<h3 style="text-align: right;">Recibo de Seguro Nro. <?= $bill->bill_number ?></h3>		
+			<h2 style="text-align: center;">Por Bs. <?= number_format($bill->amount_paid, 2, ",", ".") ?>  (<?= number_format(round($bill->amount_paid/$bill->tasa_cambio, 2), 2, ",", ".") ?>  $)</h2>
+			<br />
+			<p style="text-align: justify;">Hemos recibido de: <?= $bill->client ?> portador de la cédula/pasaporte/RIF <?= $bill->identification ?> la cantidad de <b><?= number_format($bill->amount_paid, 2, ",", ".") ?></b> Bs.</p>
+			<p>Por concepto de seguro escolar, correspondiente a lo(s) alumno(s):</p>
+			<table style="width:100%;">
+				<tbody>
+					<?php foreach ($vConcepts as $vConcept): ?>
+							<tr>
+								<td>&nbsp;&nbsp;&nbsp;- <?= h($vConcept['invoiceLine']) ?></td>
+							</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+			<br />
+			<div id="payments">
+				Formas de pago:
+				<table style="width:100%;">
+					<tbody class="nover">
+						<?php foreach ($aPayments as $aPayment): ?>
+							<tr>
+								<td><?= h($aPayment->payment_type) ?></td>
+								<td><?= h($aPayment->bank) ?></td>
+								<td><?= h($aPayment->bancoReceptor) ?></td>
+								<td><?= h($aPayment->account_or_card) ?></td>
+								<td><?= h($aPayment->serial) ?></td>
+								<td><?= h($aPayment->moneda) ?></td>
+								<td><?= number_format($aPayment->amount, 2, ",", ".") ?></td>
+								<td><?= $aPayment->comentario ?></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			</div>
+			<p>Cajero: <?= $usuarioResponsable ?></p>
+			<br />
+			<br />
+			<br />
+		</div>
 	<?php elseif ($bill->tipo_documento == "Recibo de Consejo Educativo"): 
 		$conceptos = [];
 		$checkedEfectivos = "";

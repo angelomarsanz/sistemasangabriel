@@ -225,7 +225,7 @@ class GuardiantransactionsController extends AppController
         $this->loadModel('Parentsandguardians');
 
         $representante = $this->Parentsandguardians->get($idRepresentante, [
-            'contain' => ['Students']
+            'contain' => ['Students' => ['Sections']]
         ]);
 
         $indicadorFirmarContrato = 0;

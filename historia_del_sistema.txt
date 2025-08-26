@@ -1,16 +1,38 @@
 Objetivos:
 
 Agenda:
-1) Cakephp5 - 08/06/2025:
+- Impresión copia recibo de seguro 1158
+- Cierre de turno del 01/07/2025
+	- Tasa dólar/euro 28/07/2025: 122.17
+	- Pedido Nro. 5665/5665, Recibo de anticipo, Nieves Sandoval. Se cambió por Pedido
+	- Factura Nro. 128312/113019, Nieves Sandoval
+	- Números de turno:
+		- Lorelys, 4032, fiscales no aparece la factura -> Tasa dólar: 108,18. 444.289,63 Bs. Última factura control 113034. A este turno re-asignar la factura 128312
+		- Lorelys, 4033, pedidos no aparece el pedido -> Tasa dólar: 108,18 A este turno corresponde el pedido 5665 (Listo turno cerrado correctamente)
+		- Daniela, 4034, fiscales no aparece la factura 
+		- Daniela, 4035, pedidos no aparece el pedido
+		- Daniela, 4036, pedidos no aparece el pedido
+- Eliminar la opción de depósito en los métodos de pago de la cobranza (listo)
+- Ajustar cierres del 01/07/2025
+- Reportes profesora Ana
+- Cakephp5 - 08/06/2025:
 	- Se conectó la base de datos y se restauró la base de datos del ambiente de producción - 10-06-2025
-2) Seniat - 08/06/2025
-	- En el ambiente de desarrollo se autorizó en BillsController la acción consultaNotaDebito
-3) Inventario - 08/06/2025
+- Seniat - 18/06/2025
+	- Módulos modificados:
+		- /opt/lampp/htdocs/sistemasangabriel/src/Controller/BillsController.php
+		- /opt/lampp/htdocs/sistemasangabriel/src/Controller/SalesbooksController.php
+		- /opt/lampp/htdocs/sistemasangabriel/src/Controller/EventosController.php
+		- /opt/lampp/htdocs/sistemasangabriel/src/Template/Bills/nota_contable.ctp
+	- Separación de reportes de cierre:
+		- Turno 4033 del 01/07/2025, id_usuario: 2, rol: Ventas generales, Lorelys Aguilar
+		- Factura Nro. 128312 Control 113019, turno 4033
+		- Pedido Nro. 5665 Control 5665, turno 4033
+- Inventario - 08/06/2025
 	- Se subieron al ambiente de producción: Los modelos, las vistas y los controladores.
 	- Todas las tablas están creadas en el ambiente de producción. Falta revisar los campos contra los modelos en la aplicación y agregar el campo estatus_registro
 	- Nota especial: Se crea la tabla clientes y proveedores dependientes de la tabla usuario. Cuando se quiera saber el id del cliente, proveedor, representante, empleado, etc se conecta con la tabla usuarios y la respectiva opción contain de la tabla. 
-4) Consulta facturas conceptos de inscripción años anteriores - 08/06/2025 - Listo para subir al ambiente de producción
-5) Pantalla actualización de datos 2025-2026 - 13/06/2025
+- Consulta facturas conceptos de inscripción años anteriores - 08/06/2025 - Listo para subir al ambiente de producción
+- Pantalla actualización de datos 2025-2026 - 13/06/2025
 	- Se hicieron los cambios preliminares en la pantalla de inicio
 		- Representantes seleccionados para pruebas
 			- Familia exonerada de diferencias de inscripción: Ruiz Aguilar, id_parentsanduardian: 750, id_usuario: 731, 731, cédula: 16153897
@@ -25,20 +47,39 @@ Agenda:
 		- /opt/lampp/htdocs/sistemasangabriel/src/Template/Guardiantransactions/home_screen.ctp - Ok
 		- /opt/lampp/htdocs/sistemasangabriel/src/Template/Students/filepdf.ctp - Ok
 	- Se iniciaron los cambios en la ficha de inscripción
-6) Servicio educativo: Columna servicio_educativo_exonerado - 09/06/2025
-	- Estudiante de referencia para las pruebas: Morales Mayaudon 
-7) Consulta deuda representante - Diferencias trabajadores - Separar los conceptos de inscripción - 15/06/2025
+- Servicio educativo: Columna servicio_educativo_exonerado - 09/06/2025
+	- Estudiante de referencia para las pruebas:
+		Período 2025: 
+			- Sin pago, id_estudiante: 2057, Estudiante: Caballero Sosa Mauricio, Familia: Caballero Sosa - Ok
+			- Pago parcial (producción), id_estudiante: 2077, Estudiante: García Garcés Matías, id_familia: 1446, Familia: García Garces - Revisar
+			- Pago completo, id_estudiante: 2062, Estudiante: Pérez Pierluissi Matías Fernando, id_familia: 1435, Familia: Pérez Pierluissi - Ok 
+			- Pago errado, id_estudiante: 2096, Estudiante: Pérez Moreno Ángel Jesús, id_familia: 1459, Familia: Pérez Moreno - Ok
+		Período 2024:
+			- Pago completo, id_estudiante: 1966, Estudiante: Rego Proupin Nicolas, id_familia: 1369, Familia: Rego Proupin - ok
+			- Pago completo ajustado: 1970, Estudiante: Vilchez Jimenez Cristóbal, id_familia: 1373, Familia: Vilchez Jimenez - ok
+			- Pago ajustado parcial: 2060, Estudiante: Romero Chacón Miguel, id_familia: 1433, Familia: Romero Chacón - Revisar  
+		- 
+	- Módulos modificados:
+		js_csga
+		/opt/lampp/htdocs/sistemasangabriel/src/Template/Element/menu.ctp
+		/opt/lampp/htdocs/sistemasangabriel/src/Model/Table/StudentsTable.php
+		/opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/servicio_educativo.ctp
+		/opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
+- Consulta deuda representante - Diferencias trabajadores - Separar los conceptos de inscripción - 15/06/2025
 	Módulos modificados:
 	- /opt/lampp/htdocs/sistemasangabriel/src/Controller/StudenttransactionsController.php
 	- /opt/lampp/htdocs/sistemasangabriel/src/Template/Studenttransactions/consulta_deuda_representante.ctp
-8) Columnas vector_becas_anteriores, descuentos_anteriores -> Urgente antes de que comience el proceso de inscripción
-9) En el reporte de cierre, crear una nota de anulación de pedido, similar a la nota de crédito que se usa para reversar una factura. Pero no se va a imprimir. En el reporte de cierre al igual que el cuadro resumen aparecera el pedido y luego en otra fila "Menos notas de anulación de pedido" - 11/06/2025
+- Columnas vector_becas_anteriores, descuentos_anteriores -> Urgente antes de que comience el proceso de inscripción
+- En el reporte de cierre, crear una nota de anulación de pedido, similar a la nota de crédito que se usa para reversar una factura. Pero no se va a imprimir. En el reporte de cierre al igual que el cuadro resumen aparecera el pedido y luego en otra fila "Menos notas de anulación de pedido" - 11/06/2025
 	- Se creó el controlador, entidad, tabla y vista: NotaAnulacionPedidos
-10) En el cuadro resumen en la columna de depósitos: cuando es pago por punto de ventas los cuatro últimos números de la tarjeta 11/06/2025
+- Listo - En el cuadro resumen en la columna de depósitos: cuando es pago por punto de ventas los cuatro últimos números de la tarjeta 11/06/2025
 	- Debo cargar los últimos números de la tarjeta en el vector $vectorPagos
-11) Al iniciar el proceso de inscripción en junio de cada año, a los alumnos regulares se les muestra el contrato del año que está terminando y debería ser el contrato del año que va a iniciar. Se forzó provisionalmente el año 2025
-12) Verificar en los alumnos nuevos si se inicia un ciclo sin final firmar contrato - actualizar datos
-13) A los hijos de los trabajadores del colegio exonerar el pago de la diferencia de inscripción
+- Al iniciar el proceso de inscripción en junio de cada año, a los alumnos regulares se les muestra el contrato del año que está terminando y debería ser el contrato del año que va a iniciar. Se forzó provisionalmente el año 2025
+- Verificar en los alumnos nuevos si se inicia un ciclo sin final firmar contrato - actualizar datos
+- A los hijos de los trabajadores del colegio exonerar el pago de la diferencia de inscripción
+- Aviso julio no pagado
+	Familia Mendoza, cédula 17067450
+
 
 cd /media/angelomarsanz/Mis\ documentos/Colegio\ San\ Gabriel/vite
 
@@ -48,6 +89,14 @@ Pendientes:
 Con Javascript controlar en que impresora se imprimirá, si en la fiscal o la no fiscal
 - En el módulo create_invoice en la función verificar_impuestos no se está desglosando los montos de dólares y euros en la variable acumulado_divisas. Se debe desglosar
 - Corregir y reimprimir los cierres de los días 24, 25, 26 y 27 de enero 2023
+
+31/07/2025
+Familia Fernandez Sichini duplicada: 
+id_usuario 1469, id_familia 1487, id_estudiante 2135 (Eliminados
+id_usuario 1470, id_familia 1488, id_estudiante 2136 (definitivos)
+
+04/07/2025
+Quitar anulación 5657, id 55999, Hernández González
 
 16/06/2025
 Alumno nuevo, Acosta Reverón Paula Nohemí, id_estudiante: 2073, id_representante: 1444, id_user: 1419, cédula: 19476317

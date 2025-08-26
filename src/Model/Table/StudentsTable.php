@@ -239,6 +239,9 @@ class StudentsTable extends Table
 			
         $validator
             ->allowEmpty('discount');
+
+        $validator
+            ->allowEmpty('servicio_educativo_exonerado');
 			
         return $validator;
     }

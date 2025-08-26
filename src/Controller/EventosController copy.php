@@ -27,43 +27,23 @@ class EventosController extends AppController
         // Fin cambios Seniat
         return parent::isAuthorized($user);
     }
-    
+
+    /**
+     * Index method
+     *
+     * @return \Cake\Network\Response|null
+     */
     public function index()
     {
-        // Cadenas de texto a omitir en la descripción
-        $cadenas_omitir = [
-            'anuló',
-            'modificó',
-            'cambió',
-            'ajustó',
-            'recibo',
-            'pedido',
-        ];
-    
-        // Construir la condición 'NOT LIKE' para cada cadena
-        // En lugar de un AND implícito, construimos un OR de negaciones
-        $condiciones_negacion_descripcion = [];
-        foreach ($cadenas_omitir as $cadena) {
-            $condiciones_negacion_descripcion[] = ['Eventos.descripcion LIKE' => '%' . $cadena . '%'];
-        }
-    
         $this->paginate = [
-            'contain' => ['Users'],
-            // Usamos 'NOT' y un array de condiciones unidas por 'OR'
-            'conditions' => [
-                'NOT' => [
-                    'OR' => $condiciones_negacion_descripcion
-                ]
-            ],
-            'order' => ['Eventos.created' => 'DESC'] // Ordenamos por 'created' de forma descendente
+            'contain' => ['Users']
         ];
-    
         $eventos = $this->paginate($this->Eventos);
-    
+
         $this->set(compact('eventos'));
         $this->set('_serialize', ['eventos']);
     }
-    
+
     /**
      * View method
      *

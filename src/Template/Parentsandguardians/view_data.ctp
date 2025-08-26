@@ -8,7 +8,8 @@
 	<input type="hidden" id="id-user" value=<?= $user->id ?> />
 </div>
 <div>
-	<?php if(isset($current_user['role']) && $current_user['role'] == 'Administrador'): ?>
+	<?php if(isset($current_user['role'])): ?>
+		<?php if($current_user['role'] == 'Administrador' || $current_user['role'] == 'Propietario' || $current_user['role'] == 'Ventas generales' || $current_user['role'] == 'Contabilidad general' ): ?>
 		<button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">Actualizar usuario</button>
 		<div class="modal fade" id="myModal" role="dialog">
 			<div class="modal-dialog">
@@ -28,6 +29,7 @@
 				</div>
 			</div>
 		</div>
+		<?php endif; ?>
 	<?php endif; ?>
 	<br />
 	<br />
@@ -37,10 +39,12 @@
 	<?= $this->Html->link('Ver alumnos', ['controller' => 'Students', 'action' => 'indexConsult', $idFamily, $family], ['class' => 'btn btn-success']); ?>
 	<br />
 	<br />
-	<?php if(isset($current_user['role']) && $current_user['role'] == 'Administrador'): ?>
+	<?php if(isset($current_user['role'])): ?>
+		<?php if($current_user['role'] == 'Administrador' || $current_user['role'] == 'Propietario' || $current_user['role'] == 'Ventas generales' || $current_user['role'] == 'Contabilidad general' ): ?> 
 		<?= $this->Html->link('Ver facturas', ['controller' => 'Bills' , 'action' => 'index', $idFamily, $family], ['class' => 'btn btn-success']); ?>
 		<br />
 		<br />
+		<?php endif; ?>
 	<?php endif; ?>
 </div>
 <script>

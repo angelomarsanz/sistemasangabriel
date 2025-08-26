@@ -70,7 +70,7 @@ class BillsController extends AppController
 			// Inicio cambios Seniat
 			elseif ($user['role'] === 'Seniat')
 			{
-				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito']))
+				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito', 'notaContable', 'listaFacturasFamilia', 'conceptosNotaContable']))
 				{
 					return true;
 				}				
@@ -648,6 +648,8 @@ class BillsController extends AppController
 
 		$this->loadModel('Schools');
 
+		$eventos = new EventosController;
+
 		$school = $this->Schools->get(2);
 
 		$actualAnoInscripcion = $school->current_year_registration;
@@ -834,6 +836,21 @@ class BillsController extends AppController
                         $this->Flash->error(__('No se pudo actualizar la factura con el número de control, por favor cuando cierre el turno verifique
                         los números de control de las facturas que aparecen en el reporte'));
                     }
+					else
+					{
+						if ($bill->tipo_documento == 'Factura')
+						{
+							$eventos->add('controller', 'Bills', 'actualizarIndicadorImpresion', 'Se emitió la factura Nro. '.$billGet->bill_number.' control: '.$billGet->control_number);
+						}
+						elseif ($bill->tipo_documento == 'Nota de crédito')
+						{
+							$eventos->add('controller', 'Bills', 'actualizarIndicadorImpresion', 'Se emitió la nota de crédito Nro. '.$billGet->bill_number.' control: '.$billGet->control_number);
+						}
+						elseif ($bill->tipo_documento == 'Nota de débito')
+						{
+							$eventos->add('controller', 'Bills', 'actualizarIndicadorImpresion', 'Se emitió la nota de débito Nro. '.$billGet->bill_number.' control: '.$billGet->control_number);
+						}
+					}
                 }
             }
         }
@@ -1928,6 +1945,8 @@ class BillsController extends AppController
         
         $fechaHoy = Time::now();
 
+		$eventos = new EventosController;
+
         if ($this->request->is('json')) 
         {
             $jsondata = [];
@@ -1941,9 +1960,7 @@ class BillsController extends AppController
 				if ($_POST['reimpresion'] == 1)
 				{
 					$bill->fecha_reimpresion = $fechaHoy;
-					
-					$eventos = new EventosController;
-							
+												
 					$eventos->add('controller', 'Bills', 'actualizarIndicadorImpresion', 'Se reimprimió la factura Nro. ' . $bill->bill_number);
 					
 				}

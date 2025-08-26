@@ -1,17 +1,12 @@
 <?php
 namespace App\Controller;
-
 use App\Controller\AppController;
-
 use App\Controller\ParentsandguardiansController;
-
 use App\Controller\StudenttransactionsController;
-
 use App\Controller\BinnaclesController;
-
 use Cake\I18n\Time;
-
 use Cake\ORM\TableRegistry;
+use Cake\Event\Event; // Necesario para el tipo de parámetro de beforeFilter
 
 /**
  * Students Controller
@@ -20,6 +15,21 @@ use Cake\ORM\TableRegistry;
  */
 class StudentsController extends AppController
 {
+   /**
+     * initialize method
+     *
+     * Este método se ejecuta antes que cualquier acción del controlador.
+     * Es el lugar ideal para cargar componentes.
+     *
+     * @return void
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        // Cargar el RequestHandler para que CakePHP pueda parsear el JSON de las peticiones PUT/POST
+        $this->loadComponent('RequestHandler');
+    }
+
     public function beforeFilter(\Cake\Event\Event $event)
     {
         parent::beforeFilter($event);
@@ -1350,6 +1360,7 @@ class StudentsController extends AppController
 								'section' => $sections->section,
 								'orden_grado' => $sections->orden,
 								'alumno_nuevo' => $result->new_student,
+								'servicio_educativo_exonerado' => $result->servicio_educativo_exonerado,
 								'studentTransactions' => json_decode($transacciones) 
 							];
 					}
@@ -4089,5 +4100,92 @@ class StudentsController extends AppController
 			->order(['Students.balance' => 'ASC', 'Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC']);
 
 		$this->set(compact('egresados'));
+	}
+	
+	/**
+	 * Actualiza el campo 'servicio_educativo_exonerado' de un estudiante.
+	 * Recibe el id_estudiante y valor_exoneracion vía petición PUT (JSON).
+	 *
+	 * @return \Cake\Http\Response|null Responde con JSON indicando éxito o error.
+	 */
+	public function actualizarExoneracionServicioEducativo()
+	{
+		// Esta acción solo debe responder a peticiones PUT
+		if (!$this->request->is('put'))
+		{
+			return $this->response->withType('application/json')
+				->withStatus(405) // Método no permitido
+				->withStringBody(json_encode(['exito' => false, 'mensaje' => 'Método no permitido. Solo se aceptan peticiones PUT.']));
+		}
+
+		// Obtener los datos enviados en el cuerpo de la petición PUT (JSON)
+		// RequestHandler component ya parsea el JSON a $this->request->getData()
+		$datos_recibidos = $this->request->getData();
+
+		$id_estudiante_recibido = null;
+		$valor_exoneracion_recibido = null;
+
+		// Validar que los datos esperados están presentes
+		if (isset($datos_recibidos['id_estudiante']) && isset($datos_recibidos['valor_exoneracion']))
+		{
+			$id_estudiante_recibido = (int)$datos_recibidos['id_estudiante']; // Castear a entero
+			$valor_exoneracion_recibido = (int)$datos_recibidos['valor_exoneracion']; // Castear a entero
+		}
+		else
+		{
+			// Faltan datos en la petición
+			return $this->response->withType('application/json')
+				->withStatus(400) // Bad Request
+				->withStringBody(json_encode(['exito' => false, 'mensaje' => 'Datos incompletos. Se requieren id_estudiante y valor_exoneracion.']));
+		}
+
+		// Validar que el valor de exoneración sea 0 o 100
+		if (!in_array($valor_exoneracion_recibido, [0, 100]))
+		{
+			return $this->response->withType('application/json')
+				->withStatus(400) // Bad Request
+				->withStringBody(json_encode(['exito' => false, 'mensaje' => 'Valor de exoneración inválido. Debe ser 0 o 100.']));
+		}
+
+		// Cargar la tabla de Estudiantes
+		$tabla_estudiantes = TableRegistry::getTableLocator()->get('Students');
+
+		// Buscar el registro del estudiante por ID
+		$estudiante_entidad = $tabla_estudiantes->find()
+			->where(['id' => $id_estudiante_recibido])
+			->first();
+
+		if (!$estudiante_entidad)
+		{
+			// Estudiante no encontrado
+			return $this->response->withType('application/json')
+				->withStatus(404) // Not Found
+				->withStringBody(json_encode(['exito' => false, 'mensaje' => 'Estudiante no encontrado.']));
+		}
+
+		// Actualizar el campo 'servicio_educativo_exonerado'
+		$estudiante_entidad->servicio_educativo_exonerado = $valor_exoneracion_recibido;
+
+		// Intentar guardar el registro
+		if ($tabla_estudiantes->save($estudiante_entidad))
+		{
+			// Guardado exitoso
+			return $this->response->withType('application/json')
+				->withStatus(200) // OK
+				->withStringBody(json_encode(['exito' => true, 'mensaje' => 'Estado de exoneración actualizado exitosamente.']));
+		}
+		else
+		{
+			// Error al guardar
+			$errores = $estudiante_entidad->getErrors(); // Obtener errores de validación si los hay
+			$mensaje_error = 'Error al actualizar el estado de exoneración.';
+			if (!empty($errores))
+			{
+				$mensaje_error .= ' Detalles: ' . json_encode($errores);
+			}
+			return $this->response->withType('application/json')
+				->withStatus(500) // Internal Server Error
+				->withStringBody(json_encode(['exito' => false, 'mensaje' => $mensaje_error]));
+		}
 	}
 }
