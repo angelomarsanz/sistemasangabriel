@@ -1,3 +1,9 @@
+Hola Gemini !
+
+Vamos a hacer un cambio más en el reporte de formas de pago.
+
+En la vista dinámica que se genera en el archivo reporteFormasDePago.js, en la sección "ordenado por" por favor agregar debajo de "Familia" una segunda opción "familia (agrupado)", cuando se seleccione esa opción al momento de generarse el reporte todas las facturas o pedidos de cada familia se van a agrupar y totalizar por la forma de pago y se van a eliminar del reporte para esa opción específica las columnas "nro. Factura/control" y "fecha factura", ya que se va a agrupar y totalizar por la columna "Forma de pago"
+
 Actualización a debian 12
 
 Hola. Me alegra que quieras actualizar tu sistema. El proceso no es tan difícil, pero requiere seguir los pasos con cuidado.

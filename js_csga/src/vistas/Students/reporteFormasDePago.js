@@ -146,6 +146,9 @@ export const reporteFormasDePago = () =>
                                                 <div class="radio">
                                                     <label><input type="radio" name="personType" value="natural"> Persona natural</label>
                                                 </div>
+                                                <div class="radio">
+                                                    <label><input type="radio" name="personType" value="ambas"> Persona jurídica y natural</label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -216,7 +219,10 @@ export const reporteFormasDePago = () =>
                                             <div class="form-group">
                                                 <label>Ordenado por:</label>
                                                 <div class="radio">
-                                                    <label><input type="radio" name="orderBy" value="familia" checked> Familia</label>
+                                                    <label><input type="radio" name="orderBy" value="familia_agrupado" checked> Familia (agrupado)</label>
+                                                </div>
+                                                <div class="radio">
+                                                    <label><input type="radio" name="orderBy" value="familia"> Familia</label>
                                                 </div>
                                                 <div class="radio">
                                                     <label><input type="radio" name="orderBy" value="factura"> Factura</label>
@@ -279,10 +285,16 @@ export const reporteFormasDePago = () =>
                                 <h4 class="panel-title">Reporte de Formas de Pago</h4>
                                 <div class="report-info">
                                     <p><strong>Tipo de Documento:</strong> ${filters.documentType === 'facturas' ? 'Facturas' : 'Pedidos'}</p>
-                                    <p><strong>Tipo de Persona:</strong> ${filters.personType === 'juridica' ? 'Persona Jurídica' : 'Persona Natural'}</p>
+                                    <p><strong>Tipo de Persona:</strong> ${filters.personType === 'juridica' ? 'Persona Jurídica' : (filters.personType === 'natural' ? 'Persona Natural' : 'Persona Jurídica y Natural')}</p>
                                     <p><strong>Formas de Pago:</strong> ${filters.paymentForms.includes('todas') ? 'Todas' : filters.paymentForms.join(', ')}</p>
                                     <p><strong>Periodo:</strong> Año ${filters.year} - Meses: ${filters.months.includes('all') ? 'Todos' : filters.months.join(', ')}</p>
-                                    <p><strong>Ordenado por:</strong> ${filters.orderBy === 'familia' ? 'Familia' : 'Factura'}</p>
+                                    <p><strong>Ordenado por:</strong> ${
+                                        filters.orderBy === 'familia' 
+                                            ? 'Familia' 
+                                            : filters.orderBy === 'familia_agrupado'
+                                                ? 'Familia (agrupado)'
+                                                : 'Factura'
+                                    }</p>
                                 </div>
                             </div>
                             <div class="panel-body">
@@ -307,7 +319,16 @@ export const reporteFormasDePago = () =>
                                     <thead>
                                         <tr>
                                             <th>Nro.</th>
-                                            ${filters.orderBy === 'familia' 
+                                            ${filters.orderBy === 'familia_agrupado'
+                                                ? `
+                                                    <th>Familia</th>
+                                                    <th>Estudiantes</th>
+                                                    <th>Cédula/RIF</th>
+                                                    <th>Nombre/Razón Social</th>
+                                                    <th>Forma de Pago</th>
+                                                    <th>Monto</th>
+                                                  `
+                                                : filters.orderBy === 'familia' 
                                                 ? `
                                                     <th>Familia</th>
                                                     <th>Estudiantes</th>
@@ -335,7 +356,17 @@ export const reporteFormasDePago = () =>
                                         ${reportData.map((item, index) => `
                                             <tr>
                                                 <td>${index + 1}</td>
-                                                ${filters.orderBy === 'familia' 
+                                                ${filters.orderBy === 'familia_agrupado'
+                                                    ? `
+                                                        <td>${item.familia}</td>
+                                                        <td>${formatStudents(item.students)}</td>
+                                                        <td>${item.cedulaRif}</td>
+                                                        <td>${item.razonSocial}</td>
+                                                        <td>${item.formaPago}</td>
+                                                        <td>${formatNumber(item.monto)}</td>
+                                                      `
+                                                    
+                                                    : filters.orderBy === 'familia' 
                                                     ? `
                                                         <td>${item.familia}</td>
                                                         <td>${formatStudents(item.students)}</td>
@@ -359,7 +390,7 @@ export const reporteFormasDePago = () =>
                                                 }
                                             </tr>
                                         `).join('')}
-                                        ${reportData.length === 0 ? `<tr><td colspan="9" class="text-center">No se encontraron datos para los filtros seleccionados.</td></tr>` : ''}
+                                        ${reportData.length === 0 ? `<tr><td colspan="${filters.orderBy === 'familia_agrupado' ? 7 : 9}" class="text-center">No se encontraron datos para los filtros seleccionados.</td></tr>` : ''}
                                     </tbody>
                                 </table>
                             </div>

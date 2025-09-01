@@ -845,14 +845,22 @@ class PaymentsController extends AppController
 				['Bills.identification LIKE' => 'J -%'],
 				['Bills.identification LIKE' => 'G -%']
 			]]);
-		} else { // natural
+		} elseif ($filters['personType'] === 'natural') {
 			$query->where(['OR' => [
 				['Bills.identification LIKE' => 'V -%'],
 				['Bills.identification LIKE' => 'E -%'],
 				['Bills.identification LIKE' => 'P -%']
 			]]);
+		} elseif ($filters['personType'] === 'ambas') {
+			$query->where(['OR' => [
+				['Bills.identification LIKE' => 'J -%'],
+				['Bills.identification LIKE' => 'G -%'],
+				['Bills.identification LIKE' => 'V -%'],
+				['Bills.identification LIKE' => 'E -%'],
+				['Bills.identification LIKE' => 'P -%']
+			]]);
 		}
-
+		// Si se selecciona 'ambas', se filtran explícitamente todos los tipos de persona conocidos.
 		$contadorQueryTipoPersona = $query->count();
 		
 		// Aplicar filtro de formas de pago
@@ -897,7 +905,7 @@ class PaymentsController extends AppController
 		}
 
 		// Aplicar ordenamiento
-		if ($filters['orderBy'] === 'familia') {
+		if ($filters['orderBy'] === 'familia' || $filters['orderBy'] === 'familia_agrupado') {
 			$query->order(['Parentsandguardians.family' => 'ASC']);
 		} else { // factura
 			$query->order(['Bills.bill_number' => 'ASC']);
@@ -908,48 +916,100 @@ class PaymentsController extends AppController
 		$reportData = [];
 		$totals = ['totalGeneral' => 0];
 		$cantidad = 0;
-		
-		// Agrupar los pagos por factura para un mejor procesamiento
-		$groupedByBill = [];
-		foreach ($results as $payment) {
-			$billId = $payment->bill->id;
-			if (!isset($groupedByBill[$billId])) {
-				$groupedByBill[$billId] = $payment->bill;
-				$groupedByBill[$billId]['payments'] = [];
-			}
-			$groupedByBill[$billId]['payments'][] = $payment;
-		}
 
-		foreach ($groupedByBill as $bill) {
-			$cantidad++;
-			foreach ($bill->payments as $payment) {
-				// Lógica para el resumen de totales
+		if ($filters['orderBy'] === 'familia_agrupado') {
+			$groupedByFamily = [];
+			foreach ($results as $payment) {
+				$familyId = $payment->bill->parentsandguardian->id;
 				$paymentLabel = $this->getPaymentLabel($payment);
+		
+				if (!isset($groupedByFamily[$familyId])) {
+					$representative = $payment->bill->parentsandguardian;
+					$students = [];
+					if (!empty($representative->students)) {
+						foreach ($representative->students as $student) {
+							$students[] = $student->first_name . ' ' . $student->second_name;
+						}
+					}
+					$groupedByFamily[$familyId] = [
+						'familia' => $representative->family . ' (' . $representative->first_name . ' ' . $representative->surname . ')',
+						'students' => $students,
+						'cedulaRif' => $payment->bill->identification,
+						'razonSocial' => $payment->bill->client,
+						'payments' => []
+					];
+				}
+		
+				if (!isset($groupedByFamily[$familyId]['payments'][$paymentLabel])) {
+					$groupedByFamily[$familyId]['payments'][$paymentLabel] = 0;
+				}
+				$groupedByFamily[$familyId]['payments'][$paymentLabel] += $payment->amount;
+		
+				// Actualizar totales generales
 				if (!isset($totals[$paymentLabel])) {
 					$totals[$paymentLabel] = 0;
 				}
 				$totals[$paymentLabel] += $payment->amount;
 				$totals['totalGeneral'] += $payment->amount;
-
-				// Lógica para el detalle del reporte
-				$representative = $bill->parentsandguardian;
-				$students = [];
-				if (!empty($representative->students)) {
-					foreach ($representative->students as $student) {
-						$students[] = $student->first_name . ' ' . $student->second_name;
-					}
+			}
+		
+			// Aplanar los datos agrupados para el reporte
+			foreach ($groupedByFamily as $familyData) {
+				foreach ($familyData['payments'] as $paymentLabel => $amount) {
+					$reportData[] = [
+						'familia' => $familyData['familia'],
+						'students' => $familyData['students'],
+						'cedulaRif' => $familyData['cedulaRif'],
+						'razonSocial' => $familyData['razonSocial'],
+						'formaPago' => $paymentLabel,
+						'monto' => $amount
+					];
 				}
-				
-				$reportData[] = [
-					'familia' => $representative->family . ' (' . $representative->first_name . ' ' . $representative->surname . ')',
-					'students' => $students,
-					'facturaControl' => $bill->bill_number . ' / ' . $bill->control_number,
-					'cedulaRif' => $bill->identification,
-					'razonSocial' => $bill->client,
-					'fechaFactura' => date_format($bill->date_and_time, 'd-m-Y'),
-					'formaPago' => $paymentLabel,
-					'monto' => $payment->amount
-				];
+			}
+			$cantidad = count($groupedByFamily); // La cantidad de operaciones es el número de familias
+		} else {
+			// Agrupar los pagos por factura para un mejor procesamiento
+			$groupedByBill = [];
+			foreach ($results as $payment) {
+				$billId = $payment->bill->id;
+				if (!isset($groupedByBill[$billId])) {
+					$groupedByBill[$billId] = $payment->bill;
+					$groupedByBill[$billId]['payments'] = [];
+				}
+				$groupedByBill[$billId]['payments'][] = $payment;
+			}
+	
+			foreach ($groupedByBill as $bill) {
+				$cantidad++;
+				foreach ($bill->payments as $payment) {
+					// Lógica para el resumen de totales
+					$paymentLabel = $this->getPaymentLabel($payment);
+					if (!isset($totals[$paymentLabel])) {
+						$totals[$paymentLabel] = 0;
+					}
+					$totals[$paymentLabel] += $payment->amount;
+					$totals['totalGeneral'] += $payment->amount;
+	
+					// Lógica para el detalle del reporte
+					$representative = $bill->parentsandguardian;
+					$students = [];
+					if (!empty($representative->students)) {
+						foreach ($representative->students as $student) {
+							$students[] = $student->first_name . ' ' . $student->second_name;
+						}
+					}
+					
+					$reportData[] = [
+						'familia' => $representative->family . ' (' . $representative->first_name . ' ' . $representative->surname . ')',
+						'students' => $students,
+						'facturaControl' => $bill->bill_number . ' / ' . $bill->control_number,
+						'cedulaRif' => $bill->identification,
+						'razonSocial' => $bill->client,
+						'fechaFactura' => date_format($bill->date_and_time, 'd-m-Y'),
+						'formaPago' => $paymentLabel,
+						'monto' => $payment->amount
+					];
+				}
 			}
 		}
 
