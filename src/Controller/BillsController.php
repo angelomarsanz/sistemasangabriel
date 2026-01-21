@@ -70,7 +70,7 @@ class BillsController extends AppController
 			// Inicio cambios Seniat
 			elseif ($user['role'] === 'Seniat')
 			{
-				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito', 'notaContable', 'listaFacturasFamilia', 'conceptosNotaContable']))
+				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito', 'notaContable', 'listaFacturasFamilia', 'conceptosNotaContable', 'editControl', 'searchInvoice', 'adjustInvoice']))
 				{
 					return true;
 				}				
@@ -236,12 +236,14 @@ class BillsController extends AppController
 				{
 					$bill->fiscal = 0;
 					$bill->control_number = $billNumber;
+					/*
+					Se comentó porque temporalmente no se están emitiendo Recibos de anticipo
 					if ($indicadorFacturaPendiente == 1)
 					{
 						$bill->tipo_documento = "Recibo de anticipo";
 					}
 					else
-					{
+					{ */
 						if ($indicador_servicio_educativo == 1)
 						{
 							$bill->tipo_documento = "Recibo de servicio educativo";
@@ -258,7 +260,7 @@ class BillsController extends AppController
 						{
 							$bill->tipo_documento = "Pedido";
 						}
-					}
+					// } Se comentó porque temporalmente no se están emitiendo Recibos de anticipo 
 				}
 				$bill->school_year = $this->headboard['schoolYear'];
 				$bill->identification = $this->headboard['typeOfIdentificationClient'] . ' - ' . $this->headboard['identificationNumberClient'];
@@ -282,7 +284,8 @@ class BillsController extends AppController
 				$bill->impresa = 0;
 				$bill->id_documento_padre = 0;
 				$bill->id_anticipo = 0;
-				$bill->factura_pendiente = $indicadorFacturaPendiente;
+				// $bill->factura_pendiente = $indicadorFacturaPendiente; Se comentó porque temporalmente no se están usando los recibos de anticipo
+				$bill->factura_pendiente = 0;
 				$bill->moneda_id = 1;
 				$bill->tasa_cambio = $this->headboard['tasaDolar'];
 				$bill->tasa_euro = $this->headboard['tasaEuro'];
@@ -338,6 +341,8 @@ class BillsController extends AppController
     
     public function createInvoice($menuOption = null, $idTurn = null, $turn = null)
     {
+		$binnacles = new BinnaclesController;
+
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
         
@@ -384,7 +389,37 @@ class BillsController extends AppController
 		
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar; 
-					
+
+		$tipos_factura_fiscal = 
+		[
+			'Factura inscripción regulares',
+			'Factura inscripción nuevos',
+			'Factura mensualidades'
+		];
+
+		if ($this->Auth->user('role') == 'Seniat' && !in_array($menuOption, $tipos_factura_fiscal)) 
+		{
+			$binnacles->add('controller', 'Bills', 'createInvoice', 'Opción menú inválida: Usuario: '.$this->Auth->user('username').' Rol: '.$this->Auth->user('role').' Opcion: '.$menuOption);
+		}
+
+		$tipos_pedido = 
+		[
+			'Pedido inscripción regulares',
+			'Pedido inscripción nuevos',
+			'Pedido mensualidades',
+			'Recibo servicio educativo',
+			'Recibo de seguro',
+			'Recibo Consejo Educativo'
+		];
+
+		if ($this->Auth->user('role') == 'Ventas generales' || $this->Auth->user('role') == 'Ventas generales')
+		{
+			if (!in_array($menuOption, $tipos_pedido)) 
+			{
+				$binnacles->add('controller', 'Bills', 'createInvoice', 'Opción menú inválida: Usuario: '.$this->Auth->user('username').' Rol: '.$this->Auth->user('role').' Opcion: '.$menuOption);
+			}
+		}
+			
         $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual', 'anoEscolarInscripcion', 'ano_mes_actual'));
     }
     
@@ -456,6 +491,8 @@ class BillsController extends AppController
 				{
 					foreach ($transactions as $transaction) 
 					{
+						/*
+						Se comentó porque temporalmente no se están emitiendo Recibos de anticipo
 						if (substr($transaction->monthlyPayment, 0, 10) == "Matrícula" || substr($transaction->monthlyPayment, 0, 3) == "Ago")
 						{
 							if ($this->headboard['indicador_pedido'] == 0)
@@ -463,6 +500,7 @@ class BillsController extends AppController
 								$indicadorFacturaPendiente = 1;
 							}
 						} 
+						*/
 						if (substr($transaction->monthlyPayment, 0, 14) == "Seguro escolar")
 						{
 							$indicador_seguro = 1;

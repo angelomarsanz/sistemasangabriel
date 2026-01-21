@@ -175,23 +175,44 @@ if (isset($tipo_reporte))
                 <table id='seguro' class="table">
                     <thead>
                         <tr>
-                            <th scope="col" style="display: none;" class="noExl">Id</th>
-                            <th scope="col">NÚMERO DE PÓLIZA</th>
-                            <th scope="col">NACIONALIDAD ALUMNO</th>
-                            <th scope="col">CÉDULA ALUMNO</th>
-                            <th scope="col">APELLIDOS ALUMNO</th>
-                            <th scope="col">NOMBRES ALUMNO</th>
-                            <th scope="col">NIVEL DE ESTUDIOS</th>
-                            <th scope="col">AÑO O GRADO</th>
-                            <th scope="col">SECCIÓN</th>
-                            <th scope="col">FECHA_CARGA</th>
-                            <th scope="col">FECHA_NACIMIENTO</th>
+                            <th scope="col">NOMBRE UNIDAD EDUCATIVA</th>
+                            <th scope="col">U.E. COLEGIO SAN GABRIEL ARCÁNGEL C.A.</th>
+                            <th scope="col">RIF</th>
+                            <th scope="col">J-40490885-4</th>
+                        </tr>
+                        <tr>
+                            <th scope="col">DATOS DEL ASEGURADO</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th scope="col">DATOS DEL REPRESENTANTE</th>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="noExl">NRO.</th>
+                            <th scope="col">NACIONALIDAD TITULAR</th>
+                            <th scope="col">CÉDULA TITULAR ESCOLAR</th>
+                            <th scope="col">PRIMER NOMBRE</th>
+                            <th scope="col">SEGUNDO NOMBRE</th>
+                            <th scope="col">PRIMER APELLIDO</th>
+                            <th scope="col">SEGUNDO APELLIDO</th>
+                            <th scope="col">SEXO TITULAR</th>
+                            <th scope="col">FECHA NAC. TITULAR</th>
+                            <th scope="col">GRADO</th>
                             <th scope="col">NACIONALIDAD REPRESENTANTE</th>
-                            <th scope="col">CÉDULA REPRESENTANTE</th>
-                            <th scope="col">APELLIDOS REPRESENTANTE</th>
-                            <th scope="col">NOMBRES REPRESENTANTE</th>
-                            <th scope="col">NÚMERO ALUMNO</th>
-                            <th scope="col">INDICADOR</th>
+                            <th scope="col">CEDULA REPRESENTANTE</th>
+                            <th scope="col">PRIMER NOMBRE</th>
+                            <th scope="col">SEGUNDO NOMBRE</th>
+                            <th scope="col">PRIMER APELLIDO</th>
+                            <th scope="col">SEGUNDO APELLIDO REPRESENTANTE</th>
+                            <th scope="col">SEXO REPRESENTANTE</th>
+                            <th scope="col">CORREO/EMAIL</th>
+                            <th scope="col">NÚMERO TELEFÓNICO</th>
                             <th scope="col">CÓDIGO COLEGIO SAN GABRIEL</th>
                         </tr>
                     </thead>
@@ -209,35 +230,25 @@ if (isset($tipo_reporte))
                             if ($encontrado == 1)
                             { ?>
                                 <tr>
-                                    <td style="display: none;" class="noExl"><?= $studentsFors->student->id ?></td>
-                                    <td></td>
-                                    <?php if ($studentsFors->student->type_of_identification != 'PN'): ?>
-                                        <td><?= $studentsFors->student->type_of_identification ?></td>
-                                    <?php else: ?>
-                                        <td><?= $studentsFors->student->parentsandguardian->type_of_identification ?></td>
-                                    <?php endif; ?>
-                                    <?php if ($studentsFors->student->type_of_identification != 'PN' && $studentsFors->student->identity_card > '9999'): ?>
-                                        <td><?= $studentsFors->student->identity_card ?></td>
-                                    <?php else: ?>
-                                        <td><?= $studentsFors->student->parentsandguardian->identidy_card ?></td>
-                                    <?php endif; ?>
-                                    <td><?= $studentsFors->student->surname . ' ' . $studentsFors->student->second_surname ?></td>
-                                    <td><?= $studentsFors->student->first_name . ' ' . $studentsFors->student->second_name ?></td>
-                                    <td><?= $nivel[$studentsFors->student->level_of_study] ?></td>
-                                    <td><?= $grado[$studentsFors->student->level_of_study] ?></td>
-                                    <td><?= $seccion[$studentsFors->student->section_id] ?></td>
-                                    <td><?= $currentDate->format('Ymd') ?></td>
-                                    <td><?= $studentsFors->student->birthdate->format('dmY') ?></td>
+                                    <td class="noExl"><?= $accountStudent ?></td>
+                                    <td><?= $studentsFors->student->type_of_identification ?></td>
+                                    <td><?= $studentsFors->student->identity_card ?></td>
+                                    <td><?= $studentsFors->student->first_name ?></td>
+                                    <td><?= $studentsFors->student->second_name ?></td>
+                                    <td><?= $studentsFors->student->surname ?></td>
+                                    <td><?= $studentsFors->student->second_surname ?></td>
+                                    <td><?= $studentsFors->student->sex ?></td>
+                                    <td><?= $studentsFors->student->birthdate->format('d-m-Y') ?></td>
+                                    <td><?= $studentsFors->student->level_of_study ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->type_of_identification ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->identidy_card ?></td>
-                                    <td><?= $studentsFors->student->parentsandguardian->surname.' '.$studentsFors->student->parentsandguardian->second_surname ?></td>
-                                    <td><?= $studentsFors->student->parentsandguardian->first_name.' '.$studentsFors->student->parentsandguardian->second_name ?></td>
-                                    <td><?= $accountStudent ?></td>
-                                    <?php if ($studentsFors->student->new_student == 0): ?>
-                                        <td>N</td>                          
-                                    <?php else: ?>
-                                        <td>R</td>
-                                    <?php endif; ?>
+                                    <td><?= $studentsFors->student->parentsandguardian->first_name ?></td>
+                                    <td><?= $studentsFors->student->parentsandguardian->second_name ?></td>
+                                    <td><?= $studentsFors->student->parentsandguardian->surname ?></td>
+                                    <td><?= $studentsFors->student->parentsandguardian->second_surname ?></td>
+                                    <td><?= $studentsFors->student->parentsandguardian->sex ?></td>
+                                    <td><?= $studentsFors->student->parentsandguardian->email ?></td>
+                                    <td><?= $studentsFors->student->parentsandguardian->cell_phone ?></td>
                                     <td><?= $studentsFors->student->id ?></td>
                                 </tr>
                                 <?php 

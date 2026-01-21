@@ -1,0 +1,11 @@
+30-10-2025
+    Para verificar que las notas de crédito de Pronto Pago no se están reflejando en el primer cuadro del reporte de cierre, se emitió la factura con el Nro. de control 114129
+    Es razonable que no se muestren, porque en el primer cuadro se muestran los pagos, y en el ejercicio se cobró una mensualidad de 263 dólares pero realmente se recibieron 253 dólares en efectivo, si se agregara la nota de crédito entonces quedaría en 243 y lo correcto es 253.
+    Ahora haré una prueba con una factura, después la reverso con una nota de crédito y veo como se comporta.
+        Cree la factura 129410, control 114131 
+        Se hizo la nota de crédito 2424, control 114132
+        Si se refleja la nota de crédito en el primer cuadro del reporte de cierre
+    En resumen las notas de crédito de pronto pago no se reflejan en el primer cuadro del reporte de cierre, pero las notas de crédito normales si se reflejan.
+    Entonces el comportamiento es el esperado.      
+23-10-2025
+    Cuando se hace una factura con descuento y se genera una nota de crédito, al hacer el cierre de turno no se está reflejando en el primer cuadro de totales.

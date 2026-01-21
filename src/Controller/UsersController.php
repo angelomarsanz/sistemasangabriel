@@ -26,17 +26,28 @@ class UsersController extends AppController
     public function isAuthorized($user)
     {
         if(isset($user['role']))
-		{
-            // Inicio cambios Seniat
-			if ($user['role'] === 'Representante' || $user['role'] === 'Control de estudios' || $user['role'] === 'Seniat')
-			{
-				if(in_array($this->request->action, ['home', 'view', 'edit', 'logout', 'wait']))
-				{
-					return true;
-				}
-			}
-            // Fin cambios Seniat
-		}
+        {
+            $roles = [
+                'Colaborador' => true,
+                'Control de estudios' => true,
+                'Proveedor' => true,
+                'Representante' => true,
+                'Seniat' => true,
+            ];
+
+            $allowedActions = ['home', 'view', 'edit', 'logout', 'wait'];
+
+            if (isset($roles[$user['role']])) 
+            {
+                foreach ($allowedActions as $action) 
+                {
+                    if ($this->request->action === $action) 
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
 
         return parent::isAuthorized($user);
     }        

@@ -12,9 +12,23 @@ export const servicioEducativo = () =>
                 var rutaServicioEducativo = $('#ruta-servicio-educativo').text();
                 var rutaBusquedaFamilia = $('#ruta-busqueda-familia').text();
 
+                function actualizarUrl() {
+                    var periodo = $('#periodo-escolar').val();
+                    var filtro = $('#filtro-estudiantes').val();
+                    
+                    if (periodo) {
+                        window.location = rutaServicioEducativo + '/' + periodo + '?filtro_estudiantes=' + filtro;
+                    }
+                }
+
                 $('#periodo-escolar').on('change', function(event) 
                 {
-                    window.location = rutaServicioEducativo + '/' + $('#periodo-escolar').val();
+                    actualizarUrl();
+                });
+
+                $('#filtro-estudiantes').on('change', function(event)
+                {
+                    actualizarUrl();
                 });
 
                 $('#familia').autocomplete(

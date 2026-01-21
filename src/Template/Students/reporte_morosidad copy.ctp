@@ -121,7 +121,7 @@
 			<div style="clear: both;">
 				<br />
 				<br />
-				<p><b><?= 'Total morosidad a la fecha Bs.S ' . number_format($totalDebt, 2, ",", ".") ?><b></p>
+				<p><b><?= 'Total morosidad a la fecha $ USD: ' . number_format($totalDebt, 2, ",", ".") ?><b></p>
 				<p><b><?= 'Total alumnos morosos: ' . $tDefaulters[0]['defaulters'] . " (" . number_format((($tDefaulters[0]['defaulters']/$tDefaulters[0]['totalStudents'])*100), 2, ",", ".") . '%)' ?><b></p>
 				<p><b><?= 'Total alumnos solventes: ' . $tDefaulters[0]['solvents'] . " (" . number_format((($tDefaulters[0]['solvents']/$tDefaulters[0]['totalStudents'])*100), 2, ",", ".") . '%)' ?><b></p>
 				<p><b><?= 'Total alumnos becados: ' . $tDefaulters[0]['scholarship'] . " (" . number_format((($tDefaulters[0]['scholarship']/$tDefaulters[0]['totalStudents'])*100), 2, ",", ".") . '%)' ?><b></p>
@@ -144,7 +144,7 @@
 			<div style="clear: both;">
 				<br />
 				<br />
-				<p><b><?= 'Total morosidad a la fecha Bs.S ' . number_format($totalDebt, 2, ",", ".") ?><b></p>
+				<p><b><?= 'Total morosidad a la fecha $ USD: ' . number_format($totalDebt, 2, ",", ".") ?><b></p>
 				<p><b><?= 'Total alumnos morosos: ' . $tDefaulters[0]['defaulters'] . " (" . number_format((($tDefaulters[0]['defaulters']/$tDefaulters[0]['totalStudents'])*100), 2, ",", ".") . '%)' ?><b></p>
 				<p><b><?= 'Total alumnos solventes: ' . $tDefaulters[0]['solvents'] . " (" . number_format((($tDefaulters[0]['solvents']/$tDefaulters[0]['totalStudents'])*100), 2, ",", ".") . '%)' ?><b></p>
 				<p><b><?= 'Total alumnos becados: ' . $tDefaulters[0]['scholarship'] . " (" . number_format((($tDefaulters[0]['scholarship']/$tDefaulters[0]['totalStudents'])*100), 2, ",", ".") . '%)' ?><b></p>
@@ -203,7 +203,6 @@
 					</tfoot>
 				</table>
 		<?php endif; ?>
-		<p><b>Nota: las cuotas anteriores al mes de noviembre 2018 se han devaluado porque se cobraban en bolívares.</b></p> 
 		<br />			
 	</div>
 </div>

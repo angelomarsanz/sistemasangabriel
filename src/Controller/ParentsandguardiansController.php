@@ -108,6 +108,7 @@ class ParentsandguardiansController extends AppController
                 $parentsandguardian->mi_id = 0;
                 $parentsandguardian->mi_children = 0;
                 $parentsandguardian->new_guardian = true;
+                $parentsandguardian->consejo_educativo = 'No';
                 $parentsandguardian->creative_user = $this->Auth->user('username');
             }
             else
@@ -121,6 +122,7 @@ class ParentsandguardiansController extends AppController
                 $parentsandguardian->mi_id = 0;
                 $parentsandguardian->mi_children = 0;
                 $parentsandguardian->new_guardian = true;
+                $parentsandguardian->consejo_educativo = 'No';
                 $parentsandguardian->creative_user = $this->Auth->user('username');
             }
             /*
@@ -231,6 +233,7 @@ class ParentsandguardiansController extends AppController
                 $parentsandguardian->profile_photo = "";
                 $parentsandguardian->profile_photo_dir = "";
                 $parentsandguardian->estatus_registro = "Activo";
+                $parentsandguardian->consejo_educativo = 'No';
 
                 if ($this->Parentsandguardians->save($parentsandguardian)) 
                 {
@@ -706,9 +709,9 @@ class ParentsandguardiansController extends AppController
 		}
 	}
 
-    // Esta función debe ejecutarse inmediatamente al inicio del año escolar 
+    // Esta función debe ejecutarse al iniciar el año escolar después de ejecutar por primera vez la asignación de secciones a los estudiantes
 
-    public function eliminarRepresentantesSinEstudiantesActivos()
+    public function actualizacionAnualRepresentantes()
     {
         $binnacles = new BinnaclesController;
         $controladorTransacciones = new StudenttransactionsController();
@@ -719,9 +722,18 @@ class ParentsandguardiansController extends AppController
         $anioEscolarActual = $schools->current_school_year;
         $anioEscolarAnterior = $anioEscolarActual - 1;
 
+        $anioAsignarSeccion = $schools->anio_asignar_seccion;
+        $anioActualizacionRepresentantes = $schools->anio_actualizacion_representantes;
+
         $representantes_con_estudiantes_activos = [];
         $representantes_sin_estudiantes_activos = [];
         $estudiantes_eliminados = [];
+
+        if ($anioAsignarSeccion == $anioActualizacionRepresentantes)
+        {
+            $this->Flash->error(__('Esta función ya se ejecutó para el año escolar actual'));
+            return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+        }
 
         $representantes = $this->Parentsandguardians->find('all')->where(['Parentsandguardians.id >' => 1 , "Parentsandguardians.estatus_registro" => "Activo"]);
         
@@ -729,7 +741,7 @@ class ParentsandguardiansController extends AppController
 
         foreach ($representantes as $representante)
         {
-            $indicadorEstudiantes = 0;
+            $estudiantesActivos = 0;
             $texto_indicador_estudiantes = "Sin estudiantes asociados";
             $consejoEducativo = "No";
 
@@ -739,39 +751,32 @@ class ParentsandguardiansController extends AppController
                 {
                     if ($estudiante->balance == null || $estudiante->balance == 0)
                     {
-                        if ($estudiante->created->year >= $anioEscolarActual)
+                        if ($estudiante->created->year < $anioEscolarActual)
                         {
-                            $indicadorEstudiantes = 1;
+                            $estudianteAEliminar = $this->Parentsandguardians->Students->get($estudiante->id);
+                            $estudianteAEliminar->student_condition = "Eliminado";
+                        
+                            if (!($this->Parentsandguardians->Students->save($estudianteAEliminar))) 
+                            {
+                                $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo eliminar el registro del estudiante con el ID: '.$student->id);
+                            } 
+                            else
+                            {
+                                $estudiantes_eliminados[] = ['estudiante' => $estudiante->full_name, 'familia' => $representante->family,'id_estudiante' => $estudiante->id];
+                            }                     
+                        }
+                        else
+                        {   
+                            $estudiantesActivos++;
                         } 
-                    }
-                    elseif ($estudiante->balance > $anioEscolarActual)
-                    {
-                        $indicadorEstudiantes = 1;
-                    }
-                    elseif ($estudiante->balance == $anioEscolarActual)
-                    {
-                        $indicadorEstudiantes = 1;
-                        $consejoEducativo = "Sí";
-                    }
-                    elseif ($estudiante->balance == $anioEscolarAnterior)
-                    {
-                        $indicadorEstudiantes = 1;
                     }
                     else
                     {
-                        $texto_indicador_estudiantes = "Con estudiantes inactivos";
-                        $estudianteAEliminar = $this->Parentsandguardians->Students->get($estudiante->id);
-                        $estudianteAEliminar->student_condition = "Eliminado";
-                        /*
-                        if (!($this->Parentsandguardians->Students->save($estudianteAEliminar))) 
+                        $estudiantesActivos++;
+                        if ($estudiante->balance >= $anioEscolarAnterior)
                         {
-                            $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo eliminar el registro del estudiante con el ID: '.$student->id);
-                        } 
-                        else
-                        {
-                            $estudiantes_eliminados[] = ['estudiante' => $estudiante->full_name, 'familia' => $representante->family,'id_estudiante' => $estudiante->id];
+                            $consejoEducativo = "Sí";
                         }
-                        */
                     }
                 }              
             }
@@ -784,11 +789,50 @@ class ParentsandguardiansController extends AppController
                 $representantes_sin_estudiantes_activos[] = ['familia' => $representante->family, 'nombre_representante' => $representante->full_name, 'id_representante' => $representante->id, 'id_usuario_representante' => $representante->user_id, 'motivo' => $texto_indicador_estudiantes];
             }
         }
-        /*
+        
         foreach ($representantes_con_estudiantes_activos as $representanteActivo)
         {
             $representanteAModificar = $this->Parentsandguardians->get($representanteActivo['id_representante']);
             $representanteAModificar->consejo_educativo = $representanteActivo['consejoEducativo'];
+
+            $representanteAModificar->familias_relacionadas_anterior = $representanteAModificar->familias_relacionadas;
+            $representanteAModificar->id_familia_pagadora_consejo_anterior = $representanteAModificar->id_familia_pagadora_consejo;
+            $representanteAModificar->consejo_exonerado_anterior = $representanteAModificar->consejo_exonerado;
+
+            // Si $anioActualizacionRepresentantes es igual a cero, significa que es la primera vez que se ejecuta la asignación de secciones, entonces en la columna vector_familias_relacionadas_anteriores se debe guardar un vector json con dos atributos: El primero con el anioEscolarAnterior y el valor de la columna familias_relacionadas_anterior, y el segundo con el anioEscolarActual y el valor de la columna familias_relacionadas
+            if ($anioActualizacionRepresentantes == 0)
+            {
+                $vector_familias_relacionadas_anteriores = [];
+                $vector_familias_relacionadas_anteriores[$anioEscolarAnterior] = $representanteAModificar->familias_relacionadas_anterior;
+                $vector_familias_relacionadas_anteriores[$anioEscolarActual] = $representanteAModificar->familias_relacionadas;
+                $representanteAModificar->vector_familias_relacionadas_anteriores = json_encode($vector_familias_relacionadas_anteriores, JSON_FORCE_OBJECT);
+                // Aplicar el mismo procedimiento para la columna id_familia_pagadora_consejo_anterior
+                $vector_id_familia_pagadora_consejo_anteriores = [];
+                $vector_id_familia_pagadora_consejo_anteriores[$anioEscolarAnterior] = $representanteAModificar->id_familia_pagadora_consejo_anterior;
+                $vector_id_familia_pagadora_consejo_anteriores[$anioEscolarActual] = $representanteAModificar->id_familia_pagadora_consejo;
+                $representanteAModificar->vector_id_familia_pagadora_consejo_anteriores = json_encode($vector_id_familia_pagadora_consejo_anteriores, JSON_FORCE_OBJECT);
+                // Aplicar el mismo procedimiento para la columnas consejo_exonerado_anterior
+                $vector_consejo_exonerado_anteriores = [];
+                $vector_consejo_exonerado_anteriores[$anioEscolarAnterior] = $representanteAModificar->consejo_exonerado_anterior;
+                $vector_consejo_exonerado_anteriores[$anioEscolarActual] = $representanteAModificar->consejo_exonerado;
+                $representanteAModificar->vector_consejo_exonerado_anteriores = json_encode($vector_consejo_exonerado_anteriores, JSON_FORCE_OBJECT);
+            }
+            else
+            {
+                // De lo contrario recuperar el vector json que ya existe en la columna vector_familias_relacionadas_anteriores y agregar un nuevo atributo con el anioEscolarActual y el valor de la columna familias_relacionadas
+                $vector_familias_relacionadas_anteriores = json_decode($representanteAModificar->vector_familias_relacionadas_anteriores, true);
+                $vector_familias_relacionadas_anteriores[$anioEscolarActual] = $representanteAModificar->familias_relacionadas;
+                $representanteAModificar->vector_familias_relacionadas_anteriores = json_encode($vector_familias_relacionadas_anteriores, JSON_FORCE_OBJECT);
+                // Aplicar el mismo procedimiento para la columna id_familia_pagadora_consejo_anterior
+                $vector_id_familia_pagadora_consejo_anteriores = json_decode($representanteAModificar->vector_id_familia_pagadora_consejo_anteriores, true);
+                $vector_id_familia_pagadora_consejo_anteriores[$anioEscolarActual] = $representanteAModificar->id_familia_pagadora_consejo;
+                $representanteAModificar->vector_id_familia_pagadora_consejo_anteriores = json_encode($vector_id_familia_pagadora_consejo_anteriores, JSON_FORCE_OBJECT);
+                // Aplicar el mismo procedimiento para la columnas consejo_exonerado_anterior
+                $vector_consejo_exonerado_anteriores = json_decode($representanteAModificar->vector_consejo_exonerado_anteriores, true);
+                $vector_consejo_exonerado_anteriores[$anioEscolarActual] = $representanteAModificar->consejo_exonerado;
+                $representanteAModificar->vector_consejo_exonerado_anteriores = json_encode($vector_consejo_exonerado_anteriores, JSON_FORCE_OBJECT);
+            }
+            
             if (!($this->Parentsandguardians->save($representanteAModificar))) 
             { 
                 $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo actualizar el campo consejo_educativo del representante con el ID: '.$representanteActivo['id_representante']);
@@ -812,49 +856,71 @@ class ParentsandguardiansController extends AppController
                 $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo eliminar el registro del representante con el ID: '.$representanteInactivo['id_representante']);
             }
         }
-        */
+        
+        // Actualizo el campo anio_actualizacion_representantes en la tabla schools
+        $schools->anio_actualizacion_representantes = $anioAsignarSeccion;
+        if (!($this->Schools->save($schools))) 
+        { 
+            $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo actualizar el año de actualización de representantes en la tabla schools');
+            // Enviar un flash error aquí indicando que no se pudo actualizar el año de actualización de representantes en la tabla schools
+            $this->Flash->error(__('No se pudo actualizar el año de actualización de representantes en la tabla schools, por favor contacte al administrador del sistema'));
+        }
+        else
+        {
+            $this->Flash->success(__('El proceso de actualización anual de representantes se ejecutó exitosamente'));
+        }               
+
         $this->set(compact('representantes_con_estudiantes_activos', 'representantes_sin_estudiantes_activos', 'estudiantes_eliminados'));
     }
 
-    // Esta función se creó como parte del procedimiento de eliminar lógicamente los registros de representantes que no tienen estudiantes asociados o solo tienen estudiantes inactivos. No se debe ejecutar nuevamente porque dañaría la data
-
+    // Esta función es un utilitario cuando se requiere cambiar el estatus de registro de los representantes y usuarios.
     public function cambiarEstatusRegistros()
     {
         $this->loadModel('Users');
+        // Cargar el modelo Excels
+        $this->loadModel('Excels');
         $binnacles = new BinnaclesController;
-        $representantes = $this->Parentsandguardians->find('all')->where(["Parentsandguardians.estatus_registro !=" => "Activo", "Parentsandguardians.id >" => 1]);
+        $representantesActualizados = [];
 
-        $contador_registros_seleccionados = $representantes->count();
-        $contador_registros_representantes_modificados = 0;
-        $contador_registros_usuarios_modificados = 0;
+        // Buscar todos los registros de la tabla excels
+        $excels = $this->Excels->find('all');
 
-        foreach ($representantes as $representante)
+        // Recorrer todos los registros de la tabla excels
+        foreach ($excels as $excel)
         {
-            $representante_a_modificar = $this->Parentsandguardians->get($representante->id);
-            $representante_a_modificar->estatus_registro = "Activo";
-            /*
-            if (!($this->Parentsandguardians->save($representante_a_modificar))) 
+            // si la columna cedula_representante está vacía, continuar con el siguiente registro
+            if ($excel->cedula_representante == null || $excel->cedula_representante == '')
+            {         
+                continue;
+            }
+            // Hacer un get en la tabla parentsandguardians con id de acuerdo al valor que contiene la columna cedula_titular_escolar de la tabla excels
+            $representante = $this->Parentsandguardians->get($excel->cedula_representante, 
+                ['contain' => []]);
+            // Cambiar el estatus_registro del representante a "Activo"
+            // $representante->estatus_registro = "Activo"; Descomentar cuando se deba hacer un cambio
+            // Guardar el representante
+            if (!($this->Parentsandguardians->save($representante))) 
             {
-                $binnacles->add('controller', 'Parentsandguardians', 'cambiarEstatusRegistro', 'No se pudo modificar el registro del representante con el ID: '.$representante->id);
+                $binnacles->add('controller', 'Parentsandguardians', 'cambiarEstatusRegistro', 'No se pudo modificar el registro del representante con el ID: '.$representante->id);                    
             }
             else
-            { 
-                $contador_registros_representantes_modificados++;
-                $usuario_a_modificar = $this->Users->get($representante->user_id);
-                $usuario_a_modificar->estatus_registro = "Activo";
-                
-                if (!($this->Users->save($usuario_a_modificar))) 
-                {
+            {
+                // Buscar el registro de usuario que corresponde al representante y actualizar el estatus del registro de usuario a "Activo"
+                $usuario = $this->Users->get($representante->user_id);
+                // $usuario->estatus_registro = "Activo"; descomentar cuando se deba hacer un cambio
+                if (!($this->Users->save($usuario))) 
+                {   
                     $binnacles->add('controller', 'Parentsandguardians', 'cambiarEstatusRegistro', 'No se pudo modificar el registro del usuario con el ID: '.$representante->user_id);
+                    $representantesActualizados[] = ['id_representante' => $representante->id, 'nombre_representante' => $representante->full_name, 'id_usuario' => $usuario->id, 'nombre_usuario' => $usuario->username, 'mensaje_actualizacion' => 'No se pudo modificar el registro del usuario con el ID: '.$representante->user_id];
                 }
                 else
-                { 
-                    $contador_registros_usuarios_modificados++;
+                {
+                    $representantesActualizados[] = ['id_representante' => $representante->id, 'nombre_representante' => $representante->full_name, 'id_usuario' => $usuario->id, 'nombre_usuario' => $usuario->username, 'mensaje_actualizacion' => 'Registro del representante y usuario modificado exitosamente'];
                 }
-            } 
-            */                 
+            }
         }
-        $this->set(compact('contador_registros_seleccionados', 'contador_registros_representantes_modificados', 'contador_registros_usuarios_modificados'));
+        // Pasar la variable representantesActualizados a la vista
+        $this->set(compact('representantesActualizados'));
     }
 
     public function consultaContratoRepresentante()
@@ -955,38 +1021,28 @@ class ParentsandguardiansController extends AppController
     {
         $codigoRetorno = 0;
         $mensajeRespuesta = 'Proceso exitoso';
-        $anioEscolarAnterior = $anioEscolarActual - 1;
-        $periodoEscolarAnterior = $anioEscolarAnterior.'-'.$anioEscolarActual;
-        $periodoEscolarActual = $anioEscolarActual.'-'.$proximoAnioEscolar;
-        $familiasRelacionadas = $representante->familias_relacionadas;
-        $familiasRelacionadasAnterior = $representante->familias_relacionadas_anterior;
-        $idFamiliaPagadoraConsejo = $representante->id_familia_pagadora_consejo;
-        $idFamiliaPagadoraConsejoAnterior = $representante->id_familia_pagadora_consejo_anterior;
-        $consejoExonerado = $representante->consejo_exonerado;
-        $consejoExoneradoAnterior = $representante->consejo_exonerado_anterior;
-
-        $indicadorConsejoAnterior = false;
-        $indicadorConsejoActual = false;
-        $indicadorReciboConsejoAnterior = false;
-        $indicadorReciboConsejoActual = false;
-
+    
+        // 1. Pre-cargar datos para evitar consultas en el bucle.
+    
+        // Cargar transacciones de 'Matrícula' para los años relevantes.
         $this->loadModel('Studenttransactions');
         $matriculasEstudiantes = $this->Studenttransactions->find('all')
-		->contain(['Students' => ['Parentsandguardians']])
-        ->where(['Studenttransactions.invoiced' => 0, 'Studenttransactions.transaction_type' => 'Matrícula', 'Studenttransactions.amount_dollar >' => 0, 'Students.student_condition' => 'Regular', 'Parentsandguardians.id' => $representante->id]);
-
-        foreach ($matriculasEstudiantes as $matricula)
-        {
-            if ($matricula->ano_escolar == $anioEscolarAnterior)
-            {
-                $indicadorConsejoAnterior = true;
-            }
-            if ($matricula->ano_escolar == $anioEscolarActual)
-            {
-                $indicadorConsejoActual = true;
-            }
+            ->contain(['Students' => ['Parentsandguardians']])
+            ->where([
+                'Studenttransactions.invoiced' => 0,
+                'Studenttransactions.transaction_type' => 'Matrícula',
+                'Studenttransactions.amount_dollar >' => 0,
+                'Students.student_condition' => 'Regular',
+                'Parentsandguardians.id' => $representante->id,
+                'Studenttransactions.ano_escolar >=' => 2023
+            ]);
+    
+        $matriculasPorAnio = [];
+        foreach ($matriculasEstudiantes as $matricula) {
+            $matriculasPorAnio[$matricula->ano_escolar] = true;
         }
- 
+    
+        // Cargar recibos de 'Consejo Educativo' para los años relevantes.
         $this->loadModel('Concepts');
         $recibosConsejo = $this->Concepts->find()
             ->contain(['Bills'])
@@ -994,38 +1050,57 @@ class ParentsandguardiansController extends AppController
                 'SUBSTRING(Concepts.concept, 1, 17) =' => 'Consejo Educativo', 
                 'Bills.parentsandguardian_id' => $representante->id])
             ->order(['Concepts.id' => 'ASC']);
-        if ($recibosConsejo->count() > 0)
-        {
-            foreach ($recibosConsejo as $recibo)
-            {
-                if ($recibo->concept == 'Consejo Educativo '.$periodoEscolarAnterior)
-                {
-                    $indicadorReciboConsejoAnterior = true;
-                }
-                if ($recibo->concept == 'Consejo Educativo '.$periodoEscolarActual)
-                {
-                    $indicadorReciboConsejoActual = true;
-                }
+    
+        $recibosPorAnio = [];
+        foreach ($recibosConsejo as $recibo) {
+            if (preg_match('/Consejo Educativo\s*(\d{4})-\d{4}/', $recibo->concept, $matches)) {
+                $recibosPorAnio[$matches[1]] = true;
             }
         }
-        
+    
+        // 2. Decodificar los vectores JSON una sola vez.
+        $vector_familias_relacionadas_anteriores = json_decode($representante->vector_familias_relacionadas_anteriores, true) ?: [];
+        $vector_id_familia_pagadora_consejo_anteriores = json_decode($representante->vector_id_familia_pagadora_consejo_anteriores, true) ?: [];
+        $vector_consejo_exonerado_anteriores = json_decode($representante->vector_consejo_exonerado_anteriores, true) ?: [];
+    
+        $aniosData = [];
+    
+        // 3. Iterar desde 2023 hasta el año escolar actual.
+        for ($year = 2023; $year <= $anioEscolarActual; $year++) {
+            $familiasRelacionadas = null;
+            $idFamiliaPagadoraConsejo = null;
+            $consejoExonerado = null;
+    
+            if ($year == $anioEscolarActual) {
+                $familiasRelacionadas = $representante->familias_relacionadas;
+                $idFamiliaPagadoraConsejo = $representante->id_familia_pagadora_consejo;
+                $consejoExonerado = $representante->consejo_exonerado;
+            } else {
+                $familiasRelacionadas = $vector_familias_relacionadas_anteriores[$year] ?? null;
+                $idFamiliaPagadoraConsejo = $vector_id_familia_pagadora_consejo_anteriores[$year] ?? null;
+                $consejoExonerado = $vector_consejo_exonerado_anteriores[$year] ?? null;
+            }
+    
+            $indicadorConsejo = isset($matriculasPorAnio[$year]);
+            $indicadorReciboConsejo = isset($recibosPorAnio[$year]);
+    
+            $aniosData[$year] = [
+                "familiasRelacionadas" => $familiasRelacionadas,
+                "idFamiliaPagadoraConsejo" => $idFamiliaPagadoraConsejo,
+                "consejoExonerado" => $consejoExonerado,
+                "indicadorConsejo" => $indicadorConsejo,
+                "indicadorReciboConsejo" => $indicadorReciboConsejo
+            ];
+        }
+    
         $respuesta = 
         [
             "codigoRetorno" => $codigoRetorno,
             "mensajeRespuesta" => $mensajeRespuesta,
+            "idRepresentante" => $representante->id,
             "anioEscolarActual" => $anioEscolarActual,
             "proximoAnioEscolar" => $proximoAnioEscolar,
-            "idRepresentante" => $representante->id,
-            "familiasRelacionadasAnterior" => $familiasRelacionadasAnterior,
-            "familiasRelacionadas" => $familiasRelacionadas,
-            "idFamiliaPagadoraConsejoAnterior" => $idFamiliaPagadoraConsejoAnterior,
-            "idFamiliaPagadoraConsejo" => $idFamiliaPagadoraConsejo,
-            "consejoExoneradoAnterior" => $consejoExoneradoAnterior,
-            "consejoExonerado" => $consejoExonerado,
-            "indicadorConsejoAnterior" => $indicadorConsejoAnterior,
-            "indicadorConsejoActual" => $indicadorConsejoActual,
-            "indicadorReciboConsejoAnterior" => $indicadorReciboConsejoAnterior,
-            "indicadorReciboConsejoActual" => $indicadorReciboConsejoActual        
+            "anios" => $aniosData
         ];
         return $respuesta;
     }
@@ -1591,27 +1666,6 @@ class ParentsandguardiansController extends AppController
         $this->set(compact('recibosConsejoEducativo'));
     }
 
-    // Ejecutar al iniciar el año escolar. Esta función copia en la tabla "parentsandguardians" los campos del consejo educativo que tienen algún valor a su respectivo campo del año anterior 
-    public function consejoEducativoAnterior ()
-    {
-        $representantes = $this->Parentsandguardians->find('all', [
-            'conditions' => ['id >' => 1, 'estatus_registro' => 'Activo', ]]);
-        foreach ($representantes as $representante)
-        {
-            if ($representante->familias_relacionadas != null || $representante->id_familia_pagadora_consejo || $representante->consejo_exonerado > 0 )
-            {
-                $representanteExonerado = $this->Parentsandguardians->get($representante->id);
-                $representanteExonerado->familias_relacionadas_anterior = $representante->familias_relacionadas;
-                $representanteExonerado->id_familia_pagadora_consejo_anterior = $representante->id_familia_pagadora_consejo;
-                $representanteExonerado->consejo_exonerado_anterior = $representante->consejo_exonerado;
-                if (!($this->Parentsandguardians->save($representanteExonerado))) 
-                {
-                    $this->Flash->error(__('No se pudo actualizar los campos del consejo educativo del año anterior del representante con el ID: '.$representante->id));
-                }
-            }
-        }
-        return;
-    }
     // Inicio cambios Contrato
     public function crearColumnaVectorContratos()
     {

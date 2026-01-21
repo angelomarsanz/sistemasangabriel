@@ -7,18 +7,10 @@
 	endif;
 	$anoEscolarAnterior = $anoEscolarActual - 1;
 	$proximoAnoEscolar = $anoEscolarActual + 1;
-	// Inicio cambios Seniat
-	/*
-	$tipo_usuario = 0;
-	if ($current_user['role'] == 'Seniat' || $current_user['role'] == 'Ventas fiscales' || $current_user['role'] == 'Contabilidad fiscal' ):
-		$tipo_usuario = 1;
-	endif;
-	*/
 	$indicador_pedido = 1;
 	if ($current_user['role'] == 'Seniat'):
-		$indicador_pedido = 0;
+    	$indicador_pedido = 0; 
 	endif;
-	// Fin cambios Seniat
 ?>
 <style>
 @media screen
@@ -35,20 +27,22 @@
 			<input type="hidden" id="type-invoice" value="<?= $menuOption ?>">
             <div class="row">
                 <div class="col-md-12">
-					<?php if ($menuOption == 'Recibo de seguro'): ?>
-						<h3><b>Recibo de seguro</b></h3>
-					<?php elseif ($menuOption == 'Factura inscripción regulares'): ?>
+					<?php if ($menuOption == 'Factura inscripción regulares'): ?>
 						<h3><b>Factura inscripción alumnos regulares</b></h3>
 					<?php elseif ($menuOption == 'Factura inscripción nuevos'): ?>
 						<h3><b>Factura inscripción alumnos nuevos</b></h3>
-					<?php elseif ($menuOption == 'Recibo inscripción regulares'): ?>
-						<h3><b>Recibo inscripción alumnos regulares</b></h3>
-					<?php elseif ($menuOption == 'Recibo inscripción nuevos'): ?>
-						<h3><b>Recibo inscripción alumnos nuevos</b></h3>
+					<?php elseif ($menuOption == 'Factura mensualidades'): ?>
+						<h3><b>Factura mensualidades</b></h3>
+					<?php elseif ($menuOption == 'Pedido inscripción regulares'): ?>
+						<h3><b>Pedido inscripción alumnos regulares</b></h3>
+					<?php elseif ($menuOption == 'Pedido inscripción nuevos'): ?>
+						<h3><b>Pedido inscripción alumnos nuevos</b></h3>
+					<?php elseif ($menuOption == 'Pedido mensualidades'): ?>
+						<h3><b>Pedido mensualidades</b></h3>
 					<?php elseif ($menuOption == 'Recibo servicio educativo'): ?>
 						<h3><b>Recibo servicio educativo</b></h3>
-					<?php elseif ($menuOption == 'Mensualidades'): ?>
-						<h3><b>Cobro de mensualidades</b></h3>
+					<?php elseif ($menuOption == 'Recibo de seguro'): ?>
+						<h3><b>Recibo de seguro</b></h3>
 					<?php elseif ($menuOption == 'Recibo Consejo Educativo'): ?>
 						<h3><b>Recibo Consejo Educativo</b></h3>
 					<?php endif; ?>
@@ -83,7 +77,7 @@
                     <br />
                     <input type="text" class="form-control" id="family-search">
                     <br />
-					<?php if ($menuOption == 'Factura inscripción regulares' || $menuOption == 'Recibo inscripción regulares' || $menuOption == 'Mensualidades'): ?>
+					<?php if ($menuOption == 'Factura inscripción regulares' || $menuOption == 'Pedido inscripción regulares' || $menuOption == 'Factura mensualidades' || $menuOption == 'Pedido mensualidades'): ?>
 						<button id="newfamily" class="btn btn-success" disabled>Listar familias nuevas</button>
 					<?php else: ?>
 						<button id="newfamily" class="btn btn-success">Listar familias nuevas</button>
@@ -104,12 +98,16 @@
                     </div>
 					<div id="cuadro-periodo-escolar" class="noverScreen">
 						<?php
-						echo $this->Form->input('periodo_escolar', ['label' => 'Período escolar: ', 'options' => 
-							[
-								"" => "",
-								$anoEscolarAnterior => $anoEscolarAnterior.'-'.$anoEscolarActual,
-								$anoEscolarActual => $anoEscolarActual.'-'.$proximoAnoEscolar
-							]]); ?>
+						$periodos = ["" => ""];
+						for ($anio = 2023; $anio <= $anoEscolarActual; $anio++) {
+							$proximoAnio = $anio + 1;
+							$periodos[$anio] = "$anio-$proximoAnio";
+						}
+						echo $this->Form->input('periodo_escolar', [
+							'label' => 'Período escolar: ',
+							'options' => $periodos
+						]);
+						?>
 					</div>
                 </div>
                 <div class="col-md-4">
@@ -790,20 +788,11 @@
 	var otrasTarifas = new Array();
 
 	var indicadorConsejoEducativo = 0;
-    var familiasRelacionadasAnterior = '';
-	var familiasRelacionadas = '';
-    var idFamiliaPagadoraConsejoAnterior = 0;
-	var idFamiliaPagadoraConsejo = 0;
-    var consejoExoneradoAnterior = 0;
-	var consejoExonerado = 0;
-    var indicadorConsejoAnterior = false;
-    var indicadorConsejoActual = false;
-    var indicadorReciboConsejoAnterior = false;
-    var indicadorReciboConsejoActual = false;      
+	var datosConsejoEducativo = {};
+
 	var anioConsejoEducativo = 0;
 	var proximoAnioConsejoEducativo = 0;
-
-	const ajustesPagosInscripcion = [];
+ 	const ajustesPagosInscripcion = [];
 	ajustesPagosInscripcion['Ago 2025'] = 10;
 	var observacionTransaccion = '';
 	var ordenGrado = 0;
@@ -811,7 +800,7 @@
 	var servicioEducativoExonerado = 0;
 	var servicioEducativoExoneradoTransaccion = 0;
 	var indicador_pedido = "<?= $indicador_pedido ?>";
-
+	var rolUsuario = "<?= $current_user['role'] ?>";
 	
 // Funciones Javascript
 
@@ -1362,7 +1351,7 @@
 			{
 				if (item['dbMorosoAnoAnterior'] == 1)
 				{
-					if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo de seguro')
+					if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Pedido inscripción regulares' || $('#type-invoice').val() == 'Recibo de seguro')
 					{
 						if (indicador_julio_moroso == 0)
 						{
@@ -1377,7 +1366,7 @@
 
 		if (estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] == true)
 		{
-			if ($('#type-invoice').val() == 'Mensualidades')
+			if ($('#type-invoice').val() == 'Factura mensualidades' || $('#type-invoice').val() == 'Pedido mensualidades')
 			{
 				alert("Debe alguno de los siguientes conceptos: Matrícula, Agosto, seguro o servicio educativo");
 			}
@@ -1393,7 +1382,7 @@
 				{
 					if (item['dbScholarship'] == 1)
 					{
-						if ($('#type-invoice').val() == 'Mensualidades')
+						if ($('#type-invoice').val() == 'Factura mensualidades' || $('#type-invoice').val() == 'Pedido mensualidades')
 						{
 							alert("Este alumno es becado, no se le deben cobrar cuotas");
 							return false;
@@ -1402,7 +1391,6 @@
 					if (item['dbSchoolYearFrom'] < anoEscolarInscripcion && $('#type-invoice').val() == 'Recibo servicio educativo' )
 					{
 						alert("Este estudiante debe pagar primero la matrícula");
-						return false;
 					}
 					studentName = item['dbStudentName'];
 				}
@@ -2302,13 +2290,13 @@
 								
 		payments.discount = descuentoBolivares; 
 		
-		if ($('#type-invoice').val() == 'Recibo inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo' || $('#type-invoice').val() == 'Recibo de seguro' || indicador_pedido == 1 || indicadorConsejoEducativo == 1)
+		if (rolUsuario == 'Seniat')
 		{
-			payments.fiscal = 0;
+			payments.fiscal = 1;
 		}
 		else
 		{
-			payments.fiscal = 1;
+			payments.fiscal = 0;
 		}
 
 		payments.tasaDolar = dollarExchangeRate;
@@ -2931,11 +2919,11 @@
 				
 			$("#header-messages").html("Por favor espere...");
 			
-			if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Recibo inscripción regulares')
+			if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Pedido inscripción regulares')
 			{
 				typeStudent = 0;
 			}
-			else if ($('#type-invoice').val() == 'Factura inscripción nuevos' || $('#type-invoice').val() == 'Recibo inscripción nuevos' || $('#type-invoice').val() == 'Recibo servicio educativo')
+			else if ($('#type-invoice').val() == 'Factura inscripción nuevos' || $('#type-invoice').val() == 'Pedido inscripción nuevos')
 			{
 				typeStudent = 1;
 			}
@@ -2981,16 +2969,7 @@
 					if (indicadorConsejoEducativo == 1)
 					{
 						$("#cuadro-periodo-escolar").removeClass("noverScreen");
-						familiasRelacionadasAnterior = response.data.consejo_educativo.familiasRelacionadasAnterior;
-						familiasRelacionadas = response.data.consejo_educativo.familiasRelacionadas;
-						idFamiliaPagadoraConsejoAnterior = response.data.consejo_educativo.idFamiliaPagadoraConsejoAnterior;
-						idFamiliaPagadoraConsejo = response.data.consejo_educativo.idFamiliaPagadoraConsejo;
-						consejoExoneradoAnterior = response.data.consejo_educativo.consejoExoneradoAnterior;
-						consejoExonerado = response.data.consejo_educativo.consejoExonerado;
-						indicadorConsejoAnterior = response.data.consejo_educativo.indicadorConsejoAnterior;
-						indicadorConsejoActual = response.data.consejo_educativo.indicadorConsejoActual;
-						indicadorReciboConsejoAnterior = response.data.consejo_educativo.indicadorReciboConsejoAnterior;
-						indicadorReciboConsejoActual = response.data.consejo_educativo.indicadorReciboConsejoActual;      
+						datosConsejoEducativo = response.data.consejo_educativo.anios;
 					}
 					else
 					{																															
@@ -3019,7 +2998,7 @@
 							students += value.second_name + "</td>";
 							secondName = value.second_name;
 							
-							if ($('#type-invoice').val() == 'Mensualidades')
+							if ($('#type-invoice').val() == 'Factura mensualidades' || $('#type-invoice').val() == 'Pedido mensualidades')
 							{ 
 								students += "<td>" + value.sublevel + "</td>";
 								grade = value.sublevel;
@@ -3287,7 +3266,7 @@
 												}
 												else
 												{
-													if (ordenGrado > 41)
+													if (anoEscolarMensualidad < 2025 && ordenGrado > 41)
 													{
 														montoDolar = 0;
 														montoPendienteDolar = 0;
@@ -3435,7 +3414,7 @@
 											}
 										}								
 								}
-								else if ($('#type-invoice').val() == 'Recibo inscripción regulares')
+								else if ($('#type-invoice').val() == 'Pedido inscripción regulares')
 								{
 									if (indicadorImpresion == 0)
 									{
@@ -3453,7 +3432,7 @@
 										}
 									}
 								}
-								else if ($('#type-invoice').val() == 'Recibo inscripción nuevos')
+								else if ($('#type-invoice').val() == 'Pedido inscripción nuevos')
 								{
 									if (monthlyPayment.substring(0, 9) == "Matrícula" ||
 										monthlyPayment.substring(0, 3) == "Ago")
@@ -4476,27 +4455,31 @@
 				}
 				else
 				{
-					anioConsejoEducativo = $('#periodo-escolar').val();
-					proximoAnioConsejoEducativo = parseInt(anioConsejoEducativo) + 1;
-					periodoEscolarRequerido = `${anioConsejoEducativo}-${proximoAnioConsejoEducativo}`;
-		
-					if (anioConsejoEducativo == anoEscolarAnterior)
-					{
-						if (indicadorConsejoAnterior == false)
+					let anioSeleccionado = $('#periodo-escolar').val();
+					let proximoAnioSeleccionado = parseInt(anioSeleccionado) + 1;
+					let periodoEscolarRequerido = `${anioSeleccionado}-${proximoAnioSeleccionado}`;
+					anioConsejoEducativo = anioSeleccionado;
+					proximoAnioConsejoEducativo = proximoAnioSeleccionado;
+
+					// Verificar si hay datos para el año seleccionado
+					if (datosConsejoEducativo && datosConsejoEducativo[anioSeleccionado]) {
+						let datosAnio = datosConsejoEducativo[anioSeleccionado];
+
+						if (datosAnio.indicadorConsejo == false)
 						{
 							alert(`A esta familia no le corresponde pagar el Consejo Educativo ${periodoEscolarRequerido}`);
 						}
-						else if (idFamiliaPagadoraConsejoAnterior > 0)
+						else if (datosAnio.idFamiliaPagadoraConsejo > 0)
 						{
 							alert('Esta familia no paga Consejo Educativo porque está relacionada con otra familia del mismo representante');
 							return false;
 						}	
-						else if (consejoExoneradoAnterior > 0)
+						else if (datosAnio.consejoExonerado > 0)
 						{
 							alert(`Esta familia está exonerada del pago del Consejo Educativo ${periodoEscolarRequerido}`);
 							return false;
 						}
-						else if (indicadorReciboConsejoAnterior == true)
+						else if (datosAnio.indicadorReciboConsejo == true)
 						{
 							alert(`A este representante ya se le cobró el Consejo Educativo ${periodoEscolarRequerido}`);
 							return false
@@ -4504,55 +4487,9 @@
 						else
 						{
 							var indicadorTarifaEncontrada = 0;
-							$.each(otrasTarifas, function(clave, valor)											
+							$.each(otrasTarifas, function(clave, valor)
 							{
-								if (valor.conceptoAno == "Consejo Educativo "+anioConsejoEducativo)
-								{
-									amountMonthly = valor.tarifaBolivar;
-									tarifaDolar = valor.tarifaDolar;
-									indicadorTarifaEncontrada = 1;
-									return false;
-								}
-							});
-							if (indicadorTarifaEncontrada == 1)
-							{
-								totalBalance = dosDecimales(tarifaDolar);
-								actualizarTotales();
-							}
-							else
-							{
-								alert(`No se encontró la tarifa para el Consejo Educativo del período: ${periodoEscolarRequerido}`);
-								return false
-							}
-						}
-					}
-					else
-					{
-						if (indicadorConsejoActual == false)
-						{
-							alert(`A esta familia no le corresponde pagar el Consejo Educativo ${periodoEscolarRequerido}`);
-						}
-						else if (idFamiliaPagadoraConsejo > 0)
-						{
-							alert('Esta familia no paga Consejo Educativo porque está relacionada con otra familia del mismo representante');
-							return false;
-						}	
-						else if (consejoExonerado > 0)
-						{
-							alert(`Esta familia está exonerada del pago del Consejo Educativo ${periodoEscolarRequerido}`);
-							return false;
-						}
-						else if (indicadorReciboConsejoActual == true)
-						{
-							alert(`A este representante ya se le cobró el Consejo Educativo ${periodoEscolarRequerido}`);
-							return false
-						}
-						else
-						{
-							var indicadorTarifaEncontrada = 0;
-							$.each(otrasTarifas, function(clave, valor)											
-							{
-								if (valor.conceptoAno == "Consejo Educativo "+anioConsejoEducativo)
+								if (valor.conceptoAno == "Consejo Educativo " + anioSeleccionado)
 								{
 									amountMonthly = valor.tarifaBolivar;
 									tarifaDolar = valor.tarifaDolar;
@@ -4568,10 +4505,12 @@
 							else
 							{
 								alert(`No se encontró la tarifa para el Consejo Educativo del período: ${periodoEscolarRequerido}`);;
-								return false
+								return false;
 							}
 						}
-
+					} else {
+						// No hay datos para el año seleccionado, podría ser un error o simplemente no hay información.
+						alert(`No se encontró información del Consejo Educativo para el período ${periodoEscolarRequerido}.`);
 					}
 				}
 			}

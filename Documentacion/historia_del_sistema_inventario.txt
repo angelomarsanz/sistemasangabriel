@@ -1,0 +1,164 @@
+16/01/2026
+    Se creó el usuario proveedorsga40, clave proveedorsga40, con el id 1494 como usuario único para todos los proveedores temporalmente hasta que el sistema crezca y los proveedores también puedan tener su clave
+    Se modificaron los siguientes módulos con motivo de la creación de los roles Colaborador y proveedor:
+        src/Controller/UsersController.php
+        src/Template/Users/add.ctp
+        src/Template/Users/edit.ctp
+
+14/01/2025
+    Se revisó la documentación de inventarios, se debe proceder con la creación del usuario único de proveedor
+
+01/12/2025
+    Hasta la presente esta listo:
+        la tabla proveedors con su respectivo modelo, vista y controlador
+        La tabla productos con su respectivo modelo, vista y controlador
+        La tabla movimientos con su respectivo modelo, vista y controlador
+        la tabla cuentas por cobrar con su respectivo modelo, vista y controlador
+        En la tabla bills se agregaron las columnas:
+            descripcion_descuento_recargo, varchar(255)	
+            descripcion_exonerado, varchar(255)	
+            monto_exonerado, decimal(15,2)	
+            descripcion_prestamo, varchar(255)	
+            monto_prestamo,	decimal(15,2)	
+            descripcion_interes, varchar(255)	
+            monto_abonado_prestamo, decimal(15,2)	
+            vector_recibos_abonos, text	
+            monto_intereses_pagados, decimal(15,2)	
+            vector_recibos_intereses, text
+        Se creó un usuario único colaborador y se asociaron todos los colaboradores actuales a ese usuario
+        Se debe crear un usuario único proveedor y asociar todos los proveedores a ese usuario (Continuar por acá)
+        Cuando se vaya a hacer un ingreso al almacen en la tabla movimientos se registra el id del cliente o del proveedor. Si en algún momento se requiere saber que productos vende un proveedor se pueden buscar en la tabla movimientos. También si se quiere saber cuáles proveedores venden determinado producto se puede saber por la tabla movimientos
+        Si en algún momento este sistema crece y un cliente tiene varios depósitos se puede colocar en el movimiento el id_lugar_origen e id_lugar_entrada. Los lugares de origen o destino pueden ser los distintos depósitos de la organización, o si es una compra puede ser proveedor, o si es un cliente, cliente o también puede colocarse otro papelera, cuando el producto está vencido, ya no se puede vender y hay que desecharlo
+
+                                                
+30/11/2025
+    Se creó la tabla cuentas_por_cobrar, el modelo, la vista, los archivos javascript y el controlador
+31/10/2025
+    Creación de la tabla cuentas por cobrar:
+    
+    id: Id del registro
+    
+    id_cliente: Id del cliente que puede ser el id de la tabla representante o el id de la tabla colaboradors
+    
+    tipo_cliente: Puede tomar dos valores: Representante o Colaborador
+    
+    tipo_operacion: Puede tomar estos valores: Préstamo, Intereses, Abono a capital, Pago intereses y sus reversos: Reverso préstamo, reverso intereses, Reverso abono a capital, Reverso pago intereses
+    
+    id_documento_origen: 
+        Para préstamo, abono a capital y pago intereses, el id del recibo que soporta esa operación
+        Para intereses se coloca el id único 9999999
+    
+    tipo_documento_origen:
+        Recibo
+        Automático (para el caso de intereses)
+    
+    Monto, si es:
+        Préstamo e Intereses: positivo
+        Reverso préstamo: negativo
+        Reverso intereses: negativo
+        Abono a capital: negativo
+        Reverso abono a capital: positivo
+        Pago intereses: negativo
+        Reverso pago intereses: positivo
+
+23/10/2025
+Los colaboradores actuales en la base de datos del colegio se les cambió al usuario colaborador único 1489. Los nuevos colaboradores deben quedar vinculados al usuario colaborador único 1489.
+
+20/10/2025
+Se creó el usuario único "colaboradorsga40", clave "colaboradorsga40" con el id 1489. Enlazar los colaboradores actuales a ese usuario, así como también los nuevos colaboradores que se creen
+Se hizo un backup de la base de datos de producción y se restauró en el ambiente sgadev_sangabriel
+
+19/10/2025
+Ya se agregaron los campos a la tabla Bills:
+descripcion_descuento_recargo, varchar(255)	
+descripcion_exonerado, varchar(255)	
+monto_exonerado, decimal(15,2)	
+descripcion_prestamo, varchar(255)	
+monto_prestamo,	decimal(15,2)	
+descripcion_interes, varchar(255)	
+monto_abonado_prestamo, decimal(15,2)	
+vector_recibos_abonos, text	
+monto_intereses_pagados, decimal(15,2)	
+vector_recibos_intereses, text
+
+Se borraron los módulos de tmp/cache/models
+
+15/10/2025
+
+Se estuvieron agregando los campos en la tabla bills, pero por confusión se agregaron en la base de datos de desarrollo, tienen que agregarse en la base de datos de producción.
+
+Los clientes por los momentos son: 
+    - Representantes
+    - Colaboradores
+
+Cada representante ya tiene su usuario
+
+Provisionalmente se puede crear un usuario único para los colaboradores, ya que por los momentos los colaboradores no tendrán acceso al sistema
+
+Al momento de hacer la venta que afecta el inventario:
+
+Primero se le pide que seleccione si el cliente es un representante o un colaborador.
+
+Se muestra una búsqueda inteligente con los representantes o colaboradores
+
+Si el colaborador no está registrado dar la opción para registrarlo en el momento en el área donde se registran los clientes
+
+Ese formulario de registrar nuevos clientes tiene doble propósito: Actualizar o crear un nuevo cliente, indicando si es representante o colaborador.
+
+Se pregunta tipo de operación: Compra o pago
+
+Si es compra:
+
+    Una búsqueda inteligente con una palabra clave del producto
+
+    Si el producto no está en stock, se debe indicar "Agotado"
+
+    Se selecciona el artículo y se escribe la cantidad
+
+    Después se indica si hay descuento, exonerado o préstamo. Estas tres opciones se pueden expresar en cantidad o porcentaje.
+
+    Luego se indican los pagos
+
+    Estos datos de descuento, exonerado y préstamo se registran en la tabla bill, indicando si es un porcentaje o una cantidad fija, por ejemplo: 20% de descuento o 30 dólares de descuento. 
+
+    Actualmente en la columna amount de la tabla bills se registra con negativo el valor de los descuentos y con positivo el valor de los recargos, se usa esa misma para indicar el descuento.
+
+    En amount se registraría el monto del descuento y se crearía otra columna por ejemplo descripcion_descuento que puede tener dos valores: por ejemplo 20 % o 20 $
+
+    Se debe considerar la posibilidad de recargos, en ese caso se usan las mismas columnas: El descuento en negativo y el recargo en positivo y la columna descripcion_recargo_descuento, igualmente para recargos en la columna descripcion_recargo_descuento se indicaría por ejemplo: 20 % o 20 $
+
+    Igualmente se haría para exonerado y préstamo
+
+    En la tabla bills se agregan también dos columnas: monto_abonado_prestamo y vector_recibos_abonos. monto_abonado_prestamo es un acumulador que se actualiza cada vez que se hace un abono a ese recibo y vector_recibos_abonos es un vector donde se van indicando los recibos de pagos de los prestamos. En caso que se anule un recibo se debe reversar el abono_prestamo y eliminar el recibo del vector.
+
+    Como previsión futura se agregaron los campos descripcion_interes y monto_intereses_pagados 
+
+    Ahora se registrarán dos nuevos tipos de conceptos en la tabla concepts: 
+    
+    1. Los productos para la venta: En la columna transaction_identifier se registra el id del producto y en monto la cantidad vendida.
+
+    2. Los recibos (bills) pendientes de pago: En la columna transaction_identifier se registra el id del recibo pendiente de pago, en amount el monto abonado a ese recibo y si es un abono parcial en observation la palabra "abono"
+
+    Se debe crear una tabla cuentas por cobrar donde se creará el registro inicial del préstamo y luego por cada abono crear un registro con el pago 
+
+    Los pagos que se vayan haciendo de los préstamos deben registrarse en la tabla payments relacionados con el id del recibo de pago (Bills).
+
+Si es pago
+
+Se muestran los recibos a pagar con su saldo ordenados por el consecutivo del recibo 
+
+Se selecciona los recibos a pagar como se seleccionan las mensualidades
+
+Cuando ya un recibo se paga totalmente no se muestra en lista de recibos pendiente de pago
+
+En la tabla cuentas por cobrar cada abono debe indicar el recibo al cual corresponde el pago 
+
+Debe considerarse la anulación de los recibos de compra o pagos y sus respectivos reversos en las tablas de la base de datos
+
+Primero se añadirán los campos en las tablas ya existentes de la aplicación y se crearan las nuevas tablas.
+
+Crear los modelos, vistas y controladores
+
+Crear el crud inventario
+
+Y luego los cambios en create_invoice y reporte_cierre

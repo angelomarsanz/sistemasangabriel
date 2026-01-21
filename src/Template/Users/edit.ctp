@@ -29,6 +29,7 @@
                         'Contabilidad fiscal' => 'Contabilidad fiscal',                
                         'Control de estudios' => 'Control de estudios',
                         'Propietario' => 'Propietario',
+                        'Proveedor' => 'Proveedor',
                         'Representante' => 'Padre o representante',
                         'Seniat' => 'Seniat',
                         'Ventas generales' => 'Ventas generales',

@@ -102,120 +102,67 @@ foreach ($vectorEstudiantes as $indiceEstudiante => $estudiante)
         $finPeriodoEscolarDetalle = $indiceAnio + 1; ?>
         <div id="<?= 'cuotas-'.$indiceEstudiante.'-'.$indiceAnio ?>" class='row noVerEnPantalla noVerImpreso'>
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <?php
-                if ($rolUsuario == 'Representante')
-                { ?>
-                    <h4>Inscripción <?= $inicioPeriodoEscolarDetalle.'-'.$finPeriodoEscolarDetalle ?></h4>
-                    <div class="flex-container">
+                <h4>Inscripción <?= $inicioPeriodoEscolarDetalle.'-'.$finPeriodoEscolarDetalle ?></h4>
+                <div class="flex-container">
+                    <?php
+                    foreach ($anio['cuotas_anio_escolar'] as $indiceCuota => $cuota)
+                    { 
+                        if ($cuota['tipoCuota'] == 'Anticipo matrícula' || $cuota['tipoCuota'] == 'Diferencia matrícula' || 
+                            $cuota['tipoCuota'] == 'Abono agosto' || $cuota['tipoCuota'] == 'Diferencia agosto')
+                        {
+                            $idCuota = 'cuota-'.$cuota['id'];
+                            $nombreCuota = 'cuota_'.$cuota['id']; 
+                            $indicadorCuotaVencida = $cuota['indicadorCuotaVencida']; ?>
+                            <div>
+                                <?php
+                                    if ($indicadorCuotaVencida == 1)
+                                    { ?>
+                                        <label for="<?= $idCuota ?>"><?= $cuota['cuota'] ?></label>
+                                        <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                                    <?php
+                                    }
+                                    else 
+                                    { ?>
+                                        <label for="<?= $idCuota ?>" style='color: #a4a4c1;' ><?= $cuota['cuota'] ?></label>
+                                        <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" style='color: #a4a4c1;' value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                                    <?php
+                                    } ?>
+                            </div>
                         <?php
-                        foreach ($anio['cuotas_anio_escolar'] as $indiceCuota => $cuota)
-                        { 
-                            if ($cuota['tipoCuota'] == 'Anticipo matrícula' || $cuota['tipoCuota'] == 'Diferencia matrícula' || 
-                                $cuota['tipoCuota'] == 'Abono agosto' || $cuota['tipoCuota'] == 'Diferencia agosto')
-                            {
-                                $idCuota = 'cuota-'.$cuota['id'];
-                                $nombreCuota = 'cuota_'.$cuota['id']; 
-                                $indicadorCuotaVencida = $cuota['indicadorCuotaVencida']; ?>
-                                <div>
+                        }
+                    } ?> 
+                </div>
+                <hr />
+                <h4>Detalle de las cuotas del período escolar <?= $inicioPeriodoEscolarDetalle.'-'.$finPeriodoEscolarDetalle.' (Mensualidad)' ?></h4>
+                <div class="flex-container">
+                    <?php
+                    foreach ($anio['cuotas_anio_escolar'] as $indiceCuota => $cuota)
+                    { 
+                        if ($cuota['tipoCuota'] != 'Anticipo matrícula' && $cuota['tipoCuota'] != 'Diferencia matrícula' && 
+                        $cuota['tipoCuota'] != 'Abono agosto' && $cuota['tipoCuota'] != 'Diferencia agosto')
+                        {
+                            $idCuota = 'cuota-'.$cuota['id'];
+                            $nombreCuota = 'cuota_'.$cuota['id']; 
+                            $indicadorCuotaVencida = $cuota['indicadorCuotaVencida']; ?>
+                            <div>
+                                <?php
+                                    if ($indicadorCuotaVencida == 1)
+                                    { ?>
+                                        <label for="<?= $idCuota ?>"><?= $cuota['cuota'] ?></label>
+                                        <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
                                     <?php
-                                        if ($indicadorCuotaVencida == 1)
-                                        { ?>
-                                            <label for="<?= $idCuota ?>"><?= $cuota['cuota'] ?></label>
-                                            <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
-                                        <?php
-                                        }
-                                        else 
-                                        { ?>
-                                            <label for="<?= $idCuota ?>" style='color: #a4a4c1;' ><?= $cuota['cuota'] ?></label>
-                                            <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" style='color: #a4a4c1;' value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
-                                        <?php
-                                        } ?>
-                                </div>
-                            <?php
-                            }
-                        } ?> 
-                    </div>
-                    <hr />
-                    <h4>Detalle de las cuotas del período escolar <?= $inicioPeriodoEscolarDetalle.'-'.$finPeriodoEscolarDetalle.' (Mensualidad)' ?></h4>
-                    <div class="flex-container">
+                                    }
+                                    else 
+                                    { ?>
+                                        <label for="<?= $idCuota ?>" style='color: #a4a4c1;' ><?= $cuota['cuota'] ?></label>
+                                        <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" style='color: #a4a4c1;' value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
+                                    <?php
+                                    } ?>
+                            </div>
                         <?php
-                        foreach ($anio['cuotas_anio_escolar'] as $indiceCuota => $cuota)
-                        { 
-                            if ($cuota['tipoCuota'] != 'Anticipo matrícula' && $cuota['tipoCuota'] != 'Diferencia matrícula' && 
-                            $cuota['tipoCuota'] != 'Abono agosto' && $cuota['tipoCuota'] != 'Diferencia agosto')
-                            {
-                                $idCuota = 'cuota-'.$cuota['id'];
-                                $nombreCuota = 'cuota_'.$cuota['id']; 
-                                $indicadorCuotaVencida = $cuota['indicadorCuotaVencida']; ?>
-                                <div>
-                                    <?php
-                                        if ($indicadorCuotaVencida == 1)
-                                        { ?>
-                                            <label for="<?= $idCuota ?>"><?= $cuota['cuota'] ?></label>
-                                            <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
-                                        <?php
-                                        }
-                                        else 
-                                        { ?>
-                                            <label for="<?= $idCuota ?>" style='color: #a4a4c1;' ><?= $cuota['cuota'] ?></label>
-                                            <input type="number" id="<?= $idCuota ?>" name="<?= $nombreCuota ?>]" style='color: #a4a4c1;' value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
-                                        <?php
-                                        } ?>
-                                </div>
-                            <?php
-                            }
-                        } ?> 
-                    </div>
-                <?php
-                }
-                else
-                { ?>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>        
-                                    <th class='noVerEnPantalla' style='text-align: center;'>id</th>
-                                    <th style='text-align: center;'>Cuota</th>
-                                    <th style='text-align: center;'>Monto Cuota $</th>
-                                    <th style='text-align: center;'>Monto Abonado $</th>
-                                    <th style='text-align: center;'>Por pagar $</th>
-                                    <th style='text-align: center;'>Porcentaje Descuento %</th>
-                                    <th><th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php 
-                                $contador = 1;
-                                foreach ($anio['cuotas_anio_escolar'] as $indiceCuota => $cuota)
-                                { ?> 
-                                    <tr>
-                                        <td class='noVerEnPantalla' style='text-align: center;'>
-                                            <?= $cuota['id'] ?>
-                                        </td>
-                                        <td style='text-align: left;'>
-                                            <?= $cuota['cuota'] ?>
-                                        </td>
-                                        <td style='text-align: center;'>
-                                            <input type="number" id=<?= 'amount_'.$contador ?> name='amount[<?= $contador ?>]' value=<?= $cuota['tarifaCuota'] ?> step='0.01' class='form-control' disabled>
-                                        </td>
-                                        <td style='text-align: center;'>
-                                            <input type="number" id=<?= 'amount_dollar_'.$contador ?> name='amount_dollar[<?= $contador ?>]' value=<?= $cuota['montoAbonado'] ?> step='0.01' class='form-control' disabled>
-                                        </td>
-                                        <td style='text-align: center;'>
-                                            <input type="number" id=<?= 'pendiente_dollar_'.$contador ?> name='pendiente_dollar[<?= $contador ?>]' value=<?= $cuota['pendienteCuota'] ?> step='0.01' class='form-control' disabled>
-                                        </td>
-                                        <td style='text-align: center;'>
-                                            <input type="number" id=<?= 'porcentaje_descuento_'.$contador ?> name='porcentaje_descuento[<?= $contador ?>]' value=<?= $cuota['porcentajeDescuento'] ?> step='0.01' class='form-control' disabled>
-                                        </td>
-                                    </tr>
-                                    <?php
-                                    $contador++;
-                                } ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php
-                } ?>
+                        }
+                    } ?> 
+                </div>
             </div>
         </div>
     <?php

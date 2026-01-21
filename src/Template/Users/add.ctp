@@ -14,10 +14,12 @@
                         [
                             'Administrador' => 'Administrador',
                             'Alumno' => 'Alumno',
+                            'Colaborador' => 'Colaborador',
                             'Contabilidad fiscal' => 'Contabilidad fiscal',                
                             'Contabilidad general' => 'Contabilidad general',
                             'Control de estudios' => 'Control de estudios',
                             'Propietario' => 'Propietario',
+                            'Proveedor' => 'Proveedor',
                             'Representante' => 'Padre o representante',
                             'Seniat' => 'Seniat',
                             'Ventas fiscales' => 'Ventas fiscales',

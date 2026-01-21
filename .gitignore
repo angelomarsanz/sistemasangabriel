@@ -11,3 +11,5 @@
 /migracion35.txt
 /migracion36.txt
 /PendientesProduccion.txt
+*.zip
+.env.sh

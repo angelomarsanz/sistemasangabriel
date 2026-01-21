@@ -249,7 +249,7 @@ class StudenttransactionsController extends AppController
             if ($this->Studenttransactions->save($studenttransaction)) {
                 $this->Flash->success(__('The studenttransaction has been saved.'));
 
-//                return $this->redirect(['action' => 'index']);
+				// return $this->redirect(['action' => 'index']);
             } else {
                 $this->Flash->error(__('The studenttransaction could not be saved. Please, try again.'));
             }
@@ -348,6 +348,17 @@ class StudenttransactionsController extends AppController
 				{
 					$this->Flash->error(__('Los datos del alumno no pudieron ser actualizados, vuelva a intentar.'));
 				}	
+				else
+				{
+					// Buscar en la tabla parentsandguardians el representante del alumno y cambiar el campo consejo_educativo a 'Sí'. Cargas el modelo Parentsandguardians buscas el representante que sea igual parentsandguardians_id del estudiante y luego cambias el campo consejo_educativo a 'Sí' y guardas.
+					$this->loadModel('Parentsandguardians');
+					$representante = $this->Parentsandguardians->get($student->parentsandguardian_id);
+					$representante->consejo_educativo = 'Sí';
+					if (!($this->Parentsandguardians->save($representante)))
+					{
+						$this->Flash->error(__('Los datos del representante no pudieron ser actualizados, vuelva a intentar.'));
+					}
+				}
 			}
 		}
         return;
@@ -1491,6 +1502,12 @@ class StudenttransactionsController extends AppController
 			$currentYearRegistration = $school->current_year_registration;
 			
 			$anoEscolarActual = $school->current_school_year;
+
+			$anioEscolarAnterior = $anoEscolarActual - 1; 
+
+			$vector_becas_anios_anteriores = [];
+			$vector_tipo_descuento_anios_anteriores = [];
+			$vector_descuentos_anios_anteriores = []; 
 			
 			setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
 			date_default_timezone_set('America/Caracas');
@@ -1508,28 +1525,46 @@ class StudenttransactionsController extends AppController
 					foreach ($estudiantes as $estudiante)
 					{
 						$estudianteBuscado = $this->Studenttransactions->Students->get($estudiante->id);
-						
+
 						$estudianteBuscado->becado_ano_anterior = $estudianteBuscado->scholarship;
 						$estudianteBuscado->tipo_descuento_ano_anterior = $estudianteBuscado->tipo_descuento;
 						$estudianteBuscado->descuento_ano_anterior = $estudianteBuscado->discount;
+
+						// Recuperar el valor json de la columna vector_becas_anios_anteriores y convertirlo en un array en $vector_becas_anios_anteriores
+						$vector_becas_anios_anteriores = json_decode($estudianteBuscado->vector_becas_anios_anteriores, true);				
+						$vector_becas_anios_anteriores[$anoEscolarActual] = $estudianteBuscado->scholarship;
+						$estudianteBuscado->vector_becas_anios_anteriores = json_encode($vector_becas_anios_anteriores);
 						
+						// Recuperar el valor json de la columna vector_tipo_descuento_anios_anteriores y convertirlo en un array en $vector_tipo_descuento_anios_anteriores
+						$vector_tipo_descuento_anios_anteriores = json_decode($estudianteBuscado->vector_tipo_descuento_anios_anteriores, true);
+						$vector_tipo_descuento_anios_anteriores[$anoEscolarActual] = $estudianteBuscado->tipo_descuento;
+						$estudianteBuscado->vector_tipo_descuento_anios_anteriores = json_encode($vector_tipo_descuento_anios_anteriores);
+						
+						// Recuperar el valor json de la columna vector_descuentos_anios_anteriores y convertirlo en un array en $vector_descuentos_anios_anteriores
+						$vector_descuentos_anios_anteriores = json_decode($estudianteBuscado->vector_descuentos_anios_anteriores, true);
+						$vector_descuentos_anios_anteriores[$anoEscolarActual] = $estudianteBuscado->discount;
+						$estudianteBuscado->vector_descuentos_anios_anteriores = json_encode($vector_descuentos_anios_anteriores); 
+											
 						if (!($this->Studenttransactions->Students->save($estudianteBuscado)))
 						{
 							$this->Flash->error(__('No se pudo actualizar el estudiante con el ID: ' . $estudianteBuscado->id));
 							$indicadorNoActualizado = 1;
 						}
+						
 					}
 					if ($indicadorNoActualizado == 0)
 					{
 						$school->current_school_year = $school->current_year_registration;
+						$school->anio_asignar_seccion = $school->current_year_registration;
 						if (!($this->Schools->save($school))) 
 						{
 							$this->Flash->error(__('No se pudo actualizar el año escolar'));
 							return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 						}	
 						else
-						{
-							$this->Flash->success(__('Se actualizaron correctamente los datos para el nuevo año escolar'));
+						{ 
+							$this->Flash->success(__('Estimado usuario, como es inicio del nuevo año escolar se están actualizando los datos de los estudiantes y representantes. Una vez que termine este proceso podrá asignar las secciones a los alumnos regulares.'));
+							return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'actualizacionAnualRepresentantes']);
 						}
 					}
 				}
@@ -3803,7 +3838,7 @@ class StudenttransactionsController extends AppController
 		}
     }
 
-// Función creada para corregir cualquier error en la tabla Studenttransactions
+	// Función creada para corregir cualquier error en la tabla Studenttransactions
 	
 	public function correctTransaction()
 	{
@@ -4472,12 +4507,19 @@ class StudenttransactionsController extends AppController
     {	
 		if ($this->request->is('post')) 
         {
-			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteGeneralMorosidadRepresentantes', $_POST["mes"], $_POST["periodo_escolar"], "General de Representantes", $_POST["consejo_educativo"], $_POST["indicador_recalculo"], $_POST["telefono"]]);
+			$tipoEstudiante = $this->request->getData('tipo_estudiante');
+			$condicionRegulares = $this->request->getData('condicion_regulares') === 'Regulares' ? 'Regulares' : 'No';
+			$condicionEgresados = $this->request->getData('condicion_egresados') === 'Egresados' ? 'Egresados' : 'No';
+
+			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteGeneralMorosidadRepresentantes', $_POST["mes"], $_POST["periodo_escolar"], "General de Representantes", $_POST["consejo_educativo"], $_POST["indicador_recalculo"], $_POST["telefono"], $tipoEstudiante, $condicionRegulares, $condicionEgresados]);
         }
 	}
 
-	public function reporteGeneralMorosidadRepresentantes($mes = null, $periodo_escolar = null, $tipo_reporte = null, $consejo_educativo, $indicador_recalculo = null, $telefono = null)
+	public function reporteGeneralMorosidadRepresentantes($mes = null, $periodo_escolar = null, $tipo_reporte = null, $consejo_educativo, $indicador_recalculo = null, $telefono = null, $tipoEstudiante = 'todos', $condicionRegulares = 'No', $condicionEgresados = 'No')
 	{	
+		$subtitulo_reporte = '';
+		$condiciones_estudiante = [];
+
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
 
@@ -4594,9 +4636,45 @@ class StudenttransactionsController extends AppController
 
 		$contador_transacciones = 0;
 
+		$condiciones_base = [
+			'Studenttransactions.invoiced' => 0, 
+			'Studenttransactions.ano_escolar' => $anio, 
+			'Students.balance' => $anio
+		];
+
+		if ($tipoEstudiante == 'quinto_anio')
+		{
+			$condiciones_base['Sections.orden >='] = 41;
+			$condiciones_condicion = [];
+			$subtitulo_reporte = "Solo Estudiantes de 5to. Año (";
+			if ($condicionRegulares == 'Regulares') {
+				$condiciones_condicion[] = 'Regular';
+				$subtitulo_reporte .= "Regulares";
+			}
+			if ($condicionEgresados == 'Egresados') {
+				$condiciones_condicion[] = 'Egresado';
+				$subtitulo_reporte .= ($condicionRegulares == 'Regulares' ? " y " : "") . "Egresados";
+			}
+			$subtitulo_reporte .= ")";
+
+			if (!empty($condiciones_condicion)) {
+				if (count($condiciones_condicion) > 1) 
+				{
+					$condiciones_base['Students.student_condition IN'] = $condiciones_condicion;
+				} 
+				else 
+				{
+					$condiciones_base['Students.student_condition'] = $condiciones_condicion[0];
+				}
+			}
+		} else {
+			$condiciones_base['Students.student_condition'] = 'Regular';
+			$subtitulo_reporte = "Todos los Estudiantes";
+		}
+
 		$transacciones_estudiantes = $this->Studenttransactions->find('all')
 		->contain(['Students' => ['Parentsandguardians', 'Sections']])
-		->where(['Studenttransactions.invoiced' => 0, 'Studenttransactions.ano_escolar' => $anio, 'Students.student_condition' => 'Regular', 'Students.balance' => $anio])
+		->where($condiciones_base)
 		->order(['Parentsandguardians.family' => 'ASC', 'Parentsandguardians.surname' => 'ASC', 'Parentsandguardians.first_name' => 'ASC', 'Parentsandguardians.id' => 'ASC', 'Studenttransactions.payment_date' => 'ASC']);
 
 		if ($transacciones_estudiantes->count() == 0)
@@ -4683,7 +4761,7 @@ class StudenttransactionsController extends AppController
 			$totales_morosidad = $vectorConsejo['totales_morosidad'];
 		}
 								
-		$this->set(compact('mes', 'periodo_escolar', 'tipo_reporte', 'telefono', 'currentDate', 'school', 'dollarExchangeRate', 'mes_anio_desde', 'mes_anio_hasta', 'nombre_mes_reporte', 'anio_correspondiente_mes', 'detalle_morosos', 'total_cuotas_periodo', 'totales_morosidad', 'vector_cuotas'));
+		$this->set(compact('mes', 'periodo_escolar', 'tipo_reporte', 'telefono', 'currentDate', 'school', 'dollarExchangeRate', 'mes_anio_desde', 'mes_anio_hasta', 'nombre_mes_reporte', 'anio_correspondiente_mes', 'detalle_morosos', 'total_cuotas_periodo', 'totales_morosidad', 'vector_cuotas', 'subtitulo_reporte'));
 	}
 
 	public function saldoCuotas($mes = null, $anio = null, $periodo_escolar = null, $indicador_recalculo = null, $transacciones = null, $anio_mes_dia_hasta = null, $anio_mes_dia_agosto = null)
@@ -4739,6 +4817,8 @@ class StudenttransactionsController extends AppController
 			{
 				$anio_transaccion = $transaccion->payment_date->year;
 				$mes_transaccion = $transaccion->payment_date->month;
+				// En la variable $representante guardar el registro del representante del estudiante al cual pertenece la transacción
+				$representante = $transaccion->student->parentsandguardian;
 
 				if ($transaccion->transaction_type == 'Matrícula' || $transaccion->transaction_type == 'Servicio educativo' || $transaccion->transaction_type == 'Seguro escolar')
 				{
@@ -4860,7 +4940,20 @@ class StudenttransactionsController extends AppController
 						}
 						else
 						{
-							if ($transaccion->transaction_type == 'Matrícula' || $transaccion->transaction_type == 'Servicio educativo' || $transaccion->transaction_type == 'Seguro escolar' || substr($transaccion->transaction_description, 0, 3) == 'Ago')
+							if ($transaccion->transaction_type == 'Matrícula' || substr($transaccion->transaction_description, 0, 3) == 'Ago')
+							{
+								$respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion, $representante->type_of_identification, $representante->identidy_card);
+								$indicadorExoneradoDiferenciasInscripcion = $respuestaProcesarMatriculaAgosto['indicadorExoneradoDiferenciasInscripcion'];
+								if ($indicadorExoneradoDiferenciasInscripcion == 1)
+								{
+									$saldo_cuota = 0;
+								}
+								else
+								{
+									$saldo_cuota = round($monto_neto_cuota - $transaccion->amount_dollar, 2);
+								}
+							}
+							elseif ($transaccion->transaction_type == 'Servicio educativo' || $transaccion->transaction_type == 'Seguro escolar')
 							{
 								$saldo_cuota = round($monto_neto_cuota - $transaccion->amount_dollar, 2);
 							}
@@ -7044,7 +7137,7 @@ class StudenttransactionsController extends AppController
 		{
 			if ($transaccion->transaction_type == 'Matrícula' || substr($transaccion->transaction_description, 0, 3) == 'Ago')
 			{
-				$respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion, $representante->user_id);
+				$respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion, $representante->type_of_identification, $representante->identidy_card);
 				
 				$indicadorExoneradoDiferenciasInscripcion = $respuestaProcesarMatriculaAgosto['indicadorExoneradoDiferenciasInscripcion'];
 				
@@ -7260,7 +7353,7 @@ class StudenttransactionsController extends AppController
 			];
 		return $respuesta;
 	}
-	public function procesarMatriculaAgosto($transaccion = null, $idUsuarioRepresentante = null)
+	public function procesarMatriculaAgosto($transaccion = null, $tipoDocumentoIdentidad = null, $numeroDocumentoIdentidad = null)
 	{
 		$tarifasMatriculaAgosto =
 			[
@@ -7270,11 +7363,11 @@ class StudenttransactionsController extends AppController
 				'Matrícula 2024' =>  ['tarifa' => 220, 'anticipoAbono' => 190, 'diferencia' => 30, 'descuentoRecargo' => 0],
 				'Ago 2025' => ['tarifa' => 220, 'anticipoAbono' => 190, 'diferencia' => 20, 'descuentoRecargo' => -10],
 
-				'Matrícula 2025' =>  ['tarifa' => 220, 'anticipoAbono' => 220, 'diferencia' => 0, 'descuentoRecargo' => 0],
-				'Ago 2026' => ['tarifa' => 220, 'anticipoAbono' => 220, 'diferencia' => 0, 'descuentoRecargo' => 0],
+				'Matrícula 2025' =>  ['tarifa' => 263, 'anticipoAbono' => 220, 'diferencia' => 43, 'descuentoRecargo' => 0],
+				'Ago 2026' => ['tarifa' => 263, 'anticipoAbono' => 220, 'diferencia' => 43, 'descuentoRecargo' => 0],
 
-				'Matrícula 2026' =>  ['tarifa' => 220, 'anticipoAbono' => 220, 'diferencia' => 0, 'descuentoRecargo' => 0],
-				'Ago 2027' => ['tarifa' => 220, 'anticipoAbono' => 220, 'diferencia' => 0, 'descuentoRecargo' => 0],
+				'Matrícula 2026' =>  ['tarifa' => 263, 'anticipoAbono' => 263, 'diferencia' => 0, 'descuentoRecargo' => 0],
+				'Ago 2027' => ['tarifa' => 263, 'anticipoAbono' => 263, 'diferencia' => 0, 'descuentoRecargo' => 0],
 			];
 
 		$codigo_retorno = 0;
@@ -7304,10 +7397,10 @@ class StudenttransactionsController extends AppController
 		$colaboradors = $this->Colaboradors->find('all');
 		foreach ($colaboradors as $indiceColaborador => $colaborador)
 		{
-			$vectorColaboradorsExoneradosDiferencias[$colaborador->user_id] = $colaborador->user_id;
+			$vectorColaboradorsExoneradosDiferencias[$colaborador->tipo_documento_identidad.$colaborador->numero_documento_identidad] = $colaborador->tipo_documento_identidad.$colaborador->numero_documento_identidad;
 		}
 
-		if (isset($vectorColaboradorsExoneradosDiferencias[$idUsuarioRepresentante]))
+		if (isset($vectorColaboradorsExoneradosDiferencias[$tipoDocumentoIdentidad.$numeroDocumentoIdentidad]))
 		{
 			$indicadorExoneradoDiferenciasInscripcion = 1;
 		} 
@@ -7444,7 +7537,7 @@ class StudenttransactionsController extends AppController
 			}
 			else
 			{
-				$saldoCuota = round($tarifaCuota - $montoAbono, 2);
+				$saldoCuota = $tarifaCuota;
 			}
 
 			if ($saldoCuota < 0)
@@ -7645,7 +7738,7 @@ class StudenttransactionsController extends AppController
             }
             if ($indicadorProcesarTransaccion == 1)
             {
-                $respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion, $representante->user_id); 
+                $respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion, $representante->type_of_identification, $representante->identidy_card); 
                 $indicadorExoneradoDiferenciasInscripcion = $respuestaProcesarMatriculaAgosto['indicadorExoneradoDiferenciasInscripcion'];
                 $indicadorDeudaInscripcion = $respuestaProcesarMatriculaAgosto['indicadorDeudaInscripcion'];
                 if ($indicadorDeudaInscripcion == 1)
@@ -7661,7 +7754,7 @@ class StudenttransactionsController extends AppController
 			];
 		return $respuesta;
 	}	
-			
+// Función para gestionar el servicio educativo de los estudiantes
 	public function servicioEducativo($periodoEscolar = null, $idFamilia = null, $idEstudiante = null, $indicadorExoneracion = null)
 	{
 		$this->verificarAnioUltimaInscripcion();
@@ -7683,8 +7776,14 @@ class StudenttransactionsController extends AppController
 		$periodoEscolarActual = $anioPeriodoActual . "-" . $anioPeriodoProximo;
 		$periodoEscolarProximo = $anioPeriodoProximo . "-" . $anioPeriodoProximo2;
 
+		if ($periodoEscolar === null) {
+			$periodoEscolar = $periodoEscolarActual;
+		}
+
 		$criteriosTransaccionEstudiante = [];
 		$todasLasTransaccionesServicioEducativo = [];
+
+		$filtroEstudiantes = $this->request->getQuery('filtro_estudiantes', 'todos');
 
 		if ($periodoEscolar != null && $periodoEscolar != 0)
 		{
@@ -7861,7 +7960,7 @@ class StudenttransactionsController extends AppController
 			}
 		}
 
-		$this->set(compact('periodoEscolar', 'idFamilia', 'idEstudiante', 'indicadorExoneracion', 'estudiantesEncontrados', 'matriculasEstudiantesEncontradas', 'cantidadEstudiantes', 'periodoEscolarAnterior', 'periodoEscolarActual', 'periodoEscolarProximo', 'indicadorBusquedaEstudiantes', 'indicadorActualizacionExoneracion'));
+		$this->set(compact('periodoEscolar', 'idFamilia', 'idEstudiante', 'indicadorExoneracion', 'estudiantesEncontrados', 'matriculasEstudiantesEncontradas', 'cantidadEstudiantes', 'periodoEscolarAnterior', 'periodoEscolarActual', 'periodoEscolarProximo', 'indicadorBusquedaEstudiantes', 'indicadorActualizacionExoneracion', 'filtroEstudiantes'));
 	}
 
 }

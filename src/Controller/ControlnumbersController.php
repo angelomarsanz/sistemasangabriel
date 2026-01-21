@@ -10,6 +10,20 @@ use App\Controller\AppController;
  */
 class ControlnumbersController extends AppController
 {
+    public function isAuthorized($user)
+    {
+		if(isset($user['role']))
+		{
+			if ($user['role'] === 'Seniat')
+			{
+				if(in_array($this->request->action, ['edit']))
+				{
+					return true;
+				}				
+			}
+		}
+        return parent::isAuthorized($user);
+    }        
 
     /**
      * Index method

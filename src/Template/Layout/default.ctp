@@ -26,17 +26,17 @@ $cakeDescription = 'San Gabriel Arcángel';
     </title>
     <?= $this->Html->meta('icon') ?>
 
-    <?= $this->Html->css(['jquery-ui.min', 'bootstrap.min', 'style2', 'csga.css?ver='.time(), '/js_csga/main-style.css?ver='.time() ]) ?>
+    <?= $this->Html->css(['jquery-ui.min', 'bootstrap.min', 'style2', 'csga.css?ver='.time(), 'main-style.css?ver='.time() ]) ?>
 
-    <?= $this->Html->script(['jquery-3.1.1.min', 'jquery-ui.min', 'bootstrap.min', 'jquery.redirect', 'jquery.numeric.min', 'jquery.table2excel.min', 'signature_pad.umd.min', 'csga.js?ver='.time() ]) ?>
-    
+    <?= $this->Html->script(['jquery-3.1.1.min', 'jquery-ui.min', 'bootstrap.min', 'jquery.redirect', 'jquery.numeric.min', 'jquery.table2excel.min', 'signature_pad.umd.min', 'csga.js?ver='.time(), 'xlsx.full.min' ]) ?>
+
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
     <?= $this->fetch('script') ?>
 </head>
 <body style="padding-top: 50px;" onafterprint="imprimir()">
     <?= $this->element('menu') ?>
-    
+
     <?= $this->Flash->render() ?>
     <div class="container">
         <?= $this->fetch('content') ?>
@@ -62,5 +62,5 @@ $cakeDescription = 'San Gabriel Arcángel';
         </div>
     </footer>
 </body>
-<?= $this->Html->script('/js_csga/main-script.js?ver='.time()) ?>
+<?= $this->Html->script('main-script.js?ver='.time()) ?>
 </html>

@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && rm -rf /opt/lampp/htdocs/sistemasangabriel/webroot/js_csga && cp -rv dist /opt/lampp/htdocs/sistemasangabriel/webroot/js_csga",
-    "lint": "eslint .",
+    "build": "vite build && mkdir -p ../webroot/old_assets && mv ../webroot/js/main-script.js ../webroot/old_assets/js_csga_main-script.js 2>/dev/null || true && mv ../webroot/css/main-style.css ../webroot/old_assets/js_csga_main-style.css 2>/dev/null || true && cp dist/main-script.js ../webroot/js/main-script.js && cp dist/main-style.css ../webroot/css/main-style.css",
     "preview": "vite preview"
   },
   "dependencies": {

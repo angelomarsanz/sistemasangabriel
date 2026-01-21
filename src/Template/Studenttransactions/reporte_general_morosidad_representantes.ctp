@@ -32,6 +32,9 @@
 				<p>RIF: <?= $school->rif ?></p>
 				<p>Fecha de emisión: <?= $currentDate->format('d/m/Y'); ?></p>
 				<h3 style="text-align: center;"><?= 'Reporte General Morosidad de Representantes del Año Escolar '.$periodo_escolar ?></h3>
+				<?php if (isset($subtitulo_reporte) && !empty($subtitulo_reporte)): ?>
+    				<h4 style="text-align: center;"><?= $subtitulo_reporte ?></h4>
+				<?php endif; ?>
 				<h4 style="text-align: center;"><?= 'Período desde: '.$mes_anio_desde.' hasta '.$mes_anio_hasta ?></h3>
 				<h4 style="text-align: left;">Resumen</h4>
 				<p><?= "Monto total mensualidades de septiembre a ".$nombre_mes_reporte." ".$anio_correspondiente_mes." y otros conceptos: ".number_format($total_cuotas_periodo, 2, ",", ".")." $" ?></p>

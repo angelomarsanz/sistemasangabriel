@@ -889,8 +889,7 @@
 			<br />
 			<br />
 		</div>
-		<br /><br /><br />
-		<div>
+		<div class="saltopagina">
 			<h5><?= " Fecha: ".$bill->date_and_time->format('d-m-Y').", ".$bill->school_year ?></h5>
 			<?php 
 			if ($bill->annulled == 1): ?>

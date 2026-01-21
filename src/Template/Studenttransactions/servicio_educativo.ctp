@@ -21,13 +21,29 @@
         <?= $this->Form->create() ?>
             <fieldset>
                 <?php
-                    echo $this->Form->input('periodo_escolar', ['id' => 'periodo-escolar', 'label' => 'Emitir reporte de servicio educativo correspondiente al período escolar: ', 'required', 'options' => 
-                    [
-                        null => "",
-                        $periodoEscolarAnterior => $periodoEscolarAnterior,
-                        $periodoEscolarActual => $periodoEscolarActual,
-                        $periodoEscolarProximo => $periodoEscolarProximo
-                    ]]);
+                    echo $this->Form->input('periodo_escolar', [
+                        'id' => 'periodo-escolar', 
+                        'label' => 'Emitir reporte de servicio educativo correspondiente al período escolar: ', 
+                        'required', 
+                        'options' => 
+                            [
+                                $periodoEscolarAnterior => $periodoEscolarAnterior,
+                                $periodoEscolarActual => $periodoEscolarActual,
+                                $periodoEscolarProximo => $periodoEscolarProximo
+                            ],
+                        'value' => $periodoEscolar
+                    ]);
+                    
+                    echo $this->Form->input('filtro_estudiantes', [
+                        'id' => 'filtro-estudiantes',
+                        'label' => 'Estudiantes',
+                        'required',
+                        'options' => [
+                            'todos' => 'Todos',
+                            'pendiente' => 'Pendiente de pago'
+                        ],
+                        'value' => $filtroEstudiantes
+                    ]);
                 ?>
             </fieldset>   
         <?= $this->Form->end() ?>
@@ -48,20 +64,33 @@ if ($periodoEscolar != null && $periodoEscolar != 0)
     $cantidadEstudiantesServicioEducativo = 0;
     $totalACobrarServicioEducativo = 0;
     $totalAbonadoServicioEducativo = 0;
-    $totalPagadoServicioEducativo = 0;
     $cantidadEstudiantesExoneradoServicioEducativo = 0;
     $totalMontoExoneradoServicioEducativo = 0;
+
+    $totalAlumnosPendientes = 0;
+    $totalAPagarAlumnosPendientePago = 0;
+    $pendientePorPagarServicioEducativo = 0;
+
     foreach ($matriculasEstudiantesEncontradas as $indiceMatricula => $matricula)
     {
         if ($matricula->servicio_educativo['codigo_retorno'] == 0)
         {
             $cantidadEstudiantesServicioEducativo++;
-            $totalACobrarServicioEducativo += $matricula->servicio_educativo['tarifaCuota'];
-            $totalAbonadoServicioEducativo += $matricula->servicio_educativo['montoAbono'];
             if ($matricula->student->servicio_educativo_exonerado > 0)
             {
                 $cantidadEstudiantesExoneradoServicioEducativo++;
                 $totalMontoExoneradoServicioEducativo += $matricula->servicio_educativo['tarifaCuota'];
+            }
+            else
+            {
+                $totalACobrarServicioEducativo += $matricula->servicio_educativo['tarifaCuota'];
+                $totalAbonadoServicioEducativo += $matricula->servicio_educativo['montoAbono'];
+
+                if ($matricula->servicio_educativo['saldoCuota'] > 0) {
+                    $totalAlumnosPendientes++;
+                    $totalAPagarAlumnosPendientePago += $matricula->servicio_educativo['tarifaCuota'];
+                    $pendientePorPagarServicioEducativo += $matricula->servicio_educativo['saldoCuota'];
+                }
             } 
         }
     } ?>
@@ -69,33 +98,60 @@ if ($periodoEscolar != null && $periodoEscolar != 0)
         <div class="col-md-12">
             <div class="page-header">
                 <h4>Servicio Educativo Correspondiente al Período Escolar: <?= $periodoEscolar ?></h4>
+                <?php if (isset($filtroEstudiantes)): ?>
+                    <h5>
+                        <?php
+                        if ($filtroEstudiantes == 'pendiente') {
+                            echo 'Estudiantes con pago pendiente';
+                        } else {
+                            echo 'Todos los estudiantes';
+                        }
+                        ?>
+                    </h5>
+                <?php endif; ?>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <?= 'Total Alumnos nuevos: '. $cantidadEstudiantesServicioEducativo ?>
+    <?php if ($filtroEstudiantes == 'pendiente'): ?>
+        <div class="row">
+            <div class="col-md-6">
+                <?= 'Total alumnos pendientes de pago: '. $totalAlumnosPendientes ?>
+            </div>
+            <div class="col-md-6">
+                <?= 'Total a pagar a alumnos pendiente de pago: $ '. number_format($totalAPagarAlumnosPendientePago, 2, ",", ".") ?>
+            </div>
         </div>
-        <div class="col-md-6">
-            <?= 'Total Alumnos exonerados: '. $cantidadEstudiantesExoneradoServicioEducativo ?>
+        <div class="row">
+            <div class="col-md-6">
+                <?= 'Pendiente por pagar servicio educativo: $ '. number_format($pendientePorPagarServicioEducativo, 2, ",", ".") ?>    
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <?= 'Total servicio educativo a cobrar: $ '. number_format($totalACobrarServicioEducativo, 2, ",", ".") ?>
+    <?php else: ?>
+        <div class="row">
+            <div class="col-md-6">
+                <?= 'Total Alumnos nuevos: '. $cantidadEstudiantesServicioEducativo ?>
+            </div>
+            <div class="col-md-6">
+                <?= 'Total Alumnos exonerados: '. $cantidadEstudiantesExoneradoServicioEducativo ?>
+            </div>
         </div>
-        <div class="col-md-6">
-            <?= 'Total pagado servicio educativo: $ '. number_format($totalAbonadoServicioEducativo, 2, ",", ".") ?>
+        <div class="row">
+            <div class="col-md-6">
+                <?= 'Total servicio educativo a cobrar: $ '. number_format($totalACobrarServicioEducativo, 2, ",", ".") ?>
+            </div>
+            <div class="col-md-6">
+                <?= 'Total pagado servicio educativo: $ '. number_format($totalAbonadoServicioEducativo, 2, ",", ".") ?>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <?= 'Total exonerado servicio educativo: $ '. number_format($totalMontoExoneradoServicioEducativo, 2, ",", ".") ?>
+        <div class="row">
+            <div class="col-md-6">
+                <?= 'Total exonerado servicio educativo: $ '. number_format($totalMontoExoneradoServicioEducativo, 2, ",", ".") ?>
+            </div>
+            <div class="col-md-6">
+                <?= 'Pendiente por pagar servicio educativo: $ '. number_format(round($totalACobrarServicioEducativo - $totalAbonadoServicioEducativo, 2), 2, ",", ".") ?>    
+            </div>
         </div>
-        <div class="col-md-6">
-            <?= 'Pendiente por pagar servicio educativo: $ '. number_format(round($totalACobrarServicioEducativo - $totalAbonadoServicioEducativo - $totalMontoExoneradoServicioEducativo, 2), 2, ",", ".") ?>    
-        </div>
-    </div>
+    <?php endif; ?>
     <br />
     <div class="row">
         <div class="col-md-12">    
@@ -117,23 +173,35 @@ if ($periodoEscolar != null && $periodoEscolar != 0)
                         <?php $cantidadEstudiantesServicioEducativo = 1; ?>
                         <?php 
                         foreach ($matriculasEstudiantesEncontradas as $indiceMatricula => $matricula):
-                            if ($matricula->servicio_educativo['codigo_retorno'] == 0)
+
+                            $mostrar = true;
+                            if (isset($filtroEstudiantes) && $filtroEstudiantes == 'pendiente') {
+                                if ($matricula->student->servicio_educativo_exonerado > 0 || (isset($matricula->servicio_educativo['saldoCuota']) && $matricula->servicio_educativo['saldoCuota'] <= 0)) {
+                                    $mostrar = false;
+                                }
+                            }
+
+                            if ($matricula->servicio_educativo['codigo_retorno'] == 0 && $mostrar)
                             {
-                                $totalACobrarServicioEducativo += $matricula->servicio_educativo['tarifaCuota'];
-                                $totalAbonadoServicioEducativo += $matricula->servicio_educativo['montoAbono'];
                                 $indicadorExoneracionServicioEducativo = 'No'; 
+                                $montoAbonadoParaMostrar = $matricula->servicio_educativo['montoAbono'];
+
                                 if ($matricula->student->servicio_educativo_exonerado > 0)
                                 {
                                     $indicadorExoneracionServicioEducativo = 'Sí';
-                                    $cantidadEstudiantesExoneradoServicioEducativo++;
-                                    $totalMontoExoneradoServicioEducativo += $matricula->servicio_educativo['tarifaCuota'];
+                                    $montoAbonadoParaMostrar = 0;
+                                }
+                                else
+                                {
+                                    $totalACobrarServicioEducativo += $matricula->servicio_educativo['tarifaCuota'];
+                                    $totalAbonadoServicioEducativo += $matricula->servicio_educativo['montoAbono'];
                                 } ?>
                                 <tr>
                                     <td><?= $cantidadEstudiantesServicioEducativo ?></td>
                                     <td><?= h($matricula->student->full_name) ?></td>
                                     <td><?= h($matricula->student->id) ?></td>
-                                    <td><?= h($matricula->servicio_educativo['tarifaCuota']) ?></td>
-                                    <td><?= h($matricula->servicio_educativo['montoAbono']) ?></td>
+                                    <td><?= h(number_format($matricula->servicio_educativo['tarifaCuota'], 2)) ?></td>
+                                    <td><?= h(number_format($montoAbonadoParaMostrar, 2)) ?></td>
                                     <td><?= h($matricula->servicio_educativo['saldoCuota']) ?></td>
                                     <td><?= h($indicadorExoneracionServicioEducativo) ?></td>
                                     <td class="actions nover">

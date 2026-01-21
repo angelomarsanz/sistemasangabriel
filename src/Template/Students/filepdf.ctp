@@ -76,12 +76,12 @@
                 <?php
                 if ($indicadorDeudaInscripcion == 1)
                 { ?>
-                    <li>Seguro Escolar 2025 - 2026 =  25$ (Pago único en dólares en efectivo) - <b>TOTAL A CANCELAR = 515$</b></li>
+                    <li>Seguro Escolar 2025 - 2026 =  25$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 515$</b></li>
                 <?php
                 }
                 else
                 { ?>
-                    <li>Seguro Escolar 2025 - 2026 =  25$ (Pago único en dólares en efectivo) - <b>TOTAL A CANCELAR = 465$</b></li>
+                    <li>Seguro Escolar 2025 - 2026 =  25$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 465$</b></li>
                 <?php
                 } ?>
             </ul>
@@ -258,12 +258,12 @@
                     <?php
                     if ($indicadorDeudaInscripcion == 1)
                     { ?>
-                        <li>Seguro Escolar 2025 - 2026 =  25$ (Pago único en dólares en efectivo) - <b>TOTAL A CANCELAR = 515$</b></li>
+                        <li>Seguro Escolar 2025 - 2026 =  25$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 515$</b></li>
                     <?php
                     }
                     else
                     { ?>
-                        <li>Seguro Escolar 2025 - 2026 =  25$ (Pago único en dólares en efectivo) - <b>TOTAL A CANCELAR = 465$</b></li>
+                        <li>Seguro Escolar 2025 - 2026 =  25$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 465$</b></li>
                     <?php
                     } ?>
                 </ul>
