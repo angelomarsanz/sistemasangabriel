@@ -1021,17 +1021,10 @@ class ParentsandguardiansController extends AppController
     {
         $codigoRetorno = 0;
         $mensajeRespuesta = 'Proceso exitoso';
-
-        // 1. Organizar las tarifas recibidas por año para facilitar la búsqueda
-        // Se asume que $otrasTarifas tiene una estructura de array con 'conceptoAno' (ej: 2023) y 'tarifaDolar'
-        $tarifasReferencia = [];
-        if (!empty($otrasTarifas)) {
-            foreach ($otrasTarifas as $t) {
-                $tarifasReferencia[$t['conceptoAno']] = $t['tarifaDolar'];
-            }
-        }
-
-        // 2. Cargar transacciones de 'Matrícula' para saber en qué años el estudiante estuvo activo
+    
+        // 1. Pre-cargar datos para evitar consultas en el bucle.
+    
+        // Cargar transacciones de 'Matrícula' para los años relevantes.
         $this->loadModel('Studenttransactions');
         $matriculasEstudiantes = $this->Studenttransactions->find('all')
             ->contain(['Students' => ['Parentsandguardians']])
@@ -1043,49 +1036,41 @@ class ParentsandguardiansController extends AppController
                 'Parentsandguardians.id' => $representante->id,
                 'Studenttransactions.ano_escolar >=' => 2023
             ]);
-        
+    
         $matriculasPorAnio = [];
         foreach ($matriculasEstudiantes as $matricula) {
             $matriculasPorAnio[$matricula->ano_escolar] = true;
         }
-
-        // 3. Cargar todos los conceptos de recibos de Consejo Educativo y sumar montos por año
+    
+        // Cargar recibos de 'Consejo Educativo' para los años relevantes.
         $this->loadModel('Concepts');
-        $recibosConceptos = $this->Concepts->find()
+        $recibosConsejo = $this->Concepts->find()
             ->contain(['Bills'])
-            ->where([
-                'Bills.annulled' => false,
+            ->where(['Bills.annulled' => false,
                 'SUBSTRING(Concepts.concept, 1, 17) =' => 'Consejo Educativo', 
-                'Bills.parentsandguardian_id' => $representante->id
-            ]);
-
-        $pagosPorAnio = [];
-        foreach ($recibosConceptos as $recibo) {
-            // Extraemos el año del concepto usando regex (ej: "Consejo Educativo 2023-2024" extrae 2023)
+                'Bills.parentsandguardian_id' => $representante->id])
+            ->order(['Concepts.id' => 'ASC']);
+    
+        $recibosPorAnio = [];
+        foreach ($recibosConsejo as $recibo) {
             if (preg_match('/Consejo Educativo\s*(\d{4})-\d{4}/', $recibo->concept, $matches)) {
-                $yearConcepto = $matches[1];
-                if (!isset($pagosPorAnio[$yearConcepto])) {
-                    $pagosPorAnio[$yearConcepto] = 0;
-                }
-                // Sumamos el monto del abono/pago. Usamos amount_dollar del concepto.
-                $pagosPorAnio[$yearConcepto] += $recibo->bill->amount_paid;
+                $recibosPorAnio[$matches[1]] = true;
             }
         }
-
-        // 4. Decodificar vectores JSON de históricos
+    
+        // 2. Decodificar los vectores JSON una sola vez.
         $vector_familias_relacionadas_anteriores = json_decode($representante->vector_familias_relacionadas_anteriores, true) ?: [];
         $vector_id_familia_pagadora_consejo_anteriores = json_decode($representante->vector_id_familia_pagadora_consejo_anteriores, true) ?: [];
         $vector_consejo_exonerado_anteriores = json_decode($representante->vector_consejo_exonerado_anteriores, true) ?: [];
-
+    
         $aniosData = [];
-
-        // 5. Iterar para construir la respuesta
+    
+        // 3. Iterar desde 2023 hasta el año escolar actual.
         for ($year = 2023; $year <= $anioEscolarActual; $year++) {
             $familiasRelacionadas = null;
             $idFamiliaPagadoraConsejo = null;
-            $consejoExonerado = null;    
-
-            // Determinar valores de familia y exoneración
+            $consejoExonerado = null;
+    
             if ($year == $anioEscolarActual) {
                 $familiasRelacionadas = $representante->familias_relacionadas;
                 $idFamiliaPagadoraConsejo = $representante->id_familia_pagadora_consejo;
@@ -1095,35 +1080,21 @@ class ParentsandguardiansController extends AppController
                 $idFamiliaPagadoraConsejo = $vector_id_familia_pagadora_consejo_anteriores[$year] ?? null;
                 $consejoExonerado = $vector_consejo_exonerado_anteriores[$year] ?? null;
             }
-
-            // Lógica de Pagos, Tarifas y Saldos
-            $tarifaAnio = $tarifasReferencia['Consejo Educativo '.$year] ?? 0;
-            $pagadoAnio = $pagosPorAnio[$year] ?? 0;
-            $saldoAnio = $tarifaAnio - $pagadoAnio;
-            
-            // Si el saldo es menor o igual a 0, el indicador es true (pago completo)
-            // También se considera true si la tarifa es 0 (no aplica pago) o si está exonerado al 100%
-            if ($tarifaAnio > 0 && $saldoAnio <= 0) {
-                $indicadorReciboConsejo = true;                
-            }
-            else
-            {
-                $indicadorReciboConsejo = false;
-            }
-
+    
+            $indicadorConsejo = isset($matriculasPorAnio[$year]);
+            $indicadorReciboConsejo = isset($recibosPorAnio[$year]);
+    
             $aniosData[$year] = [
                 "familiasRelacionadas" => $familiasRelacionadas,
                 "idFamiliaPagadoraConsejo" => $idFamiliaPagadoraConsejo,
                 "consejoExonerado" => $consejoExonerado,
-                "indicadorConsejo" => isset($matriculasPorAnio[$year]), // Indica si tuvo matrícula ese año
-                "indicadorReciboConsejo" => $indicadorReciboConsejo,
-                "tarifa" => $tarifaAnio,
-                "pagado" => $pagadoAnio,
-                "saldo" => ($saldoAnio < 0) ? 0 : $saldoAnio // Evitar mostrar saldos negativos por decimales
+                "indicadorConsejo" => $indicadorConsejo,
+                "indicadorReciboConsejo" => $indicadorReciboConsejo
             ];
         }
-
-        return [
+    
+        $respuesta = 
+        [
             "codigoRetorno" => $codigoRetorno,
             "mensajeRespuesta" => $mensajeRespuesta,
             "idRepresentante" => $representante->id,
@@ -1131,6 +1102,7 @@ class ParentsandguardiansController extends AppController
             "proximoAnioEscolar" => $proximoAnioEscolar,
             "anios" => $aniosData
         ];
+        return $respuesta;
     }
 
     public function consejoEducativo($reporte = null, $anioEscolarRequerido = null)

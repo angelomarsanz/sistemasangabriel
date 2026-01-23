@@ -949,7 +949,14 @@ class BillsController extends AppController
 				}
 				if ($aConcept->observation == "Abono" && substr($aConcept->concept, 0, 18) != "Servicio educativo")
 				{
-					$invoiceLine = $aConcept->student_name . " - Abono: " . $aConcept->concept;
+					if (substr($aConcept->concept, 0, 17) == "Consejo Educativo")
+					{
+						$invoiceLine = " Abono a " . $aConcept->concept;
+					}
+					else
+					{
+						$invoiceLine = $aConcept->student_name . " - Abono: " . $aConcept->concept;
+					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$loadIndicator = 1;
@@ -1107,7 +1114,14 @@ class BillsController extends AppController
 						$this->invoiceConcept($previousAcccountingCode, $invoiceLine, $amountConcept);
 						$loadIndicator = 1;
 					}
-					$invoiceLine = $aConcept->student_name . " - Abono: " . $aConcept->concept;
+					if (substr($aConcept->concept, 0, 17) == "Consejo Educativo")
+					{
+						$invoiceLine = " Abono a " . $aConcept->concept;
+					}
+					else
+					{
+						$invoiceLine = $aConcept->student_name . " - Abono: " . $aConcept->concept;
+					}
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
 					$LoadIndicator = 1;

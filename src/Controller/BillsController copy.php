@@ -390,8 +390,6 @@ class BillsController extends AppController
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar; 
 
-        $this->Flash->success(__('Usuario: '.$this->Auth->user('username').', Rol: '.$this->Auth->user('role').', Opcion: '.$menuOption));
-
 		$tipos_factura_fiscal = 
 		[
 			'Factura inscripción regulares',

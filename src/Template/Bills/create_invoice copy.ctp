@@ -27,7 +27,6 @@
 			<input type="hidden" id="type-invoice" value="<?= $menuOption ?>">
             <div class="row">
                 <div class="col-md-12">
-					<p>v2</p>
 					<?php if ($menuOption == 'Factura inscripción regulares'): ?>
 						<h3><b>Factura inscripción alumnos regulares</b></h3>
 					<?php elseif ($menuOption == 'Factura inscripción nuevos'): ?>

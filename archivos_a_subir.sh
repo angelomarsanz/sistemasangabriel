@@ -8,7 +8,8 @@ ARCHIVOS_PHP_PUNTUALES=(
     # Ejemplo: "src/Model/Table/MiTabla.php"
     # Si no quieres subir ningún archivo PHP, deja solo "Ninguno"
     # "Ninguno"
-    "src/Controller/UsersController.php"
-    "src/Template/Users/add.ctp"
-    "src/Template/Users/edit.ctp"
+    "src/Template/Bills/create_invoice.ctp"
+    "src/Controller/StudentsController.php"
+    "src/Controller/ParentsandguardiansController.php"
+    "src/Controller/BillsController.php"
 )

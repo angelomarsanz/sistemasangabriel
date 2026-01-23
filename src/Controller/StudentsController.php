@@ -7,6 +7,7 @@ use App\Controller\BinnaclesController;
 use Cake\I18n\Time;
 use Cake\ORM\TableRegistry;
 use Cake\Event\Event; // Necesario para el tipo de parámetro de beforeFilter
+use Cake\Log\Log;
 
 /**
  * Students Controller
@@ -1312,7 +1313,7 @@ class StudentsController extends AppController
 			if ($opcionMenu == "Recibo Consejo Educativo")
 			{
 				$representantes = new ParentsandguardiansController();
-				$jsondata['data']['consejo_educativo'] = $representantes->busquedaConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $parentsandguardians);
+				$jsondata['data']['consejo_educativo'] = $representantes->busquedaConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $parentsandguardians, $otrasTarifas);
 			}
 			else
 			{
@@ -3294,6 +3295,9 @@ class StudentsController extends AppController
 				}
 			}					
 		}
+		// Imprimir el vector $otrasTarifas en el debug.log
+		Log::debug('Otras tarifas:');
+		Log::debug(print_r($otrasTarifas, true));		
 		return $otrasTarifas;
 	}
 	

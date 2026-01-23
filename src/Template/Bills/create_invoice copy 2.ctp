@@ -1818,17 +1818,10 @@
 			tbStudentTransactions[transactionCounter].tarifaDolarOriginal = 0;
 			tbStudentTransactions[transactionCounter].tarifaDolar = tarifaDolar;
 			tbStudentTransactions[transactionCounter].monthlyPayment = "Consejo Educativo "+anioConsejoEducativo+"-"+proximoAnioConsejoEducativo;
-			tbStudentTransactions[transactionCounter].montoAPagarDolar = accumulatedPayment;
-			tbStudentTransactions[transactionCounter].montoAPagarEuro = acumuladoPagadoEuros;
-			tbStudentTransactions[transactionCounter].montoAPagarBolivar = acumuladoPagadoBolivares;
-			if (amountMonthly > accumulatedPayment)
-			{
-				tbStudentTransactions[transactionCounter].observation = "Abono";
-			}
-			else
-			{
-				tbStudentTransactions[transactionCounter].observation = ""; 				
-			}
+			tbStudentTransactions[transactionCounter].montoAPagarDolar = totalBalance;
+			tbStudentTransactions[transactionCounter].montoAPagarEuro = totalBalanceEuros;
+			tbStudentTransactions[transactionCounter].montoAPagarBolivar = totalBalanceBolivares;
+			tbStudentTransactions[transactionCounter].observation = ""; 
 			biggestYearFrom = parseInt(anioConsejoEducativo);	
 		}
 		else
@@ -2264,7 +2257,7 @@
 
 		if (indicadorConsejoEducativo == 1)
 		{
-			payments.invoiceAmount = accumulatedPayment;
+			payments.invoiceAmount = totalBalance;
 		}
 		else
 		{
@@ -4013,32 +4006,8 @@
 			}
 			else if (deudaMenosPagado > 0)
 			{
-				if (indicadorConsejoEducativo == 0)
-				{
-					alert('Estimado usuario debe registrar más pagos para completar el total de la factura o hacer un ajuste');
-					return false;
-				}
-				else
-				{
-					if (accumulatedPayment > 0)
-					{
-						r= confirm('¿Estimado usuario el pago no cubre el total de la factura? Está seguro de que desea guardar la facturar? Después no podrá hacer cambios');
-						
-						if (r == false)
-						{
-							return false;
-						}
-						else
-						{
-							verificar_impuestos(guardarFactura, 0);
-						}
-					}
-					else
-					{
-						alert('Estimado usuario debe registrar al menos un pago para poder emitir el recibo');
-						return false;
-					}
-				}
+				alert('Estimado usuario debe registrar más pagos para completar el total de la factura o hacer un ajuste');
+				return false;
 			}
             else if (deudaMenosPagado < 0)
             {
@@ -4514,17 +4483,26 @@
 						else if (datosAnio.indicadorReciboConsejo == true)
 						{
 							alert(`A este representante ya se le cobró el Consejo Educativo ${periodoEscolarRequerido}`);
-							return false;
+							return false
 						}
 						else
 						{
-							if (datosAnio.tarifa > 0)
+							var indicadorTarifaEncontrada = 0;
+							$.each(otrasTarifas, function(clave, valor)
 							{
-								amountMonthly = datosAnio.tarifa;
-								tarifaDolar = datosAnio.tarifa;
-								totalBalance = dosDecimales(datosAnio.saldo);
+								if (valor.conceptoAno == "Consejo Educativo " + anioSeleccionado)
+								{
+									amountMonthly = valor.tarifaBolivar;
+									tarifaDolar = valor.tarifaDolar;
+									indicadorTarifaEncontrada = 1;
+									return false;
+								}
+							});
+							if (indicadorTarifaEncontrada == 1)
+							{
+								totalBalance = dosDecimales(tarifaDolar);
 								actualizarTotales();
-							}	
+							}
 							else
 							{
 								alert(`No se encontró la tarifa para el Consejo Educativo del período: ${periodoEscolarRequerido}`);;
