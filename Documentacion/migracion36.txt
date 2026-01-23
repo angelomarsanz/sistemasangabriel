@@ -1,2 +1,0 @@
-Migración a 3.6
-Módulos modificados

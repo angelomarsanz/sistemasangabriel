@@ -1,9 +1,0 @@
-Hola !
-******
-Por favor crear el modelo, vista y controlador para la tabla cuentas por cobrar:
-
-
-
-******
-Usar las instrucciones del archivo: 
-    .github/copilot-instructions.md
