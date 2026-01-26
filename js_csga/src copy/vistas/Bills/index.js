@@ -1,0 +1,1 @@
+export { indexBills } from "./indexBills";

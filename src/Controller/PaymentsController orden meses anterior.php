@@ -836,49 +836,23 @@ class PaymentsController extends AppController
 
 		$contadorQueryOriginal = $query->count();
 		
-		// Aplicar filtros del período de las facturas y pedidos
-        // NUEVA LÓGICA DE PERÍODO ESCOLAR Y FILTRO DE FECHAS ---
-        $selectedYearBase = (int)$filters['year']; 
-        $selectedMonths = $filters['months'] ?? [];
-
-        $currentDate = new \DateTime();
-        $currentMonth = (int)$currentDate->format('m');
-        $currentYear = (int)$currentDate->format('Y');
-
-        if (in_array('all', $selectedMonths)) {
-            $mesesAProcesar = ['09', '10', '11', '12', '01', '02', '03', '04', '05', '06', '07', '08'];
-        } else {
-            $mesesAProcesar = $selectedMonths;
-        }
-
-        $monthConditions = [];
-        foreach ($mesesAProcesar as $m) {
-            $mInt = (int)$m;
-            // Sep-Dic = Año base | Ene-Ago = Año base + 1
-            $targetYear = ($mInt >= 9) ? $selectedYearBase : ($selectedYearBase + 1);
-
-            // Validar que no sea una fecha futura
-            if ($targetYear > $currentYear || ($targetYear == $currentYear && $mInt > $currentMonth)) {
-                continue; 
-            }
-
-            // Usamos 'date_and_time' que es el campo que usa tu tabla Bills originalmente
-            $monthConditions[] = [
-                'MONTH(Bills.date_and_time)' => $mInt,
-                'YEAR(Bills.date_and_time)' => $targetYear
-            ];
-        }
-
-        // Si no hay meses válidos para procesar, retornamos error
-        if (empty($monthConditions)) {
-            return $this->response->withType('application/json')
-                ->withStringBody(json_encode([
-                    'success' => false, 
-                    'message' => 'El período seleccionado aún no ha iniciado o no tiene meses válidos.'
-                ]));
-        }
-
-		$query->where(['OR' => $monthConditions]);
+		// Aplicar filtros de fecha y año
+		$year = $filters['year'];
+		if (!empty($filters['months'])) {
+			$monthConditions = [];
+			foreach ($filters['months'] as $month) {
+				if ($month === 'all') {
+					$monthConditions = [];
+					break;
+				}
+				$monthConditions[] = ['MONTH(Bills.date_and_time)' => $month];
+			}
+			if (!empty($monthConditions)) {
+				$query->where(['OR' => $monthConditions]);
+			}
+		}
+		$query->where(['YEAR(Bills.date_and_time)' => $year]);
+		
 		$contadorQueryAnioMes = $query->count();
 
 		// Aplicar filtro de tipo de documento
@@ -1130,7 +1104,7 @@ class PaymentsController extends AppController
 				'totals' => $totals,
 				'details' => $reportData,
 				'contadorQueryOriginal' => $contadorQueryOriginal,
-				'year' => $selectedYearBase,
+				'year' => $year,
 				'monthConditions' => $monthConditions,
 				'contadorQueryAnioMes' => $contadorQueryAnioMes,
 				'contadorQueryTipoPersona' => $contadorQueryTipoPersona

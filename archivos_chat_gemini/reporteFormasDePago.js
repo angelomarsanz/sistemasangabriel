@@ -101,7 +101,6 @@ export const reporteFormasDePago = () =>
 
                 // Función para renderizar dinámicamente el formulario de filtros
                 const renderFilterForm = () => {
-                    // Dentro de la función donde generas el HTML dinámico en reporteFormasDePago.js
                     const today = new Date();
                     const currentMonthForYear = today.getMonth() + 1; // Enero es 1
                     const currentYearCalendar = today.getFullYear();
@@ -241,7 +240,7 @@ export const reporteFormasDePago = () =>
                                                 <select class="form-control" id="year-select" name="year" style="width: auto; min-width: 150px; display: block;">
                                                     ${yearOptionsHtml}
                                                 </select>
-                                            </div> 
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row">

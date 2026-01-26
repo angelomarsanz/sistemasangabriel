@@ -880,7 +880,7 @@ class PaymentsController extends AppController
 
 		$query->where(['OR' => $monthConditions]);
 		$contadorQueryAnioMes = $query->count();
-
+		
 		// Aplicar filtro de tipo de documento
 		if ($filters['documentType'] === 'facturas') {
 			$query->where(['Bills.tipo_documento' => 'Factura']);
@@ -1130,7 +1130,7 @@ class PaymentsController extends AppController
 				'totals' => $totals,
 				'details' => $reportData,
 				'contadorQueryOriginal' => $contadorQueryOriginal,
-				'year' => $selectedYearBase,
+				'year' => $year,
 				'monthConditions' => $monthConditions,
 				'contadorQueryAnioMes' => $contadorQueryAnioMes,
 				'contadorQueryTipoPersona' => $contadorQueryTipoPersona

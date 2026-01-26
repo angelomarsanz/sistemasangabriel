@@ -101,23 +101,12 @@ export const reporteFormasDePago = () =>
 
                 // Función para renderizar dinámicamente el formulario de filtros
                 const renderFilterForm = () => {
-                    // Dentro de la función donde generas el HTML dinámico en reporteFormasDePago.js
-                    const today = new Date();
-                    const currentMonthForYear = today.getMonth() + 1; // Enero es 1
-                    const currentYearCalendar = today.getFullYear();
-
-                    // Si estamos de Septiembre (9) en adelante, el periodo escolar empezó este año.
-                    // Si estamos entre Enero y Agosto, el periodo empezó el año pasado.
-                    let baseYear = (currentMonthForYear >= 9) ? currentYearCalendar : currentYearCalendar - 1;
-
+                    const currentYear = new Date().getFullYear();
                     let yearOptionsHtml = '';
-                    // Generamos los últimos 5 períodos escolares
                     for (let i = 0; i < 5; i++) {
-                        let yearStart = baseYear - i;
-                        let yearEnd = yearStart + 1;
-                        // El primero de la lista (el más reciente) queda seleccionado por defecto
-                        let selected = (i === 0) ? 'selected' : '';
-                        yearOptionsHtml += `<option value="${yearStart}" ${selected}>${yearStart}-${yearEnd}</option>`;
+                        const year = currentYear - i;
+                        const isSelected = (i === 0) ? 'selected' : '';
+                        yearOptionsHtml += `<option value="${year}" ${isSelected}>${year}</option>`;
                     }
 
                     const formHtml = `
@@ -213,35 +202,34 @@ export const reporteFormasDePago = () =>
                                         </div>
                                         <div class="col-md-6 reporte-column-spacing">
                                             <div class="form-group">
-                                                <label>Período en que se emitió la factura o pedido:</label>
+                                                <label>Mes y año en que se emitió la factura o pedido:</label>
                                                 <div class="checkbox">
-                                                    <label><input type="checkbox" name="months[]" value="all" id="todos-los-meses-checkbox"> Todos los meses del período</label>
+                                                    <label><input type="checkbox" name="months[]" value="all" id="todos-los-meses-checkbox"> Todos</label>
                                                 </div>
                                                 <div class="meses-padding">
                                                     <div class="row">
-                                                        <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="09" class="month-checkbox"> Sep</label></div>
-                                                        <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="10" class="month-checkbox"> Oct</label></div>
-                                                        <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="11" class="month-checkbox"> Nov</label></div>
-                                                        <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="12" class="month-checkbox"> Dic</label></div>
                                                         <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="01" class="month-checkbox"> Ene</label></div>
                                                         <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="02" class="month-checkbox"> Feb</label></div>
-                                                    </div>
-                                                    <div class="row" style="margin-top: 10px;">
                                                         <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="03" class="month-checkbox"> Mar</label></div>
                                                         <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="04" class="month-checkbox"> Abr</label></div>
                                                         <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="05" class="month-checkbox"> May</label></div>
                                                         <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="06" class="month-checkbox"> Jun</label></div>
+                                                    </div>
+                                                    <div class="row">
                                                         <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="07" class="month-checkbox"> Jul</label></div>
                                                         <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="08" class="month-checkbox"> Ago</label></div>
+                                                        <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="09" class="month-checkbox"> Sep</label></div>
+                                                        <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="10" class="month-checkbox"> Oct</label></div>
+                                                        <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="11" class="month-checkbox"> Nov</label></div>
+                                                        <div class="col-xs-2"><label class="checkbox-inline"><input type="checkbox" name="months[]" value="12" class="month-checkbox"> Dic</label></div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="form-group" style="margin-top: 20px;">
-                                                <label for="year-select">Período escolar:</label>
-                                                <select class="form-control" id="year-select" name="year" style="width: auto; min-width: 150px; display: block;">
+                                            <div class="form-group">
+                                                <select class="form-control year-select-width" id="year-select" name="year">
                                                     ${yearOptionsHtml}
                                                 </select>
-                                            </div> 
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row">
