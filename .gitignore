@@ -14,3 +14,6 @@
 *.zip
 .env.sh
 /Documentacion/
+*copy*
+*copia*
+*- copia*
