@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use App\Controller\BinnaclesController;
+use App\Controller\StudenttransactionsController;
 use Cake\I18n\Time;
 use Cake\Event\Event;
 
@@ -767,6 +768,10 @@ class PaymentsController extends AppController
     }
 	public function datosReporteFormasDePago()
 	{
+		$transaccionesEstudiantes = new StudenttransactionsController;
+
+		$transaccionesEstudiantes->verificarAnioUltimaInscripcion();
+
 		// Esta función no necesita una vista, por lo que deshabilitamos el renderizado.
 		$this->viewBuilder()->setLayout('ajax');
 		$this->autoRender = false;
@@ -793,6 +798,8 @@ class PaymentsController extends AppController
 					$studentConditionsLabels[] = 'Regulare'; // Se pluraliza en JS
 				} elseif ($condition === 'Egresado') {
 					$studentConditionsLabels[] = 'Egresado'; // Se pluraliza en JS
+				} elseif ($condition === 'Retirado') {
+					$studentConditionsLabels[] = 'Retirado'; // Se pluraliza en JS
 				} else {
 					$studentConditionsLabels[] = $condition;
 				}
@@ -803,13 +810,15 @@ class PaymentsController extends AppController
 		$this->loadModel('Bills');
 		$this->loadModel('Parentsandguardians');
 		$this->loadModel('Students');
+		$this->loadModel('Sections');
+		$this->loadModel('Studenttransactions');
 		
 		// Construir condiciones para el estado del estudiante
 		$studentConditions = [];
 		if (!empty($filters['studentConditions'])) {
 			foreach ($filters['studentConditions'] as $condition) {
 				if ($condition === 'Otros') {
-					$studentConditions[] = ['Students.student_condition IN' => ['Retirado', 'Expulsado', 'Eliminado']];
+					$studentConditions[] = ['Students.student_condition IN' => ['Expulsado', 'Eliminado']];
 				} else {
 					$studentConditions[] = ['Students.student_condition' => $condition];
 				}
@@ -818,24 +827,28 @@ class PaymentsController extends AppController
 			// Por defecto, si no se envía nada, buscar solo regulares (comportamiento anterior)
 			$studentConditions[] = ['Students.student_condition' => 'Regular'];
 		}
-
-		// Construir el query base, uniendo las tablas
+	
 		$query = $this->Payments->find('all')
 			->contain([
 				'Bills',
 				'Bills.Parentsandguardians',
 				'Bills.Parentsandguardians.Students' => function ($q) use ($studentConditions) {
-					return $q->where(['OR' => $studentConditions]);
+					// Esto filtra los estudiantes que se CARGAN en el objeto para el reporte
+					return !empty($studentConditions) ? $q->where(['OR' => $studentConditions]) : $q;
 				}
 			])
-			->matching('Bills.Parentsandguardians.Students') // Asegura que solo se obtengan pagos con estudiantes que cumplen la condición
+			// AQUÍ ESTÁ EL CAMBIO CLAVE:
+			// Pasamos las condiciones al matching para que filtre los PAGOS reales
+			->matching('Bills.Parentsandguardians.Students', function ($q) use ($studentConditions) {
+				return !empty($studentConditions) ? $q->where(['OR' => $studentConditions]) : $q;
+			})
 			->where([
-				'Payments.annulled' => 0, // Suponemos que 0 es no anulado
+				'Payments.annulled' => 0,
 				'Bills.annulled' => 0,
 			]);
 
 		$contadorQueryOriginal = $query->count();
-		
+
 		// Aplicar filtros del período de las facturas y pedidos
         // NUEVA LÓGICA DE PERÍODO ESCOLAR Y FILTRO DE FECHAS ---
         $selectedYearBase = (int)$filters['year']; 
@@ -965,10 +978,13 @@ class PaymentsController extends AppController
 			$query->order(['Bills.bill_number' => 'ASC', 'Payments.id' => 'ASC']);
 		}
 
-		// Agrupar por el ID del pago para evitar duplicados por la unión con estudiantes.
-		// También se agrupa por los campos de las tablas relacionadas para compatibilidad con el 'order by'.
-		$query->group(['Payments.id', 'Bills.id', 'Parentsandguardians.id']);
-
+		// Agrupar para evitar duplicados por la unión con estudiantes.
+		$query->group([
+			'Payments.id', 
+			'Bills.id', 
+			'Parentsandguardians.id',
+			'Payments.created' // A veces es necesario agregar el campo del ORDER BY aquí
+		]);
 
 		// Obtener los resultados y procesarlos
 		$results = $query->toArray();

@@ -224,6 +224,9 @@ Error generating stack: `+a.message+`
                                                     <label><input type="checkbox" name="studentConditions[]" value="Egresado"> Egresados</label>
                                                 </div>
                                                 <div class="checkbox">
+                                                    <label><input type="checkbox" name="studentConditions[]" value="Retirado"> Retirados</label>
+                                                </div>
+                                                <div class="checkbox">
                                                     <label><input type="checkbox" name="studentConditions[]" value="Otros"> Otros</label>
                                                 </div>
                                             </div>
