@@ -897,9 +897,17 @@ class PaymentsController extends AppController
 		// Aplicar filtro de tipo de documento
 		if ($filters['documentType'] === 'facturas') {
 			$query->where(['Bills.tipo_documento' => 'Factura']);
-		} else { // pedidos
+		} if ($filters['documentType'] === 'pedidos') { 
 			$query->where([
 				'OR' => [
+					['Bills.tipo_documento' => 'Pedido'],
+					['Bills.tipo_documento' => 'Recibo de anticipo']
+				]
+			]);
+		} else {
+			$query->where([
+				'OR' => [
+					['Bills.tipo_documento' => 'Factura'],
 					['Bills.tipo_documento' => 'Pedido'],
 					['Bills.tipo_documento' => 'Recibo de anticipo']
 				]

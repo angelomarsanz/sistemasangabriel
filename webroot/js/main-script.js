@@ -126,12 +126,15 @@ Error generating stack: `+a.message+`
                                     <div class="row">
                                         <div class="col-md-6 reporte-column-spacing">
                                             <div class="form-group">
-                                                <label>Tipo de documento:</label>
+                                                <label>Tipo de reporte:</label>
                                                 <div class="radio">
                                                     <label><input type="radio" name="documentType" value="facturas" checked> Facturas</label>
                                                 </div>
                                                 <div class="radio">
                                                     <label><input type="radio" name="documentType" value="pedidos"> Pedidos</label>
+                                                </div>
+                                                <div class="radio">
+                                                    <label><input type="radio" name="documentType" value="familias-estudiantes"> Familias y estudiantes</label>
                                                 </div>
                                             </div>
                                         </div>
