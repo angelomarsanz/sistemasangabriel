@@ -768,10 +768,6 @@ class PaymentsController extends AppController
     }
 	public function datosReporteFormasDePago()
 	{
-		$transaccionesEstudiantes = new StudenttransactionsController;
-
-		$transaccionesEstudiantes->verificarAnioUltimaInscripcion();
-
 		// Esta función no necesita una vista, por lo que deshabilitamos el renderizado.
 		$this->viewBuilder()->setLayout('ajax');
 		$this->autoRender = false;
@@ -782,13 +778,27 @@ class PaymentsController extends AppController
 			return $this->response->withStringBody(json_encode(['success' => false, 'message' => 'Acceso denegado.']));
 		}
 
+		// Cargar los modelos necesarios para la consulta
+		$this->loadModel('Bills');
+		$this->loadModel('Parentsandguardians');
+		$this->loadModel('Students');
+		$this->loadModel('Sections');
+		$this->loadModel('Studenttransactions');
+		$this->loadModel('Schools');
+		$school = $this->Schools->get(2);
+		$anioEscolarActual = $school->current_school_year;
+		
+		$transaccionesEstudiantes = new StudenttransactionsController;
+		$transaccionesEstudiantes->verificarAnioUltimaInscripcion();
+
 		// Obtener los filtros enviados desde el cliente
 		$filters = $this->request->getData();
-		
+
+        $selectedYearBase = (int)$filters['year']; 
+
 		// Convertir valores de checkbox de JS a booleanos reales
 		$filters['countFamily'] = filter_var($filters['countFamily'] ?? false, FILTER_VALIDATE_BOOLEAN);
 		$filters['countStudents'] = filter_var($filters['countStudents'] ?? false, FILTER_VALIDATE_BOOLEAN);
-
 
 		// Mapear los valores de studentConditions a etiquetas más amigables si es necesario
 		if (isset($filters['studentConditions']) && is_array($filters['studentConditions'])) {
@@ -806,13 +816,36 @@ class PaymentsController extends AppController
 			}
 		}
 
-		// Cargar los modelos necesarios para la consulta
-		$this->loadModel('Bills');
-		$this->loadModel('Parentsandguardians');
-		$this->loadModel('Students');
-		$this->loadModel('Sections');
-		$this->loadModel('Studenttransactions');
-		
+		$studentConditions = [];
+
+		if (!empty($filters['studentConditions']) && !in_array('all', $filters['studentConditions'])) {
+			foreach ($filters['studentConditions'] as $condition) {
+				// Definimos la condición base según el tipo seleccionado
+				if ($condition === 'Otros') {
+					$baseCond = ['Students.student_condition IN' => ['Expulsado', 'Eliminado']];
+				} else {
+					$baseCond = ['Students.student_condition' => $condition];
+				}
+
+				// SI es 'familias-estudiantes', añadimos la restricción del año al balance
+				if ($filters['documentType'] === 'familias-estudiantes') {
+					// Usamos array_merge para combinar la condición de estado con la de balance
+					$studentConditions[] = array_merge($baseCond, ['Students.balance' => $selectedYearBase]);
+				} else {
+					$studentConditions[] = $baseCond;
+				}
+			}
+		} else {
+			// Caso por defecto (Regular)
+			$baseCond = ['Students.student_condition' => 'Regular'];
+			
+			if ($filters['documentType'] === 'familias-estudiantes') {
+				$studentConditions[] = array_merge($baseCond, ['Students.balance' => $selectedYearBase]);
+			} else {
+				$studentConditions[] = $baseCond;
+			}
+		}
+
 		// Construir condiciones para el estado del estudiante
 		$studentConditions = [];
 		if (!empty($filters['studentConditions'])) {
@@ -832,7 +865,8 @@ class PaymentsController extends AppController
 			->contain([
 				'Bills',
 				'Bills.Parentsandguardians',
-				'Bills.Parentsandguardians.Students' => function ($q) use ($studentConditions) {
+				'Bills.Parentsandguardians.Students',
+				'Bills.Parentsandguardians.Students.Sections' => function ($q) use ($studentConditions) {
 					// Esto filtra los estudiantes que se CARGAN en el objeto para el reporte
 					return !empty($studentConditions) ? $q->where(['OR' => $studentConditions]) : $q;
 				}
@@ -851,7 +885,6 @@ class PaymentsController extends AppController
 
 		// Aplicar filtros del período de las facturas y pedidos
         // NUEVA LÓGICA DE PERÍODO ESCOLAR Y FILTRO DE FECHAS ---
-        $selectedYearBase = (int)$filters['year']; 
         $selectedMonths = $filters['months'] ?? [];
 
         $currentDate = new \DateTime();
@@ -974,11 +1007,6 @@ class PaymentsController extends AppController
 			$query->where(['OR' => $paymentConditions]);
 		}
 
-		if (!empty($paymentConditions)) {
-			// Aquí está el cambio crucial
-			$query->where(['OR' => $paymentConditions]);
-		}
-
 		// Aplicar ordenamiento
 		if ($filters['orderBy'] === 'familia' || $filters['orderBy'] === 'familia_agrupado') {
 			$query->order(['Parentsandguardians.family' => 'ASC', 'Bills.id' => 'ASC', 'Payments.id' => 'ASC']);
@@ -1001,7 +1029,9 @@ class PaymentsController extends AppController
 			'totalGeneral' => 0,
 			'totalFamilies' => 0,
 			'totalStudents' => 0,
-			'cantidadOperaciones' => 0
+			'cantidadOperaciones' => 0,
+			'totalEstudiantesNuevos' => 0,
+			'totalBecas100' => 0
 		];
 		$uniqueStudentIds = [];
 
@@ -1015,7 +1045,104 @@ class PaymentsController extends AppController
 		}
 		$totals['totalStudents'] = count($uniqueStudentIds);
 		
-		if ($filters['orderBy'] === 'familia_agrupado') {
+		if ($filters['documentType'] === 'familias-estudiantes' && $filters['orderBy'] === 'familia_agrupado') {
+			// AGRUPACIÓN ESPECIAL TIPO EXCEL
+			$groupedByFamily = [];
+			foreach ($results as $payment) {
+				$familyId = $payment->bill->parentsandguardian->id;
+				$familyName = $payment->bill->parentsandguardian->family;
+				
+				if (!isset($groupedByFamily[$familyId])) {
+					$groupedByFamily[$familyId] = [
+						'familyName' => $familyName,
+						'students' => $payment->bill->parentsandguardian->students,
+						'documentTypes' => [],
+						'paymentMethods' => [],
+						'totalBs' => 0,
+						'totalUsd' => 0,
+						'totalEur' => 0
+					];
+				}
+
+				// Consolidar Tipos de Documento
+				$docType = $payment->bill->tipo_documento; // Ajustar según tu columna real en Bills
+				if (!in_array($docType, $groupedByFamily[$familyId]['documentTypes'])) {
+					$groupedByFamily[$familyId]['documentTypes'][] = $docType;
+				}
+
+				// Consolidar Formas de Pago y Montos
+				$method = $this->getPaymentLabel($payment); 
+				if (!in_array($method, $groupedByFamily[$familyId]['paymentMethods'])) {
+					$groupedByFamily[$familyId]['paymentMethods'][] = $method;
+				}
+
+				// Sumar montos por moneda
+				if ($payment->moneda === 'Bs.') $groupedByFamily[$familyId]['totalBs'] += $payment->amount;
+				if ($payment->moneda === '$') $groupedByFamily[$familyId]['totalUsd'] += $payment->amount;
+				if ($payment->moneda === '€') $groupedByFamily[$familyId]['totalEur'] += $payment->amount;
+			}
+
+			$familyCounter = 0;
+			$isLatestYear = ($selectedYearBase == $anioEscolarActual); 
+
+			foreach ($groupedByFamily as $family) {
+				$familyCounter++;
+				$firstStudent = true;
+				
+				foreach ($family['students'] as $student) {
+					$esNuevo = ($student->new_student == 1) ? 'Sí' : 'No';
+
+					$porcentajeBeca = 0;
+					if ($isLatestYear) {
+						$porcentajeBeca = $student->discount;
+					} else {
+						$vectorDescuentos = json_decode($student->vector_descuento_anios_anteriores, true);
+						if (isset($vectorDescuentos[$selectedYear])) {
+							$porcentajeBeca = $vectorDescuentos[$selectedYear];
+						} else {
+							// Si no existe el año, buscar el más antiguo en el vector como referencia
+							if (!empty($vectorDescuentos)) {
+								ksort($vectorDescuentos);
+								$porcentajeBeca = reset($vectorDescuentos);
+							}
+						}
+					}	
+	
+					$rowData = [
+						'familyCount' => $firstStudent ? $familyCounter : '',
+						'studentCount' => $firstStudent ? count($family['students']) : '',
+						'family' => $family['familyName'],
+						'student_first_name' => $student->first_name,
+						'student_last_name' => $student->second_name,
+						'last_year' => $student->balance, // Students.balance
+						'status' => $student->student_condition, // Students.student_condition
+						'grade' => $student->has('section') ? $student->section->level . ', ' . $student->section->sublevel : 'N/A',
+						'section' => $student->has('section') ? $student->section->section : 'N/A',
+						'estudianteNuevo' => $esNuevo,
+    					'porcentajeBeca' => $porcentajeBeca,
+						// Datos de pago SOLO en la primera fila de la familia
+						'docTypes' => $firstStudent ? implode(', ', $family['documentTypes']) : '',
+						'paymentMethods' => $firstStudent ? implode(', ', $family['paymentMethods']) : '',
+						'amountBs' => $firstStudent ? $family['totalBs'] : '',
+						'amountUsd' => $firstStudent ? $family['totalUsd'] : '',
+						'amountEur' => $firstStudent ? $family['totalEur'] : ''
+					];
+
+					$reportData[] = $rowData;
+					$firstStudent = false;
+
+					if ($student->new_student == 1) {
+     				   $totals['totalEstudiantesNuevos']++;
+					}
+
+					if ($porcentajeBeca == 100) {
+						$totals['totalBecas100']++;
+					}
+				}
+			}
+			$totals['totalFamilies'] = count($groupedByFamily);
+			$totals['cantidadOperaciones'] = $totals['totalFamilies'];
+		} elseif ($filters['orderBy'] === 'familia_agrupado') {
 			$groupedByFamily = [];
 			foreach ($results as $payment) {
 				$familyId = $payment->bill->parentsandguardian->id;
@@ -1144,7 +1271,6 @@ class PaymentsController extends AppController
 			}
 			$totals['totalFamilies'] = $familyCounter;
 		}
-
 
 		// Formato final de la respuesta
 		$response = [

@@ -329,152 +329,226 @@ export const reporteFormasDePago = () =>
                 };
 
                 const renderReport = (reportData, filters, totals) => {
-                    let tableHtml = `
-                        <style>
-                            .report-table-header {
-                                font-weight: bold;
-                                background-color: #f2f2f2;
-                            }
-                        </style>
-                        <div name="reporte_formas_de_pago_generado" id="reporte-formas-de-pago-generado" class="panel panel-default">
-                            <div class="panel-heading">
-                                <h4 class="panel-title">Reporte de Formas de Pago</h4>
-                                <div class="report-info">
-                                    <p><strong>Tipo de Documento:</strong> ${filters.documentType === 'facturas' ? 'Facturas' : 'Pedidos'}</p>
-                                    <p><strong>Tipo de Alumnos:</strong> ${(filters.studentConditions || []).map(c => c === 'Otros' ? 'Otros' : c + 's').join(', ')}</p>
-                                    <p><strong>Tipo de Persona:</strong> ${filters.personType === 'juridica' ? 'Persona Jurídica' : (filters.personType === 'natural' ? 'Persona Natural' : 'Ambas')}</p>
-                                    <p><strong>Formas de Pago:</strong> ${(filters.paymentForms && filters.paymentForms.includes('todas')) ? 'Todas' : (filters.paymentForms || []).join(', ')}</p>
-                                    <p><strong>Periodo:</strong> Año ${filters.year} - Meses: ${(filters.months && filters.months.includes('all')) ? 'Todos' : (filters.months || []).join(', ')}</p>
-                                    <p><strong>Ordenado por:</strong> ${
-                                        filters.orderBy === 'familia' 
-                                            ? 'Familia' 
-                                            : filters.orderBy === 'familia_agrupado'
-                                                ? 'Familia (agrupado)'
-                                                : 'Factura'
-                                    }</p>
-                                </div>
-                            </div> 
-                            <div class="panel-body">
-                                <h5>Resumen de Totales</h5>
-                                <table class="table table-bordered">
-                                    <tbody>
+
+                    if (!reportData) return;
+
+                    // Definimos la función generadora de encabezado una sola vez arriba
+                    const generateSummaryHtml = (filters, totals) => {
+                        return `
+                            <style>
+                                .report-table-header {
+                                    font-weight: bold;
+                                    background-color: #f2f2f2;
+                                }
+                            </style>
+                            <div name="reporte_formas_de_pago_generado" id="reporte-formas-de-pago-generado" class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">Reporte de Formas de Pago</h4>
+                                    <div class="report-info">
+                                        <p><strong>Tipo de Documento:</strong> ${filters.documentType}</p>
+                                        <p><strong>Tipo de Alumnos:</strong> ${(filters.studentConditions || []).map(c => c === 'Otros' ? 'Otros' : c + 's').join(', ')}</p>
+                                        <p><strong>Tipo de Persona:</strong> ${filters.personType === 'juridica' ? 'Persona Jurídica' : (filters.personType === 'natural' ? 'Persona Natural' : 'Ambas')}</p>
+                                        <p><strong>Formas de Pago:</strong> ${(filters.paymentForms && filters.paymentForms.includes('todas')) ? 'Todas' : (filters.paymentForms || []).join(', ')}</p>
+                                        <p><strong>Periodo:</strong> Año ${filters.year} - Meses: ${(filters.months && filters.months.includes('all')) ? 'Todos' : (filters.months || []).join(', ')}</p>
+                                        <p><strong>Ordenado por:</strong> ${
+                                            filters.orderBy === 'familia' 
+                                                ? 'Familia' 
+                                                : filters.orderBy === 'familia_agrupado'
+                                                    ? 'Familia (agrupado)'
+                                                    : 'Factura'
+                                        }</p>
+                                    </div>
+                                </div> 
+                                <div class="panel-body">
+                                    <h5>Resumen de Totales</h5>
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Cantidad de ${filters.orderBy === 'familia_agrupado' ? 'familias' : 'operaciones'}</strong></td>
+                                                <td>${totals.cantidadOperaciones || 0}</td>
+                                            </tr>
+                                            ${ (filters.orderBy !== 'familia_agrupado') ? `
+                                            <tr>
+                                                <td><strong>Total Familias</strong></td>
+                                                <td>${totals.totalFamilies || 0}</td>
+                                            </tr>` : '' }
+                                            <tr>
+                                                <td><strong>Total Estudiantes</strong></td>
+                                                <td>${totals.totalStudents || 0}</td>
+                                            </tr>
+                                            ${totals.totalEstudiantesNuevos ? `
+                                            <tr>
+                                                <td><strong>Total Estudiantes Nuevos</strong></td>
+                                                <td>${totals.totalEstudiantesNuevos || 0}</td>
+                                            </tr>` : '' }
+                                            ${totals.totalBecas100 ? `
+                                            <tr>
+                                                <td><strong>Total Becas 100%</strong></td>
+                                                <td>${totals.totalBecas100 || 0}</td>
+                                            </tr>` : '' }
+                                            ${Object.keys(totals).map(key => {
+                                                // Excluir los totales que no son de montos de pago
+                                                if (!['totalGeneral', 'totalFamilies', 'totalStudents', 'totalEstudiantesNuevos', 'totalBecas100', 'cantidadOperaciones'].includes(key)) {
+                                                    return `<tr><td><strong>Total monto por ${key}</strong></td><td>${formatNumber(totals[key] || 0)}</td></tr>`;
+                                                }
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                    <hr>
+                        `;
+                    };
+
+                    // Generamos el encabezado común para CUALQUIER reporte
+                    let tableHtml = generateSummaryHtml(filters, totals);
+                    
+                    if (filters.documentType === 'familias-estudiantes' && filters.orderBy === 'familia_agrupado') {
+                        tableHtml += `
+                            <h5>Detalle del Reporte</h5>
+                            <table class="table table-striped table-bordered responsive-table">
+                                <thead>
+                                    <tr style="background-color: #f2f2f2;">
+                                        <th>Cont. Fam.</th>
+                                        <th>Cont. Estud.</th>
+                                        <th>Familia</th>
+                                        <th>Primer nombre estud.</th>
+                                        <th>Segundo nombre estud.</th>
+                                        <th>Último año inscripción</th>
+                                        <th>Grado/Año</th>
+                                        <th>Sección</th>
+                                        <th>Estatus</th>
+                                        <th>Estudiante nuevo</th>
+                                        <th>Porcentaje beca</th>
+                                        <th>Tipo de documento</th>
+                                        <th>Formas de pago</th>
+                                        <th>Monto Bs.</th>
+                                        <th>Monto $</th>
+                                        <th>Monto €</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                        reportData.forEach(row => {
+                            tableHtml += `
+                                <tr>
+                                    <td><b>${row.familyCount || ''}</b></td>
+                                    <td>${row.studentCount || ''}</td>
+                                    <td>${row.family}</td>
+                                    <td>${row.student_first_name}</td>
+                                    <td>${row.student_last_name}</td>
+                                    <td>${row.last_year}</td>
+                                    <td>${row.grade}</td>
+                                    <td>${row.section}</td>
+                                    <td>${row.status}</td>
+                                    <td>${row.estudianteNuevo}</td>
+                                    <td>${row.porcentajeBeca}</td>
+                                    <td>${row.docTypes}</td>
+                                    <td>${row.paymentMethods}</td>
+                                    <td align="right">${row.amountBs ? row.amountBs.toLocaleString('de-DE', {minimumFractionDigits: 2}) : ''}</td>
+                                    <td align="right">${row.amountUsd ? row.amountUsd.toLocaleString('de-DE', {minimumFractionDigits: 2}) : ''}</td>
+                                    <td align="right">${row.amountEur ? row.amountEur.toLocaleString('de-DE', {minimumFractionDigits: 2}) : ''}</td>
+                                </tr>`;
+                        });
+
+                        tableHtml += `</tbody></table></div></div>`;
+                                            
+                        $('#reporte-formas-de-pago').html(tableHtml);
+
+                    } else {
+                        tableHtml += `
+                            <h5>Detalle del Reporte</h5>
+                            <table class="table table-striped table-bordered responsive-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nro.</th>
+                                        ${filters.countFamily ? '<th>Cont. Fam.</th>' : ''}
+                                        ${filters.orderBy === 'familia_agrupado'
+                                            ? `
+                                                <th>Familia</th>
+                                                <th>Estudiantes</th>
+                                                ${filters.countStudents ? '<th>Cont. Estud.</th>' : ''}
+                                                <th>Cédula/RIF</th>
+                                                <th>Nombre/Razón Social</th>
+                                                <th>Forma de Pago</th>
+                                                <th>Monto</th>
+                                            `
+                                            : filters.orderBy === 'familia' 
+                                            ? `
+                                                <th>Familia</th>
+                                                <th>Estudiantes</th>
+                                                ${filters.countStudents ? '<th>Cont. Estud.</th>' : ''}
+                                                <th>Nro. Factura/Control</th>
+                                                <th>Cédula/RIF</th>
+                                                <th>Nombre/Razón Social</th>
+                                                <th>Fecha Factura</th>
+                                                <th>Forma de Pago</th>
+                                                <th>Monto</th>
+                                            `
+                                            : `
+                                                <th>Nro. Factura/Control</th>
+                                                <th>Familia</th>
+                                                <th>Estudiantes</th>
+                                                ${filters.countStudents ? '<th>Cont. Estud.</th>' : ''}
+                                                <th>Cédula/RIF</th>
+                                                <th>Nombre/Razón Social</th>
+                                                <th>Fecha Factura</th>
+                                                <th>Forma de Pago</th>
+                                                <th>Monto</th>
+                                            `
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${reportData.map((item, index) => `
                                         <tr>
-                                            <td><strong>Cantidad de ${filters.orderBy === 'familia_agrupado' ? 'familias' : 'operaciones'}</strong></td>
-                                            <td>${totals.cantidadOperaciones || 0}</td>
-                                        </tr>
-                                        ${ (filters.orderBy !== 'familia_agrupado') ? `
-                                        <tr>
-                                            <td><strong>Total Familias</strong></td>
-                                            <td>${totals.totalFamilies || 0}</td>
-                                        </tr>` : '' }
-                                        <tr>
-                                            <td><strong>Total Estudiantes</strong></td>
-                                            <td>${totals.totalStudents || 0}</td>
-                                        </tr>
-                                        ${Object.keys(totals).map(key => {
-                                            // Excluir los totales que no son de montos de pago
-                                            if (!['totalGeneral', 'totalFamilies', 'totalStudents', 'cantidadOperaciones'].includes(key)) {
-                                                return `<tr><td><strong>Total monto por ${key}</strong></td><td>${formatNumber(totals[key] || 0)}</td></tr>`;
-                                            }
-                                        }).join('')}
-                                    </tbody>
-                                </table>
-                                <hr>
-                                <h5>Detalle del Reporte</h5>
-                                <table class="table table-striped table-bordered responsive-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Nro.</th>
-                                            ${filters.countFamily ? '<th>Cont. Fam.</th>' : ''}
+                                            <td>${index + 1}</td>
+                                            ${filters.countFamily ? `<td>${item.familyCount || ''}</td>` : ''}
                                             ${filters.orderBy === 'familia_agrupado'
                                                 ? `
-                                                    <th>Familia</th>
-                                                    <th>Estudiantes</th>
-                                                    ${filters.countStudents ? '<th>Cont. Estud.</th>' : ''}
-                                                    <th>Cédula/RIF</th>
-                                                    <th>Nombre/Razón Social</th>
-                                                    <th>Forma de Pago</th>
-                                                    <th>Monto</th>
-                                                  `
+                                                    <td>${item.familia}</td>
+                                                    <td>${formatStudents(item.students)}</td>
+                                                    ${filters.countStudents ? `<td>${item.studentCount || ''}</td>` : ''}
+                                                    <td>${item.cedulaRif}</td>
+                                                    <td>${item.razonSocial}</td>
+                                                    <td>${item.formaPago}</td>
+                                                    <td>${formatNumber(item.monto)}</td>
+                                                `
+                                                
                                                 : filters.orderBy === 'familia' 
                                                 ? `
-                                                    <th>Familia</th>
-                                                    <th>Estudiantes</th>
-                                                    ${filters.countStudents ? '<th>Cont. Estud.</th>' : ''}
-                                                    <th>Nro. Factura/Control</th>
-                                                    <th>Cédula/RIF</th>
-                                                    <th>Nombre/Razón Social</th>
-                                                    <th>Fecha Factura</th>
-                                                    <th>Forma de Pago</th>
-                                                    <th>Monto</th>
-                                                  `
+                                                    <td>${item.familia}</td>
+                                                    <td>${formatStudents(item.students)}</td>
+                                                    ${filters.countStudents ? `<td>${item.studentCount || ''}</td>` : ''}
+                                                    <td>${item.facturaControl}</td>
+                                                    <td>${item.cedulaRif}</td>
+                                                    <td>${item.razonSocial}</td>
+                                                    <td>${item.fechaFactura}</td>
+                                                    <td>${item.formaPago}</td>
+                                                    <td>${formatNumber(item.monto)}</td>
+                                                `
                                                 : `
-                                                    <th>Nro. Factura/Control</th>
-                                                    <th>Familia</th>
-                                                    <th>Estudiantes</th>
-                                                    ${filters.countStudents ? '<th>Cont. Estud.</th>' : ''}
-                                                    <th>Cédula/RIF</th>
-                                                    <th>Nombre/Razón Social</th>
-                                                    <th>Fecha Factura</th>
-                                                    <th>Forma de Pago</th>
-                                                    <th>Monto</th>
-                                                  `
+                                                    <td>${item.facturaControl}</td>
+                                                    <td>${item.familia}</td>
+                                                    <td>${formatStudents(item.students)}</td>
+                                                    ${filters.countStudents ? `<td>${item.studentCount || ''}</td>` : ''}
+                                                    <td>${item.cedulaRif}</td>
+                                                    <td>${item.razonSocial}</td>
+                                                    <td>${item.fechaFactura}</td>
+                                                    <td>${item.formaPago}</td>
+                                                    <td>${formatNumber(item.monto)}</td>
+                                                `
                                             }
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${reportData.map((item, index) => `
-                                            <tr>
-                                                <td>${index + 1}</td>
-                                                ${filters.countFamily ? `<td>${item.familyCount || ''}</td>` : ''}
-                                                ${filters.orderBy === 'familia_agrupado'
-                                                    ? `
-                                                        <td>${item.familia}</td>
-                                                        <td>${formatStudents(item.students)}</td>
-                                                        ${filters.countStudents ? `<td>${item.studentCount || ''}</td>` : ''}
-                                                        <td>${item.cedulaRif}</td>
-                                                        <td>${item.razonSocial}</td>
-                                                        <td>${item.formaPago}</td>
-                                                        <td>${formatNumber(item.monto)}</td>
-                                                      `
-                                                    
-                                                    : filters.orderBy === 'familia' 
-                                                    ? `
-                                                        <td>${item.familia}</td>
-                                                        <td>${formatStudents(item.students)}</td>
-                                                        ${filters.countStudents ? `<td>${item.studentCount || ''}</td>` : ''}
-                                                        <td>${item.facturaControl}</td>
-                                                        <td>${item.cedulaRif}</td>
-                                                        <td>${item.razonSocial}</td>
-                                                        <td>${item.fechaFactura}</td>
-                                                        <td>${item.formaPago}</td>
-                                                        <td>${formatNumber(item.monto)}</td>
-                                                      `
-                                                    : `
-                                                        <td>${item.facturaControl}</td>
-                                                        <td>${item.familia}</td>
-                                                        <td>${formatStudents(item.students)}</td>
-                                                        ${filters.countStudents ? `<td>${item.studentCount || ''}</td>` : ''}
-                                                        <td>${item.cedulaRif}</td>
-                                                        <td>${item.razonSocial}</td>
-                                                        <td>${item.fechaFactura}</td>
-                                                        <td>${item.formaPago}</td>
-                                                        <td>${formatNumber(item.monto)}</td>
-                                                      `
-                                                }
-                                            </tr>
-                                        `).join('')}
-                                        ${reportData.length === 0 ? `<tr><td colspan="${
-                                            (filters.orderBy === 'familia_agrupado' ? 7 : 9) 
-                                            + (filters.countFamily ? 1 : 0) 
-                                            + (filters.countStudents ? 1 : 0)
-                                        }" class="text-center">No se encontraron datos para los filtros seleccionados.</td></tr>` : ''}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    `;
-                    $('#reporte-formas-de-pago').html(tableHtml);
+                                    `).join('')}
+                                    ${reportData.length === 0 ? `<tr><td colspan="${
+                                        (filters.orderBy === 'familia_agrupado' ? 7 : 9) 
+                                        + (filters.countFamily ? 1 : 0) 
+                                        + (filters.countStudents ? 1 : 0)
+                                    }" class="text-center">No se encontraron datos para los filtros seleccionados.</td></tr>` : ''}
+                                </tbody>
+                            </table></div></div>
+                        `;
+                        $('#reporte-formas-de-pago').html(tableHtml);
+                    }
                 };
                 
                 const exportToExcel = () => {
