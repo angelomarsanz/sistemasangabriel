@@ -4313,23 +4313,23 @@
 						
             $("#monthly-payment input").each(function (index) 
             {
-				if (adjInputCounter == 0)
+				if (adjInputCounter == 0) // checkbox deshabilitado que contiene en "value" el monto pendiente de la cuota
 				{
 					monto_pendiente_dolar = parseFloat($(this).val());
 					adjInputCounter++;
 				}
-				else if (adjInputCounter == 1)
+				else if (adjInputCounter == 1) // Input habilitado donde se puede modificar la cuota
 				{
 					adjMontoModificadoDolar = parseFloat($(this).val());
 					adjIdAmountTransaction = $(this).attr('id');
 					adjInputCounter++;
 				}
-				else if (adjInputCounter == 2)
+				else if (adjInputCounter == 2) // Input deshabilitado donde se muestra el monto pagado
 				{
 					adjMontoPagadoDolar = parseFloat($(this).val());
 					adjInputCounter++;	
 				}
-				else if (adjInputCounter == 3)
+				else if (adjInputCounter == 3) // Input habilitado donde se muestra el monto pendiente de la cuota
 				{
 					id_a_pagar_dolar = $(this).attr('id');
 					monto_abono_item = parseFloat($(this).val());
@@ -4340,7 +4340,11 @@
 					}
 					adjInputCounter++;		
 				}
-				else if (adjInputCounter == 4)
+				else if (adjInputCounter == 4) // Input checkbox para exoneración del servicio educativo
+				{
+					adjInputCounter++;	
+				}				
+				else if (adjInputCounter == 5) // Input oculto con el valor del monto original de la cuota
 				{
 					adjOriginalMontoDolar = parseFloat($(this).val());
 
