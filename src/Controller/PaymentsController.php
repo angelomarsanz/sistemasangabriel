@@ -1057,10 +1057,7 @@ class PaymentsController extends AppController
 						'familyName' => $familyName,
 						'students' => $payment->bill->parentsandguardian->students,
 						'documentTypes' => [],
-						'paymentMethods' => [],
-						'totalBs' => 0,
-						'totalUsd' => 0,
-						'totalEur' => 0
+						'payments' => []
 					];
 				}
 
@@ -1070,16 +1067,20 @@ class PaymentsController extends AppController
 					$groupedByFamily[$familyId]['documentTypes'][] = $docType;
 				}
 
-				// Consolidar Formas de Pago y Montos
-				$method = $this->getPaymentLabel($payment); 
-				if (!in_array($method, $groupedByFamily[$familyId]['paymentMethods'])) {
-					$groupedByFamily[$familyId]['paymentMethods'][] = $method;
-				}
+				$paymentLabel = $this->getPaymentLabel($payment);
 
-				// Sumar montos por moneda
-				if ($payment->moneda === 'Bs.') $groupedByFamily[$familyId]['totalBs'] += $payment->amount;
-				if ($payment->moneda === '$') $groupedByFamily[$familyId]['totalUsd'] += $payment->amount;
-				if ($payment->moneda === '€') $groupedByFamily[$familyId]['totalEur'] += $payment->amount;
+				if (!isset($groupedByFamily[$familyId]['payments'][$paymentLabel])) {
+					$groupedByFamily[$familyId]['payments'][$paymentLabel] = 0;
+				}
+				$groupedByFamily[$familyId]['payments'][$paymentLabel] += $payment->amount;
+		
+				// Actualizar totales generales
+				if (!isset($totals[$paymentLabel])) {
+					$totals[$paymentLabel] = 0;
+				}
+				$totals[$paymentLabel] += $payment->amount;
+				$totals['totalGeneral'] += $payment->amount;
+
 			}
 
 			$familyCounter = 0;
@@ -1122,10 +1123,7 @@ class PaymentsController extends AppController
     					'porcentajeBeca' => $porcentajeBeca,
 						// Datos de pago SOLO en la primera fila de la familia
 						'docTypes' => $firstStudent ? implode(', ', $family['documentTypes']) : '',
-						'paymentMethods' => $firstStudent ? implode(', ', $family['paymentMethods']) : '',
-						'amountBs' => $firstStudent ? $family['totalBs'] : '',
-						'amountUsd' => $firstStudent ? $family['totalUsd'] : '',
-						'amountEur' => $firstStudent ? $family['totalEur'] : ''
+						'payments' => $firstStudent ? $family['payments'] : '',
 					];
 
 					$reportData[] = $rowData;

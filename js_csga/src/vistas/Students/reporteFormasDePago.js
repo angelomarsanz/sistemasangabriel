@@ -402,6 +402,12 @@ export const reporteFormasDePago = () =>
                     let tableHtml = generateSummaryHtml(filters, totals);
                     
                     if (filters.documentType === 'familias-estudiantes' && filters.orderBy === 'familia_agrupado') {
+                        const llavesFijas = [
+                            'totalFamilies', 'totalStudents', 'totalEstudiantesNuevos', 
+                            'totalBecas100', 'totalGeneral', 'cantidadOperaciones'
+                        ];
+                        const formasDePagoColumnas = Object.keys(totals).filter(key => !llavesFijas.includes(key)).sort();
+
                         tableHtml += `
                             <h5>Detalle del Reporte</h5>
                             <table class="table table-striped table-bordered responsive-table">
@@ -418,11 +424,8 @@ export const reporteFormasDePago = () =>
                                         <th>Estatus</th>
                                         <th>Estudiante nuevo</th>
                                         <th>Porcentaje beca</th>
-                                        <th>Tipo de documento</th>
-                                        <th>Formas de pago</th>
-                                        <th>Monto Bs.</th>
-                                        <th>Monto $</th>
-                                        <th>Monto €</th>
+                                        <th>Tipo de documentos probando</th>
+                                        ${formasDePagoColumnas.map(forma => `<th>${forma}</th>`).join('')}
                                     </tr>
                                 </thead>
                                 <tbody>`;
@@ -442,10 +445,16 @@ export const reporteFormasDePago = () =>
                                     <td>${row.estudianteNuevo}</td>
                                     <td>${row.porcentajeBeca}</td>
                                     <td>${row.docTypes}</td>
-                                    <td>${row.paymentMethods}</td>
-                                    <td align="right">${row.amountBs ? row.amountBs.toLocaleString('de-DE', {minimumFractionDigits: 2}) : ''}</td>
-                                    <td align="right">${row.amountUsd ? row.amountUsd.toLocaleString('de-DE', {minimumFractionDigits: 2}) : ''}</td>
-                                    <td align="right">${row.amountEur ? row.amountEur.toLocaleString('de-DE', {minimumFractionDigits: 2}) : ''}</td>
+                                    ${formasDePagoColumnas.map(forma => {
+                                        // Si row.payments tiene montos (solo viene en el primer estudiante de la familia)
+                                        let monto = 0;
+                                        if (row.payments && row.payments[forma]) {
+                                            monto = row.payments[forma];
+                                        }
+                                        
+                                        // Solo mostrar el número si es mayor a 0, si no, celda vacía para limpieza visual
+                                        return `<td>${monto > 0 ? new Intl.NumberFormat('de-DE', {minimumFractionDigits: 2}).format(monto) : ''}</td>`;
+                                    }).join('')}
                                 </tr>`;
                         });
 
