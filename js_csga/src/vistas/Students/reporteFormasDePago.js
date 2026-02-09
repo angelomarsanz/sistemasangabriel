@@ -330,6 +330,8 @@ export const reporteFormasDePago = () =>
 
                 const renderReport = (reportData, filters, totals) => {
 
+                    console.log('totals', totals);
+
                     if (!reportData) return;
 
                     // Definimos la función generadora de encabezado una sola vez arriba
@@ -424,7 +426,9 @@ export const reporteFormasDePago = () =>
                                         <th>Estatus</th>
                                         <th>Estudiante nuevo</th>
                                         <th>Porcentaje beca</th>
-                                        <th>Tipo de documentos probando</th>
+                                        <th>Tipo de documentos</th>
+                                        <th>Cédula/RIF</th>
+                                        <th>Nombre o razón social</th>
                                         ${formasDePagoColumnas.map(forma => `<th>${forma}</th>`).join('')}
                                     </tr>
                                 </thead>
@@ -445,6 +449,8 @@ export const reporteFormasDePago = () =>
                                     <td>${row.estudianteNuevo}</td>
                                     <td>${row.porcentajeBeca}</td>
                                     <td>${row.docTypes}</td>
+                                    <td>${row.cedulaRif}</td>
+                                    <td>${row.razonSocial}</td>
                                     ${formasDePagoColumnas.map(forma => {
                                         // Si row.payments tiene montos (solo viene en el primer estudiante de la familia)
                                         let monto = 0;

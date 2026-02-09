@@ -1056,6 +1056,8 @@ class PaymentsController extends AppController
 					$groupedByFamily[$familyId] = [
 						'familyName' => $familyName,
 						'students' => $payment->bill->parentsandguardian->students,
+						'cedulaRif' => $payment->bill->identification,
+						'razonSocial' => $payment->bill->client,
 						'documentTypes' => [],
 						'payments' => []
 					];
@@ -1122,6 +1124,8 @@ class PaymentsController extends AppController
 						'estudianteNuevo' => $esNuevo,
     					'porcentajeBeca' => $porcentajeBeca,
 						// Datos de pago SOLO en la primera fila de la familia
+						'cedulaRif' => $firstStudent ? $family['cedulaRif'] : '',
+						'razonSocial' => $firstStudent ? $family['razonSocial'] : '',
 						'docTypes' => $firstStudent ? implode(', ', $family['documentTypes']) : '',
 						'payments' => $firstStudent ? $family['payments'] : '',
 					];

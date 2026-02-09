@@ -1,1 +1,0 @@
-export { reporteFormasDePago } from "./reporteFormasDePago";
