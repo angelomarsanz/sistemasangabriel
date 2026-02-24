@@ -1026,12 +1026,12 @@ class PaymentsController extends AppController
 		$results = $query->toArray();
 		$reportData = [];
 		$totals = [
-			'totalGeneral' => 0,
+			'totalGeneralDolares' => 0,
 			'totalFamilies' => 0,
 			'totalStudents' => 0,
 			'cantidadOperaciones' => 0,
 			'totalEstudiantesNuevos' => 0,
-			'totalBecas100' => 0
+			'totalBecas100' => 0,
 		];
 		$uniqueStudentIds = [];
 
@@ -1081,7 +1081,29 @@ class PaymentsController extends AppController
 					$totals[$paymentLabel] = 0;
 				}
 				$totals[$paymentLabel] += $payment->amount;
-				$totals['totalGeneral'] += $payment->amount;
+
+				$montoDolares = 0;
+
+				// Lógica de conversión según la moneda del pago
+				// Usamos las columnas tasa_cambio y tasa_dolar_euro de la tabla bills relacionada
+				if ($payment->moneda === 'Bs.') {
+					$tasa = ($payment->bill->tasa_cambio > 0) ? $payment->bill->tasa_cambio : 1;
+					$montoDolares = $payment->amount / $tasa;
+				} elseif (strpos($payment->moneda, '€') !== false) {
+					$tasaEuro = ($payment->bill->tasa_dolar_euro > 0) ? $payment->bill->tasa_dolar_euro : 1;
+					$montoDolares = $payment->amount * $tasaEuro;
+				} else {
+					// Si ya es $, el monto es directo
+					$montoDolares = $payment->amount;
+				}
+
+				// Acumular en el total por familia
+				if (!isset($groupedByFamily[$familyId]['totalDolares'])) {
+					$groupedByFamily[$familyId]['totalDolares'] = 0;
+				}
+				$groupedByFamily[$familyId]['totalDolares'] += $montoDolares;
+
+				$totals['totalGeneralDolares'] += $montoDolares;
 
 			}
 
@@ -1127,6 +1149,7 @@ class PaymentsController extends AppController
 						'cedulaRif' => $firstStudent ? $family['cedulaRif'] : '',
 						'razonSocial' => $firstStudent ? $family['razonSocial'] : '',
 						'docTypes' => $firstStudent ? implode(', ', $family['documentTypes']) : '',
+						'totalDolares' => $firstStudent ? $family['totalDolares'] : 0, // Nuevo campo
 						'payments' => $firstStudent ? $family['payments'] : '',
 					];
 

@@ -388,12 +388,22 @@ export const reporteFormasDePago = () =>
                                                 <td><strong>Total Becas 100%</strong></td>
                                                 <td>${totals.totalBecas100 || 0}</td>
                                             </tr>` : '' }
+                                            ${totals.totalGeneralDolares ? `
+                                            <tr>
+                                                <td><strong>Total general dólares</strong></td>
+                                                <td>${formatNumber(totals.totalGeneralDolares || 0)}</td>
+                                            </tr>` : '' }
                                             ${Object.keys(totals).map(key => {
                                                 // Excluir los totales que no son de montos de pago
-                                                if (!['totalGeneral', 'totalFamilies', 'totalStudents', 'totalEstudiantesNuevos', 'totalBecas100', 'cantidadOperaciones'].includes(key)) {
+                                                if (!['totalGeneralDolares', 'totalFamilies', 'totalStudents', 'totalEstudiantesNuevos', 'totalBecas100', 'cantidadOperaciones', 'Retención de impuesto'].includes(key)) {
                                                     return `<tr><td><strong>Total monto por ${key}</strong></td><td>${formatNumber(totals[key] || 0)}</td></tr>`;
                                                 }
                                             }).join('')}
+                                            ${totals['Retención de impuestos'] ? `
+                                            <tr>
+                                                <td><strong>ISLR</strong></td>
+                                                <td>${new Intl.NumberFormat('de-DE', {minimumFractionDigits: 2}).format(totals['Retención de impuestos'])}</td>
+                                            </tr>` : '' } 
                                         </tbody>
                                     </table>
                                     <hr>
@@ -406,7 +416,7 @@ export const reporteFormasDePago = () =>
                     if (filters.documentType === 'familias-estudiantes' && filters.orderBy === 'familia_agrupado') {
                         const llavesFijas = [
                             'totalFamilies', 'totalStudents', 'totalEstudiantesNuevos', 
-                            'totalBecas100', 'totalGeneral', 'cantidadOperaciones'
+                            'totalBecas100', 'totalGeneralDolares', 'cantidadOperaciones', 'Retención de impuesto'
                         ];
                         const formasDePagoColumnas = Object.keys(totals).filter(key => !llavesFijas.includes(key)).sort();
 
@@ -429,12 +439,20 @@ export const reporteFormasDePago = () =>
                                         <th>Tipo de documentos</th>
                                         <th>Cédula/RIF</th>
                                         <th>Nombre o razón social</th>
+                                        <th>Total monto $</th>
                                         ${formasDePagoColumnas.map(forma => `<th>${forma}</th>`).join('')}
+                                        <th>ISLR</th>
                                     </tr>
                                 </thead>
                                 <tbody>`;
 
                         reportData.forEach(row => {
+                            let totalDolaresFormateado = (row.totalDolares > 0) 
+                                ? new Intl.NumberFormat('de-DE', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }).format(row.totalDolares) 
+                            : '';
                             tableHtml += `
                                 <tr>
                                     <td><b>${row.familyCount || ''}</b></td>
@@ -451,6 +469,7 @@ export const reporteFormasDePago = () =>
                                     <td>${row.docTypes}</td>
                                     <td>${row.cedulaRif}</td>
                                     <td>${row.razonSocial}</td>
+                                    <td>${totalDolaresFormateado}</td>
                                     ${formasDePagoColumnas.map(forma => {
                                         // Si row.payments tiene montos (solo viene en el primer estudiante de la familia)
                                         let monto = 0;
@@ -461,6 +480,7 @@ export const reporteFormasDePago = () =>
                                         // Solo mostrar el número si es mayor a 0, si no, celda vacía para limpieza visual
                                         return `<td>${monto > 0 ? new Intl.NumberFormat('de-DE', {minimumFractionDigits: 2}).format(monto) : ''}</td>`;
                                     }).join('')}
+                                    <td>${row.payments && row.payments['Retención de impuesto'] ? new Intl.NumberFormat('de-DE', {minimumFractionDigits: 2}).format(row.payments['Retención de impuesto']) : ""}</td>
                                 </tr>`;
                         });
 
