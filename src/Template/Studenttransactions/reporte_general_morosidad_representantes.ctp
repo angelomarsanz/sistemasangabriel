@@ -37,7 +37,7 @@
 				<?php endif; ?>
 				<h4 style="text-align: center;"><?= 'Período desde: '.$mes_anio_desde.' hasta '.$mes_anio_hasta ?></h3>
 				<h4 style="text-align: left;">Resumen</h4>
-				<p><?= "Monto total mensualidades de septiembre a ".$nombre_mes_reporte." ".$anio_correspondiente_mes." y otros conceptos: ".number_format($total_cuotas_periodo, 2, ",", ".")." $" ?></p>
+				<p><?= "Monto total mensualidades del ".$mes_anio_desde." al ".$mes_anio_hasta." y otros conceptos: ".number_format($total_cuotas_periodo, 2, ",", ".")." $" ?></p>
 				<p><?= "Mensualidades y otros conceptos pagados: ".number_format(round($total_cuotas_periodo - $totales_morosidad["Total $"], 2), 2, ",", ".")." $" ?></p>
 				<p><?= "Mensualidades y otros conceptos pendientes: ".number_format($totales_morosidad["Total $"], 2, ",", ".")." $" ?></p>
 				<p><?= "Porcentaje de morosidad: ".round(($totales_morosidad["Total $"]/$total_cuotas_periodo)*100, 2)." %" ?></p>

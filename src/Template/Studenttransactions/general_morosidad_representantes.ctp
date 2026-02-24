@@ -9,20 +9,34 @@
 	    <?= $this->Form->create() ?>
 	        <fieldset>
 		    	<?php
-	                echo $this->Form->input('mes', ['label' => 'Mes: ', 'options' => 
-	                    ["" => "",
-	                    '09' => 'Septiembre',
-	                    '10' => 'Octubre',
-	                    '11' => 'Noviembre',
-	                    '12' => 'Diciembre',
+					echo $this->Form->input('mes_desde', ['label' => 'Desde el mes: ', 'options' => 
+						["" => "",
+						'09' => 'Septiembre',
+						'10' => 'Octubre',
+						'11' => 'Noviembre',
+						'12' => 'Diciembre',
 						'01' => 'Enero',
-	                    '02' => 'Febrero',
-	                    '03' => 'Marzo',
-	                    '04' => 'Abril',
-	                    '05' => 'Mayo',
-	                    '06' => 'Junio',
-	                    '07' => 'Julio']]); 
-					echo "<div id='mensaje-mes' class='mensaje-usuario'></div>";
+						'02' => 'Febrero',
+						'03' => 'Marzo',
+						'04' => 'Abril',
+						'05' => 'Mayo',
+						'06' => 'Junio',
+						'07' => 'Julio']]); 
+					echo "<div id='mensaje-mes-desde' class='mensaje-usuario'></div>";
+					echo $this->Form->input('mes_hasta', ['label' => 'Hasta el mes: ', 'options' => 
+						["" => "",
+						'09' => 'Septiembre',
+						'10' => 'Octubre',
+						'11' => 'Noviembre',
+						'12' => 'Diciembre',
+						'01' => 'Enero',
+						'02' => 'Febrero',
+						'03' => 'Marzo',
+						'04' => 'Abril',
+						'05' => 'Mayo',
+						'06' => 'Junio',
+						'07' => 'Julio']]); 
+					echo "<div id='mensaje-mes-hasta' class='mensaje-usuario'></div>";
 	               	echo $this->Form->input('periodo_escolar', ['label' => 'Período escolar: ', 'options' => 
 	                    ["" => "",
 						'2024-2025' => '2024-2025',
@@ -94,10 +108,16 @@
 			
 			indicadorError = 0;
             
-            if ($('#mes').val() == "")
+            if ($('#mes-desde').val() == "")
 			{
 				indicadorError = 1;
-				$("#mensaje-mes").html("Por favor seleccione un mes").css("color", 'red');
+				$("#mensaje-mes-desde").html("Por favor seleccione un mes").css("color", 'red');
+			}
+
+            if ($('#mes-hasta').val() == "")
+			{
+				indicadorError = 1;
+				$("#mensaje-mes-hasta").html("Por favor seleccione un mes").css("color", 'red');
 			}
             
 			if ($('#periodo-escolar').val() == "")
