@@ -370,7 +370,6 @@ else
 						<li><?=  $this->Html->link('Consultar deuda', ['controller' => 'Studenttransactions', 'action' => 'consultaDeudaRepresentante', $current_user['id'],  $current_user['role'], 0]) ?></li>
                     <?php 
 					endif; 
-					// Seniat
 					if ($current_user['role'] == 'Seniat' ): ?>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Ventas<span class="caret"></span></a>
