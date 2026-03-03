@@ -16,7 +16,6 @@ class EventosController extends AppController
 		{
 			return true;
 		}
-        // Inicio cambios Seniat
         if ($user['role'] === 'Seniat')
         {
             if (in_array($this->request->action, ['index']))
@@ -24,7 +23,6 @@ class EventosController extends AppController
                 return true;
             }				
         }
-        // Fin cambios Seniat
         return parent::isAuthorized($user);
     }
     

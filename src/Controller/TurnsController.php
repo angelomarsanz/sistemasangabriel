@@ -587,8 +587,41 @@ class TurnsController extends AppController
 							
 							if ($codigoRetornoPagos == 0)
 							{
-								$pagosOriginal = $pagosFacturaOriginal['pagosFactura'];	
+								$pagosOriginal = $pagosFacturaOriginal['pagosFactura']; 
 								$pagosConvertidosDolares = $this->convertirPagosDolar($pagosOriginal, $facturaOriginalNC);
+
+								// 1. Encontrar el método de pago con mayor monto
+								$metodoPagoConMayorMonto = '';
+								$montoMayor = -1;
+
+								foreach ($pagosConvertidosDolares as $metodo => $monto) {
+									if ($monto > $montoMayor) {
+										$montoMayor = $monto;
+										$metodoPagoConMayorMonto = $metodo;
+									}
+								}
+
+								// 2. Procesar el monto de la Nota de Crédito ($factura->amount_paid está en Bs.)
+								$montoTotalNC = $factura->amount_paid;
+
+								if ($metodoPagoConMayorMonto == 'Efectivo $' || $metodoPagoConMayorMonto == 'Zelle $') {
+									// Si el mayor es en dólares, convertimos los Bs. de la NC a dólares usando la tasa de la NC
+									$montoTotalNC = round($factura->amount_paid / $factura->tasa_cambio, 2);
+								} elseif ($metodoPagoConMayorMonto == 'Efectivo €' || $metodoPagoConMayorMonto == 'Euros €') {
+									// Si el mayor es en euros, convertimos a euros
+									$montoTotalNC = round($factura->amount_paid / $factura->tasa_euro, 2);
+								}
+								// Si es en Bs., $montoTotalNC se queda igual (ya viene en Bs. por defecto)
+
+								// 3. Actualizar el vector de totales recibidos
+								if (isset($vectorTotalesRecibidos['Notas de crédito'][$metodoPagoConMayorMonto])) {
+									$vectorTotalesRecibidos['Notas de crédito'][$metodoPagoConMayorMonto] += $montoTotalNC;
+									
+									$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción'][$metodoPagoConMayorMonto] -= $montoTotalNC;
+									
+									$nombreCajero = $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname');
+									$vectorTotalesRecibidos['Total a recibir de ' . $nombreCajero][$metodoPagoConMayorMonto] -= $montoTotalNC;
+								}
 							}
 							else
 							{

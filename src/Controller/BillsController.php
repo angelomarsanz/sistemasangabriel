@@ -67,7 +67,6 @@ class BillsController extends AppController
 					return true;
 				}				
 			}
-			// Inicio cambios Seniat
 			elseif ($user['role'] === 'Seniat')
 			{
 				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito', 'notaContable', 'listaFacturasFamilia', 'conceptosNotaContable', 'editControl', 'searchInvoice', 'adjustInvoice']))
@@ -75,7 +74,6 @@ class BillsController extends AppController
 					return true;
 				}				
 			}
-			// Fin cambios Seniat
 		}
         return parent::isAuthorized($user);
     }        
