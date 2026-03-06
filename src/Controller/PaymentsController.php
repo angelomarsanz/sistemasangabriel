@@ -27,7 +27,6 @@ class PaymentsController extends AppController
     {
 		if(isset($user['role']))
 		{
-			// Inicio cambios Seniat
 			if ($user['role'] === 'Seniat')
 			{
 				if(in_array($this->request->action, ['verificarSerial']))
@@ -35,7 +34,6 @@ class PaymentsController extends AppController
 					return true;
 				}
 			}
-			// Fin cambios Seniat
 		}
         return parent::isAuthorized($user);
     }        

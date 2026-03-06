@@ -35,7 +35,6 @@ class ParentsandguardiansController extends AppController
 					return true;
 				}				
 			}
-            // Inicio cambios Seniat
             elseif ($user['role'] === 'Seniat')
 			{
 				if(in_array($this->request->action, ['updateClientData', 'findFamilyConsejoEducativo', 'findFamily']))
@@ -43,7 +42,6 @@ class ParentsandguardiansController extends AppController
 					return true;
 				}				
 			}
-            // Fin cambios Seniat
 		}
 
         return parent::isAuthorized($user);

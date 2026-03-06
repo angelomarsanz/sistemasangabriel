@@ -1,0 +1,1 @@
+export { indexProductos } from "./indexProductos";

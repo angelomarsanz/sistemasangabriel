@@ -8,7 +8,7 @@ export const indexProductos = () =>
             if ($('#indexProductos').length > 0) 
             {
                 console.log('indexProductos.length', $('#indexProductos').length)
-                $("#indexProductos").on("click", ".panel", function() 
+                $("#indexProductos").on("click", function() 
                 {
                     funcionExternaIndexProductos();
                 });   

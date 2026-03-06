@@ -579,56 +579,77 @@ class TurnsController extends AppController
 					}					
 					elseif ($factura->tipo_documento == "Nota de crédito")
 					{
-							$facturaOriginalNC = $this->Bills->get($factura->id_documento_padre);
+						$facturaOriginalNC = $this->Bills->get($factura->id_documento_padre);
 
-							$pagosFacturaOriginal = $payment->busquedaPagosFactura($factura->id_documento_padre);
-							
-							$codigoRetornoPagos = $pagosFacturaOriginal['codigoRetorno'];
-							
-							if ($codigoRetornoPagos == 0)
-							{
-								$pagosOriginal = $pagosFacturaOriginal['pagosFactura']; 
-								$pagosConvertidosDolares = $this->convertirPagosDolar($pagosOriginal, $facturaOriginalNC);
+						$pagosFacturaOriginal = $payment->busquedaPagosFactura($factura->id_documento_padre);
+						
+						$codigoRetornoPagos = $pagosFacturaOriginal['codigoRetorno'];
+						
+						if ($codigoRetornoPagos == 0)
+						{
+							$pagosOriginal = $pagosFacturaOriginal['pagosFactura']; 
+							$pagosConvertidosDolares = $this->convertirPagosDolar($pagosOriginal, $facturaOriginalNC);
 
-								// 1. Encontrar el método de pago con mayor monto
-								$metodoPagoConMayorMonto = '';
-								$montoMayor = -1;
+							// 1. Encontrar el método de pago con mayor monto
+							$metodoPagoConMayorMonto = '';
+							$montoMayor = -1;
 
-								foreach ($pagosConvertidosDolares as $metodo => $monto) {
-									if ($monto > $montoMayor) {
-										$montoMayor = $monto;
-										$metodoPagoConMayorMonto = $metodo;
-									}
+							foreach ($pagosConvertidosDolares as $metodo => $monto) {
+								if ($monto > $montoMayor) {
+									$montoMayor = $monto;
+									$metodoPagoConMayorMonto = $metodo;
 								}
+							}
 
-								// 2. Procesar el monto de la Nota de Crédito ($factura->amount_paid está en Bs.)
-								$montoTotalNC = $factura->amount_paid;
+							// 2. Procesar el monto de la Nota de Crédito ($factura->amount_paid está en Bs.)
+							$montoTotalNC = $factura->amount_paid;
 
-								if ($metodoPagoConMayorMonto == 'Efectivo $' || $metodoPagoConMayorMonto == 'Zelle $') {
-									// Si el mayor es en dólares, convertimos los Bs. de la NC a dólares usando la tasa de la NC
-									$montoTotalNC = round($factura->amount_paid / $factura->tasa_cambio, 2);
-								} elseif ($metodoPagoConMayorMonto == 'Efectivo €' || $metodoPagoConMayorMonto == 'Euros €') {
-									// Si el mayor es en euros, convertimos a euros
-									$montoTotalNC = round($factura->amount_paid / $factura->tasa_euro, 2);
+							if ($metodoPagoConMayorMonto == 'Efectivo $' || $metodoPagoConMayorMonto == 'Zelle $') {
+								// Si el mayor es en dólares, convertimos los Bs. de la NC a dólares usando la tasa de la NC
+								$montoTotalNC = round($factura->amount_paid / $factura->tasa_cambio, 2);
+							} elseif ($metodoPagoConMayorMonto == 'Efectivo €' || $metodoPagoConMayorMonto == 'Euros €') {
+								// Si el mayor es en euros, convertimos a euros
+								$montoTotalNC = round($factura->amount_paid / $factura->tasa_euro, 2);
+							}
+							// Si es en Bs., $montoTotalNC se queda igual (ya viene en Bs. por defecto)
+
+							$this->loadModel('Concepts');
+								$notaCreditoDescuento = 0;
+
+								$conceptos = $this->Concepts->find('all', [
+									'conditions' => [
+										'bill_id' => $factura->id, 
+										'concept LIKE' => 'Descuento%' // Busca conceptos que comiencen con "Descuento"
+									]
+								]);
+
+							// Si la consulta devuelve al menos un resultado, activamos el indicador
+							if ($conceptos->count() > 0) {
+								$notaCreditoDescuento = 1;
+							}
+
+							// 3. Actualizar el vector de totales recibidos
+							if (isset($vectorTotalesRecibidos['Notas de crédito'][$metodoPagoConMayorMonto])) {
+
+								$vectorTotalesRecibidos['Notas de crédito'][$metodoPagoConMayorMonto] += $montoTotalNC;
+
+								if ($notaCreditoDescuento == 1) 
+								{
+									$vectorTotalesRecibidos['Facturas'][$metodoPagoConMayorMonto] += $montoTotalNC;
 								}
-								// Si es en Bs., $montoTotalNC se queda igual (ya viene en Bs. por defecto)
-
-								// 3. Actualizar el vector de totales recibidos
-								if (isset($vectorTotalesRecibidos['Notas de crédito'][$metodoPagoConMayorMonto])) {
-									$vectorTotalesRecibidos['Notas de crédito'][$metodoPagoConMayorMonto] += $montoTotalNC;
-									
+								else
+								{
 									$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción'][$metodoPagoConMayorMonto] -= $montoTotalNC;
 									
 									$nombreCajero = $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname');
 									$vectorTotalesRecibidos['Total a recibir de ' . $nombreCajero][$metodoPagoConMayorMonto] -= $montoTotalNC;
 								}
 							}
-							else
-							{
-								$this->Flash->error(__('No se encontraron pagos para la factura original con ID ' . $factura->id_documento_padre));
-							}
 						}
-						
+						else
+						{
+							$this->Flash->error(__('No se encontraron pagos para la factura original con ID ' . $factura->id_documento_padre));
+						}
 						$indicadorNotasCredito = 1;
 					}
 					elseif ($factura->tipo_documento == "Nota de débito")
@@ -1446,11 +1467,11 @@ class TurnsController extends AppController
 					}
 					elseif ($pagoOriginal->moneda == "€")
 					{
-						$pagosConvertidosDolares['Efectivo €'] += round($pagoOriginal->amount/$facturaOriginalNC->tasa_dolar_euro, 2);
+						$pagosConvertidosDolares['Efectivo €'] += round($pagoOriginal->amount * $facturaOriginalNC->tasa_dolar_euro, 2);
 					}
 					else
 					{
-						$pagosConvertidosDolares['Efectivo Bs.'] += round($pagoOriginal->amount/$facturaOriginalNC->tasa_dolar, 2);
+						$pagosConvertidosDolares['Efectivo Bs.'] += round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);
 					}
 					break;
 				case "Transferencia":
@@ -1460,22 +1481,22 @@ class TurnsController extends AppController
 					}
 					elseif ($pagoOriginal->bank == "Euros")
 					{
-						$pagosConvertidosDolares['Euros €'] += round($pagoOriginal->amount/$facturaOriginalNC->tasa_dolar_euro, 2);
+						$pagosConvertidosDolares['Euros €'] += round($pagoOriginal->amount * $facturaOriginalNC->tasa_dolar_euro, 2);
 					}
 					else
 					{
-						$pagosConvertidosDolares['Transferencia Bs.'] += round($pagoOriginal->amount/$facturaOriginalNC->tasa_dolar, 2);						
+						$pagosConvertidosDolares['Transferencia Bs.'] += round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);						
 					}										
 					break;
 				case "Tarjeta de débito":
 				case "Tarjeta de crédito":
-					$pagosConvertidosDolares['TDB/TDC Bs.'] += round($pagoOriginal->amount/$facturaOriginalNC->tasa_dolar, 2);										
+					$pagosConvertidosDolares['TDB/TDC Bs.'] += round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);										
 					break;
 				case "Depósito":
-					$pagosConvertidosDolares['Depósito Bs.'] += round($pagoOriginal->amount/$facturaOriginalNC->tasa_dolar, 2);
+					$pagosConvertidosDolares['Depósito Bs.'] += round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);
 					break;
 				case "Cheque":
-					$pagosConvertidosDolares['Cheque Bs.'] += round($pagoOriginal->amount/$facturaOriginalNC->tasa_dolar, 2);
+					$pagosConvertidosDolares['Cheque Bs.'] += round($pagoOriginal->amount / $facturaOriginalNC->tasa_cambio, 2);
 					break;
 				default:
 					break;

@@ -7,5 +7,6 @@ import { consultaDeudaRepresentante } from './vistas/Studenttransactions';
 import { servicioEducativo } from './vistas/Studenttransactions';
 import { reporteFormasDePago } from './vistas/Students';
 import { indexCuentasPorCobrar } from './vistas/CuentasPorCobrar';
+import { indexProductos } from './vistas/Productos';
 
 console.log('Hola desde main.js');
