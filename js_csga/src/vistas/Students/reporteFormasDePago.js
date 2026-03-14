@@ -738,6 +738,8 @@ export const reporteFormasDePago = () =>
                     
                     const reportUrl = $('#ruta-datos-reporte-formas-de-pago').text();
 
+                    console.log('Se hizo la petición ajax a: '+ reportUrl);
+
                     $.ajax({
                         url: reportUrl,
                         type: 'POST',

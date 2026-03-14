@@ -1198,7 +1198,6 @@ class PaymentsController extends AppController
 					$totals[$paymentLabel] = 0;
 				}
 				$totals[$paymentLabel] += $payment->amount;
-				$totals['totalGeneral'] += $payment->amount;
 			}
 			
 			$totals['totalFamilies'] = count($groupedByFamily);
@@ -1255,7 +1254,6 @@ class PaymentsController extends AppController
 						$totals[$paymentLabel] = 0;
 					}
 					$totals[$paymentLabel] += $payment->amount;
-					$totals['totalGeneral'] += $payment->amount;
 	
 					// Lógica para el detalle del reporte
 					$representative = $bill->parentsandguardian;
