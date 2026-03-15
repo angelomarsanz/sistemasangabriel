@@ -164,8 +164,14 @@ export const reporteFormasDePago = () =>
                                                 <div class="radio">
                                                     <label><input type="radio" name="documentType" value="pedidos"> Pedidos</label>
                                                 </div>
+                                                    <div class="radio">
+                                                    <label><input type="radio" name="documentType" value="familias-estudiantes-facturas"> Familias y estudiantes (facturas)</label>
+                                                </div>
                                                 <div class="radio">
-                                                    <label><input type="radio" name="documentType" value="familias-estudiantes"> Familias y estudiantes</label>
+                                                    <label><input type="radio" name="documentType" value="familias-estudiantes-pedidos"> Familias y estudiantes (pedidos)</label>
+                                                </div>
+                                                <div class="radio">
+                                                    <label><input type="radio" name="documentType" value="familias-estudiantes-facturas-pedidos"> Familias y estudiantes (facturas y pedidos)</label>
                                                 </div>
                                             </div>
                                         </div>
