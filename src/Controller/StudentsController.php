@@ -54,7 +54,6 @@ class StudentsController extends AppController
 					return true;
 				}				
 			}
-			// Inicio cambios Seniat
 			elseif ($user['role'] === 'Seniat')
 			{
 				if(in_array($this->request->action, ['everyFamily', 'relatedStudents' ]))
@@ -62,7 +61,6 @@ class StudentsController extends AppController
 					return true;
 				}				
 			}
-			// Fin cambios Seniat
         }
 				
         return parent::isAuthorized($user);

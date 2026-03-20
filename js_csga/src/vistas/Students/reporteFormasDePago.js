@@ -311,9 +311,9 @@ export const reporteFormasDePago = () =>
                         </div>
                     `;
                     $('#formulario-formas-de-pago').html(formHtml);
+                    $('input[name="documentType"]:checked').trigger('change');
                 };
 
-                
                 // Función auxiliar para formatear números con separador de miles
                 const formatNumber = (number) => {
                     return new Intl.NumberFormat('es-ES', {
@@ -419,7 +419,7 @@ export const reporteFormasDePago = () =>
                     // Generamos el encabezado común para CUALQUIER reporte
                     let tableHtml = generateSummaryHtml(filters, totals);
                     
-                    if (filters.documentType === 'familias-estudiantes' && filters.orderBy === 'familia_agrupado') {
+                    if (filters.documentType && filters.documentType.indexOf('familias-estudiantes') === 0) {
                         const llavesFijas = [
                             'totalFamilies', 'totalStudents', 'totalEstudiantesNuevos', 
                             'totalBecas100', 'totalGeneralDolares', 'cantidadOperaciones', 'Retención de impuesto'
@@ -799,6 +799,25 @@ export const reporteFormasDePago = () =>
                 // Manejadores de eventos
                 $(document).on('click', '#aplicar-filtros-btn', function() {
                     fetchReportData();
+                });
+
+                // Manejador para el cambio de Tipo de Reporte
+                $(document).on('change', 'input[name="documentType"]', function() {
+                    const docType = $(this).val();
+                    const orderByFamilyAgrupado = $('input[name="orderBy"][value="familia_agrupado"]');
+                    const otherOrderByOptions = $('input[name="orderBy"]').not('[value="familia_agrupado"]').closest('.radio');
+
+                    // Verificamos si comienza con "familias-estudiantes"
+                    if (docType.indexOf('familias-estudiantes') === 0) {
+                        // 1. Seleccionar automáticamente "Familia (agrupado)"
+                        orderByFamilyAgrupado.prop('checked', true).trigger('change');
+                        
+                        // 2. Ocultar las otras opciones (Familia y Factura)
+                        otherOrderByOptions.hide();
+                    } else {
+                        // Si es Facturas o Pedidos, mostrar todas las opciones
+                        otherOrderByOptions.show();
+                    }
                 });
                 
                 $(document).on('change', 'input[name="paymentForms[]"]', function() {

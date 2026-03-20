@@ -1023,130 +1023,129 @@ class PaymentsController extends AppController
 		}
 		$totals['totalStudents'] = count($uniqueStudentIds);
 		
-		if (strpos($filters['documentType'], 'familias-estudiantes') === 0) { {
-			if  ($filters['orderBy'] === 'familia_agrupado') {
-				// AGRUPACIÓN ESPECIAL TIPO EXCEL
-				$groupedByFamily = [];
-				foreach ($results as $payment) {
-					$familyId = $payment->bill->parentsandguardian->id;
-					$familyName = $payment->bill->parentsandguardian->family;
-					
-					if (!isset($groupedByFamily[$familyId])) {
-						$groupedByFamily[$familyId] = [
-							'familyName' => $familyName,
-							'students' => $payment->bill->parentsandguardian->students,
-							'cedulaRif' => $payment->bill->identification,
-							'razonSocial' => $payment->bill->client,
-							'documentTypes' => [],
-							'payments' => []
-						];
-					}
-
-					// Consolidar Tipos de Documento
-					$docType = $payment->bill->tipo_documento; // Ajustar según tu columna real en Bills
-					if (!in_array($docType, $groupedByFamily[$familyId]['documentTypes'])) {
-						$groupedByFamily[$familyId]['documentTypes'][] = $docType;
-					}
-
-					$paymentLabel = $this->getPaymentLabel($payment);
-
-					if (!isset($groupedByFamily[$familyId]['payments'][$paymentLabel])) {
-						$groupedByFamily[$familyId]['payments'][$paymentLabel] = 0;
-					}
-					$groupedByFamily[$familyId]['payments'][$paymentLabel] += $payment->amount;
-			
-					// Actualizar totales generales
-					if (!isset($totals[$paymentLabel])) {
-						$totals[$paymentLabel] = 0;
-					}
-					$totals[$paymentLabel] += $payment->amount;
-
-					$montoDolares = 0;
-
-					// Lógica de conversión según la moneda del pago
-					// Usamos las columnas tasa_cambio y tasa_dolar_euro de la tabla bills relacionada
-					if ($payment->moneda === 'Bs.') {
-						$tasa = ($payment->bill->tasa_cambio > 0) ? $payment->bill->tasa_cambio : 1;
-						$montoDolares = $payment->amount / $tasa;
-					} elseif (strpos($payment->moneda, '€') !== false) {
-						$tasaEuro = ($payment->bill->tasa_dolar_euro > 0) ? $payment->bill->tasa_dolar_euro : 1;
-						$montoDolares = $payment->amount * $tasaEuro;
-					} else {
-						// Si ya es $, el monto es directo
-						$montoDolares = $payment->amount;
-					}
-
-					// Acumular en el total por familia
-					if (!isset($groupedByFamily[$familyId]['totalDolares'])) {
-						$groupedByFamily[$familyId]['totalDolares'] = 0;
-					}
-					$groupedByFamily[$familyId]['totalDolares'] += $montoDolares;
-
-					$totals['totalGeneralDolares'] += $montoDolares;
-
+		if (strpos($filters['documentType'], 'familias-estudiantes') === 0) { 
+			// AGRUPACIÓN ESPECIAL TIPO EXCEL
+			$groupedByFamily = [];
+			foreach ($results as $payment) {
+				$familyId = $payment->bill->parentsandguardian->id;
+				$familyName = $payment->bill->parentsandguardian->family;
+				
+				if (!isset($groupedByFamily[$familyId])) {
+					$groupedByFamily[$familyId] = [
+						'familyName' => $familyName,
+						'students' => $payment->bill->parentsandguardian->students,
+						'cedulaRif' => $payment->bill->identification,
+						'razonSocial' => $payment->bill->client,
+						'documentTypes' => [],
+						'payments' => []
+					];
 				}
 
-				$familyCounter = 0;
-				$isLatestYear = ($selectedYearBase == $anioEscolarActual); 
+				// Consolidar Tipos de Documento
+				$docType = $payment->bill->tipo_documento; // Ajustar según tu columna real en Bills
+				if (!in_array($docType, $groupedByFamily[$familyId]['documentTypes'])) {
+					$groupedByFamily[$familyId]['documentTypes'][] = $docType;
+				}
 
-				foreach ($groupedByFamily as $family) {
-					$familyCounter++;
-					$firstStudent = true;
-					
-					foreach ($family['students'] as $student) {
-						$esNuevo = ($student->new_student == 1) ? 'Sí' : 'No';
+				$paymentLabel = $this->getPaymentLabel($payment);
 
-						$porcentajeBeca = 0;
-						if ($isLatestYear) {
-							$porcentajeBeca = $student->discount;
-						} else {
-							$vectorDescuentos = json_decode($student->vector_descuento_anios_anteriores, true);
-							if (isset($vectorDescuentos[$selectedYear])) {
-								$porcentajeBeca = $vectorDescuentos[$selectedYear];
-							} else {
-								// Si no existe el año, buscar el más antiguo en el vector como referencia
-								if (!empty($vectorDescuentos)) {
-									ksort($vectorDescuentos);
-									$porcentajeBeca = reset($vectorDescuentos);
-								}
-							}
-						}	
+				if (!isset($groupedByFamily[$familyId]['payments'][$paymentLabel])) {
+					$groupedByFamily[$familyId]['payments'][$paymentLabel] = 0;
+				}
+				$groupedByFamily[$familyId]['payments'][$paymentLabel] += $payment->amount;
 		
-						$rowData = [
-							'familyCount' => $firstStudent ? $familyCounter : '',
-							'studentCount' => $firstStudent ? count($family['students']) : '',
-							'family' => $family['familyName'],
-							'student_first_name' => $student->first_name,
-							'student_last_name' => $student->second_name,
-							'last_year' => $student->balance, // Students.balance
-							'status' => $student->student_condition, // Students.student_condition
-							'grade' => $student->has('section') ? $student->section->level . ', ' . $student->section->sublevel : 'N/A',
-							'section' => $student->has('section') ? $student->section->section : 'N/A',
-							'estudianteNuevo' => $esNuevo,
-							'porcentajeBeca' => $porcentajeBeca,
-							// Datos de pago SOLO en la primera fila de la familia
-							'cedulaRif' => $firstStudent ? $family['cedulaRif'] : '',
-							'razonSocial' => $firstStudent ? $family['razonSocial'] : '',
-							'docTypes' => $firstStudent ? implode(', ', $family['documentTypes']) : '',
-							'totalDolares' => $firstStudent ? $family['totalDolares'] : 0, // Nuevo campo
-							'payments' => $firstStudent ? $family['payments'] : '',
-						];
+				// Actualizar totales generales
+				if (!isset($totals[$paymentLabel])) {
+					$totals[$paymentLabel] = 0;
+				}
+				$totals[$paymentLabel] += $payment->amount;
 
-						$reportData[] = $rowData;
-						$firstStudent = false;
+				$montoDolares = 0;
 
-						if ($student->new_student == 1) {
-						$totals['totalEstudiantesNuevos']++;
+				// Lógica de conversión según la moneda del pago
+				// Usamos las columnas tasa_cambio y tasa_dolar_euro de la tabla bills relacionada
+				if ($payment->moneda === 'Bs.') {
+					$tasa = ($payment->bill->tasa_cambio > 0) ? $payment->bill->tasa_cambio : 1;
+					$montoDolares = $payment->amount / $tasa;
+				} elseif (strpos($payment->moneda, '€') !== false) {
+					$tasaEuro = ($payment->bill->tasa_dolar_euro > 0) ? $payment->bill->tasa_dolar_euro : 1;
+					$montoDolares = $payment->amount * $tasaEuro;
+				} else {
+					// Si ya es $, el monto es directo
+					$montoDolares = $payment->amount;
+				}
+
+				// Acumular en el total por familia
+				if (!isset($groupedByFamily[$familyId]['totalDolares'])) {
+					$groupedByFamily[$familyId]['totalDolares'] = 0;
+				}
+				$groupedByFamily[$familyId]['totalDolares'] += $montoDolares;
+
+				$totals['totalGeneralDolares'] += $montoDolares;
+
+			}
+
+			$familyCounter = 0;
+			$isLatestYear = ($selectedYearBase == $anioEscolarActual); 
+
+			foreach ($groupedByFamily as $family) {
+				$familyCounter++;
+				$firstStudent = true;
+				
+				foreach ($family['students'] as $student) {
+					$esNuevo = ($student->new_student == 1) ? 'Sí' : 'No';
+
+					$porcentajeBeca = 0;
+					if ($isLatestYear) {
+						$porcentajeBeca = $student->discount;
+					} else {
+						$vectorDescuentos = json_decode($student->vector_descuento_anios_anteriores, true);
+						if (isset($vectorDescuentos[$selectedYear])) {
+							$porcentajeBeca = $vectorDescuentos[$selectedYear];
+						} else {
+							// Si no existe el año, buscar el más antiguo en el vector como referencia
+							if (!empty($vectorDescuentos)) {
+								ksort($vectorDescuentos);
+								$porcentajeBeca = reset($vectorDescuentos);
+							}
 						}
+					}	
+	
+					$rowData = [
+						'familyCount' => $firstStudent ? $familyCounter : '',
+						'studentCount' => $firstStudent ? count($family['students']) : '',
+						'family' => $family['familyName'],
+						'student_first_name' => $student->first_name,
+						'student_last_name' => $student->second_name,
+						'last_year' => $student->balance, // Students.balance
+						'status' => $student->student_condition, // Students.student_condition
+						'grade' => $student->has('section') ? $student->section->level . ', ' . $student->section->sublevel : 'N/A',
+						'section' => $student->has('section') ? $student->section->section : 'N/A',
+						'estudianteNuevo' => $esNuevo,
+						'porcentajeBeca' => $porcentajeBeca,
+						// Datos de pago SOLO en la primera fila de la familia
+						'cedulaRif' => $firstStudent ? $family['cedulaRif'] : '',
+						'razonSocial' => $firstStudent ? $family['razonSocial'] : '',
+						'docTypes' => $firstStudent ? implode(', ', $family['documentTypes']) : '',
+						'totalDolares' => $firstStudent ? $family['totalDolares'] : 0, // Nuevo campo
+						'payments' => $firstStudent ? $family['payments'] : '',
+					];
 
-						if ($porcentajeBeca == 100) {
-							$totals['totalBecas100']++;
-						}
+					$reportData[] = $rowData;
+					$firstStudent = false;
+
+					if ($student->new_student == 1) {
+					$totals['totalEstudiantesNuevos']++;
+					}
+
+					if ($porcentajeBeca == 100) {
+						$totals['totalBecas100']++;
 					}
 				}
-				$totals['totalFamilies'] = count($groupedByFamily);
-				$totals['cantidadOperaciones'] = $totals['totalFamilies'];
 			}
+			$totals['totalFamilies'] = count($groupedByFamily);
+			$totals['cantidadOperaciones'] = $totals['totalFamilies'];
+		
 		} elseif ($filters['orderBy'] === 'familia_agrupado') {
 			$groupedByFamily = [];
 			foreach ($results as $payment) {

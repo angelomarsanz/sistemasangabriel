@@ -9,7 +9,6 @@
                 <?php
                     echo $this->Form->input('username', ['label' => 'Usuario: *']);
                     echo $this->Form->input('password', ['label' => 'Clave: *']);
-                    // Inicio cambios Seniat
                     echo $this->Form->input('role', ['label' => 'Rol: *', 'options' => 
                         [
                             'Administrador' => 'Administrador',
@@ -25,7 +24,6 @@
                             'Ventas fiscales' => 'Ventas fiscales',
                             'Ventas generales' => 'Ventas generales'
                             ]]);
-                    // Fin cambios Seniat
                     echo $this->Form->input('first_name', ['label' => 'Primer nombre: *']);
                     echo $this->Form->input('second_name', ['label' => 'Segundo nombre:']);
                     echo $this->Form->input('surname', ['label' => 'Primer apellido: *']);

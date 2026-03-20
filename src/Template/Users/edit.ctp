@@ -18,7 +18,6 @@
             <?php
                 echo $this->Form->input('username', ['label' => 'Usuario', 'disabled' => true]);
                 echo $this->Form->input('password', ['label' => 'Clave *']);
-                // Inicio cambio Seniat
                 if ($current_user['role'] == 'Administrador')
                 {
                     echo $this->Form->input('role', ['label' => 'Rol: *', 'options' => 
@@ -36,7 +35,6 @@
                         'Ventas fiscales' => 'Ventas fiscales'
                     ]]);
                 }
-                // Fin cambios Seniat
                 echo $this->Form->input('first_name', ['label' => 'Primer nombre *']);
                 echo $this->Form->input('second_name', ['label' => 'Segundo nombre']);
                 echo $this->Form->input('surname', ['label' => 'Primer apellido *']);

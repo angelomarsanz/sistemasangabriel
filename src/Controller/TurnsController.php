@@ -20,7 +20,6 @@ class TurnsController extends AppController
     {
 		if(isset($user['role']))
 		{
-			// Inicio cambios Seniat
 			if ($user['role'] === 'Seniat')
 			{
 				if(in_array($this->request->action, ['checkTurnOpen', 'checkTurnClose', 'index',  'checkTurnInvoice', 'add', 'edit', 'imprimirReporteCierre', 'reporteCierre']))
@@ -28,7 +27,6 @@ class TurnsController extends AppController
 					return true;
 				}
 			}
-			// Fin cambios Seniat
 		}
 
         return parent::isAuthorized($user);
