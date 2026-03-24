@@ -32,7 +32,7 @@ class UsersController extends AppController
                 'Control de estudios' => true,
                 'Proveedor' => true,
                 'Representante' => true,
-                'Seniat' => true,
+                'Facturas' => true,
             ];
 
             $allowedActions = ['home', 'view', 'edit', 'logout', 'wait'];

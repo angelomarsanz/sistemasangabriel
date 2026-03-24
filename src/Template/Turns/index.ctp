@@ -36,7 +36,7 @@
 							<td><?= h($turn->user->first_name . ' ' . $turn->user->surname) ?></td>
 							<?php
 							if ($current_user['id'] == 1 || $current_user['id'] == 978): 
-								if ($turn->user->role == 'Seniat'): ?>
+								if ($turn->user->role == 'Facturas'): ?>
 									<td style="text-align:center">Sí</td>
 								<?php
 								else: ?>

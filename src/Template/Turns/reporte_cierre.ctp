@@ -27,7 +27,7 @@
 				<table style="width:100%; font-size: 14px; line-height: 16px;">
 					<tbody>
 						<?php
-						if ($rolCajero == 'Seniat')
+						if ($rolCajero == 'Facturas')
 						{ ?>
 							<tr>
 								<td>Unidad Educativa Colegio</td>
@@ -58,7 +58,7 @@
 
 			<!-- Documentos fiscales -->
 			<?php 
-			if ($rolCajero == 'Seniat')
+			if ($rolCajero == 'Facturas')
 			{ ?>
 				<div>	
 					<!-- Pagos fiscales -->
@@ -1060,7 +1060,7 @@
 			} ?>
 			<!-- Documentos no fiscales -->
 			<?php
-			if ($rolCajero != 'Seniat')
+			if ($rolCajero != 'Facturas')
 			{ ?> 
 				<div>
 					<!-- Pedidos -->

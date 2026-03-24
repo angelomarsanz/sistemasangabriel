@@ -21,7 +21,7 @@ class ProductosController extends AppController
         // Configuramos el límite por página (ejemplo: 6 para ver las cards bien distribuidas)
         $this->paginate = [
             'limit' => 9,
-            'order' => ['Productos.id' => 'desc']
+            'order' => ['Productos.id' => 'asc']
         ];
         
         $productos = $this->paginate($this->Productos);

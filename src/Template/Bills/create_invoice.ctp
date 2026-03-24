@@ -8,7 +8,7 @@
 	$anoEscolarAnterior = $anoEscolarActual - 1;
 	$proximoAnoEscolar = $anoEscolarActual + 1;
 	$indicador_pedido = 1;
-	if ($current_user['role'] == 'Seniat'):
+	if ($current_user['role'] == 'Facturas'):
     	$indicador_pedido = 0; 
 	endif;
 ?>
@@ -2297,7 +2297,7 @@
 								
 		payments.discount = descuentoBolivares; 
 		
-		if (rolUsuario == 'Seniat')
+		if (rolUsuario == 'Facturas')
 		{
 			payments.fiscal = 1;
 		}

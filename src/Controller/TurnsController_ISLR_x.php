@@ -1399,7 +1399,6 @@ class TurnsController extends AppController
 							$vectorTotalesRecibidos['Menos ISLR retenido']['ISLR'] += $pago->amount;
 						}
 					}			
-
 					// Fin ISLR
 				}
 			}

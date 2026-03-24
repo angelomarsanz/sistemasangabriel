@@ -16,7 +16,7 @@ class EventosController extends AppController
 		{
 			return true;
 		}
-        if ($user['role'] === 'Seniat')
+        if ($user['role'] === 'Facturas')
         {
             if (in_array($this->request->action, ['index']))
             {

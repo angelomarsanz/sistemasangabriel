@@ -38,7 +38,7 @@ class StudenttransactionsController extends AppController
 					return true;
 				}				
 			}
-			elseif ($user['role'] === 'Seniat')
+			elseif ($user['role'] === 'Facturas')
 			{
 				if(in_array($this->request->action, []))
 				{

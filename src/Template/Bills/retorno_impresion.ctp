@@ -1,7 +1,7 @@
 <br />
 <br />
 <?php
-if ($current_user['role'] == 'Seniat' ): ?>
+if ($current_user['role'] == 'Facturas' ): ?>
     <?= $this->Html->link('Factura inscripción estudiantes regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Factura inscripción regulares'], ['class' => 'btn btn-sm btn-primary']) ?> 
     <br />
     <br />

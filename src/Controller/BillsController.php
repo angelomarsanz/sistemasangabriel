@@ -67,7 +67,7 @@ class BillsController extends AppController
 					return true;
 				}				
 			}
-			elseif ($user['role'] === 'Seniat')
+			elseif ($user['role'] === 'Facturas')
 			{
 				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito', 'notaContable', 'listaFacturasFamilia', 'conceptosNotaContable', 'editControl', 'searchInvoice', 'adjustInvoice']))
 				{
@@ -395,7 +395,7 @@ class BillsController extends AppController
 			'Factura mensualidades'
 		];
 
-		if ($this->Auth->user('role') == 'Seniat' && !in_array($menuOption, $tipos_factura_fiscal)) 
+		if ($this->Auth->user('role') == 'Facturas' && !in_array($menuOption, $tipos_factura_fiscal)) 
 		{
 			$binnacles->add('controller', 'Bills', 'createInvoice', 'Opción menú inválida: Usuario: '.$this->Auth->user('username').' Rol: '.$this->Auth->user('role').' Opcion: '.$menuOption);
 		}

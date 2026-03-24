@@ -1,7 +1,7 @@
 <?php
     use Cake\Routing\Router; 
 	$tipo_usuario = 0;
-	if ($current_user['role'] == 'Seniat' || $current_user['role'] == 'Ventas fiscales' || $current_user['role'] == 'Contabilidad fiscal' ):
+	if ($current_user['role'] == 'Facturas'):
 		$tipo_usuario = 1;
 	endif;
 ?>

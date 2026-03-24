@@ -17,6 +17,26 @@
     transform: scale(1.02);
 }
 
-.panel-footer .btn {
-    margin: 0 5px;
+/* Contenedor responsivo con scroll lateral suave */
+.table-responsive {
+    border: none;
+    margin-bottom: 20px;
+}
+
+/* Evitar que las celdas se compriman demasiado en móvil */
+#tabla-productos th, #tabla-productos td {
+    white-space: nowrap; 
+    vertical-align: middle;
+}
+
+/* Ajuste de botones en móvil para que no queden pegados */
+.actions .btn {
+    margin: 2px;
+}
+
+/* Estilo para el encabezado de página */
+.page-header {
+    margin-top: 10px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
 }

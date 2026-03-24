@@ -30,7 +30,7 @@
                         'Propietario' => 'Propietario',
                         'Proveedor' => 'Proveedor',
                         'Representante' => 'Padre o representante',
-                        'Seniat' => 'Seniat',
+                        'Facturas' => 'Facturas',
                         'Ventas generales' => 'Ventas generales',
                         'Ventas fiscales' => 'Ventas fiscales'
                     ]]);

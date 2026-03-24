@@ -22,7 +22,7 @@ if (!(isset($reimpresion))):
 endif;
 if (isset($current_user))
 {
-	if ($current_user['role'] == 'Seniat' || $current_user['role'] == 'Representante') 
+	if ($current_user['role'] == 'Facturas' || $current_user['role'] == 'Representante') 
 	{ ?>
 		<nav class="navbar navbar-default navbar-fixed-top" style="background-color: #b3e0ff;">
 	<?php
@@ -370,7 +370,7 @@ else
 						<li><?=  $this->Html->link('Consultar deuda', ['controller' => 'Studenttransactions', 'action' => 'consultaDeudaRepresentante', $current_user['id'],  $current_user['role'], 0]) ?></li>
                     <?php 
 					endif; 
-					if ($current_user['role'] == 'Seniat' ): ?>
+					if ($current_user['role'] == 'Facturas' ): ?>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Ventas<span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">

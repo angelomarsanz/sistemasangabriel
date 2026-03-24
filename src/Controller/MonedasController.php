@@ -23,7 +23,7 @@ class MonedasController extends AppController
     {
 		if(isset($user['role']))
 		{
-			if ($user['role'] === 'Seniat')
+			if ($user['role'] === 'Facturas')
 			{
 				if(in_array($this->request->action, ['actualizarTasa']))
 				{
