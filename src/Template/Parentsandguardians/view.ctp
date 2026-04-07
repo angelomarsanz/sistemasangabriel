@@ -1,8 +1,18 @@
 <style>
-@media screen
-{
-    .menumenos
-    {
+    .panel-heading .accordion-toggle:before {
+        font-family: 'Glyphicons Halflings';
+        content: "\e080"; /* Right arrow */
+        float: left;
+        color: grey;
+        margin-right: 10px;
+    }
+    .panel-heading .accordion-toggle.collapsed:before {
+        content: "\e080"; /* Right arrow */
+    }
+    .panel-heading .accordion-toggle:not(.collapsed):before {
+        content: "\e114"; /* Down arrow */
+    }
+    .menumenos {
         display:scroll;
         position:fixed;
         bottom: 5%;
@@ -10,8 +20,7 @@
         opacity: 0.5;
         text-align: right;
     }
-    .menumas 
-    {
+    .menumas {
         display:scroll;
         position:fixed;
         bottom: 5%;
@@ -19,164 +28,165 @@
         opacity: 0.5;
         text-align: right;
     }
-    .botonMenu
-    {
-        margin-bottom: 5 px;
+    .botonMenu {
+        margin-bottom: 5px;
     }
-    .ui-autocomplete 
-    {
+    .ui-autocomplete {
         z-index: 2000;
     }
-}
 </style>
 <div class="container">
-    <div class="page-header"> 
+    <div class="page-header">
 		<?php if (isset($controller) && isset($action)): ?>
             <p><?= $this->Html->link(__('Volver'), ['controller' => $controller, 'action' => $action], ['class' => 'btn btn-sm btn-default']) ?></p>
         <?php elseif ($parentsandguardian->family != " "): ?>
-            <p><?= $this->Html->link(__('Volver'), ['action' => 'viewData', $parentsandguardian->id, $parentsandguardian->family ], ['class' => 'btn btn-sm btn-default']) ?></li>
+            <p><?= $this->Html->link(__('Volver'), ['action' => 'viewData', $parentsandguardian->id, $parentsandguardian->family ], ['class' => 'btn btn-sm btn-default']) ?></p>
         <?php else: ?>
-            <p><?= $this->Html->link(__('Volver'), ['action' => 'viewData', $parentsandguardian->id, $parentsandguardian->surname . ' ' . $parentsandguardian->first_name], ['class' => 'btn btn-sm btn-default']) ?></li>    
-        <?php endif; ?>       
+            <p><?= $this->Html->link(__('Volver'), ['action' => 'viewData', $parentsandguardian->id, $parentsandguardian->surname . ' ' . $parentsandguardian->first_name], ['class' => 'btn btn-sm btn-default']) ?></p>
+        <?php endif; ?>
         <h2>Familia:&nbsp;<?= h($parentsandguardian->family) ?></h2>
     </div>
     <div class="row">
         <div class="col col-sm-4">
             <?= $this->Html->image('../files/parentsandguardians/profile_photo/' . $parentsandguardian->get('profile_photo_dir') . '/'. $parentsandguardian->get('profile_photo'), ['class' => 'img-thumbnail img-responsive']) ?>
         </div>
-        <div class="col col-sm-8">  
-            <h3>Datos del representante:</h3>
-            <hr size="3" />
-            <?php if ((isset($current_user)) && ($current_user['role'] != 'Representante')): ?> 
-                <br />
-                <b>Eliminado? &nbsp;</b><?= $parentsandguardian->guardian ? __('Sí') : __('No'); ?>
-                <br />
-                <br />
-            <?php endif; ?>
-                <b>Nombre:&nbsp;</b><?= h($parentsandguardian->full_name) ?>
-            <br />
-            <br />
-                <b>Sexo:&nbsp;</b><?= h($parentsandguardian->sex) ?>
-            <br />
-            <br />
-                <b>Tipo de identificación:&nbsp;</b><?= h($parentsandguardian->type_of_identification) ?>
-            <br />
-            <br />
-                <b>Número de cédula o pasaporte:&nbsp;</b><?= h($parentsandguardian->identidy_card) ?>
-            <br />
-            <br />
-                <b>Profesión:&nbsp;</b><?= h($parentsandguardian->profession) ?>
-            <br />
-            <br />
-            <?php
-            if ($parentsandguardian->item != "Otro, no especificado en esta lista"): ?>
-                <b>Oficio o rubro:&nbsp;</b><?= h($parentsandguardian->item) ?>
-            <?php else: ?>
-                <b>Oficio o rubro:&nbsp;</b><?= h($parentsandguardian->item_not_specified) ?>
-            <?php endif; ?>
-            <br />
-            <br />
-                <b>Teléfono del trabajo:&nbsp;</b><?= h($parentsandguardian->work_phone) ?>
-            <br />
-            <br />
-                <b>Empresa o institución donde labora:&nbsp;</b><?= h($parentsandguardian->workplace) ?>
-            <br />
-            <br />
-                <b>Puesto que ocupa:&nbsp;</b><?= h($parentsandguardian->professional_position) ?>
-            <br />
-            <br />
-                <b>Dirección del trabajo:&nbsp;</b><?= h($parentsandguardian->work_address) ?>
-            <br />
-            <br />
-                <b>Teléfono celular:&nbsp;</b><?= h($parentsandguardian->cell_phone) ?>
-            <br />
-            <br />
-                <b>Teléfono fijo:&nbsp;</b><?= h($parentsandguardian->landline) ?>
-            <br />
-            <br />
-                <b>Email:&nbsp;</b><?= h($parentsandguardian->email) ?>
-            <br />
-            <br />
-                <b>Dirección de habitación:&nbsp;</b><?= h($parentsandguardian->address) ?>
-            <br />
-            <br />
-            <h3>Datos del padre:</h3>
-            <hr size="3" />
-                <b>Nombre:&nbsp;</b><?= h($parentsandguardian->surname_father . ' ' . $parentsandguardian->second_surname_father . ' ' . $parentsandguardian->first_name_father . ' ' . $parentsandguardian->second_name_father) ?>
-            <br />
-            <br />
-                <b>Tipo de identificación:&nbsp;</b><?= h($parentsandguardian->type_of_identification_father) ?>
-            <br />
-            <br />
-                <b>Número de cédula o pasaporte:&nbsp;</b><?= h($parentsandguardian->identidy_card_father) ?>
-            <br />
-            <br />
-                <b>Dirección de habitación:&nbsp;</b><?= h($parentsandguardian->address_father) ?>
-            <br />
-            <br />
-                <b>Email:&nbsp;</b><?= h($parentsandguardian->email_father) ?>
-            <br />
-            <br />
-                <b>Teléfono habitación:&nbsp;</b><?= h($parentsandguardian->landline_father) ?>
-            <br />
-            <br />
-                <b>Teléfono celular:&nbsp;</b><?= h($parentsandguardian->cell_phone_father) ?>
-            <br />
-            <br />
-                <b>Teléfono trabajo:&nbsp;</b><?= h($parentsandguardian->work_phone_father) ?>
-            <br />
-            <br />
-                <b>Profesión:&nbsp;</b><?= h($parentsandguardian->profession_father) ?>
-            <br />
-            <br />
-            <h3>Datos de la madre:</h3>
-            <hr size="3" />
-                <b>Nombre de la madre:&nbsp;</b><?= h($parentsandguardian->surname_mother . ' ' . $parentsandguardian->second_surname_mother . ' ' . $parentsandguardian->first_name_mother . ' ' . $parentsandguardian->second_name_mother) ?>
-            <br />
-            <br />
-                <b>Tipo de identificación:&nbsp;</b><?= h($parentsandguardian->type_of_identification_mother) ?>
-            <br />
-            <br />
-                <b>Número de cédula o pasaporte:&nbsp;</b><?= h($parentsandguardian->identidy_card_mother) ?>
-            <br />
-            <br />
-                <b>Dirección de habitación:&nbsp;</b><?= h($parentsandguardian->address_mother) ?>
-            <br />
-            <br />
-                <b>Email:&nbsp;</b><?= h($parentsandguardian->email_mother) ?>
-            <br />
-            <br />
-                <b>Teléfono habitación:&nbsp;</b><?= h($parentsandguardian->landline_mother) ?>
-            <br />
-            <br />
-                <b>Teléfono celular:&nbsp;</b><?= h($parentsandguardian->cell_phone_mother) ?>
-            <br />
-            <br />
-                <b>Teléfono trabajo:&nbsp;</b><?= h($parentsandguardian->work_phone_mother) ?>
-            <br />
-            <br />
-                <b>Profesión:&nbsp;</b><?= h($parentsandguardian->profession_mother) ?>
-            <br />
-            <br />
-            <h3>Datos para la factura:</h3>
-            <hr size="3" />
-                <b>Nombre o razón social:&nbsp;</b><?= h($parentsandguardian->client) ?>
-            <br />
-            <br />
-                <b>Tipo de identificación:&nbsp;</b><?= h($parentsandguardian->type_of_identification_client) ?>
-            <br />
-            <br />
-                <b>Número de cédula, pasaporte o RIF:&nbsp;</b><?= h($parentsandguardian->identification_number_client) ?>
-            <br />
-            <br />
-                <b>Dirección fiscal:&nbsp;</b><?= h($parentsandguardian->fiscal_address) ?>
-            <br />
-            <br />
-                <b>Teléfono:&nbsp;</b><?= h($parentsandguardian->tax_phone) ?>
-            <br />
-            <br />
+        <div class="col col-sm-8">
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" class="accordion-toggle">
+                                Datos del Representante
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <?php if ((isset($current_user)) && ($current_user['role'] != 'Representante')): ?>
+                                <br />
+                                <b>Eliminado? &nbsp;</b><?= $parentsandguardian->guardian ? __('Sí') : __('No'); ?>
+                                <br />
+                                <br />
+                            <?php endif; ?>
+                            <b>Nombre:&nbsp;</b><?= h($parentsandguardian->full_name) ?>
+                            <br /><br />
+                            <b>Sexo:&nbsp;</b><?= h($parentsandguardian->sex) ?>
+                            <br /><br />
+                            <b>Tipo de identificación:&nbsp;</b><?= h($parentsandguardian->type_of_identification) ?>
+                            <br /><br />
+                            <b>Número de cédula o pasaporte:&nbsp;</b><?= h($parentsandguardian->identidy_card) ?>
+                            <br /><br />
+                            <b>Profesión:&nbsp;</b><?= h($parentsandguardian->profession) ?>
+                            <br /><br />
+                            <?php if ($parentsandguardian->item != "Otro, no especificado en esta lista"): ?>
+                                <b>Oficio o rubro:&nbsp;</b><?= h($parentsandguardian->item) ?>
+                            <?php else: ?>
+                                <b>Oficio o rubro:&nbsp;</b><?= h($parentsandguardian->item_not_specified) ?>
+                            <?php endif; ?>
+                            <br /><br />
+                            <b>Teléfono del trabajo:&nbsp;</b><?= h($parentsandguardian->work_phone) ?>
+                            <br /><br />
+                            <b>Empresa o institución donde labora:&nbsp;</b><?= h($parentsandguardian->workplace) ?>
+                            <br /><br />
+                            <b>Puesto que ocupa:&nbsp;</b><?= h($parentsandguardian->professional_position) ?>
+                            <br /><br />
+                            <b>Dirección del trabajo:&nbsp;</b><?= h($parentsandguardian->work_address) ?>
+                            <br /><br />
+                            <b>Teléfono celular:&nbsp;</b><?= h($parentsandguardian->cell_phone) ?>
+                            <br /><br />
+                            <b>Teléfono fijo:&nbsp;</b><?= h($parentsandguardian->landline) ?>
+                            <br /><br />
+                            <b>Email:&nbsp;</b><?= h($parentsandguardian->email) ?>
+                            <br /><br />
+                            <b>Dirección de habitación:&nbsp;</b><?= h($parentsandguardian->address) ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingTwo">
+                        <h4 class="panel-title">
+                            <a class="accordion-toggle collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Datos del Padre
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        <div class="panel-body">
+                            <b>Nombre:&nbsp;</b><?= h($parentsandguardian->surname_father . ' ' . $parentsandguardian->second_surname_father . ' ' . $parentsandguardian->first_name_father . ' ' . $parentsandguardian->second_name_father) ?>
+                            <br /><br />
+                            <b>Tipo de identificación:&nbsp;</b><?= h($parentsandguardian->type_of_identification_father) ?>
+                            <br /><br />
+                            <b>Número de cédula o pasaporte:&nbsp;</b><?= h($parentsandguardian->identidy_card_father) ?>
+                            <br /><br />
+                            <b>Dirección de habitación:&nbsp;</b><?= h($parentsandguardian->address_father) ?>
+                            <br /><br />
+                            <b>Email:&nbsp;</b><?= h($parentsandguardian->email_father) ?>
+                            <br /><br />
+                            <b>Teléfono habitación:&nbsp;</b><?= h($parentsandguardian->landline_father) ?>
+                            <br /><br />
+                            <b>Teléfono celular:&nbsp;</b><?= h($parentsandguardian->cell_phone_father) ?>
+                            <br /><br />
+                            <b>Teléfono trabajo:&nbsp;</b><?= h($parentsandguardian->work_phone_father) ?>
+                            <br /><br />
+                            <b>Profesión:&nbsp;</b><?= h($parentsandguardian->profession_father) ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingThree">
+                        <h4 class="panel-title">
+                            <a class="accordion-toggle collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Datos de la Madre
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                        <div class="panel-body">
+                            <b>Nombre de la madre:&nbsp;</b><?= h($parentsandguardian->surname_mother . ' ' . $parentsandguardian->second_surname_mother . ' ' . $parentsandguardian->first_name_mother . ' ' . $parentsandguardian->second_name_mother) ?>
+                            <br /><br />
+                            <b>Tipo de identificación:&nbsp;</b><?= h($parentsandguardian->type_of_identification_mother) ?>
+                            <br /><br />
+                            <b>Número de cédula o pasaporte:&nbsp;</b><?= h($parentsandguardian->identidy_card_mother) ?>
+                            <br /><br />
+                            <b>Dirección de habitación:&nbsp;</b><?= h($parentsandguardian->address_mother) ?>
+                            <br /><br />
+                            <b>Email:&nbsp;</b><?= h($parentsandguardian->email_mother) ?>
+                            <br /><br />
+                            <b>Teléfono habitación:&nbsp;</b><?= h($parentsandguardian->landline_mother) ?>
+                            <br /><br />
+                            <b>Teléfono celular:&nbsp;</b><?= h($parentsandguardian->cell_phone_mother) ?>
+                            <br /><br />
+                            <b>Teléfono trabajo:&nbsp;</b><?= h($parentsandguardian->work_phone_mother) ?>
+                            <br /><br />
+                            <b>Profesión:&nbsp;</b><?= h($parentsandguardian->profession_mother) ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingFour">
+                        <h4 class="panel-title">
+                            <a class="accordion-toggle collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                Datos para la factura
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                        <div class="panel-body">
+                            <b>Nombre o razón social:&nbsp;</b><?= h($parentsandguardian->client) ?>
+                            <br /><br />
+                            <b>Tipo de identificación:&nbsp;</b><?= h($parentsandguardian->type_of_identification_client) ?>
+                            <br /><br />
+                            <b>Número de cédula, pasaporte o RIF:&nbsp;</b><?= h($parentsandguardian->identification_number_client) ?>
+                            <br /><br />
+                            <b>Dirección fiscal:&nbsp;</b><?= h($parentsandguardian->fiscal_address) ?>
+                            <br /><br />
+                            <b>Teléfono:&nbsp;</b><?= h($parentsandguardian->tax_phone) ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>    
+    </div>
 </div>
 <div id="menu-menos-alumno" class="menumenos">
     <p>
@@ -190,16 +200,17 @@
     </p>
 </div>
 <script>
-$(document).ready(function(){ 
-    $('#menu-mas').on('click',function()
-    {
+$(document).ready(function(){
+    $('#menu-mas').on('click',function() {
         $('#menu-menos-alumno').hide();
         $('#menu-mas-alumno').show();
     });
-    $('#menu-menos').on('click',function()
-    {
+    $('#menu-menos').on('click',function() {
         $('#menu-mas-alumno').hide();
         $('#menu-menos-alumno').show();
+    });
+    $('.collapse').on('show.bs.collapse', function () {
+        $('.collapse.in').collapse('hide');
     });
 });
 </script>

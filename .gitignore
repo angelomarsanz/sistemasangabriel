@@ -14,6 +14,7 @@
 *.zip
 .env.sh
 /Documentacion/
+/documentacion/
 archivos_chat_gemini/
 *copy*
 *copia*
