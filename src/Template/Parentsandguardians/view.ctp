@@ -62,12 +62,7 @@
                     </div>
                     <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
                         <div class="panel-body">
-                            <?php if ((isset($current_user)) && ($current_user['role'] != 'Representante')): ?>
-                                <br />
-                                <b>Eliminado? &nbsp;</b><?= $parentsandguardian->guardian ? __('Sí') : __('No'); ?>
-                                <br />
-                                <br />
-                            <?php endif; ?>
+                            <br />
                             <b>Nombre:&nbsp;</b><?= h($parentsandguardian->full_name) ?>
                             <br /><br />
                             <b>Sexo:&nbsp;</b><?= h($parentsandguardian->sex) ?>
