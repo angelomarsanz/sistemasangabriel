@@ -4827,7 +4827,7 @@ class StudenttransactionsController extends AppController
                             $incluir = 'No';
                         }
                     }
-                    elseif ($transaccion->transaction_type == 'Mensualidad')
+                    elseif ($transaccion->transaction_type == 'Mensualidad' && substr($transaccion->transaction_description, 0, 3) != 'Ago')
                     {
                         if ($anio_mes_dia_transaccion < $anio_mes_dia_desde)
 				        {
