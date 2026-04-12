@@ -4690,17 +4690,7 @@ class StudenttransactionsController extends AppController
 
 				$total_cuotas_periodo += $monto_cuota;
 
-				$indicadorProcesar = 0;
-				if ($transaccion->transaction_type == 'Servicio educativo' && $transaccion->paid_out == 0 && $saldo_cuota >= 0)
-				{
-					$indicadorProcesar = 1;
-				}
-				elseif ($saldo_cuota > 0)
-				{
-					$indicadorProcesar = 1;
-				}
-
-				if ($indicadorProcesar == 1)
+				if ($saldo_cuota > 0)
 				{
 					if ($id_representante_anterior != $transaccion->student->parentsandguardian->id)
 					{
@@ -4820,7 +4810,7 @@ class StudenttransactionsController extends AppController
                 {
                     $incluir = 'Sí';
 
-				    if ($transaccion->transaction_type == 'Matrícula' || $transaccion->transaction_type == 'Servicio educativo' || $transaccion->transaction_type == 'Seguro escolar')
+				    if ($transaccion->transaction_type == 'Matrícula' || $transaccion->transaction_type == 'Seguro escolar')
 				    {
                         if ($anio != $anio_transaccion)
                         {
