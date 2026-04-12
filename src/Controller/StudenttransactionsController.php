@@ -4827,6 +4827,17 @@ class StudenttransactionsController extends AppController
                             $incluir = 'No';
                         }
                     }
+				    elseif ($transaccion->transaction_type == 'Servicio educativo')
+				    {
+                        if ($anio != $anio_transaccion)
+                        {
+                            $incluir = 'No';
+                        }
+                        elseif ($transaccion->student->servicio_educativo_exonerado > 0)
+                        {
+                            $incluir = 'No';
+                        }
+                    }
                     elseif ($transaccion->transaction_type == 'Mensualidad' && substr($transaccion->transaction_description, 0, 3) != 'Ago')
                     {
                         if ($anio_mes_dia_transaccion < $anio_mes_dia_desde)
@@ -4866,11 +4877,7 @@ class StudenttransactionsController extends AppController
                                 }
                             }
                         }
-                        elseif ($transaccion->transaction_type == 'Servicio educativo')
-                        {
-                            $monto_cuota = $transaccion->amount;
-                        }
-                        else
+                        elseif ($transaccion->transaction_type == 'Mensualidad' && substr($transaccion->transaction_description, 0, 3) != 'Ago')
                         {
                             if ($indicador_recalculo == 'Sí' && $anio_mes_transaccion >= $anio_mes_recalculo_cuotas_atrasadas && $anio_mes_transaccion < $anio_mes_actual && $transaccion->paid_out == 0)
                             {
@@ -4905,12 +4912,6 @@ class StudenttransactionsController extends AppController
                             }
                         }
 
-                        if ($transaccion->transaction_type != 'Servicio educativo' && $transaccion->transaction_type != 'Matrícula' && substr($transaccion->transaction_description, 0, 3) != 'Ago' && $monto_cuota == 0)
-                        {
-                            $this->Flash->error(__('No se encontraron la tarifa para la cuota con el id: '.$transaccion->id));
-                            return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
-                        }
-
                         $monto_neto_cuota = $monto_cuota;
 
                         if ($transaccion->paid_out == 0)
@@ -4919,6 +4920,11 @@ class StudenttransactionsController extends AppController
                             {
                                 $respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion, $representante->type_of_identification, $representante->identidy_card);
                                 $saldo_cuota = $respuestaProcesarMatriculaAgosto['saldoCuota'];
+                            }
+                            elseif ($transaccion->transaction_type == 'Servicio educativo')
+                            {
+                                $respuestaProcesarServicioEducativo = $this->procesarServicioEducativo($transaccion, $transaccion->student);
+                                $saldo_cuota = $respuestaProcesarServicioEducativo['saldoCuota'];
                             }
                             else
                             {
@@ -4932,7 +4938,12 @@ class StudenttransactionsController extends AppController
                                 $respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion, $representante->type_of_identification, $representante->identidy_card);
                                 $saldo_cuota = $respuestaProcesarMatriculaAgosto['saldoCuota'];
                             }
-                            elseif ($transaccion->transaction_type == 'Servicio educativo' || $transaccion->transaction_type == 'Seguro escolar')
+                            elseif ($transaccion->transaction_type == 'Servicio educativo')
+                            {
+                                $respuestaProcesarServicioEducativo = $this->procesarServicioEducativo($transaccion, $transaccion->student);
+                                $saldo_cuota = $respuestaProcesarServicioEducativo['saldoCuota'];
+                            }
+                            elseif ($transaccion->transaction_type == 'Seguro escolar')
                             {
                                 $saldo_cuota = round($monto_neto_cuota - $transaccion->amount_dollar, 2);
                             }
@@ -7556,6 +7567,7 @@ class StudenttransactionsController extends AppController
 				'porcentajeDescuento' => $porcentajeDescuento,
 				'montoAbono' => $montoAbono,
 				'saldoCuota' => $saldoCuota,
+                'servicioEducativoExonerado' => $estudiante->servicio_educativo_exonerado
 			];
 		return $respuesta;
 	}
