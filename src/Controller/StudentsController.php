@@ -54,7 +54,7 @@ class StudentsController extends AppController
 					return true;
 				}
 			}
-			elseif ($user['role'] === 'Facturas')
+			elseif ($user['role'] === 'Seniat')
 			{
 				if(in_array($this->request->action, ['everyFamily', 'relatedStudents' ]))
 				{
