@@ -4515,7 +4515,7 @@ class StudenttransactionsController extends AppController
         }
 	}
 
-	public function reporteGeneralMorosidadRepresentantes($mes_desde = null, $mes_hasta = null, $periodo_escolar = null, $tipo_reporte = null, $consejo_educativo, $indicador_recalculo = null, $telefono = null, $tipoEstudiante = 'todos', $condicionRegulares = 'No', $condicionEgresados = 'No')
+	public function reporteGeneralMorosidadRepresentantes($mes_desde = null, $mes_hasta = null, $periodo_escolar = null, $tipo_reporte = null, $consejo_educativo, $indicador_recalculo = null, $telefono = null, $tipoEstudiante = 'Todos', $condicionRegulares = 'No', $condicionEgresados = 'No')
 	{
 		$subtitulo_reporte = '';
 		$condiciones_estudiante = [];
@@ -4631,7 +4631,7 @@ class StudenttransactionsController extends AppController
 			'Students.balance' => $anio
 		];
 
-		if ($tipoEstudiante == 'quinto_anio')
+		if ($tipoEstudiante == '5to. Año')
 		{
 			$condiciones_base['Sections.orden >='] = 41;
 			$condiciones_condicion = [];
@@ -4733,7 +4733,7 @@ class StudenttransactionsController extends AppController
 
 		if ($consejo_educativo == 'Sí')
 		{
-			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, 'Todos');
+			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $tipoEstudiante);
 
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];

@@ -56,12 +56,12 @@
 						<label>Tipo de estudiante:</label>
 						<div class="radio">
 							<label>
-								<?= $this->Form->radio('tipo_estudiante', [['value' => 'todos', 'text' => 'Todos los estudiantes', 'checked' => true]]) ?>
+								<?= $this->Form->radio('tipo_estudiante', [['value' => 'Todos', 'text' => 'Todos los estudiantes', 'checked' => true]]) ?>
 							</label>
 						</div>
 						<div class="radio">
 							<label>
-								<?= $this->Form->radio('tipo_estudiante', [['value' => 'quinto_anio', 'text' => 'Solo estudiantes de 5to. Año']]) ?>
+								<?= $this->Form->radio('tipo_estudiante', [['value' => '5to. Año', 'text' => 'Solo estudiantes de 5to. Año']]) ?>
 							</label>
 						</div>
 					</div>
