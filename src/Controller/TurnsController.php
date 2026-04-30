@@ -20,7 +20,7 @@ class TurnsController extends AppController
     {
 		if(isset($user['role']))
 		{
-			if ($user['role'] === 'Facturas')
+			if ($user['role'] === 'Seniat')
 			{
 				if(in_array($this->request->action, ['checkTurnOpen', 'checkTurnClose', 'index',  'checkTurnInvoice', 'add', 'edit', 'imprimirReporteCierre', 'reporteCierre']))
 				{
@@ -739,6 +739,7 @@ class TurnsController extends AppController
 						'transferenciaBolivar' => 0,
 						'depositoBolivar' => 0,
 						'chequeBolivar' => 0,
+						'retencionImpuestoBolivar' => 0,
 						'IGTFefectivoDolar' => 0,
 						'IGTFefectivoEuro' => 0,
 						'IGTFefectivoBolivar' => 0,
@@ -748,6 +749,7 @@ class TurnsController extends AppController
 						'IGTFtransferenciaBolivar' => 0,
 						'IGTFdepositoBolivar' => 0,
 						'IGTFchequeBolivar' => 0,
+						'IGTFretencionImpuestoBolivar' => 0,
 						'compensadoDolar' => $factura->saldo_compensado_dolar,
 						'totalCobradoDolar' => 0,
 						'tasaTemporalDolar' => $factura->tasa_temporal_dolar,
@@ -756,7 +758,7 @@ class TurnsController extends AppController
 						'cambioMontoCuota' => $factura->cambio_monto_cuota,
 						'montoIgtfFacturaDolar' => $factura->monto_igtf,
 						'montoIgtfFacturaBolivar' => round($factura->monto_igtf * $factura->tasa_cambio, 2),
-						'numeroTarjeta' => ''
+						'numeroTarjeta' => '',
 					];		
 					$contadorNumero++;
 				}
@@ -1308,6 +1310,65 @@ class TurnsController extends AppController
 							$vectorTotalesRecibidos['Anticipos de inscripción']['Cheque Bs.'] -= $pago->amount; 
 							$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción']['Cheque Bs.'] -= $pago->amount;
 							$vectorTotalesRecibidos['Total a recibir de ' . $this->Auth->user('first_name') . ' ' . $this->Auth->user('surname')]['Cheque Bs.'] -= $pago->amount;
+						}
+					}
+					elseif ($pago->payment_type == "Retención de impuesto")
+					{
+						if (isset($vectorPagos[$pago->bill->id]))
+						{
+							$vectorPagos[$pago->bill->id]['retencionImpuestoBolivar'] += $pago->amount;
+							$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
+						}
+						
+						if ($pago->bill->tipo_documento == "Factura")
+						{
+							$facturaIslr = $this->Bills->get($pago->bill->id);
+
+							$pagosFacturaIslr = $payment->busquedaPagosFactura($pago->bill->id);
+							
+							$codigoRetornoPagos = $pagosFacturaIslr['codigoRetorno'];
+							
+							if ($codigoRetornoPagos == 0)
+							{
+								$pagosIslr = $pagosFacturaIslr['pagosFactura']; 
+								$pagosConvertidosDolares = $this->convertirPagosDolar($pagosIslr, $facturaIslr);
+
+								// 1. Encontrar el método de pago con mayor monto
+								$metodoPagoConMayorMonto = '';
+								$montoMayor = -1;
+
+								foreach ($pagosConvertidosDolares as $metodo => $monto) {
+									if ($monto > $montoMayor) {
+										$montoMayor = $monto;
+										$metodoPagoConMayorMonto = $metodo;
+									}
+								}
+
+								$montoIslrConvertido = $pago->amount;
+
+								if ($metodoPagoConMayorMonto == 'Efectivo $' || $metodoPagoConMayorMonto == 'Zelle $') {
+									// Si el mayor es en dólares, convertimos los Bs. de la NC a dólares usando la tasa de la NC
+									$montoIslrConvertido = round($pago->amount / $facturaIslr->tasa_cambio, 2);
+								} elseif ($metodoPagoConMayorMonto == 'Efectivo €' || $metodoPagoConMayorMonto == 'Euros €') {
+									// Si el mayor es en euros, convertimos a euros
+									$montoIslrConvertido = round($pago->amount / $facturaIslr->tasa_euro, 2);
+								}
+								// Si es en Bs., $montoTotalNC se queda igual (ya viene en Bs. por defecto)
+
+								// Actualizar el vector de totales recibidos
+								if (isset($vectorTotalesRecibidos['Facturas'][$metodoPagoConMayorMonto])) 
+								{
+									$vectorTotalesRecibidos['Facturas'][$metodoPagoConMayorMonto] += $montoIslrConvertido;
+									$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción'][$metodoPagoConMayorMonto] += $montoIslrConvertido;
+									$vectorTotalesRecibidos['Menos retención de impuesto (ISLR)'][$metodoPagoConMayorMonto] += $montoIslrConvertido;
+									if ($pago->bill->id_anticipo == 0)
+									{
+										$totalFormasPago[$metodoPagoConMayorMonto]['monto'] += $montoIslrConvertido;
+										$totalFormasPago[$metodoPagoConMayorMonto]['montoBs'] += $pago->amount;
+										$totalFormasPago['Total general cobrado Bs.']['montoBs'] += $pago->amount;
+									}
+								}
+							}
 						}
 					}
 				}
@@ -1915,6 +1976,7 @@ class TurnsController extends AppController
 			'Notas de crédito',
 			'Anticipos de inscripción',
 			'Total facturas - notas de crédito + anticipos de inscripción',
+			'Menos retención de impuesto (ISLR)',
 			'Menos reintegros',
 			'Menos compras',
 			'Menos sobrantes (vueltos pendientes por entregar)',
