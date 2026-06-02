@@ -7,7 +7,8 @@
     		<table class="table table-striped table-hover">
                 <thead>
 					<tr>
-						<th scope="col">Fecha</th>
+						<th scope="col">Fecha-hora inicio</th>
+        				<th scope="col">Fecha-hora fin</th>
 						<th scope="col">Nro.</th>
 						<th scope="col" style="text-align:center">Turno</th>
 						<th scope="col">Cajero</th>
@@ -30,7 +31,14 @@
 				<tbody>
 					<?php foreach ($turns as $turn): ?>
 						<tr>
-							<td><?= h($turn->start_date->format('d-m-Y')) ?></td>
+							<td>
+								<?= h($turn->start_date->format('d-m-Y')) ?><br>
+								<?= h($turn->start_date->format('h:i a')) ?>
+							</td>
+							<td>
+								<?= h($turn->end_date->format('d-m-Y')) ?><br>
+								<?= h($turn->end_date->format('h:i a')) ?>
+							</td>
 							<td><?= h($turn->id) ?></td>
 							<td style="text-align:center"><?= h($turn->turn) ?></td>
 							<td><?= h($turn->user->first_name . ' ' . $turn->user->surname) ?></td>

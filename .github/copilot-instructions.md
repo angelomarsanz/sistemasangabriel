@@ -14,4 +14,8 @@
 
 ## Estilos CSS
 - En este proyecto
-  Usar Bootstrap 3
+  Usar Bootstrap 3 a través del plugin de Cakephp:
+    vendor/friendsofcake/bootstrap-ui
+
+## CHAT IA
+El chat de IA debe ser en idioma español

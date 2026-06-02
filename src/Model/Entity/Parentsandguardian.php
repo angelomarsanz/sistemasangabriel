@@ -50,9 +50,6 @@ class Parentsandguardian extends Entity
     protected $_accessible = [
         '*' => true,
         'id' => false,
-        'profile_photo' => true,
-        'profile_photo_dir' => true
-
     ];
     
     protected function _getFullName()

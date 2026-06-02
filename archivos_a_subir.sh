@@ -8,5 +8,7 @@ ARCHIVOS_PHP_PUNTUALES=(
     # Ejemplo: "src/Model/Table/MiTabla.php"
     # Si no quieres subir ningún archivo PHP, deja solo "Ninguno"
     # "Ninguno"
-    "src/Controller/TurnsController.php"
+    "src/Model/Entity/Parentsandguardian.php"
+    "src/Model/Table/ParentsandguardiansTable.php"
+    "src/Template/Parentsandguardians/edit.ctp"
 )
