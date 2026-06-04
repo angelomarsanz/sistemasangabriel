@@ -22,12 +22,14 @@ $vectorOficios = [
     'Ciencias de la salud' => 'Ciencias de la salud',
     'Comerciante' => 'Comerciante',
     'Computación' => 'Computación',
+    'Confección de ropa' => 'Confección de ropa',
     'Construcción' => 'Construcción',
     'Contabilidad' => 'Contabilidad',
     'Cosmetología artesanal' => 'Cosmetología artesanal',
     'Decoración' => 'Decoración',
     'Derecho' => 'Derecho',
     'Dermatología' => 'Dermatología',
+    'Diseño de modas' => 'Diseño de modas',
     'Diseño gráfico' => 'Diseño gráfico',
     'Diseño y programación web' => 'Diseño y programación web',
     'Docente' => 'Docente',
@@ -100,37 +102,33 @@ $vectorOficios = [
         <div class="page-header">
             <?php if ($action == 'view'): ?>
                 <p><?= $this->Html->link(__('Volver'), ['controller' => $controller, 'action' => $action, $parentsandguardian->id], ['class' => 'btn btn-sm btn-default']) ?></p>
-            <?php endif; ?> 
-            <h2>Actualizar datos del padre o representante</h2>
+            <?php endif; ?>
+            <h2>Actualizar datos del representante, familia y facturación</h2>
         </div>
         <?= $this->Form->create($parentsandguardian, ['type' => 'file']) ?>
         <fieldset>
-            <b>Datos básicos del representante:</b>
+            <b>Datos del representante:</b>
             <div class="row panel panel-default">
                 <div class="col-md-1">
                 </div>
                 <div class="col-md-11">
                     <br />
                     <?php
-                        if ((isset($current_user)) && ($current_user['role'] != 'Representante'))
-                        {
-                            echo $this->Form->input('guardian', ['label' => 'Eliminado (Si/No):']);
-                        }
                         echo $this->Form->input('surname', ['label' => 'Primer apellido: *']);
                         echo $this->Form->input('second_surname', ['label' => 'Segundo apellido:']);
                         echo $this->Form->input('first_name', ['label' => 'Primer nombre: *']);
                         echo $this->Form->input('second_name', ['label' => 'Segundo nombre:']);
                         echo $this->Form->input('sex', ['options' => [null => " ", 'M' => 'Masculino', 'F' => 'Femenino'], 'label' => 'Sexo: *']);
-                        echo $this->Form->input('type_of_identification', 
-                            ['options' => 
+                        echo $this->Form->input('type_of_identification',
+                            ['options' =>
                             [null => ' ',
                             'V' => 'Cédula venezolano',
                             'E' => 'Cédula extranjero',
                             'P' => 'Pasaporte'],
                             'label' => 'Tipo de documento de identificación: *']);
                         echo $this->Form->input('identidy_card', ['label' => 'Número de cédula o pasaporte: *', 'type' => 'number']);
-                        
-                        echo $this->Form->input('cell_phone', ['label' => 'Número de teléfono celular: *']);         
+
+                        echo $this->Form->input('cell_phone', ['label' => 'Número de teléfono celular: *']);
                         echo $this->Form->input('landline', ['label' => 'Teléfono fijo residencial: *']);
                         echo $this->Form->input('email', ['label' => 'Correo electrónico: *']);
                         echo $this->Form->input('address', ['label' => 'Dirección de habitación: *']);
@@ -153,6 +151,11 @@ $vectorOficios = [
                     <?php
                         echo $this->Form->input('family', ['label' => 'Por favor introduzca los dos apellidos que identifican su familia: *']);
                     ?>
+                </div>
+            </div>
+            <b>Datos del padre:</b>
+            <div class="row panel panel-default">
+                <div class="col-md-12">
                     <br />
                     <p><b>Datos del Padre (modifique si no son los correctos):</b></p>
                     <br />
@@ -165,15 +168,15 @@ $vectorOficios = [
                                 echo $this->Form->input('second_surname_father', ['label' => 'Segundo apellido:']);
                                 echo $this->Form->input('first_name_father', ['label' => 'Primer nombre: *']);
                                 echo $this->Form->input('second_name_father', ['label' => 'Segundo nombre:']);
-                                echo $this->Form->input('type_of_identification_father', 
-                                    ['options' => 
+                                echo $this->Form->input('type_of_identification_father',
+                                    ['options' =>
                                     [null => " ",
                                     'V' => 'Cédula venezolano',
                                     'E' => 'Cédula extranjero',
                                     'P' => 'Pasaporte'],
                                     'label' => 'Tipo de documento de identificación: *']);
                                 echo $this->Form->input('identidy_card_father', ['label' => 'Nro. documento de identidad: *', 'type' => 'number']);
-                                
+
                                 echo $this->Form->input('cell_phone_father', ['label' => 'Nro. Celular: *']);
                                 echo $this->Form->input('landline_father', ['label' => 'Teléfono habitación: *']);
                                 echo $this->Form->input('email_father', ['label' => 'Email: *']);
@@ -190,6 +193,12 @@ $vectorOficios = [
                         </div>
                     </div>
                     <br />
+                </div>
+            </div>
+            <b>Datos de la madre:</b>
+            <div class="row panel panel-default">
+                <div class="col-md-12">
+                    <br />
                     <p><b>Datos de la Madre (modifique si no son los correctos):</b></p>
                     <br />
                     <div class="row">
@@ -201,15 +210,15 @@ $vectorOficios = [
                                 echo $this->Form->input('second_surname_mother', ['label' => 'Segundo apellido:']);
                                 echo $this->Form->input('first_name_mother', ['label' => 'Primer nombre: *']);
                                 echo $this->Form->input('second_name_mother', ['label' => 'Segundo nombre:']);
-                                echo $this->Form->input('type_of_identification_mother', 
-                                    [null => " ",
-                                    'options' => 
+                                echo $this->Form->input('type_of_identification_mother',
+                                    ['options' =>
                                     [null => " ",
                                     'V' => 'Cédula venezolana',
                                     'E' => 'Cédula extranjera',
                                     'P' => 'Pasaporte'],
                                     'label' => 'Tipo de documento de identificación: *']);
 
+                                echo $this->Form->input('identidy_card_mother', ['label' => 'Nro. documento de identidad: *', 'type' => 'number']);
                                 echo $this->Form->input('cell_phone_mother', ['label' => 'Nro. Celular: *']);
                                 echo $this->Form->input('landline_mother', ['label' => 'Teléfono habitación: *']);
                                 echo $this->Form->input('email_mother', ['label' => 'Email: *']);
@@ -226,7 +235,7 @@ $vectorOficios = [
                             ?>
                         </div>
                     </div>
-                </div>        
+                </div>
             </div>
             <b>Datos para la factura (escoge una opción o escribe los datos de la factura):</b>
             <div class="row panel panel-default">
@@ -235,14 +244,14 @@ $vectorOficios = [
                 <div class="col-md-11">
                     <br />
                     <button id="guardian-data" class="btn btn-success">Datos del representante</button>
-                    <button id="father-data" class="btn btn-success">Datos del padre</button>            
+                    <button id="father-data" class="btn btn-success">Datos del padre</button>
                     <button id="mother-data" class="btn btn-success">Datos de la madre</button>
                     <br />
-                    <br />						
+                    <br />
                     <?= $this->Form->input('client', ['label' => 'Cliente:', 'class' => 'campo-resaltado']) ?>
 					<div id="mensaje-cliente" class="mensajes-usuario"></div>
-                    <?= $this->Form->input('type_of_identification_client', 
-                        ['options' => 
+                    <?= $this->Form->input('type_of_identification_client',
+                        ['options' =>
                         [null => "",
                         'V' => 'Cédula venezolano',
                         'E' => 'Cédula extranjero',
@@ -266,7 +275,7 @@ $vectorOficios = [
     </div>
 </div>
 <script>
-    function displayVals() 
+    function displayVals()
     {
         if ($("#item").val() == "Otro, no especificado en esta lista")
         {
@@ -281,7 +290,7 @@ $vectorOficios = [
         }
     }
 
-    function habilitarDeshabilitarInputsPadre() 
+    function habilitarDeshabilitarInputsPadre()
     {
         if ($("#rubro_trabajo_padre").val() == "Otro, no especificado en esta lista")
         {
@@ -296,7 +305,7 @@ $vectorOficios = [
         }
     }
 
-    function habilitarDeshabilitarInputsMadre() 
+    function habilitarDeshabilitarInputsMadre()
     {
         if ($("#rubro_trabajo_madre").val() == "Otro, no especificado en esta lista")
         {
@@ -314,29 +323,29 @@ $vectorOficios = [
 	function validarDatosFiscales()
 	{
 		var resultado = 0;
-		
+
 		$('.mensajes-usuario').html("");
 		$('.campo-resaltado').css('background-color', "white");
-		
-		if ($("#client").val().length < 5) 
-		{  		
+
+		if ($("#client").val().length < 5)
+		{
 			$('#client').css('background-color', "#ffffe6");
 			$('#mensaje-cliente').html("El nombre o razón social está incompleto").css('color', 'red');
 			resultado = 1;
 		}
 
-		if ($("#type-of-identification-client").val().length == 0) 
-		{  		
+		if ($("#type-of-identification-client").val().length == 0)
+		{
 			$('#type-of-identification-client').css('background-color', "#ffffe6");
 			$('#mensaje-tipo-de-identificacion').html("El tipo de identificacion no puede ser blancos").css('color', 'red');
 			resultado = 1;
 		}
 		else
 		{
-			if ($("#type-of-identification-client").val() == "J" || $("#type-of-identification-client").val() == "G") 
+			if ($("#type-of-identification-client").val() == "J" || $("#type-of-identification-client").val() == "G")
 			{
-				if ($("#identification-number-client").val().length < 9) 
-				{	
+				if ($("#identification-number-client").val().length < 9)
+				{
 					$('#identification-number-client').css('background-color', "#ffffe6");
 					$('#mensaje-numero-identificacion-cliente').html("El número del RIF está incompleto").css('color', 'red');
 					resultado = 1;
@@ -344,23 +353,23 @@ $vectorOficios = [
 			}
 			else
 			{
-				if ($("#identification-number-client").val().length < 7) 
-				{	
+				if ($("#identification-number-client").val().length < 7)
+				{
 					$('#identification-number-client').css('background-color', "#ffffe6");
 					$('#mensaje-numero-identificacion-cliente').html("El número de cédula o pasaporte está incompleto").css('color', 'red');
 					resultado = 1;
-				}				
-			}	
+				}
+			}
 		}
-		if ($("#fiscal-address").val().length < 10) 
-		{	
+		if ($("#fiscal-address").val().length < 10)
+		{
 			$('#fiscal-address').css('background-color', "#ffffe6");
 			$('#mensaje-direccion-fiscal').html("La dirección está incompleta").css('color', 'red');
 			resultado = 1;
-		}	
+		}
 
-		if ($("#tax-phone").val().length < 10) 
-		{	
+		if ($("#tax-phone").val().length < 10)
+		{
 			$('#tax-phone').css('background-color', "#ffffe6");
 			$('#mensaje-telefono').html("El número de teléfono está incompleto").css('color', 'red');
 			resultado = 1;
@@ -368,32 +377,32 @@ $vectorOficios = [
 
 		return resultado;
 	}
-    
+
     var copyFatherData = function()
     {
         if ($("#sex").val() == "M")
         {
             $("#first-name-father").val($("#first-name").val());
-            $("#first-name-father").css('background-color', '#ffff99'); 
-            
+            $("#first-name-father").css('background-color', '#ffff99');
+
             $("#second-name-father").val($("#second-name").val());
             $("#second-name-father").css('background-color', '#ffff99');
-            
+
             $("#surname-father").val($("#surname").val());
             $("#surname-father").css('background-color', '#ffff99');
-            
+
             $("#second-surname-father").val($("#second-surname").val());
             $("#second-surname-father").css('background-color', '#ffff99');
-            
+
             $("#type-of-identification-father").val($("#type-of-identification").val());
             $("#type-of-identification-father").css('background-color', '#ffff99');
-            
+
             $("#identidy-card-father").val($("#identidy-card").val());
             $("#identidy-card-father").css('background-color', '#ffff99');
-            
+
             $("#email-father").val($("#email").val());
             $("#email-father").css('background-color', '#ffff99');
-            
+
             $("#cell-phone-father").val($("#cell-phone").val());
             $("#cell-phone-father").css('background-color', '#ffff99');
 
@@ -418,39 +427,39 @@ $vectorOficios = [
         }
         $("#landline-father").val($("#landline").val());
         $("#landline-father").css('background-color', '#ffff99');
-            
+
         $("#address-father").val($("#address").val());
         $("#address-father").css('background-color', '#ffff99');
     };
-    
+
     var copyMotherData = function()
     {
         if ($("#sex").val() == "F")
         {
             $("#first-name-mother").val($("#first-name").val());
-            $("#first-name-mother").css('background-color', '#ffff99'); 
-            
+            $("#first-name-mother").css('background-color', '#ffff99');
+
             $("#second-name-mother").val($("#second-name").val());
             $("#second-name-mother").css('background-color', '#ffff99');
-            
+
             $("#surname-mother").val($("#surname").val());
             $("#surname-mother").css('background-color', '#ffff99');
-            
+
             $("#second-surname-mother").val($("#second-surname").val());
             $("#second-surname-mother").css('background-color', '#ffff99');
-            
+
             $("#type-of-identification-mother").val($("#type-of-identification").val());
             $("#type-of-identification-mother").css('background-color', '#ffff99');
-            
+
             $("#identidy-card-mother").val($("#identidy-card").val());
             $("#identidy-card-mother").css('background-color', '#ffff99');
-            
+
             $("#email-mother").val($("#email").val());
             $("#email-mother").css('background-color', '#ffff99');
-            
+
             $("#cell-phone-mother").val($("#cell-phone").val());
             $("#cell-phone-mother").css('background-color', '#ffff99');
-            
+
             $("#profession-mother").val($("#profession").val());
             $("#profession-mother").css('background-color', '#ffff99');
             $("#rubro_trabajo_madre").val($("#item").val());
@@ -470,19 +479,19 @@ $vectorOficios = [
         }
         $("#landline-mother").val($("#landline").val());
         $("#landline-mother").css('background-color', '#ffff99');
-            
+
         $("#address-mother").val($("#address").val());
         $("#address-mother").css('background-color', '#ffff99');
     };
-    
+
     var copyGuardianClient = function()
     {
         $("#client").val($("#first-name").val() + " " + $("#second-name").val() + " " + $("#surname").val() + " " + $("#second-surname").val());
-        $("#client").css('background-color', '#ffff99'); 
-            
+        $("#client").css('background-color', '#ffff99');
+
         $("#type-of-identification-client").val($("#type-of-identification").val());
         $("#type-of-identification-client").css('background-color', '#ffff99');
-            
+
         $("#identification-number-client").val($("#identidy-card").val());
         $("#identification-number-client").css('background-color', '#ffff99');
 
@@ -499,15 +508,15 @@ $vectorOficios = [
         }
         $("#tax-phone").css('background-color', '#ffff99');
     };
-    
+
     var copyFatherClient = function()
     {
         $("#client").val($("#first-name-father").val() + " " + $("#second-name-father").val() + " " + $("#surname-father").val() + " " + $("#second-surname-father").val());
-        $("#client").css('background-color', '#ffff99'); 
-            
+        $("#client").css('background-color', '#ffff99');
+
         $("#type-of-identification-client").val($("#type-of-identification-father").val());
         $("#type-of-identification-client").css('background-color', '#ffff99');
-            
+
         $("#identification-number-client").val($("#identidy-card-father").val());
         $("#identification-number-client").css('background-color', '#ffff99');
 
@@ -528,11 +537,11 @@ $vectorOficios = [
     var copyMotherClient = function()
     {
         $("#client").val($("#first-name-mother").val() + " " + $("#second-name-mother").val() + " " + $("#surname-mother").val() + " " + $("#second-surname-mother").val());
-        $("#client").css('background-color', '#ffff99'); 
-            
+        $("#client").css('background-color', '#ffff99');
+
         $("#type-of-identification-client").val($("#type-of-identification-mother").val());
         $("#type-of-identification-client").css('background-color', '#ffff99');
-            
+
         $("#identification-number-client").val($("#identidy-card-mother").val());
         $("#identification-number-client").css('background-color', '#ffff99');
 
@@ -550,70 +559,70 @@ $vectorOficios = [
         $("#tax-phone").css('background-color', '#ffff99');
     };
 
-    $(document).ready(function() 
-    {		
+    $(document).ready(function()
+    {
 		$('.entero').numeric();
 
-        $('#surname-father').click(function(e) 
+        $('#surname-father').click(function(e)
         {
             e.preventDefault();
-                
+
             copyFatherData();
         });
 
-        $('#surname-father').focus(function(e) 
+        $('#surname-father').focus(function(e)
         {
             e.preventDefault();
-                
+
             copyFatherData();
         });
 
-        $('#surname-mother').click(function(e) 
+        $('#surname-mother').click(function(e)
         {
             e.preventDefault();
-                
+
             copyMotherData();
         });
 
-        $('#surname-mother').focus(function(e) 
+        $('#surname-mother').focus(function(e)
         {
             e.preventDefault();
-                
+
             copyMotherData();
         });
 
-        $('#guardian-data').click(function(e) 
+        $('#guardian-data').click(function(e)
         {
             e.preventDefault();
-                
+
             copyGuardianClient();
         });
 
-        $('#father-data').click(function(e) 
+        $('#father-data').click(function(e)
         {
             e.preventDefault();
-                
+
             copyFatherClient();
         });
 
-        $('#mother-data').click(function(e) 
+        $('#mother-data').click(function(e)
         {
             e.preventDefault();
-                
+
             copyMotherClient();
         });
 
-        $('#save-parentsandguardians').click(function(e) 
+        $('#save-parentsandguardians').click(function(e)
         {
 			resultado = validarDatosFiscales();
-			
+
 			if (resultado > 0)
 			{
 				alert("Estimado representante uno o más datos fiscales presentan errores. Por favor revise");
 				return false;
 			}
 			else
-			{		
+			{
 				$('#surname').val($.trim($('#surname').val().toUpperCase()));
 				$('#second-surname').val($.trim($('#second-surname').val().toUpperCase()));
 				$('#first-name').val($.trim($('#first-name').val().toUpperCase()));
@@ -635,7 +644,7 @@ $vectorOficios = [
 				$('#email-father').val($.trim($('#email-father').val().toLowerCase()));
 				$('#address-father').val($.trim($('#address-father').val().toUpperCase()));
 				$('#profession-father').val($.trim($('#profession-father').val().toUpperCase()));
-				
+
 				$('#surname-mother').val($.trim($('#surname-mother').val().toUpperCase()));
 				$('#second-surname-mother').val($.trim($('#second-surname-mother').val().toUpperCase()));
 				$('#first-name-mother').val($.trim($('#first-name-mother').val().toUpperCase()));
@@ -643,14 +652,14 @@ $vectorOficios = [
 				$('#email-mother').val($.trim($('#email-mother').val().toLowerCase()));
 				$('#address-mother').val($.trim($('#address-mother').val().toUpperCase()));
 				$('#profession-mother').val($.trim($('#profession-mother').val().toUpperCase()));
-				
+
 				$('#client').val($.trim($('#client').val().toUpperCase()));
 				$('#fiscal-address').val($.trim($('#fiscal-address').val().toUpperCase()));
 			}
         });
-		
+
         $("#item").change(displayVals);
         $("#rubro_trabajo_padre").change(habilitarDeshabilitarInputsPadre);
         $("#rubro_trabajo_madre").change(habilitarDeshabilitarInputsMadre);
-    });    
+    });
 </script>

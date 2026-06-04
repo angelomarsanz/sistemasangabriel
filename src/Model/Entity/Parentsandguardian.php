@@ -51,7 +51,7 @@ class Parentsandguardian extends Entity
         '*' => true,
         'id' => false,
     ];
-    
+
     protected function _getFullName()
     {
         return $this->_properties['surname'] . ' ' .

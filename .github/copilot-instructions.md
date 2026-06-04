@@ -16,6 +16,8 @@
 - En este proyecto
   Usar Bootstrap 3 a través del plugin de Cakephp:
     vendor/friendsofcake/bootstrap-ui
+Los nuevos estilos se deben añadir a:
+js_csga/src/index.css
 
 ## CHAT IA
 El chat de IA debe ser en idioma español

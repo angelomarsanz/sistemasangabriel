@@ -3,7 +3,7 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use Cake\I18n\Time;
-use Cake\Filesystem\File; 
+use Cake\Filesystem\File;
 
 /**
  * Parentsandguardians Controller
@@ -33,19 +33,19 @@ class ParentsandguardiansController extends AppController
 				if(in_array($this->request->action, ['consultFamily', 'viewData', 'view', 'edit', 'findFamily', 'findMother', 'findGuardian']))
 				{
 					return true;
-				}				
+				}
 			}
             elseif ($user['role'] === 'Facturas')
 			{
 				if(in_array($this->request->action, ['updateClientData', 'findFamilyConsejoEducativo', 'findFamily']))
 				{
 					return true;
-				}				
+				}
 			}
 		}
 
         return parent::isAuthorized($user);
-    }        
+    }
 
     /**
      * Index method
@@ -124,12 +124,12 @@ class ParentsandguardiansController extends AppController
                 $parentsandguardian->creative_user = $this->Auth->user('username');
             }
             /*
-            if ($this->Parentsandguardians->save($parentsandguardian)) 
+            if ($this->Parentsandguardians->save($parentsandguardian))
             {
                 if ($this->Auth->user('role') == "Representante")
                 {
                     $this->Flash->success(__('Sus datos fueron guardados, ahora necesitamos crear un usuario para su hijo o representado. Por favor ingrese los datos que se indican a continuación:'));
-                    
+
                     return $this->redirect(['controller' => 'Users', 'action' => 'add']);
                 }
                 else
@@ -138,165 +138,151 @@ class ParentsandguardiansController extends AppController
 
                     $lastRecord = $this->Parentsandguardians->find('all', ['conditions' => ['creative_user' => $this->Auth->user('username')],
                         'order' => ['Parentsandguardians.created' => 'DESC'] ]);
-        
+
                     $row = $lastRecord->first();
 
                     return $this->redirect(['controller' => 'Students', 'action' => 'addAdmin', $row->id]);
                 }
-            } 
-            else 
+            }
+            else
             {
                 $this->Flash->error(__('El padre o representante no fue guardado, por favor verifique los datos e intente nuevamente'));
             }
             */
         }
-        
+
         $this->set(compact('parentsandguardian'));
         $this->set('_serialize', ['parentsandguardian']);
     }
     public function addb()
-    {       
+    {
         $parentsandguardian = $this->Parentsandguardians->newEntity();
 
-        if ($this->request->is('post')) 
+        if ($this->request->is('post'))
         {
             $this->loadModel('Users');
 
-            $parentsandguardian = $this->Parentsandguardians->patchEntity($parentsandguardian, $this->request->data);
+            $identidyCard = $this->request->data['identidy_card'];
+            
+            $existingUser = $this->Users->find('all', [
+                'conditions' => ['username' => $identidyCard],
+                'order' => ['Users.created' => 'DESC']
+            ])->first();
 
-            $lastRecord = $this->Users->find('all', ['conditions' => ['username' => $parentsandguardian->identidy_card], 'order' => ['Users.created' => 'DESC'] ]);
-                    
-            $row = $lastRecord->first();
-
-            if ($row)
+            if ($existingUser)
             {
-                $this->Flash->error(__('El usuario ' . $parentsandguardian->identidy_card . ' ya está registrado en la base de datos con el nombre de: ' . $row->surname . ' ' . $row->first_name));
+                $this->Flash->error(__('El usuario ' . $identidyCard . ' ya está registrado en la base de datos con el nombre de: ' . $existingUser->surname . ' ' . $existingUser->first_name));
             }
             else
             {
-                $parentsandguardian->user_id = 3;
-                $parentsandguardian->second_surname = "";
-                $parentsandguardian->second_name = "";
-                $parentsandguardian->sex = "";
-                $parentsandguardian->email = $parentsandguardian->identidy_card . "@correo"; 
-                $parentsandguardian->cell_phone = "";
-                $parentsandguardian->landline = "";
-                $parentsandguardian->address = "";
-                $parentsandguardian->profession = "";
-                $parentsandguardian->item = "";
-                $parentsandguardian->item_not_specified = "";
-                $parentsandguardian->workplace = "";
-                $parentsandguardian->professional_position = "";
-                $parentsandguardian->work_phone = "";
-                $parentsandguardian->work_address = "";
-                $parentsandguardian->family = "";
-                $parentsandguardian->surname_father = "";
-                $parentsandguardian->second_surname_father = "";
-                $parentsandguardian->first_name_father = "";
-                $parentsandguardian->second_name_father = "";
-                $parentsandguardian->type_of_identification_father = "";
-                $parentsandguardian->identidy_card_father = "";
-                $parentsandguardian->email_father = "";
-                $parentsandguardian->cell_phone_father = "";
-                $parentsandguardian->landline_father = "";
-                $parentsandguardian->work_phone_father = "";
-                $parentsandguardian->profession_father = "";
-                $parentsandguardian->address_father = "";
-                $parentsandguardian->surname_mother = "";
-                $parentsandguardian->second_surname_mother = "";
-                $parentsandguardian->first_name_mother = "";
-                $parentsandguardian->second_name_mother = "";
-                $parentsandguardian->type_of_identification_mother = ""; 
-                $parentsandguardian->identidy_card_mother = "";
-                $parentsandguardian->email_mother = "";
-                $parentsandguardian->cell_phone_mother = "";
-                $parentsandguardian->landline_mother = "";
-                $parentsandguardian->work_phone_mother = "";
-                $parentsandguardian->profession_mother = "";
-                $parentsandguardian->address_mother = "";
-                $parentsandguardian->client = "";
-                $parentsandguardian->type_of_identification_client = "";
-                $parentsandguardian->identification_number_client = "";
-                $parentsandguardian->fiscal_address = "";
-                $parentsandguardian->tax_phone = "";
-                $parentsandguardian->code_for_user = "";
-                $parentsandguardian->guardian = 0;
-                $parentsandguardian->family_tie = "";
-                $parentsandguardian->balance = 0;
-                $parentsandguardian->guardian_migration = 0;
-                $parentsandguardian->mi_id = 0;
-                $parentsandguardian->mi_children = 0;
-                $parentsandguardian->new_guardian = true;
-                $parentsandguardian->creative_user = $this->Auth->user('username');
-                $parentsandguardian->profile_photo = "";
-                $parentsandguardian->profile_photo_dir = "";
-                $parentsandguardian->estatus_registro = "Activo";
-                $parentsandguardian->consejo_educativo = 'No';
+                // 1. Crear el Usuario primero
+                $user = $this->Users->newEntity();
+                $user->username = $identidyCard;
+                $user->password = "sga40";
+                $user->role = "Representante";
+                $user->first_name = $this->request->data['first_name'];
+                $user->second_name = "";
+                $user->surname = $this->request->data['surname'];
+                $user->second_surname = "";
+                $user->sex = "";
+                $user->email = $identidyCard . "@correo";
+                $user->cell_phone = "";
+                $user->profile_photo = "";
+                $user->profile_photo_dir = "";
+                $user->estatus_registro = "Activo";
 
-                if ($this->Parentsandguardians->save($parentsandguardian)) 
+                if ($this->Users->save($user))
                 {
-                    $user = $this->Users->newEntity();
+                    // 2. Crear el Representante usando el ID del usuario recién creado
+                    $parentsandguardian = $this->Parentsandguardians->patchEntity($parentsandguardian, $this->request->data);
                     
-                    $user->username = $parentsandguardian->identidy_card;
-                        
-                    $user->password = "sga40";
-        
-                    $user->role = "Representante";
-        
-                    $user->first_name = $parentsandguardian->first_name;
-        
-                    $user->second_name = " ";
-                        
-                    $user->surname = $parentsandguardian->surname;
-                        
-                    $user->second_surname = " ";
-                        
-                    $user->sex = " ";
-                        
-                    $user->email = $parentsandguardian->email;
-                        
-                    $user->cell_phone = " ";
-                    
-                    $user->profile_photo = " ";
-                        
-                    $user->profile_photo_dir = " ";
+                    $parentsandguardian->user_id = $user->id;
+                    $parentsandguardian->email = $user->email;
+                    $parentsandguardian->second_surname = "";
+                    $parentsandguardian->second_name = "";
+                    $parentsandguardian->sex = "";
+                    $parentsandguardian->cell_phone = "";
+                    $parentsandguardian->landline = "";
+                    $parentsandguardian->address = "";
+                    $parentsandguardian->profession = "";
+                    $parentsandguardian->item = "";
+                    $parentsandguardian->item_not_specified = "";
+                    $parentsandguardian->workplace = "";
+                    $parentsandguardian->professional_position = "";
+                    $parentsandguardian->work_phone = "";
+                    $parentsandguardian->work_address = "";
+                    $parentsandguardian->family = "";
+                    $parentsandguardian->surname_father = "";
+                    $parentsandguardian->second_surname_father = "";
+                    $parentsandguardian->first_name_father = "";
+                    $parentsandguardian->second_name_father = "";
+                    $parentsandguardian->type_of_identification_father = "";
+                    $parentsandguardian->identidy_card_father = "";
+                    $parentsandguardian->email_father = "";
+                    $parentsandguardian->cell_phone_father = "";
+                    $parentsandguardian->landline_father = "";
+                    $parentsandguardian->work_phone_father = "";
+                    $parentsandguardian->profession_father = "";
+                    $parentsandguardian->address_father = "";
+                    $parentsandguardian->rubro_trabajo_padre = "";
+                    $parentsandguardian->lugar_trabajo_padre = "";
+                    $parentsandguardian->direccion_trabajo_padre = "";
+                    $parentsandguardian->puesto_trabajo_padre = "";
+                    $parentsandguardian->surname_mother = "";
+                    $parentsandguardian->second_surname_mother = "";
+                    $parentsandguardian->first_name_mother = "";
+                    $parentsandguardian->second_name_mother = "";
+                    $parentsandguardian->type_of_identification_mother = "";
+                    $parentsandguardian->identidy_card_mother = "";
+                    $parentsandguardian->email_mother = "";
+                    $parentsandguardian->cell_phone_mother = "";
+                    $parentsandguardian->landline_mother = "";
+                    $parentsandguardian->work_phone_mother = "";
+                    $parentsandguardian->profession_mother = "";
+                    $parentsandguardian->address_mother = "";
+                    $parentsandguardian->rubro_trabajo_madre = "";
+                    $parentsandguardian->lugar_trabajo_madre = "";
+                    $parentsandguardian->direccion_trabajo_madre = "";
+                    $parentsandguardian->puesto_trabajo_madre = "";
+                    $parentsandguardian->client = "";
+                    $parentsandguardian->type_of_identification_client = "";
+                    $parentsandguardian->identification_number_client = "";
+                    $parentsandguardian->fiscal_address = "";
+                    $parentsandguardian->tax_phone = "";
+                    $parentsandguardian->code_for_user = "";
+                    $parentsandguardian->guardian = 0;
+                    $parentsandguardian->family_tie = "";
+                    $parentsandguardian->balance = 0;
+                    $parentsandguardian->guardian_migration = 0;
+                    $parentsandguardian->mi_id = 0;
+                    $parentsandguardian->mi_children = 0;
+                    $parentsandguardian->new_guardian = true;
+                    $parentsandguardian->creative_user = $this->Auth->user('username');
+                    $parentsandguardian->profile_photo = "";
+                    $parentsandguardian->profile_photo_dir = "";
+                    $parentsandguardian->estatus_registro = "Activo";
+                    $parentsandguardian->consejo_educativo = 'No';
 
-                    $user->estatus_registro = "Activo";
-
-                    if (!($this->Users->save($user))) 
+                    if ($this->Parentsandguardians->save($parentsandguardian))
                     {
-                        $this->Flash->error(__('El usuario no fue guardado ' . $user->username));
+                        $this->Flash->success(__('Por favor registre los datos del nuevo alumno'));
+
+                        return $this->redirect(['controller' => 'Students', 'action' => 'addAdminb', $parentsandguardian->id]);
                     }
                     else
                     {
-                        $lastRecord = $this->Users->find('all', ['conditions' => ['username' => $user->username], 'order' => ['Users.created' => 'DESC'] ]);
-                    
-                        $row = $lastRecord->first();
-                            
-                        $lastRecordParent = $this->Parentsandguardians->find('all', ['conditions' => ['identidy_card' => $parentsandguardian->identidy_card], 'order' => ['Parentsandguardians.created' => 'DESC'] ]);
-                    
-                        $rowParent = $lastRecordParent->first();
-                        
-                        $parentsandguardian = $this->Parentsandguardians->get($rowParent['id']);
-
-                        $parentsandguardian->user_id = $row['id'];
-                        
-                        if (!($this->Parentsandguardians->save($parentsandguardian)))
-                        {
-                            $this->Flash->error(__('El padre o representante no pudo ser actualizado ' . $user->username));
-                        }
-                        $this->Flash->success(__('Por favor registre los datos del nuevo alumno'));
-
-                        return $this->redirect(['controller' => 'Students', 'action' => 'addAdminb', $rowParent['id']]);
+                        $errors = $parentsandguardian->getErrors();
+                        \Cake\Log\Log::debug('El padre o representante no pudo ser guardado. Errores de validación: ' . json_encode($errors, JSON_PRETTY_PRINT));
+                        $this->Flash->error(__('El padre o representante no pudo ser guardado ' . $parentsandguardian->first_name . ' ' . $parentsandguardian->surname));
                     }
                 }
                 else
                 {
-                    $this->Flash->error(__('El padre o representante no pudo ser guardado ' . $parentsandguardian->first_name . ' ' . $parentsandguardian->surname));
+                    $this->Flash->error(__('El usuario no fue guardado ' . $identidyCard));
                 }
             }
         }
-     
+
         $this->set(compact('parentsandguardian'));
         $this->set('_serialize', ['parentsandguardian']);
     }
@@ -316,11 +302,11 @@ class ParentsandguardiansController extends AppController
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $parentsandguardian = $this->Parentsandguardians->patchEntity($parentsandguardian, $this->request->data);
-    
-            if ($this->Parentsandguardians->save($parentsandguardian)) 
+
+            if ($this->Parentsandguardians->save($parentsandguardian))
             {
                 $user = $this->Parentsandguardians->Users->get($parentsandguardian->user_id);
-                
+
                 $user->first_name = $parentsandguardian->first_name;
                 $user->second_name = $parentsandguardian->second_name;
                 $user->surname = $parentsandguardian->surname;
@@ -328,11 +314,11 @@ class ParentsandguardiansController extends AppController
                 $user->sex = $parentsandguardian->sex;
                 $user->email = $parentsandguardian->email;
                 $user->cell_phone = $parentsandguardian->cell_phone;
-    
+
                 if ($this->Parentsandguardians->Users->save($user))
                 {
                     $this->Flash->success(__('Los datos se guardaron exitosamente'));
-                    
+
                     return $this->redirect(['controller' => $controller, 'action' => $action, $id]);
                 }
                 else
@@ -340,7 +326,7 @@ class ParentsandguardiansController extends AppController
                     $this->Flash->success(__('Los datos se guardaron exitosamente, correo electrónico duplicado, por favor revise'));
                 }
             }
-            else 
+            else
             {
                 $this->Flash->error(__('El padre o representante no fue guardado, por favor verifique los datos e intente nuevamente'));
             }
@@ -357,22 +343,22 @@ class ParentsandguardiansController extends AppController
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $parentsandguardian = $this->Parentsandguardians->patchEntity($parentsandguardian, $this->request->data);
-    
-            if ($this->Parentsandguardians->save($parentsandguardian)) 
+
+            if ($this->Parentsandguardians->save($parentsandguardian))
             {
                 $user = $this->Parentsandguardians->Users->get($parentsandguardian->user_id);
-        
+
                 $user->profile_photo = $parentsandguardian->profile_photo;
                 $user->profile_photo_dir = $parentsandguardian->profile_photo_dir;
 
                 if ($this->Parentsandguardians->Users->save($user))
                 {
                     $this->Flash->success(__('La foto se agregó exitosamente'));
-                    
+
                     return $this->redirect(['controller' => 'Guardiantransactions', 'action' => 'previoContratoRepresentante', $id]);
                 }
             }
-            else 
+            else
             {
                 $this->Flash->error(__('El padre o representante no fue guardado, por favor verifique los datos e intente nuevamente'));
             }
@@ -400,7 +386,7 @@ class ParentsandguardiansController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
- 
+
     public function search()
     {
         if ($this->request->is('ajax')) {
@@ -419,7 +405,7 @@ class ParentsandguardiansController extends AppController
             echo json_encode($resultsArr);
         }
     }
-    
+
     public function findFamily()
     {
         if ($this->request->is('ajax')) {
@@ -500,15 +486,15 @@ class ParentsandguardiansController extends AppController
     {
         $this->autoRender = false;
 
-        if ($this->request->is('json')) 
+        if ($this->request->is('json'))
         {
 
             if (!(isset($_POST['id'])))
             {
-                die("Solicitud no válida");    
+                die("Solicitud no válida");
             }
 
-            $parentsandguardian = $this->Parentsandguardians->get($_POST['id'], 
+            $parentsandguardian = $this->Parentsandguardians->get($_POST['id'],
                 ['contain' => []]);
 
             $parentsandguardian->client = $_POST['client'];
@@ -522,7 +508,7 @@ class ParentsandguardiansController extends AppController
             {
                 $jsondata["success"] = true;
                 $jsondata["message"] = "Se actualizaron los datos fiscales";
-            }   
+            }
             else
             {
                 $jsondata["success"] = false;
@@ -534,10 +520,10 @@ class ParentsandguardiansController extends AppController
     }
     public function officeManager()
     {
-        if ($this->request->is('post')) 
+        if ($this->request->is('post'))
         {
             return $this->redirect(['action' => 'ListOffices', $_POST['item']]);
-        }        
+        }
     }
     public function ListOffices($office = null)
     {
@@ -553,28 +539,28 @@ class ParentsandguardiansController extends AppController
     }
     public function consultFamily()
     {
-        
+
     }
     public function viewData($idFamily = null, $family = null)
     {
 		$this->loadModel('Schools');
 
 		$schools = $this->Schools->get(2);
-		
-        if ($this->request->is('post')) 
+
+        if ($this->request->is('post'))
         {
             $idFamily = $_POST['idFamily'];
             $family = $_POST['family'];
         }
-		
-        $lastRecord = $this->Parentsandguardians->find('all', ['conditions' => [['id' => $idFamily]], 
+
+        $lastRecord = $this->Parentsandguardians->find('all', ['conditions' => [['id' => $idFamily]],
             'order' => ['Parentsandguardians.created' => 'DESC']]);
-            
+
         $row = $lastRecord->first();
-                
+
         if ($row)
-        {        				
-			$user = $this->Parentsandguardians->Users->get($row->user_id);			
+        {
+			$user = $this->Parentsandguardians->Users->get($row->user_id);
 		}
 
         $this->set(compact('idFamily', 'family', 'schools', 'user'));
@@ -582,18 +568,18 @@ class ParentsandguardiansController extends AppController
     }
     public function consultCardboard()
     {
-        
+
     }
 	public function repairColumn()
 	{
 		$accountRecords = 0;
-		
+
 		$query = $this->Parentsandguardians->find('all')->where(['id >' => 1]);
-		
+
 		foreach ($query as $querys)
 		{
 			$parentsandguardian = $this->Parentsandguardians->get($querys->id);
-			
+
 			$parentsandguardian->surname = trim($parentsandguardian->surname);
 			$parentsandguardian->second_surname = trim($parentsandguardian->second_surname);
             $parentsandguardian->first_name = trim($parentsandguardian->first_name);
@@ -603,11 +589,11 @@ class ParentsandguardiansController extends AppController
 			$parentsandguardian->profession = trim($parentsandguardian->profession);
 			$parentsandguardian->workplace = trim($parentsandguardian->workplace);
 			$parentsandguardian->professional_position = trim($parentsandguardian->professional_position);
-			$parentsandguardian->work_phone = trim($parentsandguardian->work_phone);	
+			$parentsandguardian->work_phone = trim($parentsandguardian->work_phone);
 			$parentsandguardian->work_address = trim($parentsandguardian->work_address);
-		
+
 			$parentsandguardian->family = trim($parentsandguardian->family);
-						
+
 			$parentsandguardian->surname_father = trim($parentsandguardian->surname_father);
 			$parentsandguardian->second_surname_father = trim($parentsandguardian->second_surname_father);
 			$parentsandguardian->first_name_father = trim($parentsandguardian->first_name_father);
@@ -615,19 +601,19 @@ class ParentsandguardiansController extends AppController
 			$parentsandguardian->email_father = trim($parentsandguardian->email_father);
 			$parentsandguardian->address_father = trim($parentsandguardian->address_father);
 			$parentsandguardian->profession_father = trim($parentsandguardian->profession_father);
-			
+
 			$parentsandguardian->surname_mother = trim($parentsandguardian->surname_mother);
 			$parentsandguardian->second_surname_mother = trim($parentsandguardian->second_surname_mother);
 			$parentsandguardian->first_name_mother = trim($parentsandguardian->first_name_mother);
 			$parentsandguardian->second_name_mother = trim($parentsandguardian->second_name_mother);
 			$parentsandguardian->email_mother = trim($parentsandguardian->email_mother);
-			$parentsandguardian->address_mother = trim($parentsandguardian->address_mother);			
+			$parentsandguardian->address_mother = trim($parentsandguardian->address_mother);
 			$parentsandguardian->profession_mother = trim($parentsandguardian->profession_mother);
-			
+
 			$parentsandguardian->client = trim($parentsandguardian->client);
 			$parentsandguardian->fiscal_address = trim($parentsandguardian->fiscal_address);
-						
-            if (!($this->Parentsandguardians->save($parentsandguardian))) 
+
+            if (!($this->Parentsandguardians->save($parentsandguardian)))
             {
                 $this->Flash->error(__('No pudo ser actualizado el registro Nro. ' . $parentsandguardian->id. ' first_name: ' . $parentsandguardian->first_name));
 			}
@@ -640,29 +626,29 @@ class ParentsandguardiansController extends AppController
 	}
 
     public function sameNames()
-    {		
-        $this->autoRender = false; 
-        
+    {
+        $this->autoRender = false;
+
 		$jsondata = [];
 
-        if ($this->request->is('json')) 
+        if ($this->request->is('json'))
         {
             if (isset($_POST['surname']) && isset($_POST['firstName']))
             {
 				$surname = $_POST['surname'];
-				$firstName = $_POST['firstName']; 
-								
+				$firstName = $_POST['firstName'];
+
 				$sameParents = $this->Parentsandguardians->find('all')->where([['surname' => $surname], ['first_name' => $firstName]])
 					->order(['surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
 
 				$count = $sameParents->count();
-				
+
 				if ($count > 0)
 				{
 					$jsondata['success'] = true;
 					$jsondata['data']['message'] = 'Se encontraron representantes con nombres similares';
 					$jsondata['data']['parents'] = [];
-					
+
 					foreach ($sameParents as $sameParent)
 					{
 						$jsondata['data']['parents'][]['parent'] = $sameParent->full_name;
@@ -677,26 +663,26 @@ class ParentsandguardiansController extends AppController
 				}
 				exit(json_encode($jsondata, JSON_FORCE_OBJECT));
             }
-            else 
+            else
             {
                 die("Solicitud no válida.");
-            }           
-        } 
+            }
+        }
     }
 	public function busquedaReciboReintegro()
 	{
-		
+
 	}
-	
+
     public function previoReciboReintegro($idRepresentante = null)
-    {	
-        if ($this->request->is('post')) 
+    {
+        if ($this->request->is('post'))
         {
             $idRepresentante = $_POST['idRepresentante'];
         }
-		
+
 		$representante = $this->Parentsandguardians->get($idRepresentante);
-		
+
 		if ($representante->balance > 0)
 		{
 			return $this->redirect(['controller' => 'Bills', 'action' => 'establecerMontoReintegro', $idRepresentante, $representante->balance]);
@@ -734,7 +720,7 @@ class ParentsandguardiansController extends AppController
         }
 
         $representantes = $this->Parentsandguardians->find('all')->where(['Parentsandguardians.id >' => 1 , "Parentsandguardians.estatus_registro" => "Activo"]);
-        
+
         $estudiantes = $this->Parentsandguardians->Students->find('all')->where(['Students.id >' => 1 , "Students.student_condition" => "Regular"])->order(['Students.parentsandguardian_id' => 'ASC', 'Students.id' => 'ASC']);
 
         foreach ($representantes as $representante)
@@ -753,20 +739,20 @@ class ParentsandguardiansController extends AppController
                         {
                             $estudianteAEliminar = $this->Parentsandguardians->Students->get($estudiante->id);
                             $estudianteAEliminar->student_condition = "Eliminado";
-                        
-                            if (!($this->Parentsandguardians->Students->save($estudianteAEliminar))) 
+
+                            if (!($this->Parentsandguardians->Students->save($estudianteAEliminar)))
                             {
                                 $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo eliminar el registro del estudiante con el ID: '.$student->id);
-                            } 
+                            }
                             else
                             {
                                 $estudiantes_eliminados[] = ['estudiante' => $estudiante->full_name, 'familia' => $representante->family,'id_estudiante' => $estudiante->id];
-                            }                     
+                            }
                         }
                         else
-                        {   
+                        {
                             $estudiantesActivos++;
-                        } 
+                        }
                     }
                     else
                     {
@@ -776,7 +762,7 @@ class ParentsandguardiansController extends AppController
                             $consejoEducativo = "Sí";
                         }
                     }
-                }              
+                }
             }
             if ($indicadorEstudiantes == 1)
             {
@@ -787,7 +773,7 @@ class ParentsandguardiansController extends AppController
                 $representantes_sin_estudiantes_activos[] = ['familia' => $representante->family, 'nombre_representante' => $representante->full_name, 'id_representante' => $representante->id, 'id_usuario_representante' => $representante->user_id, 'motivo' => $texto_indicador_estudiantes];
             }
         }
-        
+
         foreach ($representantes_con_estudiantes_activos as $representanteActivo)
         {
             $representanteAModificar = $this->Parentsandguardians->get($representanteActivo['id_representante']);
@@ -830,9 +816,9 @@ class ParentsandguardiansController extends AppController
                 $vector_consejo_exonerado_anteriores[$anioEscolarActual] = $representanteAModificar->consejo_exonerado;
                 $representanteAModificar->vector_consejo_exonerado_anteriores = json_encode($vector_consejo_exonerado_anteriores, JSON_FORCE_OBJECT);
             }
-            
-            if (!($this->Parentsandguardians->save($representanteAModificar))) 
-            { 
+
+            if (!($this->Parentsandguardians->save($representanteAModificar)))
+            {
                 $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo actualizar el campo consejo_educativo del representante con el ID: '.$representanteActivo['id_representante']);
             }
         }
@@ -840,25 +826,25 @@ class ParentsandguardiansController extends AppController
         {
             $representanteAEliminar = $this->Parentsandguardians->get($representanteInactivo['id_representante']);
             $representanteAEliminar->estatus_registro = "Eliminado";
-            if ($this->Parentsandguardians->save($representanteAEliminar)) 
+            if ($this->Parentsandguardians->save($representanteAEliminar))
             {
                 $usuarioAEliminar = $this->Parentsandguardians->Users->get($representanteInactivo['id_usuario_representante']);
                 $usuarioAEliminar->estatus_registro = "Eliminado";
-                if (!($this->Parentsandguardians->Users->save($usuarioAEliminar))) 
+                if (!($this->Parentsandguardians->Users->save($usuarioAEliminar)))
                 {
                     $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo eliminar el registro del usuario con el ID: '.$representanteInactivo['id_usuario_representante']);
                 }
             }
             else
-            { 
+            {
                 $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo eliminar el registro del representante con el ID: '.$representanteInactivo['id_representante']);
             }
         }
-        
+
         // Actualizo el campo anio_actualizacion_representantes en la tabla schools
         $schools->anio_actualizacion_representantes = $anioAsignarSeccion;
-        if (!($this->Schools->save($schools))) 
-        { 
+        if (!($this->Schools->save($schools)))
+        {
             $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo actualizar el año de actualización de representantes en la tabla schools');
             // Enviar un flash error aquí indicando que no se pudo actualizar el año de actualización de representantes en la tabla schools
             $this->Flash->error(__('No se pudo actualizar el año de actualización de representantes en la tabla schools, por favor contacte al administrador del sistema'));
@@ -866,7 +852,7 @@ class ParentsandguardiansController extends AppController
         else
         {
             $this->Flash->success(__('El proceso de actualización anual de representantes se ejecutó exitosamente'));
-        }               
+        }
 
         $this->set(compact('representantes_con_estudiantes_activos', 'representantes_sin_estudiantes_activos', 'estudiantes_eliminados'));
     }
@@ -888,26 +874,26 @@ class ParentsandguardiansController extends AppController
         {
             // si la columna cedula_representante está vacía, continuar con el siguiente registro
             if ($excel->cedula_representante == null || $excel->cedula_representante == '')
-            {         
+            {
                 continue;
             }
             // Hacer un get en la tabla parentsandguardians con id de acuerdo al valor que contiene la columna cedula_titular_escolar de la tabla excels
-            $representante = $this->Parentsandguardians->get($excel->cedula_representante, 
+            $representante = $this->Parentsandguardians->get($excel->cedula_representante,
                 ['contain' => []]);
             // Cambiar el estatus_registro del representante a "Activo"
             // $representante->estatus_registro = "Activo"; Descomentar cuando se deba hacer un cambio
             // Guardar el representante
-            if (!($this->Parentsandguardians->save($representante))) 
+            if (!($this->Parentsandguardians->save($representante)))
             {
-                $binnacles->add('controller', 'Parentsandguardians', 'cambiarEstatusRegistro', 'No se pudo modificar el registro del representante con el ID: '.$representante->id);                    
+                $binnacles->add('controller', 'Parentsandguardians', 'cambiarEstatusRegistro', 'No se pudo modificar el registro del representante con el ID: '.$representante->id);
             }
             else
             {
                 // Buscar el registro de usuario que corresponde al representante y actualizar el estatus del registro de usuario a "Activo"
                 $usuario = $this->Users->get($representante->user_id);
                 // $usuario->estatus_registro = "Activo"; descomentar cuando se deba hacer un cambio
-                if (!($this->Users->save($usuario))) 
-                {   
+                if (!($this->Users->save($usuario)))
+                {
                     $binnacles->add('controller', 'Parentsandguardians', 'cambiarEstatusRegistro', 'No se pudo modificar el registro del usuario con el ID: '.$representante->user_id);
                     $representantesActualizados[] = ['id_representante' => $representante->id, 'nombre_representante' => $representante->full_name, 'id_usuario' => $usuario->id, 'nombre_usuario' => $usuario->username, 'mensaje_actualizacion' => 'No se pudo modificar el registro del usuario con el ID: '.$representante->user_id];
                 }
@@ -923,7 +909,7 @@ class ParentsandguardiansController extends AppController
 
     public function consultaContratoRepresentante()
     {
-        
+
     }
     public function reportesContratoServicio($tipo_reporte = null, $controlador = null, $accion = null)
     {
@@ -939,7 +925,7 @@ class ParentsandguardiansController extends AppController
         $contador_seleccionados = 0;
         $impresion = 0;
         $contador_impresion = 0;
-        /* 
+        /*
         Para seleccionar los alumnos regulares chequeo que el campo "balance" sea igual o mayor al valor del campo "current_school_year" de la tabla schools
         Para seleccionar los alumnos nuevos cheque que el campo "balance" sea igual al valor del campo "current_year_registration" de la tabla schools
          */
@@ -951,7 +937,7 @@ class ParentsandguardiansController extends AppController
             $seleccionado = 0;
             $impresion = 0;
 
-            switch ($tipo_reporte) 
+            switch ($tipo_reporte)
             {
                 case 1:
                     $titulo_reporte = "Representantes de estudiantes regulares que han firmado el contrato";
@@ -962,11 +948,11 @@ class ParentsandguardiansController extends AppController
                         if ($estudiante->parentsandguardian->datos_contrato != null)
                         {
                             $impresion = 1;
-                        }    
+                        }
                     }
                     break;
                 case 2:
-                    $titulo_reporte = "Representantes de estudiantes regulares que no han firmado el contrato";   
+                    $titulo_reporte = "Representantes de estudiantes regulares que no han firmado el contrato";
                     $titulo_total = "Total representantes de estudiantes regulares";
                     if ($estudiante->new_student == 0)
                     {
@@ -974,8 +960,8 @@ class ParentsandguardiansController extends AppController
                         if ($estudiante->parentsandguardian->datos_contrato == null)
                         {
                             $impresion = 1;
-                        }   
-                    }          
+                        }
+                    }
                     break;
                 case 3:
                     $titulo_reporte = "Representantes de estudiantes nuevos que han firmado el contrato";
@@ -986,8 +972,8 @@ class ParentsandguardiansController extends AppController
                         if ($estudiante->parentsandguardian->datos_contrato != null)
                         {
                             $impresion = 1;
-                        } 
-                    }     
+                        }
+                    }
                     break;
                 case 4:
                     $titulo_reporte = "Representantes de estudiantes nuevos que no han firmado el contrato";
@@ -998,10 +984,10 @@ class ParentsandguardiansController extends AppController
                         if ($estudiante->parentsandguardian->datos_contrato == null)
                         {
                             $impresion = 1;
-                        } 
-                    }     
+                        }
+                    }
                     break;
-            } 
+            }
             if ($seleccionado == 1)
             {
                 if (!(isset($vector_representantes[$estudiante->parentsandguardian->id])))
@@ -1041,7 +1027,7 @@ class ParentsandguardiansController extends AppController
                 'Parentsandguardians.id' => $representante->id,
                 'Studenttransactions.ano_escolar >=' => 2023
             ]);
-        
+
         $matriculasPorAnio = [];
         foreach ($matriculasEstudiantes as $matricula) {
             $matriculasPorAnio[$matricula->ano_escolar] = true;
@@ -1053,7 +1039,7 @@ class ParentsandguardiansController extends AppController
             ->contain(['Bills'])
             ->where([
                 'Bills.annulled' => false,
-                'SUBSTRING(Concepts.concept, 1, 17) =' => 'Consejo Educativo', 
+                'SUBSTRING(Concepts.concept, 1, 17) =' => 'Consejo Educativo',
                 'Bills.parentsandguardian_id' => $representante->id
             ]);
 
@@ -1081,7 +1067,7 @@ class ParentsandguardiansController extends AppController
         for ($year = 2023; $year <= $anioEscolarActual; $year++) {
             $familiasRelacionadas = null;
             $idFamiliaPagadoraConsejo = null;
-            $consejoExonerado = null;    
+            $consejoExonerado = null;
 
             // Determinar valores de familia y exoneración
             if ($year == $anioEscolarActual) {
@@ -1098,11 +1084,11 @@ class ParentsandguardiansController extends AppController
             $tarifaAnio = $tarifasReferencia['Consejo Educativo '.$year] ?? 0;
             $pagadoAnio = $pagosPorAnio[$year] ?? 0;
             $saldoAnio = $tarifaAnio - $pagadoAnio;
-            
+
             // Si el saldo es menor o igual a 0, el indicador es true (pago completo)
             // También se considera true si la tarifa es 0 (no aplica pago) o si está exonerado al 100%
             if ($tarifaAnio > 0 && $saldoAnio <= 0) {
-                $indicadorReciboConsejo = true;                
+                $indicadorReciboConsejo = true;
             }
             else
             {
@@ -1157,16 +1143,16 @@ class ParentsandguardiansController extends AppController
             if ($reporte == "familiasRelacionadas")
             {
                 $this->busquedaFamiliasRelacionadas();
-                $familiasRelacionadasControl = $this->Parentsandguardians->find('all', ['conditions' => 
+                $familiasRelacionadasControl = $this->Parentsandguardians->find('all', ['conditions' =>
                 [
                     'familias_relacionadas is not null'
                 ]]);
-        
-                $familiasRelacionadasBusqueda = $this->Parentsandguardians->find('all', ['conditions' => 
+
+                $familiasRelacionadasBusqueda = $this->Parentsandguardians->find('all', ['conditions' =>
                 [
                     'familias_relacionadas is null'
                 ]]);
-        
+
                 $this->set(compact('fechaActual', 'anioEscolar', 'reporte', 'familiasRelacionadasControl', 'familiasRelacionadasBusqueda'));
             }
             else
@@ -1191,7 +1177,7 @@ class ParentsandguardiansController extends AppController
                             'Students.first_name' => 'ASC',
                             'Students.second_name' => 'ASC',
                         ]);
-                    
+
                     $this->set(compact('fechaActual', 'anioEscolar', 'reporte', 'familiasExoneradas'));
                 }
                 elseif ($reporte == "reporteGeneralConsejoEducativo")
@@ -1232,7 +1218,7 @@ class ParentsandguardiansController extends AppController
 
                     $recibosConsejoEducativo = $this->Bills->find('all')
                         ->where(["tipo_documento" => "Recibo de Consejo Educativo", "school_year" => $periodoEscolarRequerido, "annulled" => 0 ]);
-                    
+
                     $this->loadModel('Rates');
 
                     $tarifas = $this->Rates->find('all')
@@ -1271,18 +1257,18 @@ class ParentsandguardiansController extends AppController
                 "0"
             ];
 
-        $familiasPagadorasConsejo = $this->Parentsandguardians->find('all', ['conditions' => 
+        $familiasPagadorasConsejo = $this->Parentsandguardians->find('all', ['conditions' =>
             [
                 'familias_relacionadas is not null'
             ]]);
 
 
-        $familiasRelacionadas = $this->Parentsandguardians->find('all', ['conditions' => 
+        $familiasRelacionadas = $this->Parentsandguardians->find('all', ['conditions' =>
             [
                 'id_familia_pagadora_consejo >' => 0
             ]]);
 
-        $familiasControl = $this->Parentsandguardians->find('all', ['conditions' => 
+        $familiasControl = $this->Parentsandguardians->find('all', ['conditions' =>
             [
                 'id >' => 1,
                 'estatus_registro' => "Activo",
@@ -1293,7 +1279,7 @@ class ParentsandguardiansController extends AppController
                 'identidy_card_mother !=' => "",
             ]]);
 
-        $familiasBusqueda = $this->Parentsandguardians->find('all', ['conditions' => 
+        $familiasBusqueda = $this->Parentsandguardians->find('all', ['conditions' =>
             [
                 'id >' => 1,
                 'estatus_registro' => "Activo",
@@ -1333,7 +1319,7 @@ class ParentsandguardiansController extends AppController
         {
             $representante = $this->Parentsandguardians->get($familia->id);
             $representante->familias_relacionadas = null;
-            if (!($this->Parentsandguardians->save($representante))) 
+            if (!($this->Parentsandguardians->save($representante)))
             {
                 $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo limpiar el campo familias_relacionadas en el registro con el ID '.$familia->id);
             }
@@ -1343,7 +1329,7 @@ class ParentsandguardiansController extends AppController
         {
             $representanteRelacionado = $this->Parentsandguardians->get($familia->id);
             $representanteRelacionado->id_familia_pagadora_consejo = 0;
-            if (!($this->Parentsandguardians->save($representanteRelacionado))) 
+            if (!($this->Parentsandguardians->save($representanteRelacionado)))
             {
                 $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo limpiar el campo id_familia_pagadora_consejo en el registro con el ID '.$familia->id);
             }
@@ -1356,7 +1342,7 @@ class ParentsandguardiansController extends AppController
                 $indicadorConFamiliasRelacionadas = 0;
                 $vectorFamiliasRelacionadas = [];
 
-                $nombrePadreControl = 
+                $nombrePadreControl =
                     trim($control->first_name_father)." ".
                     trim($control->second_name_father)." ".
                     trim($control->surname_father)." ".
@@ -1366,7 +1352,7 @@ class ParentsandguardiansController extends AppController
 
                 $identificacionPadreControl = $control->type_of_identification_father.trim($control->identidy_card_father);
 
-                $nombreMadreControl = 
+                $nombreMadreControl =
                     trim($control->first_name_mother)." ".
                     trim($control->second_name_mother)." ".
                     trim($control->surname_mother)." ".
@@ -1404,8 +1390,8 @@ class ParentsandguardiansController extends AppController
                             if ($control->id != $busqueda->id)
                             {
                                 if (!(in_array($busqueda->id, $familiasYaRelacionadas)))
-                                {           
-                                    $nombrePadreBusqueda = 
+                                {
+                                    $nombrePadreBusqueda =
                                         trim($busqueda->first_name_father)." ".
                                         trim($busqueda->second_name_father)." ".
                                         trim($busqueda->surname_father)." ".
@@ -1415,7 +1401,7 @@ class ParentsandguardiansController extends AppController
 
                                     $identificacionPadreBusqueda = $busqueda->type_of_identification_father.trim($busqueda->identidy_card_father);
 
-                                    $nombreMadreBusqueda = 
+                                    $nombreMadreBusqueda =
                                         trim($busqueda->first_name_mother)." ".
                                         trim($busqueda->second_name_mother)." ".
                                         trim($busqueda->surname_mother)." ".
@@ -1447,7 +1433,7 @@ class ParentsandguardiansController extends AppController
                                             }
                                         }
                                         if ($indicadorFamiliaRelacionada == 0)
-                                        { 
+                                        {
                                             if ($indicadorExcepcionNombrePadre == 0)
                                             {
                                                 if ($nombrePadreControl == $nombrePadreBusqueda)
@@ -1473,21 +1459,21 @@ class ParentsandguardiansController extends AppController
 
                                             $representanteRelacionado = $this->Parentsandguardians->get($busqueda->id);
                                             $representanteRelacionado->id_familia_pagadora_consejo = $control->id;
-                                            if (!($this->Parentsandguardians->save($representanteRelacionado))) 
+                                            if (!($this->Parentsandguardians->save($representanteRelacionado)))
                                             {
                                                 $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'No se pudo actualizar el id de la familia pagadora del consejo en el representante con el id'.$control->id);
                                             }
                                         }
                                     }
                                 }
-                            }  
+                            }
                         }
                     }
                     if ($indicadorConFamiliasRelacionadas == 1)
                     {
                         $representante = $this->Parentsandguardians->get($control->id);
                         $representante->familias_relacionadas = json_encode($vectorFamiliasRelacionadas);
-                        if ($this->Parentsandguardians->save($representante)) 
+                        if ($this->Parentsandguardians->save($representante))
                         {
                             $contadorFamiliasRelacionadasActualizadas++;
                             $familiasYaRelacionadas[] = $control->id;
@@ -1501,12 +1487,12 @@ class ParentsandguardiansController extends AppController
             }
         }
         $binnacles->add('controller', 'Parentsandguardians', 'busquedaFamiliasRelacionadas', 'contadorFamiliasControlProcesadas '.$contadorFamiliasControlProcesadas.' contadorFamiliasBusquedaProcesadas '.$contadorFamiliasBusquedaProcesadas.' contadorFamiliasRelacionadasActualizadas '.$contadorFamiliasRelacionadasActualizadas.' contadorFamiliasNoRelacionadasActualizadas '.$contadorFamiliasNoRelacionadasActualizadas);
-        return;    
+        return;
     }
-    
+
     public function eliminarAcentos($cadena)
     {
-        $letrasConTilde = 
+        $letrasConTilde =
             [
                 'Á', 'À', 'Â', 'Ä', 'á', 'à', 'ä', 'â', 'ª',
                 'É', 'È', 'Ê', 'Ë', 'é', 'è', 'ë', 'ê',
@@ -1521,18 +1507,18 @@ class ParentsandguardiansController extends AppController
                 'E', 'E', 'E', 'E', 'e', 'e', 'e', 'e',
                 'I', 'I', 'I', 'I', 'i', 'i', 'i', 'i',
                 'O', 'O', 'O', 'O', 'o', 'o', 'o', 'o',
-                'U', 'U', 'U', 'U', 'u', 'u', 'u', 'u'              
+                'U', 'U', 'U', 'U', 'u', 'u', 'u', 'u'
             ];
- 
+
         $cadena = str_replace($letrasConTilde, $letrasSinTilde, $cadena);
 
         return $cadena;
     }
 
     public function datosFamilia()
-    {    
+    {
         $this->autoRender = false;
-        if ($this->request->is('ajax')) 
+        if ($this->request->is('ajax'))
         {
             if (isset($_POST['idFamilia']))
             {
@@ -1552,7 +1538,7 @@ class ParentsandguardiansController extends AppController
                     {
                         if ($contadorEstudiantes == 0)
                         {
-                            $consejoExonerado = $estudiante->parentsandguardian->consejo_exonerado; 
+                            $consejoExonerado = $estudiante->parentsandguardian->consejo_exonerado;
                             $respuesta['html'] =
                                 "<br />".
                                 "<h4>Familia: ".$estudiante->parentsandguardian->family." (".$estudiante->parentsandguardian->surname." ".$estudiante->parentsandguardian->first_name.")</h3>".
@@ -1576,11 +1562,11 @@ class ParentsandguardiansController extends AppController
                         $respuesta['html'] .=
                                     "</tbody>".
                                 "</table>".
-                            "</div>";	
+                            "</div>";
                         if ($consejoExonerado > 0)
                         {
                             $respuesta['html'] .= "<button type='button' class='exoneracion eliminarExoneracion btn btn-primary'>Eliminar exoneración</button>";
-                        }	
+                        }
                         else
                         {
                             $respuesta['html'] .= "<button type='button' class='exoneracion exonerarFamilia btn btn-primary'>Exonerar</button>";
@@ -1597,9 +1583,9 @@ class ParentsandguardiansController extends AppController
         }
     }
     public function editarExoneracion()
-    {    
+    {
         $this->autoRender = false;
-        if ($this->request->is('ajax')) 
+        if ($this->request->is('ajax'))
         {
             if (isset($_POST['idFamilia']))
             {
@@ -1618,7 +1604,7 @@ class ParentsandguardiansController extends AppController
                     $representante->consejo_exonerado = 0;
                 }
 
-                if ($this->Parentsandguardians->save($representante)) 
+                if ($this->Parentsandguardians->save($representante))
                 {
                     $respuesta["satisfactorio"] = true;
                     if ($accion == "exonerarFamilia")
@@ -1644,7 +1630,7 @@ class ParentsandguardiansController extends AppController
     {
         $representante = $this->Parentsandguardians->get(1059);
         $representante->estatus_registro = 'Activo';
-        if ($this->Parentsandguardians->save($representante)) 
+        if ($this->Parentsandguardians->save($representante))
         {
             $usuario = $this->Parentsandguardians->Users->get($representante->user_id);
             $usuario->estatus_registro = 'Activo';
@@ -1667,28 +1653,28 @@ class ParentsandguardiansController extends AppController
     {
         $filePath = WWW_ROOT . 'componentes_react/boton/build/asset-manifest.json';
         $file = new File($filePath);
- 
+
         $manifest = json_decode($file->read());
         $file->close();
- 
+
         $maincss = 'main.css';
         $mainjs = 'main.js';
- 
+
         $css = '/componentes_react/boton/build' . $manifest->files->$maincss;
         $js = '/componentes_react/boton/build' . $manifest->files->$mainjs;
         $this->set(compact('css', 'js'));
     }
 
-    public function pruebasGenerales () 
+    public function pruebasGenerales ()
     {
         $this->loadModel('Concepts');
-        
+
         $recibosConsejoEducativo = $this->Concepts->find()
             ->contain(['Bills'])
             ->where(['Bills.annulled' => false,
                 'Concepts.concept' => 'Consejo Educativo 2023-2024',
                 'Bills.parentsandguardian_id' => 1113])
-            ->order(['Concepts.id' => 'ASC']);        
+            ->order(['Concepts.id' => 'ASC']);
         $this->set(compact('recibosConsejoEducativo'));
     }
 
@@ -1705,18 +1691,18 @@ class ParentsandguardiansController extends AppController
             if ($representante->datos_contrato_anio_anterior != null)
             {
                 $vectorContrato2023 = json_decode($representante->datos_contrato_anio_anterior);
-                $vectorContratos[2023] = $vectorContrato2023; 
-            }            
+                $vectorContratos[2023] = $vectorContrato2023;
+            }
             if ($representante->datos_contrato != null)
             {
                 $vectorContrato2024 = json_decode($representante->datos_contrato);
-                $vectorContratos[2024] = $vectorContrato2024; 
-            }   
+                $vectorContratos[2024] = $vectorContrato2024;
+            }
             $registroRepresentante->vector_contratos = json_encode($vectorContratos);
-            if (!($this->Parentsandguardians->save($registroRepresentante))) 
+            if (!($this->Parentsandguardians->save($registroRepresentante)))
             {
                 $this->Flash->error(__('El padre o representante con el ID: '.$registroRepresentante->id.' no se pudo actualizar'));
-            }         
+            }
         }
     }
     // Fin cambios Contrato

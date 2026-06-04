@@ -40,7 +40,7 @@ class ParentsandguardiansTable extends Table
         $this->primaryKey('id');
 
         $this->addBehavior('Timestamp');
-        
+
         $this->addBehavior('Proffer.Proffer', [
             'profile_photo' => [    // The name of your upload field
                 'root' => WWW_ROOT . 'files', // Customise the root upload folder here, or omit to use the default
@@ -77,126 +77,146 @@ class ParentsandguardiansTable extends Table
     {
         $validator
             ->integer('id')
-            ->allowEmpty('id', 'create');
+            ->allowEmpty('id', 'always');
 
         $validator
-            ->requirePresence('code_for_user', 'create')
-            ->notEmpty('code_for_user');
+            ->requirePresence('code_for_user', 'always')
+            ->notEmpty('code_for_user', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('first_name', 'create')
-            ->notEmpty('first_name');
+            ->requirePresence('first_name', 'always')
+            ->notEmpty('first_name', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('surname', 'create')
-            ->notEmpty('surname');
+            ->requirePresence('surname', 'always')
+            ->notEmpty('surname', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('family', 'create')
-            ->notEmpty('family');
+            ->requirePresence('family', 'always')
+            ->notEmpty('family', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('sex', 'create')
-            ->notEmpty('sex');
+            ->requirePresence('sex', 'always')
+            ->notEmpty('sex', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('type_of_identification', 'create')
-            ->notEmpty('type_of_identification');
+            ->requirePresence('type_of_identification', 'always')
+            ->notEmpty('type_of_identification', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('identidy_card', 'create')
-            ->notEmpty('identidy_card');
+            ->requirePresence('identidy_card', 'always')
+            ->notEmpty('identidy_card', 'Este campo es obligatorio');
 
         $validator
             ->allowEmpty('guardian');
 
         $validator
-            ->requirePresence('family_tie', 'create')
-            ->notEmpty('family_tie');
+            ->requirePresence('family_tie', 'always')
+            ->notEmpty('family_tie', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('profession', 'create')
-            ->notEmpty('profession');
+            ->requirePresence('profession', 'always')
+            ->notEmpty('profession', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('item', 'create')
-            ->notEmpty('item');
+            ->requirePresence('item', 'always')
+            ->notEmpty('item', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('work_phone', 'create')
-            ->notEmpty('work_phone');
+            ->allowEmpty('item_not_specified')
+            ->add('item_not_specified', 'requiredIfOther', [
+                'rule' => function ($value, $context) {
+                    if (isset($context['data']['item']) && $context['data']['item'] === 'Otro, no especificado en esta lista') {
+                        return !empty(trim($value));
+                    }
+                    return true;
+                },
+                'message' => 'Por favor especifique el rubro del representante.'
+            ]);
 
         $validator
-            ->requirePresence('workplace', 'create')
-            ->notEmpty('workplace');
+            ->requirePresence('work_phone', 'always')
+            ->notEmpty('work_phone', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('professional_position', 'create')
-            ->notEmpty('professional_position');
+            ->requirePresence('workplace', 'always')
+            ->notEmpty('workplace', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('work_address', 'create')
-            ->notEmpty('work_address');
+            ->requirePresence('professional_position', 'always')
+            ->notEmpty('professional_position', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('cell_phone', 'create')
-            ->notEmpty('cell_phone');
+            ->requirePresence('work_address', 'always')
+            ->notEmpty('work_address', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('landline', 'create')
-            ->notEmpty('landline');
+            ->requirePresence('cell_phone', 'always')
+            ->notEmpty('cell_phone', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('email', 'create')
-            ->notEmpty('email');
+            ->requirePresence('landline', 'always')
+            ->notEmpty('landline', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('address', 'create')
-            ->notEmpty('address');
-        
-        $validator
-            ->requirePresence('first_name_father', 'create')
-            ->notEmpty('first_name_father');
-        
-        $validator
-            ->requirePresence('surname_father', 'create')
-            ->notEmpty('surname_father');
-        
-        $validator
-            ->requirePresence('type_of_identification_father', 'create')
-            ->notEmpty('type_of_identification_father');
+            ->requirePresence('email', 'always')
+            ->notEmpty('email', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('identidy_card_father', 'create')
-            ->notEmpty('identidy_card_father');
+            ->requirePresence('address', 'always')
+            ->notEmpty('address', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('address_father', 'create')
-            ->notEmpty('address_father');
+            ->requirePresence('first_name_father', 'always')
+            ->notEmpty('first_name_father', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('email_father', 'create')
-            ->notEmpty('email_father');
+            ->requirePresence('surname_father', 'always')
+            ->notEmpty('surname_father', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('landline_father', 'create')
-            ->notEmpty('landline_father');
-        
+            ->requirePresence('type_of_identification_father', 'always')
+            ->notEmpty('type_of_identification_father', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('cell_phone_father', 'create')
-            ->notEmpty('cell_phone_father');
-            
+            ->requirePresence('identidy_card_father', 'always')
+            ->notEmpty('identidy_card_father', 'Este campo es obligatorio');
+
+        $validator
+            ->requirePresence('address_father', 'always')
+            ->notEmpty('address_father', 'Este campo es obligatorio');
+
+        $validator
+            ->requirePresence('email_father', 'always')
+            ->notEmpty('email_father', 'Este campo es obligatorio');
+
+        $validator
+            ->requirePresence('landline_father', 'always')
+            ->notEmpty('landline_father', 'Este campo es obligatorio');
+
+        $validator
+            ->requirePresence('cell_phone_father', 'always')
+            ->notEmpty('cell_phone_father', 'Este campo es obligatorio');
+
         $validator
             ->requirePresence('profession_father', 'always')
             ->notEmpty('profession_father', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('rubro_trabajo_padre', 'always') 
+            ->requirePresence('rubro_trabajo_padre', 'always')
             ->notEmpty('rubro_trabajo_padre', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('rubro_trabajo_padre_no_especificado', 'always')
-            ->notEmpty('rubro_trabajo_padre_no_especificado', 'Este campo es obligatorio');
+            ->allowEmpty('rubro_trabajo_padre_no_especificado')
+            ->add('rubro_trabajo_padre_no_especificado', 'requiredIfOther', [
+                'rule' => function ($value, $context) {
+                    if (isset($context['data']['rubro_trabajo_padre']) && $context['data']['rubro_trabajo_padre'] === 'Otro, no especificado en esta lista') {
+                        return !empty(trim($value));
+                    }
+                    return true;
+                },
+                'message' => 'Por favor especifique el rubro del padre.'
+            ]);
 
         $validator
             ->requirePresence('lugar_trabajo_padre', 'always')
@@ -215,48 +235,56 @@ class ParentsandguardiansTable extends Table
             ->notEmpty('puesto_trabajo_padre', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('first_name_mother', 'create')
-            ->notEmpty('first_name_mother');
-        
-        $validator
-            ->requirePresence('surname_mother', 'create')
-            ->notEmpty('surname_mother');
-        
-        $validator
-            ->requirePresence('type_of_identification_mother', 'create')
-            ->notEmpty('type_of_identification_mother');
+            ->requirePresence('first_name_mother', 'always')
+            ->notEmpty('first_name_mother', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('identidy_card_mother', 'create')
-            ->notEmpty('identidy_card_mother');
+            ->requirePresence('surname_mother', 'always')
+            ->notEmpty('surname_mother', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('address_mother', 'create')
-            ->notEmpty('address_mother');
+            ->requirePresence('type_of_identification_mother', 'always')
+            ->notEmpty('type_of_identification_mother', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('email_mother', 'create')
-            ->notEmpty('email_mother');
+            ->requirePresence('identidy_card_mother', 'always')
+            ->notEmpty('identidy_card_mother', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('landline_mother', 'create')
-            ->notEmpty('landline_mother');
-        
+            ->requirePresence('address_mother', 'always')
+            ->notEmpty('address_mother', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('cell_phone_mother', 'create')
-            ->notEmpty('cell_phone_mother');
-            
+            ->requirePresence('email_mother', 'always')
+            ->notEmpty('email_mother', 'Este campo es obligatorio');
+
+        $validator
+            ->requirePresence('landline_mother', 'always')
+            ->notEmpty('landline_mother', 'Este campo es obligatorio');
+
+        $validator
+            ->requirePresence('cell_phone_mother', 'always')
+            ->notEmpty('cell_phone_mother', 'Este campo es obligatorio');
+
         $validator
             ->requirePresence('profession_mother', 'always')
-            ->notEmpty('profession_father', 'Este campo es obligatorio');
+            ->notEmpty('profession_mother', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('rubro_trabajo_madre', 'always') 
+            ->requirePresence('rubro_trabajo_madre', 'always')
             ->notEmpty('rubro_trabajo_madre', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('rubro_trabajo_madre_no_especificado', 'always')
-            ->notEmpty('rubro_trabajo_madre_no_especificado', 'Este campo es obligatorio');
+            ->allowEmpty('rubro_trabajo_madre_no_especificado')
+            ->add('rubro_trabajo_madre_no_especificado', 'requiredIfOther', [
+                'rule' => function ($value, $context) {
+                    if (isset($context['data']['rubro_trabajo_madre']) && $context['data']['rubro_trabajo_madre'] === 'Otro, no especificado en esta lista') {
+                        return !empty(trim($value));
+                    }
+                    return true;
+                },
+                'message' => 'Por favor especifique el rubro de la madre.'
+            ]);
 
         $validator
             ->requirePresence('lugar_trabajo_madre', 'always')
@@ -275,53 +303,53 @@ class ParentsandguardiansTable extends Table
             ->notEmpty('puesto_trabajo_madre', 'Este campo es obligatorio');
 
         $validator
-            ->requirePresence('client', 'create')
-            ->notEmpty('client');
-        
+            ->requirePresence('client', 'always')
+            ->notEmpty('client', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('type_of_identification_client', 'create')
-            ->notEmpty('type_of_identification_client');
-        
+            ->requirePresence('type_of_identification_client', 'always')
+            ->notEmpty('type_of_identification_client', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('identification_number_client', 'create')
-            ->notEmpty('identification_number_client');
-        
+            ->requirePresence('identification_number_client', 'always')
+            ->notEmpty('identification_number_client', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('fiscal_address', 'create')
-            ->notEmpty('fiscal_address');
-        
+            ->requirePresence('fiscal_address', 'always')
+            ->notEmpty('fiscal_address', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('tax_phone', 'create')
-            ->notEmpty('tax_phone');
-        
+            ->requirePresence('tax_phone', 'always')
+            ->notEmpty('tax_phone', 'Este campo es obligatorio');
+
         $validator
             ->numeric('balance')
-            ->requirePresence('balance', 'create')
-            ->notEmpty('balance');
-        
+            ->requirePresence('balance', 'always')
+            ->notEmpty('balance', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('creative_user', 'create')
-            ->notEmpty('creative_user');
-        
+            ->requirePresence('creative_user', 'always')
+            ->notEmpty('creative_user', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('guardian_migration', 'create')
-            ->notEmpty('guardian_migration');
-        
+            ->requirePresence('guardian_migration', 'always')
+            ->notEmpty('guardian_migration', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('mi_id', 'create')
-            ->notEmpty('mi_id');
-        
+            ->requirePresence('mi_id', 'always')
+            ->notEmpty('mi_id', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('mi_children', 'create')
-            ->notEmpty('mi_children');
-            
+            ->requirePresence('mi_children', 'always')
+            ->notEmpty('mi_children', 'Este campo es obligatorio');
+
         $validator
-            ->requirePresence('new_guardian', 'create')
-            ->notEmpty('new_guardian');
+            ->requirePresence('new_guardian', 'always')
+            ->notEmpty('new_guardian', 'Este campo es obligatorio');
 
         $validator
             ->integer('id_familia_pagadora_consejo')
-            ->allowEmpty('id_familia_pagadora_consejo', 'create');
+            ->allowEmpty('id_familia_pagadora_consejo', 'always');
 
         $validator
             ->allowEmpty('vector_contratos');

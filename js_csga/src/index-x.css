@@ -1,0 +1,86 @@
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+.flex-container > div {
+  width: 20rem;
+  margin: 1rem;
+  text-align: center;
+}
+
+.panel {
+    transition: transform 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    /* Permitir que los elementos hijos (como menús select) se desborden del panel */
+    overflow: visible !important;
+}
+
+.panel:hover {
+    transform: scale(1.01);
+}
+
+/* Contenedor responsivo con scroll lateral suave */
+.table-responsive {
+    border: none;
+    margin-bottom: 20px;
+}
+
+/* Evitar que las celdas se compriman demasiado en móvil */
+#tabla-productos th, #tabla-productos td {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* Ajuste de botones en móvil para que no queden pegados */
+.actions .btn {
+    margin: 2px;
+}
+
+/* Estilo para el encabezado de página */
+.page-header {
+    margin-top: 10px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Desactivar el hack de "Equal Height Columns" de CakePHP que causa problemas de overflow */
+.container {
+    overflow: visible !important;
+}
+
+.content {
+    margin-bottom: 0 !important;
+    padding-bottom: 20px !important;
+}
+
+/* Asegurar que los contenedores intermedios de Bootstrap no corten contenido */
+.panel-body, .row, [class*="col-"] {
+    overflow: visible !important;
+}
+
+/* Estilos para mejorar la legibilidad y espaciado de los formularios */
+.input.select,
+.input.text,
+.input.number,
+.input.email,
+.input.tel {
+    margin-bottom: 15px;
+}
+
+/* Estilo específico para los labels */
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Asegura que los campos select tengan un comportamiento fluido */
+select.form-control {
+    height: auto !important;
+    min-height: 34px;
+}
+
+/* Ajuste fino para los paneles del formulario de representantes */
+.panel-default {
+    padding-bottom: 20px !important;
+}
