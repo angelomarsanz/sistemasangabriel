@@ -108,7 +108,7 @@ $vectorOficios = [
         <?= $this->Form->create($parentsandguardian, ['type' => 'file']) ?>
         <fieldset>
             <b>Datos del representante:</b>
-            <div class="row panel panel-default">
+            <div class="row panel panel-default panel-select-visible">
                 <div class="col-md-1">
                 </div>
                 <div class="col-md-11">
@@ -134,8 +134,13 @@ $vectorOficios = [
                         echo $this->Form->input('address', ['label' => 'Dirección de habitación: *']);
 
                         echo $this->Form->input('profession', ['label' => 'Profesión u oficio: *']);
-                        echo $this->Form->input('item', ['label' => 'Rubro: *', 'options' => $vectorOficios]);
-                        echo $this->Form->input('item_not_specified', ['label' => 'Si el rubro a que se dedica no está en lista anterior, por favor especifique:', 'disabled' => 'disabled']);
+                        ?>
+                        <div class="box-select-rubro">
+                            <?php echo $this->Form->input('item', ['label' => 'Rubro: *', 'options' => $vectorOficios]); ?>
+                            <p>Si en la lista anterior no se encuentra el rubro a que usted se dedica seleccione la opción <b>"Otro, no especificado en esta lista"</b> y a continuación escriba el rubro</p>
+                        </div>
+                        <?php
+                        echo $this->Form->input('item_not_specified', ['label' => 'Rubro personalizado:', 'disabled' => 'disabled']);
                         echo $this->Form->input('workplace', ['label' => 'Empresa o institución donde trabaja: *']);
                         echo $this->Form->input('work_address', ['label' => 'Dirección del trabajo: *']);
                         echo $this->Form->input('work_phone', ['label' => 'Teléfono de trabajo: *']);
@@ -154,7 +159,7 @@ $vectorOficios = [
                 </div>
             </div>
             <b>Datos del padre:</b>
-            <div class="row panel panel-default">
+            <div class="row panel panel-default panel-select-visible">
                 <div class="col-md-12">
                     <br />
                     <p><b>Datos del Padre (modifique si no son los correctos):</b></p>
@@ -183,8 +188,13 @@ $vectorOficios = [
                                 echo $this->Form->input('address_father', ['label' => 'Dirección: *']);
 
                                 echo $this->Form->input('profession_father', ['label' => 'Profesión u oficio: *']);
-                                echo $this->Form->input('rubro_trabajo_padre', ['label' => 'Rubro: *', 'options' => $vectorOficios]);
-                                echo $this->Form->input('rubro_trabajo_padre_no_especificado', ['label' => 'Si el rubro a que se dedica no está en lista anterior, por favor especifique:', 'disabled' => 'disabled']);
+                                ?>
+                                <div class="box-select-rubro">
+                                    <?php echo $this->Form->input('rubro_trabajo_padre', ['label' => 'Rubro: *', 'options' => $vectorOficios]); ?>
+                                    <p>Si en la lista anterior no se encuentra el rubro a que usted se dedica seleccione la opción <b>"Otro, no especificado en esta lista"</b> y a continuación escriba el rubro</p>
+                                </div>
+                                <?php
+                                echo $this->Form->input('rubro_trabajo_padre_no_especificado', ['label' => 'Rubro personalizado:', 'disabled' => 'disabled']);
                                 echo $this->Form->input('lugar_trabajo_padre', ['label' => 'Empresa o institución donde trabaja: *']);
                                 echo $this->Form->input('direccion_trabajo_padre', ['label' => 'Dirección del trabajo: *']);
                                 echo $this->Form->input('work_phone_father', ['label' => 'Teléfono trabajo: *']);
@@ -196,7 +206,7 @@ $vectorOficios = [
                 </div>
             </div>
             <b>Datos de la madre:</b>
-            <div class="row panel panel-default">
+            <div class="row panel panel-default panel-select-visible">
                 <div class="col-md-12">
                     <br />
                     <p><b>Datos de la Madre (modifique si no son los correctos):</b></p>
@@ -225,8 +235,13 @@ $vectorOficios = [
                                 echo $this->Form->input('address_mother', ['label' => 'Dirección: *']);
 
                                 echo $this->Form->input('profession_mother', ['label' => 'Profesión u oficio: *']);
-                                echo $this->Form->input('rubro_trabajo_madre', ['label' => 'Rubro: *', 'options' => $vectorOficios]);
-                                echo $this->Form->input('rubro_trabajo_madre_no_especificado', ['label' => 'Si el rubro a que se dedica no está en lista anterior, por favor especifique:', 'disabled' => 'disabled']);
+                                ?>
+                                <div class="box-select-rubro">
+                                    <?php echo $this->Form->input('rubro_trabajo_madre', ['label' => 'Rubro: *', 'options' => $vectorOficios]); ?>
+                                    <p>Si en la lista anterior no se encuentra el rubro a que usted se dedica seleccione la opción <b>"Otro, no especificado en esta lista"</b> y a continuación escriba el rubro</p>
+                                </div>
+                                <?php
+                                echo $this->Form->input('rubro_trabajo_madre_no_especificado', ['label' => 'Rubro personalizado:', 'disabled' => 'disabled']);
                                 echo $this->Form->input('lugar_trabajo_madre', ['label' => 'Empresa o institución donde trabaja: *']);
                                 echo $this->Form->input('direccion_trabajo_madre', ['label' => 'Dirección del trabajo: *']);
                                 echo $this->Form->input('work_phone_mother', ['label' => 'Teléfono trabajo: *']);
@@ -292,31 +307,31 @@ $vectorOficios = [
 
     function habilitarDeshabilitarInputsPadre()
     {
-        if ($("#rubro_trabajo_padre").val() == "Otro, no especificado en esta lista")
+        if ($("#rubro-trabajo-padre").val() == "Otro, no especificado en esta lista")
         {
-            $("#rubro_trabajo_padre_no_especificado").attr('disabled', false);
-            $("#rubro_trabajo_padre_no_especificado").attr('required', true);
+            $("#rubro-trabajo-padre-no-especificado").attr('disabled', false);
+            $("#rubro-trabajo-padre-no-especificado").attr('required', true);
         }
         else
         {
-            $("#rubro_trabajo_padre_no_especificado").val(" ");
-            $("#rubro_trabajo_padre_no_especificado").attr('disabled', true);
-            $("#rubro_trabajo_padre_no_especificado").attr('required', false);
+            $("#rubro-trabajo-padre-no-especificado").val(" ");
+            $("#rubro-trabajo-padre-no-especificado").attr('disabled', true);
+            $("#rubro-trabajo-padre-no-especificado").attr('required', false);
         }
     }
 
     function habilitarDeshabilitarInputsMadre()
     {
-        if ($("#rubro_trabajo_madre").val() == "Otro, no especificado en esta lista")
+        if ($("#rubro-trabajo-madre").val() == "Otro, no especificado en esta lista")
         {
-            $("#rubro_trabajo_madre_no_especificado").attr('disabled', false);
-            $("#rubro_trabajo_madre_no_especificado").attr('required', true);
+            $("#rubro-trabajo-madre-no-especificado").attr('disabled', false);
+            $("#rubro-trabajo-madre-no-especificado").attr('required', true);
         }
         else
         {
-            $("#rubro_trabajo_madre_no_especificado").val(" ");
-            $("#rubro_trabajo_madre_no_especificado").attr('disabled', true);
-            $("#rubro_trabajo_madre_no_especificado").attr('required', false);
+            $("#rubro-trabajo-madre-no-especificado").val(" ");
+            $("#rubro-trabajo-madre-no-especificado").attr('disabled', true);
+            $("#rubro-trabajo-madre-no-especificado").attr('required', false);
         }
     }
 
@@ -410,18 +425,18 @@ $vectorOficios = [
             $("#profession-father").val($("#profession").val());
             $("#profession-father").css('background-color', '#ffff99');
 
-            $("#rubro_trabajo_padre").val($("#item").val());
-            $("#rubro_trabajo_padre").css('background-color', '#ffff99');
-            $("#rubro_trabajo_padre_no_especificado").val($("#item-not-specified").val());
-            $("#rubro_trabajo_padre_no_especificado").css('background-color', '#ffff99');
-            $("#lugar_trabajo_padre").val($("#workplace").val());
-            $("#lugar_trabajo_padre").css('background-color', '#ffff99');
-            $("#direccion_trabajo_padre").val($("#work_address").val());
-            $("#direccion_trabajo_padre").css('background-color', '#ffff99');
-            $("#work_phone_father").val($("#work_phone").val());
-            $("#work_phone_father").css('background-color', '#ffff99');
-            $("#puesto_trabajo_padre").val($("#professional_position").val());
-            $("#puesto_trabajo_padre").css('background-color', '#ffff99');
+            $("#rubro-trabajo-padre").val($("#item").val());
+            $("#rubro-trabajo-padre").css('background-color', '#ffff99');
+            $("#rubro-trabajo-padre-no-especificado").val($("#item-not-specified").val());
+            $("#rubro-trabajo-padre-no-especificado").css('background-color', '#ffff99');
+            $("#lugar-trabajo-padre").val($("#workplace").val());
+            $("#lugar-trabajo-padre").css('background-color', '#ffff99');
+            $("#direccion-trabajo-padre").val($("#work-address").val());
+            $("#direccion-trabajo-padre").css('background-color', '#ffff99');
+            $("#work-phone-father").val($("#work-phone").val());
+            $("#work-phone-father").css('background-color', '#ffff99');
+            $("#puesto-trabajo-padre").val($("#professional-position").val());
+            $("#puesto-trabajo-padre").css('background-color', '#ffff99');
 
             habilitarDeshabilitarInputsPadre();
         }
@@ -462,18 +477,18 @@ $vectorOficios = [
 
             $("#profession-mother").val($("#profession").val());
             $("#profession-mother").css('background-color', '#ffff99');
-            $("#rubro_trabajo_madre").val($("#item").val());
-            $("#rubro_trabajo_madre").css('background-color', '#ffff99');
-            $("#rubro_trabajo_madre_no_especificado").val($("#item-not-specified").val());
-            $("#rubro_trabajo_madre_no_especificado").css('background-color', '#ffff99');
-            $("#lugar_trabajo_madre").val($("#workplace").val());
-            $("#lugar_trabajo_madre").css('background-color', '#ffff99');
-            $("#direccion_trabajo_madre").val($("#work_address").val());
-            $("#direccion_trabajo_madre").css('background-color', '#ffff99');
+            $("#rubro-trabajo-madre").val($("#item").val());
+            $("#rubro-trabajo-madre").css('background-color', '#ffff99');
+            $("#rubro-trabajo-madre-no-especificado").val($("#item-not-specified").val());
+            $("#rubro-trabajo-madre-no-especificado").css('background-color', '#ffff99');
+            $("#lugar-trabajo-madre").val($("#workplace").val());
+            $("#lugar-trabajo-madre").css('background-color', '#ffff99');
+            $("#direccion-trabajo-madre").val($("#work-address").val());
+            $("#direccion-trabajo-madre").css('background-color', '#ffff99');
             $("#work-phone-mother").val($("#work-phone").val());
             $("#work-phone-mother").css('background-color', '#ffff99');
-            $("#puesto_trabajo_madre").val($("#professional_position").val());
-            $("#puesto_trabajo_madre").css('background-color', '#ffff99');
+            $("#puesto-trabajo-madre").val($("#professional-position").val());
+            $("#puesto-trabajo-madre").css('background-color', '#ffff99');
 
             habilitarDeshabilitarInputsMadre();
         }
@@ -659,7 +674,7 @@ $vectorOficios = [
         });
 
         $("#item").change(displayVals);
-        $("#rubro_trabajo_padre").change(habilitarDeshabilitarInputsPadre);
-        $("#rubro_trabajo_madre").change(habilitarDeshabilitarInputsMadre);
+        $("#rubro-trabajo-padre").change(habilitarDeshabilitarInputsPadre);
+        $("#rubro-trabajo-madre").change(habilitarDeshabilitarInputsMadre);
     });
 </script>

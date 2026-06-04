@@ -40,3 +40,13 @@
     border-bottom: 2px solid #eee;
     padding-bottom: 10px;
 }
+
+/* Solución quirúrgica para el truncamiento de los select de Rubro */
+.box-select-rubro {
+    margin-bottom: 55px !important; /* Espacio extra para asegurar la visibilidad del último ítem al desplegar hacia abajo */
+}
+
+/* Clase para paneles que contienen selects largos, asegurando que no corten el contenido */
+.panel-select-visible {
+    overflow: visible !important;
+}
