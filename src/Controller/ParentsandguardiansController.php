@@ -163,7 +163,7 @@ class ParentsandguardiansController extends AppController
             $this->loadModel('Users');
 
             $identidyCard = $this->request->data['identidy_card'];
-            
+
             $existingUser = $this->Users->find('all', [
                 'conditions' => ['username' => $identidyCard],
                 'order' => ['Users.created' => 'DESC']
@@ -195,7 +195,7 @@ class ParentsandguardiansController extends AppController
                 {
                     // 2. Crear el Representante usando el ID del usuario recién creado
                     $parentsandguardian = $this->Parentsandguardians->patchEntity($parentsandguardian, $this->request->data);
-                    
+
                     $parentsandguardian->user_id = $user->id;
                     $parentsandguardian->email = $user->email;
                     $parentsandguardian->second_surname = "";
@@ -328,6 +328,8 @@ class ParentsandguardiansController extends AppController
             }
             else
             {
+                $errors = $parentsandguardian->getErrors();
+                \Cake\Log\Log::debug('El padre o representante no fue guardado. Errores de validación: ' . json_encode($errors, JSON_PRETTY_PRINT));
                 $this->Flash->error(__('El padre o representante no fue guardado, por favor verifique los datos e intente nuevamente'));
             }
         }

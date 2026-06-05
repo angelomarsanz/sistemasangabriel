@@ -80,8 +80,7 @@ class ParentsandguardiansTable extends Table
             ->allowEmpty('id', 'always');
 
         $validator
-            ->requirePresence('code_for_user', 'always')
-            ->notEmpty('code_for_user', 'Este campo es obligatorio');
+            ->allowEmpty('code_for_user', 'always');
 
         $validator
             ->requirePresence('first_name', 'always')
@@ -108,11 +107,10 @@ class ParentsandguardiansTable extends Table
             ->notEmpty('identidy_card', 'Este campo es obligatorio');
 
         $validator
-            ->allowEmpty('guardian');
+            ->allowEmpty('guardian', 'always');
 
         $validator
-            ->requirePresence('family_tie', 'always')
-            ->notEmpty('family_tie', 'Este campo es obligatorio');
+            ->allowEmpty('family_tie', 'always');
 
         $validator
             ->requirePresence('profession', 'always')
@@ -324,35 +322,29 @@ class ParentsandguardiansTable extends Table
 
         $validator
             ->numeric('balance')
-            ->requirePresence('balance', 'always')
-            ->notEmpty('balance', 'Este campo es obligatorio');
+            ->allowEmpty('balance', 'always');
 
         $validator
-            ->requirePresence('creative_user', 'always')
-            ->notEmpty('creative_user', 'Este campo es obligatorio');
+            ->allowEmpty('creative_user', 'always');
 
         $validator
-            ->requirePresence('guardian_migration', 'always')
-            ->notEmpty('guardian_migration', 'Este campo es obligatorio');
+            ->allowEmpty('guardian_migration', 'always');
 
         $validator
-            ->requirePresence('mi_id', 'always')
-            ->notEmpty('mi_id', 'Este campo es obligatorio');
+            ->allowEmpty('mi_id', 'always');
 
         $validator
-            ->requirePresence('mi_children', 'always')
-            ->notEmpty('mi_children', 'Este campo es obligatorio');
+            ->allowEmpty('mi_children', 'always');
 
         $validator
-            ->requirePresence('new_guardian', 'always')
-            ->notEmpty('new_guardian', 'Este campo es obligatorio');
+            ->allowEmpty('new_guardian', 'always');
 
         $validator
             ->integer('id_familia_pagadora_consejo')
             ->allowEmpty('id_familia_pagadora_consejo', 'always');
 
         $validator
-            ->allowEmpty('vector_contratos');
+            ->allowEmpty('vector_contratos', 'always');
 
         return $validator;
     }
