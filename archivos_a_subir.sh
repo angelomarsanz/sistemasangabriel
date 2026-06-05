@@ -13,7 +13,10 @@ ARCHIVOS_PHP_PUNTUALES=(
     "src/Model/Table/ParentsandguardiansTable.php"
 
     #"js_csga/src/index.css"
+    #"src/Template/Guardiantransactions/home_screen.ctp"
     #"src/Template/Parentsandguardians/edit.ctp"
+    #"src/Template/Students/filepdf.ctp"
 
     "src/Controller/ParentsandguardiansController.php"
+    "src/Controller/RatesController.php"
 )

@@ -144,8 +144,23 @@ class RatesController extends AppController
 							{
 								$representanteBuscado = $this->Parentsandguardians->get($representante->id);
 								
-								$representanteBuscado->datos_contrato_anio_anterior = $representanteBuscado->datos_contrato;
-								$representanteBuscado->datos_contrato = null;
+								$representanteBuscado->datos_contrato_anio_anterior = null; // Solo se le asignará valor null en el proceso de renovación de matrícula 2026-2027, para las renovaciones de los próximos años debe eliminarse esta instrucción
+
+								if ($representanteBuscado->item = 'Otro, no especificado en esta lista')
+								{
+									$representanteBuscado->item = '';
+									$representanteBuscado->item_not_specified = '';							
+								}
+								if ($representanteBuscado->rubro_trabajo_padre = 'Otro, no especificado en esta lista')
+								{
+									$representanteBuscado->rubro_trabajo_padre = '';
+									$representanteBuscado->rubro_trabajo_padre_no_especificado = '';							
+								}
+								if ($representanteBuscado->rubro_trabajo_madre = 'Otro, no especificado en esta lista')
+								{
+									$representanteBuscado->rubro_trabajo_madre = '';
+									$representanteBuscado->rubro_trabajo_madre_no_especificado = '';							
+								}
 								
 								if ($this->Parentsandguardians->save($representanteBuscado)) 
 								{

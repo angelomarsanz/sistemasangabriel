@@ -69,19 +69,19 @@
             <?php
                 if ($indicadorDeudaInscripcion == 1)
                 { ?>
-                    <li>Diferencia de Matrícula 2024 - 2025 = 30 $ - Diferencia de Agosto 2024 - 2025 = 20 $</li> 
+                    <li>Diferencia de Matrícula 2025 - 2026 = 43 $ - Diferencia de Agosto 2025 - 2026 = 43 $</li> 
                 <?php
                 } ?>
-                <li>Anticipo de Matrícula 2025 - 2026 =  220$ - Abono a Agosto 2025 - 2026 =  220$</li>
+                <li>Anticipo de Matrícula 2026 - 2027 =  263$ - Abono a Agosto 2026 - 2027 =  263$</li>
                 <?php
                 if ($indicadorDeudaInscripcion == 1)
                 { ?>
-                    <li>Seguro Escolar 2025 - 2026 =  25$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 515$</b></li>
+                    <li>Seguro Escolar 2026 - 2027 =  50$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 662$</b></li>
                 <?php
                 }
                 else
                 { ?>
-                    <li>Seguro Escolar 2025 - 2026 =  25$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 465$</b></li>
+                    <li>Seguro Escolar 2026 - 2027 =  50$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 576$</b></li>
                 <?php
                 } ?>
             </ul>
@@ -251,19 +251,19 @@
                     <?php
                     if ($indicadorDeudaInscripcion == 1)
                     { ?>
-                        <li>Diferencia de Matrícula 2024 - 2025 = 30 $ - Diferencia de Agosto 2024 - 2025 = 20 $</li> 
+                        <li>Diferencia de Matrícula 2025 - 2026 = 43 $ - Diferencia de Agosto 2025 - 2026 = 43 $</li> 
                     <?php
                     } ?>
-                    <li>Anticipo de Matrícula 2025 - 2026 =  220$ - Abono a Agosto 2025 - 2026 =  220$</li>
+                    <li>Anticipo de Matrícula 2026 - 2027 =  263$ - Abono a Agosto 2026 - 2027 =  263$</li>
                     <?php
                     if ($indicadorDeudaInscripcion == 1)
                     { ?>
-                        <li>Seguro Escolar 2025 - 2026 =  25$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 515$</b></li>
+                        <li>Seguro Escolar 2026 - 2027 =  50$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 662$</b></li>
                     <?php
                     }
                     else
                     { ?>
-                        <li>Seguro Escolar 2025 - 2026 =  25$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 465$</b></li>
+                        <li>Seguro Escolar 2026 - 2027 =  50$ (Se sugiere en efectivo) - <b>TOTAL A CANCELAR = 576$</b></li>
                     <?php
                     } ?>
                 </ul>
