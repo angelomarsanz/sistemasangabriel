@@ -137,7 +137,7 @@ $vectorOficios = [
                         ?>
                         <div class="box-select-rubro">
                             <?php echo $this->Form->input('item', ['label' => 'Rubro: *', 'options' => $vectorOficios]); ?>
-                            <p>Si en la lista anterior no se encuentra el rubro a que usted se dedica seleccione la opción <b>"Otro, no especificado en esta lista"</b> y a continuación escriba el rubro</p>
+                            <p>Si en la lista anterior no se encuentra el rubro a que usted se dedica seleccione la última opción <b>"Otro, no especificado en esta lista"</b> y a continuación escriba el rubro</p>
                         </div>
                         <?php
                         echo $this->Form->input('item_not_specified', ['label' => 'Rubro personalizado:', 'disabled' => 'disabled']);
@@ -191,7 +191,7 @@ $vectorOficios = [
                                 ?>
                                 <div class="box-select-rubro">
                                     <?php echo $this->Form->input('rubro_trabajo_padre', ['label' => 'Rubro: *', 'options' => $vectorOficios]); ?>
-                                    <p>Si en la lista anterior no se encuentra el rubro a que usted se dedica seleccione la opción <b>"Otro, no especificado en esta lista"</b> y a continuación escriba el rubro</p>
+                                    <p>Si en la lista anterior no se encuentra el rubro a que usted se dedica seleccione la última opción <b>"Otro, no especificado en esta lista"</b> y a continuación escriba el rubro</p>
                                 </div>
                                 <?php
                                 echo $this->Form->input('rubro_trabajo_padre_no_especificado', ['label' => 'Rubro personalizado:', 'disabled' => 'disabled']);
@@ -238,7 +238,7 @@ $vectorOficios = [
                                 ?>
                                 <div class="box-select-rubro">
                                     <?php echo $this->Form->input('rubro_trabajo_madre', ['label' => 'Rubro: *', 'options' => $vectorOficios]); ?>
-                                    <p>Si en la lista anterior no se encuentra el rubro a que usted se dedica seleccione la opción <b>"Otro, no especificado en esta lista"</b> y a continuación escriba el rubro</p>
+                                    <p>Si en la lista anterior no se encuentra el rubro a que usted se dedica seleccione la última opción <b>"Otro, no especificado en esta lista"</b> y a continuación escriba el rubro</p>
                                 </div>
                                 <?php
                                 echo $this->Form->input('rubro_trabajo_madre_no_especificado', ['label' => 'Rubro personalizado:', 'disabled' => 'disabled']);
