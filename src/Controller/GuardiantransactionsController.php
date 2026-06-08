@@ -355,9 +355,12 @@ class GuardiantransactionsController extends AppController
             }
         }
         /* 
-        Se forza 2025 para el caso de los alumnos regulares que no han actualizado los datos y al no actualizar los datos no se generan las transacciones correspondientes al período 2025. Se debe idear una lógica para estos casos
+        Esta función se ejecuta "antes" de que se actualicen los datos de los alumnos regulares. Cuando se actualizan los datos del estudiante se genera automáticamente su respectivo registro de transacción "Matrícula YYYY" como aún no se ha generado el registro de matrícula para el proceso de matriculación actual entonces $anioFirmarContrato va a tener el valor del año de inscripción anterior, el programa creerá que ya el contrato del año actual está firmado y nunca le solicitará al representante que firme el contrato del año actual. Entonces se pregunta si $anioFirmarContrato es menor a  $schools->current_year_registration, si es menor se guarda el valor de  $schools->current_year_registration en $anioFirmarContrato para obligar al programa a solicitar la firma del contrato al representante. Para el caso de los alumnos nuevos, ese conflicto no se presentará porque el registro de "Matrícula YYYY" lo genera el personal administrativo al momento de crear el nuevo estudiante. Si se presentara el caso de un representante tiene dos tipos de estudiantes: Uno regular y uno nuevo tampoco habrá conflicto porque el programa siempre tomará el año de matrícula mayor para solicitar la firma del contrato, entonces el representante deberá firmar el contrato del año actual para ambos estudiantes.
         */
-        $anioFirmarContrato = 2025; 
+        if ($anioFirmarContrato < $schools->current_year_registration)
+        {
+            $anioFirmarContrato = $schools->current_year_registration;
+        }
         $verificacionFirmarContrato = 
             [
                 'indicadorFirmarContrato' => $indicadorFirmarContrato,

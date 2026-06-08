@@ -15,8 +15,11 @@ ARCHIVOS_PHP_PUNTUALES=(
     #"js_csga/src/index.css"
     #"src/Template/Guardiantransactions/home_screen.ctp"
     #"src/Template/Parentsandguardians/edit.ctp"
+    "src/Template/Guardiantransactions/contrato_representante_2026.ctp"
+    "src/Template/Guardiantransactions/contrato_representante_2027.ctp"
     #"src/Template/Students/filepdf.ctp"
 
+    "src/Controller/GuardiantransactionsController.php"
     "src/Controller/ParentsandguardiansController.php"
     "src/Controller/RatesController.php"
 )
