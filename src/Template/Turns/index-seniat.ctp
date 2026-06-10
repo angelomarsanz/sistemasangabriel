@@ -7,10 +7,16 @@
     		<table class="table table-striped table-hover">
                 <thead>
 					<tr>
-						<th scope="col">Fecha</th>
+						<th scope="col">Fecha-hora inicio</th>
+        				<th scope="col">Fecha-hora fin</th>
 						<th scope="col">Nro.</th>
 						<th scope="col" style="text-align:center">Turno</th>
 						<th scope="col">Cajero</th>
+						<?php
+						if ($current_user['id'] == 1 || $current_user['id'] == 978): ?>
+							<th scope="col" style="text-align:center">Fiscal</th>
+						<?php
+						endif ?>  
 						<th scope="col">Estatus</th>
 						<th scope="col" class="actions"></th>
 						<?php
@@ -25,10 +31,26 @@
 				<tbody>
 					<?php foreach ($turns as $turn): ?>
 						<tr>
-							<td><?= h($turn->start_date->format('d-m-Y')) ?></td>
+							<td>
+								<?= h($turn->start_date->format('d-m-Y')) ?><br>
+								<?= h($turn->start_date->format('h:i a')) ?>
+							</td>
+							<td>
+								<?= h($turn->end_date->format('d-m-Y')) ?><br>
+								<?= h($turn->end_date->format('h:i a')) ?>
+							</td>
 							<td><?= h($turn->id) ?></td>
 							<td style="text-align:center"><?= h($turn->turn) ?></td>
 							<td><?= h($turn->user->first_name . ' ' . $turn->user->surname) ?></td>
+							<?php
+							if ($current_user['id'] == 1 || $current_user['id'] == 978): 
+								if ($turn->user->role == 'Facturas'): ?>
+									<td style="text-align:center">Sí</td>
+								<?php
+								else: ?>
+									<td style="text-align:center">No</td>
+								<?php endif; 
+							endif; ?>
 							<?php if ($turn->status == 0): ?>
 								<td>Cerrado</td>
 							<?php else: ?>
@@ -46,34 +68,34 @@
 								?>
 							</td>
 							<?php
-								if ($current_user['role'] == 'Administrador' || $current_user['role'] == 'Propietario' || $current_user['role'] == 'Ventas generales' || $current_user['role'] == 'Contabilidad general' ): ?>
-							<td class="actions">
-								<?php 
-									if ($turn->status == 0):
-										if ($turn->id > 970):
-											echo $this->Html->link('Reporte contador', ['action' => 'reporteContador', $turn->id], ['class' => 'btn btn-info', 'disabled' => 'disabled']);
+							if ($current_user['role'] == 'Administrador' || $current_user['role'] == 'Propietario' || $current_user['role'] == 'Ventas generales' || $current_user['role'] == 'Contabilidad general' ): ?>
+								<td class="actions">
+									<?php 
+										if ($turn->status == 0):
+											if ($turn->id > 970):
+												echo $this->Html->link('Reporte contador', ['action' => 'reporteContador', $turn->id], ['class' => 'btn btn-info', 'disabled' => 'disabled']);
+											endif;
 										endif;
-									endif;
-								?>
-							</td>
-							<td class="actions">
-								<?php 
-									if ($turn->status == 0):
-										if ($turn->id > 970):
-											echo $this->Html->link('Documentos', ['action' => 'excelDocumentos', $turn->id], ['class' => 'btn btn-info']);
+									?>
+								</td>
+								<td class="actions">
+									<?php 
+										if ($turn->status == 0):
+											if ($turn->id > 970):
+												echo $this->Html->link('Documentos', ['action' => 'excelDocumentos', $turn->id], ['class' => 'btn btn-info']);
+											endif;
 										endif;
-									endif;
-								?>
-							</td>
-							<td class="actions">
-								<?php 
-									if ($turn->status == 0):
-										if ($turn->id > 970):
-											echo $this->Html->link('Pagos', ['action' => 'excelPagos', $turn->id], ['class' => 'btn btn-info']);											
+									?>
+								</td>
+								<td class="actions">
+									<?php 
+										if ($turn->status == 0):
+											if ($turn->id > 970):
+												echo $this->Html->link('Pagos', ['action' => 'excelPagos', $turn->id], ['class' => 'btn btn-info']);											
+											endif;
 										endif;
-									endif;
-								?>
-							</td>
+									?>
+								</td>
 							<?php 
 							endif ; ?>
 						</tr>

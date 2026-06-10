@@ -11,7 +11,6 @@
 /migracion35.txt
 /migracion36.txt
 /PendientesProduccion.txt
-*.zip
 .env.sh
 /Documentacion/
 /documentacion/
@@ -19,3 +18,10 @@ archivos_chat_gemini/
 *copy*
 *copia*
 *- copia*
+
+# Ignorar archivos comprimidos en cualquier directorio
+*.zip
+*.tar.gz
+*.tgz
+*.tar
+*.rar

@@ -801,7 +801,6 @@
 	var servicioEducativoExoneradoTransaccion = 0;
 	var indicador_pedido = "<?= $indicador_pedido ?>";
 	var rolUsuario = "<?= $current_user['role'] ?>";
-	var indicadorAlertaTasaCambio = "<?= $indicadorAlertaTasaCambio ?>";
 	
 // Funciones Javascript
 
@@ -2806,11 +2805,7 @@
 
     $(document).ready(function() 
     {
-		console.log('Indicador pedido', indicador_pedido);
-		if (indicadorAlertaTasaCambio == 1)
-		{
-			alert("Estimado usuario, debe actualizar las tasas de cambio del dólar y euro antes de realizar la cobranza");
-		}
+		console.log('indicador_pedido', indicador_pedido);
 		if ($('#type-invoice').val() == 'Recibo Consejo Educativo')
 		{
 			$("#alumnos-relacionados").addClass("noverScreen");

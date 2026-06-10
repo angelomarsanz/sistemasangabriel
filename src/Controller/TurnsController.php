@@ -400,6 +400,9 @@ class TurnsController extends AppController
 			$codigoRetornoResultado = $resultado['codigoRetorno'];
 			$facturas = $resultado['facturas'];
 			$pagosFacturas = $resultado['pagosFacturas'];
+
+			$notasCreditoISLR = [];
+			
 						
 			if ($codigoRetornoResultado != 1)
 			{			
@@ -1322,6 +1325,7 @@ class TurnsController extends AppController
 						
 						if ($pago->bill->tipo_documento == "Factura")
 						{
+
 							$facturaIslr = $this->Bills->get($pago->bill->id);
 
 							$pagosFacturaIslr = $payment->busquedaPagosFactura($pago->bill->id);

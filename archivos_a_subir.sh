@@ -10,16 +10,20 @@ ARCHIVOS_PHP_PUNTUALES=(
     # "Ninguno"
 
     #"src/Model/Entity/Parentsandguardian.php"
-    "src/Model/Table/ParentsandguardiansTable.php"
+    #"src/Model/Table/ParentsandguardiansTable.php"
 
     #"js_csga/src/index.css"
     #"src/Template/Guardiantransactions/home_screen.ctp"
     #"src/Template/Parentsandguardians/edit.ctp"
-    "src/Template/Guardiantransactions/contrato_representante_2026.ctp"
-    "src/Template/Guardiantransactions/contrato_representante_2027.ctp"
+    #"src/Template/Guardiantransactions/contrato_representante_2026.ctp"
+    #"src/Template/Guardiantransactions/contrato_representante_2027.ctp"
     #"src/Template/Students/filepdf.ctp"
+    #"src/Template/Turns/index.ctp"
+    "src/Template/Bills/create_invoice.ctp"
 
-    "src/Controller/GuardiantransactionsController.php"
+    #"src/Controller/GuardiantransactionsController.php"
+    #"src/Controller/ParentsandguardiansController.php"
+    #"src/Controller/RatesController.php"
+    "src/Controller/BillsController.php"
     "src/Controller/ParentsandguardiansController.php"
-    "src/Controller/RatesController.php"
 )

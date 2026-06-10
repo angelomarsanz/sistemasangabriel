@@ -67,7 +67,7 @@ class BillsController extends AppController
 					return true;
 				}				
 			}
-			elseif ($user['role'] === 'Seniat')
+			elseif ($user['role'] === 'Facturas')
 			{
 				if(in_array($this->request->action, ['createInvoice', 'recordInvoiceData', 'imprimirFactura', 'invoice', 'consultBill', 'actualizarIndicadorImpresion', 'verificarFacturas', 'retornoImpresion', 'consultarNotaCredito', 'consultarNotaDebito', 'notaContable', 'listaFacturasFamilia', 'conceptosNotaContable', 'editControl', 'searchInvoice', 'adjustInvoice']))
 				{
@@ -344,8 +344,6 @@ class BillsController extends AppController
         setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
         date_default_timezone_set('America/Caracas');
         
-		$indicadorAlertaTasaCambio = 0;
-
         $dateTurn = Time::now();
 		if ($dateTurn->month < 10)
 		{
@@ -385,22 +383,7 @@ class BillsController extends AppController
 		
 		$this->loadModel('Monedas');	
 		$moneda = $this->Monedas->get(2);
-		$dollarExchangeRate = $moneda->tasa_cambio_dolar;
-		
-		// Verificar si han transcurrido más de 12 horas desde la última actualización de la tasa de cambio para mostrar una alerta al usuario, usando la columna fecha_cambio_estatus de la tabla monedas
-
-		if ($moneda->fecha_cambio_estatus) 
-		{
-			$fechaCambioEstatus = Time::parse($moneda->fecha_cambio_estatus);
-			$horasTranscurridas = $fechaCambioEstatus->diffInHours(Time::now());
-			
-			if ($horasTranscurridas > 12) 
-			{
-				$indicadorAlertaTasaCambio = 1;
-				// Registrar en bitácora el evento de que la tasa de cambio no se ha actualizado en las últimas 12 horas
-				$binnacles->add('controller', 'Bills', 'createInvoice', 'La tasa de cambio no se ha actualizado en las últimas 12 horas. Horas transcurridas: '.$horasTranscurridas.'. Usuario: '.$this->Auth->user('username').' Rol: '.$this->Auth->user('role'));
-			}
-		}	
+		$dollarExchangeRate = $moneda->tasa_cambio_dolar; 
 		
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar; 
@@ -435,7 +418,7 @@ class BillsController extends AppController
 			}
 		}
 			
-        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual', 'anoEscolarInscripcion', 'ano_mes_actual', 'indicadorAlertaTasaCambio'));
+        $this->set(compact('menuOption', 'idTurn', 'turn', 'dateTurn', 'discounts', 'dollarExchangeRate', 'euro', 'bancosEmisor', 'bancosReceptor', 'anoEscolarActual', 'anoEscolarInscripcion', 'ano_mes_actual'));
     }
     
     public function createInvoiceRegistration($idTurn = null, $turn = null)
