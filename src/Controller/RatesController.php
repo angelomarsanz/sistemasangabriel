@@ -146,6 +146,11 @@ class RatesController extends AppController
 								
 								$representanteBuscado->datos_contrato_anio_anterior = null; // Solo se le asignará valor null en el proceso de renovación de matrícula 2026-2027, para las renovaciones de los próximos años debe eliminarse esta instrucción
 
+								if ($representanteBuscado->item = 'Alimentación,') // Temporal, para arreglar el error de la coma
+								{
+									$representanteBuscado->item = 'Alimentación';
+								}
+
 								if ($representanteBuscado->item = 'Otro, no especificado en esta lista')
 								{
 									$representanteBuscado->item = '';

@@ -401,8 +401,16 @@ class TurnsController extends AppController
 			$facturas = $resultado['facturas'];
 			$pagosFacturas = $resultado['pagosFacturas'];
 
-			$notasCreditoISLR = [];
-			
+			$vectorNotasCredito = [];
+			// Hacer un foreach de $facturas para llenar el vector de notas de crédito. Se pregunta si $facturas->tipo_documento es igual a "Nota de crédito" y se crea un índice en el vector con el campo id_documento_padre de la factura y en valor se coloca el mismo id_documento_padre. De esta forma, al hacer el foreach de $pagosFacturas, se puede preguntar si el campo $pagos->bill->id está en el vector de notas de crédito y descartar ese pago, ya que eso indica que la factura original fue reversada.
+
+			foreach ($facturas as $factura)
+			{
+				if ($factura->tipo_documento == "Nota de crédito")
+				{
+					$vectorNotasCredito[$factura->id_documento_padre] = $factura->id_documento_padre;
+				}
+			}	
 						
 			if ($codigoRetornoResultado != 1)
 			{			
@@ -1316,60 +1324,63 @@ class TurnsController extends AppController
 						}
 					}
 					elseif ($pago->payment_type == "Retención de impuesto")
-					{
-						if (isset($vectorPagos[$pago->bill->id]))
+					{							
+						if ($pago->bill->tipo_documento == "Factura")								
 						{
-							$vectorPagos[$pago->bill->id]['retencionImpuestoBolivar'] += $pago->amount;
-							$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
-						}
-						
-						if ($pago->bill->tipo_documento == "Factura")
-						{
-
-							$facturaIslr = $this->Bills->get($pago->bill->id);
-
-							$pagosFacturaIslr = $payment->busquedaPagosFactura($pago->bill->id);
-							
-							$codigoRetornoPagos = $pagosFacturaIslr['codigoRetorno'];
-							
-							if ($codigoRetornoPagos == 0)
+							// Si $pago->bill->id no existe en $vectorNotasCredito ejecutamos todo el proceso
+							if (!isset($vectorNotasCredito[$pago->bill->id]))
 							{
-								$pagosIslr = $pagosFacturaIslr['pagosFactura']; 
-								$pagosConvertidosDolares = $this->convertirPagosDolar($pagosIslr, $facturaIslr);
-
-								// 1. Encontrar el método de pago con mayor monto
-								$metodoPagoConMayorMonto = '';
-								$montoMayor = -1;
-
-								foreach ($pagosConvertidosDolares as $metodo => $monto) {
-									if ($monto > $montoMayor) {
-										$montoMayor = $monto;
-										$metodoPagoConMayorMonto = $metodo;
-									}
-								}
-
-								$montoIslrConvertido = $pago->amount;
-
-								if ($metodoPagoConMayorMonto == 'Efectivo $' || $metodoPagoConMayorMonto == 'Zelle $') {
-									// Si el mayor es en dólares, convertimos los Bs. de la NC a dólares usando la tasa de la NC
-									$montoIslrConvertido = round($pago->amount / $facturaIslr->tasa_cambio, 2);
-								} elseif ($metodoPagoConMayorMonto == 'Efectivo €' || $metodoPagoConMayorMonto == 'Euros €') {
-									// Si el mayor es en euros, convertimos a euros
-									$montoIslrConvertido = round($pago->amount / $facturaIslr->tasa_euro, 2);
-								}
-								// Si es en Bs., $montoTotalNC se queda igual (ya viene en Bs. por defecto)
-
-								// Actualizar el vector de totales recibidos
-								if (isset($vectorTotalesRecibidos['Facturas'][$metodoPagoConMayorMonto])) 
+								if (isset($vectorPagos[$pago->bill->id]))
 								{
-									$vectorTotalesRecibidos['Facturas'][$metodoPagoConMayorMonto] += $montoIslrConvertido;
-									$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción'][$metodoPagoConMayorMonto] += $montoIslrConvertido;
-									$vectorTotalesRecibidos['Menos retención de impuesto (ISLR)'][$metodoPagoConMayorMonto] += $montoIslrConvertido;
-									if ($pago->bill->id_anticipo == 0)
+									$vectorPagos[$pago->bill->id]['retencionImpuestoBolivar'] += $pago->amount;
+									$vectorPagos[$pago->bill->id]['totalCobradoDolar'] += round($pago->amount / $pago->bill->tasa_cambio, 2);
+								}
+
+								$facturaIslr = $this->Bills->get($pago->bill->id);
+
+								$pagosFacturaIslr = $payment->busquedaPagosFactura($pago->bill->id);
+								
+								$codigoRetornoPagos = $pagosFacturaIslr['codigoRetorno'];
+								
+								if ($codigoRetornoPagos == 0)
+								{
+									$pagosIslr = $pagosFacturaIslr['pagosFactura']; 
+									$pagosConvertidosDolares = $this->convertirPagosDolar($pagosIslr, $facturaIslr);
+
+									// 1. Encontrar el método de pago con mayor monto
+									$metodoPagoConMayorMonto = '';
+									$montoMayor = -1;
+
+									foreach ($pagosConvertidosDolares as $metodo => $monto) {
+										if ($monto > $montoMayor) {
+											$montoMayor = $monto;
+											$metodoPagoConMayorMonto = $metodo;
+										}
+									}
+
+									$montoIslrConvertido = $pago->amount;
+
+									if ($metodoPagoConMayorMonto == 'Efectivo $' || $metodoPagoConMayorMonto == 'Zelle $') {
+										// Si el mayor es en dólares, convertimos los Bs. de la NC a dólares usando la tasa de la NC
+										$montoIslrConvertido = round($pago->amount / $facturaIslr->tasa_cambio, 2);
+									} elseif ($metodoPagoConMayorMonto == 'Efectivo €' || $metodoPagoConMayorMonto == 'Euros €') {
+										// Si el mayor es en euros, convertimos a euros
+										$montoIslrConvertido = round($pago->amount / $facturaIslr->tasa_euro, 2);
+									}
+									// Si es en Bs., $montoTotalNC se queda igual (ya viene en Bs. por defecto)
+
+									// Actualizar el vector de totales recibidos
+									if (isset($vectorTotalesRecibidos['Facturas'][$metodoPagoConMayorMonto])) 
 									{
-										$totalFormasPago[$metodoPagoConMayorMonto]['monto'] += $montoIslrConvertido;
-										$totalFormasPago[$metodoPagoConMayorMonto]['montoBs'] += $pago->amount;
-										$totalFormasPago['Total general cobrado Bs.']['montoBs'] += $pago->amount;
+										$vectorTotalesRecibidos['Facturas'][$metodoPagoConMayorMonto] += $montoIslrConvertido;
+										$vectorTotalesRecibidos['Total facturas - notas de crédito + anticipos de inscripción'][$metodoPagoConMayorMonto] += $montoIslrConvertido;
+										$vectorTotalesRecibidos['Menos retención de impuesto (ISLR)'][$metodoPagoConMayorMonto] += $montoIslrConvertido;
+										if ($pago->bill->id_anticipo == 0)
+										{
+											$totalFormasPago[$metodoPagoConMayorMonto]['monto'] += $montoIslrConvertido;
+											$totalFormasPago[$metodoPagoConMayorMonto]['montoBs'] += $pago->amount;
+											$totalFormasPago['Total general cobrado Bs.']['montoBs'] += $pago->amount;
+										}
 									}
 								}
 							}
