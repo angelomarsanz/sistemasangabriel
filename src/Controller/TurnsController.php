@@ -2155,7 +2155,10 @@ class TurnsController extends AppController
 
 		$conceptosTurno = $conceptos->busquedaConceptos($id);
 		$conceptosConsejoEducativo = $conceptosTurno['consejoEducativo'];
-		$conceptosServicioEducativo = $conceptosTurno['servicioEducativo']; 
+		$conceptosServicioEducativo = $conceptosTurno['servicioEducativo'];
+		$conceptosSeguro = $conceptosTurno['seguro']; 
+
+		$conceptosSeguro = $conceptosTurno['seguro']; 
 
 		$vectorTotalesRecibidos = json_decode($turn->vector_totales_recibidos, true);
 		$vectorTotalesRecibidosPedidos = json_decode($turn->vector_totales_recibidos_pedidos, true);
@@ -2344,6 +2347,7 @@ class TurnsController extends AppController
 			'indicadorRecibosConsejoEducativo',
 			'conceptosConsejoEducativo',
 			'conceptosServicioEducativo',
+			'conceptosSeguro',
 			'rolCajero'
 		));	
 				
@@ -2386,6 +2390,7 @@ class TurnsController extends AppController
 			'indicadorRecibosConsejoEducativo',
 			'conceptosConsejoEducativo',
 			'conceptosServicioEducativo',
+			'conceptosSeguro',
 			'rolCajero'
 		]);
 	}

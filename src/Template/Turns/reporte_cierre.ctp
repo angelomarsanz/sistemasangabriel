@@ -1789,32 +1789,77 @@
 												<th style="text-align: center;"><b>Fecha</b></th>
 												<th style="text-align: center;"><b>Familia</b></th>
 												<th style="text-align: center;"><b>No Recibo</b></th>
-												<th style="text-align: center;"><b>Tipo doc</b></th>
-												<th style="text-align: center;"><b>Efectivo $</b></th>
-												<th style="text-align: center;"><b>Zelle $</b></th>
+												<th style="text-align: center;"><b>Concepto</b></th>
+												<th style="text-align: center;"><b>E $</b></th>
+												<th style="text-align: center;"><b>E €</b></th>
+												<th style="text-align: center;"><b>E Bs.</b></th>
+												<th style="text-align: center;"><b>Zel $</b></th>
+												<th style="text-align: center;"><b>Eur €</b></th>
+												<th style="text-align: center;"><b>TD/TC Bs.</b></th>
+												<th style="text-align: center;"><b>Trans Bs.</b></th>
+												<th style="text-align: center;"><b>Total Bs.</b></th>
 											</tr>
 										</thead>
 										<tbody>				
 											<?php 
-											$totalEfectivo = 0;
+											$totalBs = 0;
+											$totalEfectivoDolar = 0;
+											$totalEfectivoEuro = 0;
+											$totalEfectivoBolivar = 0;
 											$totalZelle = 0;
+											$totalEuros = 0;
+											$totalTdbTdc = 0;
+											$totalTransferencias = 0;
 											foreach ($facturas as $factura):  
 												if ($factura->tipo_documento == "Recibo de seguro"): 
-													$efectivos = [];
-													$zelles = [];
+													$efectivoDolar = 0;
+													$efectivoEuro = 0;
+													$efectivoBolivar = 0;
+													$zelle = 0;
+													$euros = 0;
+													$tdbTdc = 0;
+													$transferencia = 0;
 													foreach ($pagosFacturas as $pago)
 													{
 														if ($pago->bill_id == $factura->id)
 														{ 
 															if ($pago->payment_type == "Efectivo")
 															{
-																$efectivos[] = number_format($pago->amount, 2, ",", ".")."&nbsp;".$pago->moneda." ";
-																$totalEfectivo += $pago->amount;
+																if ($pago->moneda == "$")
+																{
+																	$efectivoDolar += $pago->amount;
+																	$totalEfectivoDolar += $pago->amount;
+																}
+																elseif ($pago->moneda == "€")
+																{
+																	$efectivoEuro += $pago->amount;
+																	$totalEfectivoEuro += $pago->amount;
+																}
+																elseif ($pago->moneda == "Bs.")
+																{
+																	$efectivoBolivar += $pago->amount;
+																	$totalEfectivoBolivar += $pago->amount;
+																}
 															}
 															elseif ($pago->bank == "Zelle")
 															{
-																$zelles[] = number_format($pago->amount, 2, ",", ".")."&nbsp;".$pago->moneda." ";
+																$zelle += $pago->amount;
 																$totalZelle += $pago->amount;
+															}
+															elseif ($pago->bank == "Euros")
+															{
+																$euros += $pago->amount;
+																$totalEuros += $pago->amount;
+															}
+															elseif ($pago->payment_type == "Tarjeta de débito" || $pago->payment_type == "Tarjeta de crédito")
+															{
+																$tdbTdc += $pago->amount;
+																$totalTdbTdc += $pago->amount;
+															}
+															elseif ($pago->payment_type == "Transferencia")
+															{
+																$transferencia += $pago->amount;
+																$totalTransferencias += $pago->amount;
 															}
 														}
 													} ?> 
@@ -1822,19 +1867,28 @@
 														<td style="text-align: center;"><?= $factura->date_and_time->format('d-m-Y') ?></td>
 														<td><?= $factura->parentsandguardian->family ?></td>
 														<td style="text-align: center;"><?= $factura->bill_number ?></td>
-														<td><?= $factura->tipo_documento ?></td>
 														<td style="text-align: center;">
 															<?php
-															foreach ($efectivos as $efectivo):
-																echo $efectivo;
-															endforeach; ?>
+															foreach ($conceptosSeguro as $concepto)
+															{
+																if ($concepto['bill_id'] == $factura->id)
+																{
+																	echo $concepto['concepto'].'<br />';
+																} 
+															}
+															?>
 														</td>
-														<td style="text-align: center;">
-															<?php
-															foreach ($zelles as $zelle):
-																echo $zelle;
-															endforeach; ?>
-														</td>
+														<td style="text-align: center;"><?= number_format($efectivoDolar, 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($efectivoEuro, 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($efectivoBolivar, 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($zelle, 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($euros, 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($tdbTdc, 2, ",", ".") ?></td>
+														<td style="text-align: center;"><?= number_format($transferencia, 2, ",", ".") ?></td>
+														<?php 
+														$montoReciboBs = round($factura->amount_paid * $factura->tasa_cambio, 2);
+														$totalBs += $montoReciboBs; ?>
+														<td style="text-align: center;"><?= number_format($montoReciboBs, 2, ",", ".") ?></td>
 													</tr>
 												<?php endif;
 											endforeach; ?>
@@ -1843,8 +1897,14 @@
 												<td></td>
 												<td></td>
 												<td></td>
-												<td style="text-align: center;"><b><?= number_format($totalEfectivo, 2, ",", ".")."&nbsp;$ " ?></b></td>
-												<td style="text-align: center;"><b><?= number_format($totalZelle, 2, ",", ".")."&nbsp;$ " ?></b></td>
+												<td style="text-align: center;"><b><?= number_format($totalEfectivoDolar, 2, ",", ".") ?></b></td>
+												<td style="text-align: center;"><b><?= number_format($totalEfectivoEuro, 2, ",", ".") ?></b></td>
+												<td style="text-align: center;"><b><?= number_format($totalEfectivoBolivar, 2, ",", ".") ?></b></td>
+												<td style="text-align: center;"><b><?= number_format($totalZelle, 2, ",", ".") ?></b></td>
+												<td style="text-align: center;"><b><?= number_format($totalEuros, 2, ",", ".") ?></b></td>
+												<td style="text-align: center;"><b><?= number_format($totalTdbTdc, 2, ",", ".") ?></b></td>
+												<td style="text-align: center;"><b><?= number_format($totalTransferencias, 2, ",", ".") ?></b></td>
+												<td style="text-align: center;"><b><?= number_format($totalBs, 2, ",", ".") ?></b></td>
 											</tr>
 										</tbody>
 									</table>

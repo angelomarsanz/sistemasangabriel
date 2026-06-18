@@ -418,6 +418,7 @@ class ConceptsController extends AppController
 	{
 		$conceptosConsejoEducativo = [];
 		$conceptosServicioEducativo = [];
+		$conceptosSeguro = [];
 
 		$conceptos = $this->Concepts->find('all')
 			->contain(['Bills'])
@@ -438,9 +439,13 @@ class ConceptsController extends AppController
 				{
 					$conceptosServicioEducativo[] = ['bill_id' => $concepto->bill->id, 'concepto' => $concepto->student_name];
 				}
+				if ($concepto->bill->tipo_documento == 'Recibo de seguro')
+				{
+					$conceptosSeguro[] = ['bill_id' => $concepto->bill->id, 'concepto' => $concepto->concept];
+				}
 			}
 		}
 
-		return $conceptosTurno = ['consejoEducativo' => $conceptosConsejoEducativo, 'servicioEducativo' => $conceptosServicioEducativo];
+		return $conceptosTurno = ['consejoEducativo' => $conceptosConsejoEducativo, 'servicioEducativo' => $conceptosServicioEducativo, 'seguro' => $conceptosSeguro];
 	}
 }

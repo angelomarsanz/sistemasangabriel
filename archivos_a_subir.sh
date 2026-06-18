@@ -10,4 +10,7 @@ ARCHIVOS_PHP_PUNTUALES=(
     # "Ninguno"
 
     "src/Template/Turns/reporte_cierre.ctp"
+
+    "src/Controller/TurnsController.php"
+    "src/Controller/ConceptsController.php"
 )
