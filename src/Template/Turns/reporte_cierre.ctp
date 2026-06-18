@@ -1,5 +1,5 @@
 <?php
-    use Cake\Routing\Router; 
+    use Cake\Routing\Router;
 ?>
 <style>
 @media screen
@@ -13,7 +13,7 @@
 {
 	.saltopagina
 	{
-		display:block; 
+		display:block;
 		page-break-before:always;
 	}
 }
@@ -37,7 +37,7 @@
 							</tr>
 							<tr>
 								<td>&nbsp;</td>
-							</tr>	
+							</tr>
 						<?php
 						} ?>
 						<tr>
@@ -45,26 +45,26 @@
 						</tr>
 						<tr>
 							<td>&nbsp;</td>
-						</tr>							
+						</tr>
 						<tr>
 							<td><b>Tasa Oficial Dólar: <?= number_format($tasaDolar, 2, ",", ".") ?> - Tasa Oficial Euro: <?= number_format($tasaEuro, 2, ",", ".") ?></b></td>
-						</tr>							
+						</tr>
 						<tr>
 							<td>&nbsp;</td>
-						</tr>						
+						</tr>
 					</tbody>
 				</table>
 			</div>
 
 			<!-- Documentos fiscales -->
-			<?php 
+			<?php
 			if ($rolCajero == 'Seniat')
 			{ ?>
-				<div>	
+				<div>
 					<!-- Pagos fiscales -->
 					<div>
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table>
 									<thead>
 										<tr>
@@ -80,13 +80,13 @@
 								</table>
 							</div>
 						</div>
-					</div>			
+					</div>
 					<div>
 						<br />
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table class="table table-striped table-hover">
-									<thead>	
+									<thead>
 										<tr>
 											<th><b>Concepto</th>
 											<th style="text-align: center;"><b>Efvo $</b></th>
@@ -115,7 +115,7 @@
 												$reintegroTdbTdc = $recibido['TDB/TDC Bs.'];
 												$reintegroTransferencia = $recibido['Transferencia Bs.'];
 												$reintegroDeposito = $recibido['Depósito Bs.'];
-												$reintegroCheque = $recibido['Cheque Bs.'];										
+												$reintegroCheque = $recibido['Cheque Bs.'];
 											else:
 												if ($clave == 'Total recibido de ' . $cajero || $clave == "Diferencia"): ?>
 													<tr>
@@ -129,8 +129,8 @@
 														<td></td>
 														<td></td>
 														<td></td>
-													</tr> 
-												<?php 
+													</tr>
+												<?php
 												elseif ($clave == 'Total facturas + anticipos de inscripción'): ?>
 													<tr>
 														<td><b>Total facturas</b></td>
@@ -147,8 +147,8 @@
 														<td style="text-align: center;"><b><?= number_format($recibido['Transferencia Bs.'], 2, ",", ".") ?></b></td>
 														<td style="text-align: center;"><b><?= number_format($recibido['Depósito Bs.'], 2, ",", ".") ?></b></td>
 														<td style="text-align: center;"><b><?= number_format($recibido['Cheque Bs.'], 2, ",", ".") ?></b></td>
-													</tr>	
-												<?php 
+													</tr>
+												<?php
 												elseif ($clave == "Total a recibir de " . $cajero): ?>
 													<tr>
 														<td><b><?= $clave ?></b></td>
@@ -165,18 +165,18 @@
 														<td style="text-align: center;"><b><?= number_format($recibido['Transferencia Bs.'] - $reintegroTransferencia, 2, ",", ".") ?></b></td>
 														<td style="text-align: center;"><b><?= number_format($recibido['Depósito Bs.'] - $reintegroDeposito, 2, ",", ".") ?></b></td>
 														<td style="text-align: center;"><b><?= number_format($recibido['Cheque Bs.'] - $reintegroCheque, 2, ",", ".") ?></b></td>
-													</tr>														
-												<?php 
-												else: 
+													</tr>
+												<?php
+												else:
 													if ($clave != "Anticipos de inscripción" && $clave != "Menos compras" && $clave != "Más vueltos de compras"): ?>
 														<tr>
 															<?php
 															if ($clave == "Total facturas - notas de crédito + anticipos de inscripción"): ?>
 																<td>Total facturas - notas de crédito</td>
 															<?php
-															else: ?>	
+															else: ?>
 																<td><?= $clave ?></td>
-															<?php 
+															<?php
 															endif; ?>
 															<td style="text-align: center;"><?= number_format($recibido['Efectivo $'], 2, ",", ".") ?></td>
 															<td style="text-align: center;"><?= number_format($recibido['Efectivo €'], 2, ",", ".") ?></td>
@@ -186,17 +186,17 @@
 																<td style="text-align: center;"><?= number_format($recibido['Euros €'], 2, ",", ".") ?></td>
 															<?php else: ?>
 																<td style="text-align: center;"><?= "0,00" ?></td>
-															<?php endif; ?>													
+															<?php endif; ?>
 															<td style="text-align: center;"><?= number_format($recibido['TDB/TDC Bs.'], 2, ",", ".") ?></td>
 															<td style="text-align: center;"><?= number_format($recibido['Transferencia Bs.'], 2, ",", ".") ?></td>
 															<td style="text-align: center;"><?= number_format($recibido['Depósito Bs.'], 2, ",", ".") ?></td>
 															<td style="text-align: center;"><?= number_format($recibido['Cheque Bs.'], 2, ",", ".") ?></td>
-														</tr>		
+														</tr>
 													<?php
 													endif;
 												endif;
 											endif;
-										endforeach; ?>	
+										endforeach; ?>
 									</tbody>
 								</table>
 							</div>
@@ -206,17 +206,17 @@
 					<!-- Resumen general formas de pago -->
 					<div class="saltopagina">
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table>
 									<thead>
 										<?php for ($i = 1; $i <= 2; $i++): ?>
 											<tr>
 												<th>&nbsp;</th>
 											</tr>
-										<?php endfor; ?>									
+										<?php endfor; ?>
 										<tr>
 											<th style="font-size: 14px; line-height: 16px;"><b>RESUMEN GENERAL DE FORMAS DE PAGO DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
-										</tr>	
+										</tr>
 									</thead>
 								</table>
 							</div>
@@ -224,7 +224,7 @@
 					</div>
 					<div>
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr>
@@ -234,8 +234,8 @@
 											<th style="text-align: center;"><b>Bs.</b></th>
 										</tr>
 									</thead>
-									<tbody>				
-										<?php foreach ($totalFormasPago as $clave => $forma): ?> 
+									<tbody>
+										<?php foreach ($totalFormasPago as $clave => $forma): ?>
 											<?php if ($clave == "Total general cobrado Bs."): ?>
 												<tr>
 													<td><b><?= $clave ?></b></td>
@@ -263,13 +263,13 @@
 											<td style="text-align: center;">$</td>
 											<td style="text-align: center;"><b><?= number_format($totalGeneralSobrantes, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format(round($totalGeneralSobrantes * $tasaDolar, 2), 2, ",", ".") ?></b></td>
-										</tr>	
+										</tr>
 										<tr>
 											<td><b>Menos reintegros de sobrantes de este turno</b></td>
 											<td style="text-align: center;">$</td>
 											<td style="text-align: center;"><b><?= number_format($totalGeneralReintegrosSobrantes, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format(round($totalGeneralReintegrosSobrantes * $tasaDolar, 2), 2, ",", ".") ?></b></td>
-										</tr>											
+										</tr>
 										<tr>
 											<td><b>Total general cobrado + facturas compensadas - sobrantes (vueltos pendientes por entregar) - reintegros de sobrantes de este turno</b></td>
 											<td></td>
@@ -303,12 +303,12 @@
 					<!-- Detalle de facturas y anticipos de inscripción -->
 					<div class="saltopagina">
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table>
 									<thead>
 										<tr>
 											<th>&nbsp;</th>
-										</tr>	
+										</tr>
 										<tr>
 											<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE FACTURAS DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 										</tr>
@@ -319,7 +319,7 @@
 					</div>
 					<div>
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr>
@@ -345,11 +345,11 @@
 											<th style="text-align: center;"><b>TCM</b></th>
 										</tr>
 									</thead>
-									<tbody>				
-										<?php $cobradoBolivares = 0; 
+									<tbody>
+										<?php $cobradoBolivares = 0;
 										$totalCobradoBolivares = 0;
 										$totalFacturaDolar = 0;
-										$totalFacturaBolivar = 0; 
+										$totalFacturaBolivar = 0;
 										$totalEfectivoDolar = 0;
 										$totalEfectivoEuro = 0;
 										$totalEfectivoBolivar = 0;
@@ -379,7 +379,7 @@
 												$facturaDeAnticipo = $pago['facturaDeAnticipo'];
 											endif;
 											if ($facturaDeAnticipo == 0):
-												if ($pago['tipoDocumento'] == "Factura" || $pago['tipoDocumento'] == "Recibo de anticipo"): ?> 
+												if ($pago['tipoDocumento'] == "Factura" || $pago['tipoDocumento'] == "Recibo de anticipo"): ?>
 													<tr>
 														<td><?= $pago['familia']; ?></td>
 														<td style="text-align: center;"><?= $pago['nroControl'] . " " . $pago['nroFactura']; ?></td>
@@ -406,27 +406,27 @@
 															<td style="text-align: center;"><?= "0,00<br />0,00" ?></td>
 														<?php endif; ?>
 														<td style="text-align: center;"><?= number_format($pago['tddTdcBolivar'], 2, ",", ".")."<br />".number_format($pago['IGTFtddTdcBolivar'], 2, ",", ".") ?></td>
-														<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".")."<br />".number_format($pago['IGTFtransferenciaBolivar'], 2, ",", ".") ?></td>										
+														<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".")."<br />".number_format($pago['IGTFtransferenciaBolivar'], 2, ",", ".") ?></td>
 														<td style="text-align: center;"><?= $numeroTarjeta ?></td>
 														<td style="text-align: center;"><?= number_format($pago['chequeBolivar'], 2, ",", ".")."<br />".number_format($pago['IGTFchequeBolivar'], 2, ",", ".") ?></td>
-														<?php $cobradoBolivares = 
+														<?php $cobradoBolivares =
 															round(($pago['efectivoDolar'] + $pago['zelleDolar']) * $pago['tasaDolar'], 2) +
 															round($pago['efectivoEuro'] * $pago['tasaEuro'], 2) +
-															$pago['efectivoBolivar'] + 
-															$pago['tddTdcBolivar'] + 
+															$pago['efectivoBolivar'] +
+															$pago['tddTdcBolivar'] +
 															$pago['transferenciaBolivar'] +
 															$pago['depositoBolivar'] +
-															$pago['chequeBolivar']; 
-															if (isset($pago['euros'])): 
-																$cobradoBolivares += round($pago['euros'] * $pago['tasaEuro'], 2); 
-															endif; ?>														
+															$pago['chequeBolivar'];
+															if (isset($pago['euros'])):
+																$cobradoBolivares += round($pago['euros'] * $pago['tasaEuro'], 2);
+															endif; ?>
 														<td style="text-align: center;"><?= number_format($cobradoBolivares, 2, ",", ".")."<br />".number_format($pago['montoIgtfFacturaBolivar'], 2, ",", ".") ?></td>
 														<?php $compensado = round($pago['compensadoDolar'] * $pago['tasaDolar'], 2); ?>
 														<td style="text-align: center;"><?= number_format($compensado, 2, ",", ".") ?></td>
 														<?php if (isset($pago['descuentoRecargo'])):
 															$diferencia = ($pago['totalFacturaBolivar'] + $pago['descuentoRecargo']) - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));
-														else: 
-															$diferencia = $pago['totalFacturaBolivar'] - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));													
+														else:
+															$diferencia = $pago['totalFacturaBolivar'] - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));
 														endif; ?>
 														<td style="text-align: center;"><?= number_format($diferencia, 2, ",", ".") ?></td>
 														<?php if (isset($pago['tasaTemporalDolar'])):
@@ -451,9 +451,9 @@
 														endif; ?>
 														<td style="text-align: center;"><?= $transferenciaDestiempo . $cuotasAlumnoBecado . $cambioMontoCuota; ?></td>
 													</tr>
-													<?php $totalFacturaDolar += $pago['totalFacturaDolar'];  
-													$totalFacturaBolivar += $pago['totalFacturaBolivar']; 
-													if (isset($pago['descuentoRecargo'])): 
+													<?php $totalFacturaDolar += $pago['totalFacturaDolar'];
+													$totalFacturaBolivar += $pago['totalFacturaBolivar'];
+													if (isset($pago['descuentoRecargo'])):
 														$totalDescuentosRecargosFA += $pago['descuentoRecargo'];
 													endif;
 													$totalEfectivoDolar += $pago['efectivoDolar'];
@@ -462,7 +462,7 @@
 													$totalZelle += $pago['zelleDolar'];
 													if (isset($pago['euros'])):
 														$totalEuros += $pago['euros'];
-													endif; 
+													endif;
 													$totalTdbTdc += $pago['tddTdcBolivar'];
 													$totalTransferencias += $pago['transferenciaBolivar'];
 													$totalDepositos += $pago['depositoBolivar'];
@@ -478,8 +478,8 @@
 											<td></td>
 											<td></td>
 											<td style="text-align: center;"><b><?= number_format($totalFacturaDolar, 2, ",", ".") ?></b></td>
-											<td style="text-align: center;"><b><?= number_format($totalFacturaBolivar, 2, ",", ".") ?></b></td>												
-											<td style="text-align: center;"><b><?= number_format($totalDescuentosRecargosFA, 2, ",", ".") ?></b></td>	
+											<td style="text-align: center;"><b><?= number_format($totalFacturaBolivar, 2, ",", ".") ?></b></td>
+											<td style="text-align: center;"><b><?= number_format($totalDescuentosRecargosFA, 2, ",", ".") ?></b></td>
 											<td></td>
 											<td style="text-align: center;"><b><?= number_format($totalEfectivoDolar, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalEfectivoEuro, 2, ",", ".") ?></b></td>
@@ -487,13 +487,13 @@
 											<td style="text-align: center;"><b><?= number_format($totalZelle, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalEuros, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalTdbTdc, 2, ",", ".") ?></b></td>
-											<td style="text-align: center;"><b><?= number_format($totalTransferencias, 2, ",", ".") ?></b></td>										
+											<td style="text-align: center;"><b><?= number_format($totalTransferencias, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalDepositos, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalCheques, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalCobradoBolivares, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalCompensado, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalDiferencia, 2, ",", ".") ?></b></td>
-											<td></td>											
+											<td></td>
 										</tr>
 										<tr>
 											<td><i>Leyenda: T = Transferencia destiempo, C = Convenio y M = Cambio monto cuota</i></td>
@@ -504,20 +504,20 @@
 								</table>
 							</div>
 						</div>
-					</div>	
+					</div>
 
-					<?php 
+					<?php
 					if ($indicadorNotasCredito == 1 || $indicadorNotasDebito == 1): ?>
 						<div class="saltopagina">
 							<?php if ($indicadorNotasCredito == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE NOTAS DE CRÉDITO DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -528,7 +528,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -543,10 +543,10 @@
 														<th style="text-align: center;"><b>Monto Bs.</b></th>
 													</tr>
 												</thead>
-												<tbody>				
+												<tbody>
 													<?php $totalBolivar = 0;
-													foreach ($facturas as $factura):  
-														if ($factura->tipo_documento == "Nota de crédito"): ?> 
+													foreach ($facturas as $factura):
+														if ($factura->tipo_documento == "Nota de crédito"): ?>
 															<tr>
 																<td><?= $factura->parentsandguardian->family ?></td>
 																<td style="text-align: center;"><?= $factura->date_and_time->format('d-m-Y') ?></td>
@@ -582,12 +582,12 @@
 							<?php if ($indicadorNotasDebito == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE NOTAS DE DÉBITO DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -598,7 +598,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -613,9 +613,9 @@
 														<th style="text-align: center;"><b>Monto Bs.</b></th>
 													</tr>
 												</thead>
-												<tbody>				
+												<tbody>
 													<?php $totalBolivar = 0;
-													foreach ($facturas as $factura):  
+													foreach ($facturas as $factura):
 														if ($factura->tipo_documento == "Nota de débito"): ?>
 															<tr>
 																<td><?= $factura->parentsandguardian->family ?></td>
@@ -649,22 +649,22 @@
 								</div>
 							<?php endif; ?>
 						</div>
-					<?php 
+					<?php
 					endif; ?>
 
-					<?php 
+					<?php
 					if ($indicadorReintegros == 1 || $indicadorSobrantes == 1 || $indicadorFacturasRecibos == 1 || $indicadorCompras == 1): ?>
 						<div class="saltopagina">
-							<?php 
+							<?php
 							if ($indicadorReintegros == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE REINTEGROS DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -675,7 +675,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -687,12 +687,12 @@
 														<th style="text-align: center;"><b>Monto Bs.</b></th>
 													</tr>
 												</thead>
-												<tbody>				
+												<tbody>
 													<?php $totalDolar = 0;
 													$totalEuro = 0;
 													$totalBolivar = 0;
-													foreach ($facturas as $factura):  
-														if ($factura->tipo_documento == "Recibo de reintegro"): ?> 
+													foreach ($facturas as $factura):
+														if ($factura->tipo_documento == "Recibo de reintegro"): ?>
 															<tr>
 																<td><?= $factura->parentsandguardian->family ?></td>
 																<td style="text-align: center;"><?= $factura->bill_number ?></td>
@@ -715,7 +715,7 @@
 														<td></td>
 														<td></td>
 														<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
-														<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>											
+														<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>
 														<td style="text-align: center;"><b><?= number_format($totalBolivar, 2, ",", ".") ?></b></td>
 													</tr>
 												</tbody>
@@ -723,17 +723,17 @@
 										</div>
 									</div>
 								</div>
-							<?php 
-							endif; 
+							<?php
+							endif;
 							if ($indicadorSobrantes == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE SOBRANTES (VUELTOS PENDIENTES POR ENTREGAR) DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -744,7 +744,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -754,8 +754,8 @@
 														<th style="text-align: center;"><b>Monto $.</b></th>
 													</tr>
 												</thead>
-												<tbody>				
-													<?php foreach ($facturas as $factura):  
+												<tbody>
+													<?php foreach ($facturas as $factura):
 														if ($factura->tipo_documento == "Recibo de sobrante"): ?>
 															<tr>
 																<td><?= $factura->parentsandguardian->family ?></td>
@@ -776,17 +776,17 @@
 										</div>
 									</div>
 								</div>
-							<?php 
-							endif; 
+							<?php
+							endif;
 							if ($indicadorFacturasRecibos == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE FACTURAS CORRESPONDIENTES A ANTICIPOS DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -797,7 +797,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -808,9 +808,9 @@
 														<th style="text-align: center;"><b>Monto Bs.</b></th>
 													</tr>
 												</thead>
-												<tbody>				
+												<tbody>
 													<?php $totalBolivar = 0;
-													foreach ($facturas as $factura):  
+													foreach ($facturas as $factura):
 														if ($factura->id_anticipo > 0): ?>
 															<tr>
 																<td><?= $factura->parentsandguardian->family ?></td>
@@ -834,17 +834,17 @@
 										</div>
 									</div>
 								</div>
-							<?php 
-							endif; 
+							<?php
+							endif;
 							if ($indicadorCompras == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE COMPRAS DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -855,7 +855,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -867,12 +867,12 @@
 														<th style="text-align: center;"><b>Monto Bs.</b></th>
 													</tr>
 												</thead>
-												<tbody>				
+												<tbody>
 													<?php $totalDolar = 0;
 													$totalEuro = 0;
 													$totalBolivar = 0;
-													foreach ($facturas as $factura):  
-														if ($factura->tipo_documento == "Recibo de compra"): ?> 
+													foreach ($facturas as $factura):
+														if ($factura->tipo_documento == "Recibo de compra"): ?>
 															<tr>
 																<td><?= $factura->parentsandguardian->family ?></td>
 																<td style="text-align: center;"><?= $factura->bill_number ?></td>
@@ -895,7 +895,7 @@
 														<td></td>
 														<td></td>
 														<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
-														<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>											
+														<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>
 														<td style="text-align: center;"><b><?= number_format($totalBolivar, 2, ",", ".") ?></b></td>
 													</tr>
 												</tbody>
@@ -906,20 +906,20 @@
 							<?php
 							endif; ?>
 						</div>
-					<?php 
+					<?php
 					endif;
 					if ($indicadorFacturasAnuladas == 1 || $indicadorRecibosAnulados == 1): ?>
 						<div class="saltopagina">
-							<?php 
+							<?php
 							if ($indicadorFacturasAnuladas == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE FACTURAS ANULADAS EL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -930,7 +930,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -939,10 +939,10 @@
 														<th style="text-align: center;"><b>Tipo doc</b></th>
 													</tr>
 												</thead>
-												<tbody>				
+												<tbody>
 													<?php $totalBolivar = 0;
-													foreach ($documentosAnulados as $anulado):  
-														if ($anulado->fiscal == 1): ?> 
+													foreach ($documentosAnulados as $anulado):
+														if ($anulado->fiscal == 1): ?>
 															<tr>
 																<td style="text-align: center;"><?= $numero_control_anulado = $anulado->control_number == 999999 ? "S/N": $anulado->control_number; ?></td>
 																<td style="text-align: center;"><?= $anulado->bill_number ?></td>
@@ -955,17 +955,17 @@
 										</div>
 									</div>
 								</div>
-							<?php 
+							<?php
 							endif;
 							if ($indicadorRecibosAnulados == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS ANULADOS EL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -976,7 +976,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -984,21 +984,21 @@
 														<th style="text-align: center;"><b>Tipo doc</b></th>
 													</tr>
 												</thead>
-												<tbody>				
+												<tbody>
 													<?php $totalBolivar = 0;
-													foreach ($documentosAnulados as $anulado):  
-														if ($anulado->fiscal == 0):  
+													foreach ($documentosAnulados as $anulado):
+														if ($anulado->fiscal == 0):
 															if ($anulado->tipo_documento != "Pedido"
 																&& $anulado->tipo_documento != "Recibo de compra de pedido"
 																&& $anulado->tipo_documento != "Recibo de reintegro de pedido"
 																&& $anulado->tipo_documento != "Recibo de sobrante de pedido"
 																&& $anulado->tipo_documento != "Recibo de seguro"
-																&& $anulado->tipo_documento != "Recibo de compra de pedido"): ?> 
+																&& $anulado->tipo_documento != "Recibo de compra de pedido"): ?>
 																	<tr>
 																		<td style="text-align: center;"><?= $anulado->control_number ?></td>
 																		<td style="text-align: center;"><?= $anulado->tipo_documento ?></td>
 																	</tr>
-															<?php 
+															<?php
 															endif;
 														endif;
 													endforeach; ?>
@@ -1007,16 +1007,16 @@
 										</div>
 									</div>
 								</div>
-							<?php 
+							<?php
 							endif; ?>
 						</div>
-					<?php 
-					endif; ?> 
+					<?php
+					endif; ?>
 				</div>
 				<!-- Espacio de firmas de conformidad de los documentos fiscales -->
 				<div>
 					<div class="row">
-						<div class="col-md-12">					
+						<div class="col-md-12">
 							<table>
 								<thead>
 									<tr>
@@ -1061,14 +1061,14 @@
 			<!-- Documentos no fiscales -->
 			<?php
 			if ($rolCajero != 'Seniat')
-			{ ?> 
+			{ ?>
 				<div>
 					<!-- Pedidos -->
-					<?php 
+					<?php
 					if (isset($vectorTotalesRecibidosPedidos)): ?>
 						<div>
 							<div class="row">
-								<div class="col-md-12">					
+								<div class="col-md-12">
 									<table>
 										<thead>
 											<tr>
@@ -1076,7 +1076,7 @@
 											</tr>
 											<tr>
 												<th style="font-size: 16px; line-height: 18px;">Cajero: <?= $cajero ?></th>
-											</tr>	
+											</tr>
 											<tr>
 												<th>&nbsp;</th>
 											</tr>
@@ -1087,13 +1087,13 @@
 									</table>
 								</div>
 							</div>
-						</div>			
+						</div>
 						<div>
 							<br />
 							<div class="row">
-								<div class="col-md-12">					
+								<div class="col-md-12">
 									<table class="table table-striped table-hover">
-										<thead>	
+										<thead>
 											<tr>
 												<th><b>Concepto</th>
 												<th style="text-align: center;"><b>Efvo $</b></th>
@@ -1122,7 +1122,7 @@
 													$reintegroTdbTdc = $recibido['TDB/TDC Bs.'];
 													$reintegroTransferencia = $recibido['Transferencia Bs.'];
 													$reintegroDeposito = $recibido['Depósito Bs.'];
-													$reintegroCheque = $recibido['Cheque Bs.'];										
+													$reintegroCheque = $recibido['Cheque Bs.'];
 												else:
 													if ($clave == 'Total recibido de ' . $cajero || $clave == "Diferencia"): ?>
 														<tr>
@@ -1136,8 +1136,8 @@
 															<td></td>
 															<td></td>
 															<td></td>
-														</tr> 
-													<?php elseif ($clave == 'Total facturas + anticipos de inscripción'): ?> 												
+														</tr>
+													<?php elseif ($clave == 'Total facturas + anticipos de inscripción'): ?>
 														<tr>
 															<td><b><?= $clave ?></b></td>
 															<td style="text-align: center;"><b><?= number_format($recibido['Efectivo $'], 2, ",", ".") ?></b></td>
@@ -1153,7 +1153,7 @@
 															<td style="text-align: center;"><b><?= number_format($recibido['Transferencia Bs.'], 2, ",", ".") ?></b></td>
 															<td style="text-align: center;"><b><?= number_format($recibido['Depósito Bs.'], 2, ",", ".") ?></b></td>
 															<td style="text-align: center;"><b><?= number_format($recibido['Cheque Bs.'], 2, ",", ".") ?></b></td>
-														</tr>		
+														</tr>
 													<?php elseif ($clave == "Total a recibir de " . $cajero): ?>
 														<tr>
 															<td><b><?= $clave ?></b></td>
@@ -1170,7 +1170,7 @@
 															<td style="text-align: center;"><b><?= number_format($recibido['Transferencia Bs.'] - $reintegroTransferencia, 2, ",", ".") ?></b></td>
 															<td style="text-align: center;"><b><?= number_format($recibido['Depósito Bs.'] - $reintegroDeposito, 2, ",", ".") ?></b></td>
 															<td style="text-align: center;"><b><?= number_format($recibido['Cheque Bs.'] - $reintegroCheque, 2, ",", ".") ?></b></td>
-														</tr>														
+														</tr>
 													<?php else: ?>
 														<tr>
 															<td><?= $clave ?></td>
@@ -1182,7 +1182,7 @@
 																<td style="text-align: center;"><?= number_format($recibido['Euros €'], 2, ",", ".") ?></td>
 															<?php else: ?>
 																<td style="text-align: center;"><?= "0,00" ?></td>
-															<?php endif; ?>													
+															<?php endif; ?>
 															<td style="text-align: center;"><?= number_format($recibido['TDB/TDC Bs.'], 2, ",", ".") ?></td>
 															<td style="text-align: center;"><?= number_format($recibido['Transferencia Bs.'], 2, ",", ".") ?></td>
 															<td style="text-align: center;"><?= number_format($recibido['Depósito Bs.'], 2, ",", ".") ?></td>
@@ -1190,33 +1190,33 @@
 														</tr>
 													<?php endif;
 												endif;
-											endforeach; ?>	
+											endforeach; ?>
 										</tbody>
 									</table>
 								</div>
 							</div>
 						</div>
-					<?php 
+					<?php
 					endif; ?>
 
 					<!-- Detalle de pedidos -->
 					<div class="saltopagina">
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table>
 									<thead>
 										<tr>
 											<th>&nbsp;</th>
-										</tr>	
+										</tr>
 										<tr>
 											<th style="font-size: 18px; line-height: 20px;"><b>DETALLE DE PEDIDOS DEL <?= $turn->start_date->format('d-m-Y') ?></b></th>
 										</tr>
 										<tr>
 											<th>&nbsp;</th>
-										</tr>	
+										</tr>
 										<tr>
 											<th>&nbsp;</th>
-										</tr>	
+										</tr>
 									</thead>
 								</table>
 							</div>
@@ -1224,7 +1224,7 @@
 					</div>
 					<div>
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr>
@@ -1250,11 +1250,11 @@
 											<th style="text-align: center;"><b>TCM</b></th>
 										</tr>
 									</thead>
-									<tbody>				
-										<?php $cobradoBolivares = 0;  
-										$totalCobradoBolivares = 0;  
-										$totalFacturaDolar = 0;  
-										$totalFacturaBolivar = 0; 
+									<tbody>
+										<?php $cobradoBolivares = 0;
+										$totalCobradoBolivares = 0;
+										$totalFacturaDolar = 0;
+										$totalFacturaBolivar = 0;
 										$totalDescuentosRecargosSE = 0;
 										$totalEfectivoDolar = 0;
 										$totalEfectivoEuro = 0;
@@ -1274,7 +1274,7 @@
 											if (isset($pago['numeroTarjeta']))
 											{
 												$numeroTarjeta = $pago['numeroTarjeta'];
-											} 
+											}
 											$transferenciaDestiempo = "";
 											$cuotasAlumnoBecado = "";
 											$cambioMontoCuota = "";
@@ -1301,29 +1301,29 @@
 														<td style="text-align: center;"><?= "0,00" ?></td>
 													<?php endif; ?>
 													<td style="text-align: center;"><?= number_format($pago['tddTdcBolivar'], 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>										
+													<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>
 													<td style="text-align: center;"><?= $numeroTarjeta ?></td>
 													<td style="text-align: center;"><?= number_format($pago['chequeBolivar'], 2, ",", ".") ?></td>
-													<?php $cobradoBolivares = 
+													<?php $cobradoBolivares =
 														round(($pago['efectivoDolar'] + $pago['zelleDolar']) * $pago['tasaDolar'], 2) +
 														round($pago['efectivoEuro'] * $pago['tasaEuro'], 2) +
-														$pago['efectivoBolivar'] + 
-														$pago['tddTdcBolivar'] + 
+														$pago['efectivoBolivar'] +
+														$pago['tddTdcBolivar'] +
 														$pago['transferenciaBolivar'] +
 														$pago['depositoBolivar'] +
-														$pago['chequeBolivar']; 
-														if (isset($pago['euros'])): 
-															$cobradoBolivares += round($pago['euros'] * $pago['tasaEuro'], 2); 
-														endif; ?>														
+														$pago['chequeBolivar'];
+														if (isset($pago['euros'])):
+															$cobradoBolivares += round($pago['euros'] * $pago['tasaEuro'], 2);
+														endif; ?>
 													<td style="text-align: center;"><?= number_format($cobradoBolivares, 2, ",", ".") ?></td>
 													<?php $compensado = round($pago['compensadoDolar'] * $pago['tasaDolar'], 2); ?>
 													<td style="text-align: center;"><?= number_format($compensado, 2, ",", ".") ?></td>
 													<?php if (isset($pago['descuentoRecargo'])):
 														$diferencia = ($pago['totalFacturaBolivar'] + $pago['descuentoRecargo']) - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));
-													else: 
-														$diferencia = $pago['totalFacturaBolivar'] - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));													
+													else:
+														$diferencia = $pago['totalFacturaBolivar'] - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));
 													endif; ?>
-													<td style="text-align: center;"><?= number_format($diferencia, 2, ",", ".") ?></td>	
+													<td style="text-align: center;"><?= number_format($diferencia, 2, ",", ".") ?></td>
 													<?php if (isset($pago['tasaTemporalDolar'])):
 														if ($pago['tasaTemporalDolar'] == 1):
 															$transferenciaDestiempo = "T";
@@ -1346,18 +1346,18 @@
 													endif; ?>
 													<td style="text-align: center;"><?= $transferenciaDestiempo . $cuotasAlumnoBecado . $cambioMontoCuota; ?></td>
 												</tr>
-												<?php $totalFacturaDolar += $pago['totalFacturaDolar']; 
-												$totalFacturaBolivar += $pago['totalFacturaBolivar']; 
+												<?php $totalFacturaDolar += $pago['totalFacturaDolar'];
+												$totalFacturaBolivar += $pago['totalFacturaBolivar'];
 												$totalEfectivoDolar += $pago['efectivoDolar'];
-												if (isset($pago['descuentoRecargo'])): 
+												if (isset($pago['descuentoRecargo'])):
 													$totalDescuentosRecargosSE += $pago['descuentoRecargo'];
 												endif;
 												$totalEfectivoEuro += $pago['efectivoEuro'];
 												$totalEfectivoBolivar += $pago['efectivoBolivar'];
 												$totalZelle += $pago['zelleDolar'];
-												if (isset($pago['euros'])): 
+												if (isset($pago['euros'])):
 													$totalEuros += $pago['euros'];
-												endif; 
+												endif;
 												$totalTdbTdc += $pago['tddTdcBolivar'];
 												$totalTransferencias += $pago['transferenciaBolivar'];
 												$totalDepositos += $pago['depositoBolivar'];
@@ -1371,8 +1371,8 @@
 											<td><b>Totales</b></td>
 											<td></td>
 											<td></td>
-											<td style="text-align: center;"><b><?= number_format($totalFacturaDolar, 2, ",", ".") ?></b></td>	
-											<td style="text-align: center;"><b><?= number_format($totalFacturaBolivar, 2, ",", ".") ?></b></td>												
+											<td style="text-align: center;"><b><?= number_format($totalFacturaDolar, 2, ",", ".") ?></b></td>
+											<td style="text-align: center;"><b><?= number_format($totalFacturaBolivar, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalDescuentosRecargosSE, 2, ",", ".") ?></b></td>
 											<td></td>
 											<td style="text-align: center;"><b><?= number_format($totalEfectivoDolar, 2, ",", ".") ?></b></td>
@@ -1381,13 +1381,13 @@
 											<td style="text-align: center;"><b><?= number_format($totalZelle, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalEuros, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalTdbTdc, 2, ",", ".") ?></b></td>
-											<td style="text-align: center;"><b><?= number_format($totalTransferencias, 2, ",", ".") ?></b></td>										
+											<td style="text-align: center;"><b><?= number_format($totalTransferencias, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalDepositos, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalCheques, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalCobradoBolivares, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalCompensado, 2, ",", ".") ?></b></td>
-											<td style="text-align: center;"><b><?= number_format($totalDiferencia, 2, ",", ".") ?></b></td>	
-											<td></td>												
+											<td style="text-align: center;"><b><?= number_format($totalDiferencia, 2, ",", ".") ?></b></td>
+											<td></td>
 										</tr>
 										<tr>
 											<td><i>Leyenda: T = Transferencia destiempo, C = Convenio y M = Cambio monto cuota</i></td>
@@ -1400,18 +1400,18 @@
 						</div>
 					</div>
 
-					<?php 
+					<?php
 					if ($indicadorReintegrosPedidos == 1 || $indicadorSobrantesPedidos == 1 || $indicadorComprasPedidos == 1): ?>
 						<div class="saltopagina">
 							<?php if ($indicadorReintegrosPedidos == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE REINTEGROS DE PEDIDOS DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -1422,7 +1422,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -1434,12 +1434,12 @@
 														<th style="text-align: center;"><b>Monto Bs.</b></th>
 													</tr>
 												</thead>
-												<tbody>				
+												<tbody>
 													<?php $totalDolar = 0;
 													$totalEuro = 0;
 													$totalBolivar = 0;
-													foreach ($facturas as $factura):  
-														if ($factura->tipo_documento == "Recibo de reintegro de pedido"): ?> 
+													foreach ($facturas as $factura):
+														if ($factura->tipo_documento == "Recibo de reintegro de pedido"): ?>
 															<tr>
 																<td><?= $factura->parentsandguardian->family ?></td>
 																<td style="text-align: center;"><?= $factura->bill_number ?></td>
@@ -1462,7 +1462,7 @@
 														<td></td>
 														<td></td>
 														<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
-														<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>											
+														<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>
 														<td style="text-align: center;"><b><?= number_format($totalBolivar, 2, ",", ".") ?></b></td>
 													</tr>
 												</tbody>
@@ -1470,17 +1470,17 @@
 										</div>
 									</div>
 								</div>
-							<?php endif; ?>			
+							<?php endif; ?>
 
 							<?php if ($indicadorSobrantesPedidos == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE SOBRANTES DE PEDIDOS (VUELTOS PENDIENTES POR ENTREGAR) DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -1491,7 +1491,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -1501,8 +1501,8 @@
 														<th style="text-align: center;"><b>Monto $.</b></th>
 													</tr>
 												</thead>
-												<tbody>				
-													<?php foreach ($facturas as $factura):  
+												<tbody>
+													<?php foreach ($facturas as $factura):
 														if ($factura->tipo_documento == "Recibo de sobrante de pedido"): ?>
 															<tr>
 																<td><?= $factura->parentsandguardian->family ?></td>
@@ -1523,17 +1523,17 @@
 										</div>
 									</div>
 								</div>
-							<?php endif; ?>			
+							<?php endif; ?>
 
 							<?php if ($indicadorComprasPedidos == 1): ?>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table>
 												<thead>
 													<tr>
 														<th>&nbsp;</th>
-													</tr>	
+													</tr>
 													<tr>
 														<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE COMPRAS DE PEDIDO DEL <?= $turn->start_date->format('d-m-Y') ?>:</b></th>
 													</tr>
@@ -1544,7 +1544,7 @@
 								</div>
 								<div>
 									<div class="row">
-										<div class="col-md-12">					
+										<div class="col-md-12">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -1556,12 +1556,12 @@
 														<th style="text-align: center;"><b>Monto Bs.</b></th>
 													</tr>
 												</thead>
-												<tbody>				
+												<tbody>
 													<?php $totalDolar = 0;
 													$totalEuro = 0;
 													$totalBolivar = 0;
-													foreach ($facturas as $factura):  
-														if ($factura->tipo_documento == "Recibo de compra de pedido"): ?> 
+													foreach ($facturas as $factura):
+														if ($factura->tipo_documento == "Recibo de compra de pedido"): ?>
 															<tr>
 																<td><?= $factura->parentsandguardian->family ?></td>
 																<td style="text-align: center;"><?= $factura->bill_number ?></td>
@@ -1584,7 +1584,7 @@
 														<td></td>
 														<td></td>
 														<td style="text-align: center;"><b><?= number_format($totalDolar, 2, ",", ".") ?></b></td>
-														<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>											
+														<td style="text-align: center;"><b><?= number_format($totalEuro, 2, ",", ".") ?></b></td>
 														<td style="text-align: center;"><b><?= number_format($totalBolivar, 2, ",", ".") ?></b></td>
 													</tr>
 												</tbody>
@@ -1594,22 +1594,22 @@
 								</div>
 							<?php endif; ?>
 						</div>
-					<?php 
-					endif; ?>	
+					<?php
+					endif; ?>
 
-					<?php 
+					<?php
 					if ($indicadorPedidosAnulados == 1 || $indicadorRecibosAnuladosPedidos == 1): ?>
 						<div class="saltopagina">
 
 						<?php if ($indicadorPedidosAnulados == 1): ?>
 							<div>
 								<div class="row">
-									<div class="col-md-12">					
+									<div class="col-md-12">
 										<table>
 											<thead>
 												<tr>
 													<th>&nbsp;</th>
-												</tr>	
+												</tr>
 												<tr>
 													<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE PEDIDOS ANULADOS:</b></th>
 												</tr>
@@ -1620,7 +1620,7 @@
 							</div>
 							<div>
 								<div class="row">
-									<div class="col-md-12">					
+									<div class="col-md-12">
 										<table class="table table-striped table-hover">
 											<thead>
 												<tr>
@@ -1631,21 +1631,21 @@
 													<th style="text-align: center;"><b>Monto Bs.</b></th>
 												</tr>
 											</thead>
-											<tbody>				
-												<?php 
+											<tbody>
+												<?php
 												$totalBolivar = 0;
 
-												foreach ($documentosAnulados as $anulado):  
+												foreach ($documentosAnulados as $anulado):
 													if ($anulado->fiscal == 0):
-														if ($anulado->tipo_documento == "Pedido"): ?> 
-															<tr>												
+														if ($anulado->tipo_documento == "Pedido"): ?>
+															<tr>
 																<td style="text-align: center;"><?= $anulado->date_and_time->format('d-m-Y') ?></td>
 																<td style="text-align: center;"><?= $anulado->parentsandguardian->family ?></td>
 																<td style="text-align: center;"><?= $anulado->bill_number ?></td>
 																<td style="text-align: center;"><?= number_format(round($anulado->amount_paid / $anulado->tasa_cambio, 2), 2, ",", ".") ?></td>
 																<td style="text-align: center;"><?= number_format($anulado->amount_paid, 2, ",", ".")   ?></td>
 															</tr>
-														<?php 
+														<?php
 														endif;
 													endif;
 												endforeach; ?>
@@ -1659,12 +1659,12 @@
 						<?php if ($indicadorRecibosAnuladosPedidos == 1): ?>
 							<div>
 								<div class="row">
-									<div class="col-md-12">					
+									<div class="col-md-12">
 										<table>
 											<thead>
 												<tr>
 													<th>&nbsp;</th>
-												</tr>	
+												</tr>
 												<tr>
 													<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS ANULADOS:</b></th>
 												</tr>
@@ -1675,7 +1675,7 @@
 							</div>
 							<div>
 								<div class="row">
-									<div class="col-md-12">					
+									<div class="col-md-12">
 										<table class="table table-striped table-hover">
 											<thead>
 												<tr>
@@ -1683,21 +1683,21 @@
 													<th style="text-align: center;"><b>Tipo doc</b></th>
 												</tr>
 											</thead>
-											<tbody>				
-												<?php 
+											<tbody>
+												<?php
 												$totalBolivar = 0;
 
-												foreach ($documentosAnulados as $anulado):  
+												foreach ($documentosAnulados as $anulado):
 													if ($anulado->fiscal == 0):
 														if ($anulado->tipo_documento == "Recibo de reintegro de pedido"
 															|| $anulado->tipo_documento == "Recibo de sobrante de pedido"
 															|| $anulado->tipo_documento == "Recibo de compra de pedido"
-															|| $anulado->tipo_documento == "Recibo de vuelto de compra de pedido"): ?> 
+															|| $anulado->tipo_documento == "Recibo de vuelto de compra de pedido"): ?>
 															<tr>
 																<td style="text-align: center;"><?= $anulado->control_number ?></td>
 																<td style="text-align: center;"><?= $anulado->tipo_documento ?></td>
 															</tr>
-														<?php 
+														<?php
 														endif;
 													endif;
 												endforeach; ?>
@@ -1708,13 +1708,13 @@
 							</div>
 						<?php endif; ?>
 						</div>
-					<?php 
-					endif; ?>	
+					<?php
+					endif; ?>
 
 					<!-- Espacio de firmas de conformidad de pedidos -->
 					<div>
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table>
 									<thead>
 										<tr>
@@ -1759,7 +1759,7 @@
 					<?php // if ($indicadorRecibosSeguro == 1): ?>
 						<div class="saltopagina">
 							<div class="row">
-								<div class="col-md-12">					
+								<div class="col-md-12">
 									<table>
 										<thead>
 											<tr>
@@ -1767,11 +1767,11 @@
 											</tr>
 											<tr>
 												<th style="font-size: 16px; line-height: 18px;">Cajero: <?= $cajero ?></th>
-											</tr>	
+											</tr>
 
 											<tr>
 												<th>&nbsp;</th>
-											</tr>	
+											</tr>
 											<tr>
 												<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS DE SEGURO:</b></th>
 											</tr>
@@ -1782,7 +1782,7 @@
 						</div>
 						<div>
 							<div class="row">
-								<div class="col-md-12">					
+								<div class="col-md-12">
 									<table class="table table-striped table-hover">
 										<thead>
 											<tr>
@@ -1800,8 +1800,8 @@
 												<th style="text-align: center;"><b>Total Bs.</b></th>
 											</tr>
 										</thead>
-										<tbody>				
-											<?php 
+										<tbody>
+											<?php
 											$totalBs = 0;
 											$totalEfectivoDolar = 0;
 											$totalEfectivoEuro = 0;
@@ -1810,8 +1810,8 @@
 											$totalEuros = 0;
 											$totalTdbTdc = 0;
 											$totalTransferencias = 0;
-											foreach ($facturas as $factura):  
-												if ($factura->tipo_documento == "Recibo de seguro"): 
+											foreach ($facturas as $factura):
+												if ($factura->tipo_documento == "Recibo de seguro"):
 													$efectivoDolar = 0;
 													$efectivoEuro = 0;
 													$efectivoBolivar = 0;
@@ -1822,7 +1822,7 @@
 													foreach ($pagosFacturas as $pago)
 													{
 														if ($pago->bill_id == $factura->id)
-														{ 
+														{
 															if ($pago->payment_type == "Efectivo")
 															{
 																if ($pago->moneda == "$")
@@ -1862,7 +1862,7 @@
 																$totalTransferencias += $pago->amount;
 															}
 														}
-													} ?> 
+													} ?>
 													<tr>
 														<td style="text-align: center;"><?= $factura->date_and_time->format('d-m-Y') ?></td>
 														<td><?= $factura->parentsandguardian->family ?></td>
@@ -1874,7 +1874,7 @@
 																if ($concepto['bill_id'] == $factura->id)
 																{
 																	echo $concepto['concepto'].'<br />';
-																} 
+																}
 															}
 															?>
 														</td>
@@ -1885,8 +1885,8 @@
 														<td style="text-align: center;"><?= number_format($euros, 2, ",", ".") ?></td>
 														<td style="text-align: center;"><?= number_format($tdbTdc, 2, ",", ".") ?></td>
 														<td style="text-align: center;"><?= number_format($transferencia, 2, ",", ".") ?></td>
-														<?php 
-														$montoReciboBs = round($factura->amount_paid * $factura->tasa_cambio, 2);
+														<?php
+														$montoReciboBs = $factura->amount_paid;
 														$totalBs += $montoReciboBs; ?>
 														<td style="text-align: center;"><?= number_format($montoReciboBs, 2, ",", ".") ?></td>
 													</tr>
@@ -1911,18 +1911,18 @@
 								</div>
 							</div>
 						</div>
-					<?php // endif; ?>	
+					<?php // endif; ?>
 
-					<?php 
+					<?php
 					if ($indicadorRecibosSeguroAnulados == 1): ?>
 						<div>
 							<div class="row">
-								<div class="col-md-12">					
+								<div class="col-md-12">
 									<table>
 										<thead>
 											<tr>
 												<th>&nbsp;</th>
-											</tr>	
+											</tr>
 											<tr>
 												<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS DE SEGURO ANULADOS:</b></th>
 											</tr>
@@ -1933,7 +1933,7 @@
 						</div>
 						<div>
 							<div class="row">
-								<div class="col-md-12">					
+								<div class="col-md-12">
 									<table class="table table-striped table-hover">
 										<thead>
 											<tr>
@@ -1943,20 +1943,20 @@
 												<th style="text-align: center;"><b>Monto $</b></th>
 											</tr>
 										</thead>
-										<tbody>				
-											<?php 
+										<tbody>
+											<?php
 											$totalBolivar = 0;
 
-											foreach ($documentosAnulados as $anulado):  
+											foreach ($documentosAnulados as $anulado):
 												if ($anulado->fiscal == 0):
-													if ($anulado->tipo_documento == "Recibo de seguro"): ?> 
-														<tr>												
+													if ($anulado->tipo_documento == "Recibo de seguro"): ?>
+														<tr>
 															<td style="text-align: center;"><?= $anulado->date_and_time->format('d-m-Y') ?></td>
 															<td style="text-align: center;"><?= $anulado->parentsandguardian->family ?></td>
 															<td style="text-align: center;"><?= $anulado->bill_number ?></td>
 															<td style="text-align: center;"><?= number_format(round($anulado->amount_paid/$factura->tasa_cambio, 2), 2, ",", ".") ?></td>
 														</tr>
-													<?php 
+													<?php
 													endif;
 												endif;
 											endforeach; ?>
@@ -1965,14 +1965,14 @@
 								</div>
 							</div>
 						</div>
-					<?php 
+					<?php
 					endif; ?>
 
 					<!-- Recibos de consejo educativo -->
-					<?php // if ($indicadorRecibosConsejoEducativo == 1): ?> 	
+					<?php // if ($indicadorRecibosConsejoEducativo == 1): ?>
 						<div class="saltopagina">
 							<div class="row">
-								<div class="col-md-12">					
+								<div class="col-md-12">
 									<table>
 										<thead>
 											<tr>
@@ -1980,10 +1980,10 @@
 											</tr>
 											<tr>
 												<th style="font-size: 16px; line-height: 18px;">Cajero: <?= $cajero ?></th>
-											</tr>	
+											</tr>
 											<tr>
 												<th>&nbsp;</th>
-											</tr>	
+											</tr>
 											<tr>
 												<th style="font-size: 14px; line-height: 16px;"><b>DETALLE DE RECIBOS DE CONSEJO EDUCATIVO:</b></th>
 											</tr>
@@ -1994,7 +1994,7 @@
 						</div>
 						<div>
 							<div class="row">
-								<div class="col-md-12">					
+								<div class="col-md-12">
 									<table class="table table-striped table-hover">
 										<thead>
 											<tr>
@@ -2012,8 +2012,8 @@
 												<th style="text-align: center;"><b>Total Bs.</b></th>
 											</tr>
 										</thead>
-										<tbody>				
-											<?php 
+										<tbody>
+											<?php
 											$totalBs = 0;
 											$totalEfectivoDolar = 0;
 											$totalEfectivoEuro = 0;
@@ -2022,8 +2022,8 @@
 											$totalEuros = 0;
 											$totalTdbTdc = 0;
 											$totalTransferencias = 0;
-											foreach ($facturas as $factura):  
-												if ($factura->tipo_documento == "Recibo de Consejo Educativo"): 
+											foreach ($facturas as $factura):
+												if ($factura->tipo_documento == "Recibo de Consejo Educativo"):
 													$efectivoDolar = 0;
 													$efectivoEuro = 0;
 													$efectivoBolivar = 0;
@@ -2034,7 +2034,7 @@
 													foreach ($pagosFacturas as $pago)
 													{
 														if ($pago->bill_id == $factura->id)
-														{ 
+														{
 															if ($pago->payment_type == "Efectivo")
 															{
 																if ($pago->moneda == "$")
@@ -2074,7 +2074,7 @@
 																$totalTransferencias += $pago->amount;
 															}
 														}
-													} ?> 
+													} ?>
 													<tr>
 														<td style="text-align: center;"><?= $factura->date_and_time->format('d-m-Y') ?></td>
 														<td><?= $factura->parentsandguardian->family ?></td>
@@ -2087,7 +2087,7 @@
 														<td style="text-align: center;"><?= number_format($euros, 2, ",", ".") ?></td>
 														<td style="text-align: center;"><?= number_format($tdbTdc, 2, ",", ".") ?></td>
 														<td style="text-align: center;"><?= number_format($transferencia, 2, ",", ".") ?></td>
-														<?php 
+														<?php
 														$montoReciboBs = round($factura->amount_paid * $factura->tasa_cambio, 2);
 														$totalBs += $montoReciboBs; ?>
 														<td style="text-align: center;"><?= number_format($montoReciboBs, 2, ",", ".") ?></td>
@@ -2116,29 +2116,29 @@
 								</div>
 							</div>
 						</div>
-					<?php // endif; ?>	
+					<?php // endif; ?>
 
 					<!-- Servicio educativo -->
 					<div class="saltopagina">
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table>
 									<thead>
 										<tr>
 											<th>&nbsp;</th>
-										</tr>	
+										</tr>
 										<tr>
 											<th style="font-size: 18px; line-height: 20px;"><b>SERVICIO EDUCATIVO DEL <?= $turn->start_date->format('d-m-Y') ?></b></th>
 										</tr>
 										<tr>
 											<th style="font-size: 16px; line-height: 18px;">Cajero: <?= $cajero ?></th>
-										</tr>	
+										</tr>
 										<tr>
 											<th>&nbsp;</th>
-										</tr>	
+										</tr>
 										<tr>
 											<th>&nbsp;</th>
-										</tr>	
+										</tr>
 									</thead>
 								</table>
 							</div>
@@ -2146,7 +2146,7 @@
 					</div>
 					<div>
 						<div class="row">
-							<div class="col-md-12">					
+							<div class="col-md-12">
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr>
@@ -2168,11 +2168,11 @@
 											<th style="text-align: center;"><b>TCM</b></th>
 										</tr>
 									</thead>
-									<tbody>				
-										<?php $cobradoBolivares = 0;  
-										$totalCobradoBolivares = 0;  
-										$totalFacturaDolar = 0;  
-										$totalFacturaBolivar = 0; 
+									<tbody>
+										<?php $cobradoBolivares = 0;
+										$totalCobradoBolivares = 0;
+										$totalFacturaDolar = 0;
+										$totalFacturaBolivar = 0;
 										$totalDescuentosRecargosSE = 0;
 										$totalEfectivoDolar = 0;
 										$totalEfectivoEuro = 0;
@@ -2187,7 +2187,7 @@
 										$totalCompensado = 0;
 										$diferencia = 0;
 										$totalDiferencia = 0;
-										foreach ($vectorPagos as $indice => $pago): 
+										foreach ($vectorPagos as $indice => $pago):
 											$transferenciaDestiempo = "";
 											$cuotasAlumnoBecado = "";
 											$cambioMontoCuota = "";
@@ -2201,7 +2201,7 @@
 															if ($concepto['bill_id'] == $indice)
 															{
 																echo $concepto['concepto'].'<br />';
-															} 
+															}
 														}
 														?>
 													</td>
@@ -2224,24 +2224,24 @@
 														<td style="text-align: center;"><?= "0,00" ?></td>
 													<?php endif; ?>
 													<td style="text-align: center;"><?= number_format($pago['tddTdcBolivar'], 2, ",", ".") ?></td>
-													<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>										
-													<?php $cobradoBolivares = 
+													<td style="text-align: center;"><?= number_format($pago['transferenciaBolivar'], 2, ",", ".") ?></td>
+													<?php $cobradoBolivares =
 														round(($pago['efectivoDolar'] + $pago['zelleDolar']) * $pago['tasaDolar'], 2) +
 														round($pago['efectivoEuro'] * $pago['tasaEuro'], 2) +
-														$pago['efectivoBolivar'] + 
-														$pago['tddTdcBolivar'] + 
+														$pago['efectivoBolivar'] +
+														$pago['tddTdcBolivar'] +
 														$pago['transferenciaBolivar'] +
 														$pago['depositoBolivar'] +
-														$pago['chequeBolivar']; 
-														if (isset($pago['euros'])): 
-															$cobradoBolivares += round($pago['euros'] * $pago['tasaEuro'], 2); 
-														endif; ?>														
+														$pago['chequeBolivar'];
+														if (isset($pago['euros'])):
+															$cobradoBolivares += round($pago['euros'] * $pago['tasaEuro'], 2);
+														endif; ?>
 													<td style="text-align: center;"><?= number_format($cobradoBolivares, 2, ",", ".") ?></td>
 													<?php $compensado = round($pago['compensadoDolar'] * $pago['tasaDolar'], 2); ?>
 													<?php if (isset($pago['descuentoRecargo'])):
 														$diferencia = ($pago['totalFacturaBolivar'] + $pago['descuentoRecargo']) - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));
-													else: 
-														$diferencia = $pago['totalFacturaBolivar'] - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));													
+													else:
+														$diferencia = $pago['totalFacturaBolivar'] - ($cobradoBolivares + round($pago['compensadoDolar'] * $pago['tasaDolar'], 2));
 													endif; ?>
 													<?php if (isset($pago['tasaTemporalDolar'])):
 														if ($pago['tasaTemporalDolar'] == 1):
@@ -2265,18 +2265,18 @@
 													endif; ?>
 													<td style="text-align: center;"><?= $transferenciaDestiempo . $cuotasAlumnoBecado . $cambioMontoCuota; ?></td>
 												</tr>
-												<?php $totalFacturaDolar += $pago['totalFacturaDolar']; 
-												$totalFacturaBolivar += $pago['totalFacturaBolivar']; 
+												<?php $totalFacturaDolar += $pago['totalFacturaDolar'];
+												$totalFacturaBolivar += $pago['totalFacturaBolivar'];
 												$totalEfectivoDolar += $pago['efectivoDolar'];
-												if (isset($pago['descuentoRecargo'])): 
+												if (isset($pago['descuentoRecargo'])):
 													$totalDescuentosRecargosSE += $pago['descuentoRecargo'];
 												endif;
 												$totalEfectivoEuro += $pago['efectivoEuro'];
 												$totalEfectivoBolivar += $pago['efectivoBolivar'];
 												$totalZelle += $pago['zelleDolar'];
-												if (isset($pago['euros'])): 
+												if (isset($pago['euros'])):
 													$totalEuros += $pago['euros'];
-												endif; 
+												endif;
 												$totalTdbTdc += $pago['tddTdcBolivar'];
 												$totalTransferencias += $pago['transferenciaBolivar'];
 												$totalDepositos += $pago['depositoBolivar'];
@@ -2291,8 +2291,8 @@
 											<td></td>
 											<td></td>
 											<td></td>
-											<td style="text-align: center;"><b><?= number_format($totalFacturaDolar, 2, ",", ".") ?></b></td>	
-											<td style="text-align: center;"><b><?= number_format($totalFacturaBolivar, 2, ",", ".") ?></b></td>												
+											<td style="text-align: center;"><b><?= number_format($totalFacturaDolar, 2, ",", ".") ?></b></td>
+											<td style="text-align: center;"><b><?= number_format($totalFacturaBolivar, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalDescuentosRecargosSE, 2, ",", ".") ?></b></td>
 											<td></td>
 											<td style="text-align: center;"><b><?= number_format($totalEfectivoDolar, 2, ",", ".") ?></b></td>
@@ -2300,9 +2300,9 @@
 											<td style="text-align: center;"><b><?= number_format($totalZelle, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalEuros, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalTdbTdc, 2, ",", ".") ?></b></td>
-											<td style="text-align: center;"><b><?= number_format($totalTransferencias, 2, ",", ".") ?></b></td>										
+											<td style="text-align: center;"><b><?= number_format($totalTransferencias, 2, ",", ".") ?></b></td>
 											<td style="text-align: center;"><b><?= number_format($totalCobradoBolivares, 2, ",", ".") ?></b></td>
-											<td></td>												
+											<td></td>
 										</tr>
 										<tr>
 											<td><i>Leyenda: T = Transferencia destiempo, C = Convenio y M = Cambio monto cuota</i></td>
@@ -2326,28 +2326,28 @@
 								</table>
 							</div>
 						</div>
-					</div>	
-				</div>		
+					</div>
+				</div>
 			<?php
-			} ?>	
+			} ?>
         </div>
-    </div>            
-</div>   
+    </div>
+</div>
 <script>
-    $(document).ready(function() 
+    $(document).ready(function()
     {
 		$("#exportar-excel").click(function(){
-			
+
 			$("#reporte-cierre").table2excel({
-		
+
 				exclude: ".noExl",
-			
+
 				name: "reporte_cierre",
-			
-				filename: $('#reporte-cierre').attr('name') 
-		
+
+				filename: $('#reporte-cierre').attr('name')
+
 			});
 		});
     });
-        
+
 </script>
