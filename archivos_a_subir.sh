@@ -9,8 +9,7 @@ ARCHIVOS_PHP_PUNTUALES=(
     # Si no quieres subir ningún archivo PHP, deja solo "Ninguno"
     # "Ninguno"
 
-    "src/Template/Turns/reporte_cierre.ctp"
+    "src/Model/Table/StudentsTable.php"
 
-    "src/Controller/TurnsController.php"
-    "src/Controller/ConceptsController.php"
+    "src/Controller/StudentsController.php"
 )

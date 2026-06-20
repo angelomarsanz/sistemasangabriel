@@ -2539,15 +2539,27 @@ class StudentsController extends AppController
 					$accountStudents['New']++;
 				}
 
+				if ($filtersReport == "Regulares")
+				{
+					$conditionSignedUp = [['Studenttransactions.student_id' => $familyStudent->id],
+						['Studenttransactions.transaction_description >=' => 'Matrícula ' . $anoEscolarActual],
+						['Studenttransactions.transaction_description LIKE' => 'Matrícula %'],
+						['Studenttransactions.amount_dollar >' => 0]];
+				}
+				else
+				{
+					$conditionSignedUp = [['Studenttransactions.student_id' => $familyStudent->id],
+						['Studenttransactions.transaction_description' => $concepto],
+						['Studenttransactions.amount_dollar >' => 0]];
+				}
+
 				$signedUp = $this->Students->Studenttransactions->find('all')
 					->select(['Studenttransactions.student_id',
 						'Studenttransactions.transaction_description',
 						'Studenttransactions.amount',
 						'Studenttransactions.original_amount',
 						'Studenttransactions.amount_dollar'])
-					->where([['Studenttransactions.student_id' => $familyStudent->id],
-						['Studenttransactions.transaction_description' => $concepto],
-						['Studenttransactions.amount_dollar >' => 0]])
+					->where($conditionSignedUp)
 					->order(['Studenttransactions.created' => 'DESC']);
 
 				$row = $signedUp->first();

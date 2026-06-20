@@ -203,20 +203,20 @@ class StudentsTable extends Table
         $validator
             ->requirePresence('observations', 'create')
             ->notEmpty('observations');
-        
+
         $validator
             ->numeric('balance')
             ->requirePresence('balance', 'create')
             ->notEmpty('balance');
-        
+
         $validator
             ->requirePresence('creative_user', 'create')
             ->notEmpty('creative_user');
-        
+
         $validator
             ->requirePresence('student_migration', 'create')
             ->notEmpty('student_migration');
-        
+
         $validator
             ->requirePresence('mi_id', 'create')
             ->notEmpty('mi_id');
@@ -224,25 +224,25 @@ class StudentsTable extends Table
         $validator
             ->requirePresence('new_student', 'create')
             ->notEmpty('new_student');
-			
+
         $validator
             ->allowEmpty('becado_ano_anterior');
-			
+
         $validator
             ->allowEmpty('tipo_descuento_ano_anterior');
-			
+
         $validator
             ->allowEmpty('descuento_ano_anterior');
-			
+
         $validator
             ->allowEmpty('tipo_descuento');
-			
+
         $validator
             ->allowEmpty('discount');
 
         $validator
             ->allowEmpty('servicio_educativo_exonerado');
-			
+
         return $validator;
     }
 
@@ -261,12 +261,12 @@ class StudentsTable extends Table
 
         return $rules;
     }
-    
+
     public function beforeMarshal(Event $event, ArrayObject $data, ArrayObject $options)
-    {	
-        if (isset($data['parentsandguardian_id'])) 
+    {
+        if (isset($data['parentsandguardian_id']))
 		{
-			if (!(is_numeric($data['parentsandguardian_id']))) 
+			if (!(is_numeric($data['parentsandguardian_id'])))
 			{
 				$family = explode(" ", $data['parentsandguardian_id']);
 				$parentsandguardians = TableRegistry::get('Parentsandguardians');
@@ -278,15 +278,15 @@ class StudentsTable extends Table
 					$data['parentsandguardian_id'] = $query['id'];
 			}
         }
-    }    
+    }
 
     public function findRegular(Query $query, array $options)
     {
         $query->where([['id >' => 1], ['student_condition' => 'Regular']])
-			->order(['section_id' => 'ASC', 'surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']); 
-		
+			->order(['section_id' => 'ASC', 'surname' => 'ASC', 'second_surname' => 'ASC', 'first_name' => 'ASC', 'second_name' => 'ASC']);
+
         $arrayResult = [];
-        
+
         if ($query)
         {
             $arrayResult['indicator'] = 0;
@@ -296,7 +296,7 @@ class StudentsTable extends Table
         {
             $arrayResult['indicator'] = 1;
         }
-        
+
         return $arrayResult;
     }
     public function findFamily(Query $query, array $options)
@@ -309,11 +309,11 @@ class StudentsTable extends Table
 		{
 			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 1], ['Students.balance' => $options['proximoAnoEscolar']]];
 		}
-        elseif ($options['filtersReport'] == 'Regulares') 
+        elseif ($options['filtersReport'] == 'Regulares')
 		{
-			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 0], ['Students.balance' => $options['anoEscolarActual']]];
+			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 0], ['Students.balance >=' => $options['anoEscolarActual']]];
 		}
-        elseif ($options['filtersReport'] == 'Regulares próximo año escolar') 
+        elseif ($options['filtersReport'] == 'Regulares próximo año escolar')
 		{
 			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition' => 'Regular'], ['Students.new_student' => 0], ['Students.balance' => $options['proximoAnoEscolar']]];
 		}
@@ -325,8 +325,8 @@ class StudentsTable extends Table
 		{
 			$conditionQuery = [['Students.id >' => 1], ['Students.student_condition !=' => 'Eliminado'], ['Students.balance' => $options['anoEscolarActual']]];
 		}
-		
-		if ($options['orderReport'] == 'Familia') 
+
+		if ($options['orderReport'] == 'Familia')
 		{
 			$orderQuery = ['Parentsandguardians.family' => 'ASC',
 				'Parentsandguardians.surname' => 'ASC',
@@ -343,15 +343,15 @@ class StudentsTable extends Table
 			$orderQuery = ['Students.surname' => 'ASC',
 				'Students.second_surname' => 'ASC',
 				'Students.first_name' => 'ASC',
-				'Students.second_name' => 'ASC'];	
+				'Students.second_name' => 'ASC'];
 		}
-		
+
         $query->where($conditionQuery)
 			->contain(['Parentsandguardians', 'Sections'])
-			->order($orderQuery); 
-		
+			->order($orderQuery);
+
         $arrayResult = [];
-        
+
         if ($query)
         {
             $arrayResult['indicator'] = 0;
@@ -361,7 +361,7 @@ class StudentsTable extends Table
         {
             $arrayResult['indicator'] = 1;
         }
-		        
+
         return $arrayResult;
     }
 }
