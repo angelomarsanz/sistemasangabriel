@@ -9,15 +9,15 @@
       display:none
     }
 }
-@media print 
+@media print
 {
-    .nover 
+    .nover
     {
       display:none
     }
     .saltopagina
     {
-        display:block; 
+        display:block;
         page-break-before:always;
     }
 }
@@ -46,46 +46,48 @@
 				<table style="width:100%; font-size: 14px; line-height: 16px;" class="noverScreen">
 					<tbody>
 						<tr>
-							<td><b><?= $school->name ?></b></td>
+							<td></td><td><b><?= $school->name ?></b></td>
 						</tr>
 						<tr>
-							<td>RIF: <?= $school->rif ?></td>
+							<td></td><td>RIF: <?= $school->rif ?></td>
 						</tr>
 						<tr>
-							<td>Fecha de emisión: <?= $currentDate->format('d/m/Y'); ?></td>
-						</tr>	
-						<tr>
-							<td><?= 'Reporte General Morosidad de Representantes del Año Escolar '.$periodo_escolar ?></td>
+							<td></td><td>Fecha de emisión: <?= $currentDate->format('d/m/Y'); ?></td>
 						</tr>
 						<tr>
-							<td><?= 'Período desde: '.$mes_anio_desde.' hasta '.$mes_anio_hasta ?></td>
+							<td></td><td><?= 'Reporte General Morosidad de Representantes del Año Escolar '.$periodo_escolar ?></td>
 						</tr>
 						<tr>
-							<td>Resumen</td>
-						</tr>							
+							<td></td><td><?= 'Período desde: '.$mes_anio_desde.' hasta '.$mes_anio_hasta ?></td>
+						</tr>
 						<tr>
-							<td><?= "Mensualidades de septiembre a ".$nombre_mes_reporte." ".$anio_correspondiente_mes." y otros conceptos: ".number_format($total_cuotas_periodo, 2, ",", ".")." $" ?></td>
-						</tr>							
+							<td></td><td>Resumen</td>
+						</tr>
 						<tr>
-							<td><?= "Mensualidades pagadas y otros conceptos: ".number_format(round($total_cuotas_periodo - $totales_morosidad["Total $"], 2), 2, ",", ".")." $" ?></td>
-						</tr>	
+							<td></td><td><?= "Mensualidades del ".$mes_anio_desde." al ".$mes_anio_hasta." y otros conceptos: ".number_format($total_cuotas_periodo, 2, ",", ".")." $" ?></td>
+						</tr>
 						<tr>
-							<td><?= "Mensualidades pendientes y otros conceptos: ".number_format($totales_morosidad["Total $"], 2, ",", ".")." $" ?></td>
-						</tr>						
+							<td></td><td><?= "Mensualidades pagadas y otros conceptos: ".number_format(round($total_cuotas_periodo - $totales_morosidad["Total $"], 2), 2, ",", ".")." $" ?></td>
+						</tr>
 						<tr>
-							<td><?= "Porcentaje de morosidad: ".round(($totales_morosidad["Total $"]/$total_cuotas_periodo)*100, 2)." %" ?></td>
-						</tr>	
+							<td></td><td><?= "Mensualidades pendientes y otros conceptos: ".number_format($totales_morosidad["Total $"], 2, ",", ".")." $" ?></td>
+						</tr>
 						<tr>
-							<td>&nbsp;</td>
-						</tr>					
+							<td></td><td><?= "Porcentaje de morosidad: ".round(($totales_morosidad["Total $"]/$total_cuotas_periodo)*100, 2)." %" ?></td>
+						</tr>
 						<tr>
-							<td>Mensualidades y otros conceptos pendientes desglosado:</td>
-						</tr>											
+							<td></td><td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td></td><td>Mensualidades y otros conceptos pendientes desglosado:</td>
+						</tr>
 					</tbody>
 				</table>
 				<table class="table table-striped table-hover">
 					<thead>
 						<tr>
+                            <th></th>
+                            <th></th>
 							<th style="text-align:center;">Dif. Mat/Ago</th>
 							<th style="text-align:center;">SE</th>
 							<th style="text-align:center;">Seg</th>
@@ -107,6 +109,8 @@
 					</thead>
 					<tbody>
 						<tr>
+                            <td></td>
+                            <td></td>
 							<td style="text-align:center;"><?= number_format($totales_morosidad["Dif"], 2, ",", ".") ?></td>
 							<td style="text-align:center;"><?= number_format($totales_morosidad["SE"], 2, ",", ".") ?></td>
 							<td style="text-align:center;"><?= number_format($totales_morosidad["Seg"], 2, ",", ".") ?></td>
@@ -219,35 +223,35 @@
 								if ($telefono == "Sí"): ?>
 									<td style="text-align:center;"><?= $moroso["Teléfono"] ?></td>
 								<?php endif; ?>
-							</tr>  
+							</tr>
 							<?php $contador_transacciones++; ?>
-						<?php 
+						<?php
 						endforeach; ?>
 					</tbody>
 				</table>
 			</div>
 
 		<?php endif; ?>
-		<br />			
+		<br />
 	</div>
 </div>
 <script>
-function myFunction() 
+function myFunction()
 {
     window.print();
 }
 $(document).ready(function()
-{ 
+{
 	$("#exportar-excel").click(function(){
-		
+
 		$("#reporte-general-morosidad-representantes").table2excel({
-	
+
 			exclude: ".noExl",
-		
+
 			name: "reporte_general_morosidad_representantes",
-		
-			filename: $('#reporte-general-morosidad-representantes').attr('name') 
-	
+
+			filename: $('#reporte-general-morosidad-representantes').attr('name')
+
 		});
 	});
 });
