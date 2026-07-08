@@ -131,6 +131,9 @@ $vectorOficios = [
                         echo $this->Form->input('cell_phone', ['label' => 'Número de teléfono celular: *']);
                         echo $this->Form->input('landline', ['label' => 'Teléfono fijo residencial: *']);
                         echo $this->Form->input('email', ['label' => 'Correo electrónico: *']);
+                        ?>
+                        <div id="mensaje-email" class="mensajes-usuario"></div>
+                        <?php
                         echo $this->Form->input('address', ['label' => 'Dirección de habitación: *']);
 
                         echo $this->Form->input('profession', ['label' => 'Profesión u oficio: *']);
@@ -185,6 +188,9 @@ $vectorOficios = [
                                 echo $this->Form->input('cell_phone_father', ['label' => 'Nro. Celular: *']);
                                 echo $this->Form->input('landline_father', ['label' => 'Teléfono habitación: *']);
                                 echo $this->Form->input('email_father', ['label' => 'Email: *']);
+                                ?>
+                                <div id="mensaje-email-father" class="mensajes-usuario"></div>
+                                <?php
                                 echo $this->Form->input('address_father', ['label' => 'Dirección: *']);
 
                                 echo $this->Form->input('profession_father', ['label' => 'Profesión u oficio: *']);
@@ -232,6 +238,9 @@ $vectorOficios = [
                                 echo $this->Form->input('cell_phone_mother', ['label' => 'Nro. Celular: *']);
                                 echo $this->Form->input('landline_mother', ['label' => 'Teléfono habitación: *']);
                                 echo $this->Form->input('email_mother', ['label' => 'Email: *']);
+                                ?>
+                                <div id="mensaje-email-mother" class="mensajes-usuario"></div>
+                                <?php
                                 echo $this->Form->input('address_mother', ['label' => 'Dirección: *']);
 
                                 echo $this->Form->input('profession_mother', ['label' => 'Profesión u oficio: *']);
@@ -387,6 +396,41 @@ $vectorOficios = [
 		{
 			$('#tax-phone').css('background-color', "#ffffe6");
 			$('#mensaje-telefono').html("El número de teléfono está incompleto").css('color', 'red');
+			resultado = 1;
+		}
+
+		return resultado;
+	}
+
+	function validarEmails()
+	{
+		var resultado = 0;
+
+		$('#mensaje-email').html("");
+		$('#email').css('background-color', "white");
+		$('#mensaje-email-father').html("");
+		$('#email-father').css('background-color', "white");
+		$('#mensaje-email-mother').html("");
+		$('#email-mother').css('background-color', "white");
+
+		if ($("#email").val().indexOf("@correo") !== -1)
+		{
+			$('#email').css('background-color', "#ffffe6");
+			$('#mensaje-email').html("El correo electrónico no puede ser el valor inicial @correo").css('color', 'red');
+			resultado = 1;
+		}
+
+		if ($("#email-father").val().indexOf("@correo") !== -1)
+		{
+			$('#email-father').css('background-color', "#ffffe6");
+			$('#mensaje-email-father').html("El correo electrónico no puede ser el valor inicial @correo").css('color', 'red');
+			resultado = 1;
+		}
+
+		if ($("#email-mother").val().indexOf("@correo") !== -1)
+		{
+			$('#email-mother').css('background-color', "#ffffe6");
+			$('#mensaje-email-mother').html("El correo electrónico no puede ser el valor inicial @correo").css('color', 'red');
 			resultado = 1;
 		}
 
@@ -630,10 +674,11 @@ $vectorOficios = [
         $('#save-parentsandguardians').click(function(e)
         {
 			resultado = validarDatosFiscales();
+			resultado += validarEmails();
 
 			if (resultado > 0)
 			{
-				alert("Estimado representante uno o más datos fiscales presentan errores. Por favor revise");
+				alert("Estimado representante uno o más datos presentan errores. Por favor revise");
 				return false;
 			}
 			else

@@ -9,5 +9,6 @@ ARCHIVOS_PHP_PUNTUALES=(
     # Si no quieres subir ningún archivo PHP, deja solo "Ninguno"
     # "Ninguno"
 
-    "src/Template/Studenttransactions/reporte_general_morosidad_representantes.ctp"
+    "src/Controller/ParentsandguardiansController.php"
+    "src/Template/Parentsandguardians/edit.ctp"
 )

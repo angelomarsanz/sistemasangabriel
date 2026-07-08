@@ -303,7 +303,18 @@ class ParentsandguardiansController extends AppController
         if ($this->request->is(['patch', 'post', 'put'])) {
             $parentsandguardian = $this->Parentsandguardians->patchEntity($parentsandguardian, $this->request->data);
 
-            if ($this->Parentsandguardians->save($parentsandguardian))
+            // Validar que los correos no contengan @correo
+            if (strpos($parentsandguardian->email, '@correo') !== false) {
+                $parentsandguardian->errors('email', ['noCorreo' => 'El correo electrónico no puede ser el valor inicial @correo']);
+            }
+            if (strpos($parentsandguardian->email_father, '@correo') !== false) {
+                $parentsandguardian->errors('email_father', ['noCorreo' => 'El correo electrónico no puede ser el valor inicial @correo']);
+            }
+            if (strpos($parentsandguardian->email_mother, '@correo') !== false) {
+                $parentsandguardian->errors('email_mother', ['noCorreo' => 'El correo electrónico no puede ser el valor inicial @correo']);
+            }
+
+            if (!$parentsandguardian->getErrors() && $this->Parentsandguardians->save($parentsandguardian))
             {
                 $user = $this->Parentsandguardians->Users->get($parentsandguardian->user_id);
 
