@@ -44,12 +44,12 @@
             <?php $currentYear = $ultimoAnoInscripcion; ?>
             <?php $nextYear = $currentYear + 1; ?>
             <?php if ($student->new_student == 0): ?>
-                <p style="text-align: center;line-height: 5px;"><b>Ficha Renovación de Matrícula, Año Escolar <?= $currentYear . '-' . $nextYear ?></b></p>
+                <p style="text-align: center;line-height: 1.2;"><b>Ficha Renovación de Matrícula, Año Escolar <?= $currentYear . '-' . $nextYear ?></b></p>
             <?php else: ?>
-                <p style="text-align: center;line-height: 5px;"><b>Ficha de inscripción, Año Escolar <?= $currentYear . '-' . $nextYear ?></b></p>
+                <p style="text-align: center;line-height: 1.2;"><b>Ficha de inscripción, Año Escolar <?= $currentYear . '-' . $nextYear ?></b></p>
             <?php endif; ?>            
-            <p style="text-align: center;line-height: 5px;"><b><?= $student->level_of_study ?></b></p>
-            <p style="text-align: center;line-height: 5px;">Valencia, <?= $currentDate->format('d/m/Y'); ?></p>
+            <p style="text-align: center;line-height: 1.2;"><b><?= $student->level_of_study ?></b></p>
+            <p style="text-align: center;line-height: 1.2;">Valencia, <?= $currentDate->format('d/m/Y'); ?></p>
             <p>&nbsp;</p>
         </div> 
         <div  style="width: 20%; float: left;">
@@ -64,7 +64,7 @@
     </div>
     <div style="clear:both; width: 100%;">
         <?php if ($student->new_student == 0): ?>
-            <p style="line-height: 5px;">Conceptos de pagos:</p>
+            <p style="line-height: 1.2;">Conceptos de pagos:</p>
             <ul>
                 <?php
                 if ($indicadorDeudaInscripcion == 1)
@@ -88,7 +88,7 @@
         <?php endif; ?>    
         <p><b>Alumno:&nbsp;<?= $student->full_name ?></b></p>
     </div>
-    <div style="clear: both; width: 100%; border-top: 3px solid #555; line-height: 5px;">
+    <div style="clear: both; width: 100%; border-top: 3px solid #555; line-height: 1.2;">
         <div style="width: 50%; float: left; padding: 1%; text-align: left;">
             <p><b>Sexo:&nbsp;</b><?= h($student->sex) ?></p>
             <p><b>Nacionalidad:&nbsp;</b><?= h($student->nationality) ?></p>
@@ -98,18 +98,18 @@
             <p><b>Lugar de nacimiento:&nbsp;</b></p><p><?= h($student->place_of_birth) ?></p>
             <p><b>País de nacimiento:&nbsp;</b><?= h($student->country_of_birth) ?></p>
         </div>
-        <div style="width: 50%; float: left; padding: 1%; text-align: left;">
+        <div style="width: 50%; float: left; padding: 1%; text-align: left; word-wrap: break-word;">
             <p><b>Teléfono de habitación:&nbsp;</b><?= h($parentsandguardian->landline) ?></p>
-            <p><b>Dirección de habitación:&nbsp;</b></p><p><?= substr($student->address,0,40) ?></p><p><?= substr($student->address,40,40) ?></p>
+            <p><b>Dirección de habitación:&nbsp;</b></p><p><?= h($student->address) ?></p>
             <p><b>Enfermedades del alumno:&nbsp;</b></p><p><?= h($student->student_illnesses) ?></p>
             <p><b>Observaciones:&nbsp;</b></p><p><?= h($student->observations) ?></p>
         </div>
     </div>
-    <div style="clear: both; width: 100%; border-top: 3px solid #555; line-height: 5px;">
+    <div style="clear: both; width: 100%; border-top: 3px solid #555; line-height: 1.2;">
         <br />
         <p><b>Hermanos en el colegio:</b></p>
     </div>
-    <div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 5px; padding: 1%;">
+    <div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 1.2; padding: 1%;">
         <table style="width:100%;">
             <thead>
                 <tr style="line-height: 20px;">
@@ -127,11 +127,11 @@
             </tbody>
         </table>
     </div>
-    <div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 5px;">
+    <div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 1.2;">
         <br />
         <p><b>Datos de la madre:</b></p>
     </div>
-    <div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 5px;">
+    <div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 1.2;">
         <div style="width: 50%; float: left; padding: 1%; text-align: left;">
             <p><b>Nombre:&nbsp;</b><?= h($parentsandguardian->surname_mother) . ' ' . h($parentsandguardian->first_name_mother) ?></p>
             <p><b>C.I.:&nbsp;</b><?= h($parentsandguardian->type_of_identification_mother) . ' ' . h($parentsandguardian->identidy_card_mother) ?></p>
@@ -143,11 +143,11 @@
             <p><b>Email:&nbsp;</b><?= h($parentsandguardian->email_mother) ?></p>
         </div>
     </div>
-    <div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 5px;">
+    <div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 1.2;">
         <br />
         <p><b>Datos del padre:</b></p>
     </div>
-    <div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 5px;">
+    <div style="clear: left; width: 100%; border-top: 3px solid #555; line-height: 1.2;">
         <div style="width: 50%; float: left; padding: 1%; text-align: left;">
             <p><b>Nombre:&nbsp;</b><?= h($parentsandguardian->surname_father) . ' ' . h($parentsandguardian->first_name_father) ?></p>
             <p><b>C.I.:&nbsp;</b><?= h($parentsandguardian->type_of_identification_father) . ' ' . h($parentsandguardian->identidy_card_father) ?></p>
@@ -280,9 +280,9 @@
             <p><b>Lugar de nacimiento:&nbsp;</b></p><p><?= h($student->place_of_birth) ?></p>
             <p><b>País de nacimiento:&nbsp;</b><?= h($student->country_of_birth) ?></p>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-6" style="word-wrap: break-word;">
             <p><b>Teléfono de habitación:&nbsp;</b><?= h($parentsandguardian->landline) ?></p>
-            <p><b>Dirección de habitación:&nbsp;</b></p><p><?= substr($student->address,0,40) ?></p><p><?= substr($student->address,40,40) ?></p>
+            <p><b>Dirección de habitación:&nbsp;</b></p><p><?= h($student->address) ?></p>
             <p><b>Enfermedades del alumno:&nbsp;</b></p><p><?= h($student->student_illnesses) ?></p>
             <p><b>Observaciones:&nbsp;</b></p><p><?= h($student->observations) ?></p>
         </div>
