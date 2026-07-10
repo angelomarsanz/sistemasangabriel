@@ -4740,13 +4740,16 @@ class StudenttransactionsController extends AppController
 
 		if ($consejo_educativo == 'Sí')
 		{
-            \Cake\Log\Log::debug('reporteGeneralMorosidadRepresentante, valor en tipoEstudiante: '.$tipoEstudiante);
 			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $tipoEstudiante, 'reporteGeneralMorosidadRepresentantes', $condicionRegulares, $condicionEgresados);
 
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];
 			$totales_morosidad = $vectorConsejo['totales_morosidad'];
 		}
+
+		uasort($detalle_morosos, function($a, $b) {
+			return strcasecmp($a['Familia'], $b['Familia']);
+		});
 
 		$this->set(compact('mes_desde', 'mes_hasta', 'periodo_escolar', 'tipo_reporte', 'telefono', 'currentDate', 'school', 'dollarExchangeRate', 'mes_anio_desde', 'mes_anio_hasta', 'anio_correspondiente_mes', 'detalle_morosos', 'total_cuotas_periodo', 'totales_morosidad', 'vector_cuotas', 'subtitulo_reporte'));
 	}
@@ -5057,7 +5060,6 @@ class StudenttransactionsController extends AppController
 			$this->Flash->error(__('No se encontraron matrículas de estudiante'));
 			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 		}
-        \Cake\Log\Log::debug('matriculas_estudiantes->count: '.$matriculas_estudiantes->count());
 
 		$vectorRecibosConsejoEducativo = [];
 		$conceptoConsejoEducativo = "Consejo Educativo ".$periodo_escolar;
@@ -5073,10 +5075,6 @@ class StudenttransactionsController extends AppController
 		{
 			foreach ($recibosConsejoEducativo as $recibo)
 			{
-                if ($recibo->bill->parentsandguardian_id == 1113)
-                {
-                    \Cake\Log\Log::debug('Recibo de la familia ABOU ATTIEH FREITAS: '.$recibo->bill->bill_number);
-                }
 				$vectorRecibosConsejoEducativo[$recibo->bill->parentsandguardian_id] = $recibo->bill->bill_number;
 			}
 		}
@@ -5084,18 +5082,10 @@ class StudenttransactionsController extends AppController
 		$idsFamiliasConsejoVerificadas = [];
 		foreach ($matriculas_estudiantes as $matricula)
 		{
-            if ($matricula->student->parentsandguardian->id == 1113)
-            {
-                \Cake\Log\Log::debug('La familia ABOU ATTIEH FREITAS está en los resultados de búsqueda: matriculas_estudiantes');
-            }
 			if (!(isset($idsFamiliasConsejoVerificadas[$matricula->student->parentsandguardian->id])))
 			{
 				if (isset($vectorRecibosConsejoEducativo[$matricula->student->parentsandguardian->id]))
 				{
-                    if ($matricula->student->parentsandguardian->id == 1113)
-                    {
-                        \Cake\Log\Log::debug('La familia ABOU ATTIEH FREITAS ya tiene recibo, no se registra');
-                    }
 					$total_cuotas_periodo += $tarifaConsejoEducativo;
 				}
 				else
@@ -5113,44 +5103,24 @@ class StudenttransactionsController extends AppController
 					}
 					else
 					{
-                        if ($matricula->student->parentsandguardian->id == 1113)
-                        {
-                            \Cake\Log\Log::debug('Antes de verificar si la familia ABOU ATTIEH FREITAS tiene familia relacionada o está exonerada. id_familia_pagadora_consejo: '.$matricula->student->parentsandguardian->id_familia_pagadora_consejo.', consejo_exonerado: '.$matricula->student->parentsandguardian->consejo_exonerado);
-                        }
 						if ($matricula->student->parentsandguardian->id_familia_pagadora_consejo == 0)
 						{
 							if ($matricula->student->parentsandguardian->consejo_exonerado == 0)
 							{
-                                if ($matricula->student->parentsandguardian->id == 1113)
-                                {
-                                    \Cake\Log\Log::debug('La familia ABOU ATTIEH FREITAS no tiene familia relacionada y tampoco está exonerada, se debe registrar');
-                                }
 								$indicadorRegistrar = 1;
 							}
 						}
-                         if ($matricula->student->parentsandguardian->id == 1113)
-                        {
-                            \Cake\Log\Log::debug('indicadorRegistrar de la familia ABOU ATTIEH FREITAS: '.$indicadorRegistrar);
-                        }
 					}
 					if ($indicadorRegistrar == 1)
 					{
 						if (!isset($detalle_morosos[$matricula->student->parentsandguardian->id]))
 						{
-                            if ($matricula->student->parentsandguardian->id == 1113)
-                            {
-                                \Cake\Log\Log::debug('La familia ABOU ATTIEH FREITAS no está en el vector detalle_morosos');
-                            }
 							$familia = trim($matricula->student->parentsandguardian->family)." (".trim($matricula->student->parentsandguardian->surname)." ".trim($matricula->student->parentsandguardian->first_name).")";
 
 							$detalle_morosos[$matricula->student->parentsandguardian->id] = $vector_morosidad;
 							$detalle_morosos[$matricula->student->parentsandguardian->id]["Familia"] = $familia;
 							$detalle_morosos[$matricula->student->parentsandguardian->id]["Teléfono"] = $matricula->student->parentsandguardian->cell_phone;
 						}
-                        if ($matricula->student->parentsandguardian->id == 1113)
-                        {
-                            \Cake\Log\Log::debug('Se actualizó el vector detalles_morosos de la familia ABOU ATTIEH FREITAS con: '.$tarifaConsejoEducativo);
-                        }
 						$total_cuotas_periodo += $tarifaConsejoEducativo;
 						$detalle_morosos[$matricula->student->parentsandguardian->id]["CE"] = $tarifaConsejoEducativo;
 						$detalle_morosos[$matricula->student->parentsandguardian->id]["Total $"] += $tarifaConsejoEducativo;
