@@ -9,7 +9,11 @@ ARCHIVOS_PHP_PUNTUALES=(
     # Si no quieres subir ningún archivo PHP, deja solo "Ninguno"
     # "Ninguno"
 
-    #"src/Controller/ParentsandguardiansController.php"
     #"src/Template/Parentsandguardians/edit.ctp"
-    "src/Template/Students/filepdf.ctp"
+    #"src/Template/Students/filepdf.ctp"
+    #"src/Controller/ParentsandguardiansController.php"
+
+    "src/Template/Studenttransactions/general_morosidad_representantes.ctp"
+    "src/Template/Studenttransactions/consejo_educativo_por_cobrar.ctp"
+    "src/Controller/StudenttransactionsController.php"
 )

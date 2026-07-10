@@ -9,7 +9,7 @@
 	    <?= $this->Form->create() ?>
 	        <fieldset>
 		    	<?php
-					echo $this->Form->input('mes_desde', ['label' => 'Desde el mes: ', 'options' => 
+					echo $this->Form->input('mes_desde', ['label' => 'Desde el mes: ', 'options' =>
 						["" => "",
 						'09' => 'Septiembre',
 						'10' => 'Octubre',
@@ -21,9 +21,9 @@
 						'04' => 'Abril',
 						'05' => 'Mayo',
 						'06' => 'Junio',
-						'07' => 'Julio']]); 
+						'07' => 'Julio']]);
 					echo "<div id='mensaje-mes-desde' class='mensaje-usuario'></div>";
-					echo $this->Form->input('mes_hasta', ['label' => 'Hasta el mes: ', 'options' => 
+					echo $this->Form->input('mes_hasta', ['label' => 'Hasta el mes: ', 'options' =>
 						["" => "",
 						'09' => 'Septiembre',
 						'10' => 'Octubre',
@@ -35,49 +35,43 @@
 						'04' => 'Abril',
 						'05' => 'Mayo',
 						'06' => 'Junio',
-						'07' => 'Julio']]); 
+						'07' => 'Julio']]);
 					echo "<div id='mensaje-mes-hasta' class='mensaje-usuario'></div>";
-	               	echo $this->Form->input('periodo_escolar', ['label' => 'Período escolar: ', 'options' => 
+	               	echo $this->Form->input('periodo_escolar', ['label' => 'Período escolar: ', 'options' =>
 	                    ["" => "",
 						'2024-2025' => '2024-2025',
 						'2025-2026' => '2025-2026']]);
 					echo "<div id='mensaje-periodo-escolar' class='mensaje-usuario'></div>";
-					echo $this->Form->input('indicador_recalculo', ['label' => 'Desea recalcular las cuotas atrasadas de acuerdo con la tarifa vigente ?: ', 'options' => 
+					echo $this->Form->input('indicador_recalculo', ['label' => 'Desea recalcular las cuotas atrasadas de acuerdo con la tarifa vigente ?: ', 'options' =>
 						["" => "",
 							'Sí' => 'Sí',
 							'No' => 'No',]]);
 					echo "<div id='mensaje-indicador-recalculo' class='mensaje-usuario'></div>";
-					echo $this->Form->input('consejo_educativo', ['label' => 'Desea mostrar la deuda de Consejo Educativo ?: ', 'options' => 
+					echo $this->Form->input('consejo_educativo', ['label' => 'Desea mostrar la deuda de Consejo Educativo ?: ', 'options' =>
 					["" => "",
 						'Sí' => 'Sí',
 						'No' => 'No',]]);
 					echo "<div id='mensaje-consejo-educativo' class='mensaje-usuario'></div>"; ?>
-					<div class="form-group">
-						<label>Tipo de estudiante:</label>
-						<div class="radio">
-							<label>
-								<?= $this->Form->radio('tipo_estudiante', [['value' => 'Todos', 'text' => 'Todos los estudiantes', 'checked' => true]]) ?>
-							</label>
-						</div>
-						<div class="radio">
-							<label>
-								<?= $this->Form->radio('tipo_estudiante', [['value' => '5to. Año', 'text' => 'Solo estudiantes de 5to. Año']]) ?>
-							</label>
-						</div>
-					</div>
 					<?php
-					echo "<div id='mensaje-tipo-estudiante' class='mensaje-usuario'></div>";
+					echo $this->Form->input('grados', ['label' => 'Grados: ', 'options' =>
+						[
+							"" => "",
+							'Todos' => 'Todos',
+							'Todos menos 5to. Año' => 'Todos menos 5to. Año',
+							'5to. Año' => '5to. Año'
+						]]);
+					echo "<div id='mensaje-grados' class='mensaje-usuario'></div>";
 					echo '<div id="quinto_anio_opciones" style="display:none; border: 1px solid #ccc; padding: 10px; margin-top: 10px;">';
 					echo '<h5>Incluir:</h5>';
 					echo '<div class="checkbox"><label>' . $this->Form->checkbox('condicion_regulares', ['value' => 'Regulares', 'id' => 'condicion-regulares']) . ' Regulares</label></div>';
 					echo '<div class="checkbox"><label>' . $this->Form->checkbox('condicion_egresados', ['value' => 'Egresados', 'id' => 'condicion-egresados']) . ' Egresados</label></div>';
 					echo "<div id='mensaje-condicion-estudiante' class='mensaje-usuario'></div>";
 					echo '</div>';
-					echo $this->Form->input('telefono', ['label' => 'Mostrar el número de teléfono del representante: ', 'options' => 
+					echo $this->Form->input('telefono', ['label' => 'Mostrar el número de teléfono del representante: ', 'options' =>
 						["" => "",
 						'Sí' => 'Sí',
 						'No' => 'No',]]);
-					echo "<div id='mensaje-telefono' class='mensaje-usuario'></div>"; 
+					echo "<div id='mensaje-telefono' class='mensaje-usuario'></div>";
 					echo "<br />"
 		    	?>
 		    </fieldset>
@@ -88,26 +82,26 @@
 	</div>
 </div>
 <script>
-    $(document).ready(function() 
+    $(document).ready(function()
     {
-		$('input[name="tipo_estudiante"]').change(function() {
-			if ($(this).val() === 'quinto_anio') {
+		$('#grados').change(function() {
+			if ($(this).val() === '5to. Año') {
 				$('#quinto_anio_opciones').show();
 			} else {
 				$('#quinto_anio_opciones').hide();
-				// Limpiar checkboxes si se vuelve a "Todos"
+				// Limpiar checkboxes
 				$('#condicion-regulares').prop('checked', false);
 				$('#condicion-egresados').prop('checked', false);
 			}
 		});
 
 
-		$('#crear-reporte').click(function(e) 
-        {		
+		$('#crear-reporte').click(function(e)
+        {
 			$(".mensaje-usuario").html("");
-			
+
 			indicadorError = 0;
-            
+
             if ($('#mes-desde').val() == "")
 			{
 				indicadorError = 1;
@@ -119,36 +113,36 @@
 				indicadorError = 1;
 				$("#mensaje-mes-hasta").html("Por favor seleccione un mes").css("color", 'red');
 			}
-            
+
 			if ($('#periodo-escolar').val() == "")
 			{
 				indicadorError = 1;
 				$("#mensaje-periodo-escolar").html("Por favor seleccione el período escolar").css("color", 'red');
-			}	
-			
+			}
+
 			if ($('#indicador-recalculo').val() == "")
 			{
 				indicadorError = 1;
 				$("#mensaje-indicador-recalculo").html("Por favor seleccione si desea recalcular las cuotas atrasadas").css("color", 'red');
-			}	
-			
+			}
+
 			if ($('#consejo-educativo').val() == "")
 			{
 				indicadorError = 1;
 				$("#mensaje-consejo-educativo").html("Por favor seleccione si desea mostrar la deuda de consejo educativo").css("color", 'red');
-			}	
-			
+			}
+
 			if ($('#telefono').val() == "")
 			{
 				indicadorError = 1;
 				$("#mensaje-telefono").html("Por favor seleccione el tipo de reporte").css("color", 'red');
 			}
 
-			var tipoEstudiante = $('input[name="tipo_estudiante"]:checked').val();
-			if (!tipoEstudiante) {
+			var grados = $('#grados').val();
+			if (grados === "") {
 				indicadorError = 1;
-				$("#mensaje-tipo-estudiante").html("Por favor seleccione un tipo de estudiante").css("color", 'red');
-			} else if (tipoEstudiante === 'quinto_anio') {
+				$("#mensaje-grados").html("Por favor seleccione los grados").css("color", 'red');
+			} else if (grados === '5to. Año') {
 				var regularesChecked = $('#condicion-regulares').is(':checked');
 				var egresadosChecked = $('#condicion-egresados').is(':checked');
 

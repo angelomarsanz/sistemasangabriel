@@ -4507,7 +4507,7 @@ class StudenttransactionsController extends AppController
     {
 		if ($this->request->is('post'))
         {
-			$tipoEstudiante = $this->request->getData('tipo_estudiante');
+			$tipoEstudiante = $this->request->getData('grados');
 			$condicionRegulares = $this->request->getData('condicion_regulares') === 'Regulares' ? 'Regulares' : 'No';
 			$condicionEgresados = $this->request->getData('condicion_egresados') === 'Egresados' ? 'Egresados' : 'No';
 
@@ -4656,7 +4656,14 @@ class StudenttransactionsController extends AppController
 					$condiciones_base['Students.student_condition'] = $condiciones_condicion[0];
 				}
 			}
-		} else {
+		}
+		elseif ($tipoEstudiante == 'Todos menos 5to. Año')
+		{
+			$condiciones_base['Sections.orden <'] = 41;
+			$condiciones_base['Students.student_condition'] = 'Regular';
+			$subtitulo_reporte = "Todos menos 5to. Año";
+		}
+		else {
 			$condiciones_base['Students.student_condition'] = 'Regular';
 			$subtitulo_reporte = "Todos los Estudiantes";
 		}
@@ -4733,7 +4740,8 @@ class StudenttransactionsController extends AppController
 
 		if ($consejo_educativo == 'Sí')
 		{
-			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $tipoEstudiante);
+            \Cake\Log\Log::debug('reporteGeneralMorosidadRepresentante, valor en tipoEstudiante: '.$tipoEstudiante);
+			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $tipoEstudiante, 'reporteGeneralMorosidadRepresentantes', $condicionRegulares, $condicionEgresados);
 
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];
@@ -4894,6 +4902,9 @@ class StudenttransactionsController extends AppController
 			$periodo_escolar = $_POST['periodo_escolar'];
 			$anio = substr($periodo_escolar, 0, 4);
 			$grados = $_POST['grados'];
+			$condicionRegulares = isset($_POST['condicion_regulares']) ? 'Regulares' : 'No';
+			$condicionEgresados = isset($_POST['condicion_egresados']) ? 'Egresados' : 'No';
+
 			$telefono = $_POST['telefono'];
 			$detalle_morosos = [];
 			$total_cuotas_periodo = 0;
@@ -4911,7 +4922,7 @@ class StudenttransactionsController extends AppController
 				 "Total $" => 0
 				];
 
-			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $grados);
+			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $grados, 'consejoEducativoPorCobrar', $condicionRegulares, $condicionEgresados);
 
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];
@@ -4925,8 +4936,10 @@ class StudenttransactionsController extends AppController
 		}
 	}
 
-	public function vectorConsejoEducativo($anio = null, $anioEscolarActual = null, $periodo_escolar = null, $total_cuotas_periodo = null, $detalle_morosos = null, $vector_morosidad = null, $totales_morosidad = null, $grados = null)
+	public function vectorConsejoEducativo($anio = null, $anioEscolarActual = null, $periodo_escolar = null, $total_cuotas_periodo = null, $detalle_morosos = null, $vector_morosidad = null, $totales_morosidad = null, $grados = null, $funcionLlamadora = null, $condicionRegulares = 'No', $condicionEgresados = 'No')
 	{
+        \Cake\Log\Log::debug('anio: '.$anio.', anioEscolarActual: '.$anioEscolarActual.', periodo_escolar: '.$periodo_escolar.', grados: '.$grados.', funcionLlamadora: '.$funcionLlamadora);
+
 		$this->loadModel('Rates');
 		$tarifaConsejoEducativo = 0;
 		$tarifas = $this->Rates->find('all')
@@ -4951,6 +4964,17 @@ class StudenttransactionsController extends AppController
 						'Parentsandguardians.estatus_registro' => 'Activo'
 					];
 			}
+			elseif ($grados == 'Todos menos 5to. Año')
+			{
+				$condiciones =
+					[
+						'Studenttransactions.invoiced' => 0,
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
+						'Students.balance >=' => $anio,
+						'Parentsandguardians.estatus_registro' => 'Activo',
+						'Sections.orden <' => 41
+					];
+			}
 			else
 			{
 				$condiciones =
@@ -4959,7 +4983,7 @@ class StudenttransactionsController extends AppController
 						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
 						'Students.balance >=' => $anio,
 						'Parentsandguardians.estatus_registro' => 'Activo',
-						'Sections.orden >' => 41
+						'Sections.orden >=' => 41
 					];
 			}
 		}
@@ -4976,7 +5000,7 @@ class StudenttransactionsController extends AppController
 						'Parentsandguardians.estatus_registro' => 'Activo'
 					];
 			}
-			else
+			elseif ($grados == 'Todos menos 5to. Año')
 			{
 				$condiciones =
 					[
@@ -4985,8 +5009,42 @@ class StudenttransactionsController extends AppController
 						'Students.balance' => $anio,
 						'Students.student_condition' => 'Regular',
 						'Parentsandguardians.estatus_registro' => 'Activo',
-						'Sections.orden >' => 41
+						'Sections.orden <' => 41
 					];
+			}
+			else
+			{
+				$condiciones =
+					[
+						'Studenttransactions.invoiced' => 0,
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
+						'Students.balance' => $anio,
+						'Parentsandguardians.estatus_registro' => 'Activo',
+						'Sections.orden >=' => 41
+					];
+
+				$condiciones_condicion = [];
+				if ($condicionRegulares == 'Regulares') {
+					$condiciones_condicion[] = 'Regular';
+				}
+				if ($condicionEgresados == 'Egresados') {
+					$condiciones_condicion[] = 'Egresado';
+				}
+
+				if (!empty($condiciones_condicion)) {
+					if (count($condiciones_condicion) > 1)
+					{
+						$condiciones['Students.student_condition IN'] = $condiciones_condicion;
+					}
+					else
+					{
+						$condiciones['Students.student_condition'] = $condiciones_condicion[0];
+					}
+				}
+				else
+				{
+					$condiciones['Students.student_condition'] = 'Regular';
+				}
 			}
 		}
 
@@ -4999,6 +5057,7 @@ class StudenttransactionsController extends AppController
 			$this->Flash->error(__('No se encontraron matrículas de estudiante'));
 			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 		}
+        \Cake\Log\Log::debug('matriculas_estudiantes->count: '.$matriculas_estudiantes->count());
 
 		$vectorRecibosConsejoEducativo = [];
 		$conceptoConsejoEducativo = "Consejo Educativo ".$periodo_escolar;
@@ -5014,6 +5073,10 @@ class StudenttransactionsController extends AppController
 		{
 			foreach ($recibosConsejoEducativo as $recibo)
 			{
+                if ($recibo->bill->parentsandguardian_id == 1113)
+                {
+                    \Cake\Log\Log::debug('Recibo de la familia ABOU ATTIEH FREITAS: '.$recibo->bill->bill_number);
+                }
 				$vectorRecibosConsejoEducativo[$recibo->bill->parentsandguardian_id] = $recibo->bill->bill_number;
 			}
 		}
@@ -5021,10 +5084,18 @@ class StudenttransactionsController extends AppController
 		$idsFamiliasConsejoVerificadas = [];
 		foreach ($matriculas_estudiantes as $matricula)
 		{
+            if ($matricula->student->parentsandguardian->id == 1113)
+            {
+                \Cake\Log\Log::debug('La familia ABOU ATTIEH FREITAS está en los resultados de búsqueda: matriculas_estudiantes');
+            }
 			if (!(isset($idsFamiliasConsejoVerificadas[$matricula->student->parentsandguardian->id])))
 			{
 				if (isset($vectorRecibosConsejoEducativo[$matricula->student->parentsandguardian->id]))
 				{
+                    if ($matricula->student->parentsandguardian->id == 1113)
+                    {
+                        \Cake\Log\Log::debug('La familia ABOU ATTIEH FREITAS ya tiene recibo, no se registra');
+                    }
 					$total_cuotas_periodo += $tarifaConsejoEducativo;
 				}
 				else
@@ -5042,25 +5113,44 @@ class StudenttransactionsController extends AppController
 					}
 					else
 					{
+                        if ($matricula->student->parentsandguardian->id == 1113)
+                        {
+                            \Cake\Log\Log::debug('Antes de verificar si la familia ABOU ATTIEH FREITAS tiene familia relacionada o está exonerada. id_familia_pagadora_consejo: '.$matricula->student->parentsandguardian->id_familia_pagadora_consejo.', consejo_exonerado: '.$matricula->student->parentsandguardian->consejo_exonerado);
+                        }
 						if ($matricula->student->parentsandguardian->id_familia_pagadora_consejo == 0)
 						{
 							if ($matricula->student->parentsandguardian->consejo_exonerado == 0)
 							{
-									$indicadorRegistrar = 1;
+                                if ($matricula->student->parentsandguardian->id == 1113)
+                                {
+                                    \Cake\Log\Log::debug('La familia ABOU ATTIEH FREITAS no tiene familia relacionada y tampoco está exonerada, se debe registrar');
+                                }
+								$indicadorRegistrar = 1;
 							}
 						}
+                         if ($matricula->student->parentsandguardian->id == 1113)
+                        {
+                            \Cake\Log\Log::debug('indicadorRegistrar de la familia ABOU ATTIEH FREITAS: '.$indicadorRegistrar);
+                        }
 					}
 					if ($indicadorRegistrar == 1)
 					{
 						if (!isset($detalle_morosos[$matricula->student->parentsandguardian->id]))
 						{
+                            if ($matricula->student->parentsandguardian->id == 1113)
+                            {
+                                \Cake\Log\Log::debug('La familia ABOU ATTIEH FREITAS no está en el vector detalle_morosos');
+                            }
 							$familia = trim($matricula->student->parentsandguardian->family)." (".trim($matricula->student->parentsandguardian->surname)." ".trim($matricula->student->parentsandguardian->first_name).")";
 
 							$detalle_morosos[$matricula->student->parentsandguardian->id] = $vector_morosidad;
 							$detalle_morosos[$matricula->student->parentsandguardian->id]["Familia"] = $familia;
 							$detalle_morosos[$matricula->student->parentsandguardian->id]["Teléfono"] = $matricula->student->parentsandguardian->cell_phone;
 						}
-
+                        if ($matricula->student->parentsandguardian->id == 1113)
+                        {
+                            \Cake\Log\Log::debug('Se actualizó el vector detalles_morosos de la familia ABOU ATTIEH FREITAS con: '.$tarifaConsejoEducativo);
+                        }
 						$total_cuotas_periodo += $tarifaConsejoEducativo;
 						$detalle_morosos[$matricula->student->parentsandguardian->id]["CE"] = $tarifaConsejoEducativo;
 						$detalle_morosos[$matricula->student->parentsandguardian->id]["Total $"] += $tarifaConsejoEducativo;

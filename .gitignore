@@ -25,3 +25,6 @@ archivos_chat_gemini/
 *.tgz
 *.tar
 *.rar
+
+# Ignorar archivos con fechas y/o horas (ej: 20260709, 20260709-1106, etc.)
+*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*
