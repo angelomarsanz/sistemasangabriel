@@ -1311,7 +1311,7 @@ class StudentsController extends AppController
 			if ($opcionMenu == "Recibo Consejo Educativo")
 			{
 				$representantes = new ParentsandguardiansController();
-				$jsondata['data']['consejo_educativo'] = $representantes->busquedaConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $parentsandguardians, $otrasTarifas);
+				$jsondata['data']['consejo_educativo'] = $representantes->procesarConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $parentsandguardians, $otrasTarifas);
 			}
 			else
 			{

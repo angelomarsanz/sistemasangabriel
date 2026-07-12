@@ -1014,7 +1014,7 @@ class ParentsandguardiansController extends AppController
 
         $this->set(compact('tipo_reporte', 'titulo_reporte', 'titulo_total', 'vector_representantes', 'contador_seleccionados', 'contador_impresion'));
     }
-    public function busquedaConsejoEducativo($anioEscolarActual = null, $proximoAnioEscolar, $representante = null, $otrasTarifas = null)
+    public function procesarConsejoEducativo($anioEscolarActual = null, $proximoAnioEscolar, $representante = null, $otrasTarifas = null)
     {
         $codigoRetorno = 0;
         $mensajeRespuesta = 'Proceso exitoso';
@@ -1100,7 +1100,7 @@ class ParentsandguardiansController extends AppController
 
             // Si el saldo es menor o igual a 0, el indicador es true (pago completo)
             // También se considera true si la tarifa es 0 (no aplica pago) o si está exonerado al 100%
-            if ($tarifaAnio > 0 && $saldoAnio <= 0) {
+            if (($tarifaAnio > 0 && $saldoAnio <= 0) || $tarifaAnio == 0 || $consejoExonerado > 0) {
                 $indicadorReciboConsejo = true;
             }
             else

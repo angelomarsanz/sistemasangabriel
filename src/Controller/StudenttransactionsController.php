@@ -11,6 +11,8 @@ use Cake\ORM\TableRegistry;
 
 use App\Controller\EventosController;
 
+use App\Controller\ParentsandguardiansController;
+
 use Cake\I18n\Time;
 
 class StudenttransactionsController extends AppController
@@ -4944,16 +4946,18 @@ class StudenttransactionsController extends AppController
         \Cake\Log\Log::debug('anio: '.$anio.', anioEscolarActual: '.$anioEscolarActual.', periodo_escolar: '.$periodo_escolar.', grados: '.$grados.', funcionLlamadora: '.$funcionLlamadora);
 
 		$this->loadModel('Rates');
-		$tarifaConsejoEducativo = 0;
-		$tarifas = $this->Rates->find('all')
-			->where(["Concept" => "Consejo Educativo", "rate_year" => $anio])
-			->order(['id' => 'DESC']);;
 
-		if ($tarifas->count() > 0)
-		{
-			$primerRegistroEncontrado = $tarifas->first();
-			$tarifaConsejoEducativo = $primerRegistroEncontrado->amount;
-		}
+        $tarifasReferencia = $this->Rates->find('all')
+            ->where(["Concept" => "Consejo Educativo", "rate_year >=" => 2023])
+            ->order(['rate_year' => 'ASC']);
+        
+        $otrasTarifas = [];
+        foreach ($tarifasReferencia as $t) {
+            $otrasTarifas[] = [
+                'conceptoAno' => 'Consejo Educativo ' . $t->rate_year,
+                'tarifaDolar' => $t->amount
+            ];
+        }
 
 		if ($anio < $anioEscolarActual)
 		{
@@ -5061,74 +5065,43 @@ class StudenttransactionsController extends AppController
 			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 		}
 
-		$vectorRecibosConsejoEducativo = [];
-		$conceptoConsejoEducativo = "Consejo Educativo ".$periodo_escolar;
-		$this->loadModel('Concepts');
-
-		$recibosConsejoEducativo = $this->Concepts->find()
-			->contain(['Bills'])
-			->where(['Bills.annulled' => false,
-				'Concepts.concept' => $conceptoConsejoEducativo])
-			->order(['Bills.parentsandguardian_id' => 'ASC']);
-
-		if ($recibosConsejoEducativo->count() > 0)
-		{
-			foreach ($recibosConsejoEducativo as $recibo)
-			{
-				$vectorRecibosConsejoEducativo[$recibo->bill->parentsandguardian_id] = $recibo->bill->bill_number;
-			}
-		}
+        $parentsController = new ParentsandguardiansController();
+        $proximoAnioEscolar = $anioEscolarActual + 1;
 
 		$idsFamiliasConsejoVerificadas = [];
 		foreach ($matriculas_estudiantes as $matricula)
 		{
-			if (!(isset($idsFamiliasConsejoVerificadas[$matricula->student->parentsandguardian->id])))
+            $representante = $matricula->student->parentsandguardian;
+			if (!(isset($idsFamiliasConsejoVerificadas[$representante->id])))
 			{
-				if (isset($vectorRecibosConsejoEducativo[$matricula->student->parentsandguardian->id]))
-				{
-					$total_cuotas_periodo += $tarifaConsejoEducativo;
-				}
-				else
-				{
-					$indicadorRegistrar = 0;
-					if ($anio < $anioEscolarActual)
-					{
-						if ($matricula->student->parentsandguardian->id_familia_pagadora_consejo_anterior == 0)
-						{
-							if ($matricula->student->parentsandguardian->consejo_exonerado_anterior == 0)
-							{
-								$indicadorRegistrar = 1;
-							}
-						}
-					}
-					else
-					{
-						if ($matricula->student->parentsandguardian->id_familia_pagadora_consejo == 0)
-						{
-							if ($matricula->student->parentsandguardian->consejo_exonerado == 0)
-							{
-								$indicadorRegistrar = 1;
-							}
-						}
-					}
-					if ($indicadorRegistrar == 1)
-					{
-						if (!isset($detalle_morosos[$matricula->student->parentsandguardian->id]))
-						{
-							$familia = trim($matricula->student->parentsandguardian->family)." (".trim($matricula->student->parentsandguardian->surname)." ".trim($matricula->student->parentsandguardian->first_name).")";
+                $resultado = $parentsController->procesarConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $representante, $otrasTarifas);
+                
+                $dataAnio = $resultado['anios'][$anio] ?? null;
 
-							$detalle_morosos[$matricula->student->parentsandguardian->id] = $vector_morosidad;
-							$detalle_morosos[$matricula->student->parentsandguardian->id]["Familia"] = $familia;
-							$detalle_morosos[$matricula->student->parentsandguardian->id]["Teléfono"] = $matricula->student->parentsandguardian->cell_phone;
-						}
-						$total_cuotas_periodo += $tarifaConsejoEducativo;
-						$detalle_morosos[$matricula->student->parentsandguardian->id]["CE"] = $tarifaConsejoEducativo;
-						$detalle_morosos[$matricula->student->parentsandguardian->id]["Total $"] += $tarifaConsejoEducativo;
-						$totales_morosidad['CE'] += $tarifaConsejoEducativo;
-						$totales_morosidad["Total $"] += $tarifaConsejoEducativo;
-					}
-				}
-				$idsFamiliasConsejoVerificadas[$matricula->student->parentsandguardian->id] = $tarifaConsejoEducativo;
+                if ($dataAnio)
+                {
+                    if ($dataAnio['idFamiliaPagadoraConsejo'] == 0 && $dataAnio['consejoExonerado'] == 0)
+                    {
+                        $total_cuotas_periodo += $dataAnio['tarifa'];
+                        
+                        if ($dataAnio['saldo'] > 0)
+                        {
+                            if (!isset($detalle_morosos[$representante->id]))
+                            {
+                                $familia = trim($representante->family)." (".trim($representante->surname)." ".trim($representante->first_name).")";
+
+                                $detalle_morosos[$representante->id] = $vector_morosidad;
+                                $detalle_morosos[$representante->id]["Familia"] = $familia;
+                                $detalle_morosos[$representante->id]["Teléfono"] = $representante->cell_phone;
+                            }
+                            $detalle_morosos[$representante->id]["CE"] += $dataAnio['saldo'];
+                            $detalle_morosos[$representante->id]["Total $"] += $dataAnio['saldo'];
+                            $totales_morosidad['CE'] += $dataAnio['saldo'];
+                            $totales_morosidad["Total $"] += $dataAnio['saldo'];
+                        }
+                    }
+                }
+				$idsFamiliasConsejoVerificadas[$representante->id] = true;
 			}
 		}
 		$vectorConsejo =
