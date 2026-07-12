@@ -5044,7 +5044,7 @@ class StudenttransactionsController extends AppController
         $proximoAnioEscolar = $anioEscolarActual + 1;
 
         $this->loadModel('Concepts');
-        $recibosConceptos = $this->Concepts->find()
+        $recibosConceptosQuery = $this->Concepts->find()
             ->contain(['Bills'])
             ->where([
                 'Bills.annulled' => false,
@@ -5057,9 +5057,9 @@ class StudenttransactionsController extends AppController
             $representante = $matricula->student->parentsandguardian;
 			if (!(isset($idsFamiliasConsejoVerificadas[$representante->id])))
 			{
-                // Filtrar de $recibosConceptos solo los recibos que cumplan esta condición 'Bills.parentsandguardian_id' => $representante->id
+                $recibosConceptos = (clone $recibosConceptosQuery)->where(['Bills.parentsandguardian_id' => $representante->id]);
 
-                $resultado = $parentsController->procesarConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $representante, $otrasTarifas, $matricula);
+                $resultado = $parentsController->procesarConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $representante, $otrasTarifas, $matricula, $recibosConceptos);
 
                 $dataAnio = $resultado['anios'][$anio] ?? null;
 

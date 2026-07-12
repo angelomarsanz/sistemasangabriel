@@ -1014,7 +1014,7 @@ class ParentsandguardiansController extends AppController
 
         $this->set(compact('tipo_reporte', 'titulo_reporte', 'titulo_total', 'vector_representantes', 'contador_seleccionados', 'contador_impresion'));
     }
-    public function procesarConsejoEducativo($anioEscolarActual = null, $proximoAnioEscolar, $representante = null, $otrasTarifas = null, $matricula = null)
+    public function procesarConsejoEducativo($anioEscolarActual = null, $proximoAnioEscolar, $representante = null, $otrasTarifas = null, $matricula = null, $recibosConceptos = null)
     {
         $codigoRetorno = 0;
         $mensajeRespuesta = 'Proceso exitoso';
@@ -1030,8 +1030,9 @@ class ParentsandguardiansController extends AppController
 
         $matriculasPorAnio = [];
         // if $matricula no es null y es un objeto
-        if (isset($matricula) && $matricula instanceof Object)
+        if (isset($matricula) && is_object($matricula))
         {
+            // 2. Crear el elemento para el año
             $matriculasPorAnio[$matricula->ano_escolar] = true;
         }
         else
@@ -1054,14 +1055,17 @@ class ParentsandguardiansController extends AppController
             }
         }
         // 3. Cargar todos los conceptos de recibos de Consejo Educativo y sumar montos por año
-        $this->loadModel('Concepts');
-        $recibosConceptos = $this->Concepts->find()
-            ->contain(['Bills'])
-            ->where([
-                'Bills.annulled' => false,
-                'SUBSTRING(Concepts.concept, 1, 17) =' => 'Consejo Educativo',
-                'Bills.parentsandguardian_id' => $representante->id
-            ]);
+        if ($recibosConceptos === null)
+        {
+            $this->loadModel('Concepts');
+            $recibosConceptos = $this->Concepts->find()
+                ->contain(['Bills'])
+                ->where([
+                    'Bills.annulled' => false,
+                    'SUBSTRING(Concepts.concept, 1, 17) =' => 'Consejo Educativo',
+                    'Bills.parentsandguardian_id' => $representante->id
+                ]);
+        }
 
         $pagosPorAnio = [];
         foreach ($recibosConceptos as $recibo) {
