@@ -1099,8 +1099,9 @@ class ParentsandguardiansController extends AppController
             $saldoAnio = $tarifaAnio - $pagadoAnio;
 
             // Si el saldo es menor o igual a 0, el indicador es true (pago completo)
-            // También se considera true si la tarifa es 0 (no aplica pago) o si está exonerado al 100%
-            if (($tarifaAnio > 0 && $saldoAnio <= 0) || $tarifaAnio == 0 || $consejoExonerado > 0) {
+            // También se considera true si la tarifa es 0 (no aplica pago), si está exonerado al 100%
+            // o si existe una familia pagadora asignada
+            if (($tarifaAnio > 0 && $saldoAnio <= 0) || $tarifaAnio == 0 || $consejoExonerado > 0 || ($idFamiliaPagadoraConsejo !== null && $idFamiliaPagadoraConsejo > 0)) {
                 $indicadorReciboConsejo = true;
             }
             else

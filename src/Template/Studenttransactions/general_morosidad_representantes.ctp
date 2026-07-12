@@ -61,12 +61,6 @@
 							'5to. Año' => '5to. Año'
 						]]);
 					echo "<div id='mensaje-grados' class='mensaje-usuario'></div>";
-					echo '<div id="quinto_anio_opciones" style="display:none; border: 1px solid #ccc; padding: 10px; margin-top: 10px;">';
-					echo '<h5>Incluir:</h5>';
-					echo '<div class="checkbox"><label>' . $this->Form->checkbox('condicion_regulares', ['value' => 'Regulares', 'id' => 'condicion-regulares']) . ' Regulares</label></div>';
-					echo '<div class="checkbox"><label>' . $this->Form->checkbox('condicion_egresados', ['value' => 'Egresados', 'id' => 'condicion-egresados']) . ' Egresados</label></div>';
-					echo "<div id='mensaje-condicion-estudiante' class='mensaje-usuario'></div>";
-					echo '</div>';
 					echo $this->Form->input('telefono', ['label' => 'Mostrar el número de teléfono del representante: ', 'options' =>
 						["" => "",
 						'Sí' => 'Sí',
@@ -142,14 +136,6 @@
 			if (grados === "") {
 				indicadorError = 1;
 				$("#mensaje-grados").html("Por favor seleccione los grados").css("color", 'red');
-			} else if (grados === '5to. Año') {
-				var regularesChecked = $('#condicion-regulares').is(':checked');
-				var egresadosChecked = $('#condicion-egresados').is(':checked');
-
-				if (!regularesChecked && !egresadosChecked) {
-					indicadorError = 1;
-					$("#mensaje-condicion-estudiante").html("Debe seleccionar al menos una condición (Regulares o Egresados)").css("color", 'red');
-				}
 			}
 
 			if (indicadorError > 0)

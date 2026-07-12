@@ -4532,6 +4532,7 @@ class StudenttransactionsController extends AppController
 		$this->loadModel('Schools');
 		$school = $this->Schools->get(2);
 		$anioEscolarActual = $school->current_school_year;
+        $anioInscripcionActual = $school->current_year_registration;
 
 		$this->loadModel('Monedas');
 		$moneda = $this->Monedas->get(2);
@@ -4742,7 +4743,7 @@ class StudenttransactionsController extends AppController
 
 		if ($consejo_educativo == 'Sí')
 		{
-			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $tipoEstudiante, 'reporteGeneralMorosidadRepresentantes', $condicionRegulares, $condicionEgresados);
+			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $anioInscripcionActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $tipoEstudiante, 'reporteGeneralMorosidadRepresentantes', $condicionRegulares, $condicionEgresados);
 
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];
@@ -4894,6 +4895,7 @@ class StudenttransactionsController extends AppController
 		$anioEscolarAnterior = $school->current_school_year - 1;
 		$anioEscolarActual = $school->current_school_year;
 		$proximoAnioEscolar = $school->current_school_year + 1;
+        $anioInscripcionActual = $school->current_year_registration;
 
         $periodoEscolarAnterior = $anioEscolarAnterior.'-'.$anioEscolarActual;
 		$periodoEscolarActual = $anioEscolarActual.'-'.$proximoAnioEscolar;
@@ -4927,7 +4929,7 @@ class StudenttransactionsController extends AppController
 				 "Total $" => 0
 				];
 
-			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $grados, 'consejoEducativoPorCobrar', $condicionRegulares, $condicionEgresados);
+			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $anioInscripcionActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $grados, 'consejoEducativoPorCobrar', $condicionRegulares, $condicionEgresados);
 
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];
@@ -4941,16 +4943,16 @@ class StudenttransactionsController extends AppController
 		}
 	}
 
-	public function vectorConsejoEducativo($anio = null, $anioEscolarActual = null, $periodo_escolar = null, $total_cuotas_periodo = null, $detalle_morosos = null, $vector_morosidad = null, $totales_morosidad = null, $grados = null, $funcionLlamadora = null, $condicionRegulares = 'No', $condicionEgresados = 'No')
+	public function vectorConsejoEducativo($anio = null, $anioEscolarActual = null, $anioInscripcionActual = null, $periodo_escolar = null, $total_cuotas_periodo = null, $detalle_morosos = null, $vector_morosidad = null, $totales_morosidad = null, $grados = null, $funcionLlamadora = null, $condicionRegulares = 'No', $condicionEgresados = 'No')
 	{
-        \Cake\Log\Log::debug('anio: '.$anio.', anioEscolarActual: '.$anioEscolarActual.', periodo_escolar: '.$periodo_escolar.', grados: '.$grados.', funcionLlamadora: '.$funcionLlamadora);
+        \Cake\Log\Log::debug('anio: '.$anio.', anioEscolarActual: '.$anioEscolarActual.', anioInscripcionActual: '.$anioInscripcionActual.', periodo_escolar: '.$periodo_escolar.', grados: '.$grados.', funcionLlamadora: '.$funcionLlamadora);
 
 		$this->loadModel('Rates');
 
         $tarifasReferencia = $this->Rates->find('all')
             ->where(["Concept" => "Consejo Educativo", "rate_year >=" => 2023])
             ->order(['rate_year' => 'ASC']);
-        
+
         $otrasTarifas = [];
         foreach ($tarifasReferencia as $t) {
             $otrasTarifas[] = [
@@ -4965,9 +4967,11 @@ class StudenttransactionsController extends AppController
 			{
 				$condiciones =
 					[
-						'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
 						'Students.balance >=' => $anio,
+                        'Studenttransactions.invoiced' => 0,
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
+                        'Studenttransactions.amount_dollar >' => 0,
+                        'Studenttransactions.ano_escolar >=' => 2023,
 						'Parentsandguardians.estatus_registro' => 'Activo'
 					];
 			}
@@ -4975,9 +4979,11 @@ class StudenttransactionsController extends AppController
 			{
 				$condiciones =
 					[
-						'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
 						'Students.balance >=' => $anio,
+                        'Studenttransactions.invoiced' => 0,
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
+                        'Studenttransactions.amount_dollar >' => 0,
+                        'Studenttransactions.ano_escolar >=' => 2023,
 						'Parentsandguardians.estatus_registro' => 'Activo',
 						'Sections.orden <' => 41
 					];
@@ -4986,9 +4992,11 @@ class StudenttransactionsController extends AppController
 			{
 				$condiciones =
 					[
-						'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
 						'Students.balance >=' => $anio,
+                        'Studenttransactions.invoiced' => 0,
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
+                        'Studenttransactions.amount_dollar >' => 0,
+                        'Studenttransactions.ano_escolar >=' => 2023,
 						'Parentsandguardians.estatus_registro' => 'Activo',
 						'Sections.orden >=' => 41
 					];
@@ -4996,14 +5004,25 @@ class StudenttransactionsController extends AppController
 		}
 		else
 		{
+			if ($anioEscolarActual < $anioInscripcionActual)
+			{
+				$operadorBalance = 'Students.balance >=';
+			}
+			else
+			{
+				$operadorBalance = 'Students.balance';
+			}
+
 			if ($grados == 'Todos')
 			{
 				$condiciones =
 					[
-						'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-						'Students.balance' => $anio,
+						$operadorBalance => $anio,
 						'Students.student_condition' => 'Regular',
+                        'Studenttransactions.invoiced' => 0,
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
+                        'Studenttransactions.amount_dollar >' => 0,
+                        'Studenttransactions.ano_escolar >=' => 2023,
 						'Parentsandguardians.estatus_registro' => 'Activo'
 					];
 			}
@@ -5011,10 +5030,12 @@ class StudenttransactionsController extends AppController
 			{
 				$condiciones =
 					[
-						'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-						'Students.balance' => $anio,
+						$operadorBalance => $anio,
 						'Students.student_condition' => 'Regular',
+                        'Studenttransactions.invoiced' => 0,
+						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
+                        'Studenttransactions.amount_dollar >' => 0,
+                        'Studenttransactions.ano_escolar >=' => 2023,
 						'Parentsandguardians.estatus_registro' => 'Activo',
 						'Sections.orden <' => 41
 					];
@@ -5023,35 +5044,15 @@ class StudenttransactionsController extends AppController
 			{
 				$condiciones =
 					[
-						'Studenttransactions.invoiced' => 0,
+						$operadorBalance => $anio,
+                        'Students.student_condition' => 'Regular',
+                        'Studenttransactions.invoiced' => 0,
 						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-						'Students.balance' => $anio,
+                        'Studenttransactions.amount_dollar >' => 0,
+                        'Studenttransactions.ano_escolar >=' => 2023,
 						'Parentsandguardians.estatus_registro' => 'Activo',
 						'Sections.orden >=' => 41
 					];
-
-				$condiciones_condicion = [];
-				if ($condicionRegulares == 'Regulares') {
-					$condiciones_condicion[] = 'Regular';
-				}
-				if ($condicionEgresados == 'Egresados') {
-					$condiciones_condicion[] = 'Egresado';
-				}
-
-				if (!empty($condiciones_condicion)) {
-					if (count($condiciones_condicion) > 1)
-					{
-						$condiciones['Students.student_condition IN'] = $condiciones_condicion;
-					}
-					else
-					{
-						$condiciones['Students.student_condition'] = $condiciones_condicion[0];
-					}
-				}
-				else
-				{
-					$condiciones['Students.student_condition'] = 'Regular';
-				}
 			}
 		}
 
@@ -5075,30 +5076,27 @@ class StudenttransactionsController extends AppController
 			if (!(isset($idsFamiliasConsejoVerificadas[$representante->id])))
 			{
                 $resultado = $parentsController->procesarConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $representante, $otrasTarifas);
-                
+
                 $dataAnio = $resultado['anios'][$anio] ?? null;
 
                 if ($dataAnio)
                 {
-                    if ($dataAnio['idFamiliaPagadoraConsejo'] == 0 && $dataAnio['consejoExonerado'] == 0)
+                    if ($dataAnio['indicadorReciboConsejo'] == false)
                     {
                         $total_cuotas_periodo += $dataAnio['tarifa'];
-                        
-                        if ($dataAnio['saldo'] > 0)
-                        {
-                            if (!isset($detalle_morosos[$representante->id]))
-                            {
-                                $familia = trim($representante->family)." (".trim($representante->surname)." ".trim($representante->first_name).")";
 
-                                $detalle_morosos[$representante->id] = $vector_morosidad;
-                                $detalle_morosos[$representante->id]["Familia"] = $familia;
-                                $detalle_morosos[$representante->id]["Teléfono"] = $representante->cell_phone;
-                            }
-                            $detalle_morosos[$representante->id]["CE"] += $dataAnio['saldo'];
-                            $detalle_morosos[$representante->id]["Total $"] += $dataAnio['saldo'];
-                            $totales_morosidad['CE'] += $dataAnio['saldo'];
-                            $totales_morosidad["Total $"] += $dataAnio['saldo'];
+                        if (!isset($detalle_morosos[$representante->id]))
+                        {
+                            $familia = trim($representante->family)." (".trim($representante->surname)." ".trim($representante->first_name).")";
+
+                            $detalle_morosos[$representante->id] = $vector_morosidad;
+                            $detalle_morosos[$representante->id]["Familia"] = $familia;
+                            $detalle_morosos[$representante->id]["Teléfono"] = $representante->cell_phone;
                         }
+                        $detalle_morosos[$representante->id]["CE"] += $dataAnio['saldo'];
+                        $detalle_morosos[$representante->id]["Total $"] += $dataAnio['saldo'];
+                        $totales_morosidad['CE'] += $dataAnio['saldo'];
+                        $totales_morosidad["Total $"] += $dataAnio['saldo'];
                     }
                 }
 				$idsFamiliasConsejoVerificadas[$representante->id] = true;
