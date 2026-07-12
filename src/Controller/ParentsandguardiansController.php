@@ -1014,7 +1014,7 @@ class ParentsandguardiansController extends AppController
 
         $this->set(compact('tipo_reporte', 'titulo_reporte', 'titulo_total', 'vector_representantes', 'contador_seleccionados', 'contador_impresion'));
     }
-    public function procesarConsejoEducativo($anioEscolarActual = null, $proximoAnioEscolar, $representante = null, $otrasTarifas = null)
+    public function procesarConsejoEducativo($anioEscolarActual = null, $proximoAnioEscolar, $representante = null, $otrasTarifas = null, $matricula = null)
     {
         $codigoRetorno = 0;
         $mensajeRespuesta = 'Proceso exitoso';
@@ -1028,24 +1028,31 @@ class ParentsandguardiansController extends AppController
             }
         }
 
-        // 2. Cargar transacciones de 'Matrícula' para saber en qué años el estudiante estuvo activo
-        $this->loadModel('Studenttransactions');
-        $matriculasEstudiantes = $this->Studenttransactions->find('all')
-            ->contain(['Students' => ['Parentsandguardians']])
-            ->where([
-                'Studenttransactions.invoiced' => 0,
-                'Studenttransactions.transaction_type' => 'Matrícula',
-                'Studenttransactions.amount_dollar >' => 0,
-                'Students.student_condition' => 'Regular',
-                'Parentsandguardians.id' => $representante->id,
-                'Studenttransactions.ano_escolar >=' => 2023
-            ]);
-
         $matriculasPorAnio = [];
-        foreach ($matriculasEstudiantes as $matricula) {
+        // if $matricula no es null y es un objeto
+        if (isset($matricula) && $matricula instanceof Object)
+        {
             $matriculasPorAnio[$matricula->ano_escolar] = true;
         }
+        else
+        {
+            // 2 . Cargar transacciones de 'Matrícula' para saber en qué años el estudiante estuvo activo
+            $this->loadModel('Studenttransactions');
+            $matriculasEstudiantes = $this->Studenttransactions->find('all')
+                ->contain(['Students' => ['Parentsandguardians']])
+                ->where([
+                    'Students.student_condition' => 'Regular',
+                    'Studenttransactions.invoiced' => 0,
+                    'Studenttransactions.transaction_type' => 'Matrícula',
+                    'Studenttransactions.amount_dollar >' => 0,
+                    'Studenttransactions.ano_escolar >=' => 2023,
+                    'Parentsandguardians.id' => $representante->id
+                ]);
 
+            foreach ($matriculasEstudiantes as $matricula) {
+                $matriculasPorAnio[$matricula->ano_escolar] = true;
+            }
+        }
         // 3. Cargar todos los conceptos de recibos de Consejo Educativo y sumar montos por año
         $this->loadModel('Concepts');
         $recibosConceptos = $this->Concepts->find()

@@ -4629,9 +4629,9 @@ class StudenttransactionsController extends AppController
 		$contador_transacciones = 0;
 
 		$condiciones_base = [
-			'Studenttransactions.invoiced' => 0,
+			'Students.balance' => $anio,
+            'Studenttransactions.invoiced' => 0,
 			'Studenttransactions.ano_escolar' => $anio,
-			'Students.balance' => $anio
 		];
 
 		if ($tipoEstudiante == '5to. Año')
@@ -4662,8 +4662,8 @@ class StudenttransactionsController extends AppController
 		}
 		elseif ($tipoEstudiante == 'Todos menos 5to. Año')
 		{
-			$condiciones_base['Sections.orden <'] = 41;
 			$condiciones_base['Students.student_condition'] = 'Regular';
+            $condiciones_base['Sections.orden <'] = 41;
 			$subtitulo_reporte = "Todos menos 5to. Año";
 		}
 		else {
@@ -4947,114 +4947,88 @@ class StudenttransactionsController extends AppController
 	{
         \Cake\Log\Log::debug('anio: '.$anio.', anioEscolarActual: '.$anioEscolarActual.', anioInscripcionActual: '.$anioInscripcionActual.', periodo_escolar: '.$periodo_escolar.', grados: '.$grados.', funcionLlamadora: '.$funcionLlamadora);
 
-		$this->loadModel('Rates');
+		$controlador_estudiantes = new StudentsController();
+		$otrasTarifas = $controlador_estudiantes->otrasTarifas(0);
 
-        $tarifasReferencia = $this->Rates->find('all')
-            ->where(["Concept" => "Consejo Educativo", "rate_year >=" => 2023])
-            ->order(['rate_year' => 'ASC']);
-
-        $otrasTarifas = [];
-        foreach ($tarifasReferencia as $t) {
-            $otrasTarifas[] = [
-                'conceptoAno' => 'Consejo Educativo ' . $t->rate_year,
-                'tarifaDolar' => $t->amount
-            ];
+        if ($anio < $anioEscolarActual)
+        {
+            $operadorBalance = 'Students.balance >=';
+        }
+        else
+        {
+            if ($anioInscripcionActual == $anioEscolarActual)
+            {
+                $operadorBalance = 'Students.balance';
+            }
+            else
+            {
+                $operadorBalance = 'Students.balance >=';
+            }
         }
 
-		if ($anio < $anioEscolarActual)
-		{
-			if ($grados == 'Todos')
-			{
-				$condiciones =
-					[
-						'Students.balance >=' => $anio,
-                        'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-                        'Studenttransactions.amount_dollar >' => 0,
-                        'Studenttransactions.ano_escolar >=' => 2023,
-						'Parentsandguardians.estatus_registro' => 'Activo'
-					];
-			}
-			elseif ($grados == 'Todos menos 5to. Año')
-			{
-				$condiciones =
-					[
-						'Students.balance >=' => $anio,
-                        'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-                        'Studenttransactions.amount_dollar >' => 0,
-                        'Studenttransactions.ano_escolar >=' => 2023,
-						'Parentsandguardians.estatus_registro' => 'Activo',
-						'Sections.orden <' => 41
-					];
-			}
-			else
-			{
-				$condiciones =
-					[
-						'Students.balance >=' => $anio,
-                        'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-                        'Studenttransactions.amount_dollar >' => 0,
-                        'Studenttransactions.ano_escolar >=' => 2023,
-						'Parentsandguardians.estatus_registro' => 'Activo',
-						'Sections.orden >=' => 41
-					];
-			}
-		}
-		else
-		{
-			if ($anioEscolarActual < $anioInscripcionActual)
-			{
-				$operadorBalance = 'Students.balance >=';
-			}
-			else
-			{
-				$operadorBalance = 'Students.balance';
-			}
+        if ($grados == 'Todos')
+        {
+            $condiciones =
+                [
+                    'Students.student_condition' => 'Regular',
+                    $operadorBalance => $anio,
+                    'Studenttransactions.invoiced' => 0,
+                    'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
+                    'Studenttransactions.amount_dollar >' => 0,
+                    'Studenttransactions.ano_escolar >=' => 2023,
+                    'Parentsandguardians.estatus_registro' => 'Activo'
+                ];
+        }
+        elseif ($grados == 'Todos menos 5to. Año')
+        {
+            $condiciones =
+                [
+                    'Students.student_condition' => 'Regular',
+                    $operadorBalance => $anio,
+                    'Studenttransactions.invoiced' => 0,
+                    'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
+                    'Studenttransactions.amount_dollar >' => 0,
+                    'Studenttransactions.ano_escolar >=' => 2023,
+                    'Parentsandguardians.estatus_registro' => 'Activo',
+                    'Sections.orden <' => 41
+                ];
+        }
+        else
+        {
+            $condiciones =
+                [
+                    $operadorBalance => $anio,
+                    'Studenttransactions.invoiced' => 0,
+                    'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
+                    'Studenttransactions.amount_dollar >' => 0,
+                    'Studenttransactions.ano_escolar >=' => 2023,
+                    'Parentsandguardians.estatus_registro' => 'Activo',
+                    'Sections.orden >=' => 41
+                ];
 
-			if ($grados == 'Todos')
-			{
-				$condiciones =
-					[
-						$operadorBalance => $anio,
-						'Students.student_condition' => 'Regular',
-                        'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-                        'Studenttransactions.amount_dollar >' => 0,
-                        'Studenttransactions.ano_escolar >=' => 2023,
-						'Parentsandguardians.estatus_registro' => 'Activo'
-					];
-			}
-			elseif ($grados == 'Todos menos 5to. Año')
-			{
-				$condiciones =
-					[
-						$operadorBalance => $anio,
-						'Students.student_condition' => 'Regular',
-                        'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-                        'Studenttransactions.amount_dollar >' => 0,
-                        'Studenttransactions.ano_escolar >=' => 2023,
-						'Parentsandguardians.estatus_registro' => 'Activo',
-						'Sections.orden <' => 41
-					];
-			}
-			else
-			{
-				$condiciones =
-					[
-						$operadorBalance => $anio,
-                        'Students.student_condition' => 'Regular',
-                        'Studenttransactions.invoiced' => 0,
-						'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-                        'Studenttransactions.amount_dollar >' => 0,
-                        'Studenttransactions.ano_escolar >=' => 2023,
-						'Parentsandguardians.estatus_registro' => 'Activo',
-						'Sections.orden >=' => 41
-					];
-			}
-		}
+            $condiciones_condicion = [];
+            if ($condicionRegulares == 'Regulares') {
+                $condiciones_condicion[] = 'Regular';
+            }
+            if ($condicionEgresados == 'Egresados') {
+                $condiciones_condicion[] = 'Egresado';
+            }
+
+            if (!empty($condiciones_condicion)) {
+                if (count($condiciones_condicion) > 1)
+                {
+                    $condiciones['Students.student_condition IN'] = $condiciones_condicion;
+                }
+                else
+                {
+                    $condiciones['Students.student_condition'] = $condiciones_condicion[0];
+                }
+            }
+            else
+            {
+                $condiciones['Students.student_condition'] = 'Regular';
+            }
+        }
 
 		$matriculas_estudiantes = $this->Studenttransactions->find('all')
 			->contain(['Students' => ['Parentsandguardians', 'Sections']])
@@ -5069,13 +5043,23 @@ class StudenttransactionsController extends AppController
         $parentsController = new ParentsandguardiansController();
         $proximoAnioEscolar = $anioEscolarActual + 1;
 
+        $this->loadModel('Concepts');
+        $recibosConceptos = $this->Concepts->find()
+            ->contain(['Bills'])
+            ->where([
+                'Bills.annulled' => false,
+                'SUBSTRING(Concepts.concept, 1, 17) =' => 'Consejo Educativo',
+            ]);
+
 		$idsFamiliasConsejoVerificadas = [];
 		foreach ($matriculas_estudiantes as $matricula)
 		{
             $representante = $matricula->student->parentsandguardian;
 			if (!(isset($idsFamiliasConsejoVerificadas[$representante->id])))
 			{
-                $resultado = $parentsController->procesarConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $representante, $otrasTarifas);
+                // Filtrar de $recibosConceptos solo los recibos que cumplan esta condición 'Bills.parentsandguardian_id' => $representante->id
+
+                $resultado = $parentsController->procesarConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $representante, $otrasTarifas, $matricula);
 
                 $dataAnio = $resultado['anios'][$anio] ?? null;
 
