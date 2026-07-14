@@ -5042,13 +5042,15 @@ class StudenttransactionsController extends AppController
 
         $parentsController = new ParentsandguardiansController();
         $proximoAnioEscolar = $anioEscolarActual + 1;
+        $proximoAnioConsejo = $anio + 1;
+        $periodoRequeridoConsejo = $anio.'-'.$proximoAnioConsejo;
 
         $this->loadModel('Concepts');
         $recibosConceptosQuery = $this->Concepts->find()
             ->contain(['Bills'])
             ->where([
                 'Bills.annulled' => false,
-                'SUBSTRING(Concepts.concept, 1, 17) =' => 'Consejo Educativo',
+                'Concepts.concept' => 'Consejo Educativo '.$periodoRequeridoConsejo
             ]);
 
 		$idsFamiliasConsejoVerificadas = [];
@@ -5059,7 +5061,7 @@ class StudenttransactionsController extends AppController
 			{
                 $recibosConceptos = (clone $recibosConceptosQuery)->where(['Bills.parentsandguardian_id' => $representante->id]);
 
-                $resultado = $parentsController->procesarConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $representante, $otrasTarifas, $matricula, $recibosConceptos);
+                $resultado = $parentsController->procesarConsejoEducativo($anioEscolarActual, $proximoAnioEscolar, $representante, $otrasTarifas, $matricula->ano_escolar, $recibosConceptos);
 
                 $dataAnio = $resultado['anios'][$anio] ?? null;
 

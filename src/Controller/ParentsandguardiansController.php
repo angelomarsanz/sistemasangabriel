@@ -1014,7 +1014,7 @@ class ParentsandguardiansController extends AppController
 
         $this->set(compact('tipo_reporte', 'titulo_reporte', 'titulo_total', 'vector_representantes', 'contador_seleccionados', 'contador_impresion'));
     }
-    public function procesarConsejoEducativo($anioEscolarActual = null, $proximoAnioEscolar, $representante = null, $otrasTarifas = null, $matricula = null, $recibosConceptos = null)
+    public function procesarConsejoEducativo($anioEscolarActual = null, $proximoAnioEscolar, $representante = null, $otrasTarifas = null, $anioRequeridoConsejo = null, $recibosConceptos = null)
     {
         $codigoRetorno = 0;
         $mensajeRespuesta = 'Proceso exitoso';
@@ -1030,12 +1030,7 @@ class ParentsandguardiansController extends AppController
 
         $matriculasPorAnio = [];
         // if $matricula no es null y es un objeto
-        if (isset($matricula) && is_object($matricula))
-        {
-            // 2. Crear el elemento para el año
-            $matriculasPorAnio[$matricula->ano_escolar] = true;
-        }
-        else
+        if ($anioRequeridoConsejo === null)
         {
             // 2 . Cargar transacciones de 'Matrícula' para saber en qué años el estudiante estuvo activo
             $this->loadModel('Studenttransactions');
@@ -1054,6 +1049,12 @@ class ParentsandguardiansController extends AppController
                 $matriculasPorAnio[$matricula->ano_escolar] = true;
             }
         }
+        else
+        {
+            // 2. Agregar solo el año requerido del Consejo Educativo
+            $matriculasPorAnio[$anioRequeridoConsejo] = true;
+        }
+
         // 3. Cargar todos los conceptos de recibos de Consejo Educativo y sumar montos por año
         if ($recibosConceptos === null)
         {
