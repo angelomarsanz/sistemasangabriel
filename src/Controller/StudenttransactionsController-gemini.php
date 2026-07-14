@@ -4743,7 +4743,7 @@ class StudenttransactionsController extends AppController
 
 		if ($consejo_educativo == 'Sí')
 		{
-			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $anioInscripcionActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $tipoEstudiante, 'reporteGeneralMorosidadRepresentantes', $condicionRegulares, $condicionEgresados, true);
+			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $anioInscripcionActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $tipoEstudiante, 'reporteGeneralMorosidadRepresentantes', $condicionRegulares, $condicionEgresados);
 
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];
@@ -4929,7 +4929,7 @@ class StudenttransactionsController extends AppController
 				 "Total $" => 0
 				];
 
-			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $anioInscripcionActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $grados, 'consejoEducativoPorCobrar', $condicionRegulares, $condicionEgresados, true);
+			$vectorConsejo = $this->vectorConsejoEducativo($anio, $anioEscolarActual, $anioInscripcionActual, $periodo_escolar, $total_cuotas_periodo, $detalle_morosos, $vector_morosidad, $totales_morosidad, $grados, 'consejoEducativoPorCobrar', $condicionRegulares, $condicionEgresados);
 
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];
@@ -4945,6 +4945,12 @@ class StudenttransactionsController extends AppController
 
 	public function vectorConsejoEducativo($anio = null, $anioEscolarActual = null, $anioInscripcionActual = null, $periodo_escolar = null, $total_cuotas_periodo = 0, $detalle_morosos = [], $vector_morosidad = null, $totales_morosidad = null, $grados = 'Todos', $funcionLlamadora = null, $condicionRegulares = 'No', $condicionEgresados = 'No', $soloMorosos = true)
 	{
+        if ($total_cuotas_periodo === null) $total_cuotas_periodo = 0;
+        if ($detalle_morosos === null) $detalle_morosos = [];
+        if ($vector_morosidad === null) $vector_morosidad = ["Familia" => "", "CE" => 0, "Total $" => 0, "Teléfono" => "", "nroRecibo" => ""];
+        if ($totales_morosidad === null) $totales_morosidad = ["CE" => 0, "Total $" => 0];
+        if ($grados === null) $grados = 'Todos';
+
         \Cake\Log\Log::debug('anio: '.$anio.', anioEscolarActual: '.$anioEscolarActual.', anioInscripcionActual: '.$anioInscripcionActual.', periodo_escolar: '.$periodo_escolar.', grados: '.$grados.', funcionLlamadora: '.$funcionLlamadora);
 
 		$controlador_estudiantes = new StudentsController();
@@ -5037,9 +5043,7 @@ class StudenttransactionsController extends AppController
                 'Parentsandguardians.family' => 'ASC',
                 'Parentsandguardians.id' => 'ASC',
                 'Students.surname' => 'ASC',
-                'Students.second_surname' => 'ASC',
-                'Students.first_name' => 'ASC',
-                'Students.second_name' => 'ASC'
+                'Students.first_name' => 'ASC'
             ]);
 
 		if ($matriculas_estudiantes->count() == 0)
@@ -5082,7 +5086,7 @@ class StudenttransactionsController extends AppController
 		{
             $representante = $matricula->student->parentsandguardian;
             $estudiante = $matricula->student;
-
+            
             // Estadísticas de estudiantes
             $resumen['contadorEstudiantes']++;
             if ($estudiante->number_of_brothers > 0 && $estudiante->number_of_brothers < $anio) {
@@ -5110,7 +5114,7 @@ class StudenttransactionsController extends AppController
                 if ($dataAnio)
                 {
                     $resumen['tarifaConsejo'] = $dataAnio['tarifa'];
-
+                    
                     $esExoneradaORelacionada = false;
                     if ($dataAnio['consejoExonerado'] > 0) {
                         $resumen['totalFamiliasExoneradas']++;
@@ -5150,32 +5154,29 @@ class StudenttransactionsController extends AppController
                          }
                     }
 
-                    if ($total_cuotas_periodo !== null && $detalle_morosos !== null && $vector_morosidad !== null && $totales_morosidad !== null)
+                    if ($dataAnio['indicadorReciboConsejo'] == false)
                     {
-                        if ($dataAnio['indicadorReciboConsejo'] == false)
+                        $total_cuotas_periodo += $dataAnio['tarifa'];
+
+                        if (!isset($detalle_morosos[$representante->id]))
                         {
-                            $total_cuotas_periodo += $dataAnio['tarifa'];
+                            $familiaStr = trim($representante->family)." (".trim($representante->surname)." ".trim($representante->first_name).")";
 
-                            if (!isset($detalle_morosos[$representante->id]))
-                            {
-                                $familiaStr = trim($representante->family)." (".trim($representante->surname)." ".trim($representante->first_name).")";
-
-                                $detalle_morosos[$representante->id] = $vector_morosidad;
-                                $detalle_morosos[$representante->id]["Familia"] = $familiaStr;
-                                $detalle_morosos[$representante->id]["Teléfono"] = $representante->cell_phone;
-                                $detalle_morosos[$representante->id]["nroRecibo"] = $infoFamilia['nroRecibo'];
-                            }
-                            $detalle_morosos[$representante->id]["CE"] += $dataAnio['saldo'];
-                            $detalle_morosos[$representante->id]["Total $"] += $dataAnio['saldo'];
-                            $totales_morosidad['CE'] += $dataAnio['saldo'];
-                            $totales_morosidad["Total $"] += $dataAnio['saldo'];
+                            $detalle_morosos[$representante->id] = $vector_morosidad;
+                            $detalle_morosos[$representante->id]["Familia"] = $familiaStr;
+                            $detalle_morosos[$representante->id]["Teléfono"] = $representante->cell_phone;
+                            $detalle_morosos[$representante->id]["nroRecibo"] = $infoFamilia['nroRecibo'];
                         }
+                        $detalle_morosos[$representante->id]["CE"] += $dataAnio['saldo'];
+                        $detalle_morosos[$representante->id]["Total $"] += $dataAnio['saldo'];
+                        $totales_morosidad['CE'] += $dataAnio['saldo'];
+                        $totales_morosidad["Total $"] += $dataAnio['saldo'];
                     }
-
+                    
                     $idsFamiliasConsejoVerificadas[$representante->id] = $infoFamilia;
                 }
 			}
-
+            
             if (!$soloMorosos) {
                 $infoFam = $idsFamiliasConsejoVerificadas[$representante->id] ?? null;
                 $listaEstudiantes[] = [

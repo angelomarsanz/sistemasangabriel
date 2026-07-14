@@ -63,14 +63,7 @@ if (isset($reporte))
     }
     elseif ($reporte == "reporteGeneralConsejoEducativo")
     {
-        if ($anioEscolarRequerido < $anioEscolarActual)
-        {
-            include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_general_consejo_educativo_anterior.ctp';
-        }
-        else
-        {
-            include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_general_consejo_educativo.ctp';
-        }
+        include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_general_consejo_educativo.ctp';
     }
 } ?> 
 <br /><br /><br /><br /><br /><br /><br />

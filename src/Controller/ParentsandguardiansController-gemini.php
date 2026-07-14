@@ -1148,7 +1148,6 @@ class ParentsandguardiansController extends AppController
         $this->loadModel('Schools');
         $schools = $this->Schools->get(2);
         $anioEscolarActual = $schools->current_school_year;
-        $anioInscripcionActual = $school->current_year_registration;
 
         if (isset($reporte))
         {
@@ -1209,24 +1208,33 @@ class ParentsandguardiansController extends AppController
                 }
                 elseif ($reporte == "reporteGeneralConsejoEducativo")
                 {
-                    $stController = new StudenttransactionsController();
+                    $total_cuotas_periodo = 0;
+                    $detalle_morosos = [];
+                    $vector_morosidad = ["Familia" => "", "CE" => 0, "Total $" => 0, "Teléfono" => "", "nroRecibo" => ""];
+                    $totales_morosidad = ["CE" => 0, "Total $" => 0];
 
+                    $this->loadModel('Schools');
+                    $school = $this->Schools->get(2);
+                    $anioInscripcionActual = $school->current_year_registration;
+
+                    $stController = new StudenttransactionsController();
+                    
                     $resultado = $stController->vectorConsejoEducativo(
-                        $anioEscolarRequerido,
-                        $anioEscolarActual,
-                        $anioInscripcionActual,
-                        $anioEscolar,
-                        null,
-                        null,
-                        null,
-                        null,
-                        'Todos',
-                        'reporteGeneralConsejoEducativo',
-                        'Regulares',
-                        'No',
+                        $anioEscolarRequerido, 
+                        $anioEscolarActual, 
+                        $anioInscripcionActual, 
+                        $anioEscolar, 
+                        $total_cuotas_periodo, 
+                        $detalle_morosos, 
+                        $vector_morosidad, 
+                        $totales_morosidad, 
+                        'Todos', 
+                        'reporteGeneralConsejoEducativo', 
+                        'Regulares', 
+                        'No', 
                         false
                     );
-
+                    
                     $resumen = $resultado['resumen'];
                     $listaEstudiantes = $resultado['listaEstudiantes'];
                     $tarifaConsejoEducativo = (object)['amount' => $resumen['tarifaConsejo']];
