@@ -1148,7 +1148,7 @@ class ParentsandguardiansController extends AppController
         $this->loadModel('Schools');
         $schools = $this->Schools->get(2);
         $anioEscolarActual = $schools->current_school_year;
-        $anioInscripcionActual = $school->current_year_registration;
+        $anioInscripcionActual = $schools->current_year_registration;
 
         if (isset($reporte))
         {
