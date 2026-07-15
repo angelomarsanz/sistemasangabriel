@@ -1,6 +1,6 @@
 <div name="reporteGeneralConsejoEducativo" id="reporteGeneralConsejoEducativo" class="container">
     <h3 style="text-align:center">Consejo Educativo Período <?= $anioEscolar ?></h3>
-    <div class="table-responsive"> 
+    <div class="table-responsive">
         <table class="table table-striped table-hover">
             <tr>
                 <td><b>Familias: </b><?= $this->Number->format($resumen['contadorFamilias']) ?></td>
@@ -12,7 +12,7 @@
                 <td><b>Estudiantes regulares: </b><?= $this->Number->format($resumen['contadorEstudiantesRegulares']) ?></td>
                 <td><b>Estudiantes nuevos: </b><?= $this->Number->format($resumen['contadorEstudiantesNuevos']) ?></td>
             </tr>
-            <tr>           
+            <tr>
                 <td><b>Estudiantes con becas completas: </b><?= $this->Number->format($resumen['contadorEstudiantesBecasCompletas']) ?></td>
                 <td><b>Estudiantes con becas parciales: </b><?= $this->Number->format($resumen['contadorEstudiantesBecasParciales']) ?></td>
                 <td></td>
@@ -23,7 +23,7 @@
                 <td><b>Cobrado familias ($): </b><?= number_format($resumen['cobradoFamilias'], 2, ",", ".") ?></td>
             </tr>
         </table>
-    </div> 
+    </div>
     <div class="table-responsive">
         <table class="table table-striped table-hover">
             <thead>
@@ -58,18 +58,18 @@
                     <th></th>
 				</tr>
 			</tfoot>
-            <tbody>				
+            <tbody>
                 <?php
                 $familiaAnteriorId = "";
                 $contadorFamiliasRel = 0;
                 $contadorEstudiantesRel = 0;
-                foreach ($listaEstudiantes as $item): 
+                foreach ($listaEstudiantes as $item):
                     $estudiante = $item['student'];
                     $representante = $item['representative'];
                     $section = $item['section'];
                     $familiaCE = $item['familiaCE'];
-                    
-                    if ($familiaAnteriorId != $representante->id): 
+
+                    if ($familiaAnteriorId != $representante->id):
                         $contadorFamiliasRel++;
                     endif;
                     $contadorEstudiantesRel++; ?>
@@ -79,7 +79,7 @@
                         <td>
                             <?= ($familiaAnteriorId != $representante->id) ? $representante->family . " (" . $representante->surname . " " . $representante->first_name . ")" : "" ?>
                         </td>
-                        <td><?= $estudiante->full_name; ?></td>     
+                        <td><?= $estudiante->full_name; ?></td>
                         <td><?= $section->full_name ?></td>
                         <td style="text-align: center;">
                             <?= ($estudiante->number_of_brothers > 0 && $estudiante->number_of_brothers < $anioEscolarRequerido) ? "Regular" : "Nuevo" ?>
@@ -100,10 +100,10 @@
                             <?= ($familiaAnteriorId != $representante->id) ? number_format($familiaCE['pagado'], 2, ",", ".") : "" ?>
                         </td>
                         <td style="text-align: center;">
-                            <?= ($familiaAnteriorId != $representante->id) ? $familiaCE['nroRecibo'] : "" ?>
+                            <?= ($familiaAnteriorId != $representante->id) ? (is_array($familiaCE['nroRecibo']) ? implode(", ", $familiaCE['nroRecibo']) : $familiaCE['nroRecibo']) : "" ?>
                         </td>
                     </tr>
-                    <?php 
+                    <?php
                     $familiaAnteriorId = $representante->id;
                     endforeach; ?>
             </tbody>

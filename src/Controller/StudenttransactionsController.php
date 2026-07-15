@@ -5138,14 +5138,13 @@ class StudenttransactionsController extends AppController
                         'pagado' => $dataAnio['pagado'],
                         'saldo' => $dataAnio['saldo'],
                         'indicadorRecibo' => $dataAnio['indicadorReciboConsejo'],
-                        'nroRecibo' => ''
+                        'nroRecibo' => []
                     ];
 
                     if ($dataAnio['indicadorReciboConsejo'] && $dataAnio['pagado'] > 0) {
                          foreach ($recibosConceptos as $rc) {
                              if (preg_match('/Consejo Educativo\s*'.$anio.'/', $rc->concept)) {
-                                 $infoFamilia['nroRecibo'] = $rc->bill->bill_number;
-                                 break;
+                                 $infoFamilia['nroRecibo'][] = $rc->bill->bill_number;
                              }
                          }
                     }
