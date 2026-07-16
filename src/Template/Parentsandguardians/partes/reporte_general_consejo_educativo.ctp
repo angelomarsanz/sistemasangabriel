@@ -10,7 +10,7 @@
             <tr>
                 <td><b>Estudiantes: </b><?= $this->Number->format($resumen['contadorEstudiantes']) ?></td>
                 <td><b>Estudiantes regulares: </b><?= $this->Number->format($resumen['contadorEstudiantesRegulares']) ?></td>
-                <td><b>Estudiantes nuevos: </b><?= $this->Number->format($resumen['contadorEstudiantesNuevos']) ?></td>
+                <td><b>Estudiantes nuevos (<?= $anioEscolar ?>): </b><?= $this->Number->format($resumen['contadorEstudiantesNuevos']) ?></td>
             </tr>
             <tr>
                 <td><b>Estudiantes con becas completas: </b><?= $this->Number->format($resumen['contadorEstudiantesBecasCompletas']) ?></td>

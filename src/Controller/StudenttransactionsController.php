@@ -5087,7 +5087,7 @@ class StudenttransactionsController extends AppController
             $resumen['contadorEstudiantes']++;
             if ($estudiante->number_of_brothers > 0 && $estudiante->number_of_brothers < $anio) {
                 $resumen['contadorEstudiantesRegulares']++;
-            } else {
+            } elseif ($estudiante->number_of_brothers == $anio) {
                 $resumen['contadorEstudiantesNuevos']++;
             }
 
