@@ -4950,61 +4950,26 @@ class StudenttransactionsController extends AppController
 		$controlador_estudiantes = new StudentsController();
 		$otrasTarifas = $controlador_estudiantes->otrasTarifas(0);
 
-        if ($anio < $anioEscolarActual)
-        {
-            $operadorBalance = 'Students.balance >=';
-        }
-        else
-        {
-            if ($anioInscripcionActual == $anioEscolarActual)
-            {
-                $operadorBalance = 'Students.balance';
-            }
-            else
-            {
-                $operadorBalance = 'Students.balance >=';
-            }
-        }
+        $operadorBalance = ($anio == $anioEscolarActual && $anioInscripcionActual == $anioEscolarActual) ? 'Students.balance' : 'Students.balance >=';
 
-        if ($grados == 'Todos')
-        {
-            $condiciones =
-                [
-                    'Students.student_condition' => 'Regular',
-                    $operadorBalance => $anio,
-                    'Studenttransactions.invoiced' => 0,
-                    'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-                    'Studenttransactions.amount_dollar >' => 0,
-                    'Studenttransactions.ano_escolar >=' => 2023,
-                    'Parentsandguardians.estatus_registro' => 'Activo'
-                ];
-        }
-        elseif ($grados == 'Todos menos 5to. Año')
-        {
-            $condiciones =
-                [
-                    'Students.student_condition' => 'Regular',
-                    $operadorBalance => $anio,
-                    'Studenttransactions.invoiced' => 0,
-                    'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-                    'Studenttransactions.amount_dollar >' => 0,
-                    'Studenttransactions.ano_escolar >=' => 2023,
-                    'Parentsandguardians.estatus_registro' => 'Activo',
-                    'Sections.orden <' => 41
-                ];
-        }
-        else
-        {
-            $condiciones =
-                [
-                    $operadorBalance => $anio,
-                    'Studenttransactions.invoiced' => 0,
-                    'Studenttransactions.transaction_description' => 'Matrícula '.$anio,
-                    'Studenttransactions.amount_dollar >' => 0,
-                    'Studenttransactions.ano_escolar >=' => 2023,
-                    'Parentsandguardians.estatus_registro' => 'Activo',
-                    'Sections.orden >=' => 41
-                ];
+        $condiciones = [
+            $operadorBalance => $anio,
+            'Studenttransactions.invoiced' => 0,
+            'Studenttransactions.transaction_description' => 'Matrícula ' . $anio,
+            'Studenttransactions.amount_dollar >' => 0,
+            'Studenttransactions.ano_escolar >=' => 2023,
+            'Parentsandguardians.estatus_registro' => 'Activo'
+        ];
+
+        if ($grados == 'Todos' || $grados == 'Todos menos 5to. Año') {
+            if ($anio == $anioEscolarActual) {
+                $condiciones['Students.student_condition'] = 'Regular';
+            }
+            if ($grados == 'Todos menos 5to. Año') {
+                $condiciones['Sections.orden <'] = 41;
+            }
+        } else {
+            $condiciones['Sections.orden >='] = 41;
 
             $condiciones_condicion = [];
             if ($condicionRegulares == 'Regulares') {
@@ -5015,17 +4980,12 @@ class StudenttransactionsController extends AppController
             }
 
             if (!empty($condiciones_condicion)) {
-                if (count($condiciones_condicion) > 1)
-                {
+                if (count($condiciones_condicion) > 1) {
                     $condiciones['Students.student_condition IN'] = $condiciones_condicion;
-                }
-                else
-                {
+                } else {
                     $condiciones['Students.student_condition'] = $condiciones_condicion[0];
                 }
-            }
-            else
-            {
+            } else {
                 $condiciones['Students.student_condition'] = 'Regular';
             }
         }
