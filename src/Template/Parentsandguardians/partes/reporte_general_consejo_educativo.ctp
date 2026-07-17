@@ -1,26 +1,46 @@
+<h3 style="text-align:center">Consejo Educativo</h3>
+<h4 style="text-align:center">U.E. Colegio San Gabriel Arcángel, C.A.</h4>
+<h5 style="text-align:center">Av. Río Orinoco, Urb. Valles del Camoruco, Valencia, Estado Carabobo</h5>
+<h6 style="text-align:center">J-40490885-4</h6>
+<p>Fecha de emisión del reporte: <?= $fechaActual->format('d-m-Y') ?></p>
 <div name="reporteGeneralConsejoEducativo" id="reporteGeneralConsejoEducativo" class="container">
     <h3 style="text-align:center">Consejo Educativo Período <?= $anioEscolar ?></h3>
     <div class="table-responsive">
         <table class="table table-striped table-hover">
             <tr>
+                <td></td>
+                <td></td>
                 <td><b>Familias: </b><?= $this->Number->format($resumen['contadorFamilias']) ?></td>
                 <td><b>Familias exoneradas: </b><?= $this->Number->format($resumen['totalFamiliasExoneradas']) ?></td>
                 <td><b>Familias relacionadas: </b><?= $this->Number->format($resumen['totalFamiliasRelacionadas']) ?></td>
             </tr>
             <tr>
+                <td></td>
+                <td></td>
                 <td><b>Estudiantes: </b><?= $this->Number->format($resumen['contadorEstudiantes']) ?></td>
                 <td><b>Estudiantes regulares: </b><?= $this->Number->format($resumen['contadorEstudiantesRegulares']) ?></td>
                 <td><b>Estudiantes nuevos (<?= $anioEscolar ?>): </b><?= $this->Number->format($resumen['contadorEstudiantesNuevos']) ?></td>
             </tr>
             <tr>
+                <td></td>
+                <td></td>
                 <td><b>Estudiantes egresados, retirados, etc: </b><?= $this->Number->format($resumen['contadorOtrosEstudiantes']) ?></td>
                 <td><b>Estudiantes con becas completas: </b><?= $this->Number->format($resumen['contadorEstudiantesBecasCompletas']) ?></td>
                 <td><b>Estudiantes con becas parciales: </b><?= $this->Number->format($resumen['contadorEstudiantesBecasParciales']) ?></td>
             </tr>
             <tr>
+                <td></td>
+                <td></td>
                 <td><b>Proyección de cobro familias ($): </b><?= number_format($resumen['proyeccionCobroFamilias'], 2, ",", ".") ?></td>
                 <td><b>Pendiente por pago familias ($): </b><?= number_format($resumen['pendientePorPagoFamilias'], 2, ",", ".") ?></td>
                 <td><b>Cobrado familias ($): </b><?= number_format($resumen['cobradoFamilias'], 2, ",", ".") ?></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
         </table>
     </div>
