@@ -4934,8 +4934,11 @@ class StudenttransactionsController extends AppController
 			$total_cuotas_periodo = $vectorConsejo['total_cuotas_periodo'];
 			$detalle_morosos = $vectorConsejo['detalle_morosos'];
 			$totales_morosidad = $vectorConsejo['totales_morosidad'];
+            $resumen = $vectorConsejo['resumen'];
+            $estudiantesOtrosAnios = $vectorConsejo['estudiantesOtrosAnios'] ?? [];
+            $contadorEstudiantesOtrosAnios = $vectorConsejo['contadorEstudiantesOtrosAnios'] ?? 0;
 
-			$this->set(compact('anio', 'periodo_escolar', 'telefono', 'currentDate', 'school', 'detalle_morosos', 'total_cuotas_periodo', 'totales_morosidad'));
+			$this->set(compact('anio', 'periodo_escolar', 'telefono', 'currentDate', 'school', 'detalle_morosos', 'total_cuotas_periodo', 'totales_morosidad', 'resumen', 'estudiantesOtrosAnios', 'contadorEstudiantesOtrosAnios'));
 		}
 		else
 		{
@@ -4954,6 +4957,7 @@ class StudenttransactionsController extends AppController
 
         $condiciones = [
             $operadorBalance => $anio,
+            'Students.number_of_brothers <=' => $anio,
             'Studenttransactions.invoiced' => 0,
             'Studenttransactions.transaction_description' => 'Matrícula ' . $anio,
             'Studenttransactions.amount_dollar >' => 0,
@@ -5028,6 +5032,7 @@ class StudenttransactionsController extends AppController
             'contadorEstudiantes' => 0,
             'contadorEstudiantesRegulares' => 0,
             'contadorEstudiantesNuevos' => 0,
+            'contadorOtrosEstudiantes' => 0,
             'contadorEstudiantesBecasCompletas' => 0,
             'contadorEstudiantesBecasParciales' => 0,
             'proyeccionCobroFamilias' => 0,
@@ -5038,6 +5043,8 @@ class StudenttransactionsController extends AppController
         $listaEstudiantes = [];
 
 		$idsFamiliasConsejoVerificadas = [];
+        $estudiantesOtrosAnios = [];
+        $contadorEstudiantesOtrosAnios = 0;
 		foreach ($matriculas_estudiantes as $matricula)
 		{
             $representante = $matricula->student->parentsandguardian;
@@ -5049,6 +5056,22 @@ class StudenttransactionsController extends AppController
                 $resumen['contadorEstudiantesRegulares']++;
             } elseif ($estudiante->number_of_brothers == $anio) {
                 $resumen['contadorEstudiantesNuevos']++;
+            } else {
+                if ($estudiante->student_condition == 'Regular')
+                {
+                    $resumen['contadorEstudiantesRegulares']++;
+                }
+                else
+                {
+                    $resumen['contadorOtrosEstudiantes']++;
+                }
+                $estudiantesOtrosAnios[$estudiante->id.' - '.$estudiante->full_name] = [
+                    'student_condition' => $estudiante->student_condition,
+                    'number_of_brothers' => $estudiante->number_of_brothers,
+                    'balance' => $estudiante->balance,
+                    'respaldo_primer_ano_inscripcion' => $estudiante->respaldo_primer_ano_inscripcion
+                ];
+                $contadorEstudiantesOtrosAnios++;
             }
 
             if ($estudiante->discount == 100) {
@@ -5151,7 +5174,9 @@ class StudenttransactionsController extends AppController
 				'detalle_morosos' => $detalle_morosos,
 				'totales_morosidad' => $totales_morosidad,
                 'resumen' => $resumen,
-                'listaEstudiantes' => $listaEstudiantes
+                'listaEstudiantes' => $listaEstudiantes,
+                'estudiantesOtrosAnios' => $estudiantesOtrosAnios,
+                'contadorEstudiantesOtrosAnios' => $contadorEstudiantesOtrosAnios
 			];
 		return $vectorConsejo;
 	}

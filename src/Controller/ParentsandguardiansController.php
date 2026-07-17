@@ -1229,9 +1229,11 @@ class ParentsandguardiansController extends AppController
 
                     $resumen = $resultado['resumen'];
                     $listaEstudiantes = $resultado['listaEstudiantes'];
+                    $estudiantesOtrosAnios = $resultado['estudiantesOtrosAnios'] ?? [];
+                    $contadorEstudiantesOtrosAnios = $resultado['contadorEstudiantesOtrosAnios'] ?? 0;
                     $tarifaConsejoEducativo = (object)['amount' => $resumen['tarifaConsejo']];
 
-                    $this->set(compact('fechaActual', 'anioEscolar', 'anioEscolarActual', 'anioEscolarRequerido', 'reporte', 'resumen', 'listaEstudiantes', 'tarifaConsejoEducativo'));
+                    $this->set(compact('fechaActual', 'anioEscolar', 'anioEscolarActual', 'anioEscolarRequerido', 'reporte', 'resumen', 'listaEstudiantes', 'tarifaConsejoEducativo', 'estudiantesOtrosAnios', 'contadorEstudiantesOtrosAnios'));
                 }
             }
         }

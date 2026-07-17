@@ -13,9 +13,9 @@
                 <td><b>Estudiantes nuevos (<?= $anioEscolar ?>): </b><?= $this->Number->format($resumen['contadorEstudiantesNuevos']) ?></td>
             </tr>
             <tr>
+                <td><b>Estudiantes egresados, retirados, etc: </b><?= $this->Number->format($resumen['contadorOtrosEstudiantes']) ?></td>
                 <td><b>Estudiantes con becas completas: </b><?= $this->Number->format($resumen['contadorEstudiantesBecasCompletas']) ?></td>
                 <td><b>Estudiantes con becas parciales: </b><?= $this->Number->format($resumen['contadorEstudiantesBecasParciales']) ?></td>
-                <td></td>
             </tr>
             <tr>
                 <td><b>Proyección de cobro familias ($): </b><?= number_format($resumen['proyeccionCobroFamilias'], 2, ",", ".") ?></td>
@@ -82,7 +82,7 @@
                         <td><?= $estudiante->full_name; ?></td>
                         <td><?= $section->full_name ?></td>
                         <td style="text-align: center;">
-                            <?= ($estudiante->number_of_brothers > 0 && $estudiante->number_of_brothers < $anioEscolarRequerido) ? "Regular" : "Nuevo" ?>
+                            <?= ($estudiante->number_of_brothers == $anioEscolarRequerido) ? "Nuevo" : $estudiante->student_condition ?>
                         </td>
                         <td style="text-align: center">
                             <?= $estudiante->discount."%" ?>

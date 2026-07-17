@@ -66,6 +66,7 @@ if (isset($reporte))
         include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_general_consejo_educativo.ctp';
     }
 } ?> 
+<br />
 <br /><br /><br /><br /><br /><br /><br />
 <script>
     // Variables globales
@@ -78,7 +79,7 @@ if (isset($reporte))
     console.log("rutaPagina", rutaPagina);
     var idFamilia = 0;
     var reporte = "<?= $reporte ?>";
-    
+
     // Funciones generales
     function datosFamilia()
     {
@@ -203,41 +204,41 @@ if (isset($reporte))
             location.href = urlBaseAjustada+"/reporteGeneralConsejoEducativo/"+$("#reporte-general-consejo-educativo").val();
         });
 		$("#exportar-excel").click(function(){
-			
+
             if (reporte == "familiasRelacionadas")
             {
                 $("#reporteFamiliasRelacionadas").table2excel({
-            
+
                     exclude: ".noExl",
-                
+
                     name: "reporteFamiliasRelacionadas",
-                
+
                     filename: $('#reporteFamiliasRelacionadas').attr('name') 
-            
+
                 });
             }
             else if (reporte == "familiasExoneradas")
             {
                 $("#reporteFamiliasExoneradas").table2excel({
-            
+
                     exclude: ".noExl",
-                
+
                     name: "reporteFamiliasExoneradas",
-                
+
                     filename: $('#reporteFamiliasExoneradas').attr('name') 
-            
+
                 });
             }
             else if (reporte == "reporteGeneralConsejoEducativo")
             {
                 $("#reporteGeneralConsejoEducativo").table2excel({
-            
+
                     exclude: ".noExl",
-                
+
                     name: "reporteGeneralConsejoEducativo",
-                
+
                     filename: $('#reporteGeneralConsejoEducativo').attr('name') 
-            
+
                 });
             }
 		});
