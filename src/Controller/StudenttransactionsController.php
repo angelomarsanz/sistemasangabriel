@@ -5074,11 +5074,22 @@ class StudenttransactionsController extends AppController
                 $contadorEstudiantesOtrosAnios++;
             }
 
-            if ($estudiante->discount == 100) {
-                $resumen['contadorEstudiantesBecasCompletas']++;
-            } elseif ($estudiante->discount > 0 && $estudiante->discount < 100) {
-                $resumen['contadorEstudiantesBecasParciales']++;
-            }
+			if ($anio == $anioEscolarActual)
+			{
+				if ($estudiante->discount == 100) {
+					$resumen['contadorEstudiantesBecasCompletas']++;
+				} elseif ($estudiante->discount > 0 && $estudiante->discount < 100) {
+					$resumen['contadorEstudiantesBecasParciales']++;
+				}
+			}
+			else
+			{
+				if ($estudiante->descuento_ano_anterior == 100) {
+					$resumen['contadorEstudiantesBecasCompletas']++;
+				} elseif ($estudiante->descuento_ano_anterior > 0 && $estudiante->descuento_ano_anterior < 100) {
+					$resumen['contadorEstudiantesBecasParciales']++;
+				}
+			}
 
 			if (!(isset($idsFamiliasConsejoVerificadas[$representante->id])))
 			{
