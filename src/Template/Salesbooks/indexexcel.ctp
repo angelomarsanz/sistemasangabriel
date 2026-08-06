@@ -56,8 +56,13 @@ $omitir_numeros_control =
                         }
                         if ($indicador_omision == 0)
                         {
+                            $style = "";
+                            if ($invoice->nombre_razon_social == "TOTALES")
+                            {
+                                $style = "font-weight: bold;";
+                            }
                         ?>
-                            <tr>
+                            <tr style="<?= $style ?>">
                                 <td><?= $invoice->id ?></td>
                                 <td><?= $invoice->fecha ?></td>
                                 <td><?= $invoice->tipo_documento ?></td>

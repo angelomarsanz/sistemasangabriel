@@ -9,5 +9,7 @@ ARCHIVOS_PHP_PUNTUALES=(
     # Si no quieres subir ningún archivo PHP, deja solo "Ninguno"
     # "Ninguno"
 
-    "src/Template/Element/menu.ctp"
+    "src/Controller/SalesbooksController.php"
+    "src/Template/Salesbooks/crear_libro_recibos.ctp"
+    "src/Template/Salesbooks/indexexcel.ctp"
 )

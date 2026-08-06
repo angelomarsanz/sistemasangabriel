@@ -14,18 +14,18 @@ class SalesbooksController extends AppController
 {
     public function isAuthorized($user)
     {
-		if(isset($user['role']))
+    	if(isset($user['role']))
 		{
-			if ($user['role'] === 'Facturas')
+			if ($user['role'] === 'Seniat')
 			{
 				if (in_array($this->request->action, ['createBookExcel', 'downloadBook', 'indexexcel']))
 				{
 					return true;
-				}				
+				}
 			}
 		}
         return parent::isAuthorized($user);
-    }    
+    }
     public function testFunction()
     {
         /* $month = "07";
@@ -33,9 +33,9 @@ class SalesbooksController extends AppController
         $englishMonth = $this->nameMonthEnglish($month);
 
         echo ' $englishMonth: ' . $englishMonth;
-        
+
         $spanishMonth = $this->nameMonthSpanish($month);
-        
+
         echo ' $spanishMonth: ' . $spanishMonth; */
     }
 
@@ -136,13 +136,13 @@ class SalesbooksController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
-    
+
     public function deleteAll()
     {
         $this->autoRender = false;
 
         $this->Salesbooks->deleteAll(['id >' => 0]);
-        
+
         return $this->redirect(['controller' => 'users', 'action' => 'wait']);
     }
 
@@ -156,16 +156,16 @@ class SalesbooksController extends AppController
                 $this->Salesbooks->connection()->execute($sql)->execute();
             }
         });
-        
+
         return;
     }
 
     public function createBookExcel()
     {
-        if ($this->request->is('post')) 
+        if ($this->request->is('post'))
         {
 			$errorBill = 0;
-			
+
             $this->truncateTable();
 
             $this->loadModel('Bills');
@@ -175,35 +175,35 @@ class SalesbooksController extends AppController
 
             $identificadoresExcepciones = [];
 
-            $invoicesBills = $this->Bills->find('all', 
+            $invoicesBills = $this->Bills->find('all',
                 [
-                    'conditions' => 
-                    [['MONTH(date_and_time)' => $_POST['month']], 
+                    'conditions' =>
+                    [['MONTH(date_and_time)' => $_POST['month']],
                     ['YEAR(date_and_time)' => $_POST['year']],
                     ['Bills.fiscal' => true]],
-                    'order' => ['Bills.id' => 'ASC'] 
+                    'order' => ['Bills.id' => 'ASC']
                 ]);
 
-            $conceptos = $this->Concepts->find('all', 
+            $conceptos = $this->Concepts->find('all',
             [
-                'conditions' => 
-                [['MONTH(created)' => $_POST['month']], 
+                'conditions' =>
+                [['MONTH(created)' => $_POST['month']],
                 ['YEAR(created)' => $_POST['year']],
                 ['concept' => 'IGTF']]
             ]);
 
-            $pagos = $this->Payments->find('all', 
+            $pagos = $this->Payments->find('all',
             [
-                'conditions' => 
-                [['MONTH(created)' => $_POST['month']], 
+                'conditions' =>
+                [['MONTH(created)' => $_POST['month']],
                 ['YEAR(created)' => $_POST['year']]]
             ]);
 
-            $excepciones = $this->Excepciones->find('all', 
+            $excepciones = $this->Excepciones->find('all',
                 [
-                    'conditions' => 
+                    'conditions' =>
                         [
-                            'anio' => intval($_POST['year']), 
+                            'anio' => intval($_POST['year']),
                             'mes' => intval($_POST['month'])
                         ],
                     'order' => ['identificador_asociado' => 'ASC', 'consecutivo_identificador']
@@ -221,7 +221,7 @@ class SalesbooksController extends AppController
             }
 
             $contador = 0;
-			
+
 			$controlFacturaAnterior = 0;
 			$contadorControlFacturas = 0;
 
@@ -248,7 +248,7 @@ class SalesbooksController extends AppController
                     {
                         $contadorControlFacturas = $invoicesBill->control_number - $controlFacturaAnterior;
                         if ($contadorControlFacturas > 1 && $controlFacturaAnterior != 0)
-                        {						
+                        {
                             while ($contadorControlFacturas > 1)
                             {
                                 $controlFacturaAnterior++;
@@ -270,13 +270,13 @@ class SalesbooksController extends AppController
                     }
                     if ($invoicesBill->control_number != 999999)
                     {
-                        $controlFacturaAnterior = $invoicesBill->control_number;				
+                        $controlFacturaAnterior = $invoicesBill->control_number;
                     }
                 }
                 $contador++;
 			}
 
-            if ($errorBill == 0)  
+            if ($errorBill == 0)
             {
                 $this->Flash->success(__('La tabla salesbooks se creo exitosamente'));
                 return $this->redirect(['controller' => 'Salesbooks', 'action' => 'downloadBook']);
@@ -351,7 +351,7 @@ class SalesbooksController extends AppController
         $salesbook->zelle = $excepcion->zelle;
         $salesbook->euros = $excepcion->euros;
 
-        if (!($this->Salesbooks->save($salesbook))) 
+        if (!($this->Salesbooks->save($salesbook)))
 		{
 			$this->Flash->error(__('La factura: ' . $excepcion->numero_factura . ' no pudo ser grabada en la tabla salesbooks'));
 			$codigoRetorno = 1;
@@ -362,7 +362,7 @@ class SalesbooksController extends AppController
 	public function crearRegistroLibro($invoicesBill = null, $conceptos = null, $pagos = null, $controlFacturaAnterior = null)
 	{
 		$codigoRetorno = 0;
-		
+
 		$salesbook = $this->Salesbooks->newEntity();
 
         $tasaCambio = 0;
@@ -374,7 +374,7 @@ class SalesbooksController extends AppController
         $efectivoEuros = 0;
         $zelle = 0;
         $euros = 0;
-	
+
 		if ($invoicesBill->date_and_time->day < 10)
 		{
 			$dia = "0" . $invoicesBill->date_and_time->day;
@@ -383,7 +383,7 @@ class SalesbooksController extends AppController
 		{
 			$dia = $invoicesBill->date_and_time->day;
 		}
-				
+
 		if ($invoicesBill->date_and_time->month < 10)
 		{
 			$mes = "0" . $invoicesBill->date_and_time->month;
@@ -391,12 +391,12 @@ class SalesbooksController extends AppController
 		else
 		{
 			$mes = $invoicesBill->date_and_time->month;
-		}		
-				
+		}
+
 		$salesbook->fecha = $dia . '/' . $mes . '/' . $invoicesBill->date_and_time->year . ' ';
-		
+
 		$salesbook->tipo_documento = "Fact";
-        
+
         $salesbook->efectivo_bolivares = 0.00;
         $salesbook->transferencia_bolivares = 0.00;
         $salesbook->pos_bolivares = 0.00;
@@ -407,9 +407,9 @@ class SalesbooksController extends AppController
         $salesbook->euros = 0.00;
 
         $salesbook->id_documento = $invoicesBill->id;
-		
+
 		$this->loadModel('Bills');
-		
+
 		if ($controlFacturaAnterior > 0)
 		{
 			$salesbook->numero_factura = "";
@@ -418,7 +418,7 @@ class SalesbooksController extends AppController
 			$salesbook->factura_afectada = "";
 			$salesbook->numero_control = $controlFacturaAnterior;
             $salesbook->id_documento = 0;
-			
+
         }
 		elseif ($invoicesBill->control_number == 999999 || $invoicesBill->control_number == 0 || $invoicesBill->control_number === null)
 		{
@@ -434,7 +434,7 @@ class SalesbooksController extends AppController
 			$salesbook->nota_debito = "";
 			$salesbook->nota_credito = "";
 			$salesbook->factura_afectada = "";
-			$salesbook->numero_control = "";			
+			$salesbook->numero_control = "";
         }
 		elseif ($invoicesBill->tipo_documento == "Factura")
 		{
@@ -450,22 +450,22 @@ class SalesbooksController extends AppController
 			$salesbook->numero_factura = "";
 			$salesbook->nota_debito = $invoicesBill->bill_number;
 			$salesbook->nota_credito = "";
-								
-			$facturaAfectada = $this->Bills->get($invoicesBill->id_documento_padre);					
+
+			$facturaAfectada = $this->Bills->get($invoicesBill->id_documento_padre);
 			$salesbook->factura_afectada = $facturaAfectada->bill_number;
 			$salesbook->numero_control = $invoicesBill->control_number;
-		}				
+		}
 		else
 		{
             $salesbook->tipo_documento = "NC";
 			$salesbook->numero_factura = "";
 			$salesbook->nota_debito = "";
 			$salesbook->nota_credito = $invoicesBill->bill_number;
-								
-			$facturaAfectada = $this->Bills->get($invoicesBill->id_documento_padre);					
+
+			$facturaAfectada = $this->Bills->get($invoicesBill->id_documento_padre);
 			$salesbook->factura_afectada = $facturaAfectada->bill_number;
 			$salesbook->numero_control = $invoicesBill->control_number;
-		}		
+		}
 
         $salesbook->cedula_rif = "";
         $salesbook->descuento_recargo = 0;
@@ -476,16 +476,16 @@ class SalesbooksController extends AppController
 		if ($controlFacturaAnterior > 0)
 		{
 			$salesbook->nombre_razon_social = "ANULADA";
-        }        				
+        }
 		elseif ($invoicesBill->control_number == 999999 || $invoicesBill->control_number == 0 ||$invoicesBill->control_number === null)
-		{		
+		{
 			$salesbook->nombre_razon_social = "ANULADA";
-		}        				
+		}
         elseif ($invoicesBill->annulled == false )
 		{
 			$salesbook->cedula_rif = $invoicesBill->identification;
 			$salesbook->nombre_razon_social = $invoicesBill->client;
-			
+
 			if ($invoicesBill->tipo_documento == "Factura")
 			{
                 $monto_igtf_bolivares = round($invoicesBill->monto_igtf * $invoicesBill->tasa_cambio, 2);
@@ -518,8 +518,8 @@ class SalesbooksController extends AppController
 		else
 		{
 			$salesbook->nombre_razon_social = "ANULADA";
-		}        
-		
+		}
+
 		$salesbook->base = "";
 		$salesbook->alicuota = "16%";
 		$salesbook->iva = 0;
@@ -537,34 +537,34 @@ class SalesbooksController extends AppController
                     }
                     elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "Bs.")
                     {
-                        $transferenciaBolivares += $pago->amount;                    
+                        $transferenciaBolivares += $pago->amount;
                     }
                     elseif ($pago->payment_type == "Tarjeta de débito" || $pago->payment_type == "Tarjeta de crédito")
                     {
                         if ($pago->moneda == "Bs.")
                         {
                             $posBolivares += $pago->amount;
-                        }    
+                        }
                     }
                     elseif ($pago->payment_type == "Depósito" && $pago->moneda == "Bs.")
                     {
-                        $depositoBolivares += $pago->amount;    
+                        $depositoBolivares += $pago->amount;
                     }
                     elseif ($pago->payment_type == "Efectivo" && $pago->moneda == "$")
                     {
-                        $efectivoDolares += $pago->amount; 
+                        $efectivoDolares += $pago->amount;
                     }
                     elseif ($pago->payment_type == "Efectivo" && $pago->moneda == "€")
                     {
-                        $efectivoEuros += $pago->amount; 
+                        $efectivoEuros += $pago->amount;
                     }
                     elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "$")
                     {
-                        $zelle += $pago->amount;                    
+                        $zelle += $pago->amount;
                     }
                     elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "€")
                     {
-                        $euros += $pago->amount;                    
+                        $euros += $pago->amount;
                     }
                 }
             }
@@ -578,14 +578,14 @@ class SalesbooksController extends AppController
             $salesbook->euros = $euros;
         }
 
-		if (!($this->Salesbooks->save($salesbook))) 
+		if (!($this->Salesbooks->save($salesbook)))
 		{
 			$this->Flash->error(__('La factura: ' . $invoicesBill->bill_number . ' no pudo ser grabada en el libro de ventas'));
 			$codigoRetorno = 1;
 		}
 		return $codigoRetorno;
 	}
-    
+
     public function downloadBook()
     {
 
@@ -601,38 +601,38 @@ class SalesbooksController extends AppController
 
     public function createBookPdf()
     {
-        if ($this->request->is('post')) 
+        if ($this->request->is('post'))
         {
 			$errorBill = 0;
-		
+
             $bills = new BillsController();
 
             $this->truncateTable();
-			
+
             $invoicesBills = $bills->indexBills($_POST['month'], $_POST['year']);
 
 			foreach ($invoicesBills as $invoicesBill)
 			{
 				$salesbook = $this->Salesbooks->newEntity();
-				
+
 				$salesbook->fecha = $invoicesBill->date_and_time;
-				
+
 				$salesbook->tipo_documento = "Fact";
-				
+
 				$salesbook->cedula_rif = $invoicesBill->identification;
-				
+
 				$salesbook->nombre_razon_social = $invoicesBill->client;
 
 				$salesbook->numero_factura = $invoicesBill->bill_number;
-				
+
 				$salesbook->numero_control = $invoicesBill->control_number;
-				
+
 				$salesbook->nota_debito = "";
-				
+
 				$salesbook->nota_credito = "";
-				
+
 				$salesbook->factura_afectada = "";
-				
+
 				if ($invoicesBill->annulled == false )
 				{
 					$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid;
@@ -642,14 +642,14 @@ class SalesbooksController extends AppController
 				{
 					$salesbook->total_ventas_mas_impuesto = 0;
 					$salesbook->ventas_exoneradas = 0;
-				}        
+				}
 				$salesbook->base = "";
 				$salesbook->alicuota = "9%";
 				$salesbook->iva = 0;
 				$salesbook->right_bill_number = $invoicesBill->right_bill_number;
 				$salesbook->previous_control_number = $invoicesBill->previous_control_number;
 
-				if (!($this->Salesbooks->save($salesbook))) 
+				if (!($this->Salesbooks->save($salesbook)))
 				{
 					$this->Flash->error(__('La factura: ' . $invoicesBill->bill_number . ' no pudo ser grabada en el libro de ventas'));
 					$errorBill = 1;
@@ -658,7 +658,7 @@ class SalesbooksController extends AppController
 			}
             $yearMonth = $_POST['year'] . $_POST['month'];
 
-            if ($errorBill == 0)  
+            if ($errorBill == 0)
             {
                 $this->Flash->success(__('La tabla salesbooks se creo exitosamente'));
                 return $this->redirect(['action' => 'salespdf', $_POST['month'], $_POST['year'], $yearMonth, '_ext' => 'pdf']);
@@ -673,11 +673,11 @@ class SalesbooksController extends AppController
     public function salespdf($month = null, $year = null, $yearMonth = null)
     {
         $this->loadModel('Schools');
-        
+
         $school = $this->Schools->get(2);
-    
+
         $sales = $this->Salesbooks->find('all')->where([['Salesbooks.numero_control IS NOT NULL'], ['Salesbooks.numero_control >' => 0]]);
-        
+
         $nameFile = $yearMonth . '.pdf';
 
         $this->viewBuilder()
@@ -694,7 +694,7 @@ class SalesbooksController extends AppController
                     'text' => "Página: {PAGE_NUM} / {PAGE_COUNT}"]
                     ]]);
 
-        if ($year == "2020" || 
+        if ($year == "2020" ||
             $year == "2024" ||
             $year == "2028" ||
             $year == "2032" )
@@ -707,19 +707,19 @@ class SalesbooksController extends AppController
         }
 
         $firstDayMonth = "01/" . $month . "/" . $year;
-        
+
         $lastDayMonth = $lastDay . "/" . $month . "/" . $year;
-        
+
         $spanishMonth = $this->nameMonthSpanish($month);
-        
+
         $this->set(compact('sales', 'school', 'firstDayMonth', 'lastDayMonth', 'spanishMonth', 'year'));
     }
 
 	public function viewDir()
 	{
-		
+
 	}
-	
+
     public function lastDayMonth($month = null)
     {
         $monthNumbers = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
@@ -737,7 +737,7 @@ class SalesbooksController extends AppController
 
     public function nameMonthEnglish($monthNumber = null)
     {
-        $englishMonth=strftime("%B",mktime(0, 0, 0, $monthNumber, 1, 2000)); 
+        $englishMonth=strftime("%B",mktime(0, 0, 0, $monthNumber, 1, 2000));
         return $englishMonth;
     }
 
@@ -750,43 +750,43 @@ class SalesbooksController extends AppController
     }
     public function crearLibroRecibos()
     {
-        if ($this->request->is('post')) 
+        if ($this->request->is('post'))
         {
 			$errorBill = 0;
-					
+
             $this->truncateTable();
 
             $bills = new BillsController();
-        
-            $invoicesBills = $bills->indiceRecibos($_POST['month'], $_POST['year']);
-			
-			$this->loadModel('Concepts');
 
-			$servicioEducativo = $this->Concepts->find('all', ['conditions' => 
-				['SUBSTR(concept, 1, 18) =' => 'Servicio educativo',
-				'MONTH(created)' => $_POST['month'], 
-				'YEAR(created)' => $_POST['year'],
-				'annulled' => false],
-				'order' => ['id' => 'ASC'] ]);
-				
-			$contadorServicioEducativo = $servicioEducativo->count();
-		
+            $invoicesBills = $bills->indiceRecibos($_POST['month'], $_POST['year']);
+
             $contador = 0;
+
+            $totalVentas = 0;
+            $totalDescuento = 0;
+            $totalExoneradas = 0;
+            $totalIva = 0;
+            $totalIgtf = 0;
+            $totalEfectivoBs = 0;
+            $totalTransferenciaBs = 0;
+            $totalPosBs = 0;
+            $totalDepositoBs = 0;
+            $totalEfectivoUsd = 0;
+            $totalEfectivoEur = 0;
+            $totalZelle = 0;
+            $totalEuros = 0;
 
 			foreach ($invoicesBills as $invoicesBill)
 			{
-				$montoServicioEducativo = 0;
+                if ($invoicesBill->tipo_documento == "Recibo de Consejo Educativo" || 
+                    $invoicesBill->tipo_documento == "Recibo de servicio educativo" || 
+                    $invoicesBill->tipo_documento == "Recibo de seguro")
+                {
+                    continue;
+                }
 
-				foreach ($servicioEducativo as $servicio)
-				{					
-					if ($servicio->bill_id == $invoicesBill->id)
-					{
-						$montoServicioEducativo += $servicio->amount;
-					}
-				}
-								
 				$salesbook = $this->Salesbooks->newEntity();
-				
+
 				if ($invoicesBill->date_and_time->day < 10)
 				{
 					$dia = "0" . $invoicesBill->date_and_time->day;
@@ -795,7 +795,7 @@ class SalesbooksController extends AppController
 				{
 					$dia = $invoicesBill->date_and_time->day;
 				}
-						
+
 				if ($invoicesBill->date_and_time->month < 10)
 				{
 					$mes = "0" . $invoicesBill->date_and_time->month;
@@ -803,38 +803,65 @@ class SalesbooksController extends AppController
 				else
 				{
 					$mes = $invoicesBill->date_and_time->month;
-				}		
-						
+				}
+
 				$salesbook->fecha = $dia . '/' . $mes . '/' . $invoicesBill->date_and_time->year . ' ';
-				
-				$salesbook->tipo_documento = "Recibo";
-				
+
+				$salesbook->tipo_documento = $invoicesBill->tipo_documento;
+
 				$salesbook->numero_factura = $invoicesBill->bill_number;
-							
+
 				if ($invoicesBill->annulled == false )
 				{
 					$salesbook->cedula_rif = $invoicesBill->identification;
 					$salesbook->nombre_razon_social = $invoicesBill->client;
-					$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid - $montoServicioEducativo;
+					$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid;
+                    
+                    $totalVentas += $salesbook->total_ventas_mas_impuesto;
 				}
 				else
 				{
 					$salesbook->cedula_rif = "";
 					$salesbook->nombre_razon_social = "ANULADA";
 					$salesbook->total_ventas_mas_impuesto = 0;
-				}        
+				}
 
-				if (!($this->Salesbooks->save($salesbook))) 
+				if (!($this->Salesbooks->save($salesbook)))
 				{
-					$this->Flash->error(__('La factura: ' . $invoicesBill->bill_number . ' no pudo ser grabada en el libro de ventas'));
+					$this->Flash->error(__('El recibo: ' . $invoicesBill->bill_number . ' no pudo ser grabado en el libro de ventas'));
 					$errorBill = 1;
 					break;
 				}
-							
+
 				$contador++;
 			}
 
-            if ($errorBill == 0)  
+            if ($errorBill == 0)
+            {
+                $totalRow = $this->Salesbooks->newEntity();
+                $totalRow->nombre_razon_social = "TOTALES";
+                $totalRow->total_ventas_mas_impuesto = $totalVentas;
+                $totalRow->descuento_recargo = $totalDescuento;
+                $totalRow->ventas_exoneradas = $totalExoneradas;
+                $totalRow->iva = $totalIva;
+                $totalRow->igtf = $totalIgtf;
+                $totalRow->efectivo_bolivares = $totalEfectivoBs;
+                $totalRow->transferencia_bolivares = $totalTransferenciaBs;
+                $totalRow->pos_bolivares = $totalPosBs;
+                $totalRow->deposito_bolivares = $totalDepositoBs;
+                $totalRow->efectivo_dolares = $totalEfectivoUsd;
+                $totalRow->efectivo_euros = $totalEfectivoEur;
+                $totalRow->zelle = $totalZelle;
+                $totalRow->euros = $totalEuros;
+
+                if (!($this->Salesbooks->save($totalRow)))
+                {
+                    $this->Flash->error(__('No se pudo grabar la fila de totales'));
+                    $errorBill = 1;
+                }
+            }
+
+            if ($errorBill == 0)
             {
                 $this->Flash->success(__('La tabla salesbooks se creo exitosamente'));
                 return $this->redirect(['controller' => 'Salesbooks', 'action' => 'downloadBook']);
