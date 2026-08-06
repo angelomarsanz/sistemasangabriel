@@ -22,7 +22,7 @@ if (!(isset($reimpresion))):
 endif;
 if (isset($current_user))
 {
-	if ($current_user['role'] == 'Facturas' || $current_user['role'] == 'Representante') 
+	if ($current_user['role'] == 'Seniat' || $current_user['role'] == 'Representante') 
 	{ ?>
 		<nav class="navbar navbar-default navbar-fixed-top" style="background-color: #b3e0ff;">
 	<?php
@@ -335,6 +335,7 @@ else
 								<li><?= $this->Html->link('Reporte de pagos', ['controller' => 'Studenttransactions', 'action' => 'reportePagos']) ?></li>
 								<li><?= $this->Html->link('Eventos del usuario', ['controller' => 'Eventos', 'action' => 'index']) ?></li>
 								<li><?= $this->Html->link('Reporte Servicio Educativo', ['controller' => 'Turns', 'action' => 'previoServicioEducativo']) ?></li>
+								<li><?= $this->Html->link('Crear libro de recibos EXCEL', ['controller' => 'Salesbooks', 'action' => 'crearLibroRecibos']) ?></li>
 							</ul>
 						</li>												   						
 					<?php
@@ -370,7 +371,7 @@ else
 						<li><?=  $this->Html->link('Consultar deuda', ['controller' => 'Studenttransactions', 'action' => 'consultaDeudaRepresentante', $current_user['id'],  $current_user['role'], 0]) ?></li>
                     <?php 
 					endif; 
-					if ($current_user['role'] == 'Facturas' ): ?>
+					if ($current_user['role'] == 'Seniat' ): ?>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Ventas<span class="caret"></span></a>
 							<ul class="dropdown-menu" role="menu">

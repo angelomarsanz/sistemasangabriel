@@ -2701,8 +2701,6 @@ class StudentsController extends AppController
 
         $student = $this->Students->get($id);
 
-		$nivel_estudios_actual = $student->level_of_study;
-
         if ($this->request->is(['patch', 'post', 'put']))
         {
             $student = $this->Students->patchEntity($student, $this->request->data);
@@ -2716,24 +2714,30 @@ class StudentsController extends AppController
 				$anio_matricula = $school->next_year_registration;
 			}
 
-			$student->number_of_brothers = 0;
+			$nivel_estudios_actual = $student->level_of_study;
 
 			if ($student->student_condition == "Nuevo")
 			{
+				$student->respaldo_registro_reinscripcion = json_encode($student);
 				$student->student_condition = "Regular";
+				$student->new_student = true;
 				$student->scholarship = 0;
+				$student->tipo_descuento = "";
+				$student->discount = 0;
 				$student->becado_ano_anterior = 0;
 				$student->tipo_descuento_ano_anterior = "";
 				$student->descuento_ano_anterior = 0;
-				$student->new_student = true;
 				$student->section_id = 1;
+				$student->number_of_brothers = 0;
 				$student->balance = 0;
-				$student->tipo_descuento = "";
-				$student->discount = 0;
 				$student->respaldo_primer_ano_inscripcion = 0;
 				$student->respaldo_ultimo_ano_inscripcion = 0;
 				$student->respaldo_seccion_id = 0;
 				$student->respaldo_nivel_de_estudio = "";
+				$student->vector_becas_anios_anteriores = null;
+				$student->vector_tipo_descuento_anios_anteriores = null;
+				$student->vector_descuentos_anios_anteriores = null;
+				$student->servicio_educativo_exonerado = 0;
 			}
 			else
 			{
