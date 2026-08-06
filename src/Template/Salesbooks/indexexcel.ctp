@@ -63,7 +63,7 @@ $omitir_numeros_control =
                             }
                         ?>
                             <tr style="<?= $style ?>">
-                                <td><?= $invoice->id ?></td>
+                                <td><?= $invoice->nombre_razon_social == "TOTALES" ? "" : $invoice->id ?></td>
                                 <td><?= $invoice->fecha ?></td>
                                 <td><?= $invoice->tipo_documento ?></td>
                                 <td><?= $invoice->cedula_rif ?></td>

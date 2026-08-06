@@ -278,6 +278,48 @@ class SalesbooksController extends AppController
 
             if ($errorBill == 0)
             {
+                $query = $this->Salesbooks->find();
+                $totals = $query->select([
+                    'total_ventas' => $query->func()->sum('total_ventas_mas_impuesto'),
+                    'total_descuento' => $query->func()->sum('descuento_recargo'),
+                    'total_exoneradas' => $query->func()->sum('ventas_exoneradas'),
+                    'total_iva' => $query->func()->sum('iva'),
+                    'total_igtf' => $query->func()->sum('igtf'),
+                    'total_efectivo_bs' => $query->func()->sum('efectivo_bolivares'),
+                    'total_transferencia_bs' => $query->func()->sum('transferencia_bolivares'),
+                    'total_pos_bs' => $query->func()->sum('pos_bolivares'),
+                    'total_deposito_bs' => $query->func()->sum('deposito_bolivares'),
+                    'total_efectivo_usd' => $query->func()->sum('efectivo_dolares'),
+                    'total_efectivo_eur' => $query->func()->sum('efectivo_euros'),
+                    'total_zelle' => $query->func()->sum('zelle'),
+                    'total_euros' => $query->func()->sum('euros')
+                ])->first();
+
+                $totalRow = $this->Salesbooks->newEntity();
+                $totalRow->nombre_razon_social = "TOTALES";
+                $totalRow->total_ventas_mas_impuesto = $totals->total_ventas;
+                $totalRow->descuento_recargo = $totals->total_descuento;
+                $totalRow->ventas_exoneradas = $totals->total_exoneradas;
+                $totalRow->iva = $totals->total_iva;
+                $totalRow->igtf = $totals->total_igtf;
+                $totalRow->efectivo_bolivares = $totals->total_efectivo_bs;
+                $totalRow->transferencia_bolivares = $totals->total_transferencia_bs;
+                $totalRow->pos_bolivares = $totals->total_pos_bs;
+                $totalRow->deposito_bolivares = $totals->total_deposito_bs;
+                $totalRow->efectivo_dolares = $totals->total_efectivo_usd;
+                $totalRow->efectivo_euros = $totals->total_efectivo_eur;
+                $totalRow->zelle = $totals->total_zelle;
+                $totalRow->euros = $totals->total_euros;
+
+                if (!($this->Salesbooks->save($totalRow)))
+                {
+                    $this->Flash->error(__('No se pudo grabar la fila de totales en el libro fiscal'));
+                    $errorBill = 1;
+                }
+            }
+
+            if ($errorBill == 0)
+            {
                 $this->Flash->success(__('La tabla salesbooks se creo exitosamente'));
                 return $this->redirect(['controller' => 'Salesbooks', 'action' => 'downloadBook']);
             }
@@ -756,9 +798,18 @@ class SalesbooksController extends AppController
 
             $this->truncateTable();
 
+            $this->loadModel('Payments');
+
             $bills = new BillsController();
 
             $invoicesBills = $bills->indiceRecibos($_POST['month'], $_POST['year']);
+
+            $pagos = $this->Payments->find('all',
+            [
+                'conditions' =>
+                [['MONTH(created)' => $_POST['month']],
+                ['YEAR(created)' => $_POST['year']]]
+            ]);
 
             $contador = 0;
 
@@ -811,6 +862,15 @@ class SalesbooksController extends AppController
 
 				$salesbook->numero_factura = $invoicesBill->bill_number;
 
+                $salesbook->efectivo_bolivares = 0.00;
+                $salesbook->transferencia_bolivares = 0.00;
+                $salesbook->pos_bolivares = 0.00;
+                $salesbook->deposito_bolivares = 0.00;
+                $salesbook->efectivo_dolares = 0.00;
+                $salesbook->efectivo_euros = 0.00;
+                $salesbook->zelle = 0.00;
+                $salesbook->euros = 0.00;
+
 				if ($invoicesBill->annulled == false )
 				{
 					$salesbook->cedula_rif = $invoicesBill->identification;
@@ -818,12 +878,86 @@ class SalesbooksController extends AppController
 					$salesbook->total_ventas_mas_impuesto = $invoicesBill->amount_paid;
                     
                     $totalVentas += $salesbook->total_ventas_mas_impuesto;
+
+                    $salesbook->tasa_cambio = $invoicesBill->tasa_cambio;
+
+                    $efectivoBolivares = 0;
+                    $transferenciaBolivares = 0;
+                    $posBolivares = 0;
+                    $depositoBolivares = 0;
+                    $efectivoDolares = 0;
+                    $efectivoEuros = 0;
+                    $zelle = 0;
+                    $euros = 0;
+
+                    foreach ($pagos as $pago)
+                    {
+                        if ($pago->bill_id == $invoicesBill->id)
+                        {
+                            if ($pago->payment_type == "Efectivo" && $pago->moneda == "Bs.")
+                            {
+                                $efectivoBolivares += $pago->amount;
+                            }
+                            elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "Bs.")
+                            {
+                                $transferenciaBolivares += $pago->amount;
+                            }
+                            elseif ($pago->payment_type == "Tarjeta de débito" || $pago->payment_type == "Tarjeta de crédito")
+                            {
+                                if ($pago->moneda == "Bs.")
+                                {
+                                    $posBolivares += $pago->amount;
+                                }
+                            }
+                            elseif ($pago->payment_type == "Depósito" && $pago->moneda == "Bs.")
+                            {
+                                $depositoBolivares += $pago->amount;
+                            }
+                            elseif ($pago->payment_type == "Efectivo" && $pago->moneda == "$")
+                            {
+                                $efectivoDolares += $pago->amount;
+                            }
+                            elseif ($pago->payment_type == "Efectivo" && $pago->moneda == "€")
+                            {
+                                $efectivoEuros += $pago->amount;
+                            }
+                            elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "$")
+                            {
+                                $zelle += $pago->amount;
+                            }
+                            elseif ($pago->payment_type == "Transferencia" && $pago->moneda == "€")
+                            {
+                                $euros += $pago->amount;
+                            }
+                        }
+                    }
+                    if ($salesbook->tasa_cambio > 0)
+                    {
+                        $salesbook->efectivo_bolivares = round($efectivoBolivares / $salesbook->tasa_cambio, 2);
+                        $salesbook->transferencia_bolivares = round($transferenciaBolivares / $salesbook->tasa_cambio, 2);
+                        $salesbook->pos_bolivares = round($posBolivares / $salesbook->tasa_cambio, 2);
+                        $salesbook->deposito_bolivares = round($depositoBolivares / $salesbook->tasa_cambio, 2);
+                    }
+                    $salesbook->efectivo_dolares = $efectivoDolares;
+                    $salesbook->efectivo_euros = $efectivoEuros;
+                    $salesbook->zelle = $zelle;
+                    $salesbook->euros = $euros;
+
+                    $totalEfectivoBs += $salesbook->efectivo_bolivares;
+                    $totalTransferenciaBs += $salesbook->transferencia_bolivares;
+                    $totalPosBs += $salesbook->pos_bolivares;
+                    $totalDepositoBs += $salesbook->deposito_bolivares;
+                    $totalEfectivoUsd += $salesbook->efectivo_dolares;
+                    $totalEfectivoEur += $salesbook->efectivo_euros;
+                    $totalZelle += $salesbook->zelle;
+                    $totalEuros += $salesbook->euros;
 				}
 				else
 				{
 					$salesbook->cedula_rif = "";
 					$salesbook->nombre_razon_social = "ANULADA";
 					$salesbook->total_ventas_mas_impuesto = 0;
+                    $salesbook->tasa_cambio = 0;
 				}
 
 				if (!($this->Salesbooks->save($salesbook)))
