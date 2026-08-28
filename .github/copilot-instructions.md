@@ -1,6 +1,14 @@
 # Directrices de Codificación para el Proyecto
   Este proyecto está codificado en Cakephp 3 y jquery
 
+## CHAT IA
+El chat de IA debe ser en idioma español
+
+## Memoria de Sesiones (Gemini CLI)
+- **Log de Progreso:** Cada vez que inicies una nueva sesión, debes leer obligatoriamente el archivo `LOG_DESARROLLO_REDA.md`. Esto te permitirá recordar automáticamente todos los trabajos realizados anteriormente sin que el usuario tenga que repetirlos.
+- **Registro de Avances:** Al finalizar una tarea importante, actualiza dicho archivo con un resumen técnico de los cambios.
+- **Exportación de Conversaciones:** Para guardar el diálogo literal, utiliza el comando `/chat share last_chat_export.md` en la terminal de Gemini CLI y luego ejecuta el script `./registrar_sesion.sh` en la terminal de la aplicación.
+
 ## Estilo de Código General
 - Los comentarios deben estar en español.
 - Usar nombres de variables descriptivos en español
@@ -19,5 +27,8 @@
 Los nuevos estilos se deben añadir a:
 js_csga/src/index.css
 
-## CHAT IA
-El chat de IA debe ser en idioma español
+## Documentación del sistema
+Todos los archivos que se creen deben documentarse al inicio del archivo. Crear un resumen de lo que hace el archivo. Así también cada función que contenga ese archivo debe documentarse
+Además de documentar individualmente cada archivo, cada vez que se cree un archivo se debe agregar un resumen de la documentación de ese archivo en manual_tecnico_sistema.md : Se coloca el nombre del archivo como un título y luego dejando una sangría se coloca el resumen.
+Si se modifica el archivo se debe modificar tanto el resumen que se hace directamente en el archivo como el resumen en el archivo manual_tecnico_sistema.md
+Si se modifica alguna función de un archivo Javascript o Php también debe actualizarse la documentación de la función
