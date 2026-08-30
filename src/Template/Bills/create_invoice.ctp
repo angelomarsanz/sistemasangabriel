@@ -483,6 +483,13 @@
 												<td style="color: blue; text-align:center;" id="saldo-favor-euro"></td>
 												<td style="color: red; text-align:center;" id="saldo-favor-bolivar"></td>
 											</tr>
+											<tr>
+												<td><?= $this->Form->input('concepto_descuento', ['label' => 'Concepto:', 'id' => 'concepto-descuento', 'options' => ['Pronto pago' => 'Pronto pago', 'Descuento pago año completo' => 'Descuento pago año completo', 'Personalizado' => 'Personalizado'], 'default' => 'Pronto pago']); ?></td>
+												<td></td>
+												<td style="text-align:center; vertical-align: middle;"></td>
+												<td style="color: blue; text-align:center; vertical-align: middle;"></td>
+												<td style="color: red; text-align:center; vertical-align: middle;"></td>
+											</tr>
 											<tr>	
 												<td><?= $this->Form->input('descuento_recargo', ['label' => 'Descuento/Recargo:', 'id' => 'descuento-recargo', 'disabled' => 'true', 'options' => 
 													[null => '',
@@ -589,6 +596,22 @@
 <div id="results"></div>
 <div id="pagos"></div>
 <div id='insertar_html'></div>
+<div class="modal fade" id="modal-concepto-personalizado" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Concepto personalizado</h4>
+      </div>
+      <div class="modal-body">
+        <p>Por favor escriba el concepto:</p>
+        <input type="text" id="custom-concept-input" class="form-control">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btn-save-custom-concept">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 //  Variables globales
     var idFamily = 0;
@@ -723,6 +746,7 @@
 	var diferenciaBolivares = 0;
 	var becadoAnoAnterior = 0;
 	var descuentoAnoAnterior = 0;
+	var conceptoDescuento = "Pronto pago";
 	var anoEscolarActual = <?= $anoEscolarActual ?>;
 	var anoEscolarAnterior = <?= $anoEscolarActual - 1 ?>;
 	var anoEscolarInscripcion = <?= $anoEscolarInscripcion ?>;
@@ -754,6 +778,7 @@
 	payments.monto_igtf = 0;
 	payments.indicador_pedido = 0;
 	payments.indicadorConsejoEducativo = 0;
+	payments.concepto_descuento = "Pronto pago";
 
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
@@ -2327,6 +2352,7 @@
 		payments.monto_igtf = acumulado_igtf_dolar_archivo;
 		payments.indicador_pedido = indicador_pedido;
 		payments.indicadorConsejoEducativo = indicadorConsejoEducativo;
+		payments.concepto_descuento = conceptoDescuento;
 		
 		uploadTransactions();
 		loadPayments();
@@ -2806,6 +2832,31 @@
 
     $(document).ready(function() 
     {
+		$('#concepto-descuento').change(function(e) 
+        {
+			e.preventDefault();
+			conceptoDescuento = $(this).val();
+			if (conceptoDescuento == 'Personalizado')
+			{
+				$('#custom-concept-input').val('');
+				$('#modal-concepto-personalizado').modal('show');
+			}
+        });
+
+		$('#btn-save-custom-concept').click(function(e) 
+        {
+			e.preventDefault();
+			let customValue = $('#custom-concept-input').val();
+			if (customValue.trim() == '')
+			{
+				alert('Por favor escriba el concepto');
+			}
+			else
+			{
+				conceptoDescuento = customValue;
+				$('#modal-concepto-personalizado').modal('hide');
+			}
+		});
 		console.log('Indicador pedido', indicador_pedido);
 		if (indicadorAlertaTasaCambio == 1)
 		{

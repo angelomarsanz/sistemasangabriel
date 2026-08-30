@@ -9,7 +9,11 @@ ARCHIVOS_PHP_PUNTUALES=(
     # Si no quieres subir ningún archivo PHP, deja solo "Ninguno"
     # "Ninguno"
 
-    "src/Controller/SalesbooksController.php"
-    "src/Template/Salesbooks/crear_libro_recibos.ctp"
-    "src/Template/Salesbooks/indexexcel.ctp"
+    "LOG_DESARROLLO_REDA.md"
+    "manual_tecnico_sistema.md"
+    ".github/copilot-instructions.md"
+
+    "src/Template/Bills/create_invoice.ctp"
+    "src/Controller/BillsController.php"
+    "src/Controller/ConceptsController.php"
 )

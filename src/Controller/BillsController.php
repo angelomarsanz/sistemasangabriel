@@ -557,7 +557,7 @@ class BillsController extends AppController
 
 					if ($nueva_factura->fiscal == 1 && $nueva_factura->amount < 0 )
 					{ 
-						$vector_retorno = $this->agregaNotaCreditoDescuentos($nueva_factura);
+						$vector_retorno = $this->agregaNotaCreditoDescuentos($nueva_factura, $this->headboard['concepto_descuento']);
 						if ($vector_retorno["codigo_retorno"] == 1)
 						{
 							$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'No se pudo crear la nota de crédito del descuento correspondiente a la factura '.$billNumber);
@@ -3493,7 +3493,7 @@ class BillsController extends AppController
 			exit(json_encode($jsondata, JSON_FORCE_OBJECT));
 		}
 	}
-    public function agregaNotaCreditoDescuentos($facturaAfectada = null)
+    public function agregaNotaCreditoDescuentos($facturaAfectada = null, $conceptoDescuento = null)
     {	
 		$vector_retorno	 = [];
 		$vector_retorno["codigo_retorno"] = 0;
@@ -3565,7 +3565,7 @@ class BillsController extends AppController
 			{
 				$nueva_nota = $notas->first();
 				$conceptos = new ConceptsController();
-				$codigo_retorno_concepto = $conceptos->agregarConceptoNotaCreditoDescuento($nueva_nota);
+				$codigo_retorno_concepto = $conceptos->agregarConceptoNotaCreditoDescuento($nueva_nota, $conceptoDescuento);
 				if ($codigo_retorno_concepto > 0)
 				{
 					$vector_retorno["codigo_retorno"] = 1;

@@ -367,7 +367,7 @@ class ConceptsController extends AppController
 		}
 		return $codigoRetorno;
 	}
-	public function agregarConceptoNotaCreditoDescuento($nota_credito = null)
+	public function agregarConceptoNotaCreditoDescuento($nota_credito = null, $conceptoDescuento = null)
     {
 		$codigoRetornoConcepto = 0;
 		$conceptoNota = $this->Concepts->newEntity();
@@ -376,7 +376,7 @@ class ConceptsController extends AppController
 		$conceptoNota->accounting_code = "001";
 		$conceptoNota->student_name = "";
 		$conceptoNota->transaction_identifier = 0;
-		$conceptoNota->concept = "Descuento por pronto pago";
+		$conceptoNota->concept = $conceptoDescuento ?: "Descuento por pronto pago";
 		$conceptoNota->amount = $nota_credito->amount_paid;
 		$conceptoNota->observation = "";
 		$conceptoNota->annulled = 0;

@@ -13,11 +13,13 @@ El chat de IA debe ser en idioma español
 - Los comentarios deben estar en español.
 - Usar nombres de variables descriptivos en español
 
-## PHP Específico (Backend)
+## PHP
+- Se debe usar php 7.4
+- Se debe usar Cakephp 3.0
 - Para la conexión a base de datos, usa la librería `PDO`. Nunca uses funciones antiguas como `mysql_*`.
 - Para ejecutar comandos php, usar phpact en lugar de php
 
-## JavaScript Específico (Frontend)
+## JavaScript
 - Utiliza la sintaxis moderna de ES6+ (`const`, `let`, funciones flecha).
 
 ## Estilos CSS
