@@ -12,8 +12,11 @@ ARCHIVOS_PHP_PUNTUALES=(
     "LOG_DESARROLLO_REDA.md"
     "manual_tecnico_sistema.md"
     ".github/copilot-instructions.md"
+    "registrar_sesion.sh"
+    "subir.sh"
+    "archivos_a_subir.sh"
 
     "src/Template/Bills/create_invoice.ctp"
-    "src/Controller/BillsController.php"
-    "src/Controller/ConceptsController.php"
+    #"src/Controller/BillsController.php"
+    #"src/Controller/ConceptsController.php"
 )

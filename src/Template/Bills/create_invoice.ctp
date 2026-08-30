@@ -484,23 +484,26 @@
 												<td style="color: red; text-align:center;" id="saldo-favor-bolivar"></td>
 											</tr>
 											<tr>
-												<td><?= $this->Form->input('concepto_descuento', ['label' => 'Concepto:', 'id' => 'concepto-descuento', 'options' => ['Pronto pago' => 'Pronto pago', 'Descuento pago año completo' => 'Descuento pago año completo', 'Personalizado' => 'Personalizado'], 'default' => 'Pronto pago']); ?></td>
+												<td colspan="5" style="text-align: center;"><b>Descuentos/Recargos</b></td>
+											</tr>
+											<tr>
+												<td><?= $this->Form->input('concepto_descuento', ['label' => 'Concepto:', 'id' => 'concepto-descuento', 'options' => ['Descuento' => 'Descuento', 'Descuento por meses no cursados' => 'Descuento por meses no cursados', 'Descuento por pago año completo' => 'Descuento por pago año completo', 'Descuento pronto pago' => 'Descuento pronto pago', 'Concepto personalizado' => 'Concepto personalizado'], 'default' => 'Descuento pronto pago']); ?></td>
 												<td></td>
 												<td style="text-align:center; vertical-align: middle;"></td>
 												<td style="color: blue; text-align:center; vertical-align: middle;"></td>
 												<td style="color: red; text-align:center; vertical-align: middle;"></td>
 											</tr>
 											<tr>	
-												<td><?= $this->Form->input('descuento_recargo', ['label' => 'Descuento/Recargo:', 'id' => 'descuento-recargo', 'disabled' => 'true', 'options' => 
+												<td style="border-top: none;"><?= $this->Form->input('descuento_recargo', ['label' => 'Tipo:', 'id' => 'descuento-recargo', 'disabled' => 'true', 'options' => 
 													[null => '',
 													'Descuento $' => 'Descuento: $',
 													'Descuento %' => 'Descuento: %',
 													'Recargo $' => 'Recargo: $',
 													'Recargo %' => 'Recargo: %']]); ?></td>	
-												<td><?= $this->Form->input('cantidad_descuento', ['label' => 'Cantidad:', 'type' => 'text', 'id' => 'cantidad-descuento', 'value' => 0, 'disabled' => 'true', 'class' => 'alternative-decimal-separator']); ?></td>													
-												<td id="descuento-recargo-dolar" style="text-align:center; vertical-align: middle;">0</td>
-												<td style="color: blue; text-align:center; vertical-align: middle;" id="descuento-recargo-euro">0</td>
-												<td style="color: red; text-align:center; vertical-align: middle;" id="descuento-recargo-bolivar">0</td>
+												<td style="border-top: none;"><?= $this->Form->input('cantidad_descuento', ['label' => 'Cantidad:', 'type' => 'text', 'id' => 'cantidad-descuento', 'value' => 0, 'disabled' => 'true', 'class' => 'alternative-decimal-separator']); ?></td>													
+												<td id="descuento-recargo-dolar" style="border-top: none; text-align:center; vertical-align: middle;">0</td>
+												<td style="color: blue; border-top: none; text-align:center; vertical-align: middle;" id="descuento-recargo-euro">0</td>
+												<td style="color: red; border-top: none; text-align:center; vertical-align: middle;" id="descuento-recargo-bolivar">0</td>
 											</tr>
 											<tr>
 												<td>Iva 16%</td>
@@ -746,7 +749,7 @@
 	var diferenciaBolivares = 0;
 	var becadoAnoAnterior = 0;
 	var descuentoAnoAnterior = 0;
-	var conceptoDescuento = "Pronto pago";
+	var conceptoDescuento = "Descuento pronto pago";
 	var anoEscolarActual = <?= $anoEscolarActual ?>;
 	var anoEscolarAnterior = <?= $anoEscolarActual - 1 ?>;
 	var anoEscolarInscripcion = <?= $anoEscolarInscripcion ?>;
@@ -778,7 +781,7 @@
 	payments.monto_igtf = 0;
 	payments.indicador_pedido = 0;
 	payments.indicadorConsejoEducativo = 0;
-	payments.concepto_descuento = "Pronto pago";
+	payments.concepto_descuento = "Descuento pronto pago";
 
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
@@ -2836,7 +2839,7 @@
         {
 			e.preventDefault();
 			conceptoDescuento = $(this).val();
-			if (conceptoDescuento == 'Personalizado')
+			if (conceptoDescuento == 'Concepto personalizado')
 			{
 				$('#custom-concept-input').val('');
 				$('#modal-concepto-personalizado').modal('show');

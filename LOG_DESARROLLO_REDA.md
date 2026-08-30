@@ -1,16 +1,17 @@
 # Log de Desarrollo - REDA
 
-## [2026-08-30] - Implementación de concepto personalizado para descuentos
-- **Tarea:** Agregar un campo de concepto para los descuentos/recargos en la creación de facturas.
+## [2026-08-30] - Implementación completa de sección Descuentos/Recargos
+- **Tarea:** Mejorar la sección de descuentos/recargos en la creación de facturas.
 - **Cambios Realizados:**
     - **UI (`src/Template/Bills/create_invoice.ctp`):**
-        - Se añadió una fila en la tabla de totales con un selector para el concepto del descuento.
-        - Opciones añadidas: "Pronto pago", "Descuento pago año completo", "Personalizado".
-        - Implementación de un modal Bootstrap para capturar el texto cuando se selecciona "Personalizado".
-        - Actualización de la lógica JS para incluir `concepto_descuento` en el objeto de pago enviado al servidor.
+        - Se agregó el título "**Descuentos/Recargos**" a la sección correspondiente en la tabla de totales.
+        - Se actualizaron las opciones del selector de concepto: "Descuento", "Descuento por meses no cursados", "Descuento por pago año completo", "Descuento pronto pago" (por defecto) y "Concepto personalizado".
+        - Se cambió la etiqueta del input de "Descuento/Recargo" a "**Tipo**".
+        - Se eliminó la línea divisoria visual entre la fila de concepto y la fila de tipo/cantidad mediante estilos CSS (`border-top: none`).
+        - Corregido error en la lógica de JavaScript que impedía mostrar el modal al seleccionar "Concepto personalizado".
     - **Backend (`src/Controller/BillsController.php`):**
-        - Modificación de `recordInvoiceData` para recuperar el concepto del descuento.
-        - Actualización de `agregaNotaCreditoDescuentos` para aceptar el concepto como parámetro.
+        - El método `recordInvoiceData` recupera el concepto seleccionado (estático o personalizado) y lo envía al proceso de creación de notas de crédito.
+        - `agregaNotaCreditoDescuentos` ahora acepta el concepto como parámetro dinámico.
     - **Backend (`src/Controller/ConceptsController.php`):**
-        - Actualización de `agregarConceptoNotaCreditoDescuento` para usar el concepto proporcionado en lugar de un texto estático.
-- **Documentación:** Actualización de `manual_tecnico_sistema.md`.
+        - `agregarConceptoNotaCreditoDescuento` utiliza el concepto recibido desde el controlador de facturas para la descripción del registro.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` con los detalles finales de la implementación.
