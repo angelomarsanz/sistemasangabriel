@@ -25,7 +25,7 @@
 
 /* Evitar que las celdas se compriman demasiado en móvil */
 #tabla-productos th, #tabla-productos td {
-    white-space: nowrap; 
+    white-space: nowrap;
     vertical-align: middle;
 }
 
@@ -49,4 +49,8 @@
 /* Clase para paneles que contienen selects largos, asegurando que no corten el contenido */
 .panel-select-visible {
     overflow: visible !important;
+}
+
+.prueba-css {
+    color: red;
 }

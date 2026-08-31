@@ -21,6 +21,7 @@ El chat de IA debe ser en idioma español
 
 ## JavaScript
 - Utiliza la sintaxis moderna de ES6+ (`const`, `let`, funciones flecha).
+- Las vistas actuales, archivos (.ctp) en su mayoría tienen en el mismo archivo los estilos .css y el código javascript. Para nuevas vistas que se creen los estilos no se deben crear en el mismo archivo .ctp sino añadir a js_csga/src/index.css y luego insertar las clases .css correspondientes en la vista. Respecto al código javascript para cada nueva vista se deben crear un archivo .js en el directorio: js_csga/src/vistas/Directorio nombre del controlador, sin el prefijo "Controller" Ya existen algunas vistas con el directorio creado correspondiente al controlador
 
 ## Estilos CSS
 - En este proyecto

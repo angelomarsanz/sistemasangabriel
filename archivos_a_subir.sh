@@ -9,13 +9,17 @@ ARCHIVOS_PHP_PUNTUALES=(
     # Si no quieres subir ningún archivo PHP, deja solo "Ninguno"
     # "Ninguno"
 
-    "LOG_DESARROLLO_REDA.md"
-    "manual_tecnico_sistema.md"
     ".github/copilot-instructions.md"
-    "registrar_sesion.sh"
-    "subir.sh"
-    "archivos_a_subir.sh"
+    #"subir.sh"
+    #"archivos_a_subir.sh"
+    "manual_tecnico_sistema.md"
+    "LOG_DESARROLLO_REDA.md"
+    #"registrar_sesion.sh"
 
+    "js_csga/dist/main-style.css"
+    "js_csga/dist/main-script.js"
+
+    "js_csga/src/index.css"
     "src/Template/Bills/create_invoice.ctp"
     #"src/Controller/BillsController.php"
     #"src/Controller/ConceptsController.php"
