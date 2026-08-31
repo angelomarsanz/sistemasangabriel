@@ -12,6 +12,7 @@ ARCHIVOS_PHP_PUNTUALES=(
     ".github/copilot-instructions.md"
     #"subir.sh"
     #"archivos_a_subir.sh"
+    "js_csga/vite.config.js"
     "manual_tecnico_sistema.md"
     "LOG_DESARROLLO_REDA.md"
     #"registrar_sesion.sh"

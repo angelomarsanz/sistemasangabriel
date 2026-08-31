@@ -8,3 +8,6 @@
 
 ## src/Controller/ConceptsController.php
     Controlador que gestiona los conceptos de los documentos. Se actualizó la función `agregarConceptoNotaCreditoDescuento` para aceptar un concepto opcional. Si se proporciona, se usa como descripción del concepto; de lo contrario, se mantiene el valor por defecto "Descuento por pronto pago".
+
+## js_csga/vite.config.js
+    Archivo de configuración de Vite para la compilación de los assets modernos (React/ES6+). Define los puntos de entrada para el script principal (`main-script`) y los estilos (`main-style`). Se configuró la salida para generar archivos deterministas (`main-script.js` y `main-style.css`) que son compatibles con la estructura de directorios de CakePHP 3. Incluye la configuración necesaria para manejar dependencias externas como jQuery y asegura la limpieza del directorio de salida antes de cada compilación.
