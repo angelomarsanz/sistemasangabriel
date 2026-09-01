@@ -5,7 +5,7 @@
 <style>
 @media screen
 {
-    .volver 
+    .volver
     {
         display:scroll;
         position:fixed;
@@ -13,7 +13,7 @@
         left: 50px;
         opacity: 0.5;
     }
-    .cerrar 
+    .cerrar
     {
         display:scroll;
         position:fixed;
@@ -30,7 +30,7 @@
         opacity: 0.5;
         text-align: right;
     }
-    .menumas 
+    .menumas
     {
         display:scroll;
         position:fixed;
@@ -44,15 +44,15 @@
       display:none
     }
 }
-@media print 
+@media print
 {
-    .nover 
+    .nover
     {
       display:none
     }
     .saltopagina
     {
-        display:block; 
+        display:block;
         page-break-before:always;
     }
 }
@@ -65,7 +65,7 @@
         <?= $this->Form->create() ?>
         <fieldset>
             <?php
-                echo $this->Form->input('concept', ['required' => 'required', 'label' => 'Tarifa', 'options' => 
+                echo $this->Form->input('concept', ['required' => 'required', 'label' => 'Tarifa', 'options' =>
                     [null => '',
 					'Agosto' => 'Agosto',
                     'Consejo Educativo' => 'Consejo Educativo',
@@ -74,8 +74,9 @@
                     'Seguro escolar' => 'Seguro escolar',
                     'Servicio educativo' => 'Servicio educativo',
 		    		'Thales' => 'Thales',
-					'Pronto pago' => 'Pronto pago']]); 
-                echo $this->Form->input('rate_month', ['label' => 'A partir del mes: ', 'options' => 
+                    'Promoción especial mensualidad' => 'Promoción especial mensualidad',
+					'Pronto pago' => 'Pronto pago']]);
+                echo $this->Form->input('rate_month', ['label' => 'A partir del mes: ', 'options' =>
                     [null => '',
                     '01' => 'Enero',
                     '02' => 'Febrero',
@@ -89,7 +90,7 @@
                     '10' => 'Octubre',
                     '11' => 'Noviembre',
                     '12' => 'Diciembre']]);
-               	echo $this->Form->input('rate_year', ['label' => 'Del año: ', 'options' => 
+               	echo $this->Form->input('rate_year', ['label' => 'Del año: ', 'options' =>
                     [null => '',
 					'2020' => '2020',
                     '2021' => '2021',
@@ -104,9 +105,9 @@
                     '2030' => '2030',
                     '2031' => '2031']]);
                 echo $this->Form->input('amount', ['label' => 'Monto']);
-					
-				setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-                date_default_timezone_set('America/Caracas');				
+
+				setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8');
+                date_default_timezone_set('America/Caracas');
             ?>
         </fieldset>
 		<br />
@@ -115,76 +116,76 @@
     </div>
 </div>
 <script>
-    function enableInputs() 
+    function enableInputs()
     {
 		alert('Estimado usuario antes de agregar una nueva tarifa por favor comunicarse con el personal de sistema para que haga un respaldo de la base de datos');
 
-        if ($("#concept").val().substring(0, 11) == "Mensualidad" || $("#concept").val().substring(0, 11) == "Pronto pago")
+        if ($("#concept").val().substring(0, 11) == "Mensualidad" || $("#concept").val().substring(0, 31) == "Promoción especial mensualidad" || $("#concept").val().substring(0, 11) == "Pronto pago")
         {
             $("#rate-month").attr('disabled', false);
 			$("#rate-month").attr('required', true);
-            
+
 			$("#rate-year").attr('disabled', false);
 			$("#rate-year").attr('required', true);
-			
+
 			$("#amount").attr('disabled', false);
-			$("#amount").attr('required', true);			
+			$("#amount").attr('required', true);
         }
         else
         {
             $("#rate-month").attr('disabled', true);
-			
+
 			$("#rate-year").attr('disabled', false);
 			$("#rate-year").attr('required', true);
-			
+
 			$("#amount").attr('disabled', false);
-			$("#amount").attr('required', true);			
+			$("#amount").attr('required', true);
 		}
     }
-	
+
 	function verifyConcept()
-	{	
+	{
 		if ($("#concept").val() == "Diferencia de agosto")
 		{
 			$.post('/sistemasangabriel/rates/consultFee', {"yearAugust" : $("#rate-year").val() }, null, "json")
-            
-			.done(function(response) 
+
+			.done(function(response)
 			{
-				if (response.success) 
+				if (response.success)
 				{
-					alert('El monto que abonaron los representantes al mes de agosto ' + $("#rate-year").val() + ' fue de: ' + response.data + ', por favor introduzca el monto de la diferencia de agosto'); 
-				} 
-				else 
+					alert('El monto que abonaron los representantes al mes de agosto ' + $("#rate-year").val() + ' fue de: ' + response.data + ', por favor introduzca el monto de la diferencia de agosto');
+				}
+				else
 				{
 					alert('No se encontró el monto abonado al mes de agosto ' + $("#rate-year").val());
 				}
             })
-			.fail(function(jqXHR, textStatus, errorThrown) 
-			{    
+			.fail(function(jqXHR, textStatus, errorThrown)
+			{
 				alert('Algo falló al intentar acceder el registro en la base de datos');
             });
-		} 
+		}
 	}
-	   
-    $(document).ready(function() 
+
+    $(document).ready(function()
     {
         $('#concept').change(enableInputs);
-		
+
 		$('#rate-year').change(verifyConcept);
-				
+
 		$("#guardar").click(function(e)
 		{
-			if ($("#concept").val() == "Mensualidad" || $("#concept").val() == "Pronto pago")
+			if ($("#concept").val() == "Mensualidad" || $("#concept").val() == "Promoción especial mensualidad" || $("#concept").val() == "Pronto pago")
 			{
-				if ($('#rate-month').length) 
+				if ($('#rate-month').length)
 				{
 					dateFrom = $('#rate-month').val() + '/' +  $('#rate-year').val();
 				}
 				else
 				{
-					dateFrom = $('#rate-year').val();		
+					dateFrom = $('#rate-year').val();
 				}
-								
+
 				var rateUpdate = confirm('Por favor confirme que desea agregar la ' + $('#concept').val() + ' a ' + $('#amount').val() + ' a partir del ' + dateFrom);
 
 				if (rateUpdate == false)
@@ -201,8 +202,8 @@
 				{
 					e.preventDefault();
 					$.redirect('/sistemasangabriel/rates/index');
-				}			
+				}
 			}
-		}); 
+		});
     });
 </script>

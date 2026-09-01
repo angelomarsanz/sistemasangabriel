@@ -12,16 +12,17 @@ ARCHIVOS_PHP_PUNTUALES=(
     ".github/copilot-instructions.md"
     #"subir.sh"
     #"archivos_a_subir.sh"
-    "js_csga/vite.config.js"
+    #"js_csga/vite.config.js"
     "manual_tecnico_sistema.md"
     "LOG_DESARROLLO_REDA.md"
     #"registrar_sesion.sh"
 
-    "js_csga/dist/main-style.css"
-    "js_csga/dist/main-script.js"
+    #"js_csga/dist/main-style.css"
+    #"js_csga/dist/main-script.js"
 
-    "js_csga/src/index.css"
+    "src/Template/Rates/add_dollar.ctp"
     "src/Template/Bills/create_invoice.ctp"
-    #"src/Controller/BillsController.php"
-    #"src/Controller/ConceptsController.php"
+    "src/Controller/BillsController.php"
+    "src/Controller/StudenttransactionsController.php"
+    "src/Controller/ConceptsController.php"
 )
