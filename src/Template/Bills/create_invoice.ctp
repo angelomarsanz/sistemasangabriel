@@ -9,7 +9,7 @@
 	$proximoAnoEscolar = $anoEscolarActual + 1;
 	$indicador_pedido = 1;
 	if ($current_user['role'] == 'Seniat'):
-    	$indicador_pedido = 0; 
+    	$indicador_pedido = 0;
 	endif;
 ?>
 <style>
@@ -116,8 +116,8 @@
                     <?= $this->Form->input('family', ['label' => 'Familia:']) ?>
                     <?= $this->Form->input('client', ['label' => 'Cliente:', 'class' => 'campo-resaltado']) ?>
 					<div id="mensaje-cliente" class="mensajes-usuario"></div>
-                    <?= $this->Form->input('type_of_identification_client', 
-                        ['options' => 
+                    <?= $this->Form->input('type_of_identification_client',
+                        ['options' =>
                         [null => "",
                         'V' => 'Cédula venezolano',
                         'E' => 'Cédula extranjero',
@@ -152,7 +152,7 @@
                     <p><b>Alumnos relacionados:</b></p>
                     <div class="panel panel-default pre-scrollable" style="height:260px;">
                         <div class="panel-body">
-                            <div class="table-responsive">          
+                            <div class="table-responsive">
                                 <table class="table table-striped table-hover" >
                                     <thead>
                                         <tr>
@@ -175,7 +175,7 @@
                     <p><b>Cuotas pendientes:</b></p>
                     <div class="panel panel-default pre-scrollable" style="height:210px;">
                         <div class="panel-body">
-                            <div class="table-responsive">          
+                            <div class="table-responsive">
                                 <table class="table table-striped table-hover" >
                                     <thead>
                                         <tr>
@@ -196,7 +196,7 @@
                                 </table>
                             </div>
                         </div>
-                    </div> 
+                    </div>
 					<div class="row">
 						<div class="col-md-6">
 							<div id="nota-credito">
@@ -204,7 +204,7 @@
 							<div id="botones-cuotas">
 								<p>
 									<button id="mark-quotas" class="btn btn-success" disabled>Cobrar</button>
-									<button id="uncheck-quotas" class="btn btn-success" disabled>Reversar</button>  
+									<button id="uncheck-quotas" class="btn btn-success" disabled>Reversar</button>
 									<button id="adjust-fee" class="btn btn-success" disabled>Ajustar</button>
 								</p>
 							</div>
@@ -221,8 +221,8 @@
 							<p>Sub-total alumno $: <b><spam id="student-balance">0</spam></b></p>
 							<p>Sub-total familia $: <b><spam id="total-balance"></spam></b></p>
 							<p>Sub-total IGTF $: <b><spam id="sub_total_igtf"></spam></b></p>
-							<p>Total con IGTF $: <b><spam id="total_con_igtf"></spam></b></p> 
-						</div>  						
+							<p>Total con IGTF $: <b><spam id="total_con_igtf"></spam></b></p>
+						</div>
 					</div>
                 </div>
             </div>
@@ -252,11 +252,11 @@
 									<div class="row">
 										<div class="col-md-6">
 											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-01', 'class' => 'alternative-decimal-separator']) ?>
-											<?= $this->Form->input('bank', ['label' => 'Banco:', 'value' => 'N/A', 'disabled' => true, 'id' => 'bank-01']) ?>	
+											<?= $this->Form->input('bank', ['label' => 'Banco:', 'value' => 'N/A', 'disabled' => true, 'id' => 'bank-01']) ?>
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'value' => 'N/A', 'disabled' => true, 'id' => 'banco-receptor-01']); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-01']) ?>
 										</div>
-										<div class="col-md-6">	
+										<div class="col-md-6">
 											<?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-01']) ?>
 											<div class="form-group">
 												<label for="comentario-01">Comentario:</label>
@@ -286,7 +286,7 @@
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-02', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'id' => 'account_or_card-02']) ?>
 										</div>
-										<div class="col-md-6">	
+										<div class="col-md-6">
 											<?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-02']) ?>
 											<div class="form-group">
 												<label for="comentario-02">Comentario:</label>
@@ -316,7 +316,7 @@
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-03', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'id' => 'account_or_card-03']) ?>
 										</div>
-										<div class="col-md-6">		
+										<div class="col-md-6">
 											<?= $this->Form->input('serial', ['label' => 'Serial:', 'value' => 'N/A', 'disabled' => true, 'id' => 'serial-03']) ?>
 											<div class="form-group">
 												<label for="comentario-03">Comentario:</label>
@@ -326,7 +326,7 @@
 										</div>
 									</div>
 								</div>
-                                <!-- 
+                                <!--
 									<h3>Depósito</h3>
 									<div>
 										<div class="row">
@@ -356,8 +356,8 @@
 												<button id="bt-04" class="record-payment btn btn-success" disabled>Registrar pago</button>
 											</div>
 										</div>
-									</div>			
-								-->					
+									</div>
+								-->
                                 <h3>Transferencia</h3>
 								<div>
 									<div class="row">
@@ -374,11 +374,11 @@
 									<div class="row">
 										<div class="col-md-6">
 											<?= $this->Form->input('amount', ['label' => 'Monto:', 'id' => 'amount-05', 'class' => 'alternative-decimal-separator']) ?>
-											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-05', 'options' => $bancosEmisor]); ?>	
-											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-05', 'options' => $bancosReceptor]); ?>	
+											<?= $this->Form->input('bank', ['label' => 'Banco emisor:', 'id' => 'bank-05', 'options' => $bancosEmisor]); ?>
+											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-05', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-05']) ?>
 										</div>
-										<div class="col-md-6">	
+										<div class="col-md-6">
 											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-05']) ?>
 											<div class="form-group">
 												<label for="comentario-05">Comentario:</label>
@@ -387,9 +387,9 @@
 											<button id="bt-05" class="record-payment btn btn-success" disabled>Registrar pago</button>
 										</div>
 									</div>
-								</div>		
+								</div>
                                 <h3>Cheque</h3>
-								
+
 								<div>
 									<div class="row">
 										 <label class="check-dolar" for="check1">
@@ -409,7 +409,7 @@
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'id' => 'banco-receptor-06', 'options' => $bancosReceptor]); ?>
 											<?= $this->Form->input('account_or_card', ['label' => 'Cuenta:', 'id' => 'account_or_card-06']) ?>
 										</div>
-										<div class="col-md-6">	
+										<div class="col-md-6">
 											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-06']) ?>
 											<div class="form-group">
 												<label for="comentario-06">Comentario:</label>
@@ -418,8 +418,8 @@
 											<button id="bt-06" class="record-payment btn btn-success" disabled>Registrar pago</button>
 										</div>
 									</div>
-								</div>								
-                                <h3 id="acordion-retencion-impuesto">Retención de impuesto</h3>						
+								</div>
+                                <h3 id="acordion-retencion-impuesto">Retención de impuesto</h3>
 								<div>
 									<div class="row">
 										 <label class="check-dolar" for="check1">
@@ -439,7 +439,7 @@
 											<?= $this->Form->input('account_or_card', ['label' => 'Tarjeta:', 'value' => 'N/A', 'disabled' => true, 'id' => 'account_or_card-07']) ?>
 											<?= $this->Form->input('banco_receptor', ['label' => 'Banco receptor:', 'value' => 'N/A', 'disabled' => true, 'id' => 'banco-receptor-07']); ?>
 										</div>
-										<div class="col-md-6">		
+										<div class="col-md-6">
 											<?= $this->Form->input('serial', ['label' => 'Serial:', 'id' => 'serial-07']) ?>
 											<div class="form-group">
 												<label for="comentario-06">Comentario:</label>
@@ -457,7 +457,7 @@
 					<div class="row">
 						<div class="col-md-12 panel panel-default">
 							<br />
-							<div class="table-responsive">          
+							<div class="table-responsive">
 								<table class="table table-striped table-hover" >
 									<thead>
 										<tr>
@@ -467,14 +467,14 @@
 											<th scope="col" style="color: blue; width:15%; text-align:center;">Euro (€)</th>
 											<th scope="col" style="color: red; width:30%; text-align:center;">Bolívar (Bs.)</th>
 										</tr>
-									</thead>								
+									</thead>
 										<tbody>
 											<tr>
 												<td>Sub-total</td>
 												<td></td>
 												<td id="sub-total-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="sub-total-euro"></td>
-												<td style="color: red; text-align:center;" id="sub-total-bolivar"></td>	
+												<td style="color: red; text-align:center;" id="sub-total-bolivar"></td>
 											</tr>
 											<tr>
 												<td>Saldo a favor/contra</td>
@@ -493,14 +493,14 @@
 												<td style="color: blue; text-align:center; vertical-align: middle;"></td>
 												<td style="color: red; text-align:center; vertical-align: middle;"></td>
 											</tr>
-											<tr>	
-												<td style="border-top: none;"><?= $this->Form->input('descuento_recargo', ['label' => 'Tipo:', 'id' => 'descuento-recargo', 'disabled' => 'true', 'options' => 
+											<tr>
+												<td style="border-top: none;"><?= $this->Form->input('descuento_recargo', ['label' => 'Tipo:', 'id' => 'descuento-recargo', 'disabled' => 'true', 'options' =>
 													[null => '',
 													'Descuento $' => 'Descuento: $',
 													'Descuento %' => 'Descuento: %',
 													'Recargo $' => 'Recargo: $',
-													'Recargo %' => 'Recargo: %']]); ?></td>	
-												<td style="border-top: none;"><?= $this->Form->input('cantidad_descuento', ['label' => 'Cantidad:', 'type' => 'text', 'id' => 'cantidad-descuento', 'value' => 0, 'disabled' => 'true', 'class' => 'alternative-decimal-separator']); ?></td>													
+													'Recargo %' => 'Recargo: %']]); ?></td>
+												<td style="border-top: none;"><?= $this->Form->input('cantidad_descuento', ['label' => 'Cantidad:', 'type' => 'text', 'id' => 'cantidad-descuento', 'value' => 0, 'disabled' => 'true', 'class' => 'alternative-decimal-separator']); ?></td>
 												<td id="descuento-recargo-dolar" style="border-top: none; text-align:center; vertical-align: middle;">0</td>
 												<td style="color: blue; border-top: none; text-align:center; vertical-align: middle;" id="descuento-recargo-euro">0</td>
 												<td style="color: red; border-top: none; text-align:center; vertical-align: middle;" id="descuento-recargo-bolivar">0</td>
@@ -526,7 +526,7 @@
 												<td style="color: blue; text-align:center;" id="total-balance-descuento-euro"></td>
 												<td style="color: red; text-align:center;" id="total-balance-descuento-bolivar"></td>
 											</tr>
-											<tr>	
+											<tr>
 												<td>Pagado</td>
 												<td></td>
 												<td id="pagado-dolar" style="text-align:center;"></td>
@@ -545,7 +545,7 @@
 												<td></td>
 												<td id="sobrante-dolar" style="text-align:center;"></td>
 												<td style="color: blue; text-align:center;" id="sobrante-euro"></td>
-												<td style="color: red; text-align:center;" id="sobrante-bolivar"></td>																		
+												<td style="color: red; text-align:center;" id="sobrante-bolivar"></td>
 											</tr>
 										</tbody>
 								</table>
@@ -565,7 +565,7 @@
 							<br />
 							<p><b>Pagos realizados:</b></p>
 							<div class="panel-body">
-								<div class="table-responsive">          
+								<div class="table-responsive">
 									<table class="table table-striped table-hover" >
 										<thead>
 											<tr>
@@ -630,13 +630,13 @@
 	var discountAmount = 0;
 	var discount = 0;
 	var descuentoEuros = 0;
-	var descuentoBolivares = 0; 
+	var descuentoBolivares = 0;
 	var balanceDescuento = 0;
 	var balanceDescuentoEuros = 0;
 	var balanceDescuentoBolivares = 0;
 	var totalBalanceDescuento = 0;
 	var totalBalanceDescuentoEuros = 0;
-	var totalBalanceDescuentoBolivares = 0;	
+	var totalBalanceDescuentoBolivares = 0;
 	var totalGeneral = 0;
 	var invoiceDescuento = 0;
     var totalBill = 0;
@@ -668,7 +668,7 @@
     var transactionCounter = 0;
     var conceptCounter = 0;
     var accountPaid = 0;
-    var idParentsandguardians = 0; 
+    var idParentsandguardians = 0;
     var reversedDate = " ";
 	var schoolYearFrom = 0;
 	var biggestYearFrom = 0;
@@ -786,17 +786,17 @@
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
     var tbPaymentsMade = new Array();
-	
+
 	var indicador_recalcular_cuotas = true;
 	var ano_mes_actual = <?= $ano_mes_actual ?>;
 	var ano_mes_recalculo_cuotas_atrasadas = "202209";
-	var conceptos_a_omitir = 
+	var conceptos_a_omitir =
 		[
 			"Seguro escolar 2020",
 			"Seguro escolar 2021",
 			"Seguro escolar 2022",
 			"Thales 2021",
-			"Thales 2022" 
+			"Thales 2022"
 		];
 
 	var porcentaje_calculo_base_igtf = 1.03; // Cuando no se va a cobrar IGTF debe ser 1
@@ -830,13 +830,13 @@
 	var indicador_pedido = "<?= $indicador_pedido ?>";
 	var rolUsuario = "<?= $current_user['role'] ?>";
 	var indicadorAlertaTasaCambio = "<?= $indicadorAlertaTasaCambio ?>";
-	
+
 // Funciones Javascript
 
-    function log(message) 
+    function log(message)
     {
         if (totalBalance > 0)
-        {    
+        {
             var r = confirm("Si selecciona otra familia, perderá los datos del cobro realizado a la familia: " + nameFamily );
             if (r == false)
             {
@@ -847,10 +847,10 @@
         cleanPager();
         $("#response-container").html("");
         $("#response-container").html(message);
-        
+
         disableButtons();
     }
-    
+
     function disableButtons()
     {
         $("#mark-quotas").text("cobrar");
@@ -869,7 +869,7 @@
         $("#bt-06").attr('disabled', true);
         $("#bt-07").attr('disabled', true);
     }
-	
+
     function habilitaBotones()
     {
         $("#mark-quotas").attr('disabled', false);
@@ -887,7 +887,7 @@
         $("#bt-06").attr('disabled', false);
         $("#bt-07").attr('disabled', false);
     }
-    
+
     function deshabilitarBotonesAjuste()
     {
         $("#mark-quotas").attr('disabled', true);
@@ -904,9 +904,9 @@
         $("#bt-05").attr('disabled', true);
         $("#bt-06").attr('disabled', true);
         $("#bt-07").attr('disabled', true);
-		$(".registeredPayments").attr('disabled', true);	
+		$(".registeredPayments").attr('disabled', true);
     }
-	
+
     function habilitarBotonesAjuste()
     {
         $("#mark-quotas").attr('disabled', false);
@@ -924,36 +924,36 @@
         $("#bt-06").attr('disabled', false);
         $("#bt-07").attr('disabled', false);
     }
-	
+
     function markStudent(id)
     {
         $('#st' + id + ' td').each(function ()
         {
-            $(this).css('background-color', '#c2c2d6'); 
+            $(this).css('background-color', '#c2c2d6');
         });
     }
-    
+
     function uncheckStudent(id)
     {
         $('#st' + id + ' td').each(function ()
         {
-            $(this).css('background-color', 'white'); 
+            $(this).css('background-color', 'white');
         });
     }
-    
+
     function markTransaction(id)
     {
         $('#tra' + id + ' td').each(function ()
         {
-            $(this).css('background-color', '#c2c2d6'); 
+            $(this).css('background-color', '#c2c2d6');
         });
     }
-    
+
     function uncheckTransaction(id)
     {
         $('#tra' + id + ' td').each(function ()
         {
-            $(this).css('background-color', 'white'); 
+            $(this).css('background-color', 'white');
         });
     }
 
@@ -967,7 +967,7 @@
         $("#date-and-time").val(" ");
         $('#client').val(" ");
         $('#type-of-identification-client').val("");
-		$('#identification-number-client').val("");		
+		$('#identification-number-client').val("");
         $('#fiscal-address').val(" ");
         $('#tax-phone').val(" ");
         $('#email').val(" ");
@@ -996,7 +996,7 @@
 		$("#nota-credito").removeClass("noverScreen");
 		$("#botones-cuotas").removeClass("noverScreen");
 		$("#botones-notas").addClass("noverScreen");
-		$('#descuento-recargo').val(null);		
+		$('#descuento-recargo').val(null);
 		$('#cantidad-descuento').val(0);
 		$("#sub-total-dolar").html("");
 		$("#sub-total-euro").html("");
@@ -1029,7 +1029,7 @@
             $("#amount-" + paymentNumber).val(0);
 			$("#comentario-" + paymentNumber).css('background-color', '#ffffff');
             $('#comentario-' + paymentNumber).val(null);
-            
+
             if (item > 1 && item < 4)
             {
                 $("#bank-" + paymentNumber).css('background-color', '#ffffff');
@@ -1064,7 +1064,7 @@
                 $("#serial-" + paymentNumber).css('background-color', '#ffffff');
                 $('#serial-' + paymentNumber).val(null);
             }
-        }    
+        }
 
         studentBalance = 0;
         totalBalance = 0;
@@ -1092,7 +1092,7 @@
 		indicador_igtf_recalculado = 0;
 		indicadorAjuste = 0;
 		indicador_abono = 0;
-		familiasRelacionadasAnterior = '';	
+		familiasRelacionadasAnterior = '';
 		familiasRelacionadas = '';
 		idFamiliaPagadoraConsejoAnterior = 0;
 		idFamiliaPagadoraConsejo = 0;
@@ -1101,45 +1101,45 @@
 		indicadorConsejoAnterior = false;
 		indicadorConsejoActual = false;
 		indicadorReciboConsejoAnterior = false;
-		indicadorReciboConsejoActual = false;      		
+		indicadorReciboConsejoActual = false;
 		anioConsejoEducativo = 0;
 		proximoAnioConsejoEducativo = 0;
     }
-    
+
     function validateFields()
     {
-        if($("#amount-" + paymentIdentifier).val().length < 1) 
-        {  
+        if($("#amount-" + paymentIdentifier).val().length < 1)
+        {
             $("#amount-" + paymentIdentifier).css('background-color', '#f2f2f2');
             alert("El monto es obligatorio");
             return false;
         }
-        if($("#bank-" + paymentIdentifier).val().length < 1) 
-        {  
+        if($("#bank-" + paymentIdentifier).val().length < 1)
+        {
             $("#bank-" + paymentIdentifier).css('background-color', '#f2f2f2');
             alert("El nombre del banco emisor es obligatorio");
             return false;
         }
-        if($("#banco-receptor-" + paymentIdentifier).val().length < 1) 
-        {  
+        if($("#banco-receptor-" + paymentIdentifier).val().length < 1)
+        {
             $("#banco-receptor-" + paymentIdentifier).css('background-color', '#f2f2f2');
             alert("El nombre del banco receptor es obligatorio");
             return false;
         }
-        if($("#account_or_card-" + paymentIdentifier).val().length < 1) 
-        {  
+        if($("#account_or_card-" + paymentIdentifier).val().length < 1)
+        {
             $("#account_or_card-" + paymentIdentifier).css('background-color', '#f2f2f2');
             alert("El Nro. de tarjeta o cuenta es obligatorio");
             return false;
         }
-        if($("#serial-" + paymentIdentifier).val().length < 1) 
-        {  
+        if($("#serial-" + paymentIdentifier).val().length < 1)
+        {
             $("#serial-" + paymentIdentifier).css('background-color', '#f2f2f2');
             alert("El serial de la transacción es obligatorio");
             return false;
         }
     }
-	
+
 	function checkPredeterminado()
 	{
 		monedaPago = "$";
@@ -1152,7 +1152,7 @@
 	}
 
     function updateAmount()
-    {       
+    {
         if (deudaMenosPagado > 0)
         {
 			aCobrar = deudaMenosPagado;
@@ -1170,9 +1170,9 @@
 		$('#amount-06').val(formatoNumero(aCobrar)).css("color", "black");
 		$('#amount-07').val(formatoNumero(aCobrarRetencion)).css("color", "black");
 	}
-	
+
     function aCobrarEuros()
-    {       
+    {
         if (deudaMenosPagadoEuros > 0)
         {
 			aCobrar = deudaMenosPagadoEuros;
@@ -1190,9 +1190,9 @@
 		$('#amount-06').val(formatoNumero(aCobrar)).css("color", "blue");
 		$('#amount-07').val(formatoNumero(aCobrarRetencion)).css("color", "blue");
 	}
-	
+
     function aCobrarBolivares()
-    {       
+    {
         if (deudaMenosPagado > 0)
         {
 			aCobrar = deudaMenosPagadoBolivares;
@@ -1210,7 +1210,7 @@
 		$('#amount-06').val(formatoNumero(aCobrar)).css("color", "red");
 		$('#amount-07').val(formatoNumero(aCobrarRetencion)).css("color", "red");
 	}
-	
+
 	function inicializarCampos()
 	{
 		$("#amount-" + paymentIdentifier).css('background-color', '#ffffff');
@@ -1260,7 +1260,7 @@
 		let vector_registro_transacciones = new Array();
 		let aplicarDescuento = 0;
 		if (anoEscolarMensualidad == anoEscolarActual)
-		{	
+		{
 			aplicarDescuento = discountFamily;
 		}
 		else
@@ -1291,19 +1291,19 @@
 			"dbSeleccionada" : false,
         	"dbObservation" : observacionRecibida,
 			"dbServicioEducativoExoneradoTransaccion" : servicioEducativoExoneradoTransaccion	};
-			
+
 		studentTransactionsArray.push(vector_registro_transacciones);
-		
+
 		if (montoPendienteDolar < 0 && monthlyPayment.substring(0, 18) != "Servicio educativo")
 		{
 			saldoNotaCredito = saldoNotaCredito + montoPendienteDolar;
 		}
 	}
 
-    function insertRecordPayments() 
+    function insertRecordPayments()
 	{
 		let vector_registro_pagos = new Array();
-		
+
 		vector_registro_pagos = {
 			payId : accountant,
 			payMoneda : monedaPago,
@@ -1314,30 +1314,30 @@
 			payBancoReceptor : bancoReceptor,
 			payAccountOrCard : accountOrCard,
 			paySerial : serial,
-			payComentario : comentario }; 
-		
+			payComentario : comentario };
+
 		paymentsArray.push(vector_registro_pagos);
     }
-		
-	function actualizarPago(id_pago, pago_monto_igtf_dolar) 
+
+	function actualizarPago(id_pago, pago_monto_igtf_dolar)
     {
 		indice_elemento = paymentsArray.findIndex((objeto => objeto.payId == id_pago));
 		paymentsArray[indice_elemento].payMontoIgtfDolar = pago_monto_igtf_dolar;
     }
-    
-    function deletePayment(locIdPayment) 
+
+    function deletePayment(locIdPayment)
     {
 		indice_elemento = paymentsArray.findIndex((objeto => objeto.payId == locIdPayment));
 		paymentsArray.splice(indice_elemento, 1);
 	}
- 
-    function updateRecord(id, seleccionada) 
+
+    function updateRecord(id, seleccionada)
     {
 		indice_elemento = studentTransactionsArray.findIndex((objeto => objeto.dbId == id));
 		studentTransactionsArray[indice_elemento].dbSeleccionada = seleccionada;
 	}
-    
-    function updateInstallment(id, updOriginalMontoDolar, updMontoModificadoDolar, updMontoPendienteDolar, updAPagarDolar, updAPagarEuro, updAPagarBolivar, updObservation) 
+
+    function updateInstallment(id, updOriginalMontoDolar, updMontoModificadoDolar, updMontoPendienteDolar, updAPagarDolar, updAPagarEuro, updAPagarBolivar, updObservation)
     {
 		indice_elemento = studentTransactionsArray.findIndex((objeto => objeto.dbId == id));
 
@@ -1349,8 +1349,8 @@
 		studentTransactionsArray[indice_elemento].dbMontoAPagarBolivar = updAPagarBolivar;
 		studentTransactionsArray[indice_elemento].dbObservation = updObservation;
     }
-	
-    function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar, actSeleccionada, actObservacion) 
+
+    function actualizarPagar(id, actAPagarDolar, actAPagarEuro, actAPagarBolivar, actSeleccionada, actObservacion)
     {
 		indice_elemento = studentTransactionsArray.findIndex((objeto => objeto.dbId == id));
 
@@ -1361,8 +1361,8 @@
 		studentTransactionsArray[indice_elemento].dbObservation = actObservacion;
     }
 
-    function showRecords() 
-    {	
+    function showRecords()
+    {
         var detailLine = "";
         var nextPayment = "";
         var indicatorPaid = 0;
@@ -1372,7 +1372,7 @@
 
 		let indicador_julio_moroso = 0;
 
-		for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+		for (var i = 0, item = null; i < studentTransactionsArray.length; i++)
 		{
 			item = studentTransactionsArray[i];
 
@@ -1400,8 +1400,8 @@
 				alert("Debe alguno de los siguientes conceptos: Matrícula, Agosto, seguro o servicio educativo");
 			}
 		}
-		
-		for (var i = 0, item = null, indicador_estudiante_encontrado = 0; i < studentTransactionsArray.length; i++) 
+
+		for (var i = 0, item = null, indicador_estudiante_encontrado = 0; i < studentTransactionsArray.length; i++)
 		{
 			item = studentTransactionsArray[i];
 
@@ -1424,11 +1424,11 @@
 					studentName = item['dbStudentName'];
 				}
 				indicador_estudiante_encontrado = 1;
-				
+
 				monthlyPayment = item['dbMonthlyPayment'];
 
 				if (item['dbPaidOut'] == false)
-				{					
+				{
 					// Variables para determinar el estado y los estilos
 					let isSelected = item['dbSeleccionada'] === true; // Asegurarse que es booleano para claridad
 					let bgColorStyle = isSelected ? 'background-color:#c2c2d6;' : '';
@@ -1451,7 +1451,7 @@
 						</td>
 						<td style="font-size: 12px; ${bgColorStyle} color: blue;">${formatoNumero(item['dbMontoAPagarEuro'])}</td>
 						<td style="font-size: 12px; ${bgColorStyle} color: red;">${formatoNumero(item['dbMontoAPagarBolivar'])}</td>
-						${observationOrNC} 
+						${observationOrNC}
 						<td style="${bgColorStyle}">
 							<input
 								type="checkbox"
@@ -1537,8 +1537,8 @@
 			concept = firstInstallment + ' - ' + lastInstallment;
 			$("#student-balance").html(formatoNumero(studentBalance));
 
-			$("#mark-quotas").html(nextPayment); 
-								
+			$("#mark-quotas").html(nextPayment);
+
 			if (indicadorAjuste == 0)
 			{
 				$("#mark-quotas").attr('disabled', false);
@@ -1548,7 +1548,7 @@
 			{
 				deshabilitarBotonesAjuste();
 			}
-			
+
 			if (saldoNotaCredito < 0)
 			{
 				$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: red;'><b>Estimado usuario no puede facturar hasta que haga una o más notas de crédito por un total de " + -1 * saldoNotaCredito + " $</b></spam>");
@@ -1564,7 +1564,7 @@
 					$("#nota-credito").html("<spam style='text-align: center; font-size: 18px; color: blue;'><b>Estimado usuario, este representante tiene un saldo a favor/contra de " + saldoRepresentante + " $ ¿Quiere usarlo para compensar el pago de las cuotas?</b></spam>");
 					$("#print-invoice").attr('disabled', true);
 					$("#ajuste-automatico").attr('disabled', true);
-					$(".record-payment").attr('disabled', true);							
+					$(".record-payment").attr('disabled', true);
 					$("#botones-cuotas").addClass("noverScreen");
 					$("#botones-notas").removeClass("noverScreen");
 					$("#saldo-favor-dolar").html(saldoRepresentanteSigno);
@@ -1574,7 +1574,7 @@
 			}
 		}
     }
-	
+
     function showDatabase() // Para uso del desarrollador
     {
 		console.log("showDatabase", studentTransactionsArray);
@@ -1582,8 +1582,8 @@
 
     function mostrarCuotasSeleccionadas() // Para uso del desarrollador
     {
-		for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
-		{					
+		for (var i = 0, item = null; i < studentTransactionsArray.length; i++)
+		{
 			item = studentTransactionsArray[i];
 
 			if (item['dbSeleccionada'] == true)
@@ -1593,7 +1593,7 @@
 		}
     }
 
-    function ajustarCuotas() 
+    function ajustarCuotas()
     {
 		var posicion_elemento = 0;
 		var vector_estudiantes_seleccionados = [];
@@ -1603,7 +1603,7 @@
 			alert("Estimado usuario, no se puede hacer el ajustar la factura si el descuento es un porcentaje. Por favor cambie el descuento a un monto fijo y después haga el ajuste")
 			return false;
 		}
-		
+
         confirmar = confirm('Estimado usuario, después que ajuste la factura no podrá realizar cambios. ¿Está seguro de que desea ajustar la factura?');
         if (confirmar == false)
         {
@@ -1611,11 +1611,11 @@
         }
 
 		saldoPagosRealizados = dosDecimales(accumulatedPayment + saldoRepresentante - discount - acumulado_igtf_dolar);
-		
+
 		totalBalance = 0;
-				        				                
-		for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
-		{					
+
+		for (var i = 0, item = null; i < studentTransactionsArray.length; i++)
+		{
 			item = studentTransactionsArray[i];
 
 			if (item['dbSeleccionada'] == true)
@@ -1623,10 +1623,10 @@
 				posicion_elemento = $.inArray(item['dbIdStudent'], vector_estudiantes_seleccionados);
 
 				if (posicion_elemento == -1)
-				{ 
+				{
 					vector_estudiantes_seleccionados.push(item['dbIdStudent']);
 				}
-				
+
 				if (saldoPagosRealizados == 0)
 				{
 					updateRecord(item['dbId'], false);
@@ -1635,7 +1635,7 @@
 				{
 					saldoPagosRealizadosEuros = dosDecimales(saldoPagosRealizados / tasaDolarEuro);
 					saldoPagosRealizadosBolivares = dosDecimales(saldoPagosRealizados * dollarExchangeRate);
-					
+
 					actualizarPagar(item['dbId'], saldoPagosRealizados, saldoPagosRealizadosEuros, saldoPagosRealizadosBolivares, true, 'Abono');
 					totalBalance = totalBalance + saldoPagosRealizados;
 					saldoPagosRealizados = 0;
@@ -1652,8 +1652,8 @@
 		if (saldoPagosRealizados > 0)
 		{
 			let cuota_no_seleccionada = 0;
-			for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
-			{					
+			for (var i = 0, item = null; i < studentTransactionsArray.length; i++)
+			{
 				item = studentTransactionsArray[i];
 				if (item['dbSeleccionada'] == false)
 				{
@@ -1661,7 +1661,7 @@
 					break;
 				}
 			}
-			
+
 			if (cuota_no_seleccionada == 0)
 			{
 				indicadorNoCuotas = 1;
@@ -1669,17 +1669,17 @@
 				return false;
 			}
 			else
-			{               
-				for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
-				{					
+			{
+				for (var i = 0, item = null; i < studentTransactionsArray.length; i++)
+				{
 					item = studentTransactionsArray[i];
 					if (item['dbSeleccionada'] == false)
 					{
 						posicion_elemento = $.inArray(item['dbIdStudent'], vector_estudiantes_seleccionados);
 
 						if (posicion_elemento != -1)
-						{									
-							if (saldoPagosRealizados >= item['dbMontoPendienteDolar']) 
+						{
+							if (saldoPagosRealizados >= item['dbMontoPendienteDolar'])
 							{
 								updateRecord(item['dbId'], true);
 								saldoPagosRealizados = dosDecimales(saldoPagosRealizados - item['dbMontoPendienteDolar']);
@@ -1689,7 +1689,7 @@
 							{
 								saldoPagosRealizadosEuros = dosDecimales(saldoPagosRealizados / tasaDolarEuro);
 								saldoPagosRealizadosBolivares = dosDecimales(saldoPagosRealizados * dollarExchangeRate);
-								
+
 								actualizarPagar(item['dbId'], saldoPagosRealizados, saldoPagosRealizadosEuros, saldoPagosRealizadosBolivares, true, 'Abono');
 								totalBalance = totalBalance + saldoPagosRealizados;
 								saldoPagosRealizados = 0;
@@ -1717,22 +1717,22 @@
 			actualizarTotales();
 		}
     }
-			
+
     function showPayments() // Para uso del desarrollador
     {
 		console.log("showPayments", paymentsArray);
 	}
 
-    function buscarMoneda(idPago) 
+    function buscarMoneda(idPago)
     {
         var detailLine = "";
 
 		indice_elemento = paymentsArray.findIndex((objeto => objeto.payId == idPago));
 
 		item = paymentsArray[indice_elemento];
-		
+
 		monedaPagoEliminar = item['payMoneda'];
-										
+
 		if (monedaPagoEliminar == "$")
 		{
 			montoPagadoDolar = montoPagado;
@@ -1751,8 +1751,8 @@
 			montoPagadoEuro = dosDecimales(montoPagado / euro);
 			montoPagadoBolivar = montoPagado;
 		}
-											
-		accumulatedPayment -= dosDecimales(montoPagadoDolar);	
+
+		accumulatedPayment -= dosDecimales(montoPagadoDolar);
 		acumuladoPagadoEuros -= dosDecimales(montoPagadoEuro);
 		acumuladoPagadoBolivares -= dosDecimales(montoPagadoBolivar);
 
@@ -1762,21 +1762,21 @@
 			acumulado_igtf_euro = dosDecimales(acumulado_igtf_dolar / tasaDolarEuro);
 			acumulado_igtf_bolivar = dosDecimales(acumulado_igtf_dolar * dollarExchangeRate);
 		}
-		
+
 		monto_divisas = dosDecimales(monto_divisas - item['payMontoIgtfDolar']);
 		acumulado_igtf_dolar_archivo = dosDecimales(acumulado_igtf_dolar_archivo - item['payMontoIgtfDolar']);
-		
-		actualizarTotales();		
+
+		actualizarTotales();
     }
 
     function printPayments()
     {
         linePayments = " ";
-	        
+
         linePayments += "<tr id=pa" + accountant + "> \
             <td><button id=p" + accountant + " name='" + paymentType + "' value=" + montoPagado + " class='registeredPayments glyphicon glyphicon-trash'></button></td> \
 			<td style='text-align: center;'>" + paymentType + "</td>";
-			
+
 		if (monedaPago == "$")
 		{
 			linePayments += "<td style='text-align: center;'>" + monedaPago + "</td><td style='text-align: center;'>" + formatoNumero(montoPagado) + "</td>";
@@ -1789,21 +1789,21 @@
 		{
 			linePayments += "<td style='color: red; text-align: center;'>" + monedaPago + "</td><td style='color: red; text-align: center;'>" + formatoNumero(montoPagado) + "</td>";
 		}
-		
+
 		linePayments +=
             "<td style='text-align: center;'>" + bank + "</td> \
 			<td style='text-align: center;'>" + bancoReceptor + "</td> \
             <td style='text-align: center;'>" + accountOrCard + "</td> \
             <td style='text-align: center;'>" + serial + "</td> \
 			<td style='text-align: left;'>" + comentario + "</td></tr>";
-			
+
         $("#registered-payments").append(linePayments);
-        
+
         insertRecordPayments();
-        
+
         accountant++;
     }
-    
+
     function activarBotonesPago()
     {
         $("#bt-01").attr('disabled', false);
@@ -1814,7 +1814,7 @@
         $("#bt-06").attr('disabled', false);
         $("#bt-07").attr('disabled', false);
     }
-	
+
     function desactivarBotonesPago()
     {
         $("#bt-01").attr('disabled', true);
@@ -1829,7 +1829,7 @@
     function uploadTransactions()
     {
 		biggestYearFrom = schoolYearFrom;
-		
+
 		var idCuotaAbono = 0;
 		var idCuotaExonerada = 0;
 		var diferenciaBolivaresDividida = diferenciaBolivares;
@@ -1856,13 +1856,13 @@
 			}
 			else
 			{
-				tbStudentTransactions[transactionCounter].observation = ""; 				
+				tbStudentTransactions[transactionCounter].observation = "";
 			}
-			biggestYearFrom = parseInt(anioConsejoEducativo);	
+			biggestYearFrom = parseInt(anioConsejoEducativo);
 		}
 		else
-		{				
-			for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+		{
+			for (var i = 0, item = null; i < studentTransactionsArray.length; i++)
 			{
 				item = studentTransactionsArray[i];
 
@@ -1872,7 +1872,7 @@
 				}
 			}
 
-			for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+			for (var i = 0, item = null; i < studentTransactionsArray.length; i++)
 			{
 				item = studentTransactionsArray[i];
 
@@ -1882,7 +1882,7 @@
 					{
 						idCuotaAbono = item['dbId'];
 					}
-					
+
 					if (item['dbObservation'] == '(Exonerado)')
 					{
 						idCuotaAbono = item['dbId'];
@@ -1890,21 +1890,21 @@
 					}
 				}
 			}
-			
+
 			if (cantidadElementos > 1)
 			{
 				diferenciaBolivaresDividida = dosDecimales(diferenciaBolivares / cantidadElementos);
 				diferenciaUltimoElemento = diferenciaBolivaresDividida;
-				
+
 				diferenciaBolivaresTotal = dosDecimales(diferenciaBolivaresDividida * cantidadElementos);
-				
+
 				if (diferenciaBolivares != diferenciaBolivaresTotal)
 				{
 					diferenciaUltimoElemento = dosDecimales(diferenciaUltimoElemento + (diferenciaBolivares - diferenciaBolivaresTotal));
 				}
 			}
-			
-			for (var i = 0, item = null; i < studentTransactionsArray.length; i++) 
+
+			for (var i = 0, item = null; i < studentTransactionsArray.length; i++)
 			{
 				item = studentTransactionsArray[i];
 
@@ -1919,10 +1919,10 @@
 					tbStudentTransactions[transactionCounter].monthlyPayment = item['dbMonthlyPayment'];
 					tbStudentTransactions[transactionCounter].montoAPagarDolar = dosDecimales(item['dbMontoAPagarDolar']);
 					tbStudentTransactions[transactionCounter].montoAPagarEuro = dosDecimales(item['dbMontoAPagarEuro']);
-					
+
 					if (item['Observation'] == '(Exonerado')
 					{
-						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);	
+						tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);
 					}
 					else if (cantidadElementos == 1)
 					{
@@ -1936,8 +1936,8 @@
 						}
 						else
 						{
-							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);	
-						}													
+							tbStudentTransactions[transactionCounter].montoAPagarBolivar = dosDecimales(item['dbMontoAPagarBolivar']);
+						}
 					}
 					else
 					{
@@ -1951,11 +1951,11 @@
 						}
 					}
 					contadorElementos++;
-										
-					tbStudentTransactions[transactionCounter].observation = item['dbObservation']; 	
-					
+
+					tbStudentTransactions[transactionCounter].observation = item['dbObservation'];
+
 					transactionCounter++;
-					
+
 					if (item['dbMonthlyPayment'].substring(0, 9) == "Matrícula")
 					{
 						biggestYearFrom = parseInt(item['dbMonthlyPayment'].substring(10, 14));
@@ -1972,11 +1972,11 @@
     }
 
     function loadPayments()
-    {                
-		for (var i = 0, item = null; i < paymentsArray.length; i++) 
+    {
+		for (var i = 0, item = null; i < paymentsArray.length; i++)
 		{
 			item = paymentsArray[i];
-			
+
 			if (item['payPaymentType'] != "Cambio")
 			{
 				tbPaymentsMade[accountPaid] = new Object();
@@ -1993,33 +1993,33 @@
 				tbPaymentsMade[accountPaid].comentario = item['payComentario'];
 				tbPaymentsMade[accountPaid].idTurn = $("#Turno").attr('value');
 				tbPaymentsMade[accountPaid].family = nameFamily;
-				accountPaid++;						
+				accountPaid++;
 			}
 		}
-		
+
 		payments.cuotasAlumnoBecado = cuotasAlumnoBecado;
-		
+
 		var stringStudentTransactions = JSON.stringify(tbStudentTransactions);
-						
+
 		var stringPaymentsMade = JSON.stringify(tbPaymentsMade);
 
 		cleanPager();
-		
-		$.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "recordInvoiceData"]); ?>', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade }); 
+
+		$.redirect('<?php echo Router::url(["controller" => "Bills", "action" => "recordInvoiceData"]); ?>', {headboard : payments, studentTransactions : stringStudentTransactions, paymentsMade : stringPaymentsMade });
     }
 
     function listFamilies(newFamily)
-    {	
+    {
         $.post('<?php echo Router::url(["controller" => "Students", "action" => "everyFamily"]); ?>', {"newFamily" : newFamily}, null, "json")
-            
-        .done(function(response) 
+
+        .done(function(response)
         {
-            if (response.success) 
+            if (response.success)
             {
-                var output = " "; 
-                $.each(response.data.families, function(key, value) 
+                var output = " ";
+                $.each(response.data.families, function(key, value)
                 {
-                    $.each(value, function(userkey, uservalue) 
+                    $.each(value, function(userkey, uservalue)
                     {
                         if (userkey == 'id')
 						{
@@ -2041,48 +2041,48 @@
                 });
                 $("#header-messages").html("");
                 $("#response-container").html(output);
-            } 
-            else 
+            }
+            else
             {
 				$("#header-messages").html("");
                 $("#response-container").html('No ha habido suerte: ' + response.data.message);
             }
-                
+
         })
-        .fail(function(jqXHR, textStatus, errorThrown) 
+        .fail(function(jqXHR, textStatus, errorThrown)
 		{
-			$("#header-messages").html("");        
+			$("#header-messages").html("");
             $("#response-container").html("Algo ha fallado: " + textStatus);
-                
+
         });
     }
-	
+
 	function validarDatosFiscales()
 	{
 		var resultado = 0;
-		
+
 		$('.mensajes-usuario').html("");
 		$('.campo-resaltado').css('background-color', "white");
-		
-		if ($("#client").val().length < 5) 
-		{  		
+
+		if ($("#client").val().length < 5)
+		{
 			$('#client').css('background-color', "#ffffe6");
 			$('#mensaje-cliente').html("El nombre o razón social está incompleto").css('color', 'red');
 			resultado = 1;
 		}
 
-		if ($("#type-of-identification-client").val().length == 0) 
-		{  		
+		if ($("#type-of-identification-client").val().length == 0)
+		{
 			$('#type-of-identification-client').css('background-color', "#ffffe6");
 			$('#mensaje-tipo-de-identificacion').html("El tipo de identificacion no puede ser blancos").css('color', 'red');
 			resultado = 1;
 		}
 		else
 		{
-			if ($("#type-of-identification-client").val() == "J" || $("#type-of-identification-client").val() == "G") 
+			if ($("#type-of-identification-client").val() == "J" || $("#type-of-identification-client").val() == "G")
 			{
-				if ($("#identification-number-client").val().length < 9) 
-				{	
+				if ($("#identification-number-client").val().length < 9)
+				{
 					$('#identification-number-client').css('background-color', "#ffffe6");
 					$('#mensaje-numero-identificacion-cliente').html("El número del RIF está incompleto").css('color', 'red');
 					resultado = 1;
@@ -2090,38 +2090,38 @@
 			}
 			else
 			{
-				if ($("#identification-number-client").val().length < 7) 
-				{	
+				if ($("#identification-number-client").val().length < 7)
+				{
 					$('#identification-number-client').css('background-color', "#ffffe6");
 					$('#mensaje-numero-identificacion-cliente').html("El número de cédula o pasaporte está incompleto").css('color', 'red');
 					resultado = 1;
-				}				
-			}	
+				}
+			}
 		}
-		if ($("#fiscal-address").val().length < 10) 
-		{	
+		if ($("#fiscal-address").val().length < 10)
+		{
 			$('#fiscal-address').css('background-color', "#ffffe6");
 			$('#mensaje-direccion-fiscal').html("La dirección está incompleta").css('color', 'red');
 			resultado = 1;
-		}	
+		}
 
-		if ($("#tax-phone").val().length < 10) 
-		{	
+		if ($("#tax-phone").val().length < 10)
+		{
 			$('#tax-phone').css('background-color', "#ffffe6");
 			$('#mensaje-telefono').html("El número de teléfono está incompleto").css('color', 'red');
 			resultado = 1;
 		}
 		return resultado;
 	}
-	
+
 	function actualizarTotales()
 	{
 		signoDescuento = 1;
 		descuentoPrevio = 0;
-		
+
 		$("#student-balance").html(formatoNumero(studentBalance));
 		$("#total-balance").html(formatoNumero(totalBalance));
-		
+
 		let sub_total_igtf = 0;
 
 		if (indicador_pedido == 0 && indicadorConsejoEducativo == 0)
@@ -2135,11 +2135,11 @@
 		totalBalanceEuros = dosDecimales(totalBalance / tasaDolarEuro);
 		totalBalanceBolivares = dosDecimales(totalBalance * dollarExchangeRate);
 		total_balance_bolivares_igtf = dosDecimales((totalBalance + acumulado_igtf_dolar) * dollarExchangeRate);
-	
+
 		$("#sub-total-dolar").html(formatoNumero(totalBalance));
 		$("#sub-total-euro").html(formatoNumero(totalBalanceEuros));
 		$("#sub-total-bolivar").html(formatoNumero(totalBalanceBolivares));
-				
+
 		if (discountMode == 'Porcentaje')
 		{
 			if (discountAmount < 0)
@@ -2156,12 +2156,12 @@
 		}
 		else
 		{
-			discount = discountAmount;		
+			discount = discountAmount;
 		}
-		
+
 		descuentoEuros = dosDecimales(discount / tasaDolarEuro);
 		descuentoBolivares = dosDecimales(discount * dollarExchangeRate);
-						
+
 		$("#descuento-recargo-dolar").html(formatoNumero(discount));
 		$("#descuento-recargo-euro").html(formatoNumero(descuentoEuros));
 		$("#descuento-recargo-bolivar").html(formatoNumero(descuentoBolivares));
@@ -2178,15 +2178,15 @@
 
 		balanceDescuentoBolivares = dosDecimales(total_balance_bolivares_igtf + descuentoBolivares);
 		totalBalanceDescuentoBolivares = dosDecimales(total_balance_bolivares_igtf - saldoRepresentanteBolivares + descuentoBolivares);
-		
+
 		$("#total-balance-descuento-dolar").html(formatoNumero(totalBalanceDescuento));
 		$("#total-balance-descuento-euro").html(formatoNumero(totalBalanceDescuentoEuros));
 		$("#total-balance-descuento-bolivar").html(formatoNumero(totalBalanceDescuentoBolivares));
-		
+
 		$('#pagado-dolar').html(formatoNumero(accumulatedPayment));
 		$('#pagado-euro').html(formatoNumero(acumuladoPagadoEuros));
 		$('#pagado-bolivar').html(formatoNumero(acumuladoPagadoBolivares));
-		
+
 		deudaMenosPagado = dosDecimales(totalBalanceDescuento - accumulatedPayment);
 		deudaMenosPagadoEuros = dosDecimales(deudaMenosPagado / tasaDolarEuro);
 		deudaMenosPagadoBolivares = dosDecimales(totalBalanceDescuentoBolivares - acumuladoPagadoBolivares);
@@ -2213,10 +2213,10 @@
 			porPagar = 0;
 			sobrante = 0;
 		}
-		
+
 		porPagarEuros = dosDecimales(porPagar / tasaDolarEuro);
 		sobranteEuros = dosDecimales(sobrante / tasaDolarEuro);
-			
+
 		if (deudaMenosPagadoBolivares > 0)
 		{
 			porPagarBolivares = deudaMenosPagadoBolivares;
@@ -2239,15 +2239,15 @@
 			porPagarBolivares = 0;
 			sobranteBolivares = 0;
 		}
-		
+
 		$('#por-pagar-dolar').html(formatoNumero(porPagar));
 		$('#por-pagar-euro').html(formatoNumero(porPagarEuros));
-		$('#por-pagar-bolivar').html(formatoNumero(porPagarBolivares));				
-		
+		$('#por-pagar-bolivar').html(formatoNumero(porPagarBolivares));
+
 		$('#sobrante-dolar').html(formatoNumero(sobrante));
 		$('#sobrante-euro').html(formatoNumero(sobranteEuros));
 		$('#sobrante-bolivar').html(formatoNumero(sobranteBolivares));
-			
+
 		checkPredeterminado();
 		updateAmount();
 
@@ -2265,7 +2265,7 @@
 			else
 			{
 				$("#ajuste-automatico").attr('disabled', true);
-				$("#print-invoice").attr('disabled', true);			
+				$("#print-invoice").attr('disabled', true);
 			}
 		}
 
@@ -2278,9 +2278,9 @@
 			desactivarBotonesPago();
 		}
 	}
-	
+
 	function guardarFactura()
-	{		
+	{
 		$("#invoice-messages").html("Por favor espere...");
 		payments.idTurn = $("#Turno").attr('value');
 		payments.idParentsandguardians = idParentsandguardians;
@@ -2311,7 +2311,7 @@
 				{
 					diferenciaSinSigno = deudaMenosPagadoBolivares;
 				}
-				
+
 				if (diferenciaSinSigno < dosDecimales(0.01 * dollarExchangeRate))
 				{
 					diferenciaBolivares = deudaMenosPagadoBolivares * -1;
@@ -2323,9 +2323,9 @@
 				}
 			}
 		}
-								
-		payments.discount = descuentoBolivares; 
-		
+
+		payments.discount = descuentoBolivares;
+
 		if (rolUsuario == 'Seniat')
 		{
 			payments.fiscal = 1;
@@ -2344,7 +2344,7 @@
 		}
 		else
 		{
-			payments.saldoCompensado = saldoRepresentante;		
+			payments.saldoCompensado = saldoRepresentante;
 		}
 		payments.sobrante = sobrante;
 		payments.imprimirReciboSobrante = imprimirReciboSobrante;
@@ -2356,7 +2356,7 @@
 		payments.indicador_pedido = indicador_pedido;
 		payments.indicadorConsejoEducativo = indicadorConsejoEducativo;
 		payments.concepto_descuento = conceptoDescuento;
-		
+
 		uploadTransactions();
 		loadPayments();
 	}
@@ -2371,12 +2371,12 @@
 			var saldo_igtf_dolar = 0;
 			var saldo_igtf_euro = 0;
 			var saldo_igtf_bolivar = 0;
-			var recalculo_divisas = monto_divisas; 
+			var recalculo_divisas = monto_divisas;
 			var recalculo_igtf_dolar = acumulado_igtf_dolar;
 			var recalculo_igtf_bolivar = acumulado_igtf_bolivar;
-								
+
 			// Aquí hay un error porque se está considerando que el dólar tiene el mismo valor que el euro. Se debe desglosar y hacer la conversión de monedas de euros a dolares
-			for (var i = 0, item = null; i < paymentsArray.length; i++) 
+			for (var i = 0, item = null; i < paymentsArray.length; i++)
 			{
 				item = paymentsArray[i];
 				if (item['payMoneda'] == "$" || item['payMoneda'] == "€")
@@ -2407,7 +2407,7 @@
 				if (indicador_pedido == 0 && indicadorConsejoEducativo == 0)
 				{
 					saldo_igtf_dolar = recalculo_igtf_dolar;
-					for (var i = 0, item = null; i < paymentsArray.length; i++) 
+					for (var i = 0, item = null; i < paymentsArray.length; i++)
 					{
 						item = paymentsArray[i];
 						if (item['payMoneda'] == "$")
@@ -2416,12 +2416,12 @@
 							if (saldo_igtf_dolar < monto_igtf_dolar)
 							{
 								actualizarPago(item['payId'], saldo_igtf_dolar);
-								saldo_igtf_dolar -= saldo_igtf_dolar; 		
-							}	
+								saldo_igtf_dolar -= saldo_igtf_dolar;
+							}
 							else
 							{
 								actualizarPago(item['payId'], monto_igtf_dolar);
-								saldo_igtf_dolar -= monto_igtf_dolar; 
+								saldo_igtf_dolar -= monto_igtf_dolar;
 							}
 						}
 						else if (item['payMoneda'] == "€")
@@ -2432,12 +2432,12 @@
 							if (saldo_igtf_euro < monto_igtf_euro)
 							{
 								actualizarPago(item['payId'], saldo_igtf_euro);
-								saldo_igtf_dolar -= saldo_igtf_dolar; 		
-							}	
+								saldo_igtf_dolar -= saldo_igtf_dolar;
+							}
 							else
 							{
 								actualizarPago(item['payId'], monto_igtf_euro);
-								saldo_igtf_dolar -= monto_igtf_dolar; 
+								saldo_igtf_dolar -= monto_igtf_dolar;
 							}
 						}
 						else
@@ -2445,36 +2445,36 @@
 							actualizarPago(item['payId'], 0);
 						}
 					}
-				} 
+				}
 			}
 			else
 			{
 				if (indicador_pedido == 0 && indicadorConsejoEducativo == 0)
 				{
 					saldo_igtf_bolivar = recalculo_igtf_bolivar;
-					for (var i = 0, item = null; i < paymentsArray.length; i++) 
+					for (var i = 0, item = null; i < paymentsArray.length; i++)
 					{
-						item = paymentsArray[i];								
-						
+						item = paymentsArray[i];
+
 						if (item['payMoneda'] == "Bs.")
 						{
 							if (saldo_igtf_bolivar > item['payAmountPaid'])
 							{
 								actualizarPago(item['payId'], item['payAmountPaid']);
-								saldo_igtf_bolivar -= item['payAmountPaid']; 		
-							}	
+								saldo_igtf_bolivar -= item['payAmountPaid'];
+							}
 							else
 							{
 								actualizarPago(item['payId'], saldo_igtf_bolivar);
 								saldo_igtf_bolivar -= saldo_igtf_bolivar;
-							}	
+							}
 						}
 						else
 						{
 							actualizarPago(item['payId'], 0);
 						}
 					}
-				} 
+				}
 			}
 			if (indicador_sobrante == 0)
 			{
@@ -2496,17 +2496,17 @@
 			proxima_funcion_a_ejecutar();
 		}
 	}
-	
+
 	function actualizarDescuentos()
 	{
 		discountMode = "Fijo";
 		discountAmount = 0;
-		
+
 		if ($('#cantidad-descuento').val() < 0)
 		{
 			alert("Estimado usuario debe escribir una cantidad mayor a cero");
-			return false;	
-		}		
+			return false;
+		}
 		else if ($('#cantidad-descuento').val() == "" || $('#cantidad-descuento').val() == 0)
 		{
 			actualizarTotales();
@@ -2514,35 +2514,35 @@
 		else if ($('#descuento-recargo').val() === "")
 		{
 			alert("Estimado usuario debe seleccionar el tipo de descuento o recargo");
-			return false;				
+			return false;
 		}
 		else if ($('#descuento-recargo').val() == "Descuento $")
-		{						
+		{
 			discountMode = "Fijo";
 			discountAmount = dosDecimales(parseFloat($('#cantidad-descuento').val()) * -1);
-			actualizarTotales();	
+			actualizarTotales();
 		}
 		else if ($('#descuento-recargo').val() == "Descuento %")
 		{
 			discountMode = "Porcentaje";
 			discountAmount = dosDecimales((parseFloat($('#cantidad-descuento').val()) / 100) * -1);
 			actualizarTotales();
-		}	
+		}
 		else if ($('#descuento-recargo').val() == "Recargo $")
-		{						
+		{
 			discountMode = "Fijo";
 			discountAmount = dosDecimales(parseFloat($('#cantidad-descuento').val()));
-			actualizarTotales();	
+			actualizarTotales();
 		}
 		else if ($('#descuento-recargo').val() == "Recargo %")
 		{
 			discountMode = "Porcentaje";
 			discountAmount = dosDecimales(parseFloat($('#cantidad-descuento').val()) / 100);
 			actualizarTotales();
-		}	
+		}
 	}
-	
-	function formatoNumero(num) 
+
+	function formatoNumero(num)
 	{
 		if (!num || num == 'NaN') return '0,00';
 		if (num == 'Infinity') return '&#x221e;';
@@ -2559,22 +2559,22 @@
 			num = num.substring(0, num.length - (4 * i + 3)) + '.' + num.substring(num.length - (4 * i + 3));
 		return (((sign) ? '' : '-') + num + ',' + cents);
 	}
-		
+
 	function dosDecimales(numero)
 	{
 		return Number(Math.round(numero+'e'+2)+'e-'+2);
 	}
-	
+
 	function eliminarComa(cadenaRecibida)
 	{
 		var indicadorNoPuntos = 0;
 		var cadena = "";
 		var cadenaConvertida = "";
-	
+
 		if (cadenaRecibida.indexOf(",") != -1)
-		{	
+		{
 			cadena = cadenaRecibida;
-			
+
 			while (indicadorNoPuntos < 1)
 			{
 				if (cadena.indexOf(".") != -1)
@@ -2600,7 +2600,7 @@
 		{
 			cadenaConPuntoDecimal = cadenaRecibida;
 		}
-		return cadenaConPuntoDecimal;	
+		return cadenaConPuntoDecimal;
 	}
 	function procesarPago()
 	{
@@ -2621,11 +2621,11 @@
 		{
 			if (base_igtf_dolar > deudaMenosPagado)
 			{
-				base_igtf_dolar = deudaMenosPagado;		
+				base_igtf_dolar = deudaMenosPagado;
 			}
 			else if (base_igtf_dolar <= acumulado_igtf_dolar)
 			{
-				base_igtf_dolar = 0;							
+				base_igtf_dolar = 0;
 			}
 
 			if (indicadorConsejoEducativo == 0)
@@ -2667,11 +2667,11 @@
 			montoPagadoEuro = dosDecimales(montoPagado / euro);
 			montoPagadoBolivar = montoPagado;
 		}
-	
+
 		printPayments();
-		
+
 		alert('Pago registrado con éxito: ' +  monedaPago + ' ' + formatoNumero(montoPagado));
-		
+
 		accumulatedPayment += dosDecimales(montoPagadoDolar);
 		acumuladoPagadoEuros += dosDecimales(montoPagadoEuro);
 		acumuladoPagadoBolivares += dosDecimales(montoPagadoBolivar);
@@ -2682,15 +2682,17 @@
 
 	function descuentoProntoPago(anio_mes_transaccion) // Descuento pronto pago
 	{
-		var descuentos_pronto_pago = 
+		var descuentos_pronto_pago =
 			{
 				"202208" : 0.00,
 				"202308" : 5.00,
-				"202508" : 10.00
+				"202508" : 10.00,
+                "202608" : 0.00,
+                "202708" : 15.00
 			};
 
 		var monto_descuento_pronto_pago = 0;
-		for (var anio_mes_descuento in descuentos_pronto_pago) 
+		for (var anio_mes_descuento in descuentos_pronto_pago)
 		{
 			if (anio_mes_transaccion <= anio_mes_descuento)
 			{
@@ -2704,10 +2706,10 @@
 	{
 		nameFamily = response.data.family;
 		let nameRepresentative = response.data.first_name + ' ' + response.data.surname;
-		let client = response.data.client; 
+		let client = response.data.client;
 		let typeOfIdentificationClient = response.data.type_of_identification_client;
 		let identificationNumberClient = response.data.identification_number_client;
-		let fiscalAddress = response.data.fiscal_address;							
+		let fiscalAddress = response.data.fiscal_address;
 		let taxPhone = response.data.tax_phone;
 		customerEmail = response.data.email;
 
@@ -2830,12 +2832,12 @@
 			$.redirect('<?php echo Router::url(["controller" => "Users", "action" => "wait"]); ?>');
 		}
 	}
-	    
+
 // Funciones Jquery
 
-    $(document).ready(function() 
+    $(document).ready(function()
     {
-		$('#concepto-descuento').change(function(e) 
+		$('#concepto-descuento').change(function(e)
         {
 			e.preventDefault();
 			conceptoDescuento = $(this).val();
@@ -2846,7 +2848,7 @@
 			}
         });
 
-		$('#btn-save-custom-concept').click(function(e) 
+		$('#btn-save-custom-concept').click(function(e)
         {
 			e.preventDefault();
 			let customValue = $('#custom-concept-input').val();
@@ -2871,19 +2873,19 @@
 			indicadorConsejoEducativo = 1;
 		}
 		else
-		{ 
+		{
 			var recalcular = $('<p style="background-color: #a9e0ff; color: red;">¿ Estimado usuario desea cobrar las cuotas atrasadas con la tarifa vigente ?</p>').dialog(
 			{
 				modal: true,
-				buttons: 
+				buttons:
 				{
-					"Sí": function() 
+					"Sí": function()
 					{
 						indicador_recalcular_cuotas = true;
 						recalcular.dialog('close');
-						
+
 					},
-					"No":  function() 
+					"No":  function()
 					{
 						indicador_recalcular_cuotas = false;
 						recalcular.dialog('close');
@@ -2893,13 +2895,13 @@
 		}
 
 		$('.entero').numeric();
-		
+
 		$(".alternative-decimal-separator").numeric({ altDecimal: "," });
-		
+
         $("#mostrar-registros").click(showDatabase);
 
 		$("#mostrar_cuotas_seleccionadas").click(mostrarCuotasSeleccionadas);
-        
+
         $("#mostrar-pagos").click(showPayments);
 
         $('#family-search').autocomplete(
@@ -2911,12 +2913,12 @@
               }
         });
 
-        $('#newfamily').click(function(e) 
+        $('#newfamily').click(function(e)
         {
             e.preventDefault();
-            
+
             if (totalBalance > 0)
-            {    
+            {
                 var r = confirm("Si selecciona otra familia, perderá los datos del cobro realizado a la familia: " + nameFamily );
                 if (r == false)
                 {
@@ -2925,23 +2927,23 @@
             }
 
             cleanPager();
-            
+
             $("#response-container").html("");
-            
+
             disableButtons();
-            
+
             // Mostramos texto de que la solicitud está en curso
             $("#header-messages").html("Por favor espere...");
-            
+
             listFamilies(1);
         });
 
-        $('#everyfamily').click(function(e) 
+        $('#everyfamily').click(function(e)
         {
             e.preventDefault();
-            
+
             if (totalBalance > 0)
-            {    
+            {
                 var r = confirm("Si selecciona otra familia, perderá los datos del cobro realizado a la familia: " + nameFamily );
                 if (r == false)
                 {
@@ -2950,21 +2952,21 @@
             }
 
             cleanPager();
-            
+
             $("#response-container").html("");
-            
+
             disableButtons();
-            
+
             // Mostramos texto de que la solicitud está en curso
             $("#header-messages").html("Por favor espere...");
-            
+
             listFamilies(0);
         });
 
         $("#response-container").on("click", ".family", function()
         {
 			if (totalBalance > 0)
-			{    
+			{
 				var r = confirm("Si selecciona otra familia, perderá los datos de pago de la familia: " + nameFamily );
 				if (r == false)
 				{
@@ -2972,20 +2974,20 @@
 				}
 			}
 			idFamily = $(this).attr('id').substring(2);
-			
+
 			if (selectFamily > -1)
 			{
 				$('#fa' + selectFamily).css('background-color', 'white');
 			}
 			selectFamily = idFamily;
-			$('#fa' + selectFamily).css('background-color', '#c2c2d6');  
-	
+			$('#fa' + selectFamily).css('background-color', '#c2c2d6');
+
 			cleanPager();
-			
+
 			disableButtons();
-				
+
 			$("#header-messages").html("Por favor espere...");
-			
+
 			if ($('#type-invoice').val() == 'Factura inscripción regulares' || $('#type-invoice').val() == 'Pedido inscripción regulares')
 			{
 				typeStudent = 0;
@@ -2998,16 +3000,16 @@
 			{
 				typeStudent = 2;
 			}
-						
-			$.post('<?php echo Router::url(["controller" => "Students", "action" => "relatedStudents"]); ?>', {"id" : idFamily, "new" : typeStudent, "tasaTemporalDolar" : $("#tasa-temporal-dolar").val(), "tasaTemporalEuro" : $("#tasa-temporal-euro").val(), "opcionMenu" : $('#type-invoice').val() }, null, "json")				
-					
-			.done(function(response) 
+
+			$.post('<?php echo Router::url(["controller" => "Students", "action" => "relatedStudents"]); ?>', {"id" : idFamily, "new" : typeStudent, "tasaTemporalDolar" : $("#tasa-temporal-dolar").val(), "tasaTemporalEuro" : $("#tasa-temporal-euro").val(), "opcionMenu" : $('#type-invoice').val() }, null, "json")
+
+			.done(function(response)
 			{
-				if (response.success) 
+				if (response.success)
 				{
-					console.log('Consejo educativo', response.data.consejo_educativo);			
+					console.log('Consejo educativo', response.data.consejo_educativo);
 					$("#header-messages").html("");
-					
+
 					students = " ";
 
 					idParentsandguardians = response.data.parentsandguardian_id;
@@ -3016,19 +3018,19 @@
 
 					dollarExchangeRate = response.data.dollar_exchange_rate;
 					euro = response.data.euro;
-										
+
 					cadenaTasaDolarEuro = (euro / dollarExchangeRate).toFixed(5);
 					tasaDolarEuro = parseFloat(cadenaTasaDolarEuro);
 
 					saldoRepresentante = response.data.balance;
 					saldoRepresentanteSigno = dosDecimales(saldoRepresentante * -1);
 
-					saldoRepresentanteEuros = dosDecimales(saldoRepresentante / tasaDolarEuro); 
+					saldoRepresentanteEuros = dosDecimales(saldoRepresentante / tasaDolarEuro);
 					saldoRepresentanteSignoEuros = dosDecimales(saldoRepresentanteSigno / tasaDolarEuro);
 
-					saldoRepresentanteBolivares = dosDecimales(saldoRepresentante * dollarExchangeRate); 
+					saldoRepresentanteBolivares = dosDecimales(saldoRepresentante * dollarExchangeRate);
 					saldoRepresentanteSignoBolivares = dosDecimales(saldoRepresentanteSigno * dollarExchangeRate);
-					
+
 					mesesTarifas = response.data.meses_tarifas;
 					otrasTarifas = response.data.otras_tarifas;
 
@@ -3040,8 +3042,8 @@
 						datosConsejoEducativo = response.data.consejo_educativo.anios;
 					}
 					else
-					{																															
-						$.each(response.data.students, function(key, value) 
+					{
+						$.each(response.data.students, function(key, value)
 						{
 							idStudent = value.id;
 							julioExonerado = 0;
@@ -3051,12 +3053,12 @@
 
 							estudiantes_condiciones[idStudent] = [];
 							estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] = false;
-							
+
 							students += "<tr id=st" + idStudent + " class='students'>";
 
 							students += "<td>" + value.surname + " ";
 							surname = value.surname;
-							
+
 							students += value.second_surname + "</td>";
 							secondSurname = value.second_surname;
 
@@ -3065,14 +3067,14 @@
 
 							students += value.second_name + "</td>";
 							secondName = value.second_name;
-							
+
 							if ($('#type-invoice').val() == 'Factura mensualidades' || $('#type-invoice').val() == 'Pedido mensualidades')
-							{ 
+							{
 								students += "<td>" + value.sublevel + "</td>";
 								grade = value.sublevel;
 
 								students += "<td>" + value.section + "</td>";
-								section = value.section;							
+								section = value.section;
 							}
 							else
 							{
@@ -3084,9 +3086,9 @@
 							}
 
 							ordenGrado = value.orden_grado;
-							
+
 							becadoAnoAnterior = value.becado_ano_anterior;
-							
+
 							if (value.scholarship == 0)
 							{
 								students += "<td>Regular</td>";
@@ -3100,26 +3102,26 @@
 								scholarship = 1;
 								julioExonerado = 1;
 							}
-							
+
 							schoolYearFrom = value.schoolYearFrom;
-																			
+
 							julioAnoAnterior = "Jul " + anoEscolarInscripcion;
-							
+
 							if (value.descuento_ano_anterior == 0)
 							{
 								descuentoAnoAnterior = 1;
 							}
 							else
-							{	
+							{
 								descuentoAnoAnterior = (100 - value.descuento_ano_anterior) / 100;
 							}
-							
+
 							if (value.discount_family === null)
 							{
 								discountFamily = 1;
 							}
 							else
-							{	
+							{
 								discountFamily = (100 - value.discount_family) / 100;
 							}
 
@@ -3127,7 +3129,7 @@
 
 							servicioEducativoExonerado = value.servicio_educativo_exonerado;
 
-							$.each(value.studentTransactions, function(key2, value2) 
+							$.each(value.studentTransactions, function(key2, value2)
 							{
 								if (conceptos_a_omitir.includes(value2.transaction_description))
 								{
@@ -3137,20 +3139,20 @@
 								observacionTransaccion = '';
 
 								indicadorImpresion = 0;
-								
+
 								transactionIdentifier = value2.id;
-								
+
 								paymentDate = value2.payment_date;
 
-								partialPayment = value2.partial_payment;						
+								partialPayment = value2.partial_payment;
 								paidOut = value2.paid_out;
 
 								let anoMes = paymentDate.substring(0, 4) + paymentDate.substring(5, 7);
-								
+
 								transactionType = value2.transaction_type;
-								
+
 								anoEscolarMensualidad = value2.ano_escolar;
-							
+
 								monthlyPayment = value2.transaction_description;
 
 								monto_cuota = dosDecimales(value2.amount);
@@ -3166,7 +3168,7 @@
 								{
 									servicioEducativoExoneradoTransaccion = 0;
 								}
-								
+
 								if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
 								{
 									if (indicador_recalcular_cuotas == true && anoMes >= ano_mes_recalculo_cuotas_atrasadas && anoMes < ano_mes_actual && paidOut == false)
@@ -3179,7 +3181,7 @@
 										anoMes = proximoAnioEscolar + "07";
 									}
 
-									$.each(mesesTarifas, function(key3, value3)											
+									$.each(mesesTarifas, function(key3, value3)
 									{
 										if (anoMes == value3.anoMes)
 										{
@@ -3191,7 +3193,7 @@
 								}
 								else
 								{
-									$.each(otrasTarifas, function(key3, value3)											
+									$.each(otrasTarifas, function(key3, value3)
 									{
 										if (monthlyPayment == value3.conceptoAno)
 										{
@@ -3201,25 +3203,25 @@
 										}
 									});
 								}
-														
+
 								if (tarifaDolar == 0)
 								{
 									tarifaDolar = monto_cuota;
 								}
-								
+
 								transactionAmount = dosDecimales(value2.amount);
-													
+
 								originalAmount = dosDecimales(value2.original_amount);
-								
+
 								diferenciaOriginalActual = dosDecimales(originalAmount - monto_cuota);
 
 								if (diferenciaOriginalActual > 0)
 								{
 									tarifaDolar = dosDecimales(tarifaDolar - diferenciaOriginalActual);
 								}
-								
+
 								invoiced = value2.invoiced;
-								
+
 								studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
 
 								montoDolar = dosDecimales(value2.amount_dollar);
@@ -3229,7 +3231,7 @@
 									porcentajeDescuento = 1;
 								}
 								else
-								{	
+								{
 									porcentajeDescuento = (100 - value2.porcentaje_descuento) / 100;
 								}
 
@@ -3245,27 +3247,28 @@
 										indicadorImpresion = 1;
 									}
 									else
-									{						
+									{
 										if (transactionType == "Mensualidad" && monthlyPayment.substring(0, 3) != "Ago")
 										{
-											if (anoEscolarMensualidad >= anoEscolarAnterior) 
+											if (anoEscolarMensualidad >= anoEscolarAnterior)
 											{
 												tarifaDolarSinDescuento = tarifaDolar;
-												
+
 												tarifaDolar = dosDecimales(tarifaDolar * porcentajeDescuento);
-												
+
 												if (tarifaDolar == tarifaDolarSinDescuento)
-												{										
+												{
 													if (tarifaDolar > montoDolar)
 													{
+                                                        /* Cuando un representante ha pagado cuotas adelantadas se beneficia del Pronto pago, pero al haber un incremento en la tarifa de la mensualidad se anula el descuento pronto pago y se calcula la diferencia: Nueva tarifa - monto realmente pagado por el representante. */
 														let monto_descuento_pronto_pago = descuentoProntoPago(anoMes);
 														montoDolar = dosDecimales(montoDolar - monto_descuento_pronto_pago);
-														montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar); 
+														montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 														montoAPagarDolar = montoPendienteDolar;
 														montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
-														montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
+														montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);
 														paidOut = false;
-														
+
 														if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
 														{
 															morosoAnoAnterior = 1;
@@ -3282,17 +3285,19 @@
 													}
 												}
 												else
-												{											
+												{
+                                                    /* Cuando un representante ha pagado cuotas adelantadas se beneficia del Pronto pago, pero al haber un incremento en la tarifa de la mensualidad se anula el descuento pronto pago y se calcula la diferencia: Nueva tarifa - monto realmente pagado por el representante. */
+
 													if (tarifaDolar > montoDolar && tarifaDolarSinDescuento > montoDolar)
 													{
 														let monto_descuento_pronto_pago = descuentoProntoPago(anoMes);
 														montoDolar = dosDecimales(montoDolar - monto_descuento_pronto_pago);
-														montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar); 
+														montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 														montoAPagarDolar = montoPendienteDolar;
 														montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
-														montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
+														montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);
 														paidOut = false;
-														
+
 														if (monthlyPayment == julioAnoAnterior && julioExonerado == 0 && montoDolar < tarifaDolar)
 														{
 															morosoAnoAnterior = 1;
@@ -3317,7 +3322,7 @@
 												montoAPagarEuro = 0;
 												montoAPagarBolivar = 0
 												indicadorImpresion = 1;
-											} 
+											}
 										}
 										else
 										{
@@ -3361,7 +3366,7 @@
 															{
 																estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] = true;
 															}
-														}												
+														}
 													}
 												}
 											}
@@ -3373,7 +3378,7 @@
 												montoAPagarEuro = 0;
 												montoAPagarBolivar = 0
 												indicadorImpresion = 1;
-											}									
+											}
 										}
 									}
 								}
@@ -3402,10 +3407,10 @@
 									if (montoPendienteDolar > 0 && estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] == false)
 									{
 										estudiantes_condiciones[idStudent]["deuda_conceptos_inscripcion"] = true;
-									}						
+									}
 									montoAPagarDolar = montoPendienteDolar;
 									montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
-									montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);	
+									montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);
 								}
 								else if (monthlyPayment.substring(0, 3) == "Ago")
 								{
@@ -3416,14 +3421,14 @@
 									if (ajustesPagosInscripcion[monthlyPayment])
 									{
 										tarifaDolar = tarifaDolar - ajustesPagosInscripcion[monthlyPayment];
-									}				
+									}
 									montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 									montoAPagarDolar = montoPendienteDolar;
 									montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
-									montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);											
+									montoAPagarBolivar = dosDecimales(montoAPagarDolar * dollarExchangeRate);
 								}
 								else
-								{								
+								{
 									if (anoEscolarMensualidad == anoEscolarActual)
 									{
 										tarifaDolar = dosDecimales(tarifaDolar * discountFamily);
@@ -3432,7 +3437,7 @@
 									{
 										tarifaDolar = dosDecimales(tarifaDolar * descuentoAnoAnterior);
 									}
-									
+
 									montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
 									montoAPagarDolar = montoPendienteDolar;
 									montoAPagarEuro = dosDecimales(montoAPagarDolar / tasaDolarEuro);
@@ -3451,7 +3456,7 @@
 											insertRecord(observacionTransaccion);
 										}
 									}
-								} 
+								}
 								else if ($('#type-invoice').val() == 'Factura inscripción regulares')
 								{
 									if (indicadorImpresion == 0)
@@ -3462,14 +3467,14 @@
 											{
 												insertRecord(observacionTransaccion);
 											}
-										}									
+										}
 										else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
 											monthlyPayment.substring(0, 3) == "Ago")
 										{
 
 											insertRecord(observacionTransaccion);
 										}
-									}								
+									}
 								}
 								else if ($('#type-invoice').val() == 'Factura inscripción nuevos')
 								{
@@ -3480,7 +3485,7 @@
 											{
 												insertRecord(observacionTransaccion);
 											}
-										}								
+										}
 								}
 								else if ($('#type-invoice').val() == 'Pedido inscripción regulares')
 								{
@@ -3541,31 +3546,31 @@
 										}
 									}
 								}
-							});				
-						});	
+							});
+						});
 						$("#header-messages").html(" ");
 						$("#related-students").html(students);
 					}
-				} 
-				else 
+				}
+				else
 				{
 					$("#header-messages").html('No se pudieron obtener los datos: ' + response.message);
 				}
 			})
-			.fail(function(jqXHR, textStatus, errorThrown) 
+			.fail(function(jqXHR, textStatus, errorThrown)
 			{
 				$("#header-messages").html("Algo ha fallado en el servidor: " + textStatus);
-			}); 
+			});
         });
 
-        $('#update-data').click(function(e) 
+        $('#update-data').click(function(e)
         {
 			var resultado = 0;
-			
+
             e.preventDefault();
-		
+
 			resultado = validarDatosFiscales();
-			
+
 			if (resultado > 0)
 			{
 				alert("Estimado usuario uno o más datos fiscales presentan errores. Por favor revise");
@@ -3576,29 +3581,29 @@
 			{
 				$("#header-messages").html("Por favor espere...");
 
-				$.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "updateClientData"]); ?>', 
-					{"id" : idParentsandguardians, 
+				$.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "updateClientData"]); ?>',
+					{"id" : idParentsandguardians,
 					"client" : $('#client').val(),
 					"typeOfIdentificationClient" : $('#type-of-identification-client').val(),
 					"identificationNumberClient" : $('#identification-number-client').val(),
 					"fiscalAddress" : $('#fiscal-address').val(),
-					"taxPhone" : $('#tax-phone').val()}, null, "json")          
+					"taxPhone" : $('#tax-phone').val()}, null, "json")
 
-				.done(function(response) 
+				.done(function(response)
 				{
-					if (response.success) 
+					if (response.success)
 					{
 						$("#header-messages").html("Los datos fiscales fueron actualizados correctamente...");
-					} 
-					else 
+					}
+					else
 					{
 						$("#header-messages").html("Los datos fiscales no pudieron ser actualizados, intente nuevamente");
 					}
 				})
-				.fail(function(jqXHR, textStatus, errorThrown) 
+				.fail(function(jqXHR, textStatus, errorThrown)
 				{
 					$("#header-messages").html("Algo ha fallado, los datos fiscales no pudieron ser actualizados: " + textStatus);
-				});  
+				});
 			}
         });
 
@@ -3607,7 +3612,7 @@
 			e.preventDefault();
 
 			resultado = validarDatosFiscales();
-			
+
 			if (resultado > 0)
 			{
 				alert("Estimado usuario uno o más datos fiscales presentan errores. Por favor revise");
@@ -3617,50 +3622,50 @@
 			else
 			{
 				$("#student-messages").html("Por favor espere...");
-	
+
 				idStudent = $(this).attr('id').substring(2);
-	
+
 				if (selectedStudent > -1)
 				{
 					uncheckStudent(selectedStudent);
 				}
 				selectedStudent = idStudent;
-				markStudent(selectedStudent); 
+				markStudent(selectedStudent);
 				$("#monthly-payment").html("");
 				$("#student-name").html("");
 				$("#student-concept").text(" ");
 				studentBalance = 0;
 				$("#student-balance").html("");
-				
+
 				showRecords();
-				
+
 				$("#student-messages").html("");
 			}
         });
-        
-        $("#mark-quotas").click(function () 
+
+        $("#mark-quotas").click(function ()
         {
             var firstInstallment = " ";
             var lastInstallment = " ";
             var flaggedFlag = 0;
 			var blocked_amount = 0;
 			let a_pagar_dolar = 0;
-			let inputCounter = 0;		            
-            $("#monthly-payment input").each(function (index) 
+			let inputCounter = 0;
+            $("#monthly-payment input").each(function (index)
             {
 				if (inputCounter == 0)
 				{
 					if($(this).attr('value') != "Pagada")
 					{
-						if(!($(this).is(':checked'))) 
+						if(!($(this).is(':checked')))
 						{
 							if (flaggedFlag == 0)
 							{
 								flaggedFlag = 1;
 								$(this).attr('checked', true);
-								idStudentTransactions = $(this).attr('id'); 
+								idStudentTransactions = $(this).attr('id');
 								markTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), true); 
+								updateRecord(idStudentTransactions.substring(2), true);
 								$('#uncheck-quotas').attr('disabled', false);
 								$('#charge').attr('disabled', false);
 								if (firstInstallment == " ")
@@ -3693,7 +3698,7 @@
 					if (flaggedFlag == 1 && blocked_amount == 0)
 					{
 						$(this).attr('disabled', true);
-						blocked_amount = 1;	
+						blocked_amount = 1;
 					}
 					inputCounter++;
 				}
@@ -3702,7 +3707,7 @@
 					if (flaggedFlag == 1 && a_pagar_dolar == 0)
 					{
 						$(this).attr('disabled', true);
-						a_pagar_dolar = 1;	
+						a_pagar_dolar = 1;
 						studentBalance = dosDecimales(studentBalance + parseFloat($(this).attr('value')));
 						totalBalance = dosDecimales(totalBalance + parseFloat($(this).attr('value')));
 						actualizarTotales();
@@ -3717,10 +3722,10 @@
 				{
 					inputCounter++;
 				}
-            }); 
+            });
         });
 
-        $("#uncheck-quotas").click(function () 
+        $("#uncheck-quotas").click(function ()
         {
             var transactionDescription = "";
             var firstInstallment = " ";
@@ -3734,10 +3739,10 @@
 			let id_monto_abono = "";
 			let monto_abono = "";
 
-            $("#monthly-payment input").each(function (index) 
+            $("#monthly-payment input").each(function (index)
             {
 				if (inputCounter == 0)
-				{				
+				{
 					if($(this).attr('value') != "Pagada")
 					{
 						if ($(this).is(':checked'))
@@ -3755,7 +3760,7 @@
 								lastInstallment = transactionDescription;
 							}
 							markedQuotaCounter++;
-					
+
 							idStudentTransactions = $(this).attr('id');
 
 							id_monto_abono = idStudentTransactions.replace("tr", "a_pagar_dolar_");
@@ -3764,7 +3769,7 @@
 							transactionDescription = $(this).attr('name');
 							transactionAmount = parseFloat($(this).attr('value'));
 						}
-						else 
+						else
 						{
 							if (idStudentTransactions != " ")
 							{
@@ -3774,9 +3779,9 @@
 								}
 								$('#' + idStudentTransactions).attr('checked', false);
 								$('#' + idAmountTransactions).attr('disabled', false);
-								$('#' + id_monto_abono).attr('disabled', false);								
+								$('#' + id_monto_abono).attr('disabled', false);
 								uncheckTransaction(idStudentTransactions.substring(2));
-								updateRecord(idStudentTransactions.substring(2), false); 
+								updateRecord(idStudentTransactions.substring(2), false);
 								$("#mark-quotas").html(transactionDescription);
 								if (markedQuotaCounter == 1)
 								{
@@ -3789,7 +3794,7 @@
 									$("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + ')');
 									concept = firstInstallment + ' - ' + lastInstallment;
 								}
-								studentBalance = dosDecimales(studentBalance - monto_abono);															
+								studentBalance = dosDecimales(studentBalance - monto_abono);
 								totalBalance = dosDecimales(totalBalance - monto_abono);
 								contadorCuotasSeleccionadas--;
 								actualizarTotales();
@@ -3818,14 +3823,14 @@
             {
                 alert("Debe cobrar al menos una cuota para poder reversar");
             }
-            else 
+            else
             {
                 if (indicatorUnmark == 0)
                 {
                     $('#' + idStudentTransactions).attr('checked', false);
                     uncheckTransaction(idStudentTransactions.substring(2));
-                    updateRecord(idStudentTransactions.substring(2), false); 
-                            
+                    updateRecord(idStudentTransactions.substring(2), false);
+
                     $("#mark-quotas").html(transactionDescription);
                     if (markedQuotaCounter == 1)
                     {
@@ -3837,15 +3842,15 @@
                     {
                         $("#student-concept").text('(' + firstInstallment + ' - ' + lastInstallment + '):');
                         concept = firstInstallment + ' - ' + lastInstallment;
-                    }					
-					studentBalance = dosDecimales(studentBalance - monto_abono);															
+                    }
+					studentBalance = dosDecimales(studentBalance - monto_abono);
 					totalBalance = dosDecimales(totalBalance - monto_abono);
 					contadorCuotasSeleccionadas--;
 					actualizarTotales();
                 }
             }
-        }); 
-        
+        });
+
 		$("#ajuste-automatico").on("click", function(e)
         {
             e.preventDefault();
@@ -3853,15 +3858,15 @@
 			if (indicador_abono == 1)
 			{
 				alert("Estimado usuario usted ya hizo un ajuste manual de abonos a las cuotas y no se puede hacer un ajuste automático");
-				return-false				
+				return-false
 			}
-			
+
 			if (contadorCuotasSeleccionadas == 0)
 			{
 				alert("Estimado usuario debe seleccionar al menos una cuota antes de hacer un ajuste");
-				return-false				
+				return-false
 			}
-							
+
 			if (deudaMenosPagado == 0)
 			{
 				alert("Estimado usuario la factura ya está cuadrada y no requiere un ajuste");
@@ -3872,7 +3877,7 @@
 			{
 				let verificacion_pagos_en_bolivares = 0;
 
-				for (var i = 0, item = null; i < paymentsArray.length; i++) 
+				for (var i = 0, item = null; i < paymentsArray.length; i++)
 				{
 					item = paymentsArray[i];
 					if (item['payMoneda'] == "Bs.")
@@ -3885,13 +3890,13 @@
 					let pago_igtf_en_divisas = $('<p style="background-color: #a9e0ff; color: red;">Estimado usuario solo ha registrado pagos en divisas. ¿ Desea agregar un pago en bolívares para cancelar los '+acumulado_igtf_bolivar+' Bs. correspondientes al IGTF ?</p>').dialog(
 					{
 						modal: true,
-						buttons: 
+						buttons:
 						{
-							"Sí": function() 
+							"Sí": function()
 							{
-								pago_igtf_en_divisas.dialog('close');					
+								pago_igtf_en_divisas.dialog('close');
 							},
-							"No":  function() 
+							"No":  function()
 							{
 								pago_igtf_en_divisas.dialog('close');
 								verificar_impuestos(ajustarCuotas, 0);
@@ -3913,22 +3918,22 @@
 
         $("#accordion").accordion();
 
-        $('.record-payment').click(function(e) 
+        $('.record-payment').click(function(e)
         {
             e.preventDefault();
-            		
+
             if (deudaMenosPagado > 0)
             {
                 paymentIdentifier = ($(this).attr('id')).substring(3);
-                
+
                 valid = validateFields();
-                
+
                 if (valid == false)
                 {
                     return false;
                 }
 
-                switch (paymentIdentifier) 
+                switch (paymentIdentifier)
                 {
                     case '01':
                     paymentType = "Efectivo";
@@ -3951,7 +3956,7 @@
                     case '07':
                     paymentType = "Retención de impuesto";
                 }
-				
+
 				montoPagado = dosDecimales(eliminarComa($('#amount-' + paymentIdentifier).val()));
 				bank = $('#bank-' + paymentIdentifier).val();
 				bancoReceptor = $('#banco-receptor-' + paymentIdentifier).val();
@@ -3999,42 +4004,42 @@
 				{
 					alert('Estimado usuario los pagos desde Zelle solo deben ser en transferencia');
 					return false;
-				}	
+				}
 
 				if (paymentType == 'Transferencia' || paymentType == 'Deposito')
 				{
 					crm_processing_modal('Por favor espere mientras se valida el serial');
 
-					$.post('<?php echo Router::url(["controller" => "Payments", "action" => "verificarSerial"]); ?>', 
+					$.post('<?php echo Router::url(["controller" => "Payments", "action" => "verificarSerial"]); ?>',
 						{
-							"banco" : bank, 
+							"banco" : bank,
 							"serial" : serial
-						}, null, "json")          
+						}, null, "json")
 
-					.done(function(response) 
+					.done(function(response)
 					{
-						if (response.success) 
+						if (response.success)
 						{
-							crm_processing_modal_close(); 
+							crm_processing_modal_close();
 							procesarPago();
-						} 
-						else 
+						}
+						else
 						{
-							crm_processing_modal_close(); 
+							crm_processing_modal_close();
 							alert(response.message);
 						}
 					})
-					.fail(function(jqXHR, textStatus, errorThrown) 
+					.fail(function(jqXHR, textStatus, errorThrown)
 					{
-						crm_processing_modal_close(); 
+						crm_processing_modal_close();
 						alert ("El serial no pudo ser validado. Código de error " + textStatus);
-					});  
+					});
 
 				}
 				else
 				{
 					procesarPago();
-				}		
+				}
             }
             else
             {
@@ -4045,7 +4050,7 @@
         $("#registered-payments").on("click", ".registeredPayments", function(e)
         {
 			e.preventDefault();
-			
+
             selectedPayment = ($(this).attr('id').substring(1));
             paymentType = $(this).attr('name');
             montoPagado = parseFloat($(this).attr('value'));
@@ -4055,21 +4060,21 @@
                 return false;
             }
             $("#pa" + selectedPayment).remove();
-            
+
 			buscarMoneda(parseFloat(selectedPayment));
-			
+
             deletePayment(parseFloat(selectedPayment));
-			
+
         });
-		
-        $("#print-invoice").click(function (e) 
-        {	
+
+        $("#print-invoice").click(function (e)
+        {
             e.preventDefault();
 
 			if (contadorCuotasSeleccionadas == 0 && indicadorConsejoEducativo == 0)
 			{
 				alert('Estimado usuario debe seleccionar al menos una cuota para poder facturar');
-				return false;				
+				return false;
 			}
 			else if (deudaMenosPagado > 0)
 			{
@@ -4083,7 +4088,7 @@
 					if (accumulatedPayment > 0)
 					{
 						r= confirm('¿Estimado usuario el pago no cubre el total de la factura? Está seguro de que desea guardar la facturar? Después no podrá hacer cambios');
-						
+
 						if (r == false)
 						{
 							return false;
@@ -4106,18 +4111,18 @@
 				{
 					var dialog = $('<p>Estimado usuario hay un sobrante a favor del representante. ¿Qué desea hacer?</p>').dialog(
 					{
-						buttons: 
+						buttons:
 						{
-							"Abonar a cuotas": function() 
+							"Abonar a cuotas": function()
 							{
 								dialog.dialog('close');
 							},
-							"Dejarlo a favor":  function() 
+							"Dejarlo a favor":  function()
 							{
 								imprimirReciboSobrante = 1;
 								verificar_impuestos(guardarFactura, 1);
 							},
-							"Cancelar":  function() 
+							"Cancelar":  function()
 							{
 								dialog.dialog('close');
 							}
@@ -4136,7 +4141,7 @@
 						verificar_impuestos(guardarFactura, 0);
 					}
 				}
-            }   
+            }
 			else
 			{
 				r= confirm('¿Está seguro de que desea guardar la facturar? Después no podrá hacer cambios');
@@ -4150,26 +4155,26 @@
 				}
 			}
         });
-		
-        $('#descuento-recargo').change(function(e) 
+
+        $('#descuento-recargo').change(function(e)
         {
 			e.preventDefault();
 			actualizarDescuentos();
         });
-		
-		$('#cantidad-descuento').change(function(e) 
-        { 
+
+		$('#cantidad-descuento').change(function(e)
+        {
 			e.preventDefault();
-			actualizarDescuentos();					
+			actualizarDescuentos();
 
         });
-				
-        $('#update-dollar').click(function(e) 
+
+        $('#update-dollar').click(function(e)
         {
             e.preventDefault();
-			
+
 			if (totalBalance > 0)
-			{    
+			{
 				var r = confirm("Si actualiza la tasa de cambio, perderá los datos de la cobranza a la familia: " + nameFamily );
 				if (r == false)
 				{
@@ -4181,33 +4186,33 @@
 			cleanPager();
 			$("#response-container").html("");
 			disableButtons();
-		
-            $.post('<?php echo Router::url(["controller" => "Monedas", "action" => "actualizarTasa"]); ?>', 
-                {"amount" : $('#dollar-exchange-rate').val(), "tipo" : "Dolar" }, null, "json")          
 
-            .done(function(response) 
+            $.post('<?php echo Router::url(["controller" => "Monedas", "action" => "actualizarTasa"]); ?>',
+                {"amount" : $('#dollar-exchange-rate').val(), "tipo" : "Dolar" }, null, "json")
+
+            .done(function(response)
             {
-                if (response.success) 
+                if (response.success)
                 {
                     $("#dollar-messages").html("La tasa de cambio fue actualizada correctamente");
-                } 
-                else 
+                }
+                else
                 {
                     $("#dollar-messages").html("La tasa de cambio no pudo ser actualizada");
                 }
             })
-            .fail(function(jqXHR, textStatus, errorThrown) 
+            .fail(function(jqXHR, textStatus, errorThrown)
             {
                 $("#dollar-messages").html("Algo ha fallado, la tasa de cambio no pudo ser actualizada: " + textStatus);
-            });  
+            });
         });
-		
-        $('#update-euro').click(function(e) 
+
+        $('#update-euro').click(function(e)
         {
             e.preventDefault();
-			
+
 			if (totalBalance > 0)
-			{    
+			{
 				var r = confirm("Si actualiza la tasa de cambio, perderá los datos de la cobranza a la familia: " + nameFamily );
 				if (r == false)
 				{
@@ -4219,35 +4224,35 @@
 			cleanPager();
 			$("#response-container").html("");
 			disableButtons();
-		
-            $.post('<?php echo Router::url(["controller" => "Monedas", "action" => "actualizarTasa"]); ?>', 
-                {"amount" : $('#euro').val(), "tipo" : "Euro" }, null, "json")          
 
-            .done(function(response) 
+            $.post('<?php echo Router::url(["controller" => "Monedas", "action" => "actualizarTasa"]); ?>',
+                {"amount" : $('#euro').val(), "tipo" : "Euro" }, null, "json")
+
+            .done(function(response)
             {
-                if (response.success) 
+                if (response.success)
                 {
                     $("#euro-messages").html("La tasa de cambio fue actualizada correctamente");
-                } 
-                else 
+                }
+                else
                 {
                     $("#euro-messages").html("La tasa de cambio no pudo ser actualizada");
                 }
             })
-            .fail(function(jqXHR, textStatus, errorThrown) 
+            .fail(function(jqXHR, textStatus, errorThrown)
             {
                 $("#euro-messages").html("Algo ha fallado, la tasa de cambio no pudo ser actualizada: " + textStatus);
-            });  
-        });		
-		
-        $('#establecer-tasa-dolar').click(function(e) 
+            });
+        });
+
+        $('#establecer-tasa-dolar').click(function(e)
         {
 			e.preventDefault();
-																			
+
 			if ($("#tasa-temporal-dolar").val() > 0)
 			{
 				if (totalBalance > 0)
-				{    
+				{
 					var r = confirm("Si establece una tasa temporal, perderá los datos de la cobranza a la familia: " + nameFamily );
 					if (r == false)
 					{
@@ -4258,7 +4263,7 @@
 				$('#quota-adjustment').val("");
 				cleanPager();
 				$("#response-container").html("");
-				disableButtons();  
+				disableButtons();
 				$('#tasa-temporal-dolar').css('background-color', '#ffb3b3');
 				$("#establecer-tasa-dolar").addClass("noverScreen");
 				$("#eliminar-tasa-dolar").removeClass("noverScreen");
@@ -4268,15 +4273,15 @@
 			}
 			else
 			{
-				alert("La tasa temporal debe ser mayor a cero");		
+				alert("La tasa temporal debe ser mayor a cero");
 			}
         });
-		
-        $('#eliminar-tasa-dolar').click(function(e) 
+
+        $('#eliminar-tasa-dolar').click(function(e)
         {
 			e.preventDefault();
 			if (totalBalance > 0)
-			{    
+			{
 				var r = confirm("Si elimina una tasa temporal, perderá los datos de la cobranza a la familia: " + nameFamily );
 				if (r == false)
 				{
@@ -4287,8 +4292,8 @@
 			$('#quota-adjustment').val("");
 			cleanPager();
 			$("#response-container").html("");
-			disableButtons();  
-			$('#tasa-temporal-dolar').val('0,00');			
+			disableButtons();
+			$('#tasa-temporal-dolar').val('0,00');
 			$('#tasa-temporal-dolar').css('background-color', 'white');
 			$("#establecer-tasa-dolar").removeClass("noverScreen");
 			$("#eliminar-tasa-dolar").addClass("noverScreen");
@@ -4296,14 +4301,14 @@
 			alert("Estimado usuario, por favor recuerde eliminar también la tasa temporal del Euro");
 			$( "#tasa-temporal-euro" ).focus();
         });
-		
-        $('#establecer-tasa-euro').click(function(e) 
+
+        $('#establecer-tasa-euro').click(function(e)
         {
 			e.preventDefault();
 			if ($("#tasa-temporal-euro").val() > 0)
 			{
 				if (totalBalance > 0)
-				{    
+				{
 					var r = confirm("Si establece una tasa temporal, perderá los datos de la cobranza a la familia: " + nameFamily );
 					if (r == false)
 					{
@@ -4314,7 +4319,7 @@
 				$('#quota-adjustment').val("");
 				cleanPager();
 				$("#response-container").html("");
-				disableButtons();  
+				disableButtons();
 				$('#tasa-temporal-euro').css('background-color', '#ffb3b3');
 				$("#establecer-tasa-euro").addClass("noverScreen");
 				$("#eliminar-tasa-euro").removeClass("noverScreen");
@@ -4322,15 +4327,15 @@
 			}
 			else
 			{
-				alert("La tasa temporal debe ser mayor a cero");		
+				alert("La tasa temporal debe ser mayor a cero");
 			}
         });
-		
-        $('#eliminar-tasa-euro').click(function(e) 
+
+        $('#eliminar-tasa-euro').click(function(e)
         {
 			e.preventDefault();
 			if (totalBalance > 0)
-			{    
+			{
 				var r = confirm("Si elimina una tasa temporal, perderá los datos de la cobranza a la familia: " + nameFamily );
 				if (r == false)
 				{
@@ -4341,20 +4346,20 @@
 			$('#quota-adjustment').val("");
 			cleanPager();
 			$("#response-container").html("");
-			disableButtons();  
-			$('#tasa-temporal-euro').val('0,00');			
+			disableButtons();
+			$('#tasa-temporal-euro').val('0,00');
 			$('#tasa-temporal-euro').css('background-color', 'white');
 			$("#establecer-tasa-euro").removeClass("noverScreen");
 			$("#eliminar-tasa-euro").addClass("noverScreen");
 			tasaTemporalEuro = 0;
         });
-		
-        $('#adjust-fee').click(function(e) 
+
+        $('#adjust-fee').click(function(e)
         {
             e.preventDefault();
-			
+
 			var adjInputCounter = 0;
-			var adjIdAmountTransaction = ""; 
+			var adjIdAmountTransaction = "";
 			var adjMontoModificadoDolar = 0;
 			var adjOriginalMontoDolar = 0;
 			var adjMontoPagadoDolar = 0;
@@ -4370,8 +4375,8 @@
 			let indicador_abono_item = 0;
 			let id_a_pagar_dolar = "";
 			let observacion = "";
-						
-            $("#monthly-payment input").each(function (index) 
+
+            $("#monthly-payment input").each(function (index)
             {
 				if (adjInputCounter == 0) // checkbox deshabilitado que contiene en "value" el monto pendiente de la cuota
 				{
@@ -4387,7 +4392,7 @@
 				else if (adjInputCounter == 2) // Input deshabilitado donde se muestra el monto pagado
 				{
 					adjMontoPagadoDolar = parseFloat($(this).val());
-					adjInputCounter++;	
+					adjInputCounter++;
 				}
 				else if (adjInputCounter == 3) // Input habilitado donde se muestra el monto pendiente de la cuota
 				{
@@ -4398,18 +4403,18 @@
 					{
 						indicador_abono_item = 1;
 					}
-					adjInputCounter++;		
+					adjInputCounter++;
 				}
 				else if (adjInputCounter == 4) // Input checkbox para exoneración del servicio educativo
 				{
-					adjInputCounter++;	
-				}				
+					adjInputCounter++;
+				}
 				else if (adjInputCounter == 5) // Input oculto con el valor del monto original de la cuota
 				{
 					adjOriginalMontoDolar = parseFloat($(this).val());
 
 					if (adjMontoModificadoDolar != adjOriginalMontoDolar || indicador_abono_item == 1)
-					{					
+					{
 						if (adjMontoModificadoDolar > adjMontoPagadoDolar)
 						{
 							adjMontoPendienteDolar = dosDecimales(adjMontoModificadoDolar - adjMontoPagadoDolar);
@@ -4433,7 +4438,7 @@
 							else
 							{
 								adjAPagarDolar = adjMontoPendienteDolar;
-							}						
+							}
 							adjAPagarEuro = dosDecimales(adjAPagarDolar / tasaDolarEuro);
 							adjAPagarBolivar = dosDecimales(adjAPagarDolar * dollarExchangeRate);
 							updateInstallment(adjIdAmountTransaction.substring(2), adjOriginalMontoDolar, adjMontoModificadoDolar, adjMontoPendienteDolar, adjAPagarDolar, adjAPagarEuro, adjAPagarBolivar, observacion);
@@ -4454,7 +4459,7 @@
 							return false;
 						}
 					}
-					
+
 					adjInputCounter = 0;
 					adjModifiableFee = 0;
 					adjOriginalAmount = 0;
@@ -4476,20 +4481,20 @@
 				showRecords();
 			}
         });
-		
-        $('#compensar').click(function(e) 
+
+        $('#compensar').click(function(e)
         {
 			e.preventDefault();
 			$("#print-invoice").attr('disabled', false);
 			$("#ajuste-automatico").attr('disabled', false);
-			$(".record-payment").attr('disabled', false);		
+			$(".record-payment").attr('disabled', false);
 			$("#nota-credito").addClass("noverScreen");
 			$("#botones-notas").addClass("noverScreen");
 			$("#botones-cuotas").removeClass("noverScreen");
 			indicadorCompensacion = 1;
         });
-		
-		$('.check-dolar').click(function(e) 
+
+		$('.check-dolar').click(function(e)
         {
 			monedaPago = "$";
 			$('.check-dolar').attr('checked', true);
@@ -4500,8 +4505,8 @@
 			$('.check-bolivar').prop('checked', false);
 			updateAmount();
 		});
-		
-		$('.check-euro').click(function(e) 
+
+		$('.check-euro').click(function(e)
         {
 			monedaPago = "€";
 			$('.check-dolar').attr('checked', false);
@@ -4512,8 +4517,8 @@
 			$('.check-bolivar').prop('checked', false);
 			aCobrarEuros();
 		});
-		
-		$('.check-bolivar').click(function(e) 
+
+		$('.check-bolivar').click(function(e)
         {
 			monedaPago = "Bs.";
 			$('.check-dolar').attr('checked', false);
@@ -4524,14 +4529,14 @@
 			$('.check-bolivar').prop('checked', true);
 			aCobrarBolivares();
 		});
-		
-		$('#prueba-ajuste').click(function(e) 
+
+		$('#prueba-ajuste').click(function(e)
         {
 			diferenciaBolivares = 22.5;
 			uploadTransactions();
 		});
 
-		$('#periodo-escolar').change(function(e) 
+		$('#periodo-escolar').change(function(e)
         {
 			e.preventDefault();
 			studentBalance = 0;
@@ -4542,7 +4547,7 @@
 			if ($('#periodo-escolar').val() != "")
 			{
 				resultado = validarDatosFiscales();
-			
+
 				if (resultado > 0)
 				{
 					alert("Estimado usuario uno o más datos fiscales presentan errores. Por favor revise");
@@ -4569,7 +4574,7 @@
 						{
 							alert('Esta familia no paga Consejo Educativo porque está relacionada con otra familia del mismo representante');
 							return false;
-						}	
+						}
 						else if (datosAnio.consejoExonerado > 0)
 						{
 							alert(`Esta familia está exonerada del pago del Consejo Educativo ${periodoEscolarRequerido}`);
@@ -4588,7 +4593,7 @@
 								tarifaDolar = datosAnio.tarifa;
 								totalBalance = dosDecimales(datosAnio.saldo);
 								actualizarTotales();
-							}	
+							}
 							else
 							{
 								alert(`No se encontró la tarifa para el Consejo Educativo del período: ${periodoEscolarRequerido}`);;
@@ -4603,7 +4608,7 @@
 			}
         });
 
-		$('#acordion-retencion-impuesto').click(function(e) 
+		$('#acordion-retencion-impuesto').click(function(e)
         {
 			monedaPago = "Bs.";
 			$('.check-dolar').attr('checked', false);
@@ -4624,6 +4629,6 @@
 			actualizarExoneracionServicioEducativo(checkboxExose, estadoActualCheckbox);
 		});
 
-    }); 
+    });
 
 </script>

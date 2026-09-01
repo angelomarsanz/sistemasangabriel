@@ -7795,7 +7795,9 @@ class StudenttransactionsController extends AppController
 			[
 				"202208" => 0,
 				"202308" => 5.00,
-				"202508" => 10.00
+				"202508" => 10.00,
+                "202608" => 0.00,
+                "202708" => 15.00
 			];
 		$montoDescuentoProntoPago = 0;
 
