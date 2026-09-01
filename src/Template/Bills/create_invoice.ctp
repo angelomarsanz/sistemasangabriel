@@ -487,7 +487,7 @@
 												<td colspan="5" style="text-align: center;"><b>Descuentos/Recargos</b></td>
 											</tr>
 											<tr>
-												<td><?= $this->Form->input('concepto_descuento', ['label' => 'Concepto:', 'id' => 'concepto-descuento', 'options' => ['Descuento' => 'Descuento', 'Descuento por meses no cursados' => 'Descuento por meses no cursados', 'Descuento por pago año completo' => 'Descuento por pago año completo', 'Descuento pronto pago' => 'Descuento pronto pago', 'Concepto personalizado' => 'Concepto personalizado'], 'default' => 'Descuento pronto pago']); ?></td>
+												<td><?= $this->Form->input('concepto_descuento', ['label' => 'Concepto:', 'id' => 'concepto-descuento', 'options' => ['' => '', 'Descuento' => 'Descuento', 'Descuento por meses no cursados' => 'Descuento por meses no cursados', 'Descuento promoción especial mensualidad' => 'Descuento promoción especial mensualidad', 'Descuento pronto pago' => 'Descuento pronto pago', 'Concepto personalizado' => 'Concepto personalizado'], 'default' => '']); ?></td>
 												<td></td>
 												<td style="text-align:center; vertical-align: middle;"></td>
 												<td style="color: blue; text-align:center; vertical-align: middle;"></td>

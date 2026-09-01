@@ -777,7 +777,7 @@ class ParentsandguardiansController extends AppController
                     }
                 }
             }
-            if ($indicadorEstudiantes == 1)
+            if ($estudiantesActivos > 0)
             {
                 $representantes_con_estudiantes_activos[] = ['familia' => $representante->family, 'nombre_representante' => $representante->full_name, 'id_representante' => $representante->id, 'id_usuario_representante' => $representante->user_id, 'consejoEducativo' => $consejoEducativo];
             }

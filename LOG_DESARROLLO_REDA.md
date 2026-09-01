@@ -17,7 +17,7 @@
 - **Documentación:** Actualización de `manual_tecnico_sistema.md` con los detalles finales de la implementación.
 
 ## [2026-08-31] - Corrección de la compilación de assets (Vite)
-- **Tarea:** Resolver el problema por el cual los cambios en `index.css` no se reflejaban en la versión compilada.
+- **Tarea:** Resolver el problema por el cual los cambios en `index.css` no se reflejaban en la version compilada.
 - **Cambios Realizados:**
     - **Configuración (`js_csga/vite.config.js`):**
         - Se corrigió la ubicación de la propiedad `globals` moviéndola dentro de `build.rollupOptions.output`.
@@ -28,3 +28,12 @@
         - Se instalaron las dependencias de `npm` en el directorio `js_csga`.
         - Se asignaron permisos de ejecución al binario de `esbuild` (`chmod +x`) para permitir la compilación en entornos Linux.
 - **Resultado:** La compilación ahora genera correctamente `dist/main-style.css` con los cambios de `index.css` y los transfiere a `webroot/css/`.
+
+## [2026-09-01] - Mejora en la selección de conceptos de descuento
+- **Tarea:** Ajustar las opciones y el valor por defecto de la sección Descuentos/Recargos.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Bills/create_invoice.ctp`):**
+        - Se añadió una opción inicial vacía al select de `concepto_descuento`.
+        - Se renombró la opción "Descuento por pago año completo" a "Descuento promoción especial mensualidad".
+        - Se estableció la opción vacía como el valor por defecto del selector.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` para reflejar el cambio en los nombres de conceptos disponibles.
