@@ -15,3 +15,16 @@
     - **Backend (`src/Controller/ConceptsController.php`):**
         - `agregarConceptoNotaCreditoDescuento` utiliza el concepto recibido desde el controlador de facturas para la descripción del registro.
 - **Documentación:** Actualización de `manual_tecnico_sistema.md` con los detalles finales de la implementación.
+
+## [2026-08-31] - Corrección de la compilación de assets (Vite)
+- **Tarea:** Resolver el problema por el cual los cambios en `index.css` no se reflejaban en la versión compilada.
+- **Cambios Realizados:**
+    - **Configuración (`js_csga/vite.config.js`):**
+        - Se corrigió la ubicación de la propiedad `globals` moviéndola dentro de `build.rollupOptions.output`.
+        - Se eliminó la propiedad `root` que estaba mal ubicada dentro de `build`.
+        - Se mejoró la función `assetFileNames` para asegurar que los archivos CSS mantengan su nombre definido en `input`.
+        - Se añadió `emptyOutDir: true` para limpiar la carpeta `dist` antes de cada compilación.
+    - **Entorno:**
+        - Se instalaron las dependencias de `npm` en el directorio `js_csga`.
+        - Se asignaron permisos de ejecución al binario de `esbuild` (`chmod +x`) para permitir la compilación en entornos Linux.
+- **Resultado:** La compilación ahora genera correctamente `dist/main-style.css` con los cambios de `index.css` y los transfiere a `webroot/css/`.
