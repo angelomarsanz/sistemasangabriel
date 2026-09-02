@@ -40,3 +40,14 @@
         - **Automatización:** Al seleccionar "Descuento promoción especial mensualidad", el sistema busca automáticamente la tarifa de "Promoción especial mensualidad" en `otrasTarifas`, pre-cargando el tipo como "Descuento: $" y el monto correspondiente.
         - **Depuración y Ajuste:** Se corrigió la búsqueda de la tarifa promocional mediante el uso de `substring(0, 30)` para ignorar sufijos de año (ej. "2026") en `conceptoAno` y se añadieron `console.log` para facilitar la inspección de los datos cargados.
 - **Documentación:** Actualización de `manual_tecnico_sistema.md` para reflejar el comportamiento dinámico y automatizado de los campos de descuento.
+
+## [2026-09-02] - Implementación de Condición Especial en transacciones
+- **Tarea:** Permitir el registro de una "condición especial" en las transacciones cuando se aplica el descuento de promoción especial.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Bills/create_invoice.ctp`):**
+        - Se agregó el atributo `dbCondicionEspecial` al objeto de transacciones en la función `insertRecord` (inicializado en vacío).
+        - Se actualizó el evento `change` de `#concepto-descuento` para que, al seleccionar "Descuento promoción especial mensualidad", se marque este valor en el atributo `dbCondicionEspecial` de todas las transacciones cargadas.
+        - La función `uploadTransactions` ahora incluye el campo `condicionEspecial` en el objeto enviado al servidor.
+    - **Backend (`src/Controller/StudenttransactionsController.php`):**
+        - Se modificó la acción `edit` para recibir la propiedad `condicionEspecial` y guardarla en la columna `condicion_especial` de la tabla `studenttransactions`.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` con los detalles de persistencia de la condición especial.

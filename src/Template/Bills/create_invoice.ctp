@@ -1300,8 +1300,9 @@
         	"dbPaidOut" : paidOut,
 			"dbSchoolYearFrom" : schoolYearFrom,
 			"dbSeleccionada" : false,
-        	"dbObservation" : observacionRecibida,
-			"dbServicioEducativoExoneradoTransaccion" : servicioEducativoExoneradoTransaccion	};
+			"dbObservation" : observacionRecibida,
+			"dbServicioEducativoExoneradoTransaccion" : servicioEducativoExoneradoTransaccion,
+			"dbCondicionEspecial" : ""	};
 
 		studentTransactionsArray.push(vector_registro_transacciones);
 
@@ -1964,6 +1965,7 @@
 					contadorElementos++;
 
 					tbStudentTransactions[transactionCounter].observation = item['dbObservation'];
+					tbStudentTransactions[transactionCounter].condicionEspecial = item['dbCondicionEspecial'];
 
 					transactionCounter++;
 
@@ -2855,9 +2857,17 @@
 			e.preventDefault();
 			conceptoDescuento = $(this).val();
 
+			$.each(studentTransactionsArray, function(index, value) {
+				value.dbCondicionEspecial = "";
+			});
+
 			if (conceptoDescuento.substring(0, 40) == 'Descuento promoción especial mensualidad')
 			{
 				conceptoDescuento = conceptoDescuento + " septiembre " + anoEscolarActual + " julio " + proximoAnoEscolar;
+
+				$.each(studentTransactionsArray, function(index, value) {
+					value.dbCondicionEspecial = "Descuento promoción especial mensualidad";
+				});
 			}
 
             toggleDiscountInputs();

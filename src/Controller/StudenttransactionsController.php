@@ -315,6 +315,11 @@ class StudenttransactionsController extends AppController
 
         $studenttransaction->bill_number = $billNumber;
 
+		if (isset($transaccion->condicionEspecial))
+		{
+			$studenttransaction->condicion_especial = $transaccion->condicionEspecial;
+		}
+
         if (!($this->Studenttransactions->save($studenttransaction)))
         {
             $this->Flash->error(__('La transacción del alumno no pudo ser actualizada, vuelva a intentar.'));
