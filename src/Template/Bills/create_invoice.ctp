@@ -2365,7 +2365,14 @@
 		payments.tasaTemporalEuro = tasaTemporalEuro;
 		payments.cambioMontoCuota = cambioMontoCuota;
 		payments.monto_divisas = monto_divisas;
-		payments.monto_igtf = acumulado_igtf_dolar_archivo;
+		if (conceptoDescuento.substring(0, 40) == 'Descuento promoción especial mensualidad' && monto_divisas >= (totalBalance * 0.70))
+		{
+			payments.monto_igtf = totalBalance * porcentaje_calculo_igtf;
+		}
+		else
+		{
+			payments.monto_igtf = acumulado_igtf_dolar_archivo;
+		}
 		payments.indicador_pedido = indicador_pedido;
 		payments.indicadorConsejoEducativo = indicadorConsejoEducativo;
 		payments.concepto_descuento = conceptoDescuento;
