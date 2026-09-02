@@ -22,8 +22,8 @@ ARCHIVOS_PHP_PUNTUALES=(
 
     "src/Template/Rates/add_dollar.ctp"
     "src/Template/Bills/create_invoice.ctp"
-    "src/Controller/BillsController.php"
     "src/Controller/ParentsandguardiansController.php"
     "src/Controller/StudenttransactionsController.php"
+    "src/Controller/BillsController.php"
     "src/Controller/ConceptsController.php"
 )
