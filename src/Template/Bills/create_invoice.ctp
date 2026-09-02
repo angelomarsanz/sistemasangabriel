@@ -2855,6 +2855,11 @@
 			e.preventDefault();
 			conceptoDescuento = $(this).val();
 
+			if (conceptoDescuento.substring(0, 40) == 'Descuento promoción especial mensualidad')
+			{
+				conceptoDescuento = conceptoDescuento + " septiembre " + anoEscolarActual + " julio " + proximoAnoEscolar;
+			}
+
             toggleDiscountInputs();
 
 			if (conceptoDescuento == 'Concepto personalizado')
@@ -2862,7 +2867,7 @@
 				$('#custom-concept-input').val('');
 				$('#modal-concepto-personalizado').modal('show');
 			}
-            else if (conceptoDescuento == 'Descuento promoción especial mensualidad')
+            else if (conceptoDescuento.substring(0, 40) == 'Descuento promoción especial mensualidad')
             {
                 console.log('Otras tarifas disponibles:', otrasTarifas);
                 $.each(otrasTarifas, function(key3, value3)
