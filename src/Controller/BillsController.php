@@ -1063,8 +1063,8 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
-				elseif ($aConcept->concept == "Descuento por pronto pago")
-				{
+				elseif (substr($aConcept->concept, 0, 9) == "Descuento")
+                {
 					$invoiceLine = $aConcept->concept;
 					$amountConcept = $aConcept->amount;
 					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
@@ -1093,6 +1093,16 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
+                elseif ($aConcept->observation == "Concepto personalizado")
+				{
+                    $invoiceLine = $aConcept->concept;
+					$amountConcept = $aConcept->amount;
+					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+					$loadIndicator = 1;
+					$firstMonthly= " ";
+					$lastInstallment = " ";
+					$amountConcept = 0;
+                }
 				else
 				{
 					$invoiceLine = $aConcept->student_name . " - " . "Mensualidad: " . substr($aConcept->concept, 0, 3) . " - ";
@@ -1245,7 +1255,7 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
-				elseif ($aConcept->concept == "Descuento por pronto pago")
+				elseif (substr($aConcept->concept, 0, 9) == "Descuento")
 				{
 					$invoiceLine = $aConcept->concept;
 					$amountConcept = $aConcept->amount;
@@ -1280,6 +1290,16 @@ class BillsController extends AppController
 					$lastInstallment = " ";
 					$amountConcept = 0;
 				}
+                elseif ($aConcept->observation == "Concepto personalizado")
+				{
+                    $invoiceLine = $aConcept->concept;
+					$amountConcept = $aConcept->amount;
+					$this->invoiceConcept($aConcept->accounting_code, $invoiceLine, $amountConcept);
+					$loadIndicator = 1;
+					$firstMonthly= " ";
+					$lastInstallment = " ";
+					$amountConcept = 0;
+                }
 				elseif ($lastInstallment == " ")
 				{
 					$invoiceLine = $aConcept->student_name . " - " . "Mensualidad: " . substr($aConcept->concept, 0, 3) . " - ";

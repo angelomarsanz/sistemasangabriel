@@ -487,9 +487,7 @@
 												<td colspan="5" style="text-align: center;"><b>Descuentos/Recargos</b></td>
 											</tr>
 											<tr>
-												<td><?= $this->Form->input('concepto_descuento', ['label' => 'Concepto:', 'id' => 'concepto-descuento', 'options' => ['' => '', 'Descuento' => 'Descuento', 'Descuento por meses no cursados' => 'Descuento por meses no cursados', 'Descuento promoción especial mensualidad' => 'Descuento promoción especial mensualidad', 'Descuento pronto pago' => 'Descuento pronto pago', 'Concepto personalizado' => 'Concepto personalizado'], 'default' => '']); ?></td>
-												<td></td>
-												<td style="text-align:center; vertical-align: middle;"></td>
+												<td colspan="3"><?= $this->Form->input('concepto_descuento', ['label' => 'Concepto:', 'id' => 'concepto-descuento', 'options' => ['' => '', 'Descuento' => 'Descuento', 'Descuento por meses no cursados' => 'Descuento por meses no cursados', 'Descuento promoción especial mensualidad' => 'Descuento promoción especial mensualidad', 'Descuento pronto pago' => 'Descuento pronto pago', 'Concepto personalizado' => 'Concepto personalizado'], 'default' => '', 'style' => 'width: 100%;']); ?></td>
 												<td style="color: blue; text-align:center; vertical-align: middle;"></td>
 												<td style="color: red; text-align:center; vertical-align: middle;"></td>
 											</tr>
@@ -749,8 +747,9 @@
 	var diferenciaBolivares = 0;
 	var becadoAnoAnterior = 0;
 	var descuentoAnoAnterior = 0;
-	var conceptoDescuento = "Descuento pronto pago";
+	var conceptoDescuento = "Descuento";
 	var anoEscolarActual = <?= $anoEscolarActual ?>;
+    var proximoAnoEscolar = <?= $proximoAnoEscolar ?>;
 	var anoEscolarAnterior = <?= $anoEscolarActual - 1 ?>;
 	var anoEscolarInscripcion = <?= $anoEscolarInscripcion ?>;
 	var anoEscolarMensualidad = 0;
@@ -833,6 +832,20 @@
 
 // Funciones Javascript
 
+    function toggleDiscountInputs()
+    {
+        if ($('#concepto-descuento').val() != '')
+        {
+            $('#descuento-recargo').attr('disabled', false);
+            $('#cantidad-descuento').attr('disabled', false);
+        }
+        else
+        {
+            $('#descuento-recargo').attr('disabled', true).val(null);
+            $('#cantidad-descuento').attr('disabled', true).val(0);
+        }
+    }
+
     function log(message)
     {
         if (totalBalance > 0)
@@ -875,8 +888,7 @@
         $("#mark-quotas").attr('disabled', false);
         $("#uncheck-quotas").attr('disabled', false);
 		$("#adjust-fee").attr('disabled', false);
-		$("#descuento-recargo").attr('disabled', false);
-		$("#cantidad-descuento").attr('disabled', false);
+		toggleDiscountInputs();
         $("#ajuste-automatico").attr('disabled', false);
         $("#print-invoice").attr('disabled', false);
         $("#bt-01").attr('disabled', false);
@@ -913,8 +925,7 @@
 		$("#uncheck-quotas").attr('disabled', false);
         $("#uncheck-quotas").attr('disabled', false);
 		$("#adjust-fee").attr('disabled', false);
-		$("#descuento-recargo").attr('disabled', false);
-		$("#cantidad-descuento").attr('disabled', false);
+		toggleDiscountInputs();
         $("#ajuste-automatico").attr('disabled', false);
         $("#bt-01").attr('disabled', false);
         $("#bt-02").attr('disabled', false);
@@ -2837,15 +2848,34 @@
 
     $(document).ready(function()
     {
+        toggleDiscountInputs();
+
 		$('#concepto-descuento').change(function(e)
         {
 			e.preventDefault();
 			conceptoDescuento = $(this).val();
+
+            toggleDiscountInputs();
+
 			if (conceptoDescuento == 'Concepto personalizado')
 			{
 				$('#custom-concept-input').val('');
 				$('#modal-concepto-personalizado').modal('show');
 			}
+            else if (conceptoDescuento == 'Descuento promoción especial mensualidad')
+            {
+                console.log('Otras tarifas disponibles:', otrasTarifas);
+                $.each(otrasTarifas, function(key3, value3)
+                {
+                    console.log('Comparando con:', value3.conceptoAno);
+                    if (value3.conceptoAno.substring(0, 30) == 'Promoción especial mensualidad')
+                    {
+                        $('#descuento-recargo').val('Descuento $');
+                        $('#cantidad-descuento').val(value3.tarifaDolar);
+                    }
+                });
+                actualizarDescuentos();
+            }
         });
 
 		$('#btn-save-custom-concept').click(function(e)
