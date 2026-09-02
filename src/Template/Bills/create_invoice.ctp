@@ -2863,6 +2863,30 @@
 
 			if (conceptoDescuento.substring(0, 40) == 'Descuento promoción especial mensualidad')
 			{
+                let studentWithScholarshipSelected = false;
+                $.each(studentTransactionsArray, function(index, value) {
+                    if (value.dbSeleccionada == true && value.dbDescuentoAlumno < 1) {
+                        studentWithScholarshipSelected = true;
+                        return false;
+                    }
+                });
+
+                if (studentWithScholarshipSelected) {
+                    var dialogBeca = $('<p>Está intentando cobrar mensualidades de un estudiante becado con el Descuento Promoción Especial Mensualidades. Debe primero eliminar la beca y luego hacer la cobranza</p>').dialog({
+                        modal: true,
+                        buttons: {
+                            "Eliminar beca": function() {
+                                window.location.href = '<?php echo Router::url(["controller" => "Students", "action" => "becasEspeciales"]); ?>';
+                            },
+                            "Cancelar": function() {
+                                window.location.href = '<?php echo Router::url(["controller" => "Users", "action" => "home"]); ?>';
+                            }
+                        }
+                    });
+                    $(this).val('');
+                    return false;
+                }
+
 				conceptoDescuento = conceptoDescuento + " septiembre " + anoEscolarActual + " julio " + proximoAnoEscolar;
 
 				$.each(studentTransactionsArray, function(index, value) {
