@@ -3586,13 +3586,13 @@ class BillsController extends AppController
 		if ($facturaAfectada->condicion_especial != "" && strpos($facturaAfectada->condicion_especial, '100% pago en divisas') !== false)
 		{
 			$notaContable->monto_divisas = round($notaContable->amount_paid / $facturaAfectada->tasa_cambio, 2);
-			
-			$porcentajeIgtf = 0.03;
+
+			$porcentajeIgtf = 0;
 			if (isset($this->headboard['porcentaje_igtf']))
 			{
 				$porcentajeIgtf = $this->headboard['porcentaje_igtf'];
 			}
-			
+
 			$notaContable->monto_igtf = round($notaContable->monto_divisas * $porcentajeIgtf, 2);
 			$notaContable->condicion_especial = $facturaAfectada->condicion_especial;
 		}

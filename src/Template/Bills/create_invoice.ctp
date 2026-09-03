@@ -782,7 +782,7 @@
 	payments.porcentaje_igtf = 0;
 	payments.indicador_pedido = 0;
 	payments.indicadorConsejoEducativo = 0;
-	payments.concepto_descuento = "Descuento pronto pago";
+	payments.concepto_descuento = "";
 
     var tbStudentTransactions = new Array();
     var tbConcepts = new Array();
@@ -2370,15 +2370,18 @@
 		payments.monto_divisas = monto_divisas;
 		payments.indicador_pedido = indicador_pedido;
 		payments.indicadorConsejoEducativo = indicadorConsejoEducativo;
-		payments.concepto_descuento = concepto_descuento;
+		payments.concepto_descuento = conceptoDescuento;
+        payments.porcentaje_igtf = porcentaje_calculo_igtf;
 
-		let netoFactura = totalBalance - discount;
-		let porcentajeDivisa = 0;
+        let netoFactura = totalBalance + discount;
+        let porcentajeDivisa = 0;
+
 		if (conceptoDescuento.substring(0, 9) == "Descuento")
 		{
-			porcentajeDivisa = dosDecimales(monto_divisas * 100 / netoFactura);
-			payments.condicion_especial = conceptoDescuento + ", " + porcentajeDivisa + "% pago en divisas";
-			
+            porcentajeDivisa = dosDecimales(monto_divisas * 100 / netoFactura);
+
+            payments.condicion_especial = conceptoDescuento + ", " + porcentajeDivisa + "% pago en divisas";
+
 			if (porcentajeDivisa == 100)
 			{
 				payments.monto_igtf = dosDecimales(totalBalance * porcentaje_calculo_igtf);
@@ -2387,7 +2390,7 @@
 			{
 				payments.monto_igtf = acumulado_igtf_dolar_archivo;
 			}
-		}
+        }
 		else
 		{
 			payments.condicion_especial = "";
@@ -3225,7 +3228,7 @@
 							alumno_nuevo = value.alumno_nuevo;
 
 							servicioEducativoExonerado = value.servicio_educativo_exonerado;
-							
+
 							tipoDescuento = value.tipo_descuento;
 
 							$.each(value.studentTransactions, function(key2, value2)
