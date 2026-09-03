@@ -1355,6 +1355,7 @@ class StudentsController extends AppController
 								'schoolYearFrom' => $result->balance,
 								'descuento_ano_anterior' => $result->descuento_ano_anterior,
 								'discount_family' => $result->discount,
+								'tipo_descuento' => $result->tipo_descuento,
 								'sublevel' => $sections->sublevel,
 								'section' => $sections->section,
 								'orden_grado' => $sections->orden,

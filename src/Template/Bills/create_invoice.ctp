@@ -487,7 +487,7 @@
 												<td colspan="5" style="text-align: center;"><b>Descuentos/Recargos</b></td>
 											</tr>
 											<tr>
-												<td colspan="3"><?= $this->Form->input('concepto_descuento', ['label' => 'Concepto:', 'id' => 'concepto-descuento', 'options' => ['' => '', 'Descuento' => 'Descuento', 'Descuento por meses no cursados' => 'Descuento por meses no cursados', 'Descuento promoción especial mensualidad' => 'Descuento promoción especial mensualidad', 'Descuento pronto pago' => 'Descuento pronto pago', 'Concepto personalizado' => 'Concepto personalizado'], 'default' => '', 'style' => 'width: 100%;']); ?></td>
+												<td colspan="3"><?= $this->Form->input('concepto_descuento', ['label' => 'Concepto:', 'id' => 'concepto-descuento', 'options' => ['' => '', 'Descuento por meses no cursados' => 'Descuento por meses no cursados', 'Descuento promoción especial mensualidad' => 'Descuento promoción especial mensualidad', 'Descuento pronto pago' => 'Descuento pronto pago'], 'default' => '', 'style' => 'width: 100%;']); ?></td>
 												<td style="color: blue; text-align:center; vertical-align: middle;"></td>
 												<td style="color: red; text-align:center; vertical-align: middle;"></td>
 											</tr>
@@ -747,7 +747,8 @@
 	var diferenciaBolivares = 0;
 	var becadoAnoAnterior = 0;
 	var descuentoAnoAnterior = 0;
-	var conceptoDescuento = "Descuento";
+	var tipoDescuento = "";
+	var conceptoDescuento = "";
 	var anoEscolarActual = <?= $anoEscolarActual ?>;
     var proximoAnoEscolar = <?= $proximoAnoEscolar ?>;
 	var anoEscolarAnterior = <?= $anoEscolarActual - 1 ?>;
@@ -778,6 +779,7 @@
 	payments.cambioMontoCuota = 0;
 	payments.monto_divisas = 0;
 	payments.monto_igtf = 0;
+	payments.porcentaje_igtf = 0;
 	payments.indicador_pedido = 0;
 	payments.indicadorConsejoEducativo = 0;
 	payments.concepto_descuento = "Descuento pronto pago";
@@ -1266,7 +1268,7 @@
 		}
     }
 
-	function insertRecord(observacionRecibida)
+	function insertRecord(observacionRecibida, tipoDescuentoRecibido)
 	{
 		let vector_registro_transacciones = new Array();
 		let aplicarDescuento = 0;
@@ -1301,6 +1303,7 @@
 			"dbSchoolYearFrom" : schoolYearFrom,
 			"dbSeleccionada" : false,
 			"dbObservation" : observacionRecibida,
+			"dbTipoDescuento" : tipoDescuentoRecibido,
 			"dbServicioEducativoExoneradoTransaccion" : servicioEducativoExoneradoTransaccion,
 			"dbCondicionEspecial" : ""	};
 
@@ -2365,10 +2368,35 @@
 		payments.tasaTemporalEuro = tasaTemporalEuro;
 		payments.cambioMontoCuota = cambioMontoCuota;
 		payments.monto_divisas = monto_divisas;
-		payments.monto_igtf = acumulado_igtf_dolar_archivo;
 		payments.indicador_pedido = indicador_pedido;
 		payments.indicadorConsejoEducativo = indicadorConsejoEducativo;
-		payments.concepto_descuento = conceptoDescuento;
+		payments.concepto_descuento = concepto_descuento;
+
+		let netoFactura = totalBalance - discount;
+		let porcentajeDivisa = 0;
+		if (conceptoDescuento.substring(0, 9) == "Descuento")
+		{
+			porcentajeDivisa = dosDecimales(monto_divisas * 100 / netoFactura);
+			payments.condicion_especial = conceptoDescuento + ", " + porcentajeDivisa + "% pago en divisas";
+			
+			if (porcentajeDivisa == 100)
+			{
+				payments.monto_igtf = dosDecimales(totalBalance * porcentaje_calculo_igtf);
+			}
+			else
+			{
+				payments.monto_igtf = acumulado_igtf_dolar_archivo;
+			}
+		}
+		else
+		{
+			payments.condicion_especial = "";
+			payments.monto_igtf = acumulado_igtf_dolar_archivo;
+		}
+
+		$.each(studentTransactionsArray, function(index, value) {
+			value.dbCondicionEspecial = payments.condicion_especial;
+		});
 
 		uploadTransactions();
 		loadPayments();
@@ -3197,6 +3225,8 @@
 							alumno_nuevo = value.alumno_nuevo;
 
 							servicioEducativoExonerado = value.servicio_educativo_exonerado;
+							
+							tipoDescuento = value.tipo_descuento;
 
 							$.each(value.studentTransactions, function(key2, value2)
 							{
@@ -3522,7 +3552,7 @@
 									{
 										if (monthlyPayment.substring(0, 14) == "Seguro escolar")
 										{
-											insertRecord(observacionTransaccion);
+											insertRecord(observacionTransaccion, tipoDescuento);
 										}
 									}
 								}
@@ -3534,14 +3564,14 @@
 										{
 											if (montoPendienteDolar < 0)
 											{
-												insertRecord(observacionTransaccion);
+												insertRecord(observacionTransaccion, tipoDescuento);
 											}
 										}
 										else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
 											monthlyPayment.substring(0, 3) == "Ago")
 										{
 
-											insertRecord(observacionTransaccion);
+											insertRecord(observacionTransaccion, tipoDescuento);
 										}
 									}
 								}
@@ -3552,7 +3582,7 @@
 										{
 											if (indicadorImpresion == 0)
 											{
-												insertRecord(observacionTransaccion);
+												insertRecord(observacionTransaccion, tipoDescuento);
 											}
 										}
 								}
@@ -3564,13 +3594,13 @@
 										{
 											if (montoPendienteDolar < 0)
 											{
-												insertRecord(observacionTransaccion);
+												insertRecord(observacionTransaccion, tipoDescuento);
 											}
 										}
 										else if (monthlyPayment.substring(0, 9) == "Matrícula" ||
 											monthlyPayment.substring(0, 3) == "Ago")
 										{
-											insertRecord(observacionTransaccion);
+											insertRecord(observacionTransaccion, tipoDescuento);
 										}
 									}
 								}
@@ -3581,7 +3611,7 @@
 										{
 											if (indicadorImpresion == 0)
 											{
-												insertRecord(observacionTransaccion);
+												insertRecord(observacionTransaccion, tipoDescuento);
 											}
 										}
 								}
@@ -3591,7 +3621,7 @@
 										{
 											if (indicadorImpresion == 0)
 											{
-												insertRecord(observacionTransaccion);
+												insertRecord(observacionTransaccion, tipoDescuento);
 											}
 										}
 								}
@@ -3603,14 +3633,14 @@
 										{
 											if (montoPendienteDolar < 0)
 											{
-												insertRecord(observacionTransaccion);
+												insertRecord(observacionTransaccion, tipoDescuento);
 											}
 										}
 										else
 										{
 											if (monthlyPayment.substring(0, 14) != "Seguro escolar" && monthlyPayment.substring(0, 9) != "Matrícula" && monthlyPayment.substring(0, 18) != 'Servicio educativo' && monthlyPayment.substring(0, 3) != "Ago")
 											{
-												insertRecord(observacionTransaccion);
+												insertRecord(observacionTransaccion, tipoDescuento);
 											}
 										}
 									}

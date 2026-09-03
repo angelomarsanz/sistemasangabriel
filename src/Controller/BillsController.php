@@ -296,6 +296,10 @@ class BillsController extends AppController
 				$bill->cambio_monto_cuota = $this->headboard['cambioMontoCuota'];
 				$bill->monto_divisas = $this->headboard['monto_divisas'];
 				$bill->monto_igtf = $this->headboard['monto_igtf'];
+				if (isset($this->headboard['condicion_especial']))
+				{
+					$bill->condicion_especial = $this->headboard['condicion_especial'];
+				}
 
 				if (!($this->Bills->save($bill)))
 				{
@@ -3204,6 +3208,7 @@ class BillsController extends AppController
 						$nuevaFactura->cambio_monto_cuota = $pedido->cambio_monto_cuota;
 						$nuevaFactura->monto_divisas = $pedido->monto_divisas;
 						$nuevaFactura->monto_igtf = $pedido->monto_igtf;
+						$nuevaFactura->condicion_especial = $pedido->condicion_especial;
 						if (!($this->Bills->save($nuevaFactura)))
 						{
 							$this->Flash->error(__('La factura no pudo ser guardada'));
@@ -3421,6 +3426,7 @@ class BillsController extends AppController
 						$nuevaFactura->cambio_monto_cuota = $pedido->cambio_monto_cuota;
 						$nuevaFactura->monto_divisas = $pedido->monto_divisas;
 						$nuevaFactura->monto_igtf = $pedido->monto_igtf;
+						$nuevaFactura->condicion_especial = $pedido->condicion_especial;
 						if (!($this->Bills->save($nuevaFactura)))
 						{
 							$this->Flash->error(__('La factura no pudo ser guardada'));
@@ -3575,6 +3581,21 @@ class BillsController extends AppController
 		$notaContable->saldo_compensado = 0;
 		$notaContable->monto_divisas = 0;
 		$notaContable->monto_igtf = 0;
+		$notaContable->condicion_especial = "";
+
+		if ($facturaAfectada->condicion_especial != "" && strpos($facturaAfectada->condicion_especial, '100% pago en divisas') !== false)
+		{
+			$notaContable->monto_divisas = round($notaContable->amount_paid / $facturaAfectada->tasa_cambio, 2);
+			
+			$porcentajeIgtf = 0.03;
+			if (isset($this->headboard['porcentaje_igtf']))
+			{
+				$porcentajeIgtf = $this->headboard['porcentaje_igtf'];
+			}
+			
+			$notaContable->monto_igtf = round($notaContable->monto_divisas * $porcentajeIgtf, 2);
+			$notaContable->condicion_especial = $facturaAfectada->condicion_especial;
+		}
 
         if ($this->Bills->save($notaContable))
         {
