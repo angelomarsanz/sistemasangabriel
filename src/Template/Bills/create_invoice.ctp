@@ -2893,7 +2893,7 @@
 			{
                 let studentWithScholarshipSelected = false;
                 $.each(studentTransactionsArray, function(index, value) {
-                    if (value.dbSeleccionada == true && value.dbDescuentoAlumno < 1) {
+                    if (value.dbSeleccionada == true && value.dbDescuentoAlumno > 0 && value.dbTipoDescuento == 'Especial') {
                         studentWithScholarshipSelected = true;
                         return false;
                     }
