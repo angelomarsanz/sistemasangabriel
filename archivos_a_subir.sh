@@ -20,11 +20,5 @@ ARCHIVOS_PHP_PUNTUALES=(
     #"js_csga/dist/main-style.css"
     #"js_csga/dist/main-script.js"
 
-    "src/Template/Rates/add_dollar.ctp"
-    "src/Template/Bills/create_invoice.ctp"
-    "src/Controller/ParentsandguardiansController.php"
-    "src/Controller/StudentsController.php"
-    "src/Controller/StudenttransactionsController.php"
-    "src/Controller/BillsController.php"
-    "src/Controller/ConceptsController.php"
+    "src/Template/Studenttransactions/report_student_general.ctp"
 )

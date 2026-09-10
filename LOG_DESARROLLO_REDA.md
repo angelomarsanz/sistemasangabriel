@@ -59,6 +59,20 @@
         - Se eliminaron las opciones "Descuento" y "Concepto personalizado" del input select `concepto_descuento`.
 - **Documentación:** Actualización de `manual_tecnico_sistema.md` para reflejar la lista simplificada de conceptos disponibles.
 
+## [2026-09-10] - Mejora de formulario en Reporte General de Estudiantes
+- **Tarea:** Ajustar la visibilidad de campos dinámicos y añadir nuevas opciones en el reporte de seguro escolar.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se agregó documentación de cabecera al archivo describiendo su funcionalidad.
+        - Se envolvió el campo "**Período escolar**" en un contenedor `div` para controlar su visibilidad completa (etiqueta e input).
+        - Se añadió un nuevo campo select "**Tipo de estudiantes**" con las opciones independientes "**Regulares**" y "**Nuevos**", también envuelto en un contenedor dinámico.
+        - Se actualizó la lógica de jQuery para:
+            - Mostrar "**Período escolar**" y marcarlo como requerido solo si se selecciona "Reporte de alumnos solventes" o "Reporte de alumnos pendientes de pago".
+            - Mostrar "**Tipo de estudiantes**" y marcarlo como requerido si se selecciona "Reporte para aseguradora".
+            - Ocultar ambos campos y quitar la obligatoriedad en cualquier otro caso.
+        - Se eliminó el bloqueo (`alert` y `preventDefault`) que impedía el uso de la opción "Reporte para aseguradora".
+- **Documentación:** Se añadió el resumen del archivo y sus cambios al `manual_tecnico_sistema.md`.
+
 ## [2026-09-03] - Implementación de rastro de descuento y porcentaje de divisas
 - **Tarea:** Registrar una 'condición especial' en facturas y transacciones cuando se aplica un descuento y hay pagos en divisas.
 - **Cambios Realizados:**

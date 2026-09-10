@@ -15,3 +15,6 @@
 
 ## js_csga/vite.config.js
     Archivo de configuración de Vite para la compilación de los assets modernos (React/ES6+). Define los puntos de entrada para el script principal (`main-script`) y los estilos (`main-style`). Se configuró la salida para generar archivos deterministas (`main-script.js` y `main-style.css`) que son compatibles con la estructura de directorios de CakePHP 3. Incluye la configuración necesaria para manejar dependencias externas como jQuery y asegura la limpieza del directorio de salida antes de cada compilación.
+
+## src/Template/Studenttransactions/report_student_general.ctp
+    Esta vista permite generar diferentes tipos de reportes relacionados con el seguro escolar de los estudiantes (Aseguradora, Solventes y Pendientes). El formulario cuenta con lógica dinámica en JavaScript para mostrar u ocultar campos obligatorios según el tipo de reporte seleccionado: el campo "Período escolar" se activa para reportes de solvencia o deudas, mientras que el campo "Tipo de estudiantes" (con opciones independientes para "Regulares" y "Nuevos") se habilita específicamente para el reporte de aseguradora, optimizando la interfaz de usuario.

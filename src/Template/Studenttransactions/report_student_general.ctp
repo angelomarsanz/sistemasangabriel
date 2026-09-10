@@ -1,4 +1,16 @@
 <?php
+/**
+ * Reporte General de Estudiantes - Seguro Escolar
+ * 
+ * Esta vista permite generar diferentes tipos de reportes relacionados con el seguro escolar de los estudiantes.
+ * Tipos de reporte:
+ * - Reporte para aseguradora: Muestra datos detallados de estudiantes y representantes para la póliza de seguro.
+ * - Reporte de alumnos solventes: Lista estudiantes que están al día con sus pagos.
+ * - Reporte de alumnos pendientes de pago: Lista estudiantes con deudas pendientes.
+ * 
+ * La vista incluye lógica dinámica en el formulario para mostrar campos específicos (Período escolar, Tipo de estudiantes)
+ * según la selección del usuario.
+ */
 use Cake\I18n\Time;
 ?>
 <style>
@@ -350,14 +362,28 @@ else
                                     "Reporte de alumnos solventes" => "Reporte de alumnos solventes",
                                     "Reporte de alumnos pendientes de pago" => "Reporte de alumnos pendientes de pago"
                                 ]]);
-                                echo $this->Form->input('periodo_escolar', ['id' => 'periodo-escolar', 'label' => 'Período escolar: ', 'class' => 'noverScreen', 'options' => 
-                                [
-                                    null => "",
-                                    $periodo_escolar_anterior => $periodo_escolar_anterior,
-                                    $periodo_escolar_actual => $periodo_escolar_actual,
-                                    $periodo_escolar_proximo => $periodo_escolar_proximo
-                                ]]);
                             ?>
+                            <div id="div-periodo-escolar" class="noverScreen">
+                                <?php
+                                    echo $this->Form->input('periodo_escolar', ['id' => 'periodo-escolar', 'label' => 'Período escolar: ', 'options' => 
+                                    [
+                                        null => "",
+                                        $periodo_escolar_anterior => $periodo_escolar_anterior,
+                                        $periodo_escolar_actual => $periodo_escolar_actual,
+                                        $periodo_escolar_proximo => $periodo_escolar_proximo
+                                    ]]);
+                                ?>
+                            </div>
+                            <div id="div-tipo-estudiante" class="noverScreen">
+                                <?php
+                                    echo $this->Form->input('tipo_estudiante', ['id' => 'tipo-estudiante', 'label' => 'Tipo de estudiantes: ', 'options' => 
+                                    [
+                                        null => "",
+                                        "Regulares" => "Regulares",
+                                        "Nuevos" => "Nuevos"
+                                    ]]);
+                                ?>
+                            </div>
                         </fieldset>   
                         <?= $this->Form->button(__('Generar'), ['class' =>'btn btn-success']) ?>
                         <?= $this->Html->link(__('Salir'), ['controller' => 'Users', 'action' => 'wait'], ['class' => 'btn btn-default']) ?>
@@ -399,17 +425,37 @@ $(document).ready(function(){
         });
     });
 
+    /**
+     * Gestiona la visibilidad y obligatoriedad de los campos del formulario
+     * según el tipo de reporte seleccionado.
+     */
     $("#tipo_reporte").on("change", function(e)
     {
-        if ($("#tipo_reporte").val() == "Reporte para aseguradora")
+        const tipoReporte = $(this).val();
+
+        if (tipoReporte == "Reporte para aseguradora")
         {
-            e.preventDefault();
-            alert("Por favor comunicarse con el personal de sistemas para la emisión de este reporte")
+            $("#div-periodo-escolar").addClass("noverScreen");
+            $("#periodo-escolar").attr('required', false);
+            
+            $("#div-tipo-estudiante").removeClass("noverScreen");
+            $("#tipo-estudiante").attr('required', true);
+        }
+        else if (tipoReporte == "Reporte de alumnos solventes" || tipoReporte == "Reporte de alumnos pendientes de pago")
+        {
+            $("#div-tipo-estudiante").addClass("noverScreen");
+            $("#tipo-estudiante").attr('required', false);
+
+            $("#div-periodo-escolar").removeClass("noverScreen");
+            $("#periodo-escolar").attr('required', true);
         }
         else
         {
-            $("#periodo-escolar").removeClass("noverScreen");
-            $("#periodo-escolar").attr('required', true);
+            $("#div-periodo-escolar").addClass("noverScreen");
+            $("#periodo-escolar").attr('required', false);
+
+            $("#div-tipo-estudiante").addClass("noverScreen");
+            $("#tipo-estudiante").attr('required', false);
         }
     });
 });
