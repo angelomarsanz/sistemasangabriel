@@ -1,13 +1,13 @@
 <?php
 /**
  * Reporte General de Estudiantes - Seguro Escolar
- * 
+ *
  * Esta vista permite generar diferentes tipos de reportes relacionados con el seguro escolar de los estudiantes.
  * Tipos de reporte:
  * - Reporte para aseguradora: Muestra datos detallados de estudiantes y representantes para la póliza de seguro.
  * - Reporte de alumnos solventes: Lista estudiantes que están al día con sus pagos.
  * - Reporte de alumnos pendientes de pago: Lista estudiantes con deudas pendientes.
- * 
+ *
  * La vista incluye lógica dinámica en el formulario para mostrar campos específicos (Período escolar, Tipo de estudiantes)
  * según la selección del usuario.
  */
@@ -16,7 +16,7 @@ use Cake\I18n\Time;
 <style>
 @media screen
 {
-    .volver 
+    .volver
     {
         display:scroll;
         position:fixed;
@@ -24,7 +24,7 @@ use Cake\I18n\Time;
         left: 50px;
         opacity: 0.5;
     }
-    .cerrar 
+    .cerrar
     {
         display:scroll;
         position:fixed;
@@ -41,7 +41,7 @@ use Cake\I18n\Time;
         opacity: 0.5;
         text-align: right;
     }
-    .menumas 
+    .menumas
     {
         display:scroll;
         position:fixed;
@@ -55,31 +55,31 @@ use Cake\I18n\Time;
       display:none
     }
 }
-@media print 
+@media print
 {
-    .nover 
+    .nover
     {
       display:none
     }
     .saltopagina
     {
-        display:block; 
+        display:block;
         page-break-before:always;
     }
 }
 </style>
-<?php 
-    setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8');  
-    date_default_timezone_set('America/Caracas'); 
-    $currentDate = Time::now(); 
-    $accountStudent = 1; 
-    $accountLine = 1; 
-    $accountPage = 1; 
-    $nivel = 
+<?php
+    setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8');
+    date_default_timezone_set('America/Caracas');
+    $currentDate = Time::now();
+    $accountStudent = 1;
+    $accountLine = 1;
+    $accountPage = 1;
+    $nivel =
         [
             '' => '',
             'Maternal' => '0',
-            'Pre-escolar, pre-kinder' => '1',                                
+            'Pre-escolar, pre-kinder' => '1',
             'Pre-escolar, kinder' => '1',
             'Pre-escolar, preparatorio' => '1',
             'Primaria, 1er. grado' => '2',
@@ -94,11 +94,11 @@ use Cake\I18n\Time;
             'Secundaria, 4to. año' => '4',
             'Secundaria, 5to. año' => '4'
         ];
-    $grado = 
+    $grado =
         [
             '' => '',
-            'Maternal' => '01',  
-            'Pre-escolar, pre-kinder' => '01',                                
+            'Maternal' => '01',
+            'Pre-escolar, pre-kinder' => '01',
             'Pre-escolar, kinder' => '02',
             'Pre-escolar, preparatorio' => '03',
             'Primaria, 1er. grado' => '01',
@@ -170,7 +170,7 @@ if (isset($tipo_reporte))
     // debug($contador_estudiantes_seguro);
     // debug($alumnos_seleccionados);
 
-    if ($tipo_reporte == "Reporte para aseguradora") 
+    if ($tipo_reporte == "Reporte para aseguradora")
     { ?>
         <div>
             <div>
@@ -226,10 +226,11 @@ if (isset($tipo_reporte))
                             <th scope="col">CORREO/EMAIL</th>
                             <th scope="col">NÚMERO TELEFÓNICO</th>
                             <th scope="col">CÓDIGO COLEGIO SAN GABRIEL</th>
+                            <th scope="col">EJECUCION REPORTE SEGURO</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
+                        <?php
                         foreach ($studentsFor as $studentsFors):
                             $encontrado = 0;
                             foreach ($alumnosAdicionales as $adicional):
@@ -262,11 +263,12 @@ if (isset($tipo_reporte))
                                     <td><?= $studentsFors->student->parentsandguardian->email ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->cell_phone ?></td>
                                     <td><?= $studentsFors->student->id ?></td>
+                                    <td><?= $nuevaEjecucionStr ?></td>
                                 </tr>
-                                <?php 
+                                <?php
                                 $accountStudent++;
                             } ?>
-                        <?php 
+                        <?php
                         endforeach; ?>
                     </tbody>
                 </table>
@@ -308,7 +310,7 @@ if (isset($tipo_reporte))
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
+                        <?php
                         $contador_estudiante = 0;
                         foreach ($alumnos_seleccionados as $seleccionado):
                             $contador_estudiante++; ?>
@@ -319,7 +321,7 @@ if (isset($tipo_reporte))
                                 <td><?= $seleccionado['nivel_estudios'] ?></td>
                                 <td><?= $seleccionado['id'] ?></td>
                             </tr>
-                        <?php 
+                        <?php
                         endforeach; ?>
                     </tbody>
                 </table>
@@ -341,9 +343,9 @@ if (isset($tipo_reporte))
         </div>
 
     <?php
-    } 
+    }
 }
-else 
+else
 { ?>
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -355,7 +357,7 @@ else
                     <?= $this->Form->create() ?>
                         <fieldset>
                             <?php
-                                echo $this->Form->input('tipo_reporte', ['id' => 'tipo_reporte', 'label' => 'Tipo de reporte: ', 'required', 'options' => 
+                                echo $this->Form->input('tipo_reporte', ['id' => 'tipo_reporte', 'label' => 'Tipo de reporte: ', 'required', 'options' =>
                                 [
                                     null => "",
                                     "Reporte para aseguradora" => "Reporte para aseguradora",
@@ -365,7 +367,7 @@ else
                             ?>
                             <div id="div-periodo-escolar" class="noverScreen">
                                 <?php
-                                    echo $this->Form->input('periodo_escolar', ['id' => 'periodo-escolar', 'label' => 'Período escolar: ', 'options' => 
+                                    echo $this->Form->input('periodo_escolar', ['id' => 'periodo-escolar', 'label' => 'Período escolar: ', 'options' =>
                                     [
                                         null => "",
                                         $periodo_escolar_anterior => $periodo_escolar_anterior,
@@ -376,15 +378,15 @@ else
                             </div>
                             <div id="div-tipo-estudiante" class="noverScreen">
                                 <?php
-                                    echo $this->Form->input('tipo_estudiante', ['id' => 'tipo-estudiante', 'label' => 'Tipo de estudiantes: ', 'options' => 
+                                    echo $this->Form->input('tipo_estudiante', ['id' => 'tipo-estudiante', 'label' => 'Tipo de estudiante: ', 'options' =>
                                     [
                                         null => "",
-                                        "Regulares" => "Regulares",
-                                        "Nuevos" => "Nuevos"
+                                        "Nuevo" => "Nuevo",
+                                        "Regular" => "Regular"
                                     ]]);
                                 ?>
                             </div>
-                        </fieldset>   
+                        </fieldset>
                         <?= $this->Form->button(__('Generar'), ['class' =>'btn btn-success']) ?>
                         <?= $this->Html->link(__('Salir'), ['controller' => 'Users', 'action' => 'wait'], ['class' => 'btn btn-default']) ?>
                     <?= $this->Form->end() ?>
@@ -395,33 +397,33 @@ else
 <?php
 } ?>
 <script>
-function myFunction() 
+function myFunction()
 {
     window.print();
 }
-$(document).ready(function(){ 
+$(document).ready(function(){
     $('#mas').on('click',function()
     {
         $('#menu-menos').hide();
         $('#menu-mas').show();
     });
-    
+
     $('#menos').on('click',function()
     {
         $('#menu-mas').hide();
         $('#menu-menos').show();
     });
-    
+
     $("#excel").click(function(){
-        
+
         $("#seguro").table2excel({
-    
+
             exclude: ".noExl",
-        
+
             name: "Reporte seguro",
-        
-            filename: "reporte seguro" 
-    
+
+            filename: "reporte seguro"
+
         });
     });
 
@@ -437,7 +439,7 @@ $(document).ready(function(){
         {
             $("#div-periodo-escolar").addClass("noverScreen");
             $("#periodo-escolar").attr('required', false);
-            
+
             $("#div-tipo-estudiante").removeClass("noverScreen");
             $("#tipo-estudiante").attr('required', true);
         }

@@ -107,3 +107,18 @@
         - Se mejoró la lógica de validación en el evento `change` de `#concepto-descuento`: ahora el sistema solo bloquea la operación y solicita eliminar la beca si el estudiante tiene un descuento mayor a cero Y el tipo de beca es específicamente "Especial". Esto permite que estudiantes con otros tipos de beca (ej. "Hijos" o "Becado") puedan aplicar a la promoción especial si se requiere.
 - **Documentación:** Actualización de `manual_tecnico_sistema.md` para reflejar la nueva lógica de validación basada en el tipo de descuento.
 
+## [2026-09-12] - Seguimiento de ejecuciones en Reporte para Aseguradora (Solo Estudiantes Nuevos)
+- **Tarea:** Implementar un registro de control para cada ejecución del reporte de seguro escolar, limitado exclusivamente a estudiantes nuevos.
+- **Cambios Realizados:**
+    - **Backend (`src/Controller/StudenttransactionsController.php`):**
+        - **`reporteParaAseguradora`**:
+            - Se reestructuró la función para diferenciar el tratamiento según el tipo de estudiante.
+            - **Estudiantes Nuevos:**
+                - Se incorporó la carga del modelo `Schools` para gestionar el seguimiento.
+                - Se implementó una lógica de incremento consecutivo basada en la columna `ejecucion_reporte_seguro` de la tabla `schools` (registro ID 2), guardando el historial en formato JSON.
+                - Se automatizó la verificación y guardado en la tabla `excels` de cada estudiante nuevo incluido en el reporte, registrando el identificador de la ejecución actual (`N_nuevo_fecha_hora`).
+            - **Estudiantes Regulares:**
+                - Se restauró el comportamiento de búsqueda simple en la base de datos sin afectar las tablas `schools` ni `excels`.
+                - Se aseguró que la función devuelva la estructura `$datos_reporte` completa (incluyendo `alumnosAdicionales` con todos los IDs encontrados) para garantizar la correcta visualización en la interfaz.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` detallando la exclusividad del seguimiento para el proceso de alumnos nuevos.
+

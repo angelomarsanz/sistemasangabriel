@@ -21,4 +21,5 @@ ARCHIVOS_PHP_PUNTUALES=(
     #"js_csga/dist/main-script.js"
 
     "src/Template/Studenttransactions/report_student_general.ctp"
+    "src/Controller/StudenttransactionsController.php"
 )
