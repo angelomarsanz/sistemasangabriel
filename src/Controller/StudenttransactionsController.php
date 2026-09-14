@@ -2230,6 +2230,14 @@ class StudenttransactionsController extends AppController
                         }
                     }
                 }
+                else
+                {
+                    $estudiantesNoEncontradosSeguro[] = $studentsFors;
+                    if ($tipo_estudiante == "Regular")
+                    {
+                        $alumnosAdicionales[] = $estudiante->id;
+                    }
+                }
             }
         }
 
@@ -2241,6 +2249,7 @@ class StudenttransactionsController extends AppController
             'alumnosAdicionales' => $alumnosAdicionales,
             'estudiantesCondicionEspecial' => $estudiantesCondicionEspecial,
             'estudiantesInstruccionActualizada' => $estudiantesInstruccionActualizada,
+            'estudiantesNoEncontradosSeguro' => $estudiantesNoEncontradosSeguro,
             'nuevaEjecucionStr' => $nuevaEjecucionStr,
         ];
     }

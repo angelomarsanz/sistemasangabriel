@@ -305,6 +305,7 @@ use Cake\I18n\Time;
                             <th scope="col">SEGUNDO NOMBRE</th>
                             <th scope="col">PRIMER APELLIDO</th>
                             <th scope="col">SEGUNDO APELLIDO</th>
+                            <th scope="col">CONDICIÓN</th>
                             <th scope="col">ID ESTUDIANTE</th>
                         </tr>
                     </thead>
@@ -319,6 +320,7 @@ use Cake\I18n\Time;
                                 <td><?= $item->student->second_name ?></td>
                                 <td><?= $item->student->surname ?></td>
                                 <td><?= $item->student->second_surname ?></td>
+                                <td><?= $item->student->student_condition ?></td>
                                 <td><?= $item->student->id ?></td>
                             </tr>
                         <?php endforeach; ?>
@@ -340,6 +342,7 @@ use Cake\I18n\Time;
                             <th scope="col">SEGUNDO NOMBRE</th>
                             <th scope="col">PRIMER APELLIDO</th>
                             <th scope="col">SEGUNDO APELLIDO</th>
+                            <th scope="col">CONDICIÓN</th>
                             <th scope="col">ID ESTUDIANTE</th>
                         </tr>
                     </thead>
@@ -354,6 +357,7 @@ use Cake\I18n\Time;
                                 <td><?= $item->student->second_name ?></td>
                                 <td><?= $item->student->surname ?></td>
                                 <td><?= $item->student->second_surname ?></td>
+                                <td><?= $item->student->student_condition ?></td>
                                 <td><?= $item->student->id ?></td>
                             </tr>
                         <?php endforeach; ?>

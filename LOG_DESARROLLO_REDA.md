@@ -48,9 +48,15 @@
         - Se agregó el atributo `dbCondicionEspecial` al objeto de transacciones en la función `insertRecord` (inicializado en vacío).
         - Se actualizó el evento `change` de `#concepto-descuento` para que, al seleccionar "Descuento promoción especial mensualidad", se marque este valor en el atributo `dbCondicionEspecial` de todas las transacciones cargadas.
         - La función `uploadTransactions` ahora incluye el campo `condicionEspecial` en el objeto enviado al servidor.
-    - **Backend (`src/Controller/StudenttransactionsController.php`):**
-        - Se modificó la acción `edit` para recibir la propiedad `condicionEspecial` y guardarla en la columna `condicion_especial` de la tabla `studenttransactions`.
-- **Documentación:** Actualización de `manual_tecnico_sistema.md` con los detalles de persistencia de la condición especial.
+
+## [2026-09-14] - Mejora visual en tablas secundarias del Reporte de Seguro Escolar
+- **Tarea:** Incluir el estatus del estudiante en los reportes de control para mayor claridad administrativa.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se añadió la columna "**CONDICIÓN**" a la tabla de "**Estudiantes con instrucción actualizada anteriormente**".
+        - Se añadió la columna "**CONDICIÓN**" a la tabla de "**Estudiantes no encontrados en archivo del seguro**".
+        - En ambas tablas, el valor se muestra antes de la columna "**ID ESTUDIANTE**", permitiendo identificar rápidamente si un registro requiere atención especial por su estatus (ej. Retirado, Graduado, etc.).
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` para reflejar la inclusión de la columna de condición en los reportes de control.
 
 ## [2026-09-03] - Depuración de opciones de concepto de descuento
 - **Tarea:** Eliminar opciones obsoletas o redundantes del selector de conceptos de descuento.
