@@ -1964,8 +1964,10 @@ class StudenttransactionsController extends AppController
 
 			$currentDate = Time::now();
 
-			$tipo_reporte = $_POST['tipo_reporte'];
-			$periodo_escolar = $_POST['periodo_escolar'];
+			$tipo_reporte = $this->request->getData('tipo_reporte');
+			$periodo_escolar = $this->request->getData('periodo_escolar');
+            $tipo_estudiante = $this->request->getData('tipo_estudiante');
+
 			$matricula_anio = 'Matrícula '.substr($periodo_escolar, 0, 4);
 			$seguro_anio = 'Seguro escolar '.substr($periodo_escolar, 0, 4);
 
@@ -1977,14 +1979,26 @@ class StudenttransactionsController extends AppController
 
 			if ($tipo_reporte == 'Reporte para aseguradora')
 			{
-				$tipo_estudiante = $_POST['tipo_estudiante'];
 				$datos_reporte = $this->reporteParaAseguradora($anio_periodo_actual, $tipo_estudiante);
 				$studentsFor = $datos_reporte['studentsFor'];
 				$totalPages = $datos_reporte['totalPages'];
 				$alumnosAdicionales = $datos_reporte['alumnosAdicionales'];
                 $nuevaEjecucionStr = $datos_reporte['nuevaEjecucionStr'];
+				$estudiantesCondicionEspecial = $datos_reporte['estudiantesCondicionEspecial'];
+				$estudiantesInstruccionActualizada = $datos_reporte['estudiantesInstruccionActualizada'];
 
-				$this->set(compact('tipo_reporte', 'school', 'currentDate', 'studentsFor', 'totalPages', 'alumnosAdicionales', 'nuevaEjecucionStr'));
+				$this->set([
+                    'tipo_reporte' => $tipo_reporte,
+                    'school' => $school,
+                    'currentDate' => $currentDate,
+                    'studentsFor' => $studentsFor,
+                    'totalPages' => $totalPages,
+                    'alumnosAdicionales' => $alumnosAdicionales,
+                    'nuevaEjecucionStr' => $nuevaEjecucionStr,
+                    'estudiantesCondicionEspecial' => $estudiantesCondicionEspecial,
+                    'estudiantesInstruccionActualizada' => $estudiantesInstruccionActualizada,
+                    'tipo_estudiante' => $tipo_estudiante
+                ]);
 			}
 			else
 			{
@@ -2014,7 +2028,13 @@ class StudenttransactionsController extends AppController
 				}
 				$datos_reporte = $this->reportePagoSeguro($vector_condiciones_matricula, $vector_condiciones_seguro);
 				$alumnos_seleccionados = $datos_reporte['alumnos_seleccionados'];
-				$this->set(compact('tipo_reporte', 'school', 'currentDate', 'alumnos_seleccionados'));
+				$this->set([
+                    'tipo_reporte' => $tipo_reporte,
+                    'school' => $school,
+                    'currentDate' => $currentDate,
+                    'alumnos_seleccionados' => $alumnos_seleccionados,
+                    'tipo_estudiante' => $tipo_estudiante // Lo pasamos aunque sea null para evitar el notice si se evalúa
+                ]);
 			}
 		}
 		else
@@ -2034,8 +2054,13 @@ class StudenttransactionsController extends AppController
     public function reporteParaAseguradora($anio_escolar = null, $tipo_estudiante = null)
     {
 		$this->loadModel('Excels');
+        $this->loadModel('ListaAsegurados');
 
 		$matricula_anio = 'Matrícula '.$anio_escolar;
+
+        $anioEscolarAnterior = $anio_escolar - 1;
+
+        $matriculaAnioAnterior = "Matrícula ".$anioEscolarAnterior;
 
 		$studentTransactions = TableRegistry::get('Studenttransactions');
 
@@ -2065,55 +2090,157 @@ class StudenttransactionsController extends AppController
         $school->ejecucion_reporte_seguro = json_encode($vectorEjecuciones);
         $this->Schools->save($school);
 
+        $alumnosAdicionales = [];
+        $estudiantesCondicionEspecial = [];
+        $estudiantesInstruccionActualizada = [];
+
 		if ($tipo_estudiante == "Nuevo")
 		{
 			$studentsFor = $studentTransactions->find()
 				->contain(['Students' => ['Parentsandguardians']])
-				->where(['Studenttransactions.transaction_description' => $matricula_anio, 'Studenttransactions.amount_dollar >' => 0, 'Students.student_condition' => 'Regular', 'Students.new_student' => 1])
+				->where(['Studenttransactions.transaction_description' => $matricula_anio, 'Studenttransactions.amount_dollar >' => 0, 'Students.new_student' => 1])
 				->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 
             $ultimoEnvio = $this->Excels->find('all');
-
-            $alumnosAdicionales = [];
+            $consecutivoCondicion = 1;
 
             foreach ($studentsFor as $studentsFors)
             {
+                $estudiante = $studentsFors->student;
+
+                if ($estudiante->student_condition != "Regular")
+                {
+                    $estudiantesCondicionEspecial[] = [
+                        'consecutivo' => $consecutivoCondicion++,
+                        'nombres' => trim($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname),
+                        'cedula' => $estudiante->identity_card,
+                        'condicion' => $estudiante->student_condition,
+                        'modified' => $estudiante->modified
+                    ];
+                }
+
                 $encontrado = 0;
 
                 foreach ($ultimoEnvio as $envio)
                 {
-                    if ($studentsFors->student->id == $envio->codigo_colegio)
+                    if ($estudiante->id == $envio->codigo_colegio)
                     {
                         $encontrado = 1;
                         break;
                     }
                 }
-                if ($encontrado == 0)
+
+                if ($encontrado == 1)
                 {
-                    $alumnosAdicionales[] = $studentsFors->student->id;
+                    $estudiantesInstruccionActualizada[] = $studentsFors;
+                }
+                else
+                {
+                    $alumnosAdicionales[] = $estudiante->id;
                 }
             }
-
-            $totalPages = ceil($studentsFor->count() / 20);
-
-            $datos_reporte =
-                [
-                    'studentsFor' => $studentsFor,
-                    'totalPages' => $totalPages,
-                    'alumnosAdicionales' => $alumnosAdicionales,
-                    'nuevaEjecucionStr' => $nuevaEjecucionStr
-                ];
-
-		    return $datos_reporte;
 		}
 		else
 		{
+            if ($tipo_estudiante == "Regular")
+            {
+                $matriculaBusqueda = $matricula_anio;
+                $anioInscripcionEstudiante = $anio_escolar;
+                $instruccion = "RENOVAR";
+                $condicionesBusqueda = [
+                    'Studenttransactions.transaction_description' => $matriculaBusqueda,
+                    'Studenttransactions.amount_dollar >' => 0,
+                    'Students.balance' => $anioInscripcionEstudiante
+                ];
+            }
+            else
+            {
+                $matriculaBusqueda = $matriculaAnioAnterior;
+                $anioInscripcionEstudiante = $anioEscolarAnterior;
+                $instruccion = "EXCLUIR";
+                $condicionesBusqueda = [
+                    'Studenttransactions.transaction_description' => $matriculaBusqueda,
+                    'Studenttransactions.amount_dollar >' => 0,
+                    'Students.balance' => $anioInscripcionEstudiante,
+                    'Students.section_id IN' => [41, 42, 43]
+                ];
+            }
+
 			$studentsFor = $studentTransactions->find()
 				->contain(['Students' => ['Parentsandguardians']])
-				->where(['Studenttransactions.transaction_description' => $matricula_anio, 'Studenttransactions.amount_dollar >' => 0, 'Students.student_condition' => 'Regular'])
+				->where($condicionesBusqueda)
 				->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
-		}
-	}
+
+            $listaAsegurados = $this->ListaAsegurados->find('all')->toArray();
+
+            $consecutivoCondicion = 1;
+
+            foreach ($studentsFor as $studentsFors)
+            {
+                $estudiante = $studentsFors->student;
+
+                if ($estudiante->student_condition != "Regular")
+                {
+                    $estudiantesCondicionEspecial[] = [
+                        'consecutivo' => $consecutivoCondicion++,
+                        'nombres' => trim($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname),
+                        'cedula' => $estudiante->identity_card,
+                        'condicion' => $estudiante->student_condition,
+                        'modified' => $estudiante->modified
+                    ];
+                }
+
+                $encontradoAsegurado = null;
+                $nombreEstudiante = preg_replace('/\s+/', ' ', trim($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname));
+
+                foreach ($listaAsegurados as $asegurado)
+                {
+                    if ($asegurado->cedu_rif == $estudiante->identity_card)
+                    {
+                        $encontradoAsegurado = $asegurado;
+                        break;
+                    }
+
+                    $nombreAsegurado = preg_replace('/\s+/', ' ', trim($asegurado->asegurado));
+                    if ($nombreAsegurado == $nombreEstudiante)
+                    {
+                        $encontradoAsegurado = $asegurado;
+                        break;
+                    }
+                }
+
+                if ($encontradoAsegurado)
+                {
+                    if (!empty($encontradoAsegurado->instruccion) && trim($encontradoAsegurado->instruccion) != '')
+                    {
+                        $estudiantesInstruccionActualizada[] = $studentsFors;
+                    }
+                    else
+                    {
+                        $alumnosAdicionales[] = $estudiante->id;
+                        $aseguradoModificar = $this->ListaAsegurados->get($encontradoAsegurado->certificado);
+                        $aseguradoModificar->instruccion = $instruccion;
+                        $aseguradoModificar->ejecucion_reporte_seguro = $nuevaEjecucionStr;
+                        if (!($this->ListaAsegurados->save($aseguradoModificar)))
+                        {
+                            $this->Flash->error(__('No se pudo actualizar la instrucción del asegurado: ' . $aseguradoModificar->asegurado));
+                        }
+                    }
+                }
+            }
+        }
+
+        $totalPages = ceil($studentsFor->count() / 20);
+
+        return [
+            'studentsFor' => $studentsFor,
+            'totalPages' => $totalPages,
+            'alumnosAdicionales' => $alumnosAdicionales,
+            'estudiantesCondicionEspecial' => $estudiantesCondicionEspecial,
+            'estudiantesInstruccionActualizada' => $estudiantesInstruccionActualizada,
+            'nuevaEjecucionStr' => $nuevaEjecucionStr,
+        ];
+    }
 
     public function reportePagoSeguro($vector_condiciones_matricula = null, $vector_condiciones_seguro = null)
     {

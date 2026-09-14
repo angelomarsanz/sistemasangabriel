@@ -20,6 +20,8 @@ ARCHIVOS_PHP_PUNTUALES=(
     #"js_csga/dist/main-style.css"
     #"js_csga/dist/main-script.js"
 
+    "src/Model/Entity/ListaAsegurado.php"
+    "src/Model/Table/ListaAseguradosTable.php"
     "src/Template/Studenttransactions/report_student_general.ctp"
     "src/Controller/StudenttransactionsController.php"
 )

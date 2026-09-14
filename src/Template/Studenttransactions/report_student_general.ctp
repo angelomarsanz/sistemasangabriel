@@ -7,9 +7,6 @@
  * - Reporte para aseguradora: Muestra datos detallados de estudiantes y representantes para la póliza de seguro.
  * - Reporte de alumnos solventes: Lista estudiantes que están al día con sus pagos.
  * - Reporte de alumnos pendientes de pago: Lista estudiantes con deudas pendientes.
- *
- * La vista incluye lógica dinámica en el formulario para mostrar campos específicos (Período escolar, Tipo de estudiantes)
- * según la selección del usuario.
  */
 use Cake\I18n\Time;
 ?>
@@ -73,8 +70,6 @@ use Cake\I18n\Time;
     date_default_timezone_set('America/Caracas');
     $currentDate = Time::now();
     $accountStudent = 1;
-    $accountLine = 1;
-    $accountPage = 1;
     $nivel =
         [
             '' => '',
@@ -163,15 +158,8 @@ use Cake\I18n\Time;
         ];
     ?>
 <br />
-<?php
-if (isset($tipo_reporte))
-{
-    // debug($contador_estudiantes_matricula);
-    // debug($contador_estudiantes_seguro);
-    // debug($alumnos_seleccionados);
-
-    if ($tipo_reporte == "Reporte para aseguradora")
-    { ?>
+<?php if (isset($tipo_reporte)): ?>
+    <?php if ($tipo_reporte == "Reporte para aseguradora"): ?>
         <div>
             <div>
                 <div style="float: left; width:10%;">
@@ -182,6 +170,9 @@ if (isset($tipo_reporte))
                     <p>RIF: <?= $school->rif ?></p>
                     <h3 style="text-align: center;">Reporte Seguro Escolar al: <?= $currentDate->format('d-m-Y') ?></h3>
                 </div>
+            </div>
+            <div class="noExl">
+                <h2 style="text-align: center;">Tipo de estudiante: <?= $tipo_estudiante ?></h2>
             </div>
             <div>
                 <table id='seguro' class="table">
@@ -240,8 +231,7 @@ if (isset($tipo_reporte))
                                     break;
                                 }
                             endforeach;
-                            if ($encontrado == 1)
-                            { ?>
+                            if ($encontrado == 1): ?>
                                 <tr>
                                     <td class="noExl"><?= $accountStudent ?></td>
                                     <td><?= $studentsFors->student->type_of_identification ?></td>
@@ -265,14 +255,76 @@ if (isset($tipo_reporte))
                                     <td><?= $studentsFors->student->id ?></td>
                                     <td><?= $nuevaEjecucionStr ?></td>
                                 </tr>
-                                <?php
-                                $accountStudent++;
-                            } ?>
-                        <?php
-                        endforeach; ?>
+                                <?php $accountStudent++; ?>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
+
+            <?php if (isset($estudiantesCondicionEspecial) && !empty($estudiantesCondicionEspecial)): ?>
+                <div class="saltopagina"></div>
+                <div class="page-header">
+                    <h3>Estudiantes con condición distinta a Regular</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">NRO.</th>
+                            <th scope="col">NOMBRES DEL ESTUDIANTE</th>
+                            <th scope="col">CÉDULA</th>
+                            <th scope="col">CONDICIÓN</th>
+                            <th scope="col">FECHA MODIFICACIÓN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($estudiantesCondicionEspecial as $est): ?>
+                            <tr>
+                                <td><?= $est['consecutivo'] ?></td>
+                                <td><?= $est['nombres'] ?></td>
+                                <td><?= $est['cedula'] ?></td>
+                                <td><?= $est['condicion'] ?></td>
+                                <td><?= $est['modified']->format('d-m-Y H:i:s') ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+
+            <?php if (isset($estudiantesInstruccionActualizada) && !empty($estudiantesInstruccionActualizada)): ?>
+                <div class="saltopagina"></div>
+                <div class="page-header">
+                    <h3>Estudiantes con instrucción actualizada anteriormente</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">NRO.</th>
+                            <th scope="col">CÉDULA TITULAR ESCOLAR</th>
+                            <th scope="col">PRIMER NOMBRE</th>
+                            <th scope="col">SEGUNDO NOMBRE</th>
+                            <th scope="col">PRIMER APELLIDO</th>
+                            <th scope="col">SEGUNDO APELLIDO</th>
+                            <th scope="col">ID ESTUDIANTE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $accInst = 1;
+                        foreach ($estudiantesInstruccionActualizada as $item): ?>
+                            <tr>
+                                <td><?= $accInst++ ?></td>
+                                <td><?= $item->student->identity_card ?></td>
+                                <td><?= $item->student->first_name ?></td>
+                                <td><?= $item->student->second_name ?></td>
+                                <td><?= $item->student->surname ?></td>
+                                <td><?= $item->student->second_surname ?></td>
+                                <td><?= $item->student->id ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
         </div>
         <div id="menu-menos" class="menumenos nover">
             <p>
@@ -288,10 +340,7 @@ if (isset($tipo_reporte))
                 <a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
             </p>
         </div>
-    <?php
-    }
-    else
-    { ?>
+    <?php else: ?>
         <div>
             <div>
                 <div style="float: left; width: 90%;">
@@ -321,8 +370,7 @@ if (isset($tipo_reporte))
                                 <td><?= $seleccionado['nivel_estudios'] ?></td>
                                 <td><?= $seleccionado['id'] ?></td>
                             </tr>
-                        <?php
-                        endforeach; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
@@ -341,12 +389,8 @@ if (isset($tipo_reporte))
                 <a href='#' id="menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger'></a>
             </p>
         </div>
-
-    <?php
-    }
-}
-else
-{ ?>
+    <?php endif; ?>
+<?php else: ?>
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <div class="page-header">
@@ -382,7 +426,8 @@ else
                                     [
                                         null => "",
                                         "Nuevo" => "Nuevo",
-                                        "Regular" => "Regular"
+                                        "Regular" => "Regular",
+                                        "5to. Año" => "5to. Año"
                                     ]]);
                                 ?>
                             </div>
@@ -394,8 +439,7 @@ else
             </div>
         </div>
     </div>
-<?php
-} ?>
+<?php endif; ?>
 <script>
 function myFunction()
 {

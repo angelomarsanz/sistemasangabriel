@@ -122,3 +122,55 @@
                 - Se aseguró que la función devuelva la estructura `$datos_reporte` completa (incluyendo `alumnosAdicionales` con todos los IDs encontrados) para garantizar la correcta visualización en la interfaz.
 - **Documentación:** Actualización de `manual_tecnico_sistema.md` detallando la exclusividad del seguimiento para el proceso de alumnos nuevos.
 
+
+## [2026-09-14] - Creación de modelos para Lista de Asegurados
+- **Tarea:** Crear los archivos de modelo (Table y Entity) para la tabla `lista_asegurados` a partir del esquema SQL.
+- **Cambios Realizados:**
+    - **Entity (`src/Model/Entity/ListaAsegurado.php`):**
+        - Se creó la entidad con la documentación correspondiente.
+        - Se configuró el acceso masivo (`_accessible`) permitiendo todos los campos excepto `certificado` (PK).
+    - **Table (`src/Model/Table/ListaAseguradosTable.php`):**
+        - Se implementó la clase de tabla configurando el nombre de la tabla (`lista_asegurados`), la clave primaria (`certificado`) y el campo de visualización (`asegurado`).
+        - Se añadió el comportamiento `Timestamp` para la gestión automática de `created` y `modified`.
+        - Se definieron las reglas de validación básica para todos los campos de la tabla.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` con el resumen de los nuevos archivos y su funcionalidad.
+
+## [2026-09-14] - Mejora de Reporte para Aseguradora con integración de Lista de Asegurados
+- **Tarea:** Mejorar la acción `reporteParaAseguradora` para filtrar estudiantes por condición y verificar instrucciones previas en el modelo `ListaAsegurados`.
+- **Cambios Realizados:**
+    - **Controller (`src/Controller/StudenttransactionsController.php`):**
+        - Se cargó el modelo `ListaAsegurados`.
+        - En `reporteParaAseguradora`, se implementó un bucle `foreach` sobre los estudiantes para:
+            1. Identificar estudiantes con condición distinta a "Regular" (`estudiantesCondicionEspecial`).
+            2. Comparar estudiantes con la tabla `lista_asegurados` mediante cédula o nombre concatenado.
+            3. Separar a los estudiantes que ya tienen una instrucción asignada (`estudiantesInstruccionActualizada`).
+            4. Mantener en el reporte original solo a aquellos sin instrucción previa o no encontrados.
+        - Se actualizaron los métodos `reportStudentGeneral` y `reporteParaAseguradora` para enviar estas nuevas colecciones a la vista.
+    - **View (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se añadieron dos nuevas tablas dentro del bloque del reporte para aseguradora:
+            1. "Estudiantes con condición distinta a Regular": Muestra consecutivo, nombres, cédula, condición y fecha de modificación.
+            2. "Estudiantes con instrucción actualizada anteriormente": Muestra los datos de identidad para revisión.
+        - Se aseguró que estas tablas no se exporten a Excel al omitir el ID `seguro`.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` detallando la nueva lógica de filtrado y visualización de reportes adicionales.
+
+## [2026-09-14] - Optimización de lógica redundante en Reporte para Aseguradora
+- **Tarea:** Eliminar condiciones redundantes y simplificar el filtrado de estudiantes de "5to. Año".
+- **Cambios Realizados:**
+    - **Controller (`src/Controller/StudenttransactionsController.php`):**
+        - En la función `reporteParaAseguradora`, se eliminó el chequeo redundante `if ($tipo_estudiante == "5to. Año")` dentro del bloque `else` final, ya que por lógica de flujo este bloque solo se ejecuta cuando el tipo es "5to. Año".
+        - Se integró el filtro de secciones (`Students.section_id IN [41, 42, 43]`) directamente en el arreglo `$condicionesBusqueda` para mejorar la legibilidad y eficiencia del código.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` para reflejar la simplificación de la lógica de negocio.
+
+## [2026-09-14] - Unificación de lógica para Estudiantes Nuevos y mejoras de UI
+- **Tarea:** Aplicar la lógica de segmentación por condición y verificación de procesados anteriores a los estudiantes de tipo "Nuevo", y añadir un título dinámico al reporte.
+- **Cambios Realizados:**
+    - **Controller (`src/Controller/StudenttransactionsController.php`):**
+        - En `reporteParaAseguradora`, se refactorizó el bloque de estudiantes "Nuevo" para:
+            1. Detectar estudiantes con condición distinta a "Regular" y agregarlos a `estudiantesCondicionEspecial`.
+            2. Verificar si el estudiante ya fue procesado en el último envío mediante la tabla `Excels`.
+            3. Segmentar a los estudiantes ya procesados en la colección `estudiantesInstruccionActualizada`.
+            4. Incluir en `alumnosAdicionales` (reporte principal) solo a los estudiantes que no han sido procesados anteriormente.
+    - **View (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se agregó un título dinámico antes de la tabla del reporte: "**Tipo de estudiante: [Nuevo/Regular/5to. Año]**".
+        - Se utilizó la clase `noExl` para asegurar que este título sea visible solo en pantalla y no se incluya en las exportaciones a Excel, manteniendo el formato requerido por la aseguradora.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` con los detalles de la unificación lógica y los ajustes visuales.
