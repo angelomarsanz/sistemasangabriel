@@ -1993,7 +1993,7 @@ class StudenttransactionsController extends AppController
 				$alumnosAdicionales = $datos_reporte['alumnosAdicionales'];
                 $nuevaEjecucionStr = $datos_reporte['nuevaEjecucionStr'];
 				$estudiantesCondicionEspecial = $datos_reporte['estudiantesCondicionEspecial'];
-				$estudiantesInstruccionActualizada = $datos_reporte['estudiantesInstruccionActualizada'];
+				$estudiantesEncontradosSeguro = $datos_reporte['estudiantesEncontradosSeguro'];
                 $estudiantesNoEncontradosSeguro = $datos_reporte['estudiantesNoEncontradosSeguro'];
 
 				$this->set([
@@ -2005,7 +2005,7 @@ class StudenttransactionsController extends AppController
                     'alumnosAdicionales' => $alumnosAdicionales,
                     'nuevaEjecucionStr' => $nuevaEjecucionStr,
                     'estudiantesCondicionEspecial' => $estudiantesCondicionEspecial,
-                    'estudiantesInstruccionActualizada' => $estudiantesInstruccionActualizada,
+                    'estudiantesEncontradosSeguro' => $estudiantesEncontradosSeguro,
                     'estudiantesNoEncontradosSeguro' => $estudiantesNoEncontradosSeguro,
                     'tipo_estudiante' => $tipo_estudiante
                 ]);
@@ -2114,7 +2114,7 @@ class StudenttransactionsController extends AppController
 
         $alumnosAdicionales = [];
         $estudiantesCondicionEspecial = [];
-        $estudiantesInstruccionActualizada = [];
+        $estudiantesEncontradosSeguro = [];
         $estudiantesNoEncontradosSeguro = [];
 
 		if ($tipo_estudiante == "Nuevo")
@@ -2156,7 +2156,7 @@ class StudenttransactionsController extends AppController
 
                 if ($encontrado == 1)
                 {
-                    $estudiantesInstruccionActualizada[] = $studentsFors;
+                    $estudiantesEncontradosSeguro[] = $studentsFors;
                 }
                 else
                 {
@@ -2270,13 +2270,10 @@ class StudenttransactionsController extends AppController
 
                 if ($encontradoAsegurado)
                 {
-                    if (!empty($encontradoAsegurado->instruccion) && trim($encontradoAsegurado->instruccion) != '')
+                    $estudiantesEncontradosSeguro[] = $studentsFors;
+
+                    if (empty($encontradoAsegurado->instruccion) || trim($encontradoAsegurado->instruccion) == '')
                     {
-                        $estudiantesInstruccionActualizada[] = $studentsFors;
-                    }
-                    else
-                    {
-                        $alumnosAdicionales[] = $estudiante->id;
                         $aseguradoModificar = $this->ListaAsegurados->get($encontradoAsegurado->certificado);
                         $aseguradoModificar->instruccion = $instruccion;
                         $aseguradoModificar->ejecucion_reporte_seguro = $nuevaEjecucionStr;
@@ -2289,8 +2286,13 @@ class StudenttransactionsController extends AppController
                 else
                 {
                     $estudiantesNoEncontradosSeguro[] = $studentsFors;
+                    if ($tipo_estudiante == "Regular")
+                    {
+                        $alumnosAdicionales[] = $estudiante->id;
+                    }
                 }
             }
+
         }
 
         $totalPages = ceil($studentsFor->count() / 20);
@@ -2300,7 +2302,7 @@ class StudenttransactionsController extends AppController
             'totalPages' => $totalPages,
             'alumnosAdicionales' => $alumnosAdicionales,
             'estudiantesCondicionEspecial' => $estudiantesCondicionEspecial,
-            'estudiantesInstruccionActualizada' => $estudiantesInstruccionActualizada,
+            'estudiantesEncontradosSeguro' => $estudiantesEncontradosSeguro,
             'estudiantesNoEncontradosSeguro' => $estudiantesNoEncontradosSeguro,
             'nuevaEjecucionStr' => $nuevaEjecucionStr,
         ];

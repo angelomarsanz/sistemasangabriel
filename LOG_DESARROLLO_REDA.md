@@ -204,3 +204,12 @@
         - Se mantuvo la insensibilidad a acentos y mayúsculas mediante el método `normalizarTexto`.
     - **Restricción Quirúrgica:** Se respetó estrictamente la instrucción de no modificar el bloque de estudiantes "**Nuevo**", el cual mantiene su lógica original de validación contra `Excels`.
 - **Documentación:** Actualización de `manual_tecnico_sistema.md` con los detalles de la identificación flexible.
+
+- **2026-09-14 16:10 (Gemini CLI):** Culminación de los ajustes técnicos y de visibilidad para el reporte de seguros:
+    - **Backend (`src/Controller/StudenttransactionsController.php`):**
+        - Se restauró la lógica de guardado automático en la tabla `Excels` para estudiantes de tipo "**Nuevo**" cuando son incluidos en el reporte por primera vez (no procesados anteriormente), vinculando su ID al identificador de la ejecución actual.
+        - Se verificó que la segmentación quirúrgica se mantenga: los "Nuevos" procesados anteriormente van a "**Registros encontrados**", mientras que los no procesados permanecen en el reporte principal.
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se refinó el título del reporte secundario a "**Estudiantes encontrados en las listas del colegio y del seguro (Registros encontrados)**" para cumplir con la terminología solicitada por el usuario.
+        - Se validó que todas las tablas de control mantengan la estandarización de 21 columnas para compatibilidad total con la aseguradora.
+    - **Documentación:** Actualizados el `manual_tecnico_sistema.md` y este log para reflejar el estado final de la implementación.
