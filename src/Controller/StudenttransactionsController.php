@@ -2188,7 +2188,6 @@ class StudenttransactionsController extends AppController
                     'Studenttransactions.amount_dollar >' => 0,
                     'Students.balance' => $anioInscripcionEstudiante,
                     'Students.section_id IN' => [41, 42, 43],
-                    'Students.new_student' => 0
                 ];
             }
 
@@ -2218,21 +2217,54 @@ class StudenttransactionsController extends AppController
                 }
 
                 $encontradoAsegurado = null;
-                $nombreEstudiante = preg_replace('/\s+/', ' ', trim($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname));
+                $ciEstudiante = strtoupper(trim($estudiante->type_of_identification)) . "-" . trim($estudiante->identity_card);
+
+                // Generar diversas combinaciones del nombre del estudiante para la comparación
+                $nombresEstudiante = [
+                    $this->normalizarTexto($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname),
+                    $this->normalizarTexto($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname),
+                    $this->normalizarTexto($estudiante->first_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname),
+                    $this->normalizarTexto($estudiante->first_name . ' ' . $estudiante->surname),
+                    // Combinaciones con apellidos primero (común en listados externos)
+                    $this->normalizarTexto($estudiante->surname . ' ' . $estudiante->second_surname . ' ' . $estudiante->first_name . ' ' . $estudiante->second_name),
+                    $this->normalizarTexto($estudiante->surname . ' ' . $estudiante->first_name)
+                ];
 
                 foreach ($listaAsegurados as $asegurado)
                 {
-                    if ($asegurado->cedu_rif == $estudiante->identity_card)
+                    // 1. Comparación por Cédula/RIF con formato (Ej: V-12345678)
+                    if (strtoupper(trim($asegurado->cedu_rif)) == $ciEstudiante)
                     {
                         $encontradoAsegurado = $asegurado;
                         break;
                     }
 
-                    $nombreAsegurado = preg_replace('/\s+/', ' ', trim($asegurado->asegurado));
-                    if ($nombreAsegurado == $nombreEstudiante)
+                    $nombreAsegurado = $this->normalizarTexto($asegurado->asegurado);
+
+                    // 2. Coincidencia exacta con alguna de las combinaciones generadas
+                    if (in_array($nombreAsegurado, $nombresEstudiante))
                     {
                         $encontradoAsegurado = $asegurado;
                         break;
+                    }
+
+                    // 3. Procedimiento adicional: Comparación por "bolsa de palabras" (permisivo)
+                    // Verifica si los términos principales del nombre del estudiante están presentes en el registro
+                    $palabrasEstudiante = explode(' ', $nombresEstudiante[0]); // Usar nombre completo normalizado
+                    $palabrasAsegurado = explode(' ', $nombreAsegurado);
+
+                    // Filtrar conectores y palabras cortas para evitar falsos positivos
+                    $palabrasEst = array_filter($palabrasEstudiante, function($p) { return strlen($p) > 2; });
+                    $palabrasAseg = array_filter($palabrasAsegurado, function($p) { return strlen($p) > 2; });
+
+                    if (!empty($palabrasEst)) {
+                        $coincidencias = array_intersect($palabrasEst, $palabrasAseg);
+                        // Se considera coincidencia si se encuentran al menos 3 palabras clave o todas las disponibles
+                        $minimoRequerido = min(3, count($palabrasEst));
+                        if (count($coincidencias) >= $minimoRequerido) {
+                            $encontradoAsegurado = $asegurado;
+                            break;
+                        }
                     }
                 }
 
@@ -8265,5 +8297,24 @@ class StudenttransactionsController extends AppController
 
 		$this->set(compact('periodoEscolar', 'idFamilia', 'idEstudiante', 'indicadorExoneracion', 'estudiantesEncontrados', 'matriculasEstudiantesEncontradas', 'cantidadEstudiantes', 'periodoEscolarAnterior', 'periodoEscolarActual', 'periodoEscolarProximo', 'indicadorBusquedaEstudiantes', 'indicadorActualizacionExoneracion', 'filtroEstudiantes'));
 	}
+
+    /**
+     * Normaliza un texto convirtiéndolo a mayúsculas, eliminando acentos
+     * y limpiando espacios múltiples.
+     *
+     * @param string $texto El texto a normalizar.
+     * @return string El texto normalizado.
+     */
+    private function normalizarTexto($texto)
+    {
+        if (empty($texto)) {
+            return '';
+        }
+        $texto = mb_strtoupper($texto, 'UTF-8');
+        $acentos = ['Á', 'É', 'Í', 'Ó', 'Ú', 'Ñ', 'Ü', 'À', 'È', 'Ì', 'Ò', 'Ù', 'Â', 'Ê', 'Î', 'Ô', 'Û', 'Ã', 'Õ'];
+        $sinAcentos = ['A', 'E', 'I', 'O', 'U', 'N', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'O'];
+        $texto = str_replace($acentos, $sinAcentos, $texto);
+        return preg_replace('/\s+/', ' ', trim($texto));
+    }
 
 }

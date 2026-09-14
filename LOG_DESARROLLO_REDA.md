@@ -192,3 +192,15 @@
         - Se agregó un título dinámico antes de la tabla del reporte: "**Tipo de estudiante: [Nuevo/Regular/5to. Año]**".
         - Se utilizó la clase `noExl` para asegurar que este título sea visible solo en pantalla y no se incluya en las exportaciones a Excel, manteniendo el formato requerido por la aseguradora.
 - **Documentación:** Actualización de `manual_tecnico_sistema.md` con los detalles de la unificación lógica y los ajustes visuales.
+
+## [2026-09-14] - Culminación de mejora en coincidencia para Reporte de Seguros (Surgical Fix)
+- **Tarea:** Optimizar la identificación de estudiantes en el reporte para la aseguradora, mejorando la flexibilidad en nombres e identidades para los segmentos Regulares y 5to Año.
+- **Backend (`src/Controller/StudenttransactionsController.php`):**
+    - Se refinó la lógica de coincidencia en el bloque `else` de `reporteParaAseguradora`.
+    - **Identidad:** Implementación de comparación por cédula/RIF usando el formato `T-IDENTIDAD` (Ej: V-12345678). Se incluyó limpieza de espacios en blanco (`trim`) e insensibilidad a mayúsculas tanto en el registro de la aseguradora (`cedu_rif`) como en los datos del sistema (`identity_card` y `type_of_identification`).
+    - **Nombres:** 
+        - Se amplió el arreglo de combinaciones de nombres para incluir formatos con apellidos primero (ej: "PEREZ RODRIGUEZ JUAN ALBERTO").
+        - Se implementó una validación por "**bolsa de palabras**" (word bag) como procedimiento de respaldo, permitiendo coincidencias aunque el orden de los términos varíe, filtrando palabras cortas/conectores.
+        - Se mantuvo la insensibilidad a acentos y mayúsculas mediante el método `normalizarTexto`.
+    - **Restricción Quirúrgica:** Se respetó estrictamente la instrucción de no modificar el bloque de estudiantes "**Nuevo**", el cual mantiene su lógica original de validación contra `Excels`.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` con los detalles de la identificación flexible.
