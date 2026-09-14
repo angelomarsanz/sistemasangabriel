@@ -242,7 +242,7 @@ use Cake\I18n\Time;
                                     <td><?= $studentsFors->student->second_surname ?></td>
                                     <td><?= $studentsFors->student->sex ?></td>
                                     <td><?= $studentsFors->student->birthdate->format('d-m-Y') ?></td>
-                                    <td><?= $studentsFors->student->level_of_study ?></td>
+                                    <td><?= $studentsFors->student->section->full_name ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->type_of_identification ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->identidy_card ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->first_name ?></td>
@@ -274,6 +274,7 @@ use Cake\I18n\Time;
                             <th scope="col">NOMBRES DEL ESTUDIANTE</th>
                             <th scope="col">CÉDULA</th>
                             <th scope="col">CONDICIÓN</th>
+                            <th scope="col">SECCIÓN</th>
                             <th scope="col">FECHA MODIFICACIÓN</th>
                         </tr>
                     </thead>
@@ -284,6 +285,7 @@ use Cake\I18n\Time;
                                 <td><?= $est['nombres'] ?></td>
                                 <td><?= $est['cedula'] ?></td>
                                 <td><?= $est['condicion'] ?></td>
+                                <td><?= $est['seccion'] ?></td>
                                 <td><?= $est['modified']->format('d-m-Y H:i:s') ?></td>
                             </tr>
                         <?php endforeach; ?>
@@ -306,6 +308,7 @@ use Cake\I18n\Time;
                             <th scope="col">PRIMER APELLIDO</th>
                             <th scope="col">SEGUNDO APELLIDO</th>
                             <th scope="col">CONDICIÓN</th>
+                            <th scope="col">SECCIÓN</th>
                             <th scope="col">ID ESTUDIANTE</th>
                         </tr>
                     </thead>
@@ -321,6 +324,7 @@ use Cake\I18n\Time;
                                 <td><?= $item->student->surname ?></td>
                                 <td><?= $item->student->second_surname ?></td>
                                 <td><?= $item->student->student_condition ?></td>
+                                <td><?= $item->student->section->full_name ?></td>
                                 <td><?= $item->student->id ?></td>
                             </tr>
                         <?php endforeach; ?>
@@ -343,6 +347,7 @@ use Cake\I18n\Time;
                             <th scope="col">PRIMER APELLIDO</th>
                             <th scope="col">SEGUNDO APELLIDO</th>
                             <th scope="col">CONDICIÓN</th>
+                            <th scope="col">SECCIÓN</th>
                             <th scope="col">ID ESTUDIANTE</th>
                         </tr>
                     </thead>
@@ -358,6 +363,7 @@ use Cake\I18n\Time;
                                 <td><?= $item->student->surname ?></td>
                                 <td><?= $item->student->second_surname ?></td>
                                 <td><?= $item->student->student_condition ?></td>
+                                <td><?= $item->student->section->full_name ?></td>
                                 <td><?= $item->student->id ?></td>
                             </tr>
                         <?php endforeach; ?>

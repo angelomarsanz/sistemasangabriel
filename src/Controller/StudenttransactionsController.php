@@ -1,4 +1,12 @@
 <?php
+/**
+ * Studenttransactions Controller
+ *
+ * Este controlador gestiona todas las transacciones financieras de los estudiantes,
+ * incluyendo matrículas, mensualidades, seguros escolares y otros conceptos educativos.
+ * Permite la generación de reportes administrativos y para aseguradoras, así como
+ * el ajuste masivo de cuotas y descuentos.
+ */
 namespace App\Controller;
 
 use App\Controller\AppController;
@@ -2053,6 +2061,18 @@ class StudenttransactionsController extends AppController
 		}
 	}
 
+    /**
+     * Genera la lógica y los datos para el reporte de seguro escolar.
+     *
+     * Para alumnos nuevos, gestiona un consecutivo de ejecución y registra el envío en la tabla Excels.
+     * Para alumnos regulares y de 5to año, verifica contra la tabla ListaAsegurados para determinar
+     * si ya existe una instrucción previa o si deben ser renovados/excluidos.
+     * Integra la asociación con el modelo Sections para obtener el nombre completo del grado.
+     *
+     * @param int $anio_escolar El año escolar para el cual se genera el reporte.
+     * @param string $tipo_estudiante El segmento a procesar (Nuevo, Regular, 5to. Año).
+     * @return array Estructura con las colecciones de estudiantes segmentadas para la vista.
+     */
     public function reporteParaAseguradora($anio_escolar = null, $tipo_estudiante = null)
     {
 		$this->loadModel('Excels');
@@ -2100,7 +2120,7 @@ class StudenttransactionsController extends AppController
 		if ($tipo_estudiante == "Nuevo")
 		{
 			$studentsFor = $studentTransactions->find()
-				->contain(['Students' => ['Parentsandguardians']])
+				->contain(['Students' => ['Parentsandguardians', 'Sections']])
 				->where(['Studenttransactions.transaction_description' => $matricula_anio, 'Studenttransactions.amount_dollar >' => 0, 'Students.new_student' => 1])
 				->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 
@@ -2118,6 +2138,7 @@ class StudenttransactionsController extends AppController
                         'nombres' => trim($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname),
                         'cedula' => $estudiante->identity_card,
                         'condicion' => $estudiante->student_condition,
+                        'seccion' => $estudiante->section->full_name,
                         'modified' => $estudiante->modified
                     ];
                 }
@@ -2153,7 +2174,8 @@ class StudenttransactionsController extends AppController
                 $condicionesBusqueda = [
                     'Studenttransactions.transaction_description' => $matriculaBusqueda,
                     'Studenttransactions.amount_dollar >' => 0,
-                    'Students.balance' => $anioInscripcionEstudiante
+                    'Students.balance' => $anioInscripcionEstudiante,
+                    'Students.new_student' => 0
                 ];
             }
             else
@@ -2165,12 +2187,13 @@ class StudenttransactionsController extends AppController
                     'Studenttransactions.transaction_description' => $matriculaBusqueda,
                     'Studenttransactions.amount_dollar >' => 0,
                     'Students.balance' => $anioInscripcionEstudiante,
-                    'Students.section_id IN' => [41, 42, 43]
+                    'Students.section_id IN' => [41, 42, 43],
+                    'Students.new_student' => 0
                 ];
             }
 
 			$studentsFor = $studentTransactions->find()
-				->contain(['Students' => ['Parentsandguardians']])
+				->contain(['Students' => ['Parentsandguardians', 'Sections']])
 				->where($condicionesBusqueda)
 				->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 
@@ -2189,6 +2212,7 @@ class StudenttransactionsController extends AppController
                         'nombres' => trim($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname),
                         'cedula' => $estudiante->identity_card,
                         'condicion' => $estudiante->student_condition,
+                        'seccion' => $estudiante->section->full_name,
                         'modified' => $estudiante->modified
                     ];
                 }
@@ -2233,10 +2257,6 @@ class StudenttransactionsController extends AppController
                 else
                 {
                     $estudiantesNoEncontradosSeguro[] = $studentsFors;
-                    if ($tipo_estudiante == "Regular")
-                    {
-                        $alumnosAdicionales[] = $estudiante->id;
-                    }
                 }
             }
         }

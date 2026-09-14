@@ -167,6 +167,18 @@
         - Se integró el filtro de secciones (`Students.section_id IN [41, 42, 43]`) directamente en el arreglo `$condicionesBusqueda` para mejorar la legibilidad y eficiencia del código.
 - **Documentación:** Actualización de `manual_tecnico_sistema.md` para reflejar la simplificación de la lógica de negocio.
 
+## [2026-09-14] - Integración de información de sección en Reporte para Aseguradora
+- **Tarea:** Incluir el grado y sección detallada en las tablas de control y en el reporte principal de seguro escolar.
+- **Cambios Realizados:**
+    - **Controller (`src/Controller/StudenttransactionsController.php`):**
+        - Se actualizó la acción `reporteParaAseguradora` para incluir el modelo `Sections` en el `contain` de todas las consultas de estudiantes (`StudentsFor`).
+        - En la lógica de segmentación de estudiantes con condición especial, se incorporó la obtención de `section->full_name` para guardarla en el arreglo de datos enviado a la vista.
+    - **View (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se añadió la columna "**SECCIÓN**" a las tres tablas de control secundarias (Condición especial, Instrucción actualizada y No encontrados).
+        - **Mejora:** En la tabla principal del "**Reporte para aseguradora**", se sustituyó el campo simple `level_of_study` por el nombre completo de la sección (`section->full_name`) en la columna "**GRADO**", proporcionando una información más precisa para la póliza.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` para reflejar el uso extensivo del modelo `Sections` en la interfaz del reporte.
+
+
 ## [2026-09-14] - Unificación de lógica para Estudiantes Nuevos y mejoras de UI
 - **Tarea:** Aplicar la lógica de segmentación por condición y verificación de procesados anteriores a los estudiantes de tipo "Nuevo", y añadir un título dinámico al reporte.
 - **Cambios Realizados:**
