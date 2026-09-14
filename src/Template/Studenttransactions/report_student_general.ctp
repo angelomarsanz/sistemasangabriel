@@ -325,6 +325,41 @@ use Cake\I18n\Time;
                     </tbody>
                 </table>
             <?php endif; ?>
+
+            <?php if (isset($estudiantesNoEncontradosSeguro) && !empty($estudiantesNoEncontradosSeguro)): ?>
+                <div class="saltopagina"></div>
+                <div class="page-header">
+                    <h3>Estudiantes no encontrados en archivo del seguro</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">NRO.</th>
+                            <th scope="col">CÉDULA TITULAR ESCOLAR</th>
+                            <th scope="col">PRIMER NOMBRE</th>
+                            <th scope="col">SEGUNDO NOMBRE</th>
+                            <th scope="col">PRIMER APELLIDO</th>
+                            <th scope="col">SEGUNDO APELLIDO</th>
+                            <th scope="col">ID ESTUDIANTE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $accNoEnc = 1;
+                        foreach ($estudiantesNoEncontradosSeguro as $item): ?>
+                            <tr>
+                                <td><?= $accNoEnc++ ?></td>
+                                <td><?= $item->student->identity_card ?></td>
+                                <td><?= $item->student->first_name ?></td>
+                                <td><?= $item->student->second_name ?></td>
+                                <td><?= $item->student->surname ?></td>
+                                <td><?= $item->student->second_surname ?></td>
+                                <td><?= $item->student->id ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
         </div>
         <div id="menu-menos" class="menumenos nover">
             <p>

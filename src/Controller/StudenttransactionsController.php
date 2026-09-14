@@ -1986,6 +1986,7 @@ class StudenttransactionsController extends AppController
                 $nuevaEjecucionStr = $datos_reporte['nuevaEjecucionStr'];
 				$estudiantesCondicionEspecial = $datos_reporte['estudiantesCondicionEspecial'];
 				$estudiantesInstruccionActualizada = $datos_reporte['estudiantesInstruccionActualizada'];
+                $estudiantesNoEncontradosSeguro = $datos_reporte['estudiantesNoEncontradosSeguro'];
 
 				$this->set([
                     'tipo_reporte' => $tipo_reporte,
@@ -1997,6 +1998,7 @@ class StudenttransactionsController extends AppController
                     'nuevaEjecucionStr' => $nuevaEjecucionStr,
                     'estudiantesCondicionEspecial' => $estudiantesCondicionEspecial,
                     'estudiantesInstruccionActualizada' => $estudiantesInstruccionActualizada,
+                    'estudiantesNoEncontradosSeguro' => $estudiantesNoEncontradosSeguro,
                     'tipo_estudiante' => $tipo_estudiante
                 ]);
 			}
@@ -2093,6 +2095,7 @@ class StudenttransactionsController extends AppController
         $alumnosAdicionales = [];
         $estudiantesCondicionEspecial = [];
         $estudiantesInstruccionActualizada = [];
+        $estudiantesNoEncontradosSeguro = [];
 
 		if ($tipo_estudiante == "Nuevo")
 		{
