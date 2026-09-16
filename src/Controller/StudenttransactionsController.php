@@ -2086,31 +2086,10 @@ class StudenttransactionsController extends AppController
 
 		$studentTransactions = TableRegistry::get('Studenttransactions');
 
-        $this->loadModel('Schools');
-
-        $school = $this->Schools->get(2);
-
-        $ejecucionReporteSeguro = $school->ejecucion_reporte_seguro;
         $vectorEjecuciones = [];
-        $nuevoConsecutivo = 1;
-
-        if ($ejecucionReporteSeguro != null)
-        {
-            $vectorEjecuciones = json_decode($ejecucionReporteSeguro, true);
-            if (!empty($vectorEjecuciones))
-            {
-                $ultimoElemento = end($vectorEjecuciones);
-                $partes = explode('_', $ultimoElemento);
-                $nuevoConsecutivo = (int)$partes[0] + 1;
-            }
-        }
 
         $fechaHoraActual = Time::now()->format('d-m-Y_H-i-s');
-        $nuevaEjecucionStr = $nuevoConsecutivo . "_nuevo_" . $fechaHoraActual;
-
-        $vectorEjecuciones[] = $nuevaEjecucionStr;
-        $school->ejecucion_reporte_seguro = json_encode($vectorEjecuciones);
-        $this->Schools->save($school);
+        $nuevaEjecucionStr = "";
 
         $alumnosAdicionales = [];
         $estudiantesCondicionEspecial = [];
@@ -2119,7 +2098,8 @@ class StudenttransactionsController extends AppController
 
 		if ($tipo_estudiante == "Nuevo")
 		{
-			$studentsFor = $studentTransactions->find()
+            $nuevaEjecucionStr = "nuevo_" . $fechaHoraActual;
+            $studentsFor = $studentTransactions->find()
 				->contain(['Students' => ['Parentsandguardians', 'Sections']])
 				->where(['Studenttransactions.transaction_description' => $matricula_anio, 'Studenttransactions.amount_dollar >' => 0, 'Students.new_student' => 1])
 				->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
@@ -2168,6 +2148,7 @@ class StudenttransactionsController extends AppController
 		{
             if ($tipo_estudiante == "Regular")
             {
+                $nuevaEjecucionStr = "regular_" . $fechaHoraActual;
                 $matriculaBusqueda = $matricula_anio;
                 $anioInscripcionEstudiante = $anio_escolar;
                 $instruccion = "RENOVAR";
@@ -2180,6 +2161,7 @@ class StudenttransactionsController extends AppController
             }
             else
             {
+                $nuevaEjecucionStr = "5to. anio_" . $fechaHoraActual;
                 $matriculaBusqueda = $matriculaAnioAnterior;
                 $anioInscripcionEstudiante = $anioEscolarAnterior;
                 $instruccion = "EXCLUIR";
@@ -2282,13 +2264,20 @@ class StudenttransactionsController extends AppController
                             $this->Flash->error(__('No se pudo actualizar la instrucción del asegurado: ' . $aseguradoModificar->asegurado));
                         }
                     }
+                    else
+                    {
+                        $this->Flash->error(__('No se pudo actualizar la instrucción del asegurado: ' . $encontradoAsegurado->asegurado));
+                    }
                 }
                 else
                 {
-                    $estudiantesNoEncontradosSeguro[] = $studentsFors;
                     if ($tipo_estudiante == "Regular")
                     {
                         $alumnosAdicionales[] = $estudiante->id;
+                    }
+                    else
+                    {
+                        $estudiantesNoEncontradosSeguro[] = $studentsFors;
                     }
                 }
             }
