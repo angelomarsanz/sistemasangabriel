@@ -4,7 +4,8 @@
  *
  * Esta vista permite generar diferentes tipos de reportes relacionados con el seguro escolar de los estudiantes.
  * Tipos de reporte:
- * - Reporte para aseguradora: Muestra datos detallados de estudiantes y representantes para la póliza de seguro.
+ * - Reporte para aseguradora: Muestra datos detallados de estudiantes y representantes para la póliza de seguro,
+ *   incluyendo una sección especial para registros que ya cuentan con instrucción previa.
  * - Reporte de alumnos solventes: Lista estudiantes que están al día con sus pagos.
  * - Reporte de alumnos pendientes de pago: Lista estudiantes con deudas pendientes.
  */
@@ -393,6 +394,69 @@ use Cake\I18n\Time;
                         foreach ($estudiantesNoEncontradosSeguro as $item): ?>
                             <tr>
                                 <td class="noExl"><?= $accNoEnc++ ?></td>
+                                <td><?= $item->student->type_of_identification ?></td>
+                                <td><?= $item->student->identity_card ?></td>
+                                <td><?= $item->student->first_name ?></td>
+                                <td><?= $item->student->second_name ?></td>
+                                <td><?= $item->student->surname ?></td>
+                                <td><?= $item->student->second_surname ?></td>
+                                <td><?= $item->student->sex ?></td>
+                                <td><?= $item->student->birthdate->format('d-m-Y') ?></td>
+                                <td><?= $item->student->section->full_name ?></td>
+                                <td><?= $item->student->parentsandguardian->type_of_identification ?></td>
+                                <td><?= $item->student->parentsandguardian->identidy_card ?></td>
+                                <td><?= $item->student->parentsandguardian->first_name ?></td>
+                                <td><?= $item->student->parentsandguardian->second_name ?></td>
+                                <td><?= $item->student->parentsandguardian->surname ?></td>
+                                <td><?= $item->student->parentsandguardian->second_surname ?></td>
+                                <td><?= $item->student->parentsandguardian->sex ?></td>
+                                <td><?= $item->student->parentsandguardian->email ?></td>
+                                <td><?= $item->student->parentsandguardian->cell_phone ?></td>
+                                <td><?= $item->student->id ?></td>
+                                <td><?= $nuevaEjecucionStr ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+
+            <?php if (isset($estudiantesInstruccionActualizada) && !empty($estudiantesInstruccionActualizada)): ?>
+                <div class="saltopagina"></div>
+                <div class="page-header">
+                    <h3>Estudiantes con instrucción ya actualizada</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="noExl">NRO.</th>
+                            <th scope="col">NACIONALIDAD TITULAR</th>
+                            <th scope="col">CÉDULA TITULAR ESCOLAR</th>
+                            <th scope="col">PRIMER NOMBRE</th>
+                            <th scope="col">SEGUNDO NOMBRE</th>
+                            <th scope="col">PRIMER APELLIDO</th>
+                            <th scope="col">SEGUNDO APELLIDO</th>
+                            <th scope="col">SEXO TITULAR</th>
+                            <th scope="col">FECHA NAC. TITULAR</th>
+                            <th scope="col">GRADO</th>
+                            <th scope="col">NACIONALIDAD REPRESENTANTE</th>
+                            <th scope="col">CEDULA REPRESENTANTE</th>
+                            <th scope="col">PRIMER NOMBRE</th>
+                            <th scope="col">SEGUNDO NOMBRE</th>
+                            <th scope="col">PRIMER APELLIDO</th>
+                            <th scope="col">SEGUNDO APELLIDO REPRESENTANTE</th>
+                            <th scope="col">SEXO REPRESENTANTE</th>
+                            <th scope="col">CORREO/EMAIL</th>
+                            <th scope="col">NÚMERO TELEFÓNICO</th>
+                            <th scope="col">CÓDIGO COLEGIO SAN GABRIEL</th>
+                            <th scope="col">EJECUCION REPORTE SEGURO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $accInstAct = 1;
+                        foreach ($estudiantesInstruccionActualizada as $item): ?>
+                            <tr>
+                                <td class="noExl"><?= $accInstAct++ ?></td>
                                 <td><?= $item->student->type_of_identification ?></td>
                                 <td><?= $item->student->identity_card ?></td>
                                 <td><?= $item->student->first_name ?></td>

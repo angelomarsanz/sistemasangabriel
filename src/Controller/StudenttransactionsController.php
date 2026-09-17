@@ -4,8 +4,9 @@
  *
  * Este controlador gestiona todas las transacciones financieras de los estudiantes,
  * incluyendo matrículas, mensualidades, seguros escolares y otros conceptos educativos.
- * Permite la generación de reportes administrativos y para aseguradoras, así como
- * el ajuste masivo de cuotas y descuentos.
+ * Permite la generación de reportes administrativos y para aseguradoras, con segmentación
+ * detallada para alumnos con instrucciones ya procesadas, así como el ajuste masivo
+ * de cuotas y descuentos.
  */
 namespace App\Controller;
 
@@ -1995,6 +1996,7 @@ class StudenttransactionsController extends AppController
 				$estudiantesCondicionEspecial = $datos_reporte['estudiantesCondicionEspecial'];
 				$estudiantesEncontradosSeguro = $datos_reporte['estudiantesEncontradosSeguro'];
                 $estudiantesNoEncontradosSeguro = $datos_reporte['estudiantesNoEncontradosSeguro'];
+                $estudiantesInstruccionActualizada = $datos_reporte['estudiantesInstruccionActualizada'];
 
 				$this->set([
                     'tipo_reporte' => $tipo_reporte,
@@ -2007,6 +2009,7 @@ class StudenttransactionsController extends AppController
                     'estudiantesCondicionEspecial' => $estudiantesCondicionEspecial,
                     'estudiantesEncontradosSeguro' => $estudiantesEncontradosSeguro,
                     'estudiantesNoEncontradosSeguro' => $estudiantesNoEncontradosSeguro,
+                    'estudiantesInstruccionActualizada' => $estudiantesInstruccionActualizada,
                     'tipo_estudiante' => $tipo_estudiante
                 ]);
 			}
@@ -2066,8 +2069,9 @@ class StudenttransactionsController extends AppController
      *
      * Para alumnos nuevos, gestiona un consecutivo de ejecución y registra el envío en la tabla Excels.
      * Para alumnos regulares y de 5to año, verifica contra la tabla ListaAsegurados para determinar
-     * si ya existe una instrucción previa o si deben ser renovados/excluidos.
-     * Integra la asociación con el modelo Sections para obtener el nombre completo del grado.
+     * si ya existe una instrucción previa (que se segmenta en un reporte aparte) o si deben ser
+     * renovados/excluidos. Integra la asociación con el modelo Sections para obtener el nombre
+     * completo del grado.
      *
      * @param int $anio_escolar El año escolar para el cual se genera el reporte.
      * @param string $tipo_estudiante El segmento a procesar (Nuevo, Regular, 5to. Año).
@@ -2095,6 +2099,7 @@ class StudenttransactionsController extends AppController
         $estudiantesCondicionEspecial = [];
         $estudiantesEncontradosSeguro = [];
         $estudiantesNoEncontradosSeguro = [];
+        $estudiantesInstruccionActualizada = [];
 
 		if ($tipo_estudiante == "Nuevo")
 		{
@@ -2201,6 +2206,9 @@ class StudenttransactionsController extends AppController
                 $encontradoAsegurado = null;
                 $ciEstudiante = strtoupper(trim($estudiante->type_of_identification)) . "-" . trim($estudiante->identity_card);
 
+                // Normalizar fecha de nacimiento del estudiante (Sistema: AAAA-MM-DD -> DD/MM/AAAA)
+                $fechaNacimientoEstudiante = $estudiante->birthdate ? $estudiante->birthdate->format('d/m/Y') : '';
+
                 // Generar diversas combinaciones del nombre del estudiante para la comparación
                 $nombresEstudiante = [
                     $this->normalizarTexto($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname),
@@ -2214,6 +2222,16 @@ class StudenttransactionsController extends AppController
 
                 foreach ($listaAsegurados as $asegurado)
                 {
+                    // La fecha de nacimiento debe coincidir para considerar que es el mismo estudiante (Seguridad adicional)
+                    // Normalizamos ambos valores para evitar discrepancias por separadores o espacios
+                    $fechaAseguradoNormalizada = !empty($asegurado->fecha_nacimiento) ? date('d/m/Y', strtotime(str_replace('/', '-', $asegurado->fecha_nacimiento))) : '';
+                    $fechaEstudianteNormalizada = !empty($fechaNacimientoEstudiante) ? date('d/m/Y', strtotime(str_replace('/', '-', $fechaNacimientoEstudiante))) : '';
+
+                    if (empty($fechaAseguradoNormalizada) || $fechaAseguradoNormalizada != $fechaEstudianteNormalizada)
+                    {
+                        continue;
+                    }
+
                     // 1. Comparación por Cédula/RIF con formato (Ej: V-12345678)
                     if (strtoupper(trim($asegurado->cedu_rif)) == $ciEstudiante)
                     {
@@ -2252,10 +2270,9 @@ class StudenttransactionsController extends AppController
 
                 if ($encontradoAsegurado)
                 {
-                    $estudiantesEncontradosSeguro[] = $studentsFors;
-
                     if (empty($encontradoAsegurado->instruccion) || trim($encontradoAsegurado->instruccion) == '')
                     {
+                        $estudiantesEncontradosSeguro[] = $studentsFors;
                         $aseguradoModificar = $this->ListaAsegurados->get($encontradoAsegurado->certificado);
                         $aseguradoModificar->instruccion = $instruccion;
                         $aseguradoModificar->ejecucion_reporte_seguro = $nuevaEjecucionStr;
@@ -2266,7 +2283,7 @@ class StudenttransactionsController extends AppController
                     }
                     else
                     {
-                        $this->Flash->error(__('No se pudo actualizar la instrucción del asegurado: ' . $encontradoAsegurado->asegurado));
+                        $estudiantesInstruccionActualizada[] = $studentsFors;
                     }
                 }
                 else
@@ -2293,6 +2310,7 @@ class StudenttransactionsController extends AppController
             'estudiantesCondicionEspecial' => $estudiantesCondicionEspecial,
             'estudiantesEncontradosSeguro' => $estudiantesEncontradosSeguro,
             'estudiantesNoEncontradosSeguro' => $estudiantesNoEncontradosSeguro,
+            'estudiantesInstruccionActualizada' => $estudiantesInstruccionActualizada,
             'nuevaEjecucionStr' => $nuevaEjecucionStr,
         ];
     }

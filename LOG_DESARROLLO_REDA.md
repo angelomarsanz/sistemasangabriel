@@ -213,3 +213,24 @@
         - Se refinó el título del reporte secundario a "**Estudiantes encontrados en las listas del colegio y del seguro (Registros encontrados)**" para cumplir con la terminología solicitada por el usuario.
         - Se validó que todas las tablas de control mantengan la estandarización de 21 columnas para compatibilidad total con la aseguradora.
     - **Documentación:** Actualizados el `manual_tecnico_sistema.md` y este log para reflejar el estado final de la implementación.
+
+## [2026-09-16] - Nueva segmentación en Reporte para Aseguradora
+- **Tarea:** Listar estudiantes que ya poseen una instrucción actualizada en una sección independiente del reporte.
+- **Cambios Realizados:**
+    - **Backend (src/Controller/StudenttransactionsController.php):**
+        - En reporteParaAseguradora, se inicializó el array $estudiantesInstruccionActualizada.
+        - Se modificó la lógica de procesamiento para que, si un asegurado ya tiene el campo instruccion poblado, el registro se agregue a este nuevo array en lugar de ser ignorado o procesado como nueva instrucción.
+        - Se actualizó el array de retorno y la acción reportStudentGeneral para enviar esta nueva colección a la vista.
+    - **UI (src/Template/Studenttransactions/report_student_general.ctp):**
+        - Se añadió una nueva tabla "Estudiantes con instrucción ya actualizada" que se muestra al final del bloque de reporte para aseguradora.
+        - La tabla utiliza el mismo formato de 21 columnas que el reporte principal para mantener la consistencia de los datos.
+- **Documentación:** Se actualizaron los encabezados de los archivos modificados y el manual técnico del sistema.
+
+## [2026-09-16] - Fortalecimiento de la identificación de estudiantes por fecha de nacimiento
+- **Tarea:** Incorporar la fecha de nacimiento como criterio obligatorio de comparación en el reporte para la aseguradora.
+- **Cambios Realizados:**
+    - **Backend (src/Controller/StudenttransactionsController.php):**
+        - Se actualizó la función reporteParaAseguradora para preparar la fecha de nacimiento del estudiante.
+        - Se implementó una normalización robusta (DD/MM/AAAA) para las fechas de nacimiento tanto del sistema como de la aseguradora, utilizando `date()` y `strtotime()` para asegurar la compatibilidad absoluta y evitar discrepancias por formato.
+        - Se estableció la coincidencia de la fecha de nacimiento como un requisito previo obligatorio para cualquier tipo de identificación posterior (cédula o nombre).
+- **Documentación:** Actualización del manual_tecnico_sistema.md reflejando el nuevo criterio de seguridad y la normalización de fechas.
