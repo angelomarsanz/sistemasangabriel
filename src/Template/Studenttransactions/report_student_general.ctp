@@ -268,7 +268,7 @@ use Cake\I18n\Time;
                 <div class="page-header">
                     <h3>Estudiantes con condición distinta a Regular</h3>
                 </div>
-                <table class="table">
+                <table id="tabla-condicion-especial" class="table">
                     <thead>
                         <tr>
                             <th scope="col">NRO.</th>
@@ -299,7 +299,7 @@ use Cake\I18n\Time;
                 <div class="page-header">
                     <h3>Estudiantes encontrados en las listas del colegio y del seguro (Registros encontrados)</h3>
                 </div>
-                <table class="table">
+                <table id="tabla-encontrados-seguro" class="table">
                     <thead>
                         <tr>
                             <th scope="col" class="noExl">NRO.</th>
@@ -362,7 +362,7 @@ use Cake\I18n\Time;
                 <div class="page-header">
                     <h3>Estudiantes no encontrados en archivo del seguro</h3>
                 </div>
-                <table class="table">
+                <table id="tabla-no-encontrados-seguro" class="table">
                     <thead>
                         <tr>
                             <th scope="col" class="noExl">NRO.</th>
@@ -425,7 +425,7 @@ use Cake\I18n\Time;
                 <div class="page-header">
                     <h3>Estudiantes con instrucción ya actualizada</h3>
                 </div>
-                <table class="table">
+                <table id="tabla-instruccion-actualizada" class="table">
                     <thead>
                         <tr>
                             <th scope="col" class="noExl">NRO.</th>
@@ -583,7 +583,8 @@ use Cake\I18n\Time;
                                     [
                                         null => "",
                                         "Nuevo" => "Nuevo",
-                                        "Regular" => "Regular",
+                                        "Regular" => "Regular versus archivo del seguro",
+                                        "Nuevo y Regular" => "Nuevo y Regular",
                                         "5to. Año" => "5to. Año"
                                     ]]);
                                 ?>
@@ -615,17 +616,39 @@ $(document).ready(function(){
         $('#menu-menos').show();
     });
 
-    $("#excel").click(function(){
+    $("#excel").click(function(e){
+        e.preventDefault();
+        
+        var wb = XLSX.utils.book_new();
+        var tipoReporte = "<?= isset($tipo_reporte) ? $tipo_reporte : '' ?>";
+        
+        // Función para agregar tabla al libro si existe
+        function addTableToSheet(tableId, sheetName) {
+            var table = document.getElementById(tableId);
+            if (table) {
+                // Clonar tabla para remover columnas con clase .noExl
+                var tempTable = table.cloneNode(true);
+                $(tempTable).find('.noExl').remove();
+                
+                var ws = XLSX.utils.table_to_sheet(tempTable);
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            }
+        }
 
-        $("#seguro").table2excel({
+        // Caso: Reporte para aseguradora
+        if (tipoReporte == "Reporte para aseguradora") {
+            addTableToSheet('seguro', 'Seguro Escolar');
+            addTableToSheet('tabla-condicion-especial', 'Condicion Especial');
+            addTableToSheet('tabla-encontrados-seguro', 'Encontrados Seguro');
+            addTableToSheet('tabla-no-encontrados-seguro', 'No Encontrados Seguro');
+            addTableToSheet('tabla-instruccion-actualizada', 'Instruccion Actualizada');
+        } else {
+            // Otros reportes
+            addTableToSheet('seguro', 'Reporte');
+        }
 
-            exclude: ".noExl",
-
-            name: "Reporte seguro",
-
-            filename: "reporte seguro"
-
-        });
+        // Exportar archivo
+        XLSX.writeFile(wb, "reporte_seguro.xlsx");
     });
 
     /**
@@ -642,23 +665,34 @@ $(document).ready(function(){
             $("#periodo-escolar").attr('required', false);
 
             $("#div-tipo-estudiante").removeClass("noverScreen");
-            $("#tipo-estudiante").attr('required', true);
+            // Verificar si el campo existe antes de establecer required
+            if ($("#tipo-estudiante").length > 0) {
+                $("#tipo-estudiante").attr('required', true);
+            }
         }
         else if (tipoReporte == "Reporte de alumnos solventes" || tipoReporte == "Reporte de alumnos pendientes de pago")
         {
             $("#div-tipo-estudiante").addClass("noverScreen");
-            $("#tipo-estudiante").attr('required', false);
+            if ($("#tipo-estudiante").length > 0) {
+                $("#tipo-estudiante").attr('required', false);
+            }
 
             $("#div-periodo-escolar").removeClass("noverScreen");
-            $("#periodo-escolar").attr('required', true);
+            if ($("#periodo-escolar").length > 0) {
+                $("#periodo-escolar").attr('required', true);
+            }
         }
         else
         {
             $("#div-periodo-escolar").addClass("noverScreen");
-            $("#periodo-escolar").attr('required', false);
+            if ($("#periodo-escolar").length > 0) {
+                $("#periodo-escolar").attr('required', false);
+            }
 
             $("#div-tipo-estudiante").addClass("noverScreen");
-            $("#tipo-estudiante").attr('required', false);
+            if ($("#tipo-estudiante").length > 0) {
+                $("#tipo-estudiante").attr('required', false);
+            }
         }
     });
 });

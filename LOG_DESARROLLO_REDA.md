@@ -1,5 +1,17 @@
 # Log de Desarrollo - REDA
 
+## [2026-09-21] - Mejora en Reporte Seguro Escolar: Nueva opción "Nuevo y Regular"
+- **Tarea:** Agregar la opción "Nuevo y Regular" al reporte de seguro y renombrar "Regular".
+- **Cambios Realizados:**
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se renombró la etiqueta de la opción "Regular" a "**Regular versus archivo del seguro**".
+        - Se añadió la nueva opción "**Nuevo y Regular**" en el selector de tipo de estudiante para el reporte de aseguradora.
+    - **Backend (`src/Controller/StudenttransactionsController.php`):**
+        - Refactorizada la acción `reporteParaAseguradora` para manejar tanto "Nuevo" como "Nuevo y Regular" en un mismo bloque lógico.
+        - Para la opción "Nuevo y Regular", se omitió el filtro `'Students.new_student' => 1`, permitiendo incluir a todos los estudiantes con matrícula pagada.
+        - Se ajustó el prefijo de la cadena de ejecución (`$nuevaEjecucionStr`) a `nuevo_y_regular_` cuando se selecciona esta modalidad.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` reflejando la nueva capacidad de segmentación en el reporte de aseguradora.
+
 ## [2026-08-30] - Implementación completa de sección Descuentos/Recargos
 - **Tarea:** Mejorar la sección de descuentos/recargos en la creación de facturas.
 - **Cambios Realizados:**
@@ -226,11 +238,13 @@
         - La tabla utiliza el mismo formato de 21 columnas que el reporte principal para mantener la consistencia de los datos.
 - **Documentación:** Se actualizaron los encabezados de los archivos modificados y el manual técnico del sistema.
 
-## [2026-09-16] - Fortalecimiento de la identificación de estudiantes por fecha de nacimiento
-- **Tarea:** Incorporar la fecha de nacimiento como criterio obligatorio de comparación en el reporte para la aseguradora.
+## [2026-09-21] - Implementación de exportación multi-hoja a Excel en Reporte de Seguro
+- **Tarea:** Permitir la exportación de todas las tablas del reporte de seguro escolar a un único archivo Excel con hojas separadas.
 - **Cambios Realizados:**
-    - **Backend (src/Controller/StudenttransactionsController.php):**
-        - Se actualizó la función reporteParaAseguradora para preparar la fecha de nacimiento del estudiante.
-        - Se implementó una normalización robusta (DD/MM/AAAA) para las fechas de nacimiento tanto del sistema como de la aseguradora, utilizando `date()` y `strtotime()` para asegurar la compatibilidad absoluta y evitar discrepancias por formato.
-        - Se estableció la coincidencia de la fecha de nacimiento como un requisito previo obligatorio para cualquier tipo de identificación posterior (cédula o nombre).
-- **Documentación:** Actualización del manual_tecnico_sistema.md reflejando el nuevo criterio de seguridad y la normalización de fechas.
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se asignaron identificadores únicos (`id`) a todas las tablas del reporte para permitir su selección individual: `#tabla-condicion-especial`, `#tabla-encontrados-seguro`, `#tabla-no-encontrados-seguro` y `#tabla-instruccion-actualizada`.
+        - Se reemplazó la lógica de exportación basada en `table2excel` por una implementación personalizada utilizando la librería **SheetJS (XLSX)** (ya disponible en el proyecto).
+        - La nueva funcionalidad crea un libro de trabajo (`workbook`) y agrega cada tabla presente en la vista a una hoja independiente con nombres descriptivos (ej. "Seguro Escolar", "Condicion Especial", etc.).
+        - Se implementó la limpieza automática de columnas marcadas con la clase `.noExl` (como los números correlativos de la interfaz) antes de la exportación para mantener la integridad del formato Excel requerido.
+        - Se añadieron validaciones de existencia de elementos y se mejoró la gestión de obligatoriedad de campos en el formulario dinámico.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` para reflejar la mejora en la herramienta de exportación.

@@ -2101,12 +2101,23 @@ class StudenttransactionsController extends AppController
         $estudiantesNoEncontradosSeguro = [];
         $estudiantesInstruccionActualizada = [];
 
-		if ($tipo_estudiante == "Nuevo")
+		if ($tipo_estudiante == "Nuevo" || $tipo_estudiante == "Nuevo y Regular")
 		{
-            $nuevaEjecucionStr = "nuevo_" . $fechaHoraActual;
+            $prefijo = ($tipo_estudiante == "Nuevo") ? "nuevo_" : "nuevo_y_regular_";
+            $nuevaEjecucionStr = $prefijo . $fechaHoraActual;
+
+            $condiciones = [
+                'Studenttransactions.transaction_description' => $matricula_anio,
+                'Studenttransactions.amount_dollar >' => 0
+            ];
+
+            if ($tipo_estudiante == "Nuevo") {
+                $condiciones['Students.new_student'] = 1;
+            }
+
             $studentsFor = $studentTransactions->find()
 				->contain(['Students' => ['Parentsandguardians', 'Sections']])
-				->where(['Studenttransactions.transaction_description' => $matricula_anio, 'Studenttransactions.amount_dollar >' => 0, 'Students.new_student' => 1])
+				->where($condiciones)
 				->order(['Students.surname' => 'ASC', 'Students.second_surname' => 'ASC', 'Students.first_name' => 'ASC', 'Students.second_name' => 'ASC' ]);
 
             $ultimoEnvio = $this->Excels->find('all');
