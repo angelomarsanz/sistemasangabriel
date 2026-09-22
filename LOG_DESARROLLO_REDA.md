@@ -1,5 +1,14 @@
 # Log de Desarrollo - REDA
 
+## [2026-09-22] - Simplificación de Reporte Seguro Escolar: Eliminación de columna "Grado"
+- **Tarea:** Eliminar la columna "**Grado**" de todas las tablas del reporte para aseguradora.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se eliminó el encabezado `<th scope="col">GRADO</th>` de las 4 tablas principales del reporte de seguro (Principal, Registros Encontrados, No Encontrados e Instrucción Actualizada).
+        - Se eliminaron las celdas correspondientes que mostraban el nombre completo de la sección (`section->full_name`).
+        - El reporte ahora cuenta con 20 columnas de datos, manteniendo el alineamiento correcto para su visualización y exportación.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` reflejando la nueva estructura de las tablas del reporte.
+
 ## [2026-09-21] - Mejora en Reporte Seguro Escolar: Nueva opción "Nuevo y Regular"
 - **Tarea:** Agregar la opción "Nuevo y Regular" al reporte de seguro y renombrar "Regular".
 - **Cambios Realizados:**
