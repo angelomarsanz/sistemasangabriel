@@ -1997,6 +1997,7 @@ class StudenttransactionsController extends AppController
 				$estudiantesEncontradosSeguro = $datos_reporte['estudiantesEncontradosSeguro'];
                 $estudiantesNoEncontradosSeguro = $datos_reporte['estudiantesNoEncontradosSeguro'];
                 $estudiantesInstruccionActualizada = $datos_reporte['estudiantesInstruccionActualizada'];
+                $mapaCedulasPN = $datos_reporte['mapaCedulasPN'];
 
 				$this->set([
                     'tipo_reporte' => $tipo_reporte,
@@ -2010,7 +2011,8 @@ class StudenttransactionsController extends AppController
                     'estudiantesEncontradosSeguro' => $estudiantesEncontradosSeguro,
                     'estudiantesNoEncontradosSeguro' => $estudiantesNoEncontradosSeguro,
                     'estudiantesInstruccionActualizada' => $estudiantesInstruccionActualizada,
-                    'tipo_estudiante' => $tipo_estudiante
+                    'tipo_estudiante' => $tipo_estudiante,
+                    'mapaCedulasPN' => $mapaCedulasPN
                 ]);
 			}
 			else
@@ -2123,6 +2125,42 @@ class StudenttransactionsController extends AppController
             $ultimoEnvio = $this->Excels->find('all');
             $consecutivoCondicion = 1;
 
+            // Inicializar mapas y contadores para consistencia en la generación de PN
+            // Poblamos el mapa con lo que ya existe en el historial de Excels para mantener IDs estables
+            $mapaCedulasPN = [];
+            $contadoresRepresentantes = [];
+
+            foreach ($ultimoEnvio as $envio) {
+                $mapaCedulasPN[$envio->codigo_colegio] = $envio->cedula_titular_escolar;
+                
+                // Si es un ID generado (Nacionalidad M), actualizamos el contador del representante
+                if ($envio->nacionalidad_titular == 'M') {
+                    $cedulaRep = $envio->cedula_representante;
+                    $sufijo = substr($envio->cedula_titular_escolar, strlen($cedulaRep));
+                    if (is_numeric($sufijo)) {
+                        $valor = (int)$sufijo;
+                        if (!isset($contadoresRepresentantes[$cedulaRep]) || $valor > $contadoresRepresentantes[$cedulaRep]) {
+                            $contadoresRepresentantes[$cedulaRep] = $valor;
+                        }
+                    }
+                }
+            }
+
+            // Pre-procesar todos los estudiantes del lote actual para asignar IDs a los nuevos PN
+            // antes de realizar la segmentación y el guardado.
+            foreach ($studentsFor as $sf) {
+                $est = $sf->student;
+                if ($est->type_of_identification == 'PN' && !isset($mapaCedulasPN[$est->id])) {
+                    $cedulaRep = $est->parentsandguardian->identidy_card;
+                    if (!isset($contadoresRepresentantes[$cedulaRep])) {
+                        $contadoresRepresentantes[$cedulaRep] = 1;
+                    } else {
+                        $contadoresRepresentantes[$cedulaRep]++;
+                    }
+                    $mapaCedulasPN[$est->id] = $cedulaRep . $contadoresRepresentantes[$cedulaRep];
+                }
+            }
+
             foreach ($studentsFor as $studentsFors)
             {
                 $estudiante = $studentsFors->student;
@@ -2157,6 +2195,42 @@ class StudenttransactionsController extends AppController
                 else
                 {
                     $alumnosAdicionales[] = $estudiante->id;
+
+                    // Lógica de normalización idéntica a la vista
+                    $nacionalidadTitular = ($estudiante->type_of_identification == 'PN') ? 'M' : (($estudiante->type_of_identification == 'P') ? 'E' : $estudiante->type_of_identification);
+                    
+                    // Usar la cédula pre-calculada (propia o generada)
+                    $cedulaTitular = ($estudiante->type_of_identification == 'PN') ? $mapaCedulasPN[$estudiante->id] : $estudiante->identity_card;
+                    
+                    $nacionalidadRep = ($estudiante->parentsandguardian->type_of_identification == 'P') ? 'E' : $estudiante->parentsandguardian->type_of_identification;
+
+                    // Crear registro en la tabla excels para control histórico
+                    $excelEntity = $this->Excels->newEntity();
+                    $excelEntity->nacionalidad_titular = $nacionalidadTitular;
+                    $excelEntity->cedula_titular_escolar = $cedulaTitular;
+                    $excelEntity->primer_nombre_titular = strtoupper(trim($estudiante->first_name));
+                    $excelEntity->segundo_nombre_titular = strtoupper(trim($estudiante->second_name));
+                    $excelEntity->primer_apellido_titular = strtoupper(trim($estudiante->surname));
+                    $excelEntity->segundo_apellido_titular = strtoupper(trim($estudiante->second_surname));
+                    $excelEntity->sexo_titular = $estudiante->sex;
+                    $excelEntity->fecha_nacimiento_titular = $estudiante->birthdate ? $estudiante->birthdate->format('d-m-Y') : '';
+                    
+                    $excelEntity->nacionalidad_representante = $nacionalidadRep;
+                    $excelEntity->cedula_representante = $estudiante->parentsandguardian->identidy_card;
+                    $excelEntity->primer_nombre_representante = strtoupper(trim($estudiante->parentsandguardian->first_name));
+                    $excelEntity->segundo_nombre_representante = strtoupper(trim($estudiante->parentsandguardian->second_name));
+                    $excelEntity->primer_apellido_representante = strtoupper(trim($estudiante->parentsandguardian->surname));
+                    $excelEntity->segundo_apellido_representante = strtoupper(trim($estudiante->parentsandguardian->second_surname));
+                    $excelEntity->sexo_representante = $estudiante->parentsandguardian->sex;
+                    $excelEntity->correo_email_representante = $estudiante->parentsandguardian->email;
+                    $excelEntity->numero_telefonico_representante = $estudiante->parentsandguardian->cell_phone;
+                    
+                    $excelEntity->codigo_colegio = $estudiante->id;
+                    $excelEntity->ejecucion_reporte_seguro = $nuevaEjecucionStr;
+
+                    if (!($this->Excels->save($excelEntity))) {
+                        $this->Flash->error(__('No se pudo registrar al alumno ID: ' . $estudiante->id . ' en la tabla de control (Excels).'));
+                    }
                 }
             }
 		}
@@ -2197,6 +2271,38 @@ class StudenttransactionsController extends AppController
             $listaAsegurados = $this->ListaAsegurados->find('all')->toArray();
 
             $consecutivoCondicion = 1;
+
+            // También para Regulares y 5to año necesitamos el mapa de PN
+            $mapaCedulasPN = [];
+            $contadoresRepresentantes = [];
+            $ultimoEnvio = $this->Excels->find('all');
+
+            foreach ($ultimoEnvio as $envio) {
+                $mapaCedulasPN[$envio->codigo_colegio] = $envio->cedula_titular_escolar;
+                if ($envio->nacionalidad_titular == 'M') {
+                    $cedulaRep = $envio->cedula_representante;
+                    $sufijo = substr($envio->cedula_titular_escolar, strlen($cedulaRep));
+                    if (is_numeric($sufijo)) {
+                        $valor = (int)$sufijo;
+                        if (!isset($contadoresRepresentantes[$cedulaRep]) || $valor > $contadoresRepresentantes[$cedulaRep]) {
+                            $contadoresRepresentantes[$cedulaRep] = $valor;
+                        }
+                    }
+                }
+            }
+
+            foreach ($studentsFor as $sf) {
+                $est = $sf->student;
+                if ($est->type_of_identification == 'PN' && !isset($mapaCedulasPN[$est->id])) {
+                    $cedulaRep = $est->parentsandguardian->identidy_card;
+                    if (!isset($contadoresRepresentantes[$cedulaRep])) {
+                        $contadoresRepresentantes[$cedulaRep] = 1;
+                    } else {
+                        $contadoresRepresentantes[$cedulaRep]++;
+                    }
+                    $mapaCedulasPN[$est->id] = $cedulaRep . $contadoresRepresentantes[$cedulaRep];
+                }
+            }
 
             foreach ($studentsFor as $studentsFors)
             {
@@ -2323,6 +2429,7 @@ class StudenttransactionsController extends AppController
             'estudiantesNoEncontradosSeguro' => $estudiantesNoEncontradosSeguro,
             'estudiantesInstruccionActualizada' => $estudiantesInstruccionActualizada,
             'nuevaEjecucionStr' => $nuevaEjecucionStr,
+            'mapaCedulasPN' => $mapaCedulasPN,
         ];
     }
 

@@ -8,6 +8,7 @@
  *   incluyendo una sección especial para registros que ya cuentan con instrucción previa.
  * - Reporte de alumnos solventes: Lista estudiantes que están al día con sus pagos.
  * - Reporte de alumnos pendientes de pago: Lista estudiantes con deudas pendientes.
+ * - Funcionalidad de exportación a Excel multi-hoja con protección de formato de datos.
  */
 use Cake\I18n\Time;
 ?>
@@ -157,6 +158,40 @@ use Cake\I18n\Time;
             '43' => 'C',
             '44' => 'A'
         ];
+
+    /**
+     * Lógica para obtener la cédula (real o generada PN)
+     * Utiliza el mapa pre-calculado en el controlador para consistencia absoluta.
+     */
+    if (!isset($mapaCedulasPN)) {
+        $mapaCedulasPN = [];
+    }
+    $fnCedulaPN = function($student) use ($mapaCedulasPN) {
+        if ($student->type_of_identification !== 'PN') {
+            return $student->identity_card;
+        }
+        return isset($mapaCedulasPN[$student->id]) ? $mapaCedulasPN[$student->id] : $student->identity_card;
+    };
+
+    /**
+     * Lógica para normalizar la nacionalidad (Tipo de identificación)
+     */
+    $fnNacionalidadEstudiante = function($tipo) {
+        if ($tipo === 'PN') {
+            return 'M';
+        }
+        if ($tipo === 'P') {
+            return 'E';
+        }
+        return $tipo;
+    };
+
+    $fnNacionalidadRepresentante = function($tipo) {
+        if ($tipo === 'P') {
+            return 'E';
+        }
+        return $tipo;
+    };
     ?>
 <br />
 <?php if (isset($tipo_reporte)): ?>
@@ -234,8 +269,8 @@ use Cake\I18n\Time;
                             if ($encontrado == 1): ?>
                                 <tr>
                                     <td class="noExl"><?= $accountStudent ?></td>
-                                    <td><?= $studentsFors->student->type_of_identification ?></td>
-                                    <td><?= $studentsFors->student->identity_card ?></td>
+                                    <td><?= $fnNacionalidadEstudiante($studentsFors->student->type_of_identification) ?></td>
+                                    <td><?= $fnCedulaPN($studentsFors->student) ?></td>
                                     <td><?= $studentsFors->student->first_name ?></td>
                                     <td><?= $studentsFors->student->second_name ?></td>
                                     <td><?= $studentsFors->student->surname ?></td>
@@ -243,7 +278,7 @@ use Cake\I18n\Time;
                                     <td><?= $studentsFors->student->sex ?></td>
                                     <td><?= $studentsFors->student->birthdate->format('d-m-Y') ?></td>
                                     
-                                    <td><?= $studentsFors->student->parentsandguardian->type_of_identification ?></td>
+                                    <td><?= $fnNacionalidadRepresentante($studentsFors->student->parentsandguardian->type_of_identification) ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->identidy_card ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->first_name ?></td>
                                     <td><?= $studentsFors->student->parentsandguardian->second_name ?></td>
@@ -330,8 +365,8 @@ use Cake\I18n\Time;
                         foreach ($estudiantesEncontradosSeguro as $item): ?>
                             <tr>
                                 <td class="noExl"><?= $accInst++ ?></td>
-                                <td><?= $item->student->type_of_identification ?></td>
-                                <td><?= $item->student->identity_card ?></td>
+                                <td><?= $fnNacionalidadEstudiante($item->student->type_of_identification) ?></td>
+                                <td><?= $fnCedulaPN($item->student) ?></td>
                                 <td><?= $item->student->first_name ?></td>
                                 <td><?= $item->student->second_name ?></td>
                                 <td><?= $item->student->surname ?></td>
@@ -339,7 +374,7 @@ use Cake\I18n\Time;
                                 <td><?= $item->student->sex ?></td>
                                 <td><?= $item->student->birthdate->format('d-m-Y') ?></td>
                                 
-                                <td><?= $item->student->parentsandguardian->type_of_identification ?></td>
+                                <td><?= $fnNacionalidadRepresentante($item->student->parentsandguardian->type_of_identification) ?></td>
                                 <td><?= $item->student->parentsandguardian->identidy_card ?></td>
                                 <td><?= $item->student->parentsandguardian->first_name ?></td>
                                 <td><?= $item->student->parentsandguardian->second_name ?></td>
@@ -393,8 +428,8 @@ use Cake\I18n\Time;
                         foreach ($estudiantesNoEncontradosSeguro as $item): ?>
                             <tr>
                                 <td class="noExl"><?= $accNoEnc++ ?></td>
-                                <td><?= $item->student->type_of_identification ?></td>
-                                <td><?= $item->student->identity_card ?></td>
+                                <td><?= $fnNacionalidadEstudiante($item->student->type_of_identification) ?></td>
+                                <td><?= $fnCedulaPN($item->student) ?></td>
                                 <td><?= $item->student->first_name ?></td>
                                 <td><?= $item->student->second_name ?></td>
                                 <td><?= $item->student->surname ?></td>
@@ -402,7 +437,7 @@ use Cake\I18n\Time;
                                 <td><?= $item->student->sex ?></td>
                                 <td><?= $item->student->birthdate->format('d-m-Y') ?></td>
                                 
-                                <td><?= $item->student->parentsandguardian->type_of_identification ?></td>
+                                <td><?= $fnNacionalidadRepresentante($item->student->parentsandguardian->type_of_identification) ?></td>
                                 <td><?= $item->student->parentsandguardian->identidy_card ?></td>
                                 <td><?= $item->student->parentsandguardian->first_name ?></td>
                                 <td><?= $item->student->parentsandguardian->second_name ?></td>
@@ -456,8 +491,8 @@ use Cake\I18n\Time;
                         foreach ($estudiantesInstruccionActualizada as $item): ?>
                             <tr>
                                 <td class="noExl"><?= $accInstAct++ ?></td>
-                                <td><?= $item->student->type_of_identification ?></td>
-                                <td><?= $item->student->identity_card ?></td>
+                                <td><?= $fnNacionalidadEstudiante($item->student->type_of_identification) ?></td>
+                                <td><?= $fnCedulaPN($item->student) ?></td>
                                 <td><?= $item->student->first_name ?></td>
                                 <td><?= $item->student->second_name ?></td>
                                 <td><?= $item->student->surname ?></td>
@@ -465,7 +500,7 @@ use Cake\I18n\Time;
                                 <td><?= $item->student->sex ?></td>
                                 <td><?= $item->student->birthdate->format('d-m-Y') ?></td>
                                 
-                                <td><?= $item->student->parentsandguardian->type_of_identification ?></td>
+                                <td><?= $fnNacionalidadRepresentante($item->student->parentsandguardian->type_of_identification) ?></td>
                                 <td><?= $item->student->parentsandguardian->identidy_card ?></td>
                                 <td><?= $item->student->parentsandguardian->first_name ?></td>
                                 <td><?= $item->student->parentsandguardian->second_name ?></td>
@@ -621,7 +656,12 @@ $(document).ready(function(){
         var wb = XLSX.utils.book_new();
         var tipoReporte = "<?= isset($tipo_reporte) ? $tipo_reporte : '' ?>";
         
-        // Función para agregar tabla al libro si existe
+        /**
+         * Agrega una tabla HTML a una hoja del libro de Excel.
+         * 
+         * @param {string} tableId El ID del elemento table en el DOM.
+         * @param {string} sheetName El nombre que se le asignará a la pestaña en Excel.
+         */
         function addTableToSheet(tableId, sheetName) {
             var table = document.getElementById(tableId);
             if (table) {
@@ -629,7 +669,9 @@ $(document).ready(function(){
                 var tempTable = table.cloneNode(true);
                 $(tempTable).find('.noExl').remove();
                 
-                var ws = XLSX.utils.table_to_sheet(tempTable);
+                // Se utiliza 'raw: true' para evitar que SheetJS intente interpretar 
+                // las fechas y otros formatos, lo que causaba distorsiones en años.
+                var ws = XLSX.utils.table_to_sheet(tempTable, { raw: true });
                 XLSX.utils.book_append_sheet(wb, ws, sheetName);
             }
         }

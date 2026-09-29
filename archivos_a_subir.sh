@@ -24,4 +24,5 @@ ARCHIVOS_PHP_PUNTUALES=(
     "src/Model/Table/ListaAseguradosTable.php"
     "src/Template/Studenttransactions/report_student_general.ctp"
     "src/Controller/StudenttransactionsController.php"
+    "src/Model/Table/ExcelsTable.php"
 )

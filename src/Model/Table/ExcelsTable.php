@@ -1,4 +1,12 @@
 <?php
+/**
+ * Excels Model
+ *
+ * Este modelo gestiona la tabla 'excels', que se utiliza como registro de control histórico
+ * para los envíos de datos de estudiantes y representantes a las aseguradoras. Almacena la
+ * información normalizada y las identificaciones temporales (PN) generadas durante la 
+ * ejecución de los reportes de seguro escolar.
+ */
 namespace App\Model\Table;
 
 use Cake\ORM\Query;

@@ -1,5 +1,74 @@
 # Log de Desarrollo - REDA
 
+## [2026-09-22] - Corrección de Error: Índice $mapaCedulasPN indefinido en Controlador
+- **Tarea:** Resolver el error `Notice (8): Undefined index: mapaCedulasPN` en el controlador al ejecutar el reporte de aseguradora.
+- **Cambios Realizados:**
+    - **Backend (`src/Controller/StudenttransactionsController.php`):**
+        - Se modificó la función `reporteParaAseguradora` para incluir explícitamente la clave `'mapaCedulasPN' => $mapaCedulasPN` en su arreglo de retorno.
+        - Esto permite que la acción `reportStudentGeneral` acceda correctamente a los datos pre-calculados y los pase a la vista sin generar advertencias de índice inexistente.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` detallando la sincronización de identidades entre el controlador y la vista.
+
+## [2026-09-22] - Corrección de Error: Variable $mapaCedulasPN indefinida
+- **Tarea:** Resolver el error `Notice (8): Undefined variable: mapaCedulasPN` que ocurría al cargar reportes distintos al de aseguradora.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se añadió una inicialización preventiva de la variable `$mapaCedulasPN = []` si no está definida al inicio del bloque PHP.
+        - Esto asegura que la función anónima `$fnCedulaPN`, que hace un `use ($mapaCedulasPN)`, no falle en reportes (como Alumnos Solventes o Pendientes) donde el controlador no envía este mapa.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` reflejando la corrección para la compatibilidad multi-reporte.
+
+## [2026-09-22] - Refactorización de Identificación de Estudiantes (PN)
+- **Tarea:** Garantizar la estabilidad de las cédulas escolares generadas (PN) y asegurar que no colisionen entre hermanos, respetando las cédulas propias (V, E, P).
+- **Cambios Realizados:**
+    - **Backend (`src/Controller/StudenttransactionsController.php`):**
+        - Se rediseñó la función `reporteParaAseguradora` para realizar un pre-procesamiento exhaustivo de todos los estudiantes.
+        - **Estabilidad de IDs:** El sistema ahora carga el historial completo de la tabla `Excels` antes de asignar nuevos IDs. Si un estudiante ya tiene un ID generado en el pasado, este se recupera y se mantiene inalterado.
+        - **Lógica de Contadores Robusta:** Se implementó una lógica para deducir el contador actual de cada representante basándose en el historial de hijos PN (Nacionalidad M) ya registrados. Esto evita que un nuevo hijo PN reciba un correlativo que ya pertenezca a un hermano.
+        - **Respeto por IDs Propios:** Se aseguró que los estudiantes con cédula propia (V, E, P) no afecten ni consuman números del contador secuencial de sus hermanos PN.
+        - **Consistencia de Datos:** Se unificó la generación de identidades en un mapa único (`$mapaCedulasPN`) que se utiliza tanto para el guardado en base de datos como para la visualización en el reporte.
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se eliminó la lógica de cálculo de IDs locales que existía en la vista.
+        - Ahora la vista consume directamente el mapa `$mapaCedulasPN` pasado desde el controlador, garantizando que el mismo estudiante tenga exactamente el mismo ID en todas las tablas del reporte (Principal, Condición Especial, Encontrados, etc.).
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` detallando el nuevo mecanismo de persistencia y sincronización de identidades PN.
+
+## [2026-09-22] - Corrección de Error: Variable $fnCedulaPN indefinida
+- **Tarea:** Resolver el error `Notice (8): Undefined variable: fnCedulaPN` que impedía la visualización de las tablas de control en el reporte de seguro.
+... (rest of the file) ...
+
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se restauró la definición de la función anónima `$fnCedulaPN` al inicio del bloque PHP de la vista.
+        - Esta función es crítica para generar consistentemente las cédulas temporales de estudiantes "PN" en todas las secciones del reporte.
+- **Estado:** Error resuelto, funcionalidad de identificación temporal restablecida.
+
+## [2026-09-22] - Automatización de Registro en Excels para Nuevos Ingresos
+- **Tarea:** Registrar automáticamente en la tabla de control `excels` a los estudiantes de modalidad "Nuevo" y "Nuevo y Regular" que se incluyen en el reporte por primera vez.
+- **Cambios Realizados:**
+    - **Backend (`src/Controller/StudenttransactionsController.php`):**
+        - En la función `reporteParaAseguradora`, se implementó el guardado automático de entidades en la tabla `Excels` para aquellos estudiantes que no tienen un registro previo (dentro del bloque de alumnos adicionales).
+        - Se integró la lógica de **normalización de nacionalidad** (PN -> M, P -> E) y la generación de **cédulas temporales** (concatenación de ID representante + secuencia) directamente en el controlador.
+        - Se aseguró que los nombres y apellidos se guarden en **mayúsculas** para mantener la uniformidad con el histórico de la tabla.
+        - Se incluyó la vinculación del registro con el identificador de la ejecución actual (`N_nuevo_fecha_hora`).
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` detallando el proceso de persistencia automática para control de envíos.
+
+## [2026-09-22] - Normalización de Nacionalidad en Reporte de Seguro
+- **Tarea:** Ajustar la visualización del tipo de identificación para estudiantes y representantes según estándares de la aseguradora.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se implementaron las funciones auxiliares `fnNacionalidadEstudiante` y `fnNacionalidadRepresentante`.
+        - **Estudiantes:** Los registros con "**PN**" ahora se muestran como "**M**" (Menor sin cédula). Los registros con pasaporte ("**P**") se muestran como "**E**" (Extranjero). Las opciones "V" y "E" se mantienen.
+        - **Representantes:** Los registros con pasaporte ("**P**") se muestran ahora como "**E**" (Extranjero). Las opciones "V" y "E" se mantienen.
+        - Se actualizaron todas las celdas de nacionalidad en las 4 tablas del reporte para aplicar estas reglas de transformación.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` detallando las reglas de transformación de identidad.
+
+## [2026-09-22] - Implementación de Cédulas Temporales (PN) en Reporte de Seguro
+- **Tarea:** Generar números de cédula automáticos para estudiantes sin identificación (PN) basados en la cédula del representante.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se implementó una lógica de inicialización con un mapa de asignación (`$mapaCedulasPN`) y contadores por representante (`$contadoresRepresentantes`).
+        - Se añadió una función auxiliar (`fnCedulaPN`) que detecta estudiantes con `type_of_identification == 'PN'` y les asigna la cédula de su representante seguida de un contador secuencial (ej. 103490971, 103490972).
+        - La lógica asegura consistencia: un mismo estudiante mantiene la misma cédula temporal aunque aparezca en múltiples tablas del reporte (Principal, Encontrados, No encontrados, etc.).
+        - Se actualizaron todas las tablas del reporte que manejan entidades de estudiante para utilizar esta nueva función de identificación.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md` detallando el nuevo mecanismo de identificación temporal.
+
 ## [2026-09-22] - Simplificación de Reporte Seguro Escolar: Eliminación de columna "Grado"
 - **Tarea:** Eliminar la columna "**Grado**" de todas las tablas del reporte para aseguradora.
 - **Cambios Realizados:**
@@ -257,3 +326,13 @@
         - Se implementó la limpieza automática de columnas marcadas con la clase `.noExl` (como los números correlativos de la interfaz) antes de la exportación para mantener la integridad del formato Excel requerido.
         - Se añadieron validaciones de existencia de elementos y se mejoró la gestión de obligatoriedad de campos en el formulario dinámico.
 - **Documentación:** Actualización de `manual_tecnico_sistema.md` para reflejar la mejora en la herramienta de exportación.
+
+## [2026-09-22] - Corrección de error en exportación Excel (Fechas distorsionadas)
+- **Tarea:** Corregir la distorsión de fechas en la exportación a Excel del reporte de seguro escolar.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se modificó la función JavaScript `addTableToSheet` para incluir la opción `{ raw: true }` en la llamada a `XLSX.utils.table_to_sheet`.
+        - Esta modificación previene que la librería SheetJS intente interpretar las celdas como fechas, lo cual causaba que Excel aplicara una lógica de autocompletado errónea (transformando años como 2013 en 1913) para fechas con día <= 12.
+        - Se añadió documentación JSDoc a la función `addTableToSheet` para mejorar la mantenibilidad.
+        - Se actualizó el encabezado PHP de la vista para incluir la funcionalidad de exportación a Excel.
+- **Documentación:** Se actualizó el manual técnico del sistema y este log de desarrollo.
