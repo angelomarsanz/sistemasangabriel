@@ -12,7 +12,8 @@
                         <th scope="col"><?= $this->Paginator->sort('Fecha') ?></th>
                         <th scope="col"><?= $this->Paginator->sort('Número de factura') ?></th>
                         <th scope="col"><?= $this->Paginator->sort('Anulada') ?></th>
-                        <th scope="col"><?= $this->Paginator->sort('Monto') ?></th>
+                        <th scope="col"><?= $this->Paginator->sort('Monto $') ?></th>
+                        <th scope="col"><?= $this->Paginator->sort('Monto Bs.') ?></th>
                         <th scope="col" class="actions"><?= __('Acciones') ?></th>
                     </tr>
                 </thead>
@@ -28,9 +29,10 @@
                                 No
                             <?php endif; ?>
                         </td>
+                        <td><?= number_format(round($bill->amount_paid / $bill->tasa_cambio, 2), 2, ",", ".") ?></td>
                         <td><?= number_format($bill->amount_paid, 2, ",", ".") ?></td>
                         <td class="actions">
-                            <?= $this->Html->link('Ver factura', ['action' => 'invoice', $bill->id, 1, $idFamily, 'index'], ['class' => 'btn btn-success']); ?>							
+                            <?= $this->Html->link('Ver factura', ['action' => 'invoice', $bill->id, 1, $idFamily, 'index'], ['class' => 'btn btn-success']); ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

@@ -27,4 +27,5 @@ ARCHIVOS_PHP_PUNTUALES=(
     "src/Model/Table/ExcelsTable.php"
     "src/Template/Rates/add_dollar.ctp"
     "src/Template/Bills/create_invoice.ctp"
+    "src/Template/Bills/index.ctp"
 )
