@@ -2934,14 +2934,27 @@
 			}
             else if (conceptoDescuento.substring(0, 40) == 'Descuento promoción especial mensualidad')
             {
+                let conceptoPromocion = '';
+                if (indicador_pedido == 1)
+                {
+                    conceptoPromocion = 'Promoción especial mensualidad pedidos';
+                }
+                else
+                {
+                    conceptoPromocion = 'Promoción especial mensualidad';
+                }
+
                 console.log('Otras tarifas disponibles:', otrasTarifas);
                 $.each(otrasTarifas, function(key3, value3)
                 {
                     console.log('Comparando con:', value3.conceptoAno);
-                    if (value3.conceptoAno.substring(0, 30) == 'Promoción especial mensualidad')
+                    if (value3.conceptoAno.substring(0, conceptoPromocion.length) == conceptoPromocion)
                     {
-                        $('#descuento-recargo').val('Descuento $');
-                        $('#cantidad-descuento').val(value3.tarifaDolar);
+                        if (indicador_pedido == 1 || value3.conceptoAno.substring(0, 38) != 'Promoción especial mensualidad pedidos')
+                        {
+                            $('#descuento-recargo').val('Descuento $');
+                            $('#cantidad-descuento').val(value3.tarifaDolar);
+                        }
                     }
                 });
                 actualizarDescuentos();

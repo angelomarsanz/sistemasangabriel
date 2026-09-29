@@ -25,4 +25,6 @@ ARCHIVOS_PHP_PUNTUALES=(
     "src/Template/Studenttransactions/report_student_general.ctp"
     "src/Controller/StudenttransactionsController.php"
     "src/Model/Table/ExcelsTable.php"
+    "src/Template/Rates/add_dollar.ctp"
+    "src/Template/Bills/create_invoice.ctp"
 )

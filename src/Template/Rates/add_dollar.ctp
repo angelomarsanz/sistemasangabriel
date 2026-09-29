@@ -1,4 +1,9 @@
 <?php
+/**
+ * Vista para la creación y registro de nuevas tarifas en dólares del colegio.
+ * Permite seleccionar el concepto tarifario, año y mes de vigencia (cuando aplica),
+ * y el monto correspondiente en dólares.
+ */
     use Cake\I18n\Time;
 ?>
 
@@ -75,6 +80,7 @@
                     'Servicio educativo' => 'Servicio educativo',
 		    		'Thales' => 'Thales',
                     'Promoción especial mensualidad' => 'Promoción especial mensualidad',
+                    'Promoción especial mensualidad pedidos' => 'Promoción especial mensualidad pedidos',
 					'Pronto pago' => 'Pronto pago']]);
                 echo $this->Form->input('rate_month', ['label' => 'A partir del mes: ', 'options' =>
                     [null => '',
@@ -116,11 +122,16 @@
     </div>
 </div>
 <script>
+    /**
+     * Habilita o deshabilita los campos del formulario según la tarifa seleccionada.
+     * Si la tarifa corresponde a Mensualidad, Promoción especial mensualidad (incluyendo pedidos)
+     * o Pronto pago, habilita y hace requerido el campo de mes (rate_month).
+     */
     function enableInputs()
     {
 		alert('Estimado usuario antes de agregar una nueva tarifa por favor comunicarse con el personal de sistema para que haga un respaldo de la base de datos');
 
-        if ($("#concept").val().substring(0, 11) == "Mensualidad" || $("#concept").val().substring(0, 31) == "Promoción especial mensualidad" || $("#concept").val().substring(0, 11) == "Pronto pago")
+        if ($("#concept").val().substring(0, 11) == "Mensualidad" || $("#concept").val().substring(0, 30) == "Promoción especial mensualidad" || $("#concept").val().substring(0, 11) == "Pronto pago")
         {
             $("#rate-month").attr('disabled', false);
 			$("#rate-month").attr('required', true);
@@ -143,6 +154,10 @@
 		}
     }
 
+    /**
+     * Verifica mediante llamada AJAX si el concepto es 'Diferencia de agosto'
+     * y consulta el monto abonado por los representantes en dicho período.
+     */
 	function verifyConcept()
 	{
 		if ($("#concept").val() == "Diferencia de agosto")
@@ -175,7 +190,7 @@
 
 		$("#guardar").click(function(e)
 		{
-			if ($("#concept").val() == "Mensualidad" || $("#concept").val() == "Promoción especial mensualidad" || $("#concept").val() == "Pronto pago")
+			if ($("#concept").val() == "Mensualidad" || $("#concept").val().substring(0, 30) == "Promoción especial mensualidad" || $("#concept").val() == "Pronto pago")
 			{
 				if ($('#rate-month').length)
 				{

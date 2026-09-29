@@ -1,5 +1,25 @@
 # Log de Desarrollo - REDA
 
+## [2026-09-29] - Habilitación de campo mes para Promoción especial mensualidad pedidos en tarifas
+- **Tarea:** Permitir que al seleccionar "Promoción especial mensualidad pedidos" en la creación de tarifas en dólares, el campo `rate_month` (a partir del mes) se mantenga habilitado y requerido.
+- **Causa Raíz:** La cadena `"Promoción especial mensualidad"` tiene exactamente 30 caracteres. Al evaluarse con `substring(0, 31)`, para `"Promoción especial mensualidad pedidos"` se extraían 31 caracteres incluyendo un espacio en blanco final (`"Promoción especial mensualidad "`), provocando que la comparación fuera falsa y se ejecutara el bloque `else` que deshabilitaba el selector de mes.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Rates/add_dollar.ctp`):**
+        - Se incorporó la opción `'Promoción especial mensualidad pedidos' => 'Promoción especial mensualidad pedidos'` al arreglo de opciones del campo `concept`.
+        - En la función `enableInputs()`, se corrigió la longitud del substring de 31 a 30 caracteres (`$("#concept").val().substring(0, 30) == "Promoción especial mensualidad"`), abarcando tanto `"Promoción especial mensualidad"` como `"Promoción especial mensualidad pedidos"`.
+        - En el evento `click` del botón `#guardar`, se actualizó la condición para usar `.substring(0, 30)` en lugar de la comparación exacta `== "Promoción especial mensualidad"`, asegurando que la confirmación incluya el mes y año correctamente.
+        - Se agregaron los comentarios DocBlock explicativos al inicio del archivo y a las funciones `enableInputs()` y `verifyConcept()`.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md`.
+
+## [2026-09-29] - Ajuste en búsqueda de tarifa para promoción especial según indicador_pedido
+- **Tarea:** Condicionar la búsqueda de la tarifa promocional de mensualidad en la vista de facturación/pedidos para buscar "Promoción especial mensualidad pedidos" si `indicador_pedido == 1`, o "Promoción especial mensualidad" en caso contrario.
+- **Cambios Realizados:**
+    - **UI (`src/Template/Bills/create_invoice.ctp`):**
+        - Se modificó la sección del evento `change` de `#concepto-descuento` correspondiente a `'Descuento promoción especial mensualidad'`.
+        - Antes de iterar sobre `otrasTarifas`, se evalúa si `indicador_pedido == 1` para definir la cadena de búsqueda (`'Promoción especial mensualidad pedidos'` o `'Promoción especial mensualidad'`).
+        - Se ajustó la comparación contra `value3.conceptoAno` para asociar la tarifa correcta (`tarifaDolar`), estableciendo `#descuento-recargo` en `'Descuento $'` y precargando `#cantidad-descuento` adecuadamente.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md`.
+
 ## [2026-09-22] - Corrección de Error: Índice $mapaCedulasPN indefinido en Controlador
 - **Tarea:** Resolver el error `Notice (8): Undefined index: mapaCedulasPN` en el controlador al ejecutar el reporte de aseguradora.
 - **Cambios Realizados:**
