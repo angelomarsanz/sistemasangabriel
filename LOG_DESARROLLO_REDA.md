@@ -1,5 +1,26 @@
 # Log de Desarrollo - REDA
 
+## [2026-09-30] - Normalización de Cédulas Escolares y Nacionalidad M en Reporte de Aseguradora
+- **Tarea:** Implementar la regla de asignación de nacionalidad "M" y cédula escolar generada (cédula del representante más consecutivo secuencial por hijo sin cédula válida) en el reporte de aseguradora para:
+    1. Estudiantes con tipo de identificación diferente de "V" ("E", "P", "PN").
+    2. Estudiantes con cualquier nacionalidad ("V", "E", "P", "PN") cuya cédula sea igual a "cero", "0", vacía o con una numeración menor o igual a 7 cifras.
+    3. Mantener cédula propia y nacionalidad "V" únicamente para estudiantes con nacionalidad "V" cuya cédula sea válida (no "cero" y con más de 7 dígitos numéricos).
+- **Cambios Realizados:**
+    - **Backend (`src/Controller/StudenttransactionsController.php`):**
+        - Se implementó el método privado `esMenorSinCedula($estudiante)` para centralizar la verificación lógica de acuerdo a las directrices: evalúa si `type_of_identification !== 'V'`, si `identity_card` es 'cero'/'0' o si su conteo de dígitos numéricos es menor o igual a 7.
+        - Se refactorizó la acción `reporteParaAseguradora` para ambos bloques de ejecución (Nuevos/Nuevo y Regular, y Regular/5to. Año):
+            - En el pre-procesamiento, se utiliza `esMenorSinCedula($est)` para asignar de forma persistente y no colisionante la cédula escolar generada (`$cedulaRep . $consecutivo`) en `$mapaCedulasPN`.
+            - En el guardado histórico en la tabla `excels`, se almacena como `nacionalidad_titular = 'M'` y `cedula_titular_escolar` la generada con el consecutivo.
+            - En la búsqueda y comparación contra la tabla `ListaAsegurados`, se verifica tanto con el nuevo identificador normalizado (`M-{cedulaGenerada}` o `V-{cedula}`) como con el original para garantizar compatibilidad con registros existentes en la aseguradora.
+            - Se actualizó la lista de estudiantes con condición especial para mostrar la cédula escolar generada si no disponen de cédula propia válida.
+            - Se actualizaron las cabeceras DocBlock del controlador y del método `reporteParaAseguradora`.
+    - **UI (`src/Template/Studenttransactions/report_student_general.ctp`):**
+        - Se actualizó la función anónima `$fnEsMenorSinCedula` con la misma regla de validación de 7 dígitos y cédulas en cero.
+        - Se ajustaron `$fnCedulaPN` y `$fnNacionalidadEstudiante` para recibir la entidad de estudiante y sincronizar la nacionalidad ("M" o "V") con la cédula correspondiente (generada del mapa o cédula propia).
+        - Se actualizaron todas las tablas de reporte de aseguradora (Principal, Encontrados Seguro, No Encontrados Seguro e Instrucción Actualizada) pasando la entidad `$student` a `$fnNacionalidadEstudiante`.
+        - Se actualizó la cabecera DocBlock del archivo de vista.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md`.
+
 ## [2026-09-29] - Habilitación de campo mes para Promoción especial mensualidad pedidos en tarifas
 - **Tarea:** Permitir que al seleccionar "Promoción especial mensualidad pedidos" en la creación de tarifas en dólares, el campo `rate_month` (a partir del mes) se mantenga habilitado y requerido.
 - **Causa Raíz:** La cadena `"Promoción especial mensualidad"` tiene exactamente 30 caracteres. Al evaluarse con `substring(0, 31)`, para `"Promoción especial mensualidad pedidos"` se extraían 31 caracteres incluyendo un espacio en blanco final (`"Promoción especial mensualidad "`), provocando que la comparación fuera falsa y se ejecutara el bloque `else` que deshabilitaba el selector de mes.

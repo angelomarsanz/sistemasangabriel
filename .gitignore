@@ -12,8 +12,8 @@
 /migracion36.txt
 /PendientesProduccion.txt
 .env.sh
-/Documentacion/
-/documentacion/
+/Documentacion*/
+/documentacion*/
 archivos_chat_gemini/
 *copy*
 *copia*

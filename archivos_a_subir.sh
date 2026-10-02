@@ -20,12 +20,6 @@ ARCHIVOS_PHP_PUNTUALES=(
     #"js_csga/dist/main-style.css"
     #"js_csga/dist/main-script.js"
 
-    "src/Model/Entity/ListaAsegurado.php"
-    "src/Model/Table/ListaAseguradosTable.php"
     "src/Template/Studenttransactions/report_student_general.ctp"
     "src/Controller/StudenttransactionsController.php"
-    "src/Model/Table/ExcelsTable.php"
-    "src/Template/Rates/add_dollar.ctp"
-    "src/Template/Bills/create_invoice.ctp"
-    "src/Template/Bills/index.ctp"
 )

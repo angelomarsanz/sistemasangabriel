@@ -6,7 +6,10 @@
  * incluyendo matrículas, mensualidades, seguros escolares y otros conceptos educativos.
  * Permite la generación de reportes administrativos y para aseguradoras, con segmentación
  * detallada para alumnos con instrucciones ya procesadas, así como el ajuste masivo
- * de cuotas y descuentos.
+ * de cuotas y descuentos. Incorpora la asignación y normalización de identificación
+ * escolar con nacionalidad 'M' y cédula del representante más consecutivo para alumnos
+ * con tipo de identificación diferente de 'V' ('E', 'P', 'PN') o con cédulas no válidas
+ * (igual a 'cero' o con 7 o menos cifras).
  */
 namespace App\Controller;
 
@@ -2074,6 +2077,9 @@ class StudenttransactionsController extends AppController
      * si ya existe una instrucción previa (que se segmenta en un reporte aparte) o si deben ser
      * renovados/excluidos. Integra la asociación con el modelo Sections para obtener el nombre
      * completo del grado.
+     * Asigna nacionalidad 'M' y número de cédula del representante más consecutivo cuando el estudiante
+     * posee tipo de identificación diferente de 'V' ('E', 'P', 'PN') o cuando siendo 'V' su cédula
+     * es 'cero' o contiene una numeración menor o igual a 7 cifras.
      *
      * @param int $anio_escolar El año escolar para el cual se genera el reporte.
      * @param string $tipo_estudiante El segmento a procesar (Nuevo, Regular, 5to. Año).
@@ -2125,16 +2131,15 @@ class StudenttransactionsController extends AppController
             $ultimoEnvio = $this->Excels->find('all');
             $consecutivoCondicion = 1;
 
-            // Inicializar mapas y contadores para consistencia en la generación de PN
+            // Inicializar mapas y contadores para consistencia en la generación de identificaciones escolares
             // Poblamos el mapa con lo que ya existe en el historial de Excels para mantener IDs estables
             $mapaCedulasPN = [];
             $contadoresRepresentantes = [];
 
             foreach ($ultimoEnvio as $envio) {
-                $mapaCedulasPN[$envio->codigo_colegio] = $envio->cedula_titular_escolar;
-                
-                // Si es un ID generado (Nacionalidad M), actualizamos el contador del representante
+                // Si en el historial se registró con nacionalidad 'M', conservamos ese ID generado
                 if ($envio->nacionalidad_titular == 'M') {
+                    $mapaCedulasPN[$envio->codigo_colegio] = $envio->cedula_titular_escolar;
                     $cedulaRep = $envio->cedula_representante;
                     $sufijo = substr($envio->cedula_titular_escolar, strlen($cedulaRep));
                     if (is_numeric($sufijo)) {
@@ -2146,11 +2151,11 @@ class StudenttransactionsController extends AppController
                 }
             }
 
-            // Pre-procesar todos los estudiantes del lote actual para asignar IDs a los nuevos PN
+            // Pre-procesar todos los estudiantes del lote actual para asignar IDs a los menores sin cédula válida
             // antes de realizar la segmentación y el guardado.
             foreach ($studentsFor as $sf) {
                 $est = $sf->student;
-                if ($est->type_of_identification == 'PN' && !isset($mapaCedulasPN[$est->id])) {
+                if ($this->esMenorSinCedula($est) && !isset($mapaCedulasPN[$est->id])) {
                     $cedulaRep = $est->parentsandguardian->identidy_card;
                     if (!isset($contadoresRepresentantes[$cedulaRep])) {
                         $contadoresRepresentantes[$cedulaRep] = 1;
@@ -2164,13 +2169,16 @@ class StudenttransactionsController extends AppController
             foreach ($studentsFor as $studentsFors)
             {
                 $estudiante = $studentsFors->student;
+                $esMenor = $this->esMenorSinCedula($estudiante);
+                $cedulaTitular = $esMenor ? $mapaCedulasPN[$estudiante->id] : $estudiante->identity_card;
+                $nacionalidadTitular = $esMenor ? 'M' : 'V';
 
                 if ($estudiante->student_condition != "Regular")
                 {
                     $estudiantesCondicionEspecial[] = [
                         'consecutivo' => $consecutivoCondicion++,
                         'nombres' => trim($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname),
-                        'cedula' => $estudiante->identity_card,
+                        'cedula' => $cedulaTitular,
                         'condicion' => $estudiante->student_condition,
                         'seccion' => $estudiante->section->full_name,
                         'modified' => $estudiante->modified
@@ -2196,12 +2204,6 @@ class StudenttransactionsController extends AppController
                 {
                     $alumnosAdicionales[] = $estudiante->id;
 
-                    // Lógica de normalización idéntica a la vista
-                    $nacionalidadTitular = ($estudiante->type_of_identification == 'PN') ? 'M' : (($estudiante->type_of_identification == 'P') ? 'E' : $estudiante->type_of_identification);
-                    
-                    // Usar la cédula pre-calculada (propia o generada)
-                    $cedulaTitular = ($estudiante->type_of_identification == 'PN') ? $mapaCedulasPN[$estudiante->id] : $estudiante->identity_card;
-                    
                     $nacionalidadRep = ($estudiante->parentsandguardian->type_of_identification == 'P') ? 'E' : $estudiante->parentsandguardian->type_of_identification;
 
                     // Crear registro en la tabla excels para control histórico
@@ -2272,14 +2274,14 @@ class StudenttransactionsController extends AppController
 
             $consecutivoCondicion = 1;
 
-            // También para Regulares y 5to año necesitamos el mapa de PN
+            // También para Regulares y 5to año necesitamos el mapa de menores sin cédula (PN / M)
             $mapaCedulasPN = [];
             $contadoresRepresentantes = [];
             $ultimoEnvio = $this->Excels->find('all');
 
             foreach ($ultimoEnvio as $envio) {
-                $mapaCedulasPN[$envio->codigo_colegio] = $envio->cedula_titular_escolar;
                 if ($envio->nacionalidad_titular == 'M') {
+                    $mapaCedulasPN[$envio->codigo_colegio] = $envio->cedula_titular_escolar;
                     $cedulaRep = $envio->cedula_representante;
                     $sufijo = substr($envio->cedula_titular_escolar, strlen($cedulaRep));
                     if (is_numeric($sufijo)) {
@@ -2293,7 +2295,7 @@ class StudenttransactionsController extends AppController
 
             foreach ($studentsFor as $sf) {
                 $est = $sf->student;
-                if ($est->type_of_identification == 'PN' && !isset($mapaCedulasPN[$est->id])) {
+                if ($this->esMenorSinCedula($est) && !isset($mapaCedulasPN[$est->id])) {
                     $cedulaRep = $est->parentsandguardian->identidy_card;
                     if (!isset($contadoresRepresentantes[$cedulaRep])) {
                         $contadoresRepresentantes[$cedulaRep] = 1;
@@ -2307,13 +2309,16 @@ class StudenttransactionsController extends AppController
             foreach ($studentsFor as $studentsFors)
             {
                 $estudiante = $studentsFors->student;
+                $esMenor = $this->esMenorSinCedula($estudiante);
+                $cedulaTitular = $esMenor ? $mapaCedulasPN[$estudiante->id] : $estudiante->identity_card;
+                $nacEstudianteTitular = $esMenor ? 'M' : 'V';
 
                 if ($estudiante->student_condition != "Regular")
                 {
                     $estudiantesCondicionEspecial[] = [
                         'consecutivo' => $consecutivoCondicion++,
                         'nombres' => trim($estudiante->first_name . ' ' . $estudiante->second_name . ' ' . $estudiante->surname . ' ' . $estudiante->second_surname),
-                        'cedula' => $estudiante->identity_card,
+                        'cedula' => $cedulaTitular,
                         'condicion' => $estudiante->student_condition,
                         'seccion' => $estudiante->section->full_name,
                         'modified' => $estudiante->modified
@@ -2321,7 +2326,8 @@ class StudenttransactionsController extends AppController
                 }
 
                 $encontradoAsegurado = null;
-                $ciEstudiante = strtoupper(trim($estudiante->type_of_identification)) . "-" . trim($estudiante->identity_card);
+                $ciEstudiante = $nacEstudianteTitular . "-" . $cedulaTitular;
+                $ciEstudianteOriginal = strtoupper(trim($estudiante->type_of_identification)) . "-" . trim($estudiante->identity_card);
 
                 // Normalizar fecha de nacimiento del estudiante (Sistema: AAAA-MM-DD -> DD/MM/AAAA)
                 $fechaNacimientoEstudiante = $estudiante->birthdate ? $estudiante->birthdate->format('d/m/Y') : '';
@@ -2349,8 +2355,9 @@ class StudenttransactionsController extends AppController
                         continue;
                     }
 
-                    // 1. Comparación por Cédula/RIF con formato (Ej: V-12345678)
-                    if (strtoupper(trim($asegurado->cedu_rif)) == $ciEstudiante)
+                    // 1. Comparación por Cédula/RIF con formato (Ej: V-12345678 o M-103490971)
+                    $ciAsegurado = strtoupper(trim($asegurado->cedu_rif));
+                    if ($ciAsegurado == $ciEstudiante || $ciAsegurado == $ciEstudianteOriginal)
                     {
                         $encontradoAsegurado = $asegurado;
                         break;
@@ -8442,6 +8449,47 @@ class StudenttransactionsController extends AppController
         $sinAcentos = ['A', 'E', 'I', 'O', 'U', 'N', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'O'];
         $texto = str_replace($acentos, $sinAcentos, $texto);
         return preg_replace('/\s+/', ' ', trim($texto));
+    }
+
+    /**
+     * Determina si un estudiante debe ser considerado menor sin cédula válida escolar (Nacionalidad 'M').
+     *
+     * Reglas aplicadas:
+     * 1. Si el tipo de identificación del estudiante es diferente de 'V' ('E', 'P', 'PN', etc.),
+     *    se asigna nacionalidad 'M' y número de cédula del representante más consecutivo de hijo sin cédula válida.
+     * 2. Si el tipo de identificación es 'V' (o cualquier otro) y el número de cédula es igual a 'cero'
+     *    o contiene una numeración menor o igual a 7 cifras, se asigna nacionalidad 'M' y cédula del representante más consecutivo.
+     * 3. Si el estudiante tiene tipo de identificación 'V' y una cédula válida con más de 7 cifras numéricas (no 'cero'),
+     *    conserva nacionalidad 'V' y su propia cédula.
+     *
+     * @param object $estudiante Entidad del estudiante.
+     * @return bool True si requiere nacionalidad 'M' y cédula generada con consecutivo, False si conserva cédula propia válida.
+     */
+    private function esMenorSinCedula($estudiante)
+    {
+        if (!$estudiante) {
+            return false;
+        }
+
+        $tipo = strtoupper(trim((string)$estudiante->type_of_identification));
+
+        // Regla 1: Cualquier tipo de identificación diferente de 'V' ('E', 'P', 'PN', etc.)
+        if ($tipo !== 'V') {
+            return true;
+        }
+
+        // Regla 2: Si es 'V', verificar si la cédula es igual a 'cero' o menor o igual a 7 cifras
+        $cedulaTexto = strtolower(trim((string)$estudiante->identity_card));
+        if ($cedulaTexto === 'cero' || $cedulaTexto === '0' || $cedulaTexto === '') {
+            return true;
+        }
+
+        $cedulaSoloDigitos = preg_replace('/[^0-9]/', '', (string)$estudiante->identity_card);
+        if (empty($cedulaSoloDigitos) || intval($cedulaSoloDigitos) === 0 || strlen($cedulaSoloDigitos) <= 7) {
+            return true;
+        }
+
+        return false;
     }
 
 }

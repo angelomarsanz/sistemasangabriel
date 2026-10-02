@@ -6,6 +6,9 @@
  * Tipos de reporte:
  * - Reporte para aseguradora: Muestra datos detallados de estudiantes y representantes para la póliza de seguro,
  *   incluyendo una sección especial para registros que ya cuentan con instrucción previa.
+ *   Aplica normalización de identificación escolar con nacionalidad 'M' y cédula del representante más consecutivo
+ *   para estudiantes con tipo de identificación diferente de 'V' ('E', 'P', 'PN') o con cédula igual a 'cero'
+ *   o menor o igual a 7 cifras.
  * - Reporte de alumnos solventes: Lista estudiantes que están al día con sus pagos.
  * - Reporte de alumnos pendientes de pago: Lista estudiantes con deudas pendientes.
  * - Funcionalidad de exportación a Excel multi-hoja con protección de formato de datos.
@@ -160,30 +163,59 @@ use Cake\I18n\Time;
         ];
 
     /**
-     * Lógica para obtener la cédula (real o generada PN)
+     * Determina si un estudiante debe ser considerado menor sin cédula válida escolar (Nacionalidad 'M').
+     *
+     * Reglas aplicadas:
+     * 1. Si el tipo de identificación es diferente de 'V' ('E', 'P', 'PN', etc.), nacionalidad 'M'.
+     * 2. Si el tipo de identificación es 'V' (o cualquier otro) y el número de cédula es igual a 'cero'
+     *    o contiene una numeración menor o igual a 7 cifras, nacionalidad 'M'.
+     * 3. Si es 'V' con cédula válida (> 7 cifras numéricas y no 'cero'), conserva 'V'.
+     */
+    $fnEsMenorSinCedula = function($student) {
+        if (!$student) {
+            return false;
+        }
+        $tipo = strtoupper(trim((string)$student->type_of_identification));
+        if ($tipo !== 'V') {
+            return true;
+        }
+        $cedulaTexto = strtolower(trim((string)$student->identity_card));
+        if ($cedulaTexto === 'cero' || $cedulaTexto === '0' || $cedulaTexto === '') {
+            return true;
+        }
+        $cedulaSoloDigitos = preg_replace('/[^0-9]/', '', (string)$student->identity_card);
+        if (empty($cedulaSoloDigitos) || intval($cedulaSoloDigitos) === 0 || strlen($cedulaSoloDigitos) <= 7) {
+            return true;
+        }
+        return false;
+    };
+
+    /**
+     * Lógica para obtener la cédula (real o generada escolar) del estudiante.
      * Utiliza el mapa pre-calculado en el controlador para consistencia absoluta.
      */
     if (!isset($mapaCedulasPN)) {
         $mapaCedulasPN = [];
     }
-    $fnCedulaPN = function($student) use ($mapaCedulasPN) {
-        if ($student->type_of_identification !== 'PN') {
-            return $student->identity_card;
+    $fnCedulaPN = function($student) use ($mapaCedulasPN, $fnEsMenorSinCedula) {
+        if ($fnEsMenorSinCedula($student)) {
+            return isset($mapaCedulasPN[$student->id]) ? $mapaCedulasPN[$student->id] : $student->identity_card;
         }
-        return isset($mapaCedulasPN[$student->id]) ? $mapaCedulasPN[$student->id] : $student->identity_card;
+        return $student->identity_card;
     };
 
     /**
-     * Lógica para normalizar la nacionalidad (Tipo de identificación)
+     * Lógica para normalizar la nacionalidad (Tipo de identificación) del estudiante.
      */
-    $fnNacionalidadEstudiante = function($tipo) {
-        if ($tipo === 'PN') {
+    $fnNacionalidadEstudiante = function($studentOrTipo) use ($fnEsMenorSinCedula) {
+        if (is_object($studentOrTipo)) {
+            return $fnEsMenorSinCedula($studentOrTipo) ? 'M' : 'V';
+        }
+        $tipo = strtoupper(trim((string)$studentOrTipo));
+        if ($tipo !== 'V') {
             return 'M';
         }
-        if ($tipo === 'P') {
-            return 'E';
-        }
-        return $tipo;
+        return 'V';
     };
 
     $fnNacionalidadRepresentante = function($tipo) {
@@ -269,7 +301,7 @@ use Cake\I18n\Time;
                             if ($encontrado == 1): ?>
                                 <tr>
                                     <td class="noExl"><?= $accountStudent ?></td>
-                                    <td><?= $fnNacionalidadEstudiante($studentsFors->student->type_of_identification) ?></td>
+                                    <td><?= $fnNacionalidadEstudiante($studentsFors->student) ?></td>
                                     <td><?= $fnCedulaPN($studentsFors->student) ?></td>
                                     <td><?= $studentsFors->student->first_name ?></td>
                                     <td><?= $studentsFors->student->second_name ?></td>
@@ -365,7 +397,7 @@ use Cake\I18n\Time;
                         foreach ($estudiantesEncontradosSeguro as $item): ?>
                             <tr>
                                 <td class="noExl"><?= $accInst++ ?></td>
-                                <td><?= $fnNacionalidadEstudiante($item->student->type_of_identification) ?></td>
+                                <td><?= $fnNacionalidadEstudiante($item->student) ?></td>
                                 <td><?= $fnCedulaPN($item->student) ?></td>
                                 <td><?= $item->student->first_name ?></td>
                                 <td><?= $item->student->second_name ?></td>
@@ -428,7 +460,7 @@ use Cake\I18n\Time;
                         foreach ($estudiantesNoEncontradosSeguro as $item): ?>
                             <tr>
                                 <td class="noExl"><?= $accNoEnc++ ?></td>
-                                <td><?= $fnNacionalidadEstudiante($item->student->type_of_identification) ?></td>
+                                <td><?= $fnNacionalidadEstudiante($item->student) ?></td>
                                 <td><?= $fnCedulaPN($item->student) ?></td>
                                 <td><?= $item->student->first_name ?></td>
                                 <td><?= $item->student->second_name ?></td>
@@ -491,7 +523,7 @@ use Cake\I18n\Time;
                         foreach ($estudiantesInstruccionActualizada as $item): ?>
                             <tr>
                                 <td class="noExl"><?= $accInstAct++ ?></td>
-                                <td><?= $fnNacionalidadEstudiante($item->student->type_of_identification) ?></td>
+                                <td><?= $fnNacionalidadEstudiante($item->student) ?></td>
                                 <td><?= $fnCedulaPN($item->student) ?></td>
                                 <td><?= $item->student->first_name ?></td>
                                 <td><?= $item->student->second_name ?></td>
