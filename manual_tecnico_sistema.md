@@ -49,3 +49,28 @@
     - **Estandarización de Columnas (20 Columnas):** Todas las tablas de control y el reporte principal han sido simplificados eliminando la columna "**GRADO**" por requerimiento administrativo. Las tablas ahora mantienen un formato estandarizado de 20 columnas de datos, asegurando que la información de identidad, contacto y ejecución del seguro se mantenga correctamente alineada.
     - **Exportación Multi-hoja:** Se implementó una funcionalidad avanzada de exportación a Excel utilizando la librería **SheetJS (XLSX)**. El sistema genera un único archivo `.xlsx` donde cada tabla presente en el reporte (Seguro Principal, Condición Especial, Encontrados, No Encontrados e Instrucción Actualizada) se guarda en una pestaña independiente. El proceso incluye la limpieza automática de columnas de control interno (`.noExl`) para generar un archivo administrativo limpio.
     - **Corrección de Distorsión de Fechas en Excel:** Se corrigió un error en la exportación a Excel donde las fechas de nacimiento con día menor o igual a 12 se distorsionaban (ej. 2013 se transformaba en 1913). La solución consistió en configurar la opción `raw: true` en la función `table_to_sheet` de SheetJS, lo que fuerza a Excel a tratar los datos como texto plano, respetando el formato `DD-MM-AAAA` generado originalmente por el servidor.
+
+## src/Controller/UsersController.php
+    Controlador encargado de la gestión de usuarios, roles y autenticación.
+    **Control de Concurrencia de Sesiones en Login:** En la acción `login()`, se implementó una verificación preventiva contra la sobrescritura involuntaria de sesiones cuando cajeros abren múltiples pestañas en la ventana normal del navegador:
+    - **Peticiones GET:** Si el usuario ya posee una sesión activa (`$this->Auth->user('id')`), el sistema emite una notificación de advertencia detallando el usuario y rol actual, indicando que debe emplearse una ventana de incógnito para operar simultáneamente con otro usuario, y redirige a la vista `wait`.
+    - **Peticiones POST:** Si se envía el formulario de autenticación existiendo una sesión abierta en el navegador, se rechaza la operación sin invocar `Auth->setUser()`, mostrando una alerta de error que instruye abrir una ventana de incógnito para el segundo usuario.
+
+## src/Controller/TurnsController.php
+    Controlador que administra el ciclo de vida de los turnos de cobranza (apertura, verificación, cierre y reportes contables).
+    **Validación de Compatibilidad Rol-Turno:** En la acción `checkTurnInvoice($menuOption)`, se clasificaron las opciones de cobro en fiscales (`Factura inscripción regulares`, `Factura inscripción nuevos`, `Factura mensualidades`, `NC`) y pedidos/recibos (`Pedido inscripción regulares`, `Pedido inscripción nuevos`, `Pedido mensualidades`, `Recibo servicio educativo`, `Recibo de seguro`, `Recibo Consejo Educativo`). Se introdujeron reglas de validación estricta:
+    - Usuarios con rol `Seniat` no pueden solicitar opciones de pedidos o recibos.
+    - Usuarios con rol `Ventas generales` no pueden solicitar opciones de facturación fiscal.
+    - Si existe incompatibilidad, se detiene el flujo con un mensaje Flash explicativo y se redirige a `wait`.
+    - Si el usuario no tiene turno abierto, se redirige ordenadamente a `checkTurnOpen` con mensaje de alerta.
+
+## src/Controller/BillsController.php
+    Controlador central de facturación y cobranzas del colegio.
+    **Validación Estricta de Turno y Consistencia Contable:**
+    - **En `createInvoice()`:** Se verifica que el turno recibido (`$idTurn`) pertenezca al usuario en sesión (`user_id === Auth->user('id')`) y esté con estatus abierto (`status === true`). Además, se restringe el acceso según el rol fiscal (`Seniat`) o no fiscal (`Ventas generales`), evitando que se cargue la interfaz de cobro con parámetros incongruentes.
+    - **En `recordInvoiceData()`:** Antes de persistir el encabezado de factura en la tabla `bills` y generar correlativos secuenciales, se valida que `$this->headboard['idTurn']` sea un turno abierto del usuario autenticado en sesión. Se corrobora adicionalmente que comprobantes fiscales (`fiscal === 1`) solo sean emitidos por roles autorizados (`Seniat`, `Administrador`, `Propietario`) y que usuarios fiscales (`Seniat`) no registren comprobantes no fiscales (`fiscal === 0`), previniendo cualquier cruce de datos en las columnas `turn` y `user_id` de la tabla `bills`.
+
+## src/Template/Bills/retorno_impresion.ctp
+    Vista mostrada a los cajeros al finalizar la impresión o verificación de comprobantes.
+    **Segmentación de Accesos por Rol:** Se actualizó la condición para evaluar exclusivamente el rol `'Seniat'` (`$current_user['role'] == 'Seniat'`), asegurando que los cajeros fiscales solo visualicen accesos directos para nuevas facturas fiscales, evitando la aparición de opciones de pedidos al finalizar la cobranza.
+

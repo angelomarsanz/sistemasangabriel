@@ -29,6 +29,17 @@ use App\Controller\EventosController;
 
 use Cake\I18n\Time;
 
+/**
+ * Controlador de Facturación y Cobranzas (BillsController)
+ *
+ * Administra la emisión, cálculo y guardado de facturas fiscales, pedidos,
+ * recibos de servicio educativo, seguro y Consejo Educativo, notas contables,
+ * anulación de documentos y control de caja diaria.
+ * Implementa controles de validación de pertenencia de turnos y consistencia
+ * con el rol en sesión (Capa 3 de seguridad contra concurrencia indebida).
+ *
+ * @property \App\Model\Table\BillsTable $Bills
+ */
 class BillsController extends AppController
 {
     public $headboard = [];
@@ -341,6 +352,18 @@ class BillsController extends AppController
         return $this->redirect(['action' => 'index']);
     }
 
+    /**
+     * Prepara la interfaz de cobro (crear factura, pedido o recibo).
+     *
+     * Valida que el turno pertenezca al usuario en sesión y que la opción
+     * solicitada sea compatible con su rol (Capa 3 de seguridad). Carga
+     * tasas oficiales, bancos, descuentos y parámetros escolares necesarios.
+     *
+     * @param string|null $menuOption Tipo de cobro (Factura/Pedido/Recibo).
+     * @param int|null $idTurn ID del turno activo.
+     * @param string|null $turn Número/identificador del turno.
+     * @return \Cake\Network\Response|null
+     */
     public function createInvoice($menuOption = null, $idTurn = null, $turn = null)
     {
 		$binnacles = new BinnaclesController;
@@ -409,6 +432,26 @@ class BillsController extends AppController
 		$moneda = $this->Monedas->get(3);
 		$euro = $moneda->tasa_cambio_dolar;
 
+		// Capa 3: Validación de pertenencia y vigencia del turno para el usuario en sesión
+		$this->loadModel('Turns');
+		$turnoValido = null;
+		if ($idTurn)
+		{
+			$turnoValido = $this->Turns->find('all', [
+				'conditions' => [
+					'id' => $idTurn,
+					'user_id' => $this->Auth->user('id'),
+					'status' => true
+				]
+			])->first();
+		}
+
+		if (!$turnoValido)
+		{
+			$this->Flash->error(__('El turno #{0} no es válido o no pertenece a su usuario actual ({1}). Por favor verifique el turno abierto.', $idTurn, $this->Auth->user('username')));
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+		}
+
 		$tipos_factura_fiscal =
 		[
 			'Factura inscripción regulares',
@@ -416,9 +459,11 @@ class BillsController extends AppController
 			'Factura mensualidades'
 		];
 
-		if ($this->Auth->user('role') == 'Facturas' && !in_array($menuOption, $tipos_factura_fiscal))
+		if ($this->Auth->user('role') === 'Seniat' && !in_array($menuOption, $tipos_factura_fiscal))
 		{
-			$binnacles->add('controller', 'Bills', 'createInvoice', 'Opción menú inválida: Usuario: '.$this->Auth->user('username').' Rol: '.$this->Auth->user('role').' Opcion: '.$menuOption);
+			$binnacles->add('controller', 'Bills', 'createInvoice', 'Opción menú inválida bloqueada: Usuario: '.$this->Auth->user('username').' Rol: '.$this->Auth->user('role').' Opcion: '.$menuOption);
+			$this->Flash->error(__('Su usuario actual en sesión ({0} - Rol: {1}) no puede emitir "{2}". Por favor utilice la ventana de incógnito con su usuario de Ventas Generales o Contabilidad general.', $this->Auth->user('username'), $this->Auth->user('role'), $menuOption));
+			return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 		}
 
 		$tipos_pedido =
@@ -431,11 +476,13 @@ class BillsController extends AppController
 			'Recibo Consejo Educativo'
 		];
 
-		if ($this->Auth->user('role') == 'Ventas generales' || $this->Auth->user('role') == 'Ventas generales')
+		if ($this->Auth->user('role') == 'Ventas generales' || $this->Auth->user('role') == 'Contabilidad general')
 		{
 			if (!in_array($menuOption, $tipos_pedido))
 			{
-				$binnacles->add('controller', 'Bills', 'createInvoice', 'Opción menú inválida: Usuario: '.$this->Auth->user('username').' Rol: '.$this->Auth->user('role').' Opcion: '.$menuOption);
+				$binnacles->add('controller', 'Bills', 'createInvoice', 'Opción menú inválida bloqueada: Usuario: '.$this->Auth->user('username').' Rol: '.$this->Auth->user('role').' Opcion: '.$menuOption);
+				$this->Flash->error(__('Su usuario actual en sesión ({0} - Rol: {1}) no puede emitir "{2}". Por favor utilice la ventana normal del navegador con su usuario fiscal si desea emitir facturas.', $this->Auth->user('username'), $this->Auth->user('role'), $menuOption));
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
 			}
 		}
 
@@ -472,6 +519,15 @@ class BillsController extends AppController
         $this->set(compact('idTurn', 'turn', 'dateTurn'));
     }
 
+    /**
+     * Procesa y almacena los datos de la factura, pedido o recibo en la base de datos.
+     *
+     * Valida de forma estricta que el turno recibido pertenezca al usuario en sesión
+     * y que el indicador fiscal coincida con su rol (Capa 3 de seguridad).
+     * Invoca la persistencia del encabezado, conceptos, formas de pago y notas asociadas.
+     *
+     * @return \Cake\Network\Response|null Redirige a la pantalla de impresión o a wait en caso de inconsistencia.
+     */
     public function recordInvoiceData()
     {
         $this->autoRender = false;
@@ -495,6 +551,38 @@ class BillsController extends AppController
 
             $this->headboard = $_POST['headboard'];
 			$idParentsandguardian = $this->headboard['idParentsandguardians'];
+
+			// Capa 3: Validación estricta de pertenencia de turno y rol antes de registrar
+			$this->loadModel('Turns');
+			$idTurnoEnviado = isset($this->headboard['idTurn']) ? $this->headboard['idTurn'] : null;
+			$turnoVerificado = $this->Turns->find('all', [
+				'conditions' => [
+					'id' => $idTurnoEnviado,
+					'user_id' => $this->Auth->user('id'),
+					'status' => true
+				]
+			])->first();
+
+			if (!$turnoVerificado)
+			{
+				$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'Intento de guardar documento con turno inválido o no perteneciente al usuario en sesión: Turno: ' . $idTurnoEnviado . ', Usuario: ' . $this->Auth->user('username') . ' (ID: ' . $this->Auth->user('id') . ')');
+				$this->Flash->error(__('Inconsistencia de turno detectada: el turno #{0} no pertenece a su usuario actual en sesión ({1}). La operación ha sido cancelada para evitar cruces en los libros contables. Por favor verifique en qué ventana está trabajando.', $idTurnoEnviado, $this->Auth->user('username')));
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+			}
+
+			// Validar coherencia del tipo fiscal con el rol
+			if ($this->headboard['fiscal'] == 1 && !in_array($this->Auth->user('role'), ['Seniat', 'Administrador', 'Propietario']))
+			{
+				$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'Rol no autorizado para factura fiscal: Usuario: ' . $this->Auth->user('username') . ', Rol: ' . $this->Auth->user('role'));
+				$this->Flash->error(__('Su usuario actual ({0}) no tiene permisos para emitir facturas fiscales.', $this->Auth->user('username')));
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+			}
+			if ($this->headboard['fiscal'] == 0 && $this->Auth->user('role') === 'Seniat')
+			{
+				$binnacles->add('controller', 'Bills', 'recordInvoiceData', 'Rol fiscal no autorizado para pedidos/recibos: Usuario: ' . $this->Auth->user('username') . ', Rol: ' . $this->Auth->user('role'));
+				$this->Flash->error(__('Su usuario actual es fiscal y no puede registrar pedidos o recibos no fiscales. Por favor use la ventana de incógnito con su usuario de Ventas Generales o Contabilidad general.', $this->Auth->user('username')));
+				return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+			}
 
 			$transactions = json_decode($_POST['studentTransactions']);
             $payments = json_decode($_POST['paymentsMade']);

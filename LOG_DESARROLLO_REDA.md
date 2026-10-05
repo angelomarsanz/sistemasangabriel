@@ -1,5 +1,27 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-02] - Implementación de 4 Capas de Seguridad contra Concurrencia de Sesiones y Cruce de Turnos
+- **Tarea:** Prevenir el cruce accidental de turnos y facturas entre usuarios de cobranza fiscal (`Seniat`) y usuarios de pedidos/recibos (`Ventas generales`) cuando los cajeros abren ambos turnos en pestañas normales del mismo navegador Chrome. Se eliminó la referencia al rol obsoleto `Facturas` dejando únicamente `Seniat` como rol fiscal.
+- **Causa Raíz:** Los navegadores web comparten el almacén de cookies (`cookie store`) entre todas las pestañas de una sesión normal. Al iniciar sesión con un segundo usuario en otra pestaña, la cookie de sesión del servidor PHP/CakePHP se sobrescribe con el segundo usuario. Al volver a la primera pestaña, las peticiones (`checkTurnInvoice`, `createInvoice`, `recordInvoiceData`) se enviaban con la sesión del segundo usuario, asociando facturas fiscales al turno de pedidos o arrojando el error de "Usted no tiene un turno abierto".
+- **Cambios Realizados:**
+    - **Capa 1 - Control de Concurrencia en Login (`src/Controller/UsersController.php`):**
+        - En peticiones `GET` a `login()`, si ya existe un usuario autenticado (`$this->Auth->user('id')`), se emite un mensaje Flash informativo y se redirige a la acción `wait`, impidiendo que se mantenga abierta la pantalla de login en pestañas normales.
+        - En peticiones `POST` a `login()`, si se intenta autenticar teniendo ya una sesión activa con otro usuario, se rechaza la sobreescritura de credenciales, emitiendo una alerta Flash explícita: `"Usted ya accedió al sistema con otro usuario y clave... Para trabajar simultáneamente con facturas fiscales y pedidos, por favor abra una VENTANA DE INCÓGNITO e ingrese allí con el otro usuario."` y redirigiendo a `wait`.
+        - Se agregaron las cabeceras DocBlock a la clase y a la función `login()`.
+    - **Capa 2 - Validación Rol-Operación en Turnos (`src/Controller/TurnsController.php`):**
+        - En la acción `checkTurnInvoice($menuOption)`, se clasificaron las opciones de cobro en `$tiposFacturaFiscal` y `$tiposPedido`.
+        - Se valida que usuarios con rol `Seniat` no puedan acceder a opciones de pedidos/recibos, y que usuarios con rol `Ventas generales` no puedan acceder a opciones de facturación fiscal. Ante inconsistencias, se bloquea el acceso con mensaje explicativo y se redirige a `wait`.
+        - Se añadió redirección ordenada hacia `checkTurnOpen` cuando no se encuentra un turno abierto para el usuario en sesión.
+        - Se incorporó la documentación DocBlock a la clase y al método `checkTurnInvoice()`.
+    - **Capa 3 - Validación Estricta de Turno y Consistencia Contable (`src/Controller/BillsController.php`):**
+        - En `createInvoice($menuOption, $idTurn, $turn)`, se verifica obligatoriamente que el `$idTurn` recibido exista, pertenezca al usuario en sesión (`user_id === Auth->user('id')`) y esté con estatus abierto (`status === true`). Además, se restringe el acceso según el rol fiscal (`Seniat`) o no fiscal (`Ventas generales`), redirigiendo con mensaje Flash si se detecta discordancia.
+        - En `recordInvoiceData()`, antes de ejecutar `$this->add()` y generar números correlativos de cobro, se verifica que el `$this->headboard['idTurn']` sea un turno abierto propiedad del usuario en sesión. Se valida estrictamente que comprobantes con `fiscal === 1` solo sean grabados por usuarios con rol fiscal autorizado (`Seniat`, `Administrador`, `Propietario`), y que usuarios fiscales (`Seniat`) no registren comprobantes no fiscales (`fiscal === 0`). Si hay inconsistencia, se registra en bitácora (`Binnacles`) y se cancela la operación de forma segura.
+        - Se incorporaron las cabeceras DocBlock a la clase `BillsController` y a los métodos modificados.
+    - **Capa 4 - Coherencia en Interfaz de Retorno de Impresión (`src/Template/Bills/retorno_impresion.ctp`):**
+        - Se actualizó la condicional para evaluar exclusivamente el rol `'Seniat'` (`if ($current_user['role'] == 'Seniat')`), eliminando la referencia al rol obsoleto `'Facturas'`. Esto garantiza que los cajeros fiscales, al finalizar la impresión o verificación de facturas, solo visualicen accesos directos a opciones fiscales y nunca a pedidos.
+        - Se añadió la documentación DocBlock al inicio de la vista.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md`.
+
 ## [2026-09-30] - Normalización de Cédulas Escolares y Nacionalidad M en Reporte de Aseguradora
 - **Tarea:** Implementar la regla de asignación de nacionalidad "M" y cédula escolar generada (cédula del representante más consecutivo secuencial por hijo sin cédula válida) en el reporte de aseguradora para:
     1. Estudiantes con tipo de identificación diferente de "V" ("E", "P", "PN").

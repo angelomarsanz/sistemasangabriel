@@ -5,7 +5,12 @@ use App\Controller\AppController;
 use Cake\I18n\Time;
 
 /**
- * Users Controller
+ * Controlador de Usuarios (UsersController)
+ *
+ * Gestiona la autenticación, inicio y cierre de sesión, control de perfil,
+ * autorización de roles y operaciones CRUD sobre los usuarios del sistema.
+ * Incluye controles de concurrencia de sesiones para prevenir cruce de turnos
+ * entre facturación fiscal y pedidos en la misma ventana del navegador.
  *
  * @property \App\Model\Table\UsersTable $Users
  */
@@ -32,16 +37,16 @@ class UsersController extends AppController
                 'Control de estudios' => true,
                 'Proveedor' => true,
                 'Representante' => true,
-                'Facturas' => true,
+                'Seniat' => true,
             ];
 
             $allowedActions = ['home', 'view', 'edit', 'logout', 'wait'];
 
-            if (isset($roles[$user['role']])) 
+            if (isset($roles[$user['role']]))
             {
-                foreach ($allowedActions as $action) 
+                foreach ($allowedActions as $action)
                 {
-                    if ($this->request->action === $action) 
+                    if ($this->request->action === $action)
                     {
                         return true;
                     }
@@ -50,21 +55,50 @@ class UsersController extends AppController
         }
 
         return parent::isAuthorized($user);
-    }        
+    }
 
     public function testFunction()
     {
         phpinfo();
     }
 
+    /**
+     * Inicio de sesión de usuarios (login).
+     *
+     * Implementa la Capa 1 de seguridad contra cruce de sesiones y turnos:
+     * Si el navegador ya tiene una sesión activa en la ventana normal, bloquea
+     * tanto peticiones GET como POST e instruye al usuario a abrir una ventana
+     * de incógnito para trabajar con dos usuarios simultáneamente (ej. Fiscal y Pedidos),
+     * evitando la sobreescritura accidental de la cookie de sesión en el servidor.
+     *
+     * @return \Cake\Network\Response|null Redirige según el resultado de la autenticación.
+     */
     public function login()
     {
+        // Capa 1: Si ya existe un usuario autenticado en la sesión de este navegador
+        if ($this->Auth->user('id'))
+        {
+            $usuarioActivo = $this->Auth->user('username');
+            $rolActivo = $this->Auth->user('role');
+
+            if ($this->request->is('post'))
+            {
+                $this->Flash->error(__('Usted ya accedió al sistema con otro usuario y clave (Usuario activo: {0} - Rol: {1}). Para trabajar simultáneamente con facturas fiscales y pedidos, por favor abra una VENTANA DE INCÓGNITO e ingrese allí con el otro usuario.', $usuarioActivo, $rolActivo));
+                return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+            }
+            else
+            {
+                $this->Flash->warning(__('Usted ya tiene una sesión activa en este navegador como "{0}" ({1}). Si necesita trabajar con dos usuarios simultáneamente (Fiscal y Pedidos), por favor abra una VENTANA DE INCÓGNITO. Si desea cambiar de usuario en esta ventana, primero debe cerrar la sesión actual.', $usuarioActivo, $rolActivo));
+                return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+            }
+        }
+
         if($this->request->is('post'))
         {
             $user = $this->Auth->identify();
             if($user)
             {
-                $this->Auth->setUser($user); 
+                $this->Auth->setUser($user);
                 if($this->Auth->user('estatus_registro') == 'Eliminado')
                 {
                     $this->Flash->error('Datos inválidos');
@@ -75,12 +109,12 @@ class UsersController extends AppController
                     $parentsandguardians = $this->Users->Parentsandguardians->find('all')
                     ->where(['Parentsandguardians.user_id =' => $this->Auth->user('id')]);
 
-                    $resultParentsandguardians = $parentsandguardians->toArray();    
+                    $resultParentsandguardians = $parentsandguardians->toArray();
 
                     if(!$resultParentsandguardians)
-                    {   
+                    {
                         $this->Flash->error(__('Por favor complete los datos de su perfil antes de continuar'));
-                        return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'add']);    
+                        return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'add']);
                     }
                 }
                 return $this->redirect($this->Auth->redirectUrl());
@@ -94,10 +128,10 @@ class UsersController extends AppController
 
     public function home()
     {
-        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8'); 
-        date_default_timezone_set('America/Caracas');        
-        $fecha_hora_actual = Time::now(); 
-        // Inicio cambios contrato   
+        setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8');
+        date_default_timezone_set('America/Caracas');
+        $fecha_hora_actual = Time::now();
+        // Inicio cambios contrato
         $campos =
             [
                 "cell_phone",
@@ -117,7 +151,7 @@ class UsersController extends AppController
         $anioFirmarContrato = 0;
 
         if  ($this->Auth->user('role') == 'Representante')
-        {  
+        {
             $representantes = $this->Users->Parentsandguardians->find('all')
             ->where(['Parentsandguardians.user_id =' => $this->Auth->user('id')]);
 
@@ -212,31 +246,31 @@ class UsersController extends AppController
     public function add()
     {
         $user = $this->Users->newEntity();
-        if ($this->request->is('post')) 
+        if ($this->request->is('post'))
             {
             $userName = $this->request->data['username'];
 
             $user = $this->Users->patchEntity($user, $this->request->data);
-            
+
             if ($user->role == "Representante" || $user->role == "Alumno")
             {
-                $user->password = "sga40"; 
+                $user->password = "sga40";
             }
 
-            if ($this->Users->save($user)) 
+            if ($this->Users->save($user))
                 {
-                if ($this->request->data['role'] == 'Alumno') 
+                if ($this->request->data['role'] == 'Alumno')
                     {
                     $this->Flash->success(__('Por favor complete los siguientes datos de su hijo o representado'));
                     return $this->redirect(['controller' => 'Students', 'action' => 'add', $userName]);
                     }
-                else  
-                    {   
+                else
+                    {
                     $this->Flash->success(__('Los datos se guardaron correctamente, por favor escriba su usuario, la contraseña y pulsa el botón ACCEDER'));
-                    return $this->redirect(['action' => 'wait']);  
+                    return $this->redirect(['action' => 'wait']);
                     }
                 }
-            else 
+            else
                 {
                 $this->Flash->error(__('El usuario no pudo ser guardado, por favor intente nuevamente'));
                 }
@@ -257,25 +291,25 @@ class UsersController extends AppController
         $user = $this->Users->get($id, [
             'contain' => ['Parentsandguardians', 'Students']
         ]);
-        if ($this->request->is(['patch', 'post', 'put'])) 
+        if ($this->request->is(['patch', 'post', 'put']))
             {
                 $user = $this->Users->patchEntity($user, $this->request->data);
-                if ($this->Users->save($user)) 
+                if ($this->Users->save($user))
                 {
-                    if ($user->role == 'Representante') 
+                    if ($user->role == 'Representante')
                     {
-                        
+
                         $parentsandguardians = $this->Users->Parentsandguardians->find('all')
                         ->where(['Parentsandguardians.user_id =' => $this->Auth->user('id')]);
-    
+
                         $resultParentsandguardians = $parentsandguardians->toArray();
-    
-                            if (!$resultParentsandguardians)     
+
+                            if (!$resultParentsandguardians)
                             {
                                 $this->Flash->error(__('Por favor primero complete el perfil del representante'));
                                 return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'add']);
-                            }                        
-                            else  
+                            }
+                            else
                             {
                                 $id = $resultParentsandguardians[0]['id'];
                                 $this->Flash->success(__('Por favor complete los siguientes datos'));
@@ -288,32 +322,32 @@ class UsersController extends AppController
                         ->where(['Students.user_id =' => $id]);
 
                         $resultStudents = $students->toArray();
-  
-                        if (!$resultStudents)     
+
+                        if (!$resultStudents)
                         {
                             $this->Flash->error(__('Por favor primero complete los datos del alumno'));
-                                
+
                             return $this->redirect(['controller' => 'Students', 'action' => 'add']);
-                        }                        
-                        else  
+                        }
+                        else
                         {
                             $id = $resultStudents[0]['id'];
                             $this->Flash->success(__('Por favor complete los siguientes datos'));
                             return $this->redirect(['controller' => 'Students', 'action' => 'edit', $id]);
                         }
                     }
-                    else  
-                    {   
+                    else
+                    {
                         $this->Flash->success(__('Los datos del usuario se guardaron correctamente'));
-                        return $this->redirect(['action' => 'home']);  
+                        return $this->redirect(['action' => 'home']);
                     }
                 }
-                else 
+                else
                 {
                     $this->Flash->error(__('El usuario no pudo ser guardado, por favor verifique los datos'));
                 }
             }
-            
+
         $this->set(compact('user'));
         $this->set('_serialize', ['user']);
     }
@@ -338,7 +372,7 @@ class UsersController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
-    
+
     public function logout()
     {
         return $this->redirect($this->Auth->logout());
@@ -362,43 +396,43 @@ class UsersController extends AppController
             echo json_encode($resultsArr);
         }
     }
-    
+
     public function wait()
     {
-        
+
     }
     public function inactiveSystem()
     {
-        
+
     }
 	public function redetronic()
 	{
-		
+
 	}
 	public function updateUsername()
 	{
         $this->autoRender = false;
-         
+
         if ($this->request->is('json'))
         {
             $jsondata = [];
 
             if (isset($_POST['username']))
-            {               
+            {
                 $username = trim($_POST['username']);
-		                
-                $lastRecord = $this->Users->find('all', ['conditions' => [['Users.username' => $username]], 
+
+                $lastRecord = $this->Users->find('all', ['conditions' => [['Users.username' => $username]],
                     'order' => ['Users.created' => 'DESC']]);
-            
+
                 $row = $lastRecord->first();
-                
+
                 if (!($row))
-                {        
+                {
 					$user = $this->Users->get($_POST['idUser']);
-					
+
 					$user->username = $username;
-					
-		            if ($this->Users->save($user)) 
+
+		            if ($this->Users->save($user))
 					{
 						$jsondata["success"] = true;
 						$jsondata["message"] = "El usuario se modificó exitosamente";
@@ -430,15 +464,15 @@ class UsersController extends AppController
             $usuario_a_modificar = $this->Users->get($usuario->id);
             $usuario_a_modificar->estatus_registro = "Activo";
             /*
-            if (!($this->Users->save($usuario_a_modificar))) 
+            if (!($this->Users->save($usuario_a_modificar)))
             {
                 $this->Flash->error(__('El registro con el ID '.$usuario_a_modificar->id.' no pudo ser modificado'));
             }
             else
             {
                 $contador_registros_modificados++;
-            } 
-            */                
+            }
+            */
         }
         $this->set(compact('contador_registros_seleccionados', 'contador_registros_modificados'));
     }

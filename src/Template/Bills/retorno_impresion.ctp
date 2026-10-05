@@ -1,7 +1,17 @@
+<?php
+/**
+ * Vista de Retorno de Impresión (Bills/retorno_impresion.ctp)
+ *
+ * Muestra las opciones de cobro disponibles para el cajero una vez finalizada
+ * la impresión o verificación de un documento de cobro.
+ * Discrimina las opciones según el rol del usuario en sesión (Seniat para fiscal,
+ * Ventas generales para pedidos/recibos, o Administrador/Propietario para todos).
+ */
+?>
 <br />
 <br />
 <?php
-if ($current_user['role'] == 'Facturas' ): ?>
+if ($current_user['role'] == 'Seniat'): ?>
     <?= $this->Html->link('Factura inscripción estudiantes regulares', ['controller' => 'Turns', 'action' => 'checkTurnInvoice', 'Factura inscripción regulares'], ['class' => 'btn btn-sm btn-primary']) ?> 
     <br />
     <br />

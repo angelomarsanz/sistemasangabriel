@@ -10,7 +10,13 @@ use App\Controller\BinnaclesController;
 use Cake\I18n\Time;
 
 /**
- * Turns Controller
+ * Controlador de Turnos (TurnsController)
+ *
+ * Administra la apertura, verificación, cierre, reportes y consulta de turnos
+ * de cobranza de los cajeros del colegio (tanto turnos fiscales para facturas
+ * como turnos para pedidos y recibos).
+ * Incorpora controles de validación de compatibilidad entre rol del usuario
+ * y opción de cobro para evitar cruce de turnos por concurrencia de pestañas.
  *
  * @property \App\Model\Table\TurnsTable $Turns
  */
@@ -129,8 +135,48 @@ class TurnsController extends AppController
         }
     }
 
+    /**
+     * Verifica si el usuario actual tiene un turno abierto y si la opción solicitada
+     * es compatible con su rol antes de redirigir a facturación, notas o anulación.
+     * Implementa la Capa 2 de seguridad contra cruce de turnos.
+     *
+     * @param string $menuOption Opción de menú seleccionada.
+     * @return \Cake\Network\Response|null Redirección a la acción correspondiente.
+     */
     public function checkTurnInvoice($menuOption)
     {
+        $rolUsuario = $this->Auth->user('role');
+        $nombreUsuario = $this->Auth->user('username');
+
+        $tiposFacturaFiscal = [
+            'Factura inscripción regulares',
+            'Factura inscripción nuevos',
+            'Factura mensualidades',
+            'NC'
+        ];
+
+        $tiposPedido = [
+            'Pedido inscripción regulares',
+            'Pedido inscripción nuevos',
+            'Pedido mensualidades',
+            'Recibo servicio educativo',
+            'Recibo de seguro',
+            'Recibo Consejo Educativo'
+        ];
+
+        // Capa 2: Validar compatibilidad entre el rol en sesión y la opción solicitada
+        if ($rolUsuario === 'Seniat' && in_array($menuOption, $tiposPedido))
+        {
+            $this->Flash->error(__('Su usuario actual en sesión ({0} - Rol: {1}) corresponde a Facturación Fiscal y no puede emitir "{2}". Si desea emitir pedidos o recibos, por favor use la ventana de incógnito con su usuario de Ventas Generales o Contabilidad general.', $nombreUsuario, $rolUsuario, $menuOption));
+            return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+        }
+
+        if (in_array($rolUsuario, ['Ventas generales', 'Contabilidad general']) && in_array($menuOption, $tiposFacturaFiscal))
+        {
+            $this->Flash->error(__('Su usuario actual en sesión ({0} - Rol: {1}) corresponde a Cobranzas no fiscales (Pedidos/Recibos) y no puede emitir "{2}". Si desea emitir facturas fiscales, por favor use la ventana normal del navegador con su usuario fiscal.', $nombreUsuario, $rolUsuario, $menuOption));
+            return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
+        }
+
         $openTurn = $this->Turns->find('all')->where(['user_id' => $this->Auth->user('id'), 'status' => true]);
         
         $result = $openTurn->toArray(); 
@@ -163,11 +209,13 @@ class TurnsController extends AppController
             else
             {
                 $this->Flash->error(__('Por favor cierre el turno, porque no coincide con la fecha de hoy y luego abra un turno nuevo')); 
+                return $this->redirect(['controller' => 'Users', 'action' => 'wait']);
             }
         }
         else
         {
-            $this->Flash->error(__('Usted no tiene un turno abierto, por favor abra un turno para poder facturar'));    
+            $this->Flash->error(__('Usted no tiene un turno abierto con el usuario "{0}", por favor abra un turno para poder continuar.', $nombreUsuario));
+            return $this->redirect(['action' => 'checkTurnOpen']);
         }
     }
 
