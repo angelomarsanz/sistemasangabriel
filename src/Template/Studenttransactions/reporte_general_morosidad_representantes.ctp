@@ -1,5 +1,13 @@
 <?php
-    use Cake\Routing\Router;
+/**
+ * Vista del Reporte General de Morosidad de Representantes.
+ *
+ * Muestra el desglose detallado y totalizado de las deudas por concepto educativo
+ * (diferencias de inscripción, servicio educativo, seguro escolar, mensualidades desglosadas
+ * por mes y Consejo Educativo) para cada familia/representante con saldos pendientes,
+ * junto con resúmenes estadísticos, totales generales y opciones de exportación o impresión.
+ */
+use Cake\Routing\Router;
 ?>
 <style>
 @media screen

@@ -1,5 +1,24 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-05] - Dinamización de Períodos Escolares y Optimización de Sesión en Reporte General de Morosidad de Representantes
+- **Tarea:** Sustituir los valores estáticos ('2024-2025' y '2025-2026') en el selector de período escolar del formulario de morosidad general de representantes por períodos dinámicos calculados a partir de la tabla `schools` (`current_school_year`), y transferir los datos de la institución entre las acciones para evitar consultas redundantes a la base de datos y optimizar los tiempos de respuesta.
+- **Cambios Realizados:**
+    - **Backend (`src/Controller/StudenttransactionsController.php`):**
+        - En la acción `generalMorosidadRepresentantes()`, se incorporó la consulta a la institución educativa (`$school = $this->Schools->get(2)`), calculando automáticamente:
+            - Período escolar anterior: `($anioEscolarActual - 1) . '-' . $anioEscolarActual`
+            - Período escolar actual: `$anioEscolarActual . '-' . ($anioEscolarActual + 1)`
+        - Se envía `compact('periodoEscolarAnterior', 'periodoEscolarActual')` a la vista para poblar las opciones del selector.
+        - Se implementó la persistencia de la entidad institucional en la sesión PHP de CakePHP (`$this->request->session()->write('school', $school)`).
+        - En la acción `reporteGeneralMorosidadRepresentantes()`, se eliminó la consulta repetida y doble carga redundante del modelo `Schools`. Ahora el sistema recupera la institución directamente desde la sesión (`$session->read('school')`), manteniendo como respaldo seguro `$this->Schools->get(2)` solo si la sesión no estuviera disponible.
+        - En las funciones auxiliares `saldoCuotas()` y `verificarAnioUltimaInscripcion()`, se adaptó la misma lógica de lectura desde la sesión, logrando que todo el proceso de generación del reporte opere con 0 consultas adicionales a la tabla `schools`.
+        - Se incorporaron las cabeceras DocBlock a las funciones modificadas.
+    - **UI Formulario (`src/Template/Studenttransactions/general_morosidad_representantes.ctp`):**
+        - Se sustituyeron las opciones fijas de `'2024-2025'` y `'2025-2026'` por las variables dinámicas `$periodoEscolarAnterior` y `$periodoEscolarActual`.
+        - Se agregó la cabecera DocBlock con la documentación explicativa de la vista.
+    - **UI Reporte (`src/Template/Studenttransactions/reporte_general_morosidad_representantes.ctp`):**
+        - Se añadió la documentación de cabecera DocBlock al inicio del archivo.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md`.
+
 ## [2026-10-02] - Implementación de 4 Capas de Seguridad contra Concurrencia de Sesiones y Cruce de Turnos
 - **Tarea:** Prevenir el cruce accidental de turnos y facturas entre usuarios de cobranza fiscal (`Seniat`) y usuarios de pedidos/recibos (`Ventas generales`) cuando los cajeros abren ambos turnos en pestañas normales del mismo navegador Chrome. Se eliminó la referencia al rol obsoleto `Facturas` dejando únicamente `Seniat` como rol fiscal.
 - **Causa Raíz:** Los navegadores web comparten el almacén de cookies (`cookie store`) entre todas las pestañas de una sesión normal. Al iniciar sesión con un segundo usuario en otra pestaña, la cookie de sesión del servidor PHP/CakePHP se sobrescribe con el segundo usuario. Al volver a la primera pestaña, las peticiones (`checkTurnInvoice`, `createInvoice`, `recordInvoiceData`) se enviaban con la sesión del segundo usuario, asociando facturas fiscales al turno de pedidos o arrojando el error de "Usted no tiene un turno abierto".

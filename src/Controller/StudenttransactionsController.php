@@ -4872,8 +4872,31 @@ class StudenttransactionsController extends AppController
 		return $codigoRetorno;
 	}
 
+	/**
+	 * Configuración y parámetros para el Reporte General de Morosidad de Representantes.
+	 *
+	 * Carga la información de la institución educativa desde la tabla Schools para calcular
+	 * dinámicamente los períodos escolares actual y anterior, pasándolos a la vista para
+	 * poblar las opciones del selector de período escolar. Guarda el registro de la institución
+	 * en la sesión para optimizar los tiempos de respuesta y evitar consultas adicionales
+	 * a la base de datos al generar el reporte en reporteGeneralMorosidadRepresentantes.
+	 *
+	 * @return \Cake\Network\Response|null Redirige a reporteGeneralMorosidadRepresentantes con los parámetros seleccionados.
+	 */
 	public function generalMorosidadRepresentantes()
     {
+		$this->loadModel('Schools');
+		$school = $this->Schools->get(2);
+		$anioEscolarActual = $school->current_school_year;
+		$anioEscolarAnterior = $anioEscolarActual - 1;
+		$proximoAnioEscolar = $anioEscolarActual + 1;
+
+		$periodoEscolarAnterior = $anioEscolarAnterior . '-' . $anioEscolarActual;
+		$periodoEscolarActual = $anioEscolarActual . '-' . $proximoAnioEscolar;
+
+		$session = $this->request->session();
+		$session->write('school', $school);
+
 		if ($this->request->is('post'))
         {
 			$tipoEstudiante = $this->request->getData('grados');
@@ -4882,9 +4905,30 @@ class StudenttransactionsController extends AppController
 
 			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteGeneralMorosidadRepresentantes', $_POST["mes_desde"], $_POST["mes_hasta"], $_POST["periodo_escolar"], "General de Representantes", $_POST["consejo_educativo"], $_POST["indicador_recalculo"], $_POST["telefono"], $tipoEstudiante, $condicionRegulares, $condicionEgresados]);
         }
+
+		$this->set(compact('periodoEscolarAnterior', 'periodoEscolarActual'));
 	}
 
-	public function reporteGeneralMorosidadRepresentantes($mes_desde = null, $mes_hasta = null, $periodo_escolar = null, $tipo_reporte = null, $consejo_educativo, $indicador_recalculo = null, $telefono = null, $tipoEstudiante = 'Todos', $condicionRegulares = 'No', $condicionEgresados = 'No')
+	/**
+	 * Genera el Reporte General de Morosidad de Representantes.
+	 *
+	 * Recopila y totaliza la deuda pendiente de los representantes en los meses y período escolar indicados.
+	 * Obtiene los datos de la institución educativa desde la sesión si fue precargada por generalMorosidadRepresentantes
+	 * para reducir tiempos de respuesta, o consulta la base de datos si no estuviera disponible en sesión.
+	 *
+	 * @param string|null $mes_desde Mes de inicio del rango consultado.
+	 * @param string|null $mes_hasta Mes de fin del rango consultado.
+	 * @param string|null $periodo_escolar Período escolar seleccionado.
+	 * @param string|null $tipo_reporte Tipo descriptivo del reporte.
+	 * @param string|null $consejo_educativo Si incluye la deuda de Consejo Educativo ('Sí'/'No').
+	 * @param string|null $indicador_recalculo Si recalcula con la tarifa vigente ('Sí'/'No').
+	 * @param string|null $telefono Si muestra el teléfono del representante ('Sí'/'No').
+	 * @param string $tipoEstudiante Filtro por grado/condición de estudiante ('Todos', 'Todos menos 5to. Año', '5to. Año').
+	 * @param string $condicionRegulares Si incluye regulares para 5to. Año ('Regulares'/'No').
+	 * @param string $condicionEgresados Si incluye egresados para 5to. Año ('Egresados'/'No').
+	 * @return \Cake\Network\Response|null Redirección en caso de no existir cuotas pendientes, o void al renderizar la vista.
+	 */
+	public function reporteGeneralMorosidadRepresentantes($mes_desde = null, $mes_hasta = null, $periodo_escolar = null, $tipo_reporte = null, $consejo_educativo = null, $indicador_recalculo = null, $telefono = null, $tipoEstudiante = 'Todos', $condicionRegulares = 'No', $condicionEgresados = 'No')
 	{
 		$subtitulo_reporte = '';
 		$condiciones_estudiante = [];
@@ -4894,10 +4938,16 @@ class StudenttransactionsController extends AppController
 
 		$currentDate = Time::now();
 
-		$this->loadModel('Schools');
-
-		$this->loadModel('Schools');
-		$school = $this->Schools->get(2);
+		$session = $this->request->session();
+		if ($session->check('school'))
+		{
+			$school = $session->read('school');
+		}
+		else
+		{
+			$this->loadModel('Schools');
+			$school = $this->Schools->get(2);
+		}
 		$anioEscolarActual = $school->current_school_year;
         $anioInscripcionActual = $school->current_year_registration;
 
@@ -5124,6 +5174,22 @@ class StudenttransactionsController extends AppController
 		$this->set(compact('mes_desde', 'mes_hasta', 'periodo_escolar', 'tipo_reporte', 'telefono', 'currentDate', 'school', 'dollarExchangeRate', 'mes_anio_desde', 'mes_anio_hasta', 'anio_correspondiente_mes', 'detalle_morosos', 'total_cuotas_periodo', 'totales_morosidad', 'vector_cuotas', 'subtitulo_reporte'));
 	}
 
+	/**
+	 * Calcula el saldo y monto de las cuotas pendientes para el rango de meses y transacciones especificadas.
+	 *
+	 * Reutiliza los datos institucionales desde la sesión para optimizar las consultas.
+	 *
+	 * @param string|null $mes_desde Mes inicial del rango.
+	 * @param string|null $mes_hasta Mes final del rango.
+	 * @param string|null $anio Año base del período.
+	 * @param string|null $periodo_escolar Cadena representativa del período escolar.
+	 * @param string|null $indicador_recalculo Indicador para recalcular cuotas con tarifa vigente.
+	 * @param mixed $transacciones Colección de transacciones a evaluar.
+	 * @param string $anio_mes_dia_desde Fecha límite inferior en formato YYYYMMDD.
+	 * @param string|null $anio_mes_dia_hasta Fecha límite superior en formato YYYYMMDD.
+	 * @param string|null $anio_mes_dia_agosto Fecha de agosto en formato YYYYMMDD.
+	 * @return array Vector con los montos y saldos calculados por ID de transacción.
+	 */
 	public function saldoCuotas($mes_desde = null, $mes_hasta = null, $anio = null, $periodo_escolar = null, $indicador_recalculo = null, $transacciones = null, $anio_mes_dia_desde, $anio_mes_dia_hasta = null, $anio_mes_dia_agosto = null)
 	{
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8');
@@ -5133,8 +5199,16 @@ class StudenttransactionsController extends AppController
 
 		$vector_cuotas = [];
 
-		$this->loadModel('Schools');
-		$school = $this->Schools->get(2);
+		$session = $this->request->session();
+		if ($session->check('school'))
+		{
+			$school = $session->read('school');
+		}
+		else
+		{
+			$this->loadModel('Schools');
+			$school = $this->Schools->get(2);
+		}
 		$anio_escolar_actual = $school->current_school_year;
 
 		$anio_mes_cuota = "";
@@ -6569,13 +6643,27 @@ class StudenttransactionsController extends AppController
 
 		return $tarifaProntoPagoCuota;
 	}
-	/*
-	Verifica si todos los estudiantes que hayan abonado o pagado totalmente la matrícula tengan actualizada la columna "balance" con el año correspondiente a la última inscripción que hizo
-	*/
+
+	/**
+	 * Verifica si todos los estudiantes que hayan abonado o pagado totalmente la matrícula
+	 * tengan actualizada la columna "balance" con el año correspondiente a la última inscripción que hizo.
+	 *
+	 * Utiliza la sesión institucional si está disponible para evitar lecturas redundantes en la tabla Schools.
+	 *
+	 * @return void
+	 */
 	public function verificarAnioUltimaInscripcion()
 	{
-		$this->loadModel('Schools');
-		$school = $this->Schools->get(2);
+		$session = $this->request->session();
+		if ($session->check('school'))
+		{
+			$school = $session->read('school');
+		}
+		else
+		{
+			$this->loadModel('Schools');
+			$school = $this->Schools->get(2);
+		}
 		$anio = $school->current_school_year;
 
 		$binnacles = new BinnaclesController;
