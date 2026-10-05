@@ -83,3 +83,7 @@
     Vista mostrada a los cajeros al finalizar la impresión o verificación de comprobantes.
     **Segmentación de Accesos por Rol:** Se actualizó la condición para evaluar exclusivamente el rol `'Seniat'` (`$current_user['role'] == 'Seniat'`), asegurando que los cajeros fiscales solo visualicen accesos directos para nuevas facturas fiscales, evitando la aparición de opciones de pedidos al finalizar la cobranza.
 
+## previo_cambios_realizados.md
+    Archivo de salvaguarda incremental y persistencia en caliente ante contingencias de pérdida de suministro eléctrico o desconexión a internet. Permite registrar en tiempo real los archivos creados o modificados y el estado del trabajo en curso durante la ejecución de una tarea. Se consulta de manera obligatoria al inicio de cada sesión o petición para reanudar trabajos incompletos, se limpia al iniciar una nueva solicitud para evitar acumulación de datos residuales, y se consolida definitivamente en `LOG_DESARROLLO_REDA.md` y `manual_tecnico_sistema.md` al finalizar.
+
+

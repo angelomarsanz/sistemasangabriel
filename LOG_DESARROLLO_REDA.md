@@ -1,5 +1,19 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-05] - Implementación de Protocolo de Salvaguarda Incremental ante Cortes Eléctricos/Conexión (`previo_cambios_realizados.md`)
+- **Tarea:** Establecer un mecanismo de persistencia continua e incremental de avances técnicos para mitigar la pérdida de contexto e interrupciones causadas por fallas de suministro eléctrico o caídas del servicio de internet en el entorno del usuario.
+- **Cambios Realizados:**
+    - **Creación de Archivo Raíz (`previo_cambios_realizados.md`):**
+        - Se creó el archivo en la raíz del proyecto para registrar de forma inmediata y en caliente el avance por cada archivo modificado o creado durante el desarrollo de una petición.
+        - Mantiene un estado limpio inicializado ("Sin tareas inconclusas") que se actualiza dinámicamente durante cualquier trabajo.
+    - **Actualización de Directrices de Proyecto (`GEMINI.md` / `.github/copilot-instructions.md`):**
+        - Se formalizó el protocolo mandatorio:
+            1. **Lectura Obligatoria al Iniciar:** Al recibir cualquier requerimiento o iniciar sesión, se lee primero `previo_cambios_realizados.md` para verificar si existe una tarea interrumpida y reanudarla en el punto exacto.
+            2. **Inicialización Limpia:** Se reinicia el contenido del archivo con la nueva solicitud en curso para evitar acumulación de datos residuales o basura.
+            3. **Registro Incremental en Caliente:** Conforme se modifique o cree cada archivo, se documenta inmediatamente su ruta y resumen técnico antes de continuar con el siguiente paso.
+            4. **Consolidación Oficial:** Al completar la tarea, se transfiere la documentación final a `LOG_DESARROLLO_REDA.md` y `manual_tecnico_sistema.md`, dejando `previo_cambios_realizados.md` en su estado limpio.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md`.
+
 ## [2026-10-05] - Dinamización de Períodos Escolares y Optimización de Sesión en Reporte General de Morosidad de Representantes
 - **Tarea:** Sustituir los valores estáticos ('2024-2025' y '2025-2026') en el selector de período escolar del formulario de morosidad general de representantes por períodos dinámicos calculados a partir de la tabla `schools` (`current_school_year`), y transferir los datos de la institución entre las acciones para evitar consultas redundantes a la base de datos y optimizar los tiempos de respuesta.
 - **Cambios Realizados:**

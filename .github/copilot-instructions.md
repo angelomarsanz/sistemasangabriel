@@ -4,8 +4,14 @@
 ## CHAT IA
 El chat de IA debe ser en idioma español
 
-## Memoria de Sesiones (Gemini CLI y Gemini Code Assist)
+## Memoria de Sesiones y Protocolo ante Fallas Eléctricas/Conexión (Gemini CLI y Gemini Code Assist)
 - **Log de Progreso:** Cada vez que inicies una nueva sesión, debes leer obligatoriamente el archivo `LOG_DESARROLLO_REDA.md`. Esto te permitirá recordar automáticamente todos los trabajos realizados anteriormente sin que el usuario tenga que repetirlos.
+- **Protocolo de Protección contra Cortes Eléctricos / Pérdida de Internet (`previo_cambios_realizados.md`):**
+  Debido a fallas recurrentes de electricidad y conectividad en el entorno del usuario, se debe utilizar el archivo `previo_cambios_realizados.md` en la raíz del proyecto para registrar avances parciales:
+  1. **Verificación Inicial:** Al inicio de CADA petición del usuario, leer obligatoriamente `previo_cambios_realizados.md` para verificar si quedó algún trabajo inconcluso por una interrupción imprevista. Si hay trabajo inconcluso, retomarlo inmediatamente en el punto exacto donde se detuvo.
+  2. **Inicialización Limpia:** Si no hay trabajo inconcluso (o una vez resuelto y al arrancar una nueva solicitud), limpiar/reiniciar el archivo `previo_cambios_realizados.md` indicando la nueva tarea que se inicia, evitando así acumulación de contenido obsoleto o basura.
+  3. **Registro Incremental en Caliente:** A medida que se avance y se modifique o cree cada archivo durante la tarea, actualizar de inmediato `previo_cambios_realizados.md` detallando la ruta del archivo y los cambios específicos realizados hasta ese momento.
+  4. **Consolidación Definitiva:** Al finalizar satisfactoriamente toda la petición, redactar la documentación oficial en `LOG_DESARROLLO_REDA.md` y `manual_tecnico_sistema.md`, y restablecer `previo_cambios_realizados.md` a su estado limpio ("Sin tareas inconclusas").
 - **Registro de Avances:** Al finalizar "CADA PETICIÓN" que haga el usuario en la línea de comandos de Gemini CLI o e en el prompt de Gemini Code Assist se debe actualizar el archivo "LOG_DESARROLLO_REDA.md": Mencionar cada una de las rutas de los achivos que se modificaron o crearon y hacer un resumen técnico de los cambios que se realizaron en los archivos existentes o del código de los nuevos archivos creados. Así se podrá llevar un hilo de todas las modificacione que has realizado en la aplicación. Esta actividad debe ser ejecutada tanto si se está usando Gemini CLI como si se usa Gemini Code Assist que viene integrado con el IDE Cloud Editor.
 - **Exportación de Conversaciones:** Para guardar el diálogo literal, utiliza el comando `/chat share last_chat_export.md` y luego ejecuta el script `./registrar_sesion.sh`.
 
