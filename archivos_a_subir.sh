@@ -24,6 +24,7 @@ ARCHIVOS_PHP_PUNTUALES=(
     "src/Controller/TurnsController.php"
     "src/Controller/UsersController.php"
     "src/Template/Bills/retorno_impresion.ctp"
+    "src/Template/Bills/index.ctp"
 
     "src/Controller/StudenttransactionsController.php"
     "src/Template/Studenttransactions/general_morosidad_representantes.ctp"

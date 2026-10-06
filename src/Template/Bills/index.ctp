@@ -26,8 +26,8 @@
                         <th scope="col"><?= $this->Paginator->sort('control_number', 'Nro. Control') ?></th>
                         <th scope="col"><?= $this->Paginator->sort('tipo_documento', 'Tipo de Documento') ?></th>
                         <th scope="col"><?= $this->Paginator->sort('annulled', 'Anulada') ?></th>
-                        <th scope="col"><?= $this->Paginator->sort('amount', 'Descuento/Recargo $') ?></th>
                         <th scope="col"><?= $this->Paginator->sort('amount_paid', 'Monto $') ?></th>
+                        <th scope="col"><?= $this->Paginator->sort('amount', 'Descuento/Recargo $') ?></th>
                         <th scope="col"><?= $this->Paginator->sort('amount_paid', 'Monto Bs.') ?></th>
                         <th scope="col" class="actions"><?= __('Acciones') ?></th>
                     </tr>
@@ -59,8 +59,8 @@
                                 No
                             <?php endif; ?>
                         </td>
-                        <td><?= number_format($descuentoRecargoDolar, 2, ",", ".") ?></td>
                         <td><?= number_format($montoDolar, 2, ",", ".") ?></td>
+                        <td><?= number_format($descuentoRecargoDolar, 2, ",", ".") ?></td>
                         <td><?= number_format($montoBs, 2, ",", ".") ?></td>
                         <td class="actions">
                             <?= $this->Html->link('Ver factura', ['action' => 'invoice', $bill->id, 1, $idFamily, 'index'], ['class' => 'btn btn-success']); ?>

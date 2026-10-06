@@ -15,6 +15,9 @@ El chat de IA debe ser en idioma español
 - **Registro de Avances:** Al finalizar "CADA PETICIÓN" que haga el usuario en la línea de comandos de Gemini CLI o e en el prompt de Gemini Code Assist se debe actualizar el archivo "LOG_DESARROLLO_REDA.md": Mencionar cada una de las rutas de los achivos que se modificaron o crearon y hacer un resumen técnico de los cambios que se realizaron en los archivos existentes o del código de los nuevos archivos creados. Así se podrá llevar un hilo de todas las modificacione que has realizado en la aplicación. Esta actividad debe ser ejecutada tanto si se está usando Gemini CLI como si se usa Gemini Code Assist que viene integrado con el IDE Cloud Editor.
 - **Exportación de Conversaciones:** Para guardar el diálogo literal, utiliza el comando `/chat share last_chat_export.md` y luego ejecuta el script `./registrar_sesion.sh`.
 
+## Interacción con la IA y Modo de Trabajo Autónomo
+- **Ejecución Autónoma y Directa de Cambios:** Cuando el usuario solicite realizar cualquier cambio, ajuste o nueva funcionalidad, la IA debe trabajar de forma autónoma e independiente, aplicando las modificaciones y creando el código necesario de manera automática y directa en los archivos del proyecto, **SIN hacer pausas intermedias** ni detenerse a pedir que el usuario acepte o rechace el código paso a paso.
+
 ## Estilo de Código General
 - Los comentarios deben estar en español.
 - Usar nombres de variables descriptivos en español
