@@ -1,5 +1,19 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-05] - Mejora y Enriquecimiento de Columnas en Listado de Documentos por Familia (`src/Template/Bills/index.ctp`)
+- **Tarea:** Enriquecer la vista del listado de comprobantes y facturas por familia (`Bills/index`), renombrando la columna "Número de factura" a "Nro. documento", añadiendo las columnas "Nro. Control", "Tipo de Documento", "Descuento/Recargo $" y adaptando el cálculo de conversión de divisas para el caso particular de "Recibo de Consejo Educativo".
+- **Cambios Realizados:**
+    - **UI (`src/Template/Bills/index.ctp`):**
+        - Se renombró el encabezado de "Número de factura" a "Nro. documento" con soporte para ordenamiento `bill_number`.
+        - Se incorporaron las columnas ordenables "Nro. Control" (`control_number`) y "Tipo de Documento" (`tipo_documento`).
+        - Se añadió la columna "Descuento/Recargo $" que calcula el equivalente en dólares del descuento o recargo (`round($bill->amount / $bill->tasa_cambio, 2)`).
+        - **Lógica Particular para "Recibo de Consejo Educativo":**
+            - Debido a que en la tabla `bills` este tipo de documento guarda el valor en dólares directamente en el campo `amount_paid`, se muestra dicho valor tal cual en la columna "Monto $".
+            - En la columna "Monto Bs.", se calcula el valor equivalente en bolívares multiplicando por la tasa de cambio (`round($bill->amount_paid * $bill->tasa_cambio, 2)`).
+            - Para los demás tipos de comprobante (facturas, pedidos, otros recibos) se conserva la lógica habitual (`round($bill->amount_paid / $bill->tasa_cambio, 2)` para Monto $ y `$bill->amount_paid` para Monto Bs.).
+        - Se agregó la cabecera DocBlock con la documentación explicativa al inicio del archivo.
+- **Documentación:** Actualización de `manual_tecnico_sistema.md`.
+
 ## [2026-10-05] - Implementación de Protocolo de Salvaguarda Incremental ante Cortes Eléctricos/Conexión (`previo_cambios_realizados.md`)
 - **Tarea:** Establecer un mecanismo de persistencia continua e incremental de avances técnicos para mitigar la pérdida de contexto e interrupciones causadas por fallas de suministro eléctrico o caídas del servicio de internet en el entorno del usuario.
 - **Cambios Realizados:**

@@ -83,6 +83,10 @@
     Vista mostrada a los cajeros al finalizar la impresión o verificación de comprobantes.
     **Segmentación de Accesos por Rol:** Se actualizó la condición para evaluar exclusivamente el rol `'Seniat'` (`$current_user['role'] == 'Seniat'`), asegurando que los cajeros fiscales solo visualicen accesos directos para nuevas facturas fiscales, evitando la aparición de opciones de pedidos al finalizar la cobranza.
 
+## src/Template/Bills/index.ctp
+    Vista del listado de comprobantes y facturas emitidos por familia o representante. Se renombró la columna "Número de factura" a "Nro. documento" y se incorporaron las columnas "Nro. Control" (`control_number`), "Tipo de Documento" (`tipo_documento`) y "Descuento/Recargo $" (`round(bill->amount / tasa_cambio, 2)`). Además, se implementó el tratamiento especial para los comprobantes de tipo "Recibo de Consejo Educativo", en los cuales el monto pagado se almacena originalmente en dólares en el campo `amount_paid`: se muestra dicho valor directo en la columna "Monto $" y se calcula su equivalente en moneda nacional en la columna "Monto Bs." multiplicándolo por la tasa de cambio (`round(bill->amount_paid * tasa_cambio, 2)`), manteniendo para los demás tipos de comprobante la conversión estándar.
+
+
 ## previo_cambios_realizados.md
     Archivo de salvaguarda incremental y persistencia en caliente ante contingencias de pérdida de suministro eléctrico o desconexión a internet. Permite registrar en tiempo real los archivos creados o modificados y el estado del trabajo en curso durante la ejecución de una tarea. Se consulta de manera obligatoria al inicio de cada sesión o petición para reanudar trabajos incompletos, se limpia al iniciar una nueva solicitud para evitar acumulación de datos residuales, y se consolida definitivamente en `LOG_DESARROLLO_REDA.md` y `manual_tecnico_sistema.md` al finalizar.
 
