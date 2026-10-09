@@ -1,5 +1,5 @@
 <?php
-    use Cake\Routing\Router; 
+    use Cake\Routing\Router;
 ?>
 <div class="row noVerImpreso">
     <div class="col-xs-12 col-sm-12 col-md-12">
@@ -28,7 +28,7 @@
     </div>
     <div class="col-xs-12 col-sm-12 col-md-4">
         <?php
-            echo $this->Form->input('reporte_general_consejo_educativo', ['label' => 'Reporte general de Consejo educativo: ', 'options' => 
+            echo $this->Form->input('reporte_general_consejo_educativo', ['label' => 'Reporte general de Consejo educativo: ', 'options' =>
                 ["" => "",
                 ($anioEscolarActual-1) => ($anioEscolarActual-1).'-'.$anioEscolarActual,
                 $anioEscolarActual => $anioEscolarActual.'-'.($anioEscolarActual+1)]]); ?>
@@ -45,12 +45,9 @@
         <button type='button' id="botonFamiliasExoneradas" class='btn btn-success' style='margin-bottom: 5%;'>Familias exoneradas</button>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-4">
-        <button type='button' id="botonFamiliasRelacionadas" class='btn btn-success' style='margin-bottom: 5%;'>Familias relacionadas</button>
-    </div>
-    <div class="col-xs-12 col-sm-12 col-md-4">
     </div>
 </div>
-<?php 
+<?php
 if (isset($reporte))
 {
     if ($reporte == "familiasExoneradas")
@@ -65,12 +62,12 @@ if (isset($reporte))
     {
         include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_general_consejo_educativo.ctp';
     }
-} ?> 
+} ?>
 <br />
 <br /><br /><br /><br /><br /><br /><br />
 <script>
     // Variables globales
-    var urlBase = window.location.hostname; 
+    var urlBase = window.location.hostname;
     console.log("urlBase", urlBase)
     var urlBaseAjustada = "";
     var nombreRuta = window.location.pathname;
@@ -85,42 +82,42 @@ if (isset($reporte))
     {
         crm_processing_modal('Por favor espere mientras se buscan los datos de la familia');
         ocultarAlertas();
-        $.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "datosFamilia"]); ?>', 
-            {"idFamilia" : idFamilia}, null, "json")          
-            .done(function(respuesta) 
+        $.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "datosFamilia"]); ?>',
+            {"idFamilia" : idFamilia}, null, "json")
+            .done(function(respuesta)
             {
-                if (respuesta.satisfactorio) 
+                if (respuesta.satisfactorio)
                 {
-                    crm_processing_modal_close(); 
+                    crm_processing_modal_close();
                     $("#datosFamilia").html(respuesta.html);
                     if ($("#familiaConsejoEducativo").hasClass("noVerEnPantalla") == true)
                     {
                         $("#familiaConsejoEducativo").removeClass("noVerEnPantalla");
                     }
-                } 
-                else 
+                }
+                else
                 {
-                    crm_processing_modal_close(); 
+                    crm_processing_modal_close();
                     $("#mensajeAlertaPeligro").text(respuesta.mensajeDeError);
                     mostrarAlertaPeligro();
                 }
             })
-            .fail(function(jqXHR, textStatus, errorThrown) 
+            .fail(function(jqXHR, textStatus, errorThrown)
             {
                 $("#header-messages").html("Algo ha fallado, los datos fiscales no pudieron ser actualizados: " + textStatus);
-            });  
+            });
     }
     function editarExoneracion(accion)
     {
         crm_processing_modal('Por favor espere mientras se hacen los cambios');
         ocultarAlertas();
-        $.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "editarExoneracion"]); ?>', 
-            {"idFamilia" : idFamilia, "accion" : accion}, null, "json")          
-            .done(function(respuesta) 
+        $.post('<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "editarExoneracion"]); ?>',
+            {"idFamilia" : idFamilia, "accion" : accion}, null, "json")
+            .done(function(respuesta)
             {
-                if (respuesta.satisfactorio) 
+                if (respuesta.satisfactorio)
                 {
-                    crm_processing_modal_close(); 
+                    crm_processing_modal_close();
                     $("#mensajeAlertaSatisfactorio").text(respuesta.mensaje);
                     mostrarAlertaSatisfactorio();
                     if (accion == "exonerarFamilia")
@@ -135,21 +132,21 @@ if (isset($reporte))
                         $(".exoneracion").addClass("exonerarFamilia");
                         $(".exoneracion").text("Exonerar");
                     }
-                } 
-                else 
+                }
+                else
                 {
-                    crm_processing_modal_close(); 
+                    crm_processing_modal_close();
                     $("#mensajeAlertaPeligro").text(respuesta.mensaje);
                     mostrarAlertaPeligro();
                 }
             })
-            .fail(function(jqXHR, textStatus, errorThrown) 
+            .fail(function(jqXHR, textStatus, errorThrown)
             {
                 $("#header-messages").html("Algo ha fallado, los datos fiscales no pudieron ser actualizados: " + textStatus);
-            });  
+            });
 
     }
-    $(document).ready(function() 
+    $(document).ready(function()
     {
         if (urlBase == "localhost")
         {
@@ -185,19 +182,13 @@ if (isset($reporte))
         {
             editarExoneracion("eliminarExoneracion");
         });
-        $('#botonFamiliasExoneradas').on( 'click', function(event) 
+        $('#botonFamiliasExoneradas').on( 'click', function(event)
 		{
 			event.preventDefault();
             crm_processing_modal('Por favor espere mientras se emite el reporte...');
             location.href = urlBaseAjustada+"/familiasExoneradas";
 		});
-        $('#botonFamiliasRelacionadas').on( 'click', function(event) 
-		{
-			event.preventDefault();
-            crm_processing_modal('Por favor espere mientras se emite el reporte...');
-            location.href = urlBaseAjustada+"/familiasRelacionadas";
-        });
-        $('#reporte-general-consejo-educativo').on( 'change', function(event) 
+        $('#reporte-general-consejo-educativo').on( 'change', function(event)
 		{
 			event.preventDefault();
             crm_processing_modal('Por favor espere mientras se emite el reporte...');
@@ -213,7 +204,7 @@ if (isset($reporte))
 
                     name: "reporteFamiliasRelacionadas",
 
-                    filename: $('#reporteFamiliasRelacionadas').attr('name') 
+                    filename: $('#reporteFamiliasRelacionadas').attr('name')
 
                 });
             }
@@ -225,7 +216,7 @@ if (isset($reporte))
 
                     name: "reporteFamiliasExoneradas",
 
-                    filename: $('#reporteFamiliasExoneradas').attr('name') 
+                    filename: $('#reporteFamiliasExoneradas').attr('name')
 
                 });
             }
@@ -237,10 +228,10 @@ if (isset($reporte))
 
                     name: "reporteGeneralConsejoEducativo",
 
-                    filename: $('#reporteGeneralConsejoEducativo').attr('name') 
+                    filename: $('#reporteGeneralConsejoEducativo').attr('name')
 
                 });
             }
 		});
-    });    
+    });
 </script>
