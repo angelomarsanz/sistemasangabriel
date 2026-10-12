@@ -72,6 +72,13 @@
     - Usuarios con rol `Ventas generales` no pueden solicitar opciones de facturación fiscal.
     - Si existe incompatibilidad, se detiene el flujo con un mensaje Flash explicativo y se redirige a `wait`.
     - Si el usuario no tiene turno abierto, se redirige ordenadamente a `checkTurnOpen` con mensaje de alerta.
+    **Filtros y cierre consolidado por período:** La acción `index()` valida el rango de fechas seleccionado y permite listar todos los turnos o restringirlos al cajero seleccionado; los usuarios 1 y 978 son los únicos que pueden consultar turnos de otros cajeros, conservándose para el usuario 978 la exclusión del usuario 1. Antes de cargar la vista, se obtienen los `user_id` presentes en `turns` y sus nombres asociados en `Users`. La acción `reporteCierrePeriodo()` restringe el cálculo a turnos cerrados y suma las formas de pago, entregas esperadas, documentos activos por tipo/moneda, anulaciones y totales contables. `obtenerRangoFechasPeriodo()` valida fechas ISO e implementa un límite final exclusivo para incluir el día completo.
+
+## src/Template/Turns/index.ctp
+    Vista del historial de turnos. Incorpora un formulario con selectores calendario "Del/Al" y opciones para abrir los cierres individuales de todos los cajeros del período, generar un único cierre consolidado o listar por separado los cierres del cajero seleccionado. El listado conserva la paginación y los permisos existentes.
+
+## src/Template/Turns/reporte_cierre.ctp
+    Presenta el cierre individual de un turno o, cuando se recibe `consolidadoPeriodo`, un reporte único para los turnos cerrados del intervalo seleccionado. La versión consolidada lista los turnos/cajeros incluidos, suma medios de pago y montos por entregar, agrupa documentos emitidos por tipo y moneda, informa cantidades anuladas y presenta totales contables generales. La vista individual existente permanece como ruta alternativa sin cambios funcionales.
 
 ## src/Controller/BillsController.php
     Controlador central de facturación y cobranzas del colegio.
@@ -89,5 +96,4 @@
 
 ## previo_cambios_realizados.md
     Archivo de salvaguarda incremental y persistencia en caliente ante contingencias de pérdida de suministro eléctrico o desconexión a internet. Permite registrar en tiempo real los archivos creados o modificados y el estado del trabajo en curso durante la ejecución de una tarea. Se consulta de manera obligatoria al inicio de cada sesión o petición para reanudar trabajos incompletos, se limpia al iniciar una nueva solicitud para evitar acumulación de datos residuales, y se consolida definitivamente en `LOG_DESARROLLO_REDA.md` y `manual_tecnico_sistema.md` al finalizar.
-
 

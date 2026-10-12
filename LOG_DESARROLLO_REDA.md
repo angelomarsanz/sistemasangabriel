@@ -1,5 +1,23 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-11] - Filtros por período y reportes de cierre consolidados para turnos
+- **Tarea:** Facilitar la consulta de turnos por intervalo de fechas, con reportes individuales para todos los cajeros, reportes separados para un cajero específico y un cierre consolidado de todos los turnos del período.
+- **Cambios realizados:**
+    - **Controlador (`src/Controller/TurnsController.php`):**
+        - Se amplió `index()` para validar y aplicar fechas inicial/final, filtrar por cajero y mantener los límites de visibilidad existentes (usuarios 1 y 978; el usuario 978 no consulta turnos del usuario 1).
+        - Se consulta `turns.user_id` y luego se obtienen los nombres desde `Users` para poblar el filtro de cajeros.
+        - Se añadió `reporteCierrePeriodo()`, que consolida turnos cerrados sumando formas de pago, montos que deben entregar los cajeros, compensaciones, facturación, descuentos/recargos, sobrantes y documentos emitidos/anulados por tipo y moneda.
+        - Se añadió `obtenerRangoFechasPeriodo()` para validar el formato `AAAA-MM-DD` y construir un límite final exclusivo que incluye el día de cierre completo.
+        - Se autorizó la nueva acción de consolidación para los usuarios con rol `Seniat`, manteniendo su acceso restringido por las validaciones de usuario.
+    - **Vista de turnos (`src/Template/Turns/index.ctp`):**
+        - Se incorporaron campos calendario "Del/Al" y opciones de reportes separados, un reporte único o cierres separados por cajero.
+        - El listado cambia su título según el filtro aplicado y conserva los enlaces actuales a reportes por turno.
+    - **Reporte de cierre (`src/Template/Turns/reporte_cierre.ctp`):**
+        - Se agregó una vista consolidada para el período con listado de turnos, resumen agregado de formas de pago y entrega, documentos por tipo/moneda, anulaciones y totales contables.
+        - El reporte individual existente se mantiene como comportamiento predeterminado.
+    - **Documentación del sistema:** Se actualizaron `manual_tecnico_sistema.md` y el registro incremental `previo_cambios_realizados.md`.
+- **Validación:** revisión de diagnósticos de archivos sin errores reportados y control de formato del diff; no fue posible ejecutar `phpact -l` porque el comando no está instalado/disponible en este entorno.
+
 ## [2026-10-05] - Mejora y Enriquecimiento de Columnas en Listado de Documentos por Familia (`src/Template/Bills/index.ctp`)
 - **Tarea:** Enriquecer la vista del listado de comprobantes y facturas por familia (`Bills/index`), renombrando la columna "Número de factura" a "Nro. documento", añadiendo las columnas "Nro. Control", "Tipo de Documento", "Descuento/Recargo $" y adaptando el cálculo de conversión de divisas para el caso particular de "Recibo de Consejo Educativo".
 - **Cambios Realizados:**

@@ -1,6 +1,172 @@
 <?php
+/**
+ * Presenta el cierre individual de un turno o el resumen contable consolidado
+ * de los turnos cerrados dentro de un período seleccionado.
+ */
     use Cake\Routing\Router;
 ?>
+<?php if (!empty($consolidadoPeriodo)): ?>
+<div id="reporte-cierre" class="container" style="font-size: 12px; line-height: 16px;">
+	<div class="page-header">
+		<h2>Cierre consolidado de turnos</h2>
+		<p><strong>Período:</strong> <?= h($desde) ?> al <?= h($hasta) ?></p>
+		<p><strong>Turnos incluidos:</strong> <?= count($turnosPeriodo) ?></p>
+	</div>
+
+	<h3>Dinero total que deben entregar los cajeros</h3>
+	<div class="table-responsive">
+		<table class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<th>Forma de pago</th>
+					<th class="text-right">Monto a entregar</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($entregasPorForma as $nombreForma => $montoEntrega): ?>
+					<tr>
+						<td><?= h($nombreForma) ?></td>
+						<td class="text-right"><?= number_format($montoEntrega, 2, ',', '.') ?></td>
+					</tr>
+				<?php endforeach; ?>
+				<tr>
+					<td><strong>Total general a entregar (Bs.)</strong></td>
+					<td class="text-right"><strong><?= number_format($totalEntregaGeneralBs, 2, ',', '.') ?></strong></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<h3>Turnos incluidos en el cierre</h3>
+	<div class="table-responsive">
+		<table class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<th>Turno</th>
+					<th>Fecha de inicio</th>
+					<th>Cajero</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($turnosPeriodo as $turnoPeriodo): ?>
+					<tr>
+						<td><?= h($turnoPeriodo->turn) ?></td>
+						<td><?= h($turnoPeriodo->start_date->format('d-m-Y H:i')) ?></td>
+						<td><?= h($turnoPeriodo->user->first_name . ' ' . $turnoPeriodo->user->surname) ?></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+	</div>
+
+	<h3>Resumen general de formas de pago</h3>
+	<div class="table-responsive">
+		<table class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<th>Forma de pago</th>
+					<th>Moneda</th>
+					<th class="text-right">Monto</th>
+					<th class="text-right">Equivalente Bs.</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($formasPagoPeriodo as $nombreForma => $forma): ?>
+					<?php if ($nombreForma === 'Total general cobrado Bs.'): ?>
+						<tr>
+							<td colspan="3"><strong><?= h($nombreForma) ?></strong></td>
+							<td class="text-right"><strong><?= number_format($forma['montoBs'], 2, ',', '.') ?></strong></td>
+						</tr>
+					<?php else: ?>
+						<tr>
+							<td><?= h($nombreForma) ?></td>
+							<td><?= h($forma['moneda']) ?></td>
+							<td class="text-right"><?= number_format($forma['monto'], 2, ',', '.') ?></td>
+							<td class="text-right"><?= number_format($forma['montoBs'], 2, ',', '.') ?></td>
+						</tr>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+	</div>
+
+	<h3>Documentos emitidos por tipo y moneda</h3>
+	<div class="table-responsive">
+		<table class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<th>Tipo de documento</th>
+					<th>Moneda original</th>
+					<th class="text-right">Cantidad</th>
+					<th class="text-right">Monto original</th>
+					<th class="text-right">Total Bs.</th>
+					<th class="text-right">Total $</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php $cantidadDocumentos = 0;
+				foreach ($resumenDocumentos as $resumenDocumento):
+					$cantidadDocumentos += $resumenDocumento['cantidad']; ?>
+					<tr>
+						<td><?= h($resumenDocumento['tipo']) ?></td>
+						<td><?= h($resumenDocumento['moneda']) ?></td>
+						<td class="text-right"><?= number_format($resumenDocumento['cantidad'], 0, ',', '.') ?></td>
+						<td class="text-right"><?= number_format($resumenDocumento['montoOriginal'], 2, ',', '.') ?></td>
+						<td class="text-right"><?= number_format($resumenDocumento['montoBs'], 2, ',', '.') ?></td>
+						<td class="text-right"><?= number_format($resumenDocumento['montoDolares'], 2, ',', '.') ?></td>
+					</tr>
+				<?php endforeach; ?>
+				<tr>
+					<td colspan="2"><strong>Total de documentos emitidos</strong></td>
+					<td class="text-right"><strong><?= number_format($cantidadDocumentos, 0, ',', '.') ?></strong></td>
+					<td colspan="3"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<?php if (!empty($resumenAnulados)): ?>
+		<h3>Documentos anulados</h3>
+		<div class="table-responsive">
+			<table class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Tipo de documento</th>
+						<th class="text-right">Cantidad anulada</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($resumenAnulados as $tipoDocumento => $cantidadAnulada): ?>
+						<tr>
+							<td><?= h($tipoDocumento) ?></td>
+							<td class="text-right"><?= number_format($cantidadAnulada, 0, ',', '.') ?></td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+	<?php endif; ?>
+
+	<h3>Totales contables</h3>
+	<div class="table-responsive">
+		<table class="table table-striped table-hover">
+			<tbody>
+				<tr><th>Total general facturado (Bs.)</th><td class="text-right"><?= number_format($totalGeneralFacturado, 2, ',', '.') ?></td></tr>
+				<tr><th>Descuentos y recargos (Bs.)</th><td class="text-right"><?= number_format($totalDescuentosRecargos, 2, ',', '.') ?></td></tr>
+				<tr><th>Facturas compensadas (Bs.)</th><td class="text-right"><?= number_format($totalGeneralCompensado, 2, ',', '.') ?></td></tr>
+				<tr><th>Sobrantes pendientes ($)</th><td class="text-right"><?= number_format($totalGeneralSobrantes, 2, ',', '.') ?></td></tr>
+				<tr><th>Reintegros de sobrantes ($)</th><td class="text-right"><?= number_format($totalGeneralReintegrosSobrantes, 2, ',', '.') ?></td></tr>
+			</tbody>
+		</table>
+	</div>
+	<button type="button" class="btn btn-default noverScreen" onclick="window.print()">Imprimir</button>
+</div>
+<style>
+@media print {
+	.noverScreen { display: none; }
+}
+</style>
+<?php else: ?>
 <style>
 @media screen
 {
@@ -2351,3 +2517,4 @@
     });
 
 </script>
+<?php endif; ?>

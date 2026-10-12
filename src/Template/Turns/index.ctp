@@ -1,7 +1,41 @@
+<?php
+/**
+ * Historial de turnos con filtros de período y cierres individuales por cajero.
+ */
+?>
 <div class="row">
     <div class="col-md-12">
+		<?php if (!empty($puedeConsultarTodos)): ?>
+			<div class="panel panel-default">
+				<div class="panel-heading"><strong>Filtros de reportes de cierre</strong></div>
+				<div class="panel-body">
+					<?= $this->Form->create(null, ['type' => 'get', 'url' => ['action' => 'index'], 'class' => 'form-inline']) ?>
+						<div class="form-group">
+							<label for="periodo-desde">Del</label>
+							<input class="form-control" type="date" id="periodo-desde" name="desde" value="<?= h($desde) ?>" required>
+						</div>
+						<div class="form-group">
+							<label for="periodo-al">Al</label>
+							<input class="form-control" type="date" id="periodo-al" name="al" value="<?= h($hasta) ?>" required>
+						</div>
+						<div class="form-group">
+							<label for="modo-reporte">Mostrar</label>
+							<select class="form-control" id="modo-reporte" name="modo" required>
+								<option value="">Seleccione una opción</option>
+								<option value="todos_separados" <?= $modo === 'todos_separados' ? 'selected' : '' ?>>Todos los turnos en reportes separados</option>
+								<option value="todos_unico" <?= $modo === 'todos_unico' ? 'selected' : '' ?>>Todos los turnos en un único reporte</option>
+								<?php foreach ($cajeros as $idCajero => $nombreCajero): ?>
+									<option value="<?= h('usuario-' . $idCajero) ?>" <?= ($modo === 'usuario-' . $idCajero) ? 'selected' : '' ?>>Turnos de <?= h($nombreCajero) ?></option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+						<button type="submit" class="btn btn-primary">Buscar</button>
+					<?= $this->Form->end() ?>
+				</div>
+			</div>
+		<?php endif; ?>
     	<div class="page-header">
-     	    <h2><?= "Histórico de turnos correspondientes a " . $current_user['first_name'] . ' ' . $current_user['surname'] ?></h2>
+			<h2><?= h($tituloTurnos) ?></h2>
     	</div>
     	<div class="table-responsive">
     		<table class="table table-striped table-hover">

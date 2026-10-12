@@ -28,7 +28,7 @@ class TurnsController extends AppController
 		{
 			if ($user['role'] === 'Seniat')
 			{
-				if(in_array($this->request->action, ['checkTurnOpen', 'checkTurnClose', 'index',  'checkTurnInvoice', 'add', 'edit', 'imprimirReporteCierre', 'reporteCierre']))
+				if(in_array($this->request->action, ['checkTurnOpen', 'checkTurnClose', 'index', 'reporteCierrePeriodo', 'checkTurnInvoice', 'add', 'edit', 'imprimirReporteCierre', 'reporteCierre']))
 				{
 					return true;
 				}
@@ -54,19 +54,50 @@ class TurnsController extends AppController
 	}
 
     /**
-     * Index method
+     * Muestra el historial de turnos y permite filtrar cierres por período y cajero.
+     *
+     * Los usuarios administradores pueden consultar turnos de todos los cajeros;
+     * el usuario supervisor conserva la exclusión de los turnos del usuario 1.
      *
      * @return \Cake\Network\Response|null
      */
     public function index()
     {
-		if ($this->Auth->user('id') == 1)
+		$idUsuarioActual = (int)$this->Auth->user('id');
+		$puedeConsultarTodos = in_array($idUsuarioActual, [1, 978], true);
+		$modo = $this->request->getQuery('modo');
+		$desde = $this->request->getQuery('desde');
+		$hasta = $this->request->getQuery('al');
+		$fechaInicio = null;
+		$fechaFin = null;
+
+		if ($modo !== null && $modo !== '')
+		{
+			$rangoFechas = $this->obtenerRangoFechasPeriodo($desde, $hasta);
+			if ($rangoFechas === null)
+			{
+				$this->Flash->error(__('Indique un período válido, con fecha inicial y fecha final.'));
+				return $this->redirect(['action' => 'index']);
+			}
+			$fechaInicio = $rangoFechas['desde'];
+			$fechaFin = $rangoFechas['hasta'];
+
+			if ($modo === 'todos_unico')
+			{
+				return $this->redirect([
+					'action' => 'reporteCierrePeriodo',
+					'?' => ['desde' => $desde, 'al' => $hasta]
+				]);
+			}
+		}
+
+		if ($idUsuarioActual == 1)
 		{
 			$query = $this->Turns->find('all')
 				->contain(['Users'])
 				->order(['start_date' => 'DESC']);			
 		}
-		elseif ($this->Auth->user('id') == 978)
+		elseif ($idUsuarioActual == 978)
 		{
 			$query = $this->Turns->find('all')
 				->contain(['Users'])
@@ -80,11 +111,321 @@ class TurnsController extends AppController
 				->where(['user_id' => $this->Auth->user('id')])
 				->order(['start_date' => 'DESC']);
 		}
+
+		if ($fechaInicio !== null)
+		{
+			$query->where([
+				'start_date >=' => $fechaInicio,
+				'start_date <' => $fechaFin
+			]);
+
+			if ($modo === 'todos_separados' && !$puedeConsultarTodos)
+			{
+				$this->Flash->error(__('No tiene autorización para consultar los turnos de todos los cajeros.'));
+				return $this->redirect(['action' => 'index']);
+			}
+			if (strpos((string)$modo, 'usuario-') === 0)
+			{
+				$idCajero = substr($modo, strlen('usuario-'));
+				if (!$puedeConsultarTodos || !ctype_digit($idCajero) || ($idUsuarioActual == 978 && (int)$idCajero == 1))
+				{
+					$this->Flash->error(__('El cajero seleccionado no está disponible para su usuario.'));
+					return $this->redirect(['action' => 'index']);
+				}
+				$query->where(['Turns.user_id' => (int)$idCajero]);
+			}
+			elseif ($modo !== 'todos_separados')
+			{
+				$this->Flash->error(__('Seleccione una opción válida para consultar los turnos.'));
+				return $this->redirect(['action' => 'index']);
+			}
+		}
    
 		$this->set('turns', $this->paginate($query));
+
+		$cajeros = [];
+		if ($puedeConsultarTodos)
+		{
+			$consultaIds = $this->Turns->find()
+				->select(['user_id'])
+				->distinct(['user_id']);
+			if ($idUsuarioActual == 978)
+			{
+				$consultaIds->where(['user_id !=' => 1]);
+			}
+			$idsCajeros = [];
+			foreach ($consultaIds->all() as $turnoConUsuario)
+			{
+				$idsCajeros[] = (int)$turnoConUsuario->user_id;
+			}
+			if (!empty($idsCajeros))
+			{
+				$usuarios = $this->Turns->Users->find()
+					->select(['id', 'first_name', 'surname'])
+					->where(['id IN' => $idsCajeros])
+					->order(['first_name' => 'ASC', 'surname' => 'ASC'])
+					->all();
+				foreach ($usuarios as $usuario)
+				{
+					$cajeros[$usuario->id] = $usuario->first_name . ' ' . $usuario->surname;
+				}
+			}
+		}
+
+		$tituloTurnos = __('Histórico de turnos correspondientes a {0} {1}', $this->Auth->user('first_name'), $this->Auth->user('surname'));
+		if ($modo === 'todos_separados')
+		{
+			$tituloTurnos = __('Turnos de todos los cajeros entre {0} y {1}', $desde, $hasta);
+		}
+		elseif (strpos((string)$modo, 'usuario-') === 0)
+		{
+			$idCajero = (int)substr($modo, strlen('usuario-'));
+			$tituloTurnos = __('Turnos de {0} entre {1} y {2}', isset($cajeros[$idCajero]) ? $cajeros[$idCajero] : '', $desde, $hasta);
+		}
+		$this->set(compact('cajeros', 'modo', 'desde', 'hasta', 'tituloTurnos', 'puedeConsultarTodos'));
 		
         $this->set('_serialize', ['turns']);
     }
+
+	/**
+	 * Genera un cierre consolidado con los turnos cerrados del período indicado.
+	 *
+	 * Suma por cajero las formas de pago, montos por entregar y documentos emitidos,
+	 * conservando separados los montos de documentos según su moneda original.
+	 *
+	 * @return \Cake\Network\Response|null
+	 */
+	public function reporteCierrePeriodo()
+	{
+		$idUsuarioActual = (int)$this->Auth->user('id');
+		if (!in_array($idUsuarioActual, [1, 978], true))
+		{
+			$this->Flash->error(__('No tiene autorización para generar cierres consolidados de todos los cajeros.'));
+			return $this->redirect(['action' => 'index']);
+		}
+
+		$desde = $this->request->getQuery('desde');
+		$hasta = $this->request->getQuery('al');
+		$rangoFechas = $this->obtenerRangoFechasPeriodo($desde, $hasta);
+		if ($rangoFechas === null)
+		{
+			$this->Flash->error(__('Indique un período válido, con fecha inicial y fecha final.'));
+			return $this->redirect(['action' => 'index']);
+		}
+
+		$condicionesTurnos = [
+			'Turns.status' => 0,
+			'Turns.start_date >=' => $rangoFechas['desde'],
+			'Turns.start_date <' => $rangoFechas['hasta']
+		];
+		if ($idUsuarioActual == 978)
+		{
+			$condicionesTurnos['Turns.user_id !='] = 1;
+		}
+
+		$turnosPeriodo = $this->Turns->find('all')
+			->contain(['Users'])
+			->where($condicionesTurnos)
+			->order(['Turns.start_date' => 'ASC', 'Turns.id' => 'ASC'])
+			->all();
+		if (count($turnosPeriodo) === 0)
+		{
+			$this->Flash->error(__('No se encontraron turnos cerrados para el período seleccionado.'));
+			return $this->redirect(['action' => 'index']);
+		}
+
+		$idsTurnos = [];
+		foreach ($turnosPeriodo as $turnoPeriodo)
+		{
+			$idsTurnos[] = (int)$turnoPeriodo->id;
+		}
+		$formasPagoPeriodo = [];
+		$entregasPorForma = [];
+		$totalGeneralCompensado = 0;
+		$totalGeneralFacturado = 0;
+		$totalDescuentosRecargos = 0;
+		$totalGeneralSobrantes = 0;
+		$totalGeneralReintegrosSobrantes = 0;
+		$totalEntregaGeneralBs = 0;
+
+		foreach ($turnosPeriodo as $turnoPeriodo)
+		{
+			$formasPagoTurno = json_decode($turnoPeriodo->total_formas_pago, true);
+			$vectorRecibido = json_decode($turnoPeriodo->vector_totales_recibidos, true);
+			$vectorPedidos = json_decode($turnoPeriodo->vector_totales_recibidos_pedidos, true);
+			if (!is_array($formasPagoTurno) || !is_array($vectorRecibido) || !is_array($vectorPedidos))
+			{
+				$this->Flash->error(__('No se pudo consolidar el turno {0}: faltan datos contables válidos.', $turnoPeriodo->id));
+				return $this->redirect(['action' => 'index']);
+			}
+
+			foreach ($formasPagoTurno as $nombreForma => $forma)
+			{
+				if (!isset($formasPagoPeriodo[$nombreForma]))
+				{
+					$formasPagoPeriodo[$nombreForma] = [
+						'moneda' => isset($forma['moneda']) ? $forma['moneda'] : '',
+						'monto' => 0,
+						'montoBs' => 0
+					];
+				}
+				if (isset($forma['monto']) && is_numeric($forma['monto']))
+				{
+					$formasPagoPeriodo[$nombreForma]['monto'] += $forma['monto'];
+				}
+				if (isset($forma['montoBs']) && is_numeric($forma['montoBs']))
+				{
+					$formasPagoPeriodo[$nombreForma]['montoBs'] += $forma['montoBs'];
+				}
+			}
+
+			foreach ([$vectorRecibido, $vectorPedidos] as $vectorEntrega)
+			{
+				foreach ($vectorEntrega as $nombreFila => $montosFila)
+				{
+					if (strpos($nombreFila, 'Total a recibir de ') !== 0 || !is_array($montosFila))
+					{
+						continue;
+					}
+					foreach ($montosFila as $nombreForma => $monto)
+					{
+						if (is_numeric($monto))
+						{
+							if (!isset($entregasPorForma[$nombreForma]))
+							{
+								$entregasPorForma[$nombreForma] = 0;
+							}
+							$entregasPorForma[$nombreForma] += $monto;
+						}
+					}
+				}
+			}
+
+			$totalGeneralCompensado += (float)$turnoPeriodo->total_general_compensado;
+			$totalGeneralFacturado += (float)$turnoPeriodo->total_general_facturado;
+			$totalDescuentosRecargos += (float)$turnoPeriodo->total_descuentos_recargos;
+			$totalGeneralSobrantes += (float)$turnoPeriodo->total_general_sobrantes;
+			$totalGeneralReintegrosSobrantes += (float)$turnoPeriodo->total_general_reintegros_sobrantes;
+			$totalCobradoBs = isset($formasPagoTurno['Total general cobrado Bs.']['montoBs'])
+				? (float)$formasPagoTurno['Total general cobrado Bs.']['montoBs'] : 0;
+			$totalGeneralEntregaTurno = $totalCobradoBs + (float)$turnoPeriodo->total_general_compensado
+				- round((float)$turnoPeriodo->total_general_sobrantes * (float)$turnoPeriodo->tasa_dolar, 2)
+				- round((float)$turnoPeriodo->total_general_reintegros_sobrantes * (float)$turnoPeriodo->tasa_dolar, 2);
+			$totalEntregaGeneralBs += $totalGeneralEntregaTurno;
+		}
+
+		$this->loadModel('Bills');
+		$documentosPeriodo = $this->Bills->find('all')
+			->where(['Bills.turn IN' => $idsTurnos, 'Bills.annulled' => 0])
+			->order(['Bills.tipo_documento' => 'ASC', 'Bills.moneda_id' => 'ASC']);
+		$resumenDocumentos = [];
+		foreach ($documentosPeriodo as $documento)
+		{
+			$moneda = (int)$documento->moneda_id;
+			$etiquetaMoneda = $moneda === 1 ? 'Bs.' : ($moneda === 2 ? '$' : '€');
+			$claveResumen = $documento->tipo_documento . '|' . $etiquetaMoneda;
+			if (!isset($resumenDocumentos[$claveResumen]))
+			{
+				$resumenDocumentos[$claveResumen] = [
+					'tipo' => $documento->tipo_documento,
+					'moneda' => $etiquetaMoneda,
+					'cantidad' => 0,
+					'montoOriginal' => 0,
+					'montoBs' => 0,
+					'montoDolares' => 0
+				];
+			}
+
+			$montoOriginal = (float)$documento->amount_paid;
+			if ($moneda === 1)
+			{
+				$montoBs = $montoOriginal;
+				$montoDolares = (float)$documento->tasa_cambio > 0 ? round($montoOriginal / $documento->tasa_cambio, 2) : 0;
+			}
+			elseif ($moneda === 2)
+			{
+				$montoBs = round($montoOriginal * (float)$documento->tasa_cambio, 2);
+				$montoDolares = $montoOriginal;
+			}
+			else
+			{
+				$montoBs = round($montoOriginal * (float)$documento->tasa_euro, 2);
+				$montoDolares = round($montoOriginal * (float)$documento->tasa_dolar_euro, 2);
+			}
+			$resumenDocumentos[$claveResumen]['cantidad']++;
+			$resumenDocumentos[$claveResumen]['montoOriginal'] += $montoOriginal;
+			$resumenDocumentos[$claveResumen]['montoBs'] += $montoBs;
+			$resumenDocumentos[$claveResumen]['montoDolares'] += $montoDolares;
+		}
+
+		$documentosAnuladosPeriodo = $this->Bills->find('all')
+			->select(['tipo_documento'])
+			->where(['Bills.turn IN' => $idsTurnos, 'Bills.annulled' => 1])
+			->all();
+		$resumenAnulados = [];
+		foreach ($documentosAnuladosPeriodo as $documentoAnulado)
+		{
+			$tipoDocumento = $documentoAnulado->tipo_documento;
+			if (!isset($resumenAnulados[$tipoDocumento]))
+			{
+				$resumenAnulados[$tipoDocumento] = 0;
+			}
+			$resumenAnulados[$tipoDocumento]++;
+		}
+
+		$this->set(compact(
+			'turnosPeriodo',
+			'desde',
+			'hasta',
+			'formasPagoPeriodo',
+			'entregasPorForma',
+			'totalGeneralCompensado',
+			'totalGeneralFacturado',
+			'totalDescuentosRecargos',
+			'totalGeneralSobrantes',
+			'totalGeneralReintegrosSobrantes',
+			'totalEntregaGeneralBs',
+			'resumenDocumentos',
+			'resumenAnulados'
+		));
+		$this->set('consolidadoPeriodo', true);
+		$this->set('_serialize', ['turnosPeriodo', 'resumenDocumentos', 'resumenAnulados']);
+
+		return $this->render('reporte_cierre');
+	}
+
+	/**
+	 * Valida fechas ISO y devuelve los límites inclusivos de un período diario.
+	 *
+	 * @param string|null $desde Fecha inicial en formato AAAA-MM-DD.
+	 * @param string|null $hasta Fecha final en formato AAAA-MM-DD.
+	 * @return array|null Límites para la consulta o null si el rango no es válido.
+	 */
+	private function obtenerRangoFechasPeriodo($desde, $hasta)
+	{
+		if (!is_string($desde) || !is_string($hasta))
+		{
+			return null;
+		}
+		$fechaDesde = \DateTimeImmutable::createFromFormat('!Y-m-d', $desde);
+		$erroresDesde = \DateTimeImmutable::getLastErrors();
+		$fechaHasta = \DateTimeImmutable::createFromFormat('!Y-m-d', $hasta);
+		$erroresHasta = \DateTimeImmutable::getLastErrors();
+		if (!$fechaDesde || !$fechaHasta
+			|| ($erroresDesde !== false && ($erroresDesde['warning_count'] || $erroresDesde['error_count']))
+			|| ($erroresHasta !== false && ($erroresHasta['warning_count'] || $erroresHasta['error_count']))
+			|| $fechaDesde->format('Y-m-d') !== $desde
+			|| $fechaHasta->format('Y-m-d') !== $hasta
+			|| $fechaDesde > $fechaHasta)
+		{
+			return null;
+		}
+
+		return [
+			'desde' => $fechaDesde->format('Y-m-d 00:00:00'),
+			'hasta' => $fechaHasta->modify('+1 day')->format('Y-m-d 00:00:00')
+		];
+	}
 
     /**
      * View method
