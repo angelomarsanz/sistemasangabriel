@@ -1,7 +1,7 @@
 <?php
 /**
  * Presenta el cierre individual de un turno o el resumen contable consolidado
- * de los turnos cerrados dentro de un período seleccionado.
+ * de los turnos cerrados dentro de un período y, opcionalmente, de cajeros seleccionados.
  */
     use Cake\Routing\Router;
 ?>
@@ -10,6 +10,9 @@
 	<div class="page-header">
 		<h2>Cierre consolidado de turnos</h2>
 		<p><strong>Período:</strong> <?= h($desde) ?> al <?= h($hasta) ?></p>
+		<?php if (!empty($cajerosSeleccionados)): ?>
+			<p><strong>Cajeros:</strong> <?= h(implode(', ', $cajerosSeleccionados)) ?></p>
+		<?php endif; ?>
 		<p><strong>Turnos incluidos:</strong> <?= count($turnosPeriodo) ?></p>
 	</div>
 

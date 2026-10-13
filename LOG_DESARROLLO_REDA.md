@@ -1,5 +1,25 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-13] - Selección de varios cajeros para reportes de cierre
+- **Tarea:** Permitir consultar turnos de uno o varios cajeros dentro de un rango de fechas, en reportes separados o en un único consolidado.
+- **Cambios realizados:**
+    - **Controlador (`src/Controller/TurnsController.php`):**
+        - Se extrajo `obtenerCajerosDisponibles()` para construir la lista permitida de usuarios con turnos, excluyendo cuentas técnicas y respetando la restricción del usuario 978.
+        - `index()` valida cada ID seleccionado, filtra turnos mediante `user_id IN`, permite listar en reportes separados y conserva el modo individual `usuario-ID` para compatibilidad.
+        - `reporteCierrePeriodo()` valida y aplica la selección múltiple también al consolidado, manteniendo sus controles de autorización.
+    - **Vista de turnos (`src/Template/Turns/index.ctp`):** Se añadieron casillas de verificación por cajero y opciones para mostrar sus turnos en reportes separados o consolidados; se conserva la selección al mostrar resultados.
+    - **Reporte de cierre (`src/Template/Turns/reporte_cierre.ctp`):** El consolidado indica los cajeros incluidos cuando se aplica el filtro.
+    - **Documentación del sistema (`manual_tecnico_sistema.md`):** Se actualizaron los resúmenes del controlador y ambas vistas.
+- **Validación:** `git diff --check` y los diagnósticos del controlador y las vistas no reportan errores. No se pudo ejecutar `phpact -l` porque `phpact` no está disponible en el entorno.
+
+## [2026-10-13] - Exclusión y rotulación de cajeros en el filtro de reportes de cierre
+- **Tarea:** Omitir del selector de cajeros cuatro cuentas específicas y mostrar el rol junto al nombre para distinguir usuarios homónimos.
+- **Cambios realizados:**
+    - **Controlador (`src/Controller/TurnsController.php`):** La consulta de cajeros del filtro excluye los username `angel2703`, `fangel2703`, `cangel2703` y `vangel2703`; también obtiene el rol y construye las etiquetas con el formato `Nombre Apellido (Rol)`.
+    - **Vista (`src/Template/Turns/index.ctp`):** Se actualizó la documentación inicial para describir la lista de cajeros identificada por nombre y rol.
+    - **Documentación del sistema (`manual_tecnico_sistema.md`):** Se documentaron las cuentas omitidas y las etiquetas del selector en los resúmenes del controlador y la vista.
+- **Validación:** `git diff --check` y los diagnósticos de controlador y vista no reportan errores. No se pudo ejecutar `phpact -l` porque `phpact` no está disponible en el entorno.
+
 ## [2026-10-11] - Filtros por período y reportes de cierre consolidados para turnos
 - **Tarea:** Facilitar la consulta de turnos por intervalo de fechas, con reportes individuales para todos los cajeros, reportes separados para un cajero específico y un cierre consolidado de todos los turnos del período.
 - **Cambios realizados:**

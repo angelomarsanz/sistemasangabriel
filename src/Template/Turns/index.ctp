@@ -1,6 +1,7 @@
 <?php
 /**
- * Historial de turnos con filtros de período y cierres individuales por cajero.
+ * Historial de turnos con filtros de período y cierres individuales por cajero;
+ * permite seleccionar varios cajeros con casillas, distingue nombre y rol y omite cuentas técnicas.
  */
 ?>
 <div class="row">
@@ -24,11 +25,25 @@
 								<option value="">Seleccione una opción</option>
 								<option value="todos_separados" <?= $modo === 'todos_separados' ? 'selected' : '' ?>>Todos los turnos en reportes separados</option>
 								<option value="todos_unico" <?= $modo === 'todos_unico' ? 'selected' : '' ?>>Todos los turnos en un único reporte</option>
-								<?php foreach ($cajeros as $idCajero => $nombreCajero): ?>
-									<option value="<?= h('usuario-' . $idCajero) ?>" <?= ($modo === 'usuario-' . $idCajero) ? 'selected' : '' ?>>Turnos de <?= h($nombreCajero) ?></option>
-								<?php endforeach; ?>
+								<option value="seleccionados_separados" <?= $modo === 'seleccionados_separados' ? 'selected' : '' ?>>Cajeros seleccionados en reportes separados</option>
+								<option value="seleccionados_unico" <?= $modo === 'seleccionados_unico' ? 'selected' : '' ?>>Cajeros seleccionados en un único reporte</option>
 							</select>
 						</div>
+						<?php if (!empty($cajeros)): ?>
+							<div class="form-group col-xs-12">
+								<strong>Seleccione uno o varios cajeros:</strong>
+								<div class="row">
+									<?php foreach ($cajeros as $idCajero => $nombreCajero): ?>
+										<div class="col-sm-4">
+											<label class="checkbox-inline">
+												<input type="checkbox" name="usuarios[]" value="<?= h($idCajero) ?>" <?= in_array($idCajero, $usuariosSeleccionados, true) ? 'checked' : '' ?>>
+												<?= h($nombreCajero) ?>
+											</label>
+										</div>
+									<?php endforeach; ?>
+								</div>
+							</div>
+						<?php endif; ?>
 						<button type="submit" class="btn btn-primary">Buscar</button>
 					<?= $this->Form->end() ?>
 				</div>
