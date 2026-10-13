@@ -1,5 +1,15 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-13] - Paneles de búsqueda y consolidación de cierres de cajeros
+- **Tarea:** Verificar y reorganizar la consulta de reportes de cierre por período y usuarios; exigir mismo rol en el consolidado y adaptar la vista a móviles.
+- **Verificación del consolidado:** Ya estaba implementado en `reporteCierrePeriodo()`: filtra turnos cerrados mediante intervalo de fechas y usuarios seleccionados, y agrega formas de pago, montos por entregar, documentos y totales contables. Se conserva ese cálculo.
+- **Cambios realizados:**
+    - **Controlador (`src/Controller/TurnsController.php`):** Se adaptó la lista permitida de cajeros para ofrecer etiqueta y rol; la búsqueda acepta su propia lista de usuarios; la generación consolidada valida en servidor que todos los usuarios sean disponibles y compartan rol.
+    - **Vista de turnos (`src/Template/Turns/index.ctp`):** Se reorganizó el rango obligatorio y dos paneles de búsqueda/consolidación. Cada panel tiene su selección múltiple y botón; interactuar con uno limpia y desactiva visualmente el otro. Se añadió modal de incompatibilidad de roles y validación de fechas y de selección de usuarios.
+    - **Directrices (`.github/copilot-instructions.md`):** Se indicó que todas las vistas deben adaptarse a escritorio, tabletas y móviles.
+    - **Manual técnico (`manual_tecnico_sistema.md`):** Se actualizaron los resúmenes del controlador y las vistas para documentar el comportamiento.
+- **Validación:** `php -l` de `TurnsController.php` e `index.ctp`, comprobación sintáctica JavaScript con Node, `git diff --check` y diagnósticos del editor: sin errores.
+
 ## [2026-10-13] - Selección de varios cajeros para reportes de cierre
 - **Tarea:** Permitir consultar turnos de uno o varios cajeros dentro de un rango de fechas, en reportes separados o en un único consolidado.
 - **Cambios realizados:**

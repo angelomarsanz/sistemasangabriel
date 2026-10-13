@@ -126,6 +126,11 @@ Los scripts:
 Los nuevos estilos se deben añadir a:
 js_csga/src/index.css
 
+## Diseño adaptable
+- Todas las vistas nuevas o modificadas deben funcionar tanto en pantallas de escritorio como en celulares y tabletas.
+- Usar la grilla y utilidades responsivas de Bootstrap 3, controles fluidos y tablas dentro de `.table-responsive` cuando corresponda.
+- Evitar anchos fijos y comprobar que formularios, botones, paneles y contenido no generen desplazamiento horizontal en pantallas pequeñas.
+
 ## Documentación del sistema
 Todos los archivos que se creen deben documentarse al inicio del archivo. Crear un resumen de lo que hace el archivo. Así también cada función que contenga ese archivo debe documentarse
 Además de documentar individualmente cada archivo, cada vez que se cree un archivo se debe agregar un resumen de la documentación de ese archivo en manual_tecnico_sistema.md : Se coloca la ruta y el nombre del archivo como un título y luego dejando una sangría se coloca el resumen.
