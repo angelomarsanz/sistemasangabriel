@@ -18,6 +18,9 @@ archivos_chat_gemini/
 *copy*
 *copia*
 *- copia*
+*original*
+*original*
+*- original*
 
 # Ignorar archivos comprimidos en cualquier directorio
 *.zip

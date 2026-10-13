@@ -1,5 +1,14 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-13] - Verificación de integridad del reporte de cierre individual
+- **Tarea:** Comprobar que el reporte diario de caja siga mostrando el cierre de un solo cajero y turno, sin alteraciones causadas por el reporte consolidado.
+- **Comparaciones realizadas:**
+    - **Controlador (`src/Controller/TurnsController.php`):** La acción `reporteCierre($id)` coincide exactamente con el bloque correspondiente de `src/Controller/TurnsController-original.php`; continúa recibiendo un ID de turno y calcula/presenta los datos de ese turno.
+    - **Vista (`src/Template/Turns/reporte_cierre.ctp`):** El contenido individual coincide exactamente con `src/Template/Turns/reporte_cierre-original.ctp`. La diferencia funcional es el bloque consolidado añadido al inicio y el condicional que selecciona esa rama; al no recibirse `consolidadoPeriodo`, se renderiza íntegro el reporte original.
+    - **Manual técnico (`manual_tecnico_sistema.md`):** Se documentó el resultado de la comparación y el aislamiento de las dos rutas.
+- **Código del reporte individual:** No requirió modificaciones; se verificó que conserva su comportamiento original.
+- **Validación:** Comparaciones exactas de las secciones, `php -l` del controlador y la vista, y `git diff --check`, sin errores.
+
 ## [2026-10-13] - Paneles de búsqueda y consolidación de cierres de cajeros
 - **Tarea:** Verificar y reorganizar la consulta de reportes de cierre por período y usuarios; exigir mismo rol en el consolidado y adaptar la vista a móviles.
 - **Verificación del consolidado:** Ya estaba implementado en `reporteCierrePeriodo()`: filtra turnos cerrados mediante intervalo de fechas y usuarios seleccionados, y agrega formas de pago, montos por entregar, documentos y totales contables. Se conserva ese cálculo.
