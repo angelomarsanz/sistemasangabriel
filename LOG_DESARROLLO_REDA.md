@@ -1,5 +1,13 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-13] - Acceso restringido a filtros de cierre por período
+- **Tarea:** Permitir las secciones de fechas, búsqueda y consolidado solo a `angel2703` y `emiguerrero`, y filtrar las opciones de cajeros por roles admitidos.
+- **Cambios realizados:**
+    - **Controlador (`src/Controller/TurnsController.php`):** Se añadió `puedeConsultarReportesPeriodo()` para validar las cuentas autorizadas en servidor. `index()` envía el indicador a la vista y rechaza modos de filtro de cualquier otra cuenta; `reporteCierrePeriodo()` repite la validación para impedir acceso directo. Las consultas con filtro usan el listado de turnos de cajeros, incluso si el autorizado no es ID 1/978, manteniendo para ID 978 la exclusión histórica del usuario 1. `obtenerCajerosDisponibles()` limita las opciones a los roles `Seniat`, `Ventas generales` y `Contabilidad general`, y excluye `angel2703`, `fangel2703`, `cangel2703` y `vangel2703`. El consolidado requiere una selección explícita; se bloquearon los antiguos modos de consulta general sin usuarios seleccionados.
+    - **Vista (`src/Template/Turns/index.ctp`):** Las nuevas secciones dependen del indicador de autorización por username, en lugar de los IDs de administrador/supervisor.
+    - **Manual técnico (`manual_tecnico_sistema.md`):** Se documentaron restricciones de acceso, roles admitidos y cuentas excluidas.
+- **Validación:** `php -l` del controlador y la vista, diagnósticos del editor y `git diff --check` finalizados sin errores.
+
 ## [2026-10-13] - Saldo cero para familias exoneradas del Consejo Educativo
 - **Tarea:** Corregir el cálculo de pagos y saldos anuales en `procesarConsejoEducativo` para familias exoneradas.
 - **Archivos modificados:**

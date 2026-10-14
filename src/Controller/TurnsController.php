@@ -17,8 +17,8 @@ use Cake\I18n\Time;
  * como turnos para pedidos y recibos).
  * Incorpora controles de validación de compatibilidad entre rol del usuario
  * y opción de cobro para evitar cruce de turnos por concurrencia de pestañas.
- * El filtro de reportes permite seleccionar varios cajeros, los identifica por
- * su nombre y rol, omite cuentas técnicas y limita cada consolidado a un rol.
+ * El filtro de períodos y cierres consolidados está limitado a las cuentas
+ * angel2703 y emiguerrero, y solo lista cajeros de roles autorizados.
  *
  * @property \App\Model\Table\TurnsTable $Turns
  */
@@ -59,11 +59,9 @@ class TurnsController extends AppController
      * Muestra el historial de turnos y filtra por período y cajeros seleccionados;
      * valida que un consolidado incluya usuarios de un solo rol.
      *
-     * Los usuarios administradores pueden consultar turnos de todos los cajeros;
-     * el usuario supervisor conserva la exclusión de los turnos del usuario 1.
-     * El selector de reportes excluye cuentas específicas y etiqueta los
-     * cajeros con su rol para distinguir usuarios con nombres coincidentes.
-     * Los usuarios autorizados pueden consultar cierres de varios cajeros.
+     * Los usuarios administradores conservan la consulta general del historial.
+     * Los controles de búsqueda por período solo se muestran y procesan para
+     * angel2703 y emiguerrero; la lista de cajeros se limita a roles permitidos.
      *
      * @return \Cake\Network\Response|null
      */
@@ -71,17 +69,23 @@ class TurnsController extends AppController
     {
 		$idUsuarioActual = (int)$this->Auth->user('id');
 		$puedeConsultarTodos = in_array($idUsuarioActual, [1, 978], true);
+		$puedeConsultarReportesPeriodo = $this->puedeConsultarReportesPeriodo();
 		$modo = $this->request->getQuery('modo');
 		$desde = $this->request->getQuery('desde');
 		$hasta = $this->request->getQuery('al');
 		$fechaInicio = null;
 		$fechaFin = null;
-		$cajeros = $puedeConsultarTodos ? $this->obtenerCajerosDisponibles($idUsuarioActual) : [];
+		$cajeros = $puedeConsultarReportesPeriodo ? $this->obtenerCajerosDisponibles($idUsuarioActual) : [];
 		$usuariosSeleccionados = [];
 		$usuariosBusquedaSeleccionados = [];
 
 		if ($modo !== null && $modo !== '')
 		{
+			if (!$puedeConsultarReportesPeriodo)
+			{
+				$this->Flash->error(__('No tiene autorización para consultar reportes de cierre por período.'));
+				return $this->redirect(['action' => 'index']);
+			}
 			$rangoFechas = $this->obtenerRangoFechasPeriodo($desde, $hasta);
 			if ($rangoFechas === null)
 			{
@@ -91,14 +95,6 @@ class TurnsController extends AppController
 			$fechaInicio = $rangoFechas['desde'];
 			$fechaFin = $rangoFechas['hasta'];
 
-			if ($modo === 'todos_unico')
-			{
-				return $this->redirect([
-					'action' => 'reporteCierrePeriodo',
-					'?' => ['desde' => $desde, 'al' => $hasta]
-				]);
-			}
-
 			if (in_array($modo, ['buscar', 'consolidar', 'seleccionados_separados', 'seleccionados_unico'], true))
 			{
 				$nombreParametroUsuarios = in_array($modo, ['buscar', 'seleccionados_separados'], true)
@@ -106,7 +102,7 @@ class TurnsController extends AppController
 				$seleccionRecibida = in_array($modo, ['seleccionados_separados', 'seleccionados_unico'], true)
 					? $this->request->getQuery('usuarios')
 					: $this->request->getQuery($nombreParametroUsuarios);
-				if (!$puedeConsultarTodos || !is_array($seleccionRecibida) || empty($seleccionRecibida))
+				if (!$puedeConsultarReportesPeriodo || !is_array($seleccionRecibida) || empty($seleccionRecibida))
 				{
 					$this->Flash->error(__('Seleccione uno o varios cajeros disponibles para consultar sus turnos.'));
 					return $this->redirect(['action' => 'index']);
@@ -145,37 +141,24 @@ class TurnsController extends AppController
 			elseif (strpos((string)$modo, 'usuario-') === 0)
 			{
 				$idCajero = substr($modo, strlen('usuario-'));
-				if (!$puedeConsultarTodos || !ctype_digit($idCajero) || !isset($cajeros[(int)$idCajero]))
+				if (!$puedeConsultarReportesPeriodo || !ctype_digit($idCajero) || !isset($cajeros[(int)$idCajero]))
 				{
 					$this->Flash->error(__('El cajero seleccionado no está disponible para su usuario.'));
 					return $this->redirect(['action' => 'index']);
 				}
 				$usuariosSeleccionados = [(int)$idCajero];
 			}
-			elseif (!in_array($modo, ['todos_separados'], true))
+			else
 			{
 				$this->Flash->error(__('Seleccione una opción válida para consultar los turnos.'));
 				return $this->redirect(['action' => 'index']);
 			}
-
-			if ($modo === 'todos_separados' && !$puedeConsultarTodos)
-			{
-				$this->Flash->error(__('No tiene autorización para consultar los turnos de todos los cajeros.'));
-				return $this->redirect(['action' => 'index']);
-			}
 		}
 
-		if ($idUsuarioActual == 1)
+		if ($idUsuarioActual == 1 || $idUsuarioActual == 978 || ($modo !== null && $modo !== ''))
 		{
 			$query = $this->Turns->find('all')
 				->contain(['Users'])
-				->order(['start_date' => 'DESC']);			
-		}
-		elseif ($idUsuarioActual == 978)
-		{
-			$query = $this->Turns->find('all')
-				->contain(['Users'])
-				->where(['user_id !=' => 1])
 				->order(['start_date' => 'DESC']);			
 		}
 		else
@@ -184,6 +167,10 @@ class TurnsController extends AppController
 				->contain(['Users'])
 				->where(['user_id' => $this->Auth->user('id')])
 				->order(['start_date' => 'DESC']);
+		}
+		if ($idUsuarioActual == 978)
+		{
+			$query->where(['user_id !=' => 1]);
 		}
 
 		if ($fechaInicio !== null)
@@ -202,11 +189,7 @@ class TurnsController extends AppController
 		$this->set('turns', $this->paginate($query));
 
 		$tituloTurnos = __('Histórico de turnos correspondientes a {0} {1}', $this->Auth->user('first_name'), $this->Auth->user('surname'));
-		if ($modo === 'todos_separados')
-		{
-			$tituloTurnos = __('Turnos de todos los cajeros entre {0} y {1}', $desde, $hasta);
-		}
-		elseif (!empty($usuariosSeleccionados))
+		if (!empty($usuariosSeleccionados))
 		{
 			$nombresCajeros = [];
 			foreach ($usuariosSeleccionados as $idCajero)
@@ -215,7 +198,7 @@ class TurnsController extends AppController
 			}
 			$tituloTurnos = __('Turnos de {0} entre {1} y {2}', implode(', ', $nombresCajeros), $desde, $hasta);
 		}
-		$this->set(compact('cajeros', 'usuariosSeleccionados', 'usuariosBusquedaSeleccionados', 'modo', 'desde', 'hasta', 'tituloTurnos', 'puedeConsultarTodos'));
+		$this->set(compact('cajeros', 'usuariosSeleccionados', 'usuariosBusquedaSeleccionados', 'modo', 'desde', 'hasta', 'tituloTurnos', 'puedeConsultarTodos', 'puedeConsultarReportesPeriodo'));
 		
         $this->set('_serialize', ['turns']);
     }
@@ -232,13 +215,13 @@ class TurnsController extends AppController
 	 */
 	public function reporteCierrePeriodo()
 	{
-		$idUsuarioActual = (int)$this->Auth->user('id');
-		if (!in_array($idUsuarioActual, [1, 978], true))
+		if (!$this->puedeConsultarReportesPeriodo())
 		{
 			$this->Flash->error(__('No tiene autorización para generar cierres consolidados de todos los cajeros.'));
 			return $this->redirect(['action' => 'index']);
 		}
 
+		$idUsuarioActual = (int)$this->Auth->user('id');
 		$desde = $this->request->getQuery('desde');
 		$hasta = $this->request->getQuery('al');
 		$usuariosSeleccionados = $this->request->getQuery('usuarios');
@@ -256,38 +239,35 @@ class TurnsController extends AppController
 		];
 		$cajerosDisponibles = $this->obtenerCajerosDisponibles($idUsuarioActual);
 		$cajerosSeleccionados = [];
-		if ($usuariosSeleccionados !== null)
+		if (!is_array($usuariosSeleccionados) || empty($usuariosSeleccionados))
 		{
-			if (!is_array($usuariosSeleccionados) || empty($usuariosSeleccionados))
-			{
-				$this->Flash->error(__('La selección de cajeros no es válida.'));
-				return $this->redirect(['action' => 'index']);
-			}
-			$idsCajerosSeleccionados = [];
-			foreach ($usuariosSeleccionados as $idCajero)
-			{
-				if (!is_string($idCajero) || !ctype_digit($idCajero) || !isset($cajerosDisponibles[(int)$idCajero]))
-				{
-					$this->Flash->error(__('Uno o varios cajeros seleccionados no están disponibles para su usuario.'));
-					return $this->redirect(['action' => 'index']);
-				}
-				$idCajero = (int)$idCajero;
-				$idsCajerosSeleccionados[] = $idCajero;
-				$cajerosSeleccionados[$idCajero] = $cajerosDisponibles[$idCajero]['etiqueta'];
-			}
-			$idsCajerosSeleccionados = array_values(array_unique($idsCajerosSeleccionados));
-			$rolesSeleccionados = [];
-			foreach ($idsCajerosSeleccionados as $idCajero)
-			{
-				$rolesSeleccionados[] = $cajerosDisponibles[$idCajero]['rol'];
-			}
-			if (count(array_unique($rolesSeleccionados)) > 1)
-			{
-				$this->Flash->error(__('Se deben seleccionar usuarios que tengan el mismo tipo de rol.'));
-				return $this->redirect(['action' => 'index']);
-			}
-			$condicionesTurnos['Turns.user_id IN'] = $idsCajerosSeleccionados;
+			$this->Flash->error(__('Seleccione uno o varios cajeros para generar el reporte consolidado.'));
+			return $this->redirect(['action' => 'index']);
 		}
+		$idsCajerosSeleccionados = [];
+		foreach ($usuariosSeleccionados as $idCajero)
+		{
+			if (!is_string($idCajero) || !ctype_digit($idCajero) || !isset($cajerosDisponibles[(int)$idCajero]))
+			{
+				$this->Flash->error(__('Uno o varios cajeros seleccionados no están disponibles para su usuario.'));
+				return $this->redirect(['action' => 'index']);
+			}
+			$idCajero = (int)$idCajero;
+			$idsCajerosSeleccionados[] = $idCajero;
+			$cajerosSeleccionados[$idCajero] = $cajerosDisponibles[$idCajero]['etiqueta'];
+		}
+		$idsCajerosSeleccionados = array_values(array_unique($idsCajerosSeleccionados));
+		$rolesSeleccionados = [];
+		foreach ($idsCajerosSeleccionados as $idCajero)
+		{
+			$rolesSeleccionados[] = $cajerosDisponibles[$idCajero]['rol'];
+		}
+		if (count(array_unique($rolesSeleccionados)) > 1)
+		{
+			$this->Flash->error(__('Se deben seleccionar usuarios que tengan el mismo tipo de rol.'));
+			return $this->redirect(['action' => 'index']);
+		}
+		$condicionesTurnos['Turns.user_id IN'] = $idsCajerosSeleccionados;
 		if ($idUsuarioActual == 978)
 		{
 			$condicionesTurnos['Turns.user_id !='] = 1;
@@ -466,7 +446,7 @@ class TurnsController extends AppController
 	}
 
 	/**
-	 * Obtiene los cajeros con turnos consultables y excluye las cuentas técnicas del filtro.
+	 * Obtiene los cajeros con turnos y roles permitidos, omitiendo cuentas técnicas.
 	 *
 	 * @param int $idUsuarioActual Identificador del usuario que solicita los cajeros.
 	 * @return array Mapa de identificador de usuario a etiqueta visible y rol.
@@ -499,6 +479,7 @@ class TurnsController extends AppController
 		$usuarios = $this->Turns->Users->find()
 			->select(['id', 'first_name', 'surname', 'role'])
 			->where(['id IN' => $idsCajeros])
+			->where(['role IN' => ['Seniat', 'Ventas generales', 'Contabilidad general']])
 			->where(['username NOT IN' => $usuariosExcluidosDelFiltro])
 			->order(['first_name' => 'ASC', 'surname' => 'ASC'])
 			->all();
@@ -512,6 +493,16 @@ class TurnsController extends AppController
 		}
 
 		return $cajeros;
+	}
+
+	/**
+	 * Determina si el usuario puede usar los filtros de reportes por período.
+	 *
+	 * @return bool True solo para las cuentas angel2703 y emiguerrero.
+	 */
+	private function puedeConsultarReportesPeriodo()
+	{
+		return in_array($this->Auth->user('username'), ['angel2703', 'emiguerrero'], true);
 	}
 
 	/**

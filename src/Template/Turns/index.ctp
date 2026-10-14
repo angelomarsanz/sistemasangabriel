@@ -6,7 +6,7 @@
 ?>
 <div class="row">
     <div class="col-md-12">
-		<?php if (!empty($puedeConsultarTodos)): ?>
+		<?php if (!empty($puedeConsultarReportesPeriodo)): ?>
 			<h3>Opciones del reporte de cierre</h3>
 			<?= $this->Form->create(null, ['type' => 'get', 'url' => ['action' => 'index'], 'id' => 'form-filtros-cierre']) ?>
 				<div class="panel panel-default">
