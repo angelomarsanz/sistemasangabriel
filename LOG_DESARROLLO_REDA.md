@@ -1,5 +1,31 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-14] - Consolidado detallado de cierres de turnos
+- **Tarea:** Reproducir en el reporte consolidado los cuadros y detalles del cierre diario para todos los turnos seleccionados, sin alterar la consulta individual.
+- **Archivos modificados y creados:**
+    - **`src/Controller/TurnsController.php`:** Se completó la acumulación de vectores por forma de pago con etiquetas genéricas, documentos activos y anulados, pagos, conceptos y totales. Se añadieron auxiliares documentados para sumar vectores y calcular indicadores. Las equivalencias de importes compensados, sobrantes y reintegros se agregan usando la tasa propia de cada turno.
+    - **`src/Template/Turns/reporte_cierre.ctp`:** Se reemplazó el resumen consolidado simplificado por la relación inicial de cajeros, roles, IDs de turnos, fechas y tasas; incluye el elemento compartido con el detalle contable diario.
+    - **`src/Template/Element/Turns/reporte_cierre_detalle.ctp`:** Se extrajo el cuerpo del reporte diario para compartir sus cuadros resumen y listas detalladas en modo individual y consolidado. Los títulos y etiquetas se adaptan al período/usuarios consolidados; los importes del reporte individual mantienen su cálculo anterior.
+    - **`manual_tecnico_sistema.md`:** Se actualizó la documentación del controlador y de la vista, y se agregó el resumen del nuevo elemento.
+    - **`previo_cambios_realizados.md`:** Se utilizó como registro incremental durante la implementación y quedó restablecido a “Sin tareas inconclusas” al finalizar.
+- **Validación:** `php -l` en el controlador y ambas plantillas, diagnósticos del editor y `git diff --check` sin errores. No se ejecutaron pruebas funcionales contra la base de datos.
+
+## [2026-10-14] - Revisión de alcance pendiente del reporte consolidado
+- **Tarea:** Verificar si el reporte consolidado ya replica los cuadros y el detalle del reporte individual, agregando totales entre los turnos seleccionados.
+- **Resultado:** No está implementado según ese alcance. La rama consolidada de `src/Template/Turns/reporte_cierre.ctp` solo presenta cuadros resumidos agregados y no reutiliza los cuadros ni los listados detallados de facturas, recibos, pedidos, notas de crédito/débito y anulaciones del reporte diario.
+- **Controlador (`src/Controller/TurnsController.php`):** `reporteCierrePeriodo()` filtra turnos cerrados por fechas y usuarios, agrega algunos totales y agrupa documentos por tipo/moneda, pero no prepara los datos con la estructura que consume la plantilla original para imprimir sus detalles por sección. Tampoco ordena la lista de turnos por nombre de cajero y luego por ID.
+- **Datos requeridos todavía ausentes en el consolidado:** Cuadro inicial por turno con cajero, rol, ID, fecha y tasas de cambio; cuadros resumen del reporte diario adaptados a totales multiusuario; listados detallados organizados según las secciones de la plantilla original. El mensaje previo que reportó únicamente la validación del reporte individual no implementó estos requisitos.
+- **Archivos revisados:** `src/Template/Turns/reporte_cierre.ctp`, `src/Template/Turns/reporte_cierre-original.ctp`, `src/Controller/TurnsController.php` y `src/Model/Entity/Turn.php`.
+- **Código:** Sin cambios en esta revisión; la implementación del consolidado detallado queda pendiente.
+
+## [2026-10-14] - Restricción de acceso y usuarios en filtros de cierres
+- **Tarea:** Limitar los filtros por período, búsqueda y consolidado a dos cuentas, y restringir los usuarios seleccionables por rol y username.
+- **Cambios realizados:**
+    - **Controlador (`src/Controller/TurnsController.php`):** Se añadió `puedeConsultarReportesPeriodo()` como regla central para permitir filtros únicamente a `angel2703` y `emiguerrero`. `index()` envía el permiso a la vista y rechaza solicitudes filtradas para otras cuentas; `reporteCierrePeriodo()` repite la autorización y requiere una lista explícita de cajeros. `obtenerCajerosDisponibles()` filtra los roles `Seniat`, `Ventas generales` y `Contabilidad general`, excluyendo `angel2703`, `cangel2703`, `vangel2703` y `fangel2703`.
+    - **Vista (`src/Template/Turns/index.ctp`):** La presentación de las secciones nuevas depende del permiso específico del controlador y no de los IDs administrativos.
+    - **Manual técnico (`manual_tecnico_sistema.md`):** Se documentaron las cuentas autorizadas, los roles incluidos y los usernames excluidos.
+- **Validación:** `php -l` del controlador y la vista, diagnósticos del editor y `git diff --check` completados sin errores.
+
 ## [2026-10-13] - Acceso restringido a filtros de cierre por período
 - **Tarea:** Permitir las secciones de fechas, búsqueda y consolidado solo a `angel2703` y `emiguerrero`, y filtrar las opciones de cajeros por roles admitidos.
 - **Cambios realizados:**

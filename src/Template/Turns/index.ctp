@@ -1,7 +1,7 @@
 <?php
 /**
- * Historial de turnos con filtros de período, búsqueda por cajeros y acceso a
- * reportes consolidados; distingue los usuarios por rol y omite cuentas técnicas.
+ * Historial de turnos que muestra filtros de período y selección de cajeros
+ * únicamente a los usuarios autorizados; oculta roles y cuentas no permitidos.
  */
 ?>
 <div class="row">

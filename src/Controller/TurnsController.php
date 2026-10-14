@@ -17,8 +17,8 @@ use Cake\I18n\Time;
  * como turnos para pedidos y recibos).
  * Incorpora controles de validación de compatibilidad entre rol del usuario
  * y opción de cobro para evitar cruce de turnos por concurrencia de pestañas.
- * El filtro de períodos y cierres consolidados está limitado a las cuentas
- * angel2703 y emiguerrero, y solo lista cajeros de roles autorizados.
+ * Los filtros de períodos y cierres consolidados están limitados a las cuentas
+ * autorizadas, y solo listan cajeros de roles permitidos.
  *
  * @property \App\Model\Table\TurnsTable $Turns
  */
@@ -60,8 +60,8 @@ class TurnsController extends AppController
      * valida que un consolidado incluya usuarios de un solo rol.
      *
      * Los usuarios administradores conservan la consulta general del historial.
-     * Los controles de búsqueda por período solo se muestran y procesan para
-     * angel2703 y emiguerrero; la lista de cajeros se limita a roles permitidos.
+     * Solo las cuentas autorizadas pueden usar los filtros por período; el
+     * selector se restringe a roles permitidos y omite las cuentas técnicas.
      *
      * @return \Cake\Network\Response|null
      */
@@ -204,12 +204,11 @@ class TurnsController extends AppController
     }
 
 	/**
-	 * Genera un cierre consolidado con los turnos cerrados del período y cajeros indicados.
+	 * Genera un cierre consolidado detallado para los turnos cerrados del período y cajeros indicados.
 	 *
-	 * Suma por cajero las formas de pago, montos por entregar y documentos emitidos,
-	 * conservando separados los montos de documentos según su moneda original.
-	 * Si se reciben cajeros, solo consolida los turnos de esos usuarios autorizados
-	 * y exige que pertenezcan a un mismo rol.
+	 * Acumula los datos contables, pagos, documentos, conceptos, anulaciones e indicadores
+	 * compatibles con los cuadros y listados del reporte diario. Solo consolida cajeros
+	 * autorizados que pertenezcan al mismo rol.
 	 *
 	 * @return \Cake\Network\Response|null
 	 */
@@ -276,7 +275,7 @@ class TurnsController extends AppController
 		$turnosPeriodo = $this->Turns->find('all')
 			->contain(['Users'])
 			->where($condicionesTurnos)
-			->order(['Turns.start_date' => 'ASC', 'Turns.id' => 'ASC'])
+			->order(['Users.first_name' => 'ASC', 'Users.surname' => 'ASC', 'Turns.id' => 'ASC'])
 			->all();
 		if (count($turnosPeriodo) === 0)
 		{
@@ -284,165 +283,368 @@ class TurnsController extends AppController
 			return $this->redirect(['action' => 'index']);
 		}
 
-		$idsTurnos = [];
-		foreach ($turnosPeriodo as $turnoPeriodo)
-		{
-			$idsTurnos[] = (int)$turnoPeriodo->id;
-		}
-		$formasPagoPeriodo = [];
-		$entregasPorForma = [];
+		$this->loadModel('Bills');
+		$this->loadModel('Pagos');
+		$payment = new PaymentsController();
+		$conceptos = new ConceptsController();
+		$turn = $turnosPeriodo->first();
+		$cajero = 'los usuarios o cajeros';
+		$rolCajero = $turn->user->role;
+		$tasaDolar = (float)$turn->tasa_dolar;
+		$tasaEuro = (float)$turn->tasa_euro;
+		$vectorTotalesRecibidos = [];
+		$vectorTotalesRecibidosPedidos = [];
+		$totalFormasPago = [];
+		$vectorPagos = [];
+		$facturas = [];
+		$pagosFacturas = [];
+		$facturasNotas = [];
+		$documentosAnulados = [];
+		$conceptosConsejoEducativo = [];
+		$conceptosServicioEducativo = [];
+		$conceptosSeguro = [];
+		$indicadores = [
+			'indicadorFacturasAnticipos' => 0,
+			'indicadorServiciosEducativos' => 0,
+			'indicadorReintegros' => 0,
+			'indicadorReintegrosPedidos' => 0,
+			'indicadorCompras' => 0,
+			'indicadorComprasPedidos' => 0,
+			'indicadorVueltoCompra' => 0,
+			'indicadorNotasCredito' => 0,
+			'indicadorNotasDebito' => 0,
+			'indicadorFacturasRecibos' => 0,
+			'indicadorSobrantes' => 0,
+			'indicadorSobrantesPedidos' => 0,
+			'indicadorFacturasAnuladas' => 0,
+			'indicadorRecibosAnulados' => 0,
+			'indicadorPedidosAnulados' => 0,
+			'indicadorRecibosAnuladosPedidos' => 0,
+			'indicadorRecibosSeguro' => 0,
+			'indicadorRecibosSeguroAnulados' => 0,
+			'indicadorRecibosConsejoEducativo' => 0
+		];
 		$totalGeneralCompensado = 0;
+		$totalGeneralCompensadoDolares = 0;
 		$totalGeneralFacturado = 0;
 		$totalDescuentosRecargos = 0;
 		$totalGeneralSobrantes = 0;
+		$totalGeneralSobrantesBs = 0;
 		$totalGeneralReintegrosSobrantes = 0;
-		$totalEntregaGeneralBs = 0;
+		$totalGeneralReintegrosSobrantesBs = 0;
+		$totalFacturasRecibos = 0;
+		$turnosResumen = [];
 
 		foreach ($turnosPeriodo as $turnoPeriodo)
 		{
+			$idTurnoPeriodo = (int)$turnoPeriodo->id;
+			$nombreCajeroPeriodo = $turnoPeriodo->user->first_name . ' ' . $turnoPeriodo->user->surname;
+			$turnosResumen[] = [
+				'cajero' => $nombreCajeroPeriodo,
+				'rol' => $turnoPeriodo->user->role,
+				'turno' => $turnoPeriodo->turn,
+				'id' => $idTurnoPeriodo,
+				'fecha' => $turnoPeriodo->start_date,
+				'tasaDolar' => $turnoPeriodo->tasa_dolar,
+				'tasaEuro' => $turnoPeriodo->tasa_euro
+			];
+
 			$formasPagoTurno = json_decode($turnoPeriodo->total_formas_pago, true);
-			$vectorRecibido = json_decode($turnoPeriodo->vector_totales_recibidos, true);
-			$vectorPedidos = json_decode($turnoPeriodo->vector_totales_recibidos_pedidos, true);
-			if (!is_array($formasPagoTurno) || !is_array($vectorRecibido) || !is_array($vectorPedidos))
+			$vectorRecibidoTurno = json_decode($turnoPeriodo->vector_totales_recibidos, true);
+			$vectorPedidosTurno = json_decode($turnoPeriodo->vector_totales_recibidos_pedidos, true);
+			if (!is_array($formasPagoTurno) || !is_array($vectorRecibidoTurno) || !is_array($vectorPedidosTurno))
 			{
-				$this->Flash->error(__('No se pudo consolidar el turno {0}: faltan datos contables válidos.', $turnoPeriodo->id));
+				$this->Flash->error(__('No se pudo consolidar el turno {0}: faltan datos contables válidos.', $idTurnoPeriodo));
 				return $this->redirect(['action' => 'index']);
 			}
 
+			$vectorTotalesRecibidos = $this->sumarVectorCierreConsolidado($vectorTotalesRecibidos, $vectorRecibidoTurno);
+			$vectorTotalesRecibidosPedidos = $this->sumarVectorCierreConsolidado($vectorTotalesRecibidosPedidos, $vectorPedidosTurno);
 			foreach ($formasPagoTurno as $nombreForma => $forma)
 			{
-				if (!isset($formasPagoPeriodo[$nombreForma]))
+				if (!isset($totalFormasPago[$nombreForma]))
 				{
-					$formasPagoPeriodo[$nombreForma] = [
+					$totalFormasPago[$nombreForma] = [
 						'moneda' => isset($forma['moneda']) ? $forma['moneda'] : '',
 						'monto' => 0,
 						'montoBs' => 0
 					];
 				}
-				if (isset($forma['monto']) && is_numeric($forma['monto']))
-				{
-					$formasPagoPeriodo[$nombreForma]['monto'] += $forma['monto'];
-				}
-				if (isset($forma['montoBs']) && is_numeric($forma['montoBs']))
-				{
-					$formasPagoPeriodo[$nombreForma]['montoBs'] += $forma['montoBs'];
-				}
-			}
-
-			foreach ([$vectorRecibido, $vectorPedidos] as $vectorEntrega)
-			{
-				foreach ($vectorEntrega as $nombreFila => $montosFila)
-				{
-					if (strpos($nombreFila, 'Total a recibir de ') !== 0 || !is_array($montosFila))
-					{
-						continue;
-					}
-					foreach ($montosFila as $nombreForma => $monto)
-					{
-						if (is_numeric($monto))
-						{
-							if (!isset($entregasPorForma[$nombreForma]))
-							{
-								$entregasPorForma[$nombreForma] = 0;
-							}
-							$entregasPorForma[$nombreForma] += $monto;
-						}
-					}
-				}
+				$totalFormasPago[$nombreForma]['monto'] += isset($forma['monto']) && is_numeric($forma['monto']) ? (float)$forma['monto'] : 0;
+				$totalFormasPago[$nombreForma]['montoBs'] += isset($forma['montoBs']) && is_numeric($forma['montoBs']) ? (float)$forma['montoBs'] : 0;
 			}
 
 			$totalGeneralCompensado += (float)$turnoPeriodo->total_general_compensado;
+			$totalGeneralCompensadoDolares += (float)$turnoPeriodo->tasa_dolar > 0
+				? round((float)$turnoPeriodo->total_general_compensado / (float)$turnoPeriodo->tasa_dolar, 2) : 0;
 			$totalGeneralFacturado += (float)$turnoPeriodo->total_general_facturado;
 			$totalDescuentosRecargos += (float)$turnoPeriodo->total_descuentos_recargos;
 			$totalGeneralSobrantes += (float)$turnoPeriodo->total_general_sobrantes;
+			$totalGeneralSobrantesBs += round((float)$turnoPeriodo->total_general_sobrantes * (float)$turnoPeriodo->tasa_dolar, 2);
 			$totalGeneralReintegrosSobrantes += (float)$turnoPeriodo->total_general_reintegros_sobrantes;
-			$totalCobradoBs = isset($formasPagoTurno['Total general cobrado Bs.']['montoBs'])
-				? (float)$formasPagoTurno['Total general cobrado Bs.']['montoBs'] : 0;
-			$totalGeneralEntregaTurno = $totalCobradoBs + (float)$turnoPeriodo->total_general_compensado
-				- round((float)$turnoPeriodo->total_general_sobrantes * (float)$turnoPeriodo->tasa_dolar, 2)
-				- round((float)$turnoPeriodo->total_general_reintegros_sobrantes * (float)$turnoPeriodo->tasa_dolar, 2);
-			$totalEntregaGeneralBs += $totalGeneralEntregaTurno;
-		}
-
-		$this->loadModel('Bills');
-		$documentosPeriodo = $this->Bills->find('all')
-			->where(['Bills.turn IN' => $idsTurnos, 'Bills.annulled' => 0])
-			->order(['Bills.tipo_documento' => 'ASC', 'Bills.moneda_id' => 'ASC']);
-		$resumenDocumentos = [];
-		foreach ($documentosPeriodo as $documento)
-		{
-			$moneda = (int)$documento->moneda_id;
-			$etiquetaMoneda = $moneda === 1 ? 'Bs.' : ($moneda === 2 ? '$' : '€');
-			$claveResumen = $documento->tipo_documento . '|' . $etiquetaMoneda;
-			if (!isset($resumenDocumentos[$claveResumen]))
+			$totalGeneralReintegrosSobrantesBs += round((float)$turnoPeriodo->total_general_reintegros_sobrantes * (float)$turnoPeriodo->tasa_dolar, 2);
+			$totalFacturasRecibos += (float)$turnoPeriodo->total_facturas_recibos;
+			if ((float)$turnoPeriodo->total_facturas_recibos > 0)
 			{
-				$resumenDocumentos[$claveResumen] = [
-					'tipo' => $documento->tipo_documento,
-					'moneda' => $etiquetaMoneda,
-					'cantidad' => 0,
-					'montoOriginal' => 0,
-					'montoBs' => 0,
-					'montoDolares' => 0
-				];
+				$indicadores['indicadorFacturasRecibos'] = 1;
 			}
+			$indicadorSobrantesRegistrados = ((float)$turnoPeriodo->total_general_sobrantes > 0 || (float)$turnoPeriodo->total_general_reintegros_sobrantes > 0);
+			$indicadorDescuentosRecargosRegistrados = (float)$turnoPeriodo->total_descuentos_recargos != 0;
 
-			$montoOriginal = (float)$documento->amount_paid;
-			if ($moneda === 1)
+			if ($turnoPeriodo->vector_pagos === null)
 			{
-				$montoBs = $montoOriginal;
-				$montoDolares = (float)$documento->tasa_cambio > 0 ? round($montoOriginal / $documento->tasa_cambio, 2) : 0;
-			}
-			elseif ($moneda === 2)
-			{
-				$montoBs = round($montoOriginal * (float)$documento->tasa_cambio, 2);
-				$montoDolares = $montoOriginal;
+				$pagosGuardadosTurno = $this->Pagos->find('all', ['conditions' => ['turn_id' => $idTurnoPeriodo]]);
+				foreach ($pagosGuardadosTurno as $pagoGuardado)
+				{
+					$vectorPago = json_decode($pagoGuardado->vector_pago, true);
+					if (is_array($vectorPago))
+					{
+						$vectorPagos[$pagoGuardado->identificador_factura] = $vectorPago;
+					}
+				}
 			}
 			else
 			{
-				$montoBs = round($montoOriginal * (float)$documento->tasa_euro, 2);
-				$montoDolares = round($montoOriginal * (float)$documento->tasa_dolar_euro, 2);
+				$vectorPagosTurno = json_decode($turnoPeriodo->vector_pagos, true);
+				if (!is_array($vectorPagosTurno))
+				{
+					$this->Flash->error(__('No se pudo leer el detalle de pagos del turno {0}.', $idTurnoPeriodo));
+					return $this->redirect(['action' => 'index']);
+				}
+				$vectorPagos = array_replace($vectorPagos, $vectorPagosTurno);
 			}
-			$resumenDocumentos[$claveResumen]['cantidad']++;
-			$resumenDocumentos[$claveResumen]['montoOriginal'] += $montoOriginal;
-			$resumenDocumentos[$claveResumen]['montoBs'] += $montoBs;
-			$resumenDocumentos[$claveResumen]['montoDolares'] += $montoDolares;
-		}
 
-		$documentosAnuladosPeriodo = $this->Bills->find('all')
-			->select(['tipo_documento'])
-			->where(['Bills.turn IN' => $idsTurnos, 'Bills.annulled' => 1])
-			->all();
-		$resumenAnulados = [];
-		foreach ($documentosAnuladosPeriodo as $documentoAnulado)
-		{
-			$tipoDocumento = $documentoAnulado->tipo_documento;
-			if (!isset($resumenAnulados[$tipoDocumento]))
+			$conceptosTurno = $conceptos->busquedaConceptos($idTurnoPeriodo);
+			$conceptosConsejoEducativo += $conceptosTurno['consejoEducativo'];
+			$conceptosServicioEducativo = array_merge($conceptosServicioEducativo, $conceptosTurno['servicioEducativo']);
+			$conceptosSeguro = array_merge($conceptosSeguro, $conceptosTurno['seguro']);
+			$resultadoPagos = $payment->busquedaPagosContabilidad($idTurnoPeriodo);
+			foreach ($resultadoPagos['facturas'] as $factura)
 			{
-				$resumenAnulados[$tipoDocumento] = 0;
+				$facturas[] = $factura;
+				if ($resultadoPagos['codigoRetorno'] != 1)
+				{
+					$this->actualizarIndicadoresCierreConsolidado(
+						$factura,
+						$indicadores,
+						$totalGeneralSobrantes,
+						$totalGeneralReintegrosSobrantes,
+						$totalGeneralSobrantesBs,
+						$totalGeneralReintegrosSobrantesBs,
+						$totalDescuentosRecargos,
+						$indicadorSobrantesRegistrados,
+						$indicadorDescuentosRecargosRegistrados,
+						(float)$turnoPeriodo->tasa_dolar
+					);
+				}
 			}
-			$resumenAnulados[$tipoDocumento]++;
+			if ($resultadoPagos['codigoRetorno'] != 1)
+			{
+				foreach ($resultadoPagos['pagosFacturas'] as $pagoFactura)
+				{
+					$pagosFacturas[] = $pagoFactura;
+				}
+				$facturasNotas += $resultadoPagos['facturasNotas'];
+			}
+
+			$documentosAnuladosTurno = $this->Bills->find('all', [
+				'conditions' => ['annulled' => true, 'id_turno_anulacion' => $idTurnoPeriodo],
+				'contain' => ['Parentsandguardians'],
+				'order' => ['Bills.id' => 'ASC']
+			]);
+			foreach ($documentosAnuladosTurno as $documentoAnulado)
+			{
+				$documentosAnulados[] = $documentoAnulado;
+				$this->actualizarIndicadorAnuladoCierreConsolidado($documentoAnulado, $indicadores);
+			}
 		}
 
 		$this->set(compact(
-			'turnosPeriodo',
+			'turn',
+			'turnosResumen',
 			'desde',
 			'hasta',
-			'cajerosSeleccionados',
-			'formasPagoPeriodo',
-			'entregasPorForma',
-			'totalGeneralCompensado',
-			'totalGeneralFacturado',
+			'consolidadoPeriodo',
+			'facturas',
+			'pagosFacturas',
+			'facturasNotas',
+			'vectorPagos',
+			'cajero',
+			'rolCajero',
+			'vectorTotalesRecibidos',
+			'vectorTotalesRecibidosPedidos',
+			'totalFormasPago',
 			'totalDescuentosRecargos',
+			'totalGeneralCompensado',
+			'totalGeneralCompensadoDolares',
+			'totalGeneralFacturado',
+			'totalFacturasRecibos',
+			'tasaDolar',
+			'tasaEuro',
+			'documentosAnulados',
 			'totalGeneralSobrantes',
+			'totalGeneralSobrantesBs',
 			'totalGeneralReintegrosSobrantes',
-			'totalEntregaGeneralBs',
-			'resumenDocumentos',
-			'resumenAnulados'
+			'totalGeneralReintegrosSobrantesBs',
+			'conceptosConsejoEducativo',
+			'conceptosServicioEducativo',
+			'conceptosSeguro'
 		));
+		foreach ($indicadores as $nombreIndicador => $valorIndicador)
+		{
+			$this->set($nombreIndicador, $valorIndicador);
+		}
 		$this->set('consolidadoPeriodo', true);
-		$this->set('_serialize', ['turnosPeriodo', 'resumenDocumentos', 'resumenAnulados']);
+		$this->set('_serialize', ['turnosResumen', 'facturas', 'pagosFacturas']);
 
 		return $this->render('reporte_cierre');
+	}
+
+	/**
+	 * Suma los renglones de un vector de cierre y unifica las etiquetas del cajero.
+	 *
+	 * @param array $vectorAcumulado Vector agregado hasta el turno anterior.
+	 * @param array $vectorTurno Vector contable del turno actual.
+	 * @return array Vector consolidado por renglón y forma de pago.
+	 */
+	private function sumarVectorCierreConsolidado($vectorAcumulado, $vectorTurno)
+	{
+		foreach ($vectorTurno as $nombreFila => $montosFila)
+		{
+			if (!is_array($montosFila))
+			{
+				continue;
+			}
+			if (strpos($nombreFila, 'Total a recibir de ') === 0)
+			{
+				$nombreFila = 'Total a recibir de los usuarios o cajeros';
+			}
+			elseif (strpos($nombreFila, 'Total recibido de ') === 0)
+			{
+				$nombreFila = 'Total recibido de los cajeros o usuarios';
+			}
+			if (!isset($vectorAcumulado[$nombreFila]))
+			{
+				$vectorAcumulado[$nombreFila] = [];
+			}
+			foreach ($montosFila as $nombreForma => $monto)
+			{
+				if (is_numeric($monto))
+				{
+					$valorExistente = isset($vectorAcumulado[$nombreFila][$nombreForma])
+						&& is_numeric($vectorAcumulado[$nombreFila][$nombreForma])
+						? (float)$vectorAcumulado[$nombreFila][$nombreForma] : 0;
+					$vectorAcumulado[$nombreFila][$nombreForma] = $valorExistente + (float)$monto;
+				}
+				elseif (!isset($vectorAcumulado[$nombreFila][$nombreForma]))
+				{
+					$vectorAcumulado[$nombreFila][$nombreForma] = $monto;
+				}
+			}
+		}
+
+		return $vectorAcumulado;
+	}
+
+	/**
+	 * Actualiza indicadores y totales derivados de los documentos activos de un turno.
+	 *
+	 * @param \App\Model\Entity\Bill $factura Documento activo del turno.
+	 * @param array $indicadores Indicadores contables consolidados, actualizados por referencia.
+	 * @param float $totalGeneralSobrantes Total de sobrantes, actualizado por referencia.
+	 * @param float $totalGeneralReintegrosSobrantes Total de reintegros, actualizado por referencia.
+	 * @param float $totalGeneralSobrantesBs Equivalente en bolívares de sobrantes, actualizado por referencia.
+	 * @param float $totalGeneralReintegrosSobrantesBs Equivalente en bolívares de reintegros, actualizado por referencia.
+	 * @param float $totalDescuentosRecargos Total de descuentos/recargos, actualizado por referencia.
+	 * @param bool $indicadorSobrantesRegistrados Indica si el turno ya registró los sobrantes en sus totales.
+	 * @param bool $indicadorDescuentosRecargosRegistrados Indica si el turno ya registró descuentos/recargos.
+	 * @param float $tasaDolarTurno Tasa del dólar aplicada al turno.
+	 * @return void
+	 */
+	private function actualizarIndicadoresCierreConsolidado(
+		$factura,
+		&$indicadores,
+		&$totalGeneralSobrantes,
+		&$totalGeneralReintegrosSobrantes,
+		&$totalGeneralSobrantesBs,
+		&$totalGeneralReintegrosSobrantesBs,
+		&$totalDescuentosRecargos,
+		$indicadorSobrantesRegistrados,
+		$indicadorDescuentosRecargosRegistrados,
+		$tasaDolarTurno
+	) {
+		$tipoDocumento = $factura->tipo_documento;
+		$indicadoresPorTipo = [
+			'Factura' => 'indicadorFacturasAnticipos',
+			'Recibo de anticipo' => 'indicadorFacturasAnticipos',
+			'Recibo de servicio educativo' => 'indicadorServiciosEducativos',
+			'Recibo de reintegro' => 'indicadorReintegros',
+			'Recibo de reintegro de pedido' => 'indicadorReintegrosPedidos',
+			'Recibo de compra' => 'indicadorCompras',
+			'Recibo de compra de pedido' => 'indicadorComprasPedidos',
+			'Recibo de vuelto de compra' => 'indicadorVueltoCompra',
+			'Recibo de seguro' => 'indicadorRecibosSeguro',
+			'Recibo de Consejo Educativo' => 'indicadorRecibosConsejoEducativo',
+			'Nota de crédito' => 'indicadorNotasCredito',
+			'Nota de débito' => 'indicadorNotasDebito',
+			'Recibo de sobrante' => 'indicadorSobrantes',
+			'Recibo de sobrante de pedido' => 'indicadorSobrantesPedidos'
+		];
+		if (isset($indicadoresPorTipo[$tipoDocumento]))
+		{
+			$indicadores[$indicadoresPorTipo[$tipoDocumento]] = 1;
+		}
+		if ($tipoDocumento === 'Recibo de sobrante' && !$indicadorSobrantesRegistrados)
+		{
+			$montoSobrante = (float)$factura->amount_paid - (float)$factura->reintegro_sobrante;
+			$montoReintegro = (float)$factura->reintegro_sobrante;
+			$totalGeneralSobrantes += $montoSobrante;
+			$totalGeneralReintegrosSobrantes += $montoReintegro;
+			$totalGeneralSobrantesBs += round($montoSobrante * $tasaDolarTurno, 2);
+			$totalGeneralReintegrosSobrantesBs += round($montoReintegro * $tasaDolarTurno, 2);
+		}
+		if ((float)$factura->amount != 0 && !$indicadorDescuentosRecargosRegistrados)
+		{
+			$totalDescuentosRecargos += (float)$factura->amount;
+		}
+	}
+
+	/**
+	 * Actualiza los indicadores de anulaciones correspondientes al cierre original.
+	 *
+	 * @param \App\Model\Entity\Bill $documentoAnulado Documento anulado en el turno.
+	 * @param array $indicadores Indicadores consolidados, actualizados por referencia.
+	 * @return void
+	 */
+	private function actualizarIndicadorAnuladoCierreConsolidado($documentoAnulado, &$indicadores)
+	{
+		if ((int)$documentoAnulado->fiscal === 1)
+		{
+			$indicadores['indicadorFacturasAnuladas'] = 1;
+		}
+		elseif (!in_array($documentoAnulado->tipo_documento, [
+			'Pedido',
+			'Recibo de reintegro de pedido',
+			'Recibo de sobrante de pedido',
+			'Recibo de compra de pedido',
+			'Recibo de seguro',
+			'Recibo de vuelto de compra de pedido'
+		], true))
+		{
+			$indicadores['indicadorRecibosAnulados'] = 1;
+		}
+		elseif ($documentoAnulado->tipo_documento === 'Pedido')
+		{
+			$indicadores['indicadorPedidosAnulados'] = 1;
+		}
+		elseif ($documentoAnulado->tipo_documento === 'Recibo de seguro')
+		{
+			$indicadores['indicadorRecibosSeguroAnulados'] = 1;
+		}
+		else
+		{
+			$indicadores['indicadorRecibosAnuladosPedidos'] = 1;
+		}
 	}
 
 	/**
