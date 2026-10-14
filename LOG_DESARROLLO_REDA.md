@@ -1,5 +1,13 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-14] - Variable de modo consolidado no inicializada
+- **Tarea:** Corregir el Notice reportado al generar cierres consolidados y los avisos posteriores al emitir headers.
+- **Archivos modificados:**
+    - **`src/Controller/TurnsController.php`:** `reporteCierrePeriodo()` ahora inicializa `$consolidadoPeriodo = true` antes de pasarlo a `compact()`. Se quitó la asignación posterior redundante.
+    - **`manual_tecnico_sistema.md`:** Se documentó la corrección y la relación del Notice con los errores de headers.
+- **Causa:** `compact()` recibió el nombre de una variable que todavía no existía. CakePHP emitía un Notice antes de completar la respuesta, y los mensajes de headers enviados después eran consecuencias de esa salida.
+- **Validación:** Sintaxis PHP del controlador y `git diff --check` sin errores.
+
 ## [2026-10-14] - Consolidado detallado de cierres de turnos
 - **Tarea:** Reproducir en el reporte consolidado los cuadros y detalles del cierre diario para todos los turnos seleccionados, sin alterar la consulta individual.
 - **Archivos modificados y creados:**

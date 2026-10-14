@@ -207,8 +207,9 @@ class TurnsController extends AppController
 	 * Genera un cierre consolidado detallado para los turnos cerrados del período y cajeros indicados.
 	 *
 	 * Acumula los datos contables, pagos, documentos, conceptos, anulaciones e indicadores
-	 * compatibles con los cuadros y listados del reporte diario. Solo consolida cajeros
-	 * autorizados que pertenezcan al mismo rol.
+	 * compatibles con los cuadros y listados del reporte diario. Inicializa explícitamente
+	 * el indicador de modo consolidado antes de compartir variables con la vista. Solo
+	 * consolida cajeros autorizados que pertenezcan al mismo rol.
 	 *
 	 * @return \Cake\Network\Response|null
 	 */
@@ -459,6 +460,7 @@ class TurnsController extends AppController
 			}
 		}
 
+		$consolidadoPeriodo = true;
 		$this->set(compact(
 			'turn',
 			'turnosResumen',
@@ -494,7 +496,6 @@ class TurnsController extends AppController
 		{
 			$this->set($nombreIndicador, $valorIndicador);
 		}
-		$this->set('consolidadoPeriodo', true);
 		$this->set('_serialize', ['turnosResumen', 'facturas', 'pagosFacturas']);
 
 		return $this->render('reporte_cierre');
