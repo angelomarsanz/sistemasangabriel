@@ -54,10 +54,6 @@ if (isset($reporte))
     {
         include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_familias_exoneradas.ctp';
     }
-    elseif ($reporte == "familiasRelacionadas")
-    {
-        include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_familias_relacionadas.ctp';
-    }
     elseif ($reporte == "reporteGeneralConsejoEducativo")
     {
         include dirname(__DIR__) . '/Parentsandguardians/partes/reporte_general_consejo_educativo.ctp';
@@ -196,19 +192,7 @@ if (isset($reporte))
         });
 		$("#exportar-excel").click(function(){
 
-            if (reporte == "familiasRelacionadas")
-            {
-                $("#reporteFamiliasRelacionadas").table2excel({
-
-                    exclude: ".noExl",
-
-                    name: "reporteFamiliasRelacionadas",
-
-                    filename: $('#reporteFamiliasRelacionadas').attr('name')
-
-                });
-            }
-            else if (reporte == "familiasExoneradas")
+            if (reporte == "familiasExoneradas")
             {
                 $("#reporteFamiliasExoneradas").table2excel({
 

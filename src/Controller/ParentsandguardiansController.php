@@ -6,7 +6,7 @@ use Cake\I18n\Time;
 use Cake\Filesystem\File;
 
 /**
- * Parentsandguardians Controller
+ * Controlador para gestionar representantes, familias y operaciones relacionadas.
  *
  * @property \App\Model\Table\ParentsandguardiansTable $Parentsandguardians
  */
@@ -1014,6 +1014,17 @@ class ParentsandguardiansController extends AppController
 
         $this->set(compact('tipo_reporte', 'titulo_reporte', 'titulo_total', 'vector_representantes', 'contador_seleccionados', 'contador_impresion'));
     }
+    /**
+     * Construye los datos anuales del Consejo Educativo, respetando exoneraciones y familias pagadoras.
+     *
+     * @param mixed $anioEscolarActual Año escolar actual.
+     * @param mixed $proximoAnioEscolar Próximo año escolar.
+     * @param mixed $representante Representante cuyos pagos y datos familiares se procesan.
+     * @param mixed $otrasTarifas Tarifas de Consejo Educativo por año.
+     * @param mixed $anioRequeridoConsejo Año específico que se debe procesar, si aplica.
+     * @param mixed $recibosConceptos Conceptos de recibos precargados, si están disponibles.
+     * @return array Resultado del procesamiento por año escolar.
+     */
     public function procesarConsejoEducativo($anioEscolarActual = null, $proximoAnioEscolar, $representante = null, $otrasTarifas = null, $anioRequeridoConsejo = null, $recibosConceptos = null)
     {
         $codigoRetorno = 0;
@@ -1107,8 +1118,13 @@ class ParentsandguardiansController extends AppController
 
             // Lógica de Pagos, Tarifas y Saldos
             $tarifaAnio = $tarifasReferencia['Consejo Educativo '.$year] ?? 0;
-            $pagadoAnio = $pagosPorAnio[$year] ?? 0;
-            $saldoAnio = $tarifaAnio - $pagadoAnio;
+            if ($consejoExonerado > 0) {
+                $pagadoAnio = 0;
+                $saldoAnio = 0;
+            } else {
+                $pagadoAnio = $pagosPorAnio[$year] ?? 0;
+                $saldoAnio = $tarifaAnio - $pagadoAnio;
+            }
 
             // Si el saldo es menor o igual a 0, el indicador es true (pago completo)
             // También se considera true si la tarifa es 0 (no aplica pago), si está exonerado al 100%
@@ -1167,75 +1183,57 @@ class ParentsandguardiansController extends AppController
                 $condicionBalance = 'Students.balance >=';
             }
 
-            if ($reporte == "familiasRelacionadas")
+            $tarifaConsejoEducativo = 0;
+
+            $transaccionesEstudiante = new StudenttransactionsController;
+
+            $transaccionesEstudiante->verificarAnioUltimaInscripcion();
+
+            if ($reporte == "familiasExoneradas")
             {
-                $this->busquedaFamiliasRelacionadas();
-                $familiasRelacionadasControl = $this->Parentsandguardians->find('all', ['conditions' =>
-                [
-                    'familias_relacionadas is not null'
-                ]]);
+                $familiasExoneradas = $this->Parentsandguardians->Students->find('all')
+                ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Parentsandguardians.consejo_exonerado >' => 0, 'Students.student_condition' => "Regular", $condicionBalance => $anioEscolarActual])
+                ->contain(['Parentsandguardians', 'Sections'])
+                ->order(
+                    [
+                        'Parentsandguardians.family' => 'ASC',
+                        'Parentsandguardians.id' => 'ASC',
+                        'Students.surname' => 'ASC',
+                        'Students.second_surname' => 'ASC',
+                        'Students.first_name' => 'ASC',
+                        'Students.second_name' => 'ASC',
+                    ]);
 
-                $familiasRelacionadasBusqueda = $this->Parentsandguardians->find('all', ['conditions' =>
-                [
-                    'familias_relacionadas is null'
-                ]]);
-
-                $this->set(compact('fechaActual', 'anioEscolar', 'reporte', 'familiasRelacionadasControl', 'familiasRelacionadasBusqueda'));
+                $this->set(compact('fechaActual', 'anioEscolar', 'reporte', 'familiasExoneradas'));
             }
-            else
+            elseif ($reporte == "reporteGeneralConsejoEducativo")
             {
-                $tarifaConsejoEducativo = 0;
+                $stController = new StudenttransactionsController();
 
-                $transaccionesEstudiante = new StudenttransactionsController;
+                $resultado = $stController->vectorConsejoEducativo(
+                    $anioEscolarRequerido,
+                    $anioEscolarActual,
+                    $anioInscripcionActual,
+                    $anioEscolar,
+                    null,
+                    null,
+                    null,
+                    null,
+                    'Todos',
+                    'reporteGeneralConsejoEducativo',
+                    'Regulares',
+                    'No',
+                    false
+                );
 
-                $transaccionesEstudiante->verificarAnioUltimaInscripcion();
+                $resumen = $resultado['resumen'];
+                $listaEstudiantes = $resultado['listaEstudiantes'];
+                $estudiantesOtrosAnios = $resultado['estudiantesOtrosAnios'] ?? [];
+                $contadorEstudiantesOtrosAnios = $resultado['contadorEstudiantesOtrosAnios'] ?? 0;
+                $tarifaConsejoEducativo = (object)['amount' => $resumen['tarifaConsejo']];
 
-                if ($reporte == "familiasExoneradas")
-                {
-                    $familiasExoneradas = $this->Parentsandguardians->Students->find('all')
-                    ->where(['Parentsandguardians.estatus_registro' => 'Activo', 'Parentsandguardians.consejo_exonerado >' => 0, 'Students.student_condition' => "Regular", $condicionBalance => $anioEscolarActual])
-                    ->contain(['Parentsandguardians', 'Sections'])
-                    ->order(
-                        [
-                            'Parentsandguardians.family' => 'ASC',
-                            'Parentsandguardians.id' => 'ASC',
-                            'Students.surname' => 'ASC',
-                            'Students.second_surname' => 'ASC',
-                            'Students.first_name' => 'ASC',
-                            'Students.second_name' => 'ASC',
-                        ]);
-
-                    $this->set(compact('fechaActual', 'anioEscolar', 'reporte', 'familiasExoneradas'));
-                }
-                elseif ($reporte == "reporteGeneralConsejoEducativo")
-                {
-                    $stController = new StudenttransactionsController();
-
-                    $resultado = $stController->vectorConsejoEducativo(
-                        $anioEscolarRequerido,
-                        $anioEscolarActual,
-                        $anioInscripcionActual,
-                        $anioEscolar,
-                        null,
-                        null,
-                        null,
-                        null,
-                        'Todos',
-                        'reporteGeneralConsejoEducativo',
-                        'Regulares',
-                        'No',
-                        false
-                    );
-
-                    $resumen = $resultado['resumen'];
-                    $listaEstudiantes = $resultado['listaEstudiantes'];
-                    $estudiantesOtrosAnios = $resultado['estudiantesOtrosAnios'] ?? [];
-                    $contadorEstudiantesOtrosAnios = $resultado['contadorEstudiantesOtrosAnios'] ?? 0;
-                    $tarifaConsejoEducativo = (object)['amount' => $resumen['tarifaConsejo']];
-
-                    $this->set(compact('fechaActual', 'anioEscolar', 'anioEscolarActual', 'anioEscolarRequerido', 'reporte', 'resumen', 'listaEstudiantes', 'tarifaConsejoEducativo', 'estudiantesOtrosAnios', 'contadorEstudiantesOtrosAnios'));
-                }
-            }
+                $this->set(compact('fechaActual', 'anioEscolar', 'anioEscolarActual', 'anioEscolarRequerido', 'reporte', 'resumen', 'listaEstudiantes', 'tarifaConsejoEducativo', 'estudiantesOtrosAnios', 'contadorEstudiantesOtrosAnios'));
+            }            
         }
         else
         {

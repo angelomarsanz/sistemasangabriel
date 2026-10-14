@@ -1,5 +1,8 @@
 # Manual Técnico del Sistema San Gabriel
 
+## src/Controller/ParentsandguardiansController.php
+    Controlador que gestiona representantes, familias y operaciones relacionadas. En `procesarConsejoEducativo`, construye el estado anual de pagos, tarifas, saldos y datos familiares; cuando una familia tiene una exoneración mayor que cero, informa cero como monto pagado y saldo del Consejo Educativo para ese año.
+
 ## src/Template/Rates/add_dollar.ctp
     Vista para el registro de tarifas en dólares del colegio. Se incorporó la opción "Promoción especial mensualidad pedidos" dentro del listado de conceptos tarifarios y se ajustó la longitud del selector de subcadena en la validación JavaScript de `enableInputs()` (de 31 a 30 caracteres) y en la confirmación de guardado. Esto permite que tanto "Promoción especial mensualidad" como "Promoción especial mensualidad pedidos" mantengan habilitado y obligatorio el campo `rate_month` (a partir del mes) junto con el año y monto, impidiendo su deshabilitación involuntaria.
 

@@ -23,4 +23,8 @@ ARCHIVOS_PHP_PUNTUALES=(
     "src/Controller/TurnsController.php"
     "src/Template/Turns/index.ctp"
     "src/Template/Turns/reporte_cierre.ctp"
+
+    "src/Controller/StudenttransactionsController.php"
+    "src/Template/Parentsandguardians/consejo_educativo.ctp"
+    "src/Controller/ParentsandguardiansController.php"
 )

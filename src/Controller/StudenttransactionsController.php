@@ -5156,7 +5156,7 @@ class StudenttransactionsController extends AppController
 			}
 		}
 
-		// Si se requiere mostrar la deuda de Consejo Educativo, se añaden al vector $detalles_morososos los representantes que tienen el Consejo Educativo pendiente de pago y se actualizan las variables de totales
+		// Si se requiere mostrar la deuda de Consejo Educativo, se añaden al vector $detalles_morosos los representantes que tienen el Consejo Educativo pendiente de pago y se actualizan las variables de totales
 
 		if ($consejo_educativo == 'Sí')
 		{

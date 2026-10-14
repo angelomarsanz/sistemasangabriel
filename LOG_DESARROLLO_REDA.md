@@ -1,5 +1,12 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-13] - Saldo cero para familias exoneradas del Consejo Educativo
+- **Tarea:** Corregir el cálculo de pagos y saldos anuales en `procesarConsejoEducativo` para familias exoneradas.
+- **Archivos modificados:**
+    - **`src/Controller/ParentsandguardiansController.php`:** Se añadió documentación al controlador y a `procesarConsejoEducativo`. Si el valor de `consejo_exonerado` es mayor que cero, la respuesta anual ahora establece `pagado` y `saldo` en cero, sin modificar la tarifa ni la lógica de años no exonerados.
+    - **`manual_tecnico_sistema.md`:** Se agregó el resumen técnico del controlador y de la regla de exoneración.
+- **Validación:** `php -l` del controlador finalizó sin errores. `git diff --check` detectó un espacio en blanco al final de línea en una modificación preexistente del controlador (línea 1236), fuera del cambio de exoneración.
+
 ## [2026-10-13] - Verificación de integridad del reporte de cierre individual
 - **Tarea:** Comprobar que el reporte diario de caja siga mostrando el cierre de un solo cajero y turno, sin alteraciones causadas por el reporte consolidado.
 - **Comparaciones realizadas:**
