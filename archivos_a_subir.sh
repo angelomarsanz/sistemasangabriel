@@ -20,8 +20,7 @@ ARCHIVOS_PHP_PUNTUALES=(
     #"js_csga/dist/main-style.css"
     #"js_csga/dist/main-script.js"
 
-    "src/Controller/TurnsController.php"
-    "src/Template/Turns/index.ctp"
-    "src/Template/Turns/reporte_cierre.ctp"
+    "src/Controller/StudenttransactionsController.php"
     "src/Template/Element/Turns/reporte_cierre_detalle.ctp"
+    "src/Template/Turns/reporte_cierre.ctp"
 )

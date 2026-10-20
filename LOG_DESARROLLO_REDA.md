@@ -1,5 +1,13 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-19] - Formato uniforme de fechas en reporte de cierre
+- **Tarea:** Asegurar que todas las fechas impresas en el reporte estén en formato `DD-MM-AAAA` y las que incluyen hora en `DD-MM-AAAA hh:mm`.
+- **Archivos modificados:**
+    - **`src/Template/Turns/reporte_cierre.ctp`:** El rango seleccionado se convierte de ISO `AAAA-MM-DD` a `DD-MM-AAAA` antes de mostrarse, y se pasan las fechas presentables al elemento compartido.
+    - **`src/Template/Element/Turns/reporte_cierre_detalle.ctp`:** Se usa el rango formateado en encabezados consolidados. Se revisaron las fechas del detalle: las fechas de documentos y facturas afectadas ya usan `d-m-Y`, mientras que las fechas de inicio de turno que incluyen hora usan `d-m-Y H:i`.
+- **Documentación:** Se documentaron los formatos utilizados por ambas vistas en `manual_tecnico_sistema.md`.
+- **Validación:** `php -l` en ambas plantillas, búsqueda de todas las expresiones de fechas impresas y `git diff --check` sin errores.
+
 ## [2026-10-14] - Variable de modo consolidado no inicializada
 - **Tarea:** Corregir el Notice reportado al generar cierres consolidados y los avisos posteriores al emitir headers.
 - **Archivos modificados:**

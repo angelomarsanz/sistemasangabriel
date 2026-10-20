@@ -7830,6 +7830,9 @@ class StudenttransactionsController extends AppController
 
 				'Matrícula 2026' =>  ['tarifa' => 263, 'anticipoAbono' => 263, 'diferencia' => 0, 'descuentoRecargo' => 0],
 				'Ago 2027' => ['tarifa' => 263, 'anticipoAbono' => 263, 'diferencia' => 0, 'descuentoRecargo' => 0],
+
+				'Matrícula 2026' =>  ['tarifa' => 325, 'anticipoAbono' => 263, 'diferencia' => 62, 'descuentoRecargo' => 0],
+				'Ago 2027' => ['tarifa' => 325, 'anticipoAbono' => 263, 'diferencia' => 62, 'descuentoRecargo' => 0],
 			];
 
 		$codigo_retorno = 0;

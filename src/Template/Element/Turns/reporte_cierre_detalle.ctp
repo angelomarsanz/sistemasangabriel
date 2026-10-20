@@ -5,14 +5,14 @@
     use Cake\Routing\Router;
 	$esConsolidadoDetallado = !empty($esConsolidadoDetallado);
 	$fechaReporteCierre = $esConsolidadoDetallado
-		? $desde . ' al ' . $hasta
+		? $fechaDesdeReporte . ' al ' . $fechaHastaReporte
 		: $turn->start_date->format('d-m-Y');
 ?>
 <?php if (!empty($consolidadoPeriodo)): ?>
 <div id="reporte-cierre" class="container" style="font-size: 12px; line-height: 16px;">
 	<div class="page-header">
 		<h2>Cierre consolidado de turnos</h2>
-		<p><strong>Período:</strong> <?= h($desde) ?> al <?= h($hasta) ?></p>
+		<p><strong>Período:</strong> <?= h($fechaDesdeReporte) ?> al <?= h($fechaHastaReporte) ?></p>
 		<?php if (!empty($cajerosSeleccionados)): ?>
 			<p><strong>Cajeros:</strong> <?= h(implode(', ', $cajerosSeleccionados)) ?></p>
 		<?php endif; ?>
