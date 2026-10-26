@@ -5469,7 +5469,6 @@ class StudenttransactionsController extends AppController
         $resumen = [
             'contadorFamilias' => 0,
             'totalFamiliasExoneradas' => 0,
-            'totalFamiliasRelacionadas' => 0,
             'contadorEstudiantes' => 0,
             'contadorEstudiantesRegulares' => 0,
             'contadorEstudiantesNuevos' => 0,
@@ -5546,16 +5545,13 @@ class StudenttransactionsController extends AppController
                 {
                     $resumen['tarifaConsejo'] = $dataAnio['tarifa'];
 
-                    $esExoneradaORelacionada = false;
+                    $esExonerada = false;
                     if ($dataAnio['consejoExonerado'] > 0) {
                         $resumen['totalFamiliasExoneradas']++;
-                        $esExoneradaORelacionada = true;
-                    } elseif ($dataAnio['idFamiliaPagadoraConsejo'] > 0) {
-                        $resumen['totalFamiliasRelacionadas']++;
-                        $esExoneradaORelacionada = true;
+                        $esExonerada = true;
                     }
 
-                    if (!$esExoneradaORelacionada) {
+                    if (!$esExonerada) {
                         $resumen['proyeccionCobroFamilias'] += $dataAnio['tarifa'];
                         if ($dataAnio['indicadorReciboConsejo']) {
                             $resumen['cobradoFamilias'] += $dataAnio['tarifa'];
@@ -5569,7 +5565,7 @@ class StudenttransactionsController extends AppController
                     }
 
                     $infoFamilia = [
-                        'exoneradaORelacionada' => $esExoneradaORelacionada,
+                        'exonerada' => $esExonerada,
                         'pagado' => $dataAnio['pagado'],
                         'saldo' => $dataAnio['saldo'],
                         'indicadorRecibo' => $dataAnio['indicadorReciboConsejo'],

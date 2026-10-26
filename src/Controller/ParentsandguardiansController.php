@@ -1092,27 +1092,19 @@ class ParentsandguardiansController extends AppController
             }
         }
 
-        // 4. Decodificar vectores JSON de históricos
-        $vector_familias_relacionadas_anteriores = json_decode($representante->vector_familias_relacionadas_anteriores, true) ?: [];
-        $vector_id_familia_pagadora_consejo_anteriores = json_decode($representante->vector_id_familia_pagadora_consejo_anteriores, true) ?: [];
+        // 4. Decodificar vector JSON de históricos
         $vector_consejo_exonerado_anteriores = json_decode($representante->vector_consejo_exonerado_anteriores, true) ?: [];
 
         $aniosData = [];
 
         // 5. Iterar para construir la respuesta
         for ($year = 2023; $year <= $anioEscolarActual; $year++) {
-            $familiasRelacionadas = null;
-            $idFamiliaPagadoraConsejo = null;
             $consejoExonerado = null;
 
             // Determinar valores de familia y exoneración
             if ($year == $anioEscolarActual) {
-                $familiasRelacionadas = $representante->familias_relacionadas;
-                $idFamiliaPagadoraConsejo = $representante->id_familia_pagadora_consejo;
                 $consejoExonerado = $representante->consejo_exonerado;
             } else {
-                $familiasRelacionadas = $vector_familias_relacionadas_anteriores[$year] ?? null;
-                $idFamiliaPagadoraConsejo = $vector_id_familia_pagadora_consejo_anteriores[$year] ?? null;
                 $consejoExonerado = $vector_consejo_exonerado_anteriores[$year] ?? null;
             }
 
@@ -1129,7 +1121,7 @@ class ParentsandguardiansController extends AppController
             // Si el saldo es menor o igual a 0, el indicador es true (pago completo)
             // También se considera true si la tarifa es 0 (no aplica pago), si está exonerado al 100%
             // o si existe una familia pagadora asignada
-            if (($tarifaAnio > 0 && $saldoAnio <= 0) || $tarifaAnio == 0 || $consejoExonerado > 0 || ($idFamiliaPagadoraConsejo !== null && $idFamiliaPagadoraConsejo > 0)) {
+            if (($tarifaAnio > 0 && $saldoAnio <= 0) || $tarifaAnio == 0 || $consejoExonerado > 0) {
                 $indicadorReciboConsejo = true;
             }
             else
@@ -1138,8 +1130,6 @@ class ParentsandguardiansController extends AppController
             }
 
             $aniosData[$year] = [
-                "familiasRelacionadas" => $familiasRelacionadas,
-                "idFamiliaPagadoraConsejo" => $idFamiliaPagadoraConsejo,
                 "consejoExonerado" => $consejoExonerado,
                 "indicadorConsejo" => isset($matriculasPorAnio[$year]), // Indica si tuvo matrícula ese año
                 "indicadorReciboConsejo" => $indicadorReciboConsejo,

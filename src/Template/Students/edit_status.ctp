@@ -32,7 +32,6 @@
                                 'Expulsado' => 'Expulsado',
                                 'Egresado' => 'Egresado',
                                 'Eliminado' => 'Eliminado',
-                                'Nuevo' => 'Nuevo',
                                 'Regular' => 'Regular',
                                 'Retirado' => 'Retirado',
                                 'Suspendido' => 'Suspendido']]);

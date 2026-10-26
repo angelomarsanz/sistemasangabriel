@@ -4685,11 +4685,6 @@
 						{
 							alert(`A esta familia no le corresponde pagar el Consejo Educativo ${periodoEscolarRequerido}`);
 						}
-						else if (datosAnio.idFamiliaPagadoraConsejo > 0)
-						{
-							alert('Esta familia no paga Consejo Educativo porque está relacionada con otra familia del mismo representante');
-							return false;
-						}
 						else if (datosAnio.consejoExonerado > 0)
 						{
 							alert(`Esta familia está exonerada del pago del Consejo Educativo ${periodoEscolarRequerido}`);
