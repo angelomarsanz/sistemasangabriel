@@ -792,23 +792,10 @@ class ParentsandguardiansController extends AppController
             $representanteAModificar = $this->Parentsandguardians->get($representanteActivo['id_representante']);
             $representanteAModificar->consejo_educativo = $representanteActivo['consejoEducativo'];
 
-            $representanteAModificar->familias_relacionadas_anterior = $representanteAModificar->familias_relacionadas;
-            $representanteAModificar->id_familia_pagadora_consejo_anterior = $representanteAModificar->id_familia_pagadora_consejo;
             $representanteAModificar->consejo_exonerado_anterior = $representanteAModificar->consejo_exonerado;
 
-            // Si $anioActualizacionRepresentantes es igual a cero, significa que es la primera vez que se ejecuta la asignación de secciones, entonces en la columna vector_familias_relacionadas_anteriores se debe guardar un vector json con dos atributos: El primero con el anioEscolarAnterior y el valor de la columna familias_relacionadas_anterior, y el segundo con el anioEscolarActual y el valor de la columna familias_relacionadas
             if ($anioActualizacionRepresentantes == 0)
             {
-                $vector_familias_relacionadas_anteriores = [];
-                $vector_familias_relacionadas_anteriores[$anioEscolarAnterior] = $representanteAModificar->familias_relacionadas_anterior;
-                $vector_familias_relacionadas_anteriores[$anioEscolarActual] = $representanteAModificar->familias_relacionadas;
-                $representanteAModificar->vector_familias_relacionadas_anteriores = json_encode($vector_familias_relacionadas_anteriores, JSON_FORCE_OBJECT);
-                // Aplicar el mismo procedimiento para la columna id_familia_pagadora_consejo_anterior
-                $vector_id_familia_pagadora_consejo_anteriores = [];
-                $vector_id_familia_pagadora_consejo_anteriores[$anioEscolarAnterior] = $representanteAModificar->id_familia_pagadora_consejo_anterior;
-                $vector_id_familia_pagadora_consejo_anteriores[$anioEscolarActual] = $representanteAModificar->id_familia_pagadora_consejo;
-                $representanteAModificar->vector_id_familia_pagadora_consejo_anteriores = json_encode($vector_id_familia_pagadora_consejo_anteriores, JSON_FORCE_OBJECT);
-                // Aplicar el mismo procedimiento para la columnas consejo_exonerado_anterior
                 $vector_consejo_exonerado_anteriores = [];
                 $vector_consejo_exonerado_anteriores[$anioEscolarAnterior] = $representanteAModificar->consejo_exonerado_anterior;
                 $vector_consejo_exonerado_anteriores[$anioEscolarActual] = $representanteAModificar->consejo_exonerado;
@@ -816,15 +803,6 @@ class ParentsandguardiansController extends AppController
             }
             else
             {
-                // De lo contrario recuperar el vector json que ya existe en la columna vector_familias_relacionadas_anteriores y agregar un nuevo atributo con el anioEscolarActual y el valor de la columna familias_relacionadas
-                $vector_familias_relacionadas_anteriores = json_decode($representanteAModificar->vector_familias_relacionadas_anteriores, true);
-                $vector_familias_relacionadas_anteriores[$anioEscolarActual] = $representanteAModificar->familias_relacionadas;
-                $representanteAModificar->vector_familias_relacionadas_anteriores = json_encode($vector_familias_relacionadas_anteriores, JSON_FORCE_OBJECT);
-                // Aplicar el mismo procedimiento para la columna id_familia_pagadora_consejo_anterior
-                $vector_id_familia_pagadora_consejo_anteriores = json_decode($representanteAModificar->vector_id_familia_pagadora_consejo_anteriores, true);
-                $vector_id_familia_pagadora_consejo_anteriores[$anioEscolarActual] = $representanteAModificar->id_familia_pagadora_consejo;
-                $representanteAModificar->vector_id_familia_pagadora_consejo_anteriores = json_encode($vector_id_familia_pagadora_consejo_anteriores, JSON_FORCE_OBJECT);
-                // Aplicar el mismo procedimiento para la columnas consejo_exonerado_anterior
                 $vector_consejo_exonerado_anteriores = json_decode($representanteAModificar->vector_consejo_exonerado_anteriores, true);
                 $vector_consejo_exonerado_anteriores[$anioEscolarActual] = $representanteAModificar->consejo_exonerado;
                 $representanteAModificar->vector_consejo_exonerado_anteriores = json_encode($vector_consejo_exonerado_anteriores, JSON_FORCE_OBJECT);
@@ -832,7 +810,7 @@ class ParentsandguardiansController extends AppController
 
             if (!($this->Parentsandguardians->save($representanteAModificar)))
             {
-                $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo actualizar el campo consejo_educativo del representante con el ID: '.$representanteActivo['id_representante']);
+                $binnacles->add('controller', 'Parentsandguardians', 'actualizacionAnualRepresentantes', 'No se pudo actualizar el campo consejo_educativo del representante con el ID: '.$representanteActivo['id_representante']);
             }
         }
         foreach ($representantes_sin_estudiantes_activos as $representanteInactivo)
@@ -845,12 +823,12 @@ class ParentsandguardiansController extends AppController
                 $usuarioAEliminar->estatus_registro = "Eliminado";
                 if (!($this->Parentsandguardians->Users->save($usuarioAEliminar)))
                 {
-                    $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo eliminar el registro del usuario con el ID: '.$representanteInactivo['id_usuario_representante']);
+                    $binnacles->add('controller', 'Parentsandguardians', 'actualizacionAnualRepresentantes', 'No se pudo eliminar el registro del usuario con el ID: '.$representanteInactivo['id_usuario_representante']);
                 }
             }
             else
             {
-                $binnacles->add('controller', 'Parentsandguardians', 'eliminarRepresentantesEstudiantesInactivos', 'No se pudo eliminar el registro del representante con el ID: '.$representanteInactivo['id_representante']);
+                $binnacles->add('controller', 'Parentsandguardians', 'actualizacionAnualRepresentantes', 'No se pudo eliminar el registro del representante con el ID: '.$representanteInactivo['id_representante']);
             }
         }
 
@@ -1016,6 +994,7 @@ class ParentsandguardiansController extends AppController
     }
     /**
      * Construye los datos anuales del Consejo Educativo, respetando exoneraciones y familias pagadoras.
+     * Si falta la exoneración histórica exacta, utiliza el valor del año histórico posterior más cercano.
      *
      * @param mixed $anioEscolarActual Año escolar actual.
      * @param mixed $proximoAnioEscolar Próximo año escolar.
@@ -1094,6 +1073,8 @@ class ParentsandguardiansController extends AppController
 
         // 4. Decodificar vector JSON de históricos
         $vector_consejo_exonerado_anteriores = json_decode($representante->vector_consejo_exonerado_anteriores, true) ?: [];
+        $aniosHistoricosExoneracion = array_keys($vector_consejo_exonerado_anteriores);
+        sort($aniosHistoricosExoneracion, SORT_NUMERIC);
 
         $aniosData = [];
 
@@ -1105,7 +1086,16 @@ class ParentsandguardiansController extends AppController
             if ($year == $anioEscolarActual) {
                 $consejoExonerado = $representante->consejo_exonerado;
             } else {
-                $consejoExonerado = $vector_consejo_exonerado_anteriores[$year] ?? null;
+                if (array_key_exists($year, $vector_consejo_exonerado_anteriores)) {
+                    $consejoExonerado = $vector_consejo_exonerado_anteriores[$year];
+                } else {
+                    foreach ($aniosHistoricosExoneracion as $anioHistorico) {
+                        if (is_numeric($anioHistorico) && (int)$anioHistorico > $year) {
+                            $consejoExonerado = $vector_consejo_exonerado_anteriores[$anioHistorico];
+                            break;
+                        }
+                    }
+                }
             }
 
             // Lógica de Pagos, Tarifas y Saldos

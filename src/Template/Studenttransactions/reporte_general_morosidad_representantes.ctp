@@ -6,6 +6,7 @@
  * (diferencias de inscripción, servicio educativo, seguro escolar, mensualidades desglosadas
  * por mes y Consejo Educativo) para cada familia/representante con saldos pendientes,
  * junto con resúmenes estadísticos, totales generales y opciones de exportación o impresión.
+ * Presenta el período escolar recibido, que puede ser cualquiera desde 2023-2024 hasta el actual.
  */
 use Cake\Routing\Router;
 ?>

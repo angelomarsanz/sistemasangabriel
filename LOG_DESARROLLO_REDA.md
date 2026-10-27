@@ -1,5 +1,44 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-27] - Acceso directo al detalle desde la búsqueda familiar
+- **Tarea:** Omitir la tabla intermedia en la búsqueda y abrir el detalle de la familia al seleccionar una sugerencia del autocompletado.
+- **Archivos modificados:**
+    - **`src/Template/Parentsandguardians/consult_family.ctp`:** Se eliminaron la tabla de resultados y su manejador de clic. Los autocompletados de familia, madre, representante y razón social envían directamente por POST el `idFamily` y el texto seleccionado a `viewData`.
+    - **`manual_tecnico_sistema.md`:** Se documentó el comportamiento actualizado de la vista.
+- **Controlador:** `consultFamily` continúa mostrando esta vista y `viewData` conserva el manejo POST existente de `idFamily` y `family`; no fue necesario modificar el controlador.
+- **Validación:** `/opt/lampp/bin/php -l src/Template/Parentsandguardians/consult_family.ctp`, búsqueda de referencias a la tabla y manejadores eliminados, y `git diff --check`, todo sin errores.
+
+## [2026-10-26] - Reportes históricos de morosidad por período escolar
+- **Tarea:** Permitir emitir el Reporte General de Morosidad para cualquier período desde 2023-2024 hasta el período escolar actual.
+- **Archivos modificados:**
+    - **`src/Controller/StudenttransactionsController.php`:** `generalMorosidadRepresentantes` genera dinámicamente todos los períodos desde 2023 hasta el año actual; `reporteGeneralMorosidadRepresentantes` valida que el período recibido sea consecutivo y esté dentro del rango permitido.
+    - **`src/Template/Studenttransactions/general_morosidad_representantes.ctp`:** Se muestran todas las opciones disponibles desde 2023-2024.
+    - **`src/Template/Studenttransactions/reporte_general_morosidad_representantes.ctp`:** Se documentó que el reporte presenta el período escolar seleccionado dentro del nuevo rango habilitado.
+    - **`manual_tecnico_sistema.md`:** Se documentaron el rango de períodos y la validación del endpoint.
+- **Validación:** `php -l` del controlador y ambas vistas; prueba de generación de períodos y rechazo de años fuera de rango o no consecutivos; `git diff --check`, todo sin errores.
+
+## [2026-10-26] - Nombre oficial del vector de descuentos históricos
+- **Tarea:** Estandarizar el nombre de la columna histórica de descuentos.
+- **Archivos modificados:**
+    - **`src/Controller/StudenttransactionsController.php`:** El método `obtenerDescuentoHistorico` ahora consulta exclusivamente `vector_descuentos_anios_anteriores`.
+    - **`src/Controller/PaymentsController.php`:** Se corrigió la referencia singular para usar el nombre plural oficial de la columna.
+    - **`manual_tecnico_sistema.md`:** Se actualizó la documentación para mencionar únicamente el nombre correcto de la columna.
+- **Validación:** `php -l` en ambos controladores, búsqueda global sin referencias al nombre singular, prueba funcional que confirma el uso exclusivo del campo oficial y `git diff --check`, todo sin errores.
+
+## [2026-10-26] - Descuentos históricos por año escolar
+- **Tarea:** Usar el vector JSON de descuentos históricos en `vectorConsejoEducativo`, `saldoCuotas` y `procesarMensualidad`, con fallback al año posterior disponible más cercano.
+- **Archivos modificados:**
+    - **`src/Controller/StudenttransactionsController.php`:** Se añadió el método privado documentado `obtenerDescuentoHistorico`, que maneja valores nulos o JSON inválido, prioriza el año exacto y selecciona el año posterior más cercano cuando falta. Se aplicó en las tres acciones solicitadas y se actualizaron sus documentaciones.
+    - **`manual_tecnico_sistema.md`:** Se documentó el cálculo de descuentos históricos y el fallback por año.
+- **Validación:** `php -l` del controlador, prueba funcional del año exacto, año posterior más cercano, año sin posterior y campo `null`; `git diff --check`, todo sin errores.
+
+## [2026-10-26] - Fallback de exoneración histórica del Consejo Educativo
+- **Tarea:** Cuando no exista una exoneración histórica para el año consultado en `procesarConsejoEducativo`, utilizar el dato del año disponible inmediatamente posterior.
+- **Archivos modificados:**
+    - **`src/Controller/ParentsandguardiansController.php`:** Se mantiene la prioridad del valor exacto y, si no existe la clave, se recorren las claves históricas en orden numérico para seleccionar la primera mayor que el año solicitado. Se actualizó la documentación de la acción.
+    - **`manual_tecnico_sistema.md`:** Se actualizó el resumen técnico del controlador para describir el comportamiento de fallback.
+- **Validación:** `/opt/lampp/bin/php -l src/Controller/ParentsandguardiansController.php` y `git diff --check` finalizados sin errores.
+
 ## [2026-10-19] - Formato uniforme de fechas en reporte de cierre
 - **Tarea:** Asegurar que todas las fechas impresas en el reporte estén en formato `DD-MM-AAAA` y las que incluyen hora en `DD-MM-AAAA hh:mm`.
 - **Archivos modificados:**

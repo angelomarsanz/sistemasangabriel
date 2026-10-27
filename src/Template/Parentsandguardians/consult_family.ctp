@@ -1,4 +1,8 @@
 <?php
+    /**
+     * Vista para buscar familias y abrir directamente el detalle al seleccionar
+     * una opción de cualquiera de sus autocompletados.
+     */
     use Cake\Routing\Router; 
 ?>
 <div class="row">
@@ -26,44 +30,21 @@
                 <br />
                 <input type="text" class="form-control" id="invoice">
                 <br />
-                <p id="header-messages"></p>
-                <br />
-                <div class="panel panel-default pre-scrollable" style="height:220px;">
-                    <div class="panel-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <tbody id="response-container"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </div>
 <script>
-// Declaración de variables
-    var selectFamily = -1;
-    
-// Funciones
-
-    function log(message) 
+    /**
+     * Envía a la acción viewData los datos de la familia elegida.
+     */
+    function abrirDatosFamilia(idFamilia, nombreFamilia)
     {
-        cleanPager();
-        $("#response-container").html(message);
+        $.redirect(
+            '<?php echo Router::url(["controller" => "Parentsandguardians", "action" => "viewData"]); ?>',
+            {idFamily: idFamilia, family: nombreFamilia}
+        );
     }
-
-    function cleanPager()
-    {
-        $('#family').val(" ");
-        $('#mother').val(" ");
-        $('#guardian').val(" ");
-        $("#response-container").html("");
-    }
-    
-// Funciones Jquery
-
-    var family = "";
 
     $(document).ready(function() 
     {
@@ -72,8 +53,7 @@
             source:'<?php echo Router::url(array("controller" => "Parentsandguardians", "action" => "findFamily")); ?>',
             minLength: 3,
             select: function( event, ui ) {
-                log("<tr id=fa" + ui.item.id + " class='family'><td>" + ui.item.value + "</td></tr>");
-                family = ui.item.value;
+                abrirDatosFamilia(ui.item.id, ui.item.value);
               }
         });
 
@@ -82,8 +62,7 @@
             source:'<?php echo Router::url(array("controller" => "Parentsandguardians", "action" => "findMother")); ?>',
             minLength: 3,
             select: function( event, ui ) {
-                log("<tr id=fa" + ui.item.id + " class='family'><td>" + ui.item.value + "</td></tr>");
-                family = ui.item.value;
+                abrirDatosFamilia(ui.item.id, ui.item.value);
               }
         });
 
@@ -92,8 +71,7 @@
             source:'<?php echo Router::url(array("controller" => "Parentsandguardians", "action" => "findGuardian")); ?>',
             minLength: 3,
             select: function( event, ui ) {
-                log("<tr id=fa" + ui.item.id + " class='family'><td>" + ui.item.value + "</td></tr>");
-                family = ui.item.value;
+                abrirDatosFamilia(ui.item.id, ui.item.value);
               }
         });
 
@@ -102,35 +80,9 @@
             source:'<?php echo Router::url(array("controller" => "Parentsandguardians", "action" => "findInvoice")); ?>',
             minLength: 3,
             select: function( event, ui ) {
-                log("<tr id=fa" + ui.item.id + " class='family'><td>" + ui.item.value + "</td></tr>");
-                family = ui.item.value;
+                abrirDatosFamilia(ui.item.id, ui.item.value);
               }
         });
-
-
-
-        $("#response-container").on("click", ".family", function()
-        {
-            idFamily = $(this).attr('id').substring(2);
-
-            if (selectFamily > -1)
-            {
-                $('#fa' + selectFamily).css('background-color', 'white');
-            }
-            
-            selectFamily = idFamily;
-            
-            $('#fa' + selectFamily).css('background-color', '#c2c2d6');  
-    
-            cleanPager();
-            
-            $("#header-messages").html("Por favor espere...");
-                       
-            $.redirect('../parentsandguardians/viewData', {idFamily : idFamily, family: family}); 
-
-        });
-
-// Final funciones Jquery
     });    
 
 </script>

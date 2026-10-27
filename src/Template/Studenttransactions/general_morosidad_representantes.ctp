@@ -3,8 +3,8 @@
  * Vista del formulario para el Reporte General de Morosidad de Representantes.
  *
  * Presenta los criterios de selección para emitir el reporte:
- * rango de meses (desde - hasta), período escolar dinámico (obtenido a partir
- * de la configuración institucional en la tabla Schools), opción de recálculo con
+ * rango de meses (desde - hasta), períodos escolares desde 2023-2024 hasta el actual
+ * (obtenidos a partir de la configuración institucional en la tabla Schools), opción de recálculo con
  * la tarifa vigente, inclusión de la deuda de Consejo Educativo, filtro de grados/condición
  * de los estudiantes (incluyendo opciones para 5to. Año: Regulares y/o Egresados)
  * y visibilidad del número telefónico del representante.
@@ -50,9 +50,7 @@
 						'07' => 'Julio']]);
 					echo "<div id='mensaje-mes-hasta' class='mensaje-usuario'></div>";
 	               	echo $this->Form->input('periodo_escolar', ['label' => 'Período escolar: ', 'options' =>
-	                    ["" => "",
-						$periodoEscolarAnterior => $periodoEscolarAnterior,
-						$periodoEscolarActual => $periodoEscolarActual]]);
+	                    ["" => ""] + $periodosEscolares]);
 					echo "<div id='mensaje-periodo-escolar' class='mensaje-usuario'></div>";
 					echo $this->Form->input('indicador_recalculo', ['label' => 'Desea recalcular las cuotas atrasadas de acuerdo con la tarifa vigente ?: ', 'options' =>
 						["" => "",

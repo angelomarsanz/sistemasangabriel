@@ -20,7 +20,12 @@ ARCHIVOS_PHP_PUNTUALES=(
     #"js_csga/dist/main-style.css"
     #"js_csga/dist/main-script.js"
 
+    "src/Template/Students/edit_status.ctp"
+    "src/Template/Bills/create_invoice.ctp"
+    "src/Template/Parentsandguardians/consult_family.ctp"
+    "src/Template/Studenttransactions/reporte_general_morosidad_representantes.ctp"
+
     "src/Controller/StudenttransactionsController.php"
-    "src/Template/Element/Turns/reporte_cierre_detalle.ctp"
-    "src/Template/Turns/reporte_cierre.ctp"
+    "src/Controller/ParentsandguardiansController.php"
+    "src/Controller/PaymentsController.php"
 )

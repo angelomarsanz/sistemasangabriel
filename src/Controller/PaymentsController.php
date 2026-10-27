@@ -1099,7 +1099,7 @@ class PaymentsController extends AppController
 					if ($isLatestYear) {
 						$porcentajeBeca = $student->discount;
 					} else {
-						$vectorDescuentos = json_decode($student->vector_descuento_anios_anteriores, true);
+						$vectorDescuentos = json_decode($student->vector_descuentos_anios_anteriores, true);
 						if (isset($vectorDescuentos[$selectedYear])) {
 							$porcentajeBeca = $vectorDescuentos[$selectedYear];
 						} else {

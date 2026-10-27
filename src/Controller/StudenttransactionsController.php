@@ -4671,129 +4671,6 @@ class StudenttransactionsController extends AppController
         $this->set('_serialize', ['transacciones']);
 	}
 
-	// Ejecutar al iniciar el año escolar
-
-	public function marcarEliminado()
-	{
-		$contadorBusqueda = 0;
-		$contadorMensualidades = 0;
-		$contadorMatriculas = 0;
-		$contadorSeguro = 0;
-		$contadorServicio = 0;
-		$contadorThales = 0;
-		$contadorActualizadas = 0;
-
-		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
-
-		$transacciones = $transaccionesEstudiante->find('all');
-
-		$contadorBusqueda = $transacciones->count();
-
-		$this->Flash->success(__('Total transacciones busqueda ' . $contadorBusqueda));
-
-		foreach ($transacciones as $transaccion)
-		{
-			$marcar = 0;
-
-			$fechaHasta = new Time('2020-09-01 00:00:00');
-
-			if ($transaccion->invoiced == 0)
-			{
-				if ($transaccion->transaction_type == 'Mensualidad' && $transaccion->payment_date < $fechaHasta)
-				{
-					$marcar = 1;
-					$contadorMensualidades++;
-				}
-				elseif ($transaccion->transaction_type == 'Matrícula' && $transaccion->transaction_description != 'Matrícula 2020' && $transaccion->transaction_description != 'Matrícula 2021')
-				{
-					$marcar = 1;
-					$contadorMatriculas++;
-				}
-				elseif ($transaccion->transaction_type == 'Seguro escolar' && $transaccion->transaction_description != 'Seguro escolar 2020' && $transaccion->transaction_description != 'Seguro escolar 2021')
-				{
-					$marcar = 1;
-					$contadorSeguro++;
-				}
-				elseif ($transaccion->transaction_type == 'Servicio educativo' && $transaccion->transaction_description != 'Servicio educativo 2020' && $transaccion->transaction_description != 'Servicio educativo 2021')
-				{
-					$marcar = 1;
-					$contadorServicio++;
-				}
-				elseif ($transaccion->transaction_type == 'Thales')
-				{
-					$marcar = 1;
-					$contadorThales++;
-				}
-
-
-				if ($marcar == 1)
-				{
-					$transaccionGet = $this->Studenttransactions->get($transaccion->id);
-
-					$transaccionGet->invoiced = 1;
-
-					if (!($this->Studenttransactions->save($transaccionGet)))
-					{
-						$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
-					}
-					else
-					{
-						$contadorActualizadas++;
-					}
-				}
-			}
-		}
-
-		$this->Flash->success(__('Total mensualidades ' . $contadorMensualidades));
-		$this->Flash->success(__('Total matrículas ' . $contadorMatriculas));
-		$this->Flash->success(__('Total seguro ' . $contadorSeguro));
-		$this->Flash->success(__('Total servicio educativo ' . $contadorServicio));
-		$this->Flash->success(__('Total Thales ' . $contadorThales));
-		$this->Flash->success(__('Total actualizadas ' . $contadorActualizadas));
-
-        $this->set(compact('transacciones'));
-        $this->set('_serialize', ['transacciones']);
-	}
-
-	// Ejecutar al iniciar el año escolar
-
-	public function eliminarMarcado()
-	{
-		$contadorBusqueda = 0;
-		$contadorEliminadas = 0;
-
-		$transaccionesEstudiante = TableRegistry::get('Studenttransactions');
-
-		$transacciones = $transaccionesEstudiante->find('all');
-
-		$this->Flash->success(__('Total transacciones busqueda ' . $contadorBusqueda));
-
-		foreach ($transacciones as $transaccion)
-		{
-			$marcar = 0;
-
-			if ($transaccion->invoiced == 1)
-			{
-				$studenttransaction = $this->Studenttransactions->get($transaccion->id);
-
-				if (!($this->Studenttransactions->delete($studenttransaction)))
-				{
-					$this->Flash->error(__('La transacción con el id ' . $transaccion->id . ' no pudo ser actualizada'));
-				}
-				else
-				{
-					$contadorEliminadas++;
-				}
-			}
-		}
-
-		$this->Flash->success(__('Total registros marcados para eliminar ' . $contadorBusqueda));
-		$this->Flash->success(__('Total transacciones eliminadas ' . $contadorEliminadas));
-
-        $this->set(compact('transacciones'));
-        $this->set('_serialize', ['transacciones']);
-	}
-
 	public function actualizarTransaccionBecado($idEstudiante = null, $anoEscolar = null)
 	{
 		$this->autoRender = false;
@@ -4876,10 +4753,9 @@ class StudenttransactionsController extends AppController
 	 * Configuración y parámetros para el Reporte General de Morosidad de Representantes.
 	 *
 	 * Carga la información de la institución educativa desde la tabla Schools para calcular
-	 * dinámicamente los períodos escolares actual y anterior, pasándolos a la vista para
-	 * poblar las opciones del selector de período escolar. Guarda el registro de la institución
-	 * en la sesión para optimizar los tiempos de respuesta y evitar consultas adicionales
-	 * a la base de datos al generar el reporte en reporteGeneralMorosidadRepresentantes.
+	 * todos los períodos escolares desde 2023-2024 hasta el actual, pasándolos a la vista
+	 * para poblar las opciones del selector. Guarda el registro de la institución en la sesión
+	 * para optimizar consultas al generar el reporte en reporteGeneralMorosidadRepresentantes.
 	 *
 	 * @return \Cake\Network\Response|null Redirige a reporteGeneralMorosidadRepresentantes con los parámetros seleccionados.
 	 */
@@ -4888,11 +4764,10 @@ class StudenttransactionsController extends AppController
 		$this->loadModel('Schools');
 		$school = $this->Schools->get(2);
 		$anioEscolarActual = $school->current_school_year;
-		$anioEscolarAnterior = $anioEscolarActual - 1;
-		$proximoAnioEscolar = $anioEscolarActual + 1;
-
-		$periodoEscolarAnterior = $anioEscolarAnterior . '-' . $anioEscolarActual;
-		$periodoEscolarActual = $anioEscolarActual . '-' . $proximoAnioEscolar;
+		$periodosEscolares = [];
+		for ($anioInicio = 2023; $anioInicio <= $anioEscolarActual; $anioInicio++) {
+			$periodosEscolares[$anioInicio . '-' . ($anioInicio + 1)] = $anioInicio . '-' . ($anioInicio + 1);
+		}
 
 		$session = $this->request->session();
 		$session->write('school', $school);
@@ -4906,13 +4781,14 @@ class StudenttransactionsController extends AppController
 			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'reporteGeneralMorosidadRepresentantes', $_POST["mes_desde"], $_POST["mes_hasta"], $_POST["periodo_escolar"], "General de Representantes", $_POST["consejo_educativo"], $_POST["indicador_recalculo"], $_POST["telefono"], $tipoEstudiante, $condicionRegulares, $condicionEgresados]);
         }
 
-		$this->set(compact('periodoEscolarAnterior', 'periodoEscolarActual'));
+		$this->set(compact('periodosEscolares'));
 	}
 
 	/**
 	 * Genera el Reporte General de Morosidad de Representantes.
 	 *
 	 * Recopila y totaliza la deuda pendiente de los representantes en los meses y período escolar indicados.
+	 * Acepta períodos consecutivos desde 2023-2024 hasta el período actual configurado.
 	 * Obtiene los datos de la institución educativa desde la sesión si fue precargada por generalMorosidadRepresentantes
 	 * para reducir tiempos de respuesta, o consulta la base de datos si no estuviera disponible en sesión.
 	 *
@@ -4950,6 +4826,14 @@ class StudenttransactionsController extends AppController
 		}
 		$anioEscolarActual = $school->current_school_year;
         $anioInscripcionActual = $school->current_year_registration;
+
+		if (!preg_match('/^(\d{4})-(\d{4})$/', (string)$periodo_escolar, $coincidenciasPeriodo) ||
+			(int)$coincidenciasPeriodo[1] < 2023 ||
+			(int)$coincidenciasPeriodo[1] > $anioEscolarActual ||
+			(int)$coincidenciasPeriodo[2] !== (int)$coincidenciasPeriodo[1] + 1) {
+			$this->Flash->error(__('El período escolar seleccionado no es válido.'));
+			return $this->redirect(['controller' => 'Studenttransactions', 'action' => 'generalMorosidadRepresentantes']);
+		}
 
 		$this->loadModel('Monedas');
 		$moneda = $this->Monedas->get(2);
@@ -5188,6 +5072,9 @@ class StudenttransactionsController extends AppController
 	 * @param string $anio_mes_dia_desde Fecha límite inferior en formato YYYYMMDD.
 	 * @param string|null $anio_mes_dia_hasta Fecha límite superior en formato YYYYMMDD.
 	 * @param string|null $anio_mes_dia_agosto Fecha de agosto en formato YYYYMMDD.
+	 *
+	 * Para excluir mensualidades con beca completa de años anteriores, obtiene el descuento
+	 * histórico del año de la transacción o el año posterior disponible más cercano.
 	 * @return array Vector con los montos y saldos calculados por ID de transacción.
 	 */
 	public function saldoCuotas($mes_desde = null, $mes_hasta = null, $anio = null, $periodo_escolar = null, $indicador_recalculo = null, $transacciones = null, $anio_mes_dia_desde, $anio_mes_dia_hasta = null, $anio_mes_dia_agosto = null)
@@ -5283,7 +5170,8 @@ class StudenttransactionsController extends AppController
                         }
                         else
                         {
-                            if ($transaccion->student->descuento_ano_anterior == 100)
+                            $descuentoHistorico = $this->obtenerDescuentoHistorico($transaccion->student, $transaccion->ano_escolar);
+                            if ($descuentoHistorico == 100)
                             {
                                 $incluir = 'No';
                             }
@@ -5387,6 +5275,27 @@ class StudenttransactionsController extends AppController
 		}
 	}
 
+    /**
+     * Calcula el resumen de Consejo Educativo y las estadísticas de becas por año escolar.
+     *
+     * Para años anteriores, obtiene el porcentaje desde el vector JSON de descuentos históricos,
+     * usando el año posterior disponible más cercano cuando no exista una clave exacta.
+     *
+     * @param int|null $anio Año escolar del resumen.
+     * @param int|null $anioEscolarActual Año escolar vigente.
+     * @param int|null $anioInscripcionActual Año escolar de inscripción actual.
+     * @param string|null $periodo_escolar Período escolar del resumen.
+     * @param float|int $total_cuotas_periodo Total de cuotas del período.
+     * @param array $detalle_morosos Detalle acumulado de morosidad.
+     * @param mixed $vector_morosidad Vector de morosidad.
+     * @param mixed $totales_morosidad Totales de morosidad.
+     * @param string $grados Filtro de grados.
+     * @param string|null $funcionLlamadora Acción que solicita el resumen.
+     * @param string $condicionRegulares Filtro de estudiantes regulares.
+     * @param string $condicionEgresados Filtro de estudiantes egresados.
+     * @param bool $soloMorosos Indica si debe retornar cuando no hay matrículas.
+     * @return array Resumen y detalles del Consejo Educativo.
+     */
 	public function vectorConsejoEducativo($anio = null, $anioEscolarActual = null, $anioInscripcionActual = null, $periodo_escolar = null, $total_cuotas_periodo = 0, $detalle_morosos = [], $vector_morosidad = null, $totales_morosidad = null, $grados = 'Todos', $funcionLlamadora = null, $condicionRegulares = 'No', $condicionEgresados = 'No', $soloMorosos = true)
 	{
         \Cake\Log\Log::debug('anio: '.$anio.', anioEscolarActual: '.$anioEscolarActual.', anioInscripcionActual: '.$anioInscripcionActual.', periodo_escolar: '.$periodo_escolar.', grados: '.$grados.', funcionLlamadora: '.$funcionLlamadora);
@@ -5524,9 +5433,10 @@ class StudenttransactionsController extends AppController
 			}
 			else
 			{
-				if ($estudiante->descuento_ano_anterior == 100) {
+                $descuentoHistorico = $this->obtenerDescuentoHistorico($estudiante, $anio);
+				if ($descuentoHistorico == 100) {
 					$resumen['contadorEstudiantesBecasCompletas']++;
-				} elseif ($estudiante->descuento_ano_anterior > 0 && $estudiante->descuento_ano_anterior < 100) {
+				} elseif ($descuentoHistorico > 0 && $descuentoHistorico < 100) {
 					$resumen['contadorEstudiantesBecasParciales']++;
 				}
 			}
@@ -8085,6 +7995,17 @@ class StudenttransactionsController extends AppController
 		return $respuesta;
 	}
 
+    /**
+     * Calcula la tarifa, el descuento y el saldo de una mensualidad.
+     *
+     * Para transacciones de años anteriores, obtiene el porcentaje de descuento del vector
+     * histórico del año escolar de la transacción o del año posterior más cercano disponible.
+     *
+     * @param mixed $transaccion Transacción de mensualidad a procesar.
+     * @param string|null $indicadorRecalculoCuota Indica si se recalcula la cuota.
+     * @param string|null $soloCuotasVencidas Indica si se consideran únicamente cuotas vencidas.
+     * @return array Resultado del cálculo de la mensualidad.
+     */
 	public function procesarMensualidad($transaccion = null, $indicadorRecalculoCuota = null, $soloCuotasVencidas = null)
 	{
 		setlocale(LC_TIME, 'es_VE', 'es_VE.utf-8', 'es_VE.utf8');
@@ -8170,7 +8091,7 @@ class StudenttransactionsController extends AppController
 		{
 			if ($transaccion->ano_escolar < $anioEscolarActual)
 			{
-				$porcentajeDescuento = $transaccion->student->descuento_ano_anterior;
+				$porcentajeDescuento = $this->obtenerDescuentoHistorico($transaccion->student, $transaccion->ano_escolar);
 			}
 			elseif ($transaccion->ano_escolar == $anioEscolarActual)
 			{
@@ -8536,6 +8457,56 @@ class StudenttransactionsController extends AppController
         $sinAcentos = ['A', 'E', 'I', 'O', 'U', 'N', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'O'];
         $texto = str_replace($acentos, $sinAcentos, $texto);
         return preg_replace('/\s+/', ' ', trim($texto));
+    }
+
+    /**
+     * Obtiene el descuento histórico exacto o el del año posterior más cercano.
+     *
+     * Lee la columna vector_descuentos_anios_anteriores. Si el campo está vacío, contiene
+     * null o no contiene un JSON válido, devuelve null sin provocar errores.
+     *
+     * @param \App\Model\Entity\Student|null $estudiante Estudiante con su vector histórico.
+     * @param int|string|null $anio Año escolar cuyo descuento se busca.
+     * @return mixed Porcentaje de descuento encontrado o null si no existe.
+     */
+    private function obtenerDescuentoHistorico($estudiante, $anio)
+    {
+        if (!$estudiante || !is_numeric($anio)) {
+            return null;
+        }
+
+        $valorCampo = $estudiante->get('vector_descuentos_anios_anteriores');
+        if (is_array($valorCampo)) {
+            $vectorDescuentos = $valorCampo;
+        } elseif (is_string($valorCampo) && trim($valorCampo) !== '') {
+            $vectorDescuentos = json_decode($valorCampo, true);
+        } else {
+            $vectorDescuentos = null;
+        }
+
+        if (!is_array($vectorDescuentos) || empty($vectorDescuentos)) {
+            return null;
+        }
+
+        $anioBuscado = (int)$anio;
+        $claveAnioBuscado = (string)$anioBuscado;
+        if (array_key_exists($claveAnioBuscado, $vectorDescuentos)) {
+            return $vectorDescuentos[$claveAnioBuscado];
+        }
+
+        $anioPosteriorMasCercano = null;
+        foreach (array_keys($vectorDescuentos) as $anioHistorico) {
+            if (is_numeric($anioHistorico) && (int)$anioHistorico > $anioBuscado &&
+                ($anioPosteriorMasCercano === null || (int)$anioHistorico < $anioPosteriorMasCercano)) {
+                $anioPosteriorMasCercano = (int)$anioHistorico;
+            }
+        }
+
+        if ($anioPosteriorMasCercano === null) {
+            return null;
+        }
+
+        return $vectorDescuentos[(string)$anioPosteriorMasCercano] ?? null;
     }
 
     /**
