@@ -17,6 +17,12 @@ class ParentsandguardiansController extends AppController
         parent::beforeFilter($event);
     }
 
+    /**
+     * Define las acciones permitidas para cada rol de usuario.
+     *
+     * @param array $user Datos del usuario autenticado.
+     * @return bool
+     */
     public function isAuthorized($user)
     {
 		if(isset($user['role']))
@@ -30,7 +36,7 @@ class ParentsandguardiansController extends AppController
 			}
 			elseif ($user['role'] === 'Control de estudios')
 			{
-				if(in_array($this->request->action, ['consultFamily', 'viewData', 'view', 'edit', 'findFamily', 'findMother', 'findGuardian']))
+				if(in_array($this->request->action, ['consultFamily', 'viewData', 'cambiarEstatusFamilia', 'view', 'edit', 'findFamily', 'buscarFamiliaInactiva', 'findMother', 'findGuardian']))
 				{
 					return true;
 				}
@@ -419,6 +425,11 @@ class ParentsandguardiansController extends AppController
         }
     }
 
+    /**
+     * Busca familias activas por sus apellidos para el autocompletado.
+     *
+     * @return void
+     */
     public function findFamily()
     {
         if ($this->request->is('ajax')) {
@@ -431,6 +442,30 @@ class ParentsandguardiansController extends AppController
 				$resultsArr[] =['label' => $result['family'] . ' (' . $result['surname'] . ' ' . $result['first_name'] . ')', 'value' => $result['family'] . ' (' . $result['surname'] . ' ' . $result['first_name'] . ')', 'id' => $result['id']];
 				}
 			exit(json_encode($resultsArr, JSON_FORCE_OBJECT));
+        }
+    }
+
+    /**
+     * Busca familias eliminadas por sus apellidos para el autocompletado.
+     *
+     * @return void
+     */
+    public function buscarFamiliaInactiva()
+    {
+        if ($this->request->is('ajax')) {
+            $this->autoRender = false;
+            $name = trim($this->request->query['term']);
+            $results = $this->Parentsandguardians->find('all', [
+                'conditions' => [['family LIKE' => $name . '%'], ['guardian !=' => 1], ['estatus_registro' => 'Eliminado']]]);
+            $resultsArr = [];
+            foreach ($results as $result) {
+                $resultsArr[] = [
+                    'label' => $result['family'] . ' (' . $result['surname'] . ' ' . $result['first_name'] . ')',
+                    'value' => $result['family'] . ' (' . $result['surname'] . ' ' . $result['first_name'] . ')',
+                    'id' => $result['id']
+                ];
+            }
+            exit(json_encode($resultsArr, JSON_FORCE_OBJECT));
         }
     }
 
@@ -554,11 +589,19 @@ class ParentsandguardiansController extends AppController
     {
 
     }
+    /**
+     * Muestra los datos y el estado de la familia seleccionada.
+     *
+     * @param int|null $idFamily Identificador del representante de la familia.
+     * @param string|null $family Nombre de la familia.
+     * @return void
+     */
     public function viewData($idFamily = null, $family = null)
     {
 		$this->loadModel('Schools');
 
 		$schools = $this->Schools->get(2);
+        $accionFamilia = null;
 
         if ($this->request->is('post'))
         {
@@ -574,11 +617,157 @@ class ParentsandguardiansController extends AppController
         if ($row)
         {
 			$user = $this->Parentsandguardians->Users->get($row->user_id);
+
+            if ($row->estatus_registro === 'Eliminado' || $user->estatus_registro === 'Eliminado')
+            {
+                $accionFamilia = 'Activar familia';
+            }
+            elseif ($row->estatus_registro === 'Activo' || $user->estatus_registro === 'Activo')
+            {
+                $accionFamilia = 'Inactivar familia';
+            }
 		}
 
-        $this->set(compact('idFamily', 'family', 'schools', 'user'));
+        $this->set(compact('idFamily', 'family', 'schools', 'user', 'accionFamilia'));
 		$this->set('_serialize', ['schools', 'user']);
     }
+
+    /**
+     * Activa o inactiva al usuario, representante y estudiantes de una familia.
+     *
+     * @return \Cake\Network\Response
+     */
+    public function cambiarEstatusFamilia()
+    {
+        $this->autoRender = false;
+
+        if (!$this->request->is('ajax') || !$this->request->is('post'))
+        {
+            return $this->response->withType('application/json')
+                ->withStatus(405)
+                ->withStringBody(json_encode([
+                    'success' => false,
+                    'message' => 'La solicitud debe enviarse por AJAX mediante POST.'
+                ]));
+        }
+
+        $idFamilia = filter_var($this->request->data('idFamily'), FILTER_VALIDATE_INT);
+        if ($idFamilia === false || $idFamilia < 1)
+        {
+            return $this->response->withType('application/json')
+                ->withStatus(400)
+                ->withStringBody(json_encode([
+                    'success' => false,
+                    'message' => 'El identificador de la familia no es válido.'
+                ]));
+        }
+
+        $this->loadModel('Users');
+        $this->loadModel('Students');
+
+        if (!$this->Parentsandguardians->exists(['id' => $idFamilia]))
+        {
+            return $this->response->withType('application/json')
+                ->withStatus(404)
+                ->withStringBody(json_encode([
+                    'success' => false,
+                    'message' => 'No se encontró el representante de la familia.'
+                ]));
+        }
+
+        try
+        {
+            $resultado = $this->Parentsandguardians->getConnection()->transactional(function () use ($idFamilia) {
+                $representante = $this->Parentsandguardians->get($idFamilia);
+                $usuario = $this->Users->get($representante->user_id);
+                $estadosActuales = [$representante->estatus_registro, $usuario->estatus_registro];
+                $estudiantesActualizados = [];
+
+                if (in_array('Eliminado', $estadosActuales, true))
+                {
+                    $nuevoEstado = 'Activo';
+                    $nuevoEstadoEstudiante = 'Regular';
+                    $textoBoton = 'Inactivar familia';
+                    $accionRealizada = 'activó';
+                }
+                elseif (in_array('Activo', $estadosActuales, true))
+                {
+                    $nuevoEstado = 'Eliminado';
+                    $nuevoEstadoEstudiante = 'Eliminado';
+                    $textoBoton = 'Activar familia';
+                    $accionRealizada = 'inactivó';
+                }
+                else
+                {
+                    throw new \UnexpectedValueException('No se puede cambiar el estado: el usuario y el representante no están activos ni eliminados.');
+                }
+
+                $representante->estatus_registro = $nuevoEstado;
+                if (!$this->Parentsandguardians->save($representante))
+                {
+                    throw new \UnexpectedValueException('No se pudo actualizar el estado del representante.');
+                }
+
+                $usuario->estatus_registro = $nuevoEstado;
+                if (!$this->Users->save($usuario))
+                {
+                    throw new \UnexpectedValueException('No se pudo actualizar el estado del usuario de la familia.');
+                }
+
+                $estudiantes = $this->Students->find()
+                    ->where(['parentsandguardian_id' => $representante->id]);
+
+                foreach ($estudiantes as $estudiante)
+                {
+                    if ($estudiante->student_condition !== $nuevoEstadoEstudiante)
+                    {
+                        if ($nuevoEstado === 'Eliminado')
+                        {
+                            $estudiante->student_condition = $nuevoEstadoEstudiante;
+                        }
+                        elseif ($estudiante->student_condition === 'Eliminado')
+                        {
+                            $estudiante->student_condition = $nuevoEstadoEstudiante;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+
+                        if (!$this->Students->save($estudiante))
+                        {
+                            throw new \UnexpectedValueException('No se pudo actualizar el estado de uno de los estudiantes de la familia.');
+                        }
+                    }
+
+                    $estudiantesActualizados[] = [
+                        'nombre' => trim($estudiante->first_name . ' ' . $estudiante->surname)
+                    ];
+                }
+
+                return [
+                    'success' => true,
+                    'buttonText' => $textoBoton,
+                    'familia' => $representante->family,
+                    'accion' => $accionRealizada,
+                    'estudiantes' => $estudiantesActualizados
+                ];
+            });
+        }
+        catch (\UnexpectedValueException $exception)
+        {
+            return $this->response->withType('application/json')
+                ->withStatus(500)
+                ->withStringBody(json_encode([
+                    'success' => false,
+                    'message' => $exception->getMessage()
+                ]));
+        }
+
+        return $this->response->withType('application/json')
+            ->withStringBody(json_encode($resultado));
+    }
+
     public function consultCardboard()
     {
 

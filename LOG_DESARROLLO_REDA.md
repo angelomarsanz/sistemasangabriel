@@ -1,5 +1,37 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-27] - Incluir estudiantes con estado ya vigente en el modal
+- **Tarea:** Listar también estudiantes cuyo estado ya coincidía con el estado objetivo de activar o inactivar la familia.
+- **Archivos modificados:**
+    - **`src/Controller/ParentsandguardiansController.php`:** La respuesta incluye todos los estudiantes que terminan en el estado objetivo: `Regular` al activar y `Eliminado` al inactivar, independientemente de si se guardó un cambio en su registro.
+    - **`manual_tecnico_sistema.md`:** Se aclaró que la lista contempla estudiantes ya en el estado destino.
+- **Validación:** `/opt/lampp/bin/php -l src/Controller/ParentsandguardiansController.php` y `git diff --check`, sin errores.
+
+## [2026-10-27] - Modal de confirmación al cambiar estado familiar
+- **Tarea:** Informar el resultado de activar o inactivar una familia y enumerar los estudiantes actualizados.
+- **Archivos modificados:**
+    - **`src/Controller/ParentsandguardiansController.php`:** La respuesta de `cambiarEstatusFamilia` devuelve el nombre de la familia, la acción realizada y el nombre y apellido de los estudiantes que quedan en el estado objetivo.
+    - **`src/Template/Parentsandguardians/view_data.ctp`:** Se añadió un modal de confirmación con el mensaje y lista de estudiantes. Se cierra con «Entendido», el icono X, clic fuera o Escape; los nombres se agregan como texto para evitar interpretar contenido como HTML.
+    - **`manual_tecnico_sistema.md`:** Se actualizó la documentación del endpoint y del modal.
+- **Validación:** `/opt/lampp/bin/php -l` en el controlador y la vista, `node --check` sobre el JavaScript de la vista, y `git diff --check`, todo sin errores. No se ejecutó una prueba funcional contra la base de datos.
+
+## [2026-10-27] - Activación e inactivación de familias
+- **Tarea:** Añadir un botón de estado familiar con actualización AJAX transaccional del usuario, representante y estudiantes asociados.
+- **Archivos modificados:**
+    - **`src/Controller/ParentsandguardiansController.php`:** `viewData` determina el texto según los estados de usuario y representante. Se agregó `cambiarEstatusFamilia`, restringida a solicitudes AJAX POST y autorizada para Control de estudios junto con los roles generales del sistema. La transacción actualiza usuario y representante; al activar cambia solo estudiantes `Eliminado` a `Regular`, y al inactivar marca todos los estudiantes relacionados como `Eliminado`. Un fallo revierte la operación.
+    - **`src/Template/Parentsandguardians/view_data.ctp`:** Se añadió el botón para los roles autorizados, con petición AJAX y actualización del texto/estilo según el nuevo estado.
+    - **`src/Model/Entity/User.php`, `src/Model/Entity/Parentsandguardian.php` y `src/Model/Entity/Student.php`:** Se documentaron las propiedades de estado utilizadas en el cambio.
+    - **`manual_tecnico_sistema.md`:** Se documentó la acción y el comportamiento del botón.
+- **Validación:** `/opt/lampp/bin/php -l` en el controlador, la vista y las tres entidades; `node --check` sobre el JavaScript de la vista; `git diff --check`, todo sin errores. El proyecto no contiene una prueba de integración para este flujo AJAX.
+
+## [2026-10-27] - Búsqueda de familias inactivas
+- **Tarea:** Añadir un autocompletado para buscar familias inactivas con estado `Eliminado`.
+- **Archivos modificados:**
+    - **`src/Template/Parentsandguardians/consult_family.ctp`:** Se añadió debajo de la búsqueda habitual el campo "Escriba los apellidos que identifican la familia INACTIVA", conectado a la nueva acción y al flujo directo de apertura de `viewData`.
+    - **`src/Controller/ParentsandguardiansController.php`:** Se agregó la acción documentada `buscarFamiliaInactiva`, que devuelve sugerencias con el mismo formato de `findFamily` y filtra `estatus_registro = 'Eliminado'`. Se autorizó al rol Control de estudios, que puede consultar el detalle familiar.
+    - **`manual_tecnico_sistema.md`:** Se actualizaron los resúmenes de controlador y vista.
+- **Validación:** `/opt/lampp/bin/php -l` en el controlador y la vista, verificación del campo, acción y filtro de estado, y `git diff --check`, todo sin errores.
+
 ## [2026-10-27] - Acceso directo al detalle desde la búsqueda familiar
 - **Tarea:** Omitir la tabla intermedia en la búsqueda y abrir el detalle de la familia al seleccionar una sugerencia del autocompletado.
 - **Archivos modificados:**

@@ -37,6 +37,7 @@ use Cake\ORM\Entity;
  * @property bool $scholarship
  * @property bool $brothers_in_school
  * @property int $number_of_brothers
+ * @property string $student_condition
  * @property string $previous_school
  * @property string $student_illnesses
  * @property string $observations

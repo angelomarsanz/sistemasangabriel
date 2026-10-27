@@ -1,10 +1,22 @@
 # Manual Técnico del Sistema San Gabriel
 
 ## src/Controller/ParentsandguardiansController.php
-    Controlador que gestiona representantes, familias y operaciones relacionadas. En `procesarConsejoEducativo`, construye el estado anual de pagos, tarifas, saldos y datos familiares; cuando una familia tiene una exoneración mayor que cero, informa cero como monto pagado y saldo del Consejo Educativo para ese año. Para la exoneración histórica conserva la coincidencia exacta y, si falta, utiliza la del año histórico posterior más cercano disponible.
+    Controlador que gestiona representantes, familias y operaciones relacionadas. En `findFamily` busca familias activas para el autocompletado; la acción `buscarFamiliaInactiva` busca registros con `estatus_registro` igual a `Eliminado` y está autorizada para Control de estudios y los roles de acceso general. `viewData` obtiene el estado del usuario y representante para decidir el texto del botón de familia. La acción AJAX `cambiarEstatusFamilia` aplica transaccionalmente la activación o inactivación al usuario, representante y estudiantes relacionados: al activar, restaura estudiantes `Eliminado` a `Regular`; al inactivar, marca como `Eliminado` a todos los estudiantes. La respuesta incluye el nombre de la familia, la acción y los estudiantes que quedan en el estado objetivo, incluso si ya tenían dicho estado, para mostrarlos en el modal de confirmación. En `procesarConsejoEducativo`, construye el estado anual de pagos, tarifas, saldos y datos familiares; cuando una familia tiene una exoneración mayor que cero, informa cero como monto pagado y saldo del Consejo Educativo para ese año. Para la exoneración histórica conserva la coincidencia exacta y, si falta, utiliza la del año histórico posterior más cercano.
+
+## src/Model/Entity/User.php
+    Entidad de usuario; se documentó la propiedad `estatus_registro`, utilizada para determinar si se muestra la acción de activar o inactivar la familia.
+
+## src/Model/Entity/Parentsandguardian.php
+    Entidad del representante familiar; se documentó `estatus_registro`, que se mantiene sincronizado con el estado del usuario en la activación o inactivación familiar.
+
+## src/Model/Entity/Student.php
+    Entidad de estudiante; se documentó `student_condition`, campo que se restablece de `Eliminado` a `Regular` al activar una familia y se marca `Eliminado` al inactivarla.
 
 ## src/Template/Parentsandguardians/consult_family.ctp
-    Vista de búsqueda familiar mediante autocompletado por familia, apellido de madre, representante o razón social. Al seleccionar una sugerencia, envía directamente por POST el identificador y nombre de la familia a `viewData`, sin insertar resultados en una tabla ni requerir un segundo clic.
+    Vista de búsqueda familiar mediante autocompletado por familia activa, familia inactiva, apellido de madre, representante o razón social. La búsqueda de familias inactivas utiliza `buscarFamiliaInactiva`; al seleccionar una sugerencia, envía directamente por POST el identificador y nombre de la familia a `viewData`, sin insertar resultados en una tabla ni requerir un segundo clic.
+
+## src/Template/Parentsandguardians/view_data.ctp
+    Vista de opciones de la familia consultada. Muestra el botón «Activar familia» o «Inactivar familia» según los estados de usuario y representante, y ejecuta el cambio por AJAX. Tras el éxito, actualiza el botón y muestra un modal con el nombre de la familia y la lista de estudiantes que quedan en el estado objetivo, aunque su estado no haya requerido modificación; el modal se cierra con «Entendido», el icono X, clic fuera o Escape.
 
 ## src/Template/Rates/add_dollar.ctp
     Vista para el registro de tarifas en dólares del colegio. Se incorporó la opción "Promoción especial mensualidad pedidos" dentro del listado de conceptos tarifarios y se ajustó la longitud del selector de subcadena en la validación JavaScript de `enableInputs()` (de 31 a 30 caracteres) y en la confirmación de guardado. Esto permite que tanto "Promoción especial mensualidad" como "Promoción especial mensualidad pedidos" mantengan habilitado y obligatorio el campo `rate_month` (a partir del mes) junto con el año y monto, impidiendo su deshabilitación involuntaria.

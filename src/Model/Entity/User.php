@@ -19,6 +19,7 @@ use Cake\Auth\DefaultPasswordHasher;
  * @property string $cell_phone
  * @property string $profile_photo
  * @property string $profile_photo_dir
+ * @property string $estatus_registro
  * @property \Cake\I18n\Time $created
  * @property \Cake\I18n\Time $modified
  *

@@ -27,6 +27,7 @@ use Cake\ORM\Entity;
  * @property string $landline
  * @property string $email
  * @property string $address
+ * @property string $estatus_registro
  * @property float $balance
  * @property int $id_familia_pagadora_consejo
  * @property \Cake\I18n\Time $created

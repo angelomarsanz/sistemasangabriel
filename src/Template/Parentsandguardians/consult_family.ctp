@@ -1,7 +1,7 @@
 <?php
     /**
-     * Vista para buscar familias y abrir directamente el detalle al seleccionar
-     * una opción de cualquiera de sus autocompletados.
+     * Vista para buscar familias activas e inactivas y abrir directamente el
+     * detalle al seleccionar una opción de cualquiera de sus autocompletados.
      */
     use Cake\Routing\Router; 
 ?>
@@ -17,6 +17,10 @@
                 <label for="family">Escriba los apellidos que identifican la familia</label>
                 <br />
                 <input type="text" class="form-control" id="family">
+                <br />
+                <label for="inactive-family">Escriba los apellidos que identifican la familia INACTIVA</label>
+                <br />
+                <input type="text" class="form-control" id="inactive-family">
                 <br />
                 <label for="mother">Escriba el primer apellido de la madre</label>
                 <br />
@@ -51,6 +55,15 @@
         $('#family').autocomplete(
         {
             source:'<?php echo Router::url(array("controller" => "Parentsandguardians", "action" => "findFamily")); ?>',
+            minLength: 3,
+            select: function( event, ui ) {
+                abrirDatosFamilia(ui.item.id, ui.item.value);
+              }
+        });
+
+        $('#inactive-family').autocomplete(
+        {
+            source:'<?php echo Router::url(array("controller" => "Parentsandguardians", "action" => "buscarFamiliaInactiva")); ?>',
             minLength: 3,
             select: function( event, ui ) {
                 abrirDatosFamilia(ui.item.id, ui.item.value);
