@@ -394,6 +394,12 @@ class StudentsController extends AppController
         $this->set('_serialize', ['student', 'idFamily', 'family', 'assignedSection', 'controller', 'action']);
     }
 
+    /**
+     * Muestra los datos del alumno y prepara los períodos escolares para el modal de exoneraciones.
+     *
+     * @param string|null $id Identificador del alumno consultado.
+     * @return void
+     */
     public function viewStudent($id = null)
     {
         if ($this->request->is('post'))
@@ -407,8 +413,76 @@ class StudentsController extends AppController
 
         $assignedSection = $section->sublevel . ' ' . $section->section;
 
-        $this->set(compact('student', 'assignedSection'));
-        $this->set('_serialize', ['student', 'assignedSection']);
+        $this->loadModel('Schools');
+        $escuela = $this->Schools->get(2);
+        $anioEscolarActual = (int)$escuela->current_school_year;
+        $anioEscolarProximo = $anioEscolarActual + 1;
+        $periodoEscolarActual = $anioEscolarActual . '-' . $anioEscolarProximo;
+        $periodosEscolares = [];
+
+        for ($anioInicio = 2023; $anioInicio <= $anioEscolarProximo; $anioInicio++)
+        {
+            $periodosEscolares[] = $anioInicio . '-' . ($anioInicio + 1);
+        }
+
+        $tarifasHistoricas = $this->otrasTarifas(0, true);
+        $tarifasPorConceptoAno = [];
+
+        foreach ($tarifasHistoricas as $tarifa)
+        {
+            $tarifasPorConceptoAno[$tarifa['conceptoAno']][] = (float)$tarifa['tarifaDolar'];
+        }
+
+        $montosDiferenciaMatricula = [];
+        $montosDiferenciaAgosto = [];
+
+        foreach ($periodosEscolares as $periodoEscolar)
+        {
+            list($anioMatricula, $anioAgosto) = explode('-', $periodoEscolar);
+            $conceptosPorTipo = [
+                'matricula' => 'Matrícula ' . $anioMatricula,
+                'agosto' => 'Ago ' . $anioAgosto
+            ];
+
+            foreach ($conceptosPorTipo as $tipoExoneracion => $conceptoAno)
+            {
+                $tarifasConcepto = isset($tarifasPorConceptoAno[$conceptoAno])
+                    ? $tarifasPorConceptoAno[$conceptoAno]
+                    : [];
+                $montoDiferencia = 0;
+
+                for ($indiceTarifa = 1; $indiceTarifa < count($tarifasConcepto); $indiceTarifa++)
+                {
+                    $montoDiferencia += $tarifasConcepto[$indiceTarifa - 1] - $tarifasConcepto[$indiceTarifa];
+                }
+
+                if ($tipoExoneracion === 'matricula')
+                {
+                    $montosDiferenciaMatricula[$periodoEscolar] = round($montoDiferencia, 2);
+                }
+                else
+                {
+                    $montosDiferenciaAgosto[$periodoEscolar] = round($montoDiferencia, 2);
+                }
+            }
+        }
+
+        $this->set(compact(
+            'student',
+            'assignedSection',
+            'periodosEscolares',
+            'periodoEscolarActual',
+            'montosDiferenciaMatricula',
+            'montosDiferenciaAgosto'
+        ));
+        $this->set('_serialize', [
+            'student',
+            'assignedSection',
+            'periodosEscolares',
+            'periodoEscolarActual',
+            'montosDiferenciaMatricula',
+            'montosDiferenciaAgosto'
+        ]);
     }
 
     /**
@@ -3262,7 +3336,14 @@ class StudentsController extends AppController
 		return $mesesTarifas;
 	}
 
-	public function otrasTarifas($tasaTemporal = null)
+	/**
+	 * Obtiene tarifas distintas de mensualidad, opcionalmente incluyendo todas sus actualizaciones.
+	 *
+	 * @param float|null $tasaTemporal Tasa de cambio temporal; cero consulta la tasa vigente.
+	 * @param bool $incluirHistorial Indica si se conservan todas las tarifas de cada concepto y año.
+	 * @return array Tarifas con concepto y año, monto en dólares y monto en bolívares.
+	 */
+	public function otrasTarifas($tasaTemporal = null, $incluirHistorial = false)
 	{
 		if ($tasaTemporal == 0)
 		{
@@ -3277,14 +3358,20 @@ class StudentsController extends AppController
 
 		$this->loadModel('Rates');
 
+		$ordenTarifas = ['Rates.concept' => 'ASC', 'Rates.rate_year' => 'ASC', 'Rates.created' => 'DESC'];
+		if ($incluirHistorial)
+		{
+			$ordenTarifas['Rates.id'] = 'DESC';
+		}
+
 		$tarifas = $this->Rates->find('all', ['conditions' => ['concept !=' => 'Mensualidad'],
-			'order' => ['Rates.concept' => 'ASC', 'Rates.rate_year' => 'ASC', 'Rates.created' => 'DESC']]);
+			'order' => $ordenTarifas]);
 
 		$contadorRegistros = $tarifas->count();
+		$otrasTarifas = [];
 
 		if ($contadorRegistros > 0)
 		{
-			$otrasTarifas = [];
 			$otrasConceptoAnoAnterior = "";
 			$otrasConceptoAnoActual = "";
 
@@ -3304,7 +3391,7 @@ class StudentsController extends AppController
 				$otrasDolarActual = $tarifa->amount;
 				$otrasBolivarActual = round($otrasDolarActual * $dollarExchangeRate);
 
-				if ($otrasConceptoAnoActual != $otrasConceptoAnoAnterior)
+				if ($incluirHistorial || $otrasConceptoAnoActual != $otrasConceptoAnoAnterior)
 				{
 					$otrasTarifas[] = ['conceptoAno' => $otrasConceptoAnoActual, 'tarifaDolar' => $otrasDolarActual, 'tarifaBolivar' => $otrasBolivarActual];
 				}

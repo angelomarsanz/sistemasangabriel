@@ -1,5 +1,47 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-28] - Aislar el historial de tarifas de las llamadas existentes
+- **Tarea:** Revisar el efecto del parámetro `$incluirHistorial` de `otrasTarifas()` y asegurar que no cambie las demás funciones que la llaman.
+- **Archivos modificados:**
+    - **`src/Controller/StudentsController.php`:** Confirmado que las llamadas existentes en los controladores activos omiten el segundo argumento, por lo que permanece en `false` y la selección de una tarifa por concepto/año conserva la lógica original. El criterio adicional `Rates.id DESC` se aplica ahora solo cuando se solicita historial, preservando también el orden anterior para los demás usos.
+    - **`manual_tecnico_sistema.md`:** Precisada la compatibilidad del parámetro por defecto y el desempate usado por el modo histórico.
+- **Validación:** `rg` sobre los controladores activos confirmó 10 llamadas preexistentes, todas omiten `$incluirHistorial` y mantienen el valor predeterminado `false`; hay una única llamada nueva con `true` desde `viewStudent`. `/opt/lampp/bin/php -l src/Controller/StudentsController.php` y `git diff --check`, sin errores.
+
+## [2026-10-28] - Mostrar diferencias tarifarias en el modal de exoneraciones
+- **Tarea:** Calcular y mostrar el monto de diferencia de matrícula y agosto para cada período escolar seleccionable en la vista del alumno.
+- **Archivos modificados:**
+    - **`src/Controller/StudentsController.php`:** `otrasTarifas()` acepta el parámetro opcional `incluirHistorial` (desactivado por defecto) para devolver todas las actualizaciones ordenadas por fecha descendente sin alterar los usos actuales. `viewStudent` agrupa los montos en dólares por concepto y año, suma la diferencia entre tarifas consecutivas y pasa el resultado por período a la vista. Matrícula usa el año inicial; agosto, el año final.
+    - **`src/Template/Students/view_student.ctp`:** Se muestra el monto correspondiente debajo de cada selector y se actualiza al cambiar el período. Los selectores y las acciones existentes permanecen independientes.
+    - **`manual_tecnico_sistema.md`:** Se documentó la obtención del historial, el cálculo y la presentación dinámica de montos.
+- **Validación:** `/opt/lampp/bin/php -l` en el controlador y la vista, comprobación sintáctica del JavaScript incrustado y `git diff --check` de los archivos relacionados, todo sin errores. Se contrastó el cálculo con el historial del volcado de tarifas: Matrícula 2026 y Agosto 2027 pasan de US$ 263,00 a US$ 325,00, dando US$ 62,00 de diferencia.
+
+## [2026-10-28] - Modal visual de exoneraciones del alumno
+- **Tarea:** Habilitar la opción «Exoneraciones» del menú del alumno y preparar los selectores de períodos escolares para dos conceptos, sin implementar todavía operaciones ni consulta del estado de exoneración.
+- **Archivos modificados:**
+    - **`src/Controller/StudentsController.php`:** `viewStudent` consulta `Schools` con ID 2, construye los períodos desde 2023-2024 hasta el que comienza el año siguiente al actual y entrega el rango y el período vigente a la vista.
+    - **`src/Template/Students/view_student.ctp`:** La opción abre un modal Bootstrap responsivo con «Diferencia de matrícula» y «Diferencia de agosto», selectores independientes con el período actual seleccionado y botones iniciales «Exonerar». Los botones incluyen atributos preparados para distinguir posteriormente «Eliminar exoneración», sin acción todavía.
+    - **`manual_tecnico_sistema.md`:** Documentadas la consulta de períodos en el controlador y la interfaz provisional del modal.
+- **Validación:** `/opt/lampp/bin/php -l` en el controlador y la vista, comprobación sintáctica del JavaScript incrustado y `git diff --check` de los archivos de esta tarea, sin errores. No se recompilaron assets ni se modificaron archivos de `webroot`.
+
+## [2026-10-28] - Evitar cambios directos en assets compilados
+- **Tarea:** Restaurar el CSS compilado que se había alterado localmente y dejar explícita la regla de no editar los artefactos de Vite.
+- **Archivos modificados:**
+    - **`webroot/css/main-style.css`:** Restaurado al estado previo a la compilación local; el cambio del menú se conserva únicamente en `js_csga/src/index.css`.
+    - **`.github/copilot-instructions.md`:** Se indicó modificar las fuentes `js_csga/src/index.css` y `js_csga/src/main.jsx`, no los artefactos `webroot/css/main-style.css` ni `webroot/js/main-script.js`; la compilación y copia para despliegue se gestionan mediante `subir.sh`.
+    - **`manual_tecnico_sistema.md`:** Documentados los lineamientos de instrucciones del proyecto y la naturaleza de los archivos generados.
+- **Validación:** `git diff --check` sin errores; `git diff --quiet` confirmó que `webroot/css/main-style.css` y `webroot/js/main-script.js` no tienen cambios locales.
+
+## [2026-10-28] - Menú de opciones adaptable en vista del alumno
+- **Tarea:** Modernizar el menú de acciones del alumno en `view_student.ctp` e incorporar la opción visual «Exoneraciones» sin definir todavía su operación.
+- **Archivos modificados:**
+    - **`src/Template/Parentsandguardians/view_data.ctp`:** Se retiraron los cambios que se habían aplicado allí por error; se conservaron intactos los accesos y la funcionalidad original de la vista familiar.
+    - **`src/Template/Students/view_student.ctp`:** El menú primitivo de íconos se sustituyó por un menú flotante accesible y adaptable, con íconos SVG en línea, control por teclado y cierre al hacer clic fuera o pulsar Escape. Se preservaron los accesos y roles existentes. «Exoneraciones» queda visible y deshabilitada.
+    - **`js_csga/src/index.css`:** Se documentó la hoja global y se añadieron estilos de escritorio y móvil, incluidos estados de foco y límite de altura para el panel.
+    - **`webroot/css/main-style.css`:** Se regeneró durante la validación inicial, pero luego se restauró al estado previo; el despliegue debe compilar los artefactos desde las fuentes con `subir.sh`.
+    - **`manual_tecnico_sistema.md`:** Se actualizaron los resúmenes de la vista y de la hoja de estilos.
+    - **`previo_cambios_realizados.md`:** Se usó como registro incremental de la tarea y se deja limpio al finalizar.
+- **Validación:** `/opt/lampp/bin/php -l` en ambas vistas, comprobación sintáctica del JavaScript incrustado y `git diff --check`, sin errores. Los estilos ya habían sido compilados con `npm --prefix js_csga run build`.
+
 ## [2026-10-27] - Incluir estudiantes con estado ya vigente en el modal
 - **Tarea:** Listar también estudiantes cuyo estado ya coincidía con el estado objetivo de activar o inactivar la familia.
 - **Archivos modificados:**

@@ -1,38 +1,16 @@
 <?php
-    use Cake\Routing\Router; 
+    /**
+     * Vista de datos detallados del alumno, menú adaptable y modal visual de exoneraciones.
+     */
+    use Cake\Routing\Router;
 ?>
 <style>
-@media screen
-{
-    .menumenos
-    {
-        display:scroll;
-        position:fixed;
-        bottom: 5%;
-        right: 1%;
-        opacity: 0.5;
-        text-align: right;
-    }
-    .menumas 
-    {
-        display:scroll;
-        position:fixed;
-        bottom: 5%;
-        right: 1%;
-        opacity: 0.5;
-        text-align: right;
-    }
-    .botonMenu
-    {
-        margin-bottom: 5 px;
-    }
-    .ui-autocomplete 
-    {
-        z-index: 2000;
-    }
+.ui-autocomplete {
+    z-index: 2000;
 }
 </style>
 <div class="container">
+    <br />
     <div class="page-header">    
         <p><?= $this->Html->link(__('Volver'), ['controller' => 'Students', 'action' => 'consultStudent'], ['class' => 'btn btn-sm btn-default']) ?></p>
         <h1>Alumno:&nbsp;<?= h($student->full_name) ?></h1>
@@ -105,46 +83,239 @@
             <br />
          </div>
     </div>
-    <div id="menu-menos-alumno" class="menumenos">
-        <p>
-        <a href="#" id="menu-mas" title="Más opciones" class='glyphicon glyphicon-plus btn btn-danger' style='padding: 4px 9px;'></a>
-        </p>
+    <div id="alumno-menu-acciones" class="familia-menu-acciones">
+        <div id="alumno-menu-opciones" class="familia-menu-panel" hidden>
+            <p class="familia-menu-titulo">Acciones del alumno</p>
+            <nav aria-label="Opciones del alumno">
+                <ul class="familia-menu-lista">
+                    <?php if (isset($current_user['role']) && in_array($current_user['role'], ['Administrador', 'Ventas generales'])): ?>
+                        <li>
+                            <?= $this->Html->link(
+                                '<svg class="familia-menu-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4l11-11a2.1 2.1 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4M4 20h16"/></svg><span>Modificar alumno</span>',
+                                ['controller' => 'Students', 'action' => 'edit', $student->id, 'Students', 'viewStudent'],
+                                ['class' => 'familia-menu-item', 'escape' => false]
+                            ) ?>
+                        </li>
+                        <li>
+                            <?= $this->Html->link(
+                                '<svg class="familia-menu-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v18M5 8h10a3 3 0 0 1 0 6H8a3 3 0 0 0 0 6h11"/></svg><span>Cambiar condición</span>',
+                                ['controller' => 'Students', 'action' => 'editStatus', $student->id, 'Students', 'viewStudent'],
+                                ['class' => 'familia-menu-item', 'escape' => false]
+                            ) ?>
+                        </li>
+                        <li>
+                            <?= $this->Html->link(
+                                '<svg class="familia-menu-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h16M6 5v15h12V5M9 9v7M15 9v7M9 3h6"/></svg><span>Asignar sección</span>',
+                                ['controller' => 'Students', 'action' => 'editSection', $student->id, 'Students', 'viewStudent'],
+                                ['class' => 'familia-menu-item', 'escape' => false]
+                            ) ?>
+                        </li>
+                        <li>
+                            <?= $this->Html->link(
+                                '<svg class="familia-menu-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3"/><path d="M3.5 20v-1.5A5.5 5.5 0 0 1 9 13h.5a5.5 5.5 0 0 1 5.5 5.5V20z"/><path d="M16 11a3 3 0 1 0 0-6M17 13.3a5.5 5.5 0 0 1 4 5.2V20h-3"/></svg><span>Reasignar familia</span>',
+                                ['controller' => 'Students', 'action' => 'reasignFamilyInt', $student->id, 'Students', 'viewStudent'],
+                                ['class' => 'familia-menu-item', 'escape' => false]
+                            ) ?>
+                        </li>
+                        <li>
+                            <?= $this->Html->link(
+                                '<svg class="familia-menu-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3h9l5 5v13H6z"/><path d="M15 3v6h5M12.5 12v6M10 15.5l2.5 2.5 2.5-2.5"/></svg><span>Descargar ficha de inscripción</span>',
+                                ['controller' => 'Students', 'action' => 'filepdf', $student->id, 'Students', 'viewStudent'],
+                                ['class' => 'familia-menu-item', 'escape' => false]
+                            ) ?>
+                        </li>
+                    <?php elseif (isset($current_user['role']) && $current_user['role'] === 'Control de estudios'): ?>
+                        <li>
+                            <?= $this->Html->link(
+                                '<svg class="familia-menu-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4l11-11a2.1 2.1 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4M4 20h16"/></svg><span>Modificar alumno</span>',
+                                ['controller' => 'Students', 'action' => 'edit', $student->id, 'Students', 'viewStudent'],
+                                ['class' => 'familia-menu-item', 'escape' => false]
+                            ) ?>
+                        </li>
+                        <li>
+                            <?= $this->Html->link(
+                                '<svg class="familia-menu-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v18M5 8h10a3 3 0 0 1 0 6H8a3 3 0 0 0 0 6h11"/></svg><span>Cambiar condición</span>',
+                                ['controller' => 'Students', 'action' => 'editStatus', $student->id, 'Students', 'viewStudent'],
+                                ['class' => 'familia-menu-item', 'escape' => false]
+                            ) ?>
+                        </li>
+                        <li>
+                            <?= $this->Html->link(
+                                '<svg class="familia-menu-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3h9l5 5v13H6z"/><path d="M15 3v6h5M12.5 12v6M10 15.5l2.5 2.5 2.5-2.5"/></svg><span>Descargar ficha de inscripción</span>',
+                                ['controller' => 'Students', 'action' => 'filepdf', $student->id, 'Students', 'viewStudent'],
+                                ['class' => 'familia-menu-item', 'escape' => false]
+                            ) ?>
+                        </li>
+                    <?php endif; ?>
+                    <?php if (isset($current_user['role']) && in_array($current_user['role'], ['Administrador', 'Ventas generales', 'Control de estudios'])): ?>
+                        <li>
+                            <button
+                                type="button"
+                                class="familia-menu-item"
+                                data-toggle="modal"
+                                data-target="#modal-exoneraciones-alumno"
+                                aria-haspopup="dialog"
+                            >
+                                <svg class="familia-menu-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3.5h9l5 5V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M14 3.5V9h5M8 13h8M8 17h3"/><circle cx="16.5" cy="16.5" r="3.5"/><path d="M16.5 14.8v3.4M17.7 15.5c-.3-.5-.7-.7-1.2-.7-.7 0-1.2.4-1.2.9 0 1.3 2.4.5 2.4 1.8 0 .5-.5 1-1.2 1-.6 0-1.1-.3-1.3-.8"/></svg>
+                                <span>Exoneraciones</span>
+                            </button>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
+        </div>
+        <button
+            type="button"
+            id="alumno-menu-toggle"
+            class="familia-menu-toggle"
+            aria-controls="alumno-menu-opciones"
+            aria-expanded="false"
+            aria-label="Mostrar opciones del alumno"
+        >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <span>Opciones</span>
+        </button>
     </div>
-	<?php if(isset($current_user['role'])): ?>
-		<?php if($current_user['role'] == 'Administrador' || $current_user['role'] == 'Ventas generales' || $current_user['role'] == 'Ventas generales'): ?>
-			<div id="menu-mas-alumno" style="display:none;" class="menumas">
-				<p>
-				<?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'edit', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-edit btn btn-sm btn-danger', 'title' => 'Modificar alumno']) ?>
-				<?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'editStatus', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-pencil btn btn-sm btn-danger', 'title' => 'Cambiar condición del alumno']) ?>
-				<?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'editSection', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-font btn btn-sm btn-danger', 'title' => 'Asignar sección']) ?>
-				<?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'reasignFamilyInt', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-user btn btn-sm btn-danger', 'title' => 'Reasignar familia']) ?>
-				<?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'filepdf', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-download-alt btn btn-sm btn-danger', 'title' => 'Descargar ficha de inscripción']) ?>
-				<a href="#" id="menu-menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger' style='padding: 4px 9px;'></a>
-				</p>
-			</div>
-		<?php elseif ($current_user['role'] == 'Control de estudios'): ?>
-			<div id="menu-mas-alumno" style="display:none;" class="menumas">
-				<p>
-				<?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'edit', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-edit btn btn-sm btn-danger', 'title' => 'Modificar alumno']) ?>
-				<?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'editStatus', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-pencil btn btn-sm btn-danger', 'title' => 'Cambiar condición del alumno']) ?>
-				<?= $this->Html->link(__(''), ['controller' => 'Students', 'action' => 'filepdf', $student->id, 'Students', 'viewStudent'], ['class' => 'glyphicon glyphicon-download-alt btn btn-sm btn-danger', 'title' => 'Descargar ficha de inscripción']) ?>
-				<a href="#" id="menu-menos" title="Menos opciones" class='glyphicon glyphicon-minus btn btn-danger' style='padding: 4px 9px;'></a>
-				</p>
-			</div>
-		<?php endif; ?>
-	<?php endif; ?>
+</div>
+<div class="modal fade" id="modal-exoneraciones-alumno" tabindex="-1" role="dialog" aria-labelledby="titulo-modal-exoneraciones-alumno" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="titulo-modal-exoneraciones-alumno">Exoneraciones del alumno</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <section class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">Diferencia de matrícula</h4>
+                            </div>
+                            <div class="panel-body">
+                                <label for="periodo-diferencia-matricula">Período escolar</label>
+                                <select id="periodo-diferencia-matricula" name="periodoDiferenciaMatricula" class="form-control">
+                                    <?php foreach ($periodosEscolares as $periodoEscolar): ?>
+                                        <option
+                                            value="<?= h($periodoEscolar) ?>"
+                                            data-monto-formateado="<?= h(number_format($montosDiferenciaMatricula[$periodoEscolar], 2, ',', '.')) ?>"
+                                            <?= $periodoEscolar === $periodoEscolarActual ? 'selected' : '' ?>
+                                        >
+                                            <?= h($periodoEscolar) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <p class="help-block">
+                                    Monto de la diferencia: <strong>US$ <span id="monto-diferencia-matricula" aria-live="polite"><?= number_format($montosDiferenciaMatricula[$periodoEscolarActual], 2, ',', '.') ?></span></strong>
+                                </p>
+                                <br />
+                                <button
+                                    type="button"
+                                    class="btn btn-primary btn-block boton-exoneracion"
+                                    data-concepto="Diferencia de matrícula"
+                                    data-texto-exonerar="Exonerar"
+                                    data-texto-eliminar="Eliminar exoneración"
+                                >Exonerar</button>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="col-sm-6">
+                        <section class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">Diferencia de agosto</h4>
+                            </div>
+                            <div class="panel-body">
+                                <label for="periodo-diferencia-agosto">Período escolar</label>
+                                <select id="periodo-diferencia-agosto" name="periodoDiferenciaAgosto" class="form-control">
+                                    <?php foreach ($periodosEscolares as $periodoEscolar): ?>
+                                        <option
+                                            value="<?= h($periodoEscolar) ?>"
+                                            data-monto-formateado="<?= h(number_format($montosDiferenciaAgosto[$periodoEscolar], 2, ',', '.')) ?>"
+                                            <?= $periodoEscolar === $periodoEscolarActual ? 'selected' : '' ?>
+                                        >
+                                            <?= h($periodoEscolar) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <p class="help-block">
+                                    Monto de la diferencia: <strong>US$ <span id="monto-diferencia-agosto" aria-live="polite"><?= number_format($montosDiferenciaAgosto[$periodoEscolarActual], 2, ',', '.') ?></span></strong>
+                                </p>
+                                <br />
+                                <button
+                                    type="button"
+                                    class="btn btn-primary btn-block boton-exoneracion"
+                                    data-concepto="Diferencia de agosto"
+                                    data-texto-exonerar="Exonerar"
+                                    data-texto-eliminar="Eliminar exoneración"
+                                >Exonerar</button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
 </div>
 <script>
-$(document).ready(function(){ 
-    $('#menu-mas').on('click',function()
+/**
+ * Inicializa el menú de acciones del alumno y sus interacciones accesibles.
+ */
+$(document).ready(function()
+{
+    /**
+     * Abre o cierra el panel de opciones del alumno y actualiza sus atributos accesibles.
+     *
+     * @param {boolean} abrir Indica si el panel debe permanecer abierto.
+     */
+    const alternarMenuAlumno = function(abrir)
     {
-        $('#menu-menos-alumno').hide();
-        $('#menu-mas-alumno').show();
+        $('#alumno-menu-opciones').prop('hidden', !abrir);
+        $('#alumno-menu-toggle')
+            .attr('aria-expanded', abrir ? 'true' : 'false')
+            .attr('aria-label', abrir ? 'Ocultar opciones del alumno' : 'Mostrar opciones del alumno');
+    };
+
+    $('#alumno-menu-toggle').on('click', function()
+    {
+        alternarMenuAlumno($('#alumno-menu-toggle').attr('aria-expanded') !== 'true');
     });
-    $('#menu-menos').on('click',function()
+
+    $('#alumno-menu-opciones').on('click', '[data-target="#modal-exoneraciones-alumno"]', function()
     {
-        $('#menu-mas-alumno').hide();
-        $('#menu-menos-alumno').show();
+        alternarMenuAlumno(false);
+    });
+
+    $('#periodo-diferencia-matricula').on('change', function()
+    {
+        const montoSeleccionado = $(this).find(':selected').data('monto-formateado');
+        $('#monto-diferencia-matricula').text(montoSeleccionado);
+    });
+
+    $('#periodo-diferencia-agosto').on('change', function()
+    {
+        const montoSeleccionado = $(this).find(':selected').data('monto-formateado');
+        $('#monto-diferencia-agosto').text(montoSeleccionado);
+    });
+
+    $(document).on('click', function(evento)
+    {
+        if (!$(evento.target).closest('#alumno-menu-acciones').length)
+        {
+            alternarMenuAlumno(false);
+        }
+    });
+
+    $(document).on('keydown', function(evento)
+    {
+        if (evento.key === 'Escape')
+        {
+            alternarMenuAlumno(false);
+            $('#alumno-menu-toggle').trigger('focus');
+        }
     });
 });
 </script>

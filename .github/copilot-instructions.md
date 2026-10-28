@@ -125,6 +125,7 @@ Los scripts:
     vendor/friendsofcake/bootstrap-ui
 Los nuevos estilos se deben añadir a:
 js_csga/src/index.css
+- No modificar directamente `webroot/css/main-style.css` ni `webroot/js/main-script.js`: son archivos generados por la compilación de Vite a partir de `js_csga/src/index.css` y `js_csga/src/main.jsx`. Realizar los cambios en esas fuentes. La compilación y copia de los artefactos para el despliegue se gestionan mediante `subir.sh`; no incluir ediciones manuales de los archivos generados.
 
 ## Diseño adaptable
 - Todas las vistas nuevas o modificadas deben funcionar tanto en pantallas de escritorio como en celulares y tabletas.

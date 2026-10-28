@@ -18,6 +18,24 @@
 ## src/Template/Parentsandguardians/view_data.ctp
     Vista de opciones de la familia consultada. Muestra el botón «Activar familia» o «Inactivar familia» según los estados de usuario y representante, y ejecuta el cambio por AJAX. Tras el éxito, actualiza el botón y muestra un modal con el nombre de la familia y la lista de estudiantes que quedan en el estado objetivo, aunque su estado no haya requerido modificación; el modal se cierra con «Entendido», el icono X, clic fuera o Escape.
 
+## src/Template/Students/view_student.ctp
+    Vista con los datos personales, familiares y académicos del alumno. Incluye un menú flotante adaptable con íconos SVG para las acciones disponibles según el rol: modificar datos, cambiar condición, asignar sección, reasignar familia y descargar la ficha. «Exoneraciones» abre un modal responsivo con «Diferencia de matrícula» y «Diferencia de agosto», cada una con su selector de período escolar, monto de diferencia en dólares y botón inicial «Exonerar». El monto se actualiza al seleccionar otro período. El modal aún no ejecuta ni determina el estado de las exoneraciones. El menú informa su estado accesible, se cierra al hacer clic fuera o pulsar Escape, y mantiene el foco en el botón al cerrarlo con teclado.
+
+## src/Controller/StudentsController.php
+    Controlador de las operaciones de estudiantes. En `viewStudent` consulta el año escolar actual de `Schools` (registro 2), construye los períodos desde 2023-2024 hasta el período que inicia el año siguiente y entrega a la vista `periodosEscolares` y `periodoEscolarActual`. También agrupa las tarifas históricas de matrícula y agosto por concepto/año y suma sus diferencias consecutivas para calcular el monto acumulado de cada período. `otrasTarifas($tasaTemporal, $incluirHistorial)` conserva por defecto el filtro y orden originales; cuando se solicita historial devuelve todas las actualizaciones ordenadas por fecha e ID descendentes, para calcular las diferencias sin alterar los resultados de las demás llamadas.
+
+## js_csga/src/index.css
+    Hoja de estilos globales del frontend. Incluye estilos compartidos y el diseño adaptable del menú flotante de acciones del alumno: panel, accesos, íconos SVG, foco de teclado y ajustes para pantallas pequeñas.
+
+## webroot/css/main-style.css
+    Artefacto CSS generado por Vite desde `js_csga/src/index.css`. No editarlo directamente; la compilación y copia de artefactos para el despliegue en Vesta se realizan con `subir.sh`.
+
+## webroot/js/main-script.js
+    Artefacto JavaScript generado por Vite desde `js_csga/src/main.jsx`. No editarlo directamente; la compilación y copia de artefactos para el despliegue en Vesta se realizan con `subir.sh`.
+
+## .github/copilot-instructions.md
+    Instrucciones compartidas del proyecto para Copilot. Indican que los estilos y el JavaScript se modifican en `js_csga/src/index.css` y `js_csga/src/main.jsx`, respectivamente, y prohíben editar directamente `webroot/css/main-style.css` y `webroot/js/main-script.js`, que son artefactos generados por Vite y gestionados por `subir.sh`.
+
 ## src/Template/Rates/add_dollar.ctp
     Vista para el registro de tarifas en dólares del colegio. Se incorporó la opción "Promoción especial mensualidad pedidos" dentro del listado de conceptos tarifarios y se ajustó la longitud del selector de subcadena en la validación JavaScript de `enableInputs()` (de 31 a 30 caracteres) y en la confirmación de guardado. Esto permite que tanto "Promoción especial mensualidad" como "Promoción especial mensualidad pedidos" mantengan habilitado y obligatorio el campo `rate_month` (a partir del mes) junto con el año y monto, impidiendo su deshabilitación involuntaria.
 
