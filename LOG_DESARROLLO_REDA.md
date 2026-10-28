@@ -1,5 +1,12 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-28] - Usar año inicial para las dos tarifas de exoneración
+- **Tarea:** Corregir el año de consulta de «Diferencia de agosto»: tanto agosto como matrícula se asocian al año en que inicia el período escolar.
+- **Archivos modificados:**
+    - **`src/Controller/StudentsController.php`:** `viewStudent` ahora consulta «Matrícula AAAA» y «Ago AAAA» con el año inicial de cada período (por ejemplo, para 2026-2027 consulta ambas tarifas del año 2026).
+    - **`manual_tecnico_sistema.md`:** Corregida la documentación del cálculo para indicar el mismo año inicial en ambos conceptos.
+- **Validación:** `/opt/lampp/bin/php -l src/Controller/StudentsController.php`, prueba de mapeo para 2026-2027 (produce «Matrícula 2026» y «Ago 2026») y `git diff --check`, sin errores. No se modificaron la vista, CSS ni assets generados.
+
 ## [2026-10-28] - Aislar el historial de tarifas de las llamadas existentes
 - **Tarea:** Revisar el efecto del parámetro `$incluirHistorial` de `otrasTarifas()` y asegurar que no cambie las demás funciones que la llaman.
 - **Archivos modificados:**
@@ -10,10 +17,10 @@
 ## [2026-10-28] - Mostrar diferencias tarifarias en el modal de exoneraciones
 - **Tarea:** Calcular y mostrar el monto de diferencia de matrícula y agosto para cada período escolar seleccionable en la vista del alumno.
 - **Archivos modificados:**
-    - **`src/Controller/StudentsController.php`:** `otrasTarifas()` acepta el parámetro opcional `incluirHistorial` (desactivado por defecto) para devolver todas las actualizaciones ordenadas por fecha descendente sin alterar los usos actuales. `viewStudent` agrupa los montos en dólares por concepto y año, suma la diferencia entre tarifas consecutivas y pasa el resultado por período a la vista. Matrícula usa el año inicial; agosto, el año final.
+    - **`src/Controller/StudentsController.php`:** `otrasTarifas()` acepta el parámetro opcional `incluirHistorial` (desactivado por defecto) para devolver todas las actualizaciones ordenadas por fecha descendente sin alterar los usos actuales. `viewStudent` agrupa los montos en dólares por concepto y año, suma la diferencia entre tarifas consecutivas y pasa el resultado por período a la vista. Ambos conceptos usan el año inicial.
     - **`src/Template/Students/view_student.ctp`:** Se muestra el monto correspondiente debajo de cada selector y se actualiza al cambiar el período. Los selectores y las acciones existentes permanecen independientes.
     - **`manual_tecnico_sistema.md`:** Se documentó la obtención del historial, el cálculo y la presentación dinámica de montos.
-- **Validación:** `/opt/lampp/bin/php -l` en el controlador y la vista, comprobación sintáctica del JavaScript incrustado y `git diff --check` de los archivos relacionados, todo sin errores. Se contrastó el cálculo con el historial del volcado de tarifas: Matrícula 2026 y Agosto 2027 pasan de US$ 263,00 a US$ 325,00, dando US$ 62,00 de diferencia.
+- **Validación:** `/opt/lampp/bin/php -l` en el controlador y la vista, comprobación sintáctica del JavaScript incrustado y `git diff --check` de los archivos relacionados, todo sin errores. El cálculo original del volcado usó «Ago 2027» y quedó reemplazado por la regla del año inicial en esta corrección.
 
 ## [2026-10-28] - Modal visual de exoneraciones del alumno
 - **Tarea:** Habilitar la opción «Exoneraciones» del menú del alumno y preparar los selectores de períodos escolares para dos conceptos, sin implementar todavía operaciones ni consulta del estado de exoneración.

@@ -395,7 +395,7 @@ class StudentsController extends AppController
     }
 
     /**
-     * Muestra los datos del alumno y prepara los períodos escolares para el modal de exoneraciones.
+     * Muestra los datos del alumno y prepara los períodos y diferencias de tarifas para exoneraciones.
      *
      * @param string|null $id Identificador del alumno consultado.
      * @return void
@@ -438,10 +438,11 @@ class StudentsController extends AppController
 
         foreach ($periodosEscolares as $periodoEscolar)
         {
-            list($anioMatricula, $anioAgosto) = explode('-', $periodoEscolar);
+            list($anioInicioPeriodo) = explode('-', $periodoEscolar);
+            // En Venezuela, matrícula y diferencia de agosto se asocian al año inicial del período escolar.
             $conceptosPorTipo = [
-                'matricula' => 'Matrícula ' . $anioMatricula,
-                'agosto' => 'Ago ' . $anioAgosto
+                'matricula' => 'Matrícula ' . $anioInicioPeriodo,
+                'agosto' => 'Ago ' . $anioInicioPeriodo
             ];
 
             foreach ($conceptosPorTipo as $tipoExoneracion => $conceptoAno)
