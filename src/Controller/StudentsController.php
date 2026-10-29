@@ -49,7 +49,7 @@ class StudentsController extends AppController
 			}
 			elseif ($user['role'] === 'Control de estudios')
 			{
-				if(in_array($this->request->action, ['familyStudents', 'reportFamilyStudents', 'familiasDescuento20', 'familiasDescuento50', 'consultStudent', 'viewStudent', 'edit', 'editStatus', 'reporteBecados', 'reportGraduateStudents', 'consultStudentDelete', 'indexConsult', 'viewConsult', 'filepdf', 'findStudent', 'findStudentDelete']))
+				if(in_array($this->request->action, ['familyStudents', 'reportFamilyStudents', 'familiasDescuento20', 'familiasDescuento50', 'consultStudent', 'viewStudent', 'actualizarExoneracionDiferencia', 'edit', 'editStatus', 'reporteBecados', 'reportGraduateStudents', 'consultStudentDelete', 'indexConsult', 'viewConsult', 'filepdf', 'findStudent', 'findStudentDelete']))
 				{
 					return true;
 				}
@@ -395,7 +395,7 @@ class StudentsController extends AppController
     }
 
     /**
-     * Muestra los datos del alumno y prepara los períodos y diferencias de tarifas para exoneraciones.
+     * Muestra los datos del alumno y prepara los períodos, tarifas y estados de exoneración.
      *
      * @param string|null $id Identificador del alumno consultado.
      * @return void
@@ -408,6 +408,27 @@ class StudentsController extends AppController
         }
 
         $student = $this->Students->get($id);
+        $exoneracionesPorAnio = [];
+        if (!empty($student->vector_exoneraciones_por_anio))
+        {
+            $exoneracionesPorAnio = json_decode($student->vector_exoneraciones_por_anio, true);
+            if (!is_array($exoneracionesPorAnio))
+            {
+                Log::error('El vector de exoneraciones del alumno ' . $student->id . ' no contiene un JSON válido.');
+                $exoneracionesPorAnio = [];
+            }
+            else
+            {
+                foreach ($exoneracionesPorAnio as $periodo => $conceptos)
+                {
+                    if (!is_array($conceptos))
+                    {
+                        Log::error('El período ' . $periodo . ' del vector de exoneraciones del alumno ' . $student->id . ' no contiene un objeto JSON.');
+                        unset($exoneracionesPorAnio[$periodo]);
+                    }
+                }
+            }
+        }
 
         $section = $this->Students->Sections->get($student->section_id);
 
@@ -447,15 +468,9 @@ class StudentsController extends AppController
 
             foreach ($conceptosPorTipo as $tipoExoneracion => $conceptoAno)
             {
-                $tarifasConcepto = isset($tarifasPorConceptoAno[$conceptoAno])
-                    ? $tarifasPorConceptoAno[$conceptoAno]
-                    : [];
-                $montoDiferencia = 0;
-
-                for ($indiceTarifa = 1; $indiceTarifa < count($tarifasConcepto); $indiceTarifa++)
-                {
-                    $montoDiferencia += $tarifasConcepto[$indiceTarifa - 1] - $tarifasConcepto[$indiceTarifa];
-                }
+                $montoDiferencia = $this->calcularMontoDiferenciaExoneracion(
+                    isset($tarifasPorConceptoAno[$conceptoAno]) ? $tarifasPorConceptoAno[$conceptoAno] : []
+                );
 
                 if ($tipoExoneracion === 'matricula')
                 {
@@ -474,7 +489,8 @@ class StudentsController extends AppController
             'periodosEscolares',
             'periodoEscolarActual',
             'montosDiferenciaMatricula',
-            'montosDiferenciaAgosto'
+            'montosDiferenciaAgosto',
+            'exoneracionesPorAnio'
         ));
         $this->set('_serialize', [
             'student',
@@ -482,8 +498,207 @@ class StudentsController extends AppController
             'periodosEscolares',
             'periodoEscolarActual',
             'montosDiferenciaMatricula',
-            'montosDiferenciaAgosto'
+            'montosDiferenciaAgosto',
+            'exoneracionesPorAnio'
         ]);
+    }
+
+    /**
+     * Suma las diferencias entre las tarifas históricas de un concepto.
+     *
+     * @param array $tarifasConcepto Tarifas del concepto ordenadas de mayor a menor.
+     * @return float Monto total de la diferencia.
+     */
+    private function calcularMontoDiferenciaExoneracion(array $tarifasConcepto)
+    {
+        $montoDiferencia = 0;
+        for ($indiceTarifa = 1; $indiceTarifa < count($tarifasConcepto); $indiceTarifa++)
+        {
+            $montoDiferencia += $tarifasConcepto[$indiceTarifa - 1] - $tarifasConcepto[$indiceTarifa];
+        }
+
+        return round($montoDiferencia, 2);
+    }
+
+    /**
+     * Registra o elimina una exoneración de diferencia y la refleja en su transacción.
+     *
+     * @return \Cake\Network\Response Respuesta JSON con el estado actualizado.
+     */
+    public function actualizarExoneracionDiferencia()
+    {
+        if (!$this->request->is('put'))
+        {
+            return $this->response->withType('application/json')
+                ->withStatus(405)
+                ->withStringBody(json_encode(['exito' => false, 'mensaje' => 'Solo se aceptan peticiones PUT.']));
+        }
+
+        $datos = $this->request->getData();
+        $idEstudiante = isset($datos['id_estudiante']) ? filter_var($datos['id_estudiante'], FILTER_VALIDATE_INT) : false;
+        $periodoEscolar = isset($datos['periodo_escolar']) ? $datos['periodo_escolar'] : '';
+        $tipoExoneracion = isset($datos['tipo_exoneracion']) ? $datos['tipo_exoneracion'] : '';
+        $accion = isset($datos['accion']) ? $datos['accion'] : '';
+
+        if (!$idEstudiante || $idEstudiante < 1 ||
+            !is_string($periodoEscolar) || !preg_match('/^(\d{4})-(\d{4})$/D', $periodoEscolar, $partesPeriodo) ||
+            (int)$partesPeriodo[2] !== (int)$partesPeriodo[1] + 1 ||
+            !in_array($tipoExoneracion, ['matricula', 'agosto'], true) ||
+            !in_array($accion, ['exonerar', 'eliminar'], true))
+        {
+            return $this->response->withType('application/json')
+                ->withStatus(400)
+                ->withStringBody(json_encode(['exito' => false, 'mensaje' => 'Los datos de la exoneración no son válidos.']));
+        }
+
+        $anioInicio = (int)$partesPeriodo[1];
+        $anioTransaccion = $tipoExoneracion === 'agosto' ? $anioInicio + 1 : $anioInicio;
+        $claveVectorAlumno = 'Diferencia ' . ($tipoExoneracion === 'matricula' ? 'matrícula ' : 'agosto ') . $anioInicio;
+        $etiquetaTransaccion = 'Exoneración diferencia ' . ($tipoExoneracion === 'matricula' ? 'matrícula ' : 'agosto ') . $anioTransaccion;
+        $descripcionTransaccion = ($tipoExoneracion === 'matricula' ? 'Matrícula ' : 'Ago ') . $anioTransaccion;
+
+        $estudiante = $this->Students->find()
+            ->where(['Students.id' => $idEstudiante])
+            ->first();
+        if (!$estudiante)
+        {
+            return $this->response->withType('application/json')
+                ->withStatus(404)
+                ->withStringBody(json_encode(['exito' => false, 'mensaje' => 'No se encontró el alumno.']));
+        }
+
+        $tarifasHistoricas = $this->otrasTarifas(0, true);
+        $tarifasConcepto = [];
+        foreach ($tarifasHistoricas as $tarifa)
+        {
+            $conceptoAno = $tipoExoneracion === 'matricula'
+                ? 'Matrícula ' . $anioInicio
+                : 'Ago ' . $anioInicio;
+            if ($tarifa['conceptoAno'] === $conceptoAno)
+            {
+                $tarifasConcepto[] = (float)$tarifa['tarifaDolar'];
+            }
+        }
+        $montoExoneracion = $this->calcularMontoDiferenciaExoneracion($tarifasConcepto);
+        if ($accion === 'exonerar' && $montoExoneracion <= 0)
+        {
+            return $this->response->withType('application/json')
+                ->withStatus(422)
+                ->withStringBody(json_encode(['exito' => false, 'mensaje' => 'No existe una diferencia de tarifa para el período seleccionado.']));
+        }
+
+        $transacciones = $this->Students->Studenttransactions->find()
+            ->where([
+                'Studenttransactions.student_id' => $idEstudiante,
+                'Studenttransactions.transaction_description LIKE' => $descripcionTransaccion . '%',
+                'Studenttransactions.invoiced' => 0
+            ])
+            ->all()
+            ->toArray();
+        if (count($transacciones) !== 1)
+        {
+            $codigo = count($transacciones) === 0 ? 404 : 409;
+            $mensaje = $codigo === 404
+                ? 'No se encontró la transacción activa correspondiente al concepto y período.'
+                : 'Hay varias transacciones activas para el concepto y período; no se modificó ninguna.';
+            return $this->response->withType('application/json')
+                ->withStatus($codigo)
+                ->withStringBody(json_encode(['exito' => false, 'mensaje' => $mensaje]));
+        }
+        $transaccion = $transacciones[0];
+
+        $vectorAlumno = [];
+        $errorVectorAlumno = JSON_ERROR_NONE;
+        if (!empty($estudiante->vector_exoneraciones_por_anio))
+        {
+            $vectorAlumno = json_decode($estudiante->vector_exoneraciones_por_anio, true);
+            $errorVectorAlumno = json_last_error();
+        }
+        $vectorTransaccion = [];
+        $errorVectorTransaccion = JSON_ERROR_NONE;
+        if (!empty($transaccion->vector_descuentos_exoneraciones_recargos))
+        {
+            $vectorTransaccion = json_decode($transaccion->vector_descuentos_exoneraciones_recargos, true);
+            $errorVectorTransaccion = json_last_error();
+        }
+        if (!is_array($vectorAlumno) || $errorVectorAlumno !== JSON_ERROR_NONE)
+        {
+            return $this->response->withType('application/json')
+                ->withStatus(500)
+                ->withStringBody(json_encode(['exito' => false, 'mensaje' => 'El vector de exoneraciones del alumno contiene datos JSON inválidos.']));
+        }
+        foreach ($vectorAlumno as $periodo => $conceptos)
+        {
+            if (!is_array($conceptos))
+            {
+                return $this->response->withType('application/json')
+                    ->withStatus(500)
+                    ->withStringBody(json_encode(['exito' => false, 'mensaje' => 'El vector del alumno contiene un período con estructura inválida.']));
+            }
+        }
+        if (!is_array($vectorTransaccion) || $errorVectorTransaccion !== JSON_ERROR_NONE)
+        {
+            return $this->response->withType('application/json')
+                ->withStatus(500)
+                ->withStringBody(json_encode(['exito' => false, 'mensaje' => 'El vector de la transacción contiene datos JSON inválidos.']));
+        }
+
+        if ($accion === 'exonerar')
+        {
+            if (!isset($vectorAlumno[$periodoEscolar]) || !is_array($vectorAlumno[$periodoEscolar]))
+            {
+                $vectorAlumno[$periodoEscolar] = [];
+            }
+            $vectorAlumno[$periodoEscolar][$claveVectorAlumno] = $montoExoneracion;
+            $vectorTransaccion[$etiquetaTransaccion] = $montoExoneracion;
+        }
+        else
+        {
+            if (isset($vectorAlumno[$periodoEscolar]) && is_array($vectorAlumno[$periodoEscolar]))
+            {
+                unset($vectorAlumno[$periodoEscolar][$claveVectorAlumno]);
+                if (empty($vectorAlumno[$periodoEscolar]))
+                {
+                    unset($vectorAlumno[$periodoEscolar]);
+                }
+            }
+            unset($vectorTransaccion[$etiquetaTransaccion]);
+        }
+
+        $estudiante->vector_exoneraciones_por_anio = json_encode((object)$vectorAlumno, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $transaccion->vector_descuentos_exoneraciones_recargos = json_encode((object)$vectorTransaccion, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        try
+        {
+            $this->Students->getConnection()->transactional(function() use ($estudiante, $transaccion)
+            {
+                if (!$this->Students->save($estudiante))
+                {
+                    throw new \RuntimeException('No se pudo guardar el vector de exoneraciones del alumno.');
+                }
+                if (!$this->Students->Studenttransactions->save($transaccion))
+                {
+                    throw new \RuntimeException('No se pudo guardar la exoneración en la transacción.');
+                }
+            });
+        }
+        catch (\RuntimeException $error)
+        {
+            Log::error($error->getMessage());
+            return $this->response->withType('application/json')
+                ->withStatus(500)
+                ->withStringBody(json_encode(['exito' => false, 'mensaje' => 'No se pudo guardar la exoneración.']));
+        }
+
+        return $this->response->withType('application/json')
+            ->withStatus(200)
+            ->withStringBody(json_encode([
+                'exito' => true,
+                'accion' => $accion,
+                'periodo_escolar' => $periodoEscolar,
+                'tipo_exoneracion' => $tipoExoneracion,
+                'monto' => $montoExoneracion
+            ]));
     }
 
     /**
@@ -3380,7 +3595,7 @@ class StudentsController extends AppController
 			{
 				$otrasConceptoAnoAnterior = $otrasConceptoAnoActual;
 
-				if ($tarifa->concept == "Agosto")
+				if (in_array($tarifa->concept, ["Agosto", "Ago"], true))
 				{
 					$otrasConceptoAnoActual = "Ago " . $tarifa->rate_year;
 				}

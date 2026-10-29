@@ -41,6 +41,7 @@ use Cake\ORM\Entity;
  * @property string $previous_school
  * @property string $student_illnesses
  * @property string $observations
+ * @property string $vector_exoneraciones_por_anio JSON anual con las diferencias exoneradas.
  * @property float $balance
  * @property \Cake\I18n\Time $created
  * @property \Cake\I18n\Time $modified

@@ -18,8 +18,8 @@ ARCHIVOS_PHP_PUNTUALES=(
     #"registrar_sesion.sh"
 
     # Archivos .css de Vite modificados
-    "js_csga/src/index.css"
-    "js_csga/dist/main-style.css"
+    #"js_csga/src/index.css"
+    #"js_csga/dist/main-style.css"
     
     # Archivos .jsx y .js creados y/o modificados
     #"js_csga/src/main.jsx"
@@ -27,7 +27,8 @@ ARCHIVOS_PHP_PUNTUALES=(
 
     #"src/Model/Entity/User.php"
     #"src/Model/Entity/Parentsandguardian.php"
-    #"src/Model/Entity/Student.php"
+    "src/Model/Entity/Student.php"
+    "src/Model/Entity/Studenttransaction.php"
 
     #"src/Template/Students/edit_status.ctp"
     #"src/Template/Bills/create_invoice.ctp"

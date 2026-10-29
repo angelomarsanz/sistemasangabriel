@@ -1,5 +1,22 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-28] - Normalizar agosto al prefijo Ago en tarifas
+- **Tarea:** Asegurar que tanto el concepto de tarifa `Ago` como `Agosto` produzcan el prefijo `Ago` usado en las descripciones de las transacciones de estudiante.
+- **Archivos modificados:**
+    - **`src/Controller/StudentsController.php`:** `otrasTarifas` reconoce explícitamente los conceptos `Ago` y `Agosto` y normaliza ambos a `Ago AAAA`. La acción de exoneración ya busca transacciones de agosto por ese prefijo y lo conserva sin modificar `transaction_description`.
+    - **`manual_tecnico_sistema.md`:** Se documentó la normalización del concepto de tarifa y la coincidencia con las cuotas de `studenttransactions`.
+- **Validación:** `/opt/lampp/bin/php -l src/Controller/StudentsController.php`, prueba de normalización para los valores `Ago` y `Agosto`, y `git diff --check`, sin errores.
+
+## [2026-10-28] - Persistir exoneraciones de diferencias por período
+- **Tarea:** Completar la acción de «Exonerar» y «Eliminar exoneración» para diferencias de matrícula y agosto, vinculando el estado anual del alumno con su transacción.
+- **Archivos modificados:**
+    - **`src/Controller/StudentsController.php`:** `viewStudent` decodifica el vector anual y lo entrega a la vista. Se extrajo el cálculo común del monto de diferencia y se añadió `actualizarExoneracionDiferencia`, que valida solicitudes PUT, obtiene el monto desde las tarifas históricas, localiza la transacción activa por `transaction_description` y guarda/elimina las claves en ambos JSON dentro de una transacción de base de datos. Para el período 2026-2027, las transacciones asociadas son «Matrícula 2026» y «Ago 2027», mientras la clave anual del alumno usa el año inicial. La descripción de la transacción se preserva porque otros procesos dependen de coincidencias exactas.
+    - **`src/Template/Students/view_student.ctp`:** Los botones consultan el estado guardado, alternan su acción y envían la operación por AJAX. Los errores se presentan en el modal y el estado visual solo cambia tras una respuesta exitosa.
+    - **`src/Model/Entity/Student.php`:** Se documentó `vector_exoneraciones_por_anio`.
+    - **`src/Model/Entity/Studenttransaction.php`:** Se documentó `vector_descuentos_exoneraciones_recargos`, nombre confirmado por `documentacion-sangabriel-3/BD/studenttransactions.sql`.
+    - **`manual_tecnico_sistema.md`:** Se documentaron la acción AJAX, el comportamiento de la vista y los campos JSON de ambas entidades.
+- **Validación:** Sintaxis PHP correcta en controlador, vista y entidades; sintaxis del JavaScript incrustado válida; se comprobó la serialización de las claves y montos para 2026-2027; `git diff --check` limpio. No se pudo ejecutar PHPUnit porque `vendor/bin/phpunit` no está instalado en este entorno.
+
 ## [2026-10-28] - Usar año inicial para las dos tarifas de exoneración
 - **Tarea:** Corregir el año de consulta de «Diferencia de agosto»: tanto agosto como matrícula se asocian al año en que inicia el período escolar.
 - **Archivos modificados:**

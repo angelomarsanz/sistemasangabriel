@@ -1,6 +1,6 @@
 <?php
     /**
-     * Vista de datos detallados del alumno, menú adaptable y modal visual de exoneraciones.
+     * Vista de datos detallados del alumno, menú adaptable y exoneraciones por período escolar.
      */
     use Cake\Routing\Router;
 ?>
@@ -177,7 +177,16 @@
         </button>
     </div>
 </div>
-<div class="modal fade" id="modal-exoneraciones-alumno" tabindex="-1" role="dialog" aria-labelledby="titulo-modal-exoneraciones-alumno" aria-hidden="true">
+<div
+    class="modal fade"
+    id="modal-exoneraciones-alumno"
+    data-url="<?= h(Router::url(['controller' => 'Students', 'action' => 'actualizarExoneracionDiferencia'])) ?>"
+    data-student-id="<?= h($student->id) ?>"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="titulo-modal-exoneraciones-alumno"
+    aria-hidden="true"
+>
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -197,9 +206,11 @@
                                 <label for="periodo-diferencia-matricula">Período escolar</label>
                                 <select id="periodo-diferencia-matricula" name="periodoDiferenciaMatricula" class="form-control">
                                     <?php foreach ($periodosEscolares as $periodoEscolar): ?>
+                                        <?php list($anioInicioPeriodo) = explode('-', $periodoEscolar); ?>
                                         <option
                                             value="<?= h($periodoEscolar) ?>"
                                             data-monto-formateado="<?= h(number_format($montosDiferenciaMatricula[$periodoEscolar], 2, ',', '.')) ?>"
+                                            data-exonerado="<?= isset($exoneracionesPorAnio[$periodoEscolar]['Diferencia matrícula ' . $anioInicioPeriodo]) ? 'true' : 'false' ?>"
                                             <?= $periodoEscolar === $periodoEscolarActual ? 'selected' : '' ?>
                                         >
                                             <?= h($periodoEscolar) ?>
@@ -213,10 +224,11 @@
                                 <button
                                     type="button"
                                     class="btn btn-primary btn-block boton-exoneracion"
-                                    data-concepto="Diferencia de matrícula"
+                                    data-tipo-exoneracion="matricula"
                                     data-texto-exonerar="Exonerar"
                                     data-texto-eliminar="Eliminar exoneración"
                                 >Exonerar</button>
+                                <p class="mensaje-exoneracion" role="status" aria-live="polite"></p>
                             </div>
                         </section>
                     </div>
@@ -229,9 +241,11 @@
                                 <label for="periodo-diferencia-agosto">Período escolar</label>
                                 <select id="periodo-diferencia-agosto" name="periodoDiferenciaAgosto" class="form-control">
                                     <?php foreach ($periodosEscolares as $periodoEscolar): ?>
+                                        <?php list($anioInicioPeriodo) = explode('-', $periodoEscolar); ?>
                                         <option
                                             value="<?= h($periodoEscolar) ?>"
                                             data-monto-formateado="<?= h(number_format($montosDiferenciaAgosto[$periodoEscolar], 2, ',', '.')) ?>"
+                                            data-exonerado="<?= isset($exoneracionesPorAnio[$periodoEscolar]['Diferencia agosto ' . $anioInicioPeriodo]) ? 'true' : 'false' ?>"
                                             <?= $periodoEscolar === $periodoEscolarActual ? 'selected' : '' ?>
                                         >
                                             <?= h($periodoEscolar) ?>
@@ -245,10 +259,11 @@
                                 <button
                                     type="button"
                                     class="btn btn-primary btn-block boton-exoneracion"
-                                    data-concepto="Diferencia de agosto"
+                                    data-tipo-exoneracion="agosto"
                                     data-texto-exonerar="Exonerar"
                                     data-texto-eliminar="Eliminar exoneración"
                                 >Exonerar</button>
+                                <p class="mensaje-exoneracion" role="status" aria-live="polite"></p>
                             </div>
                         </section>
                     </div>
@@ -299,6 +314,78 @@ $(document).ready(function()
     {
         const montoSeleccionado = $(this).find(':selected').data('monto-formateado');
         $('#monto-diferencia-agosto').text(montoSeleccionado);
+    });
+
+    /**
+     * Sincroniza el texto y el estado de la acción de exoneración.
+     *
+     * @param {jQuery} $boton Botón de exoneración del concepto.
+     * @param {boolean} exonerado Indica si el concepto está exonerado.
+     */
+    const actualizarBotonExoneracion = function($boton, exonerado)
+    {
+        $boton
+            .data('exonerado', exonerado)
+            .text(exonerado ? $boton.data('texto-eliminar') : $boton.data('texto-exonerar'));
+    };
+
+    $('.boton-exoneracion').each(function()
+    {
+        const $boton = $(this);
+        const $selector = $boton.closest('.panel-body').find('select');
+        actualizarBotonExoneracion($boton, $selector.find(':selected').attr('data-exonerado') === 'true');
+    });
+
+    $('#periodo-diferencia-matricula, #periodo-diferencia-agosto').on('change', function()
+    {
+        const $selector = $(this);
+        const $boton = $selector.closest('.panel-body').find('.boton-exoneracion');
+        actualizarBotonExoneracion($boton, $selector.find(':selected').attr('data-exonerado') === 'true');
+        $selector.closest('.panel-body').find('.mensaje-exoneracion').text('');
+    });
+
+    $('.boton-exoneracion').on('click', function()
+    {
+        const $boton = $(this);
+        const $panel = $boton.closest('.panel-body');
+        const $selector = $panel.find('select');
+        const exonerado = $boton.data('exonerado') === true;
+        const accion = exonerado ? 'eliminar' : 'exonerar';
+        const $mensaje = $panel.find('.mensaje-exoneracion');
+        const $modal = $('#modal-exoneraciones-alumno');
+
+        $boton.prop('disabled', true);
+        $mensaje.removeClass('text-danger').text('');
+
+        $.ajax({
+            url: $modal.data('url'),
+            method: 'PUT',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify({
+                id_estudiante: Number($modal.data('student-id')),
+                periodo_escolar: $selector.val(),
+                tipo_exoneracion: $boton.data('tipo-exoneracion'),
+                accion: accion
+            })
+        })
+            .done(function(respuesta)
+            {
+                actualizarBotonExoneracion($boton, accion === 'exonerar');
+                $selector.find(':selected').attr('data-exonerado', accion === 'exonerar' ? 'true' : 'false');
+                $mensaje.text(accion === 'exonerar' ? 'Exoneración registrada.' : 'Exoneración eliminada.');
+            })
+            .fail(function(respuesta)
+            {
+                const mensaje = respuesta.responseJSON && respuesta.responseJSON.mensaje
+                    ? respuesta.responseJSON.mensaje
+                    : 'No se pudo actualizar la exoneración. Intente nuevamente.';
+                $mensaje.addClass('text-danger').text(mensaje);
+            })
+            .always(function()
+            {
+                $boton.prop('disabled', false);
+            });
     });
 
     $(document).on('click', function(evento)

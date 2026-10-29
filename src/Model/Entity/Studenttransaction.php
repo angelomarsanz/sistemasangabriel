@@ -11,6 +11,7 @@ use Cake\ORM\Entity;
  * @property \Cake\I18n\Time $payment_date
  * @property string $transaction_type
  * @property string $transaction_description
+ * @property string $vector_descuentos_exoneraciones_recargos JSON con ajustes y exoneraciones de la transacción.
  * @property bool $paid_out
  * @property float $amount
  * @property \Cake\I18n\Time $created
