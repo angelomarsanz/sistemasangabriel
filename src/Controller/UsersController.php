@@ -298,23 +298,7 @@ class UsersController extends AppController
                 {
                     if ($user->role == 'Representante')
                     {
-
-                        $parentsandguardians = $this->Users->Parentsandguardians->find('all')
-                        ->where(['Parentsandguardians.user_id =' => $this->Auth->user('id')]);
-
-                        $resultParentsandguardians = $parentsandguardians->toArray();
-
-                            if (!$resultParentsandguardians)
-                            {
-                                $this->Flash->error(__('Por favor primero complete el perfil del representante'));
-                                return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'add']);
-                            }
-                            else
-                            {
-                                $id = $resultParentsandguardians[0]['id'];
-                                $this->Flash->success(__('Por favor complete los siguientes datos'));
-                                return $this->redirect(['controller' => 'Parentsandguardians', 'action' => 'edit', $id]);
-                            }
+                        return $this->redirect(['controller' => 'Users', 'action' => 'home']);
                     }
                     elseif ($user->role == 'Alumno')
                     {
