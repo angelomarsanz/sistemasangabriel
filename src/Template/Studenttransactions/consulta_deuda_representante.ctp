@@ -83,6 +83,7 @@ foreach ($vectorEstudiantes as $indiceEstudiante => $estudiante)
                     '2023' => '2023-2024',
                     '2024' => '2024-2025',
                     '2025' => '2025-2026',
+                    '2026' => '2026-2027',
                 ]]); ?>
         </div>
         <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
