@@ -20,6 +20,7 @@ use App\Controller\ExcelsController;
 use App\Controller\BinnaclesController;
 
 use Cake\ORM\TableRegistry;
+use Cake\Log\Log;
 
 use App\Controller\EventosController;
 
@@ -5186,7 +5187,7 @@ class StudenttransactionsController extends AppController
 
                         if ($transaccion->transaction_type == 'Matrícula' || substr($transaccion->transaction_description, 0, 3) == 'Ago')
                         {
-                            $respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion, $representante->type_of_identification, $representante->identidy_card);
+                            $respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion);
                             $monto_neto_cuota = $respuestaProcesarMatriculaAgosto['tarifaConDescuentoRecargo'];
                             $saldo_cuota = $respuestaProcesarMatriculaAgosto['saldoCuota'];
                         }
@@ -7505,7 +7506,7 @@ class StudenttransactionsController extends AppController
 		{
 			if ($transaccion->transaction_type == 'Matrícula' || substr($transaccion->transaction_description, 0, 3) == 'Ago')
 			{
-				$respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion, $representante->type_of_identification, $representante->identidy_card);
+				$respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion);
 
 				$indicadorExoneradoDiferenciasInscripcion = $respuestaProcesarMatriculaAgosto['indicadorExoneradoDiferenciasInscripcion'];
 
@@ -7721,7 +7722,16 @@ class StudenttransactionsController extends AppController
 			];
 		return $respuesta;
 	}
-	public function procesarMatriculaAgosto($transaccion = null, $tipoDocumentoIdentidad = null, $numeroDocumentoIdentidad = null)
+	/**
+	 * Calcula el saldo pendiente de matrícula o agosto usando la exoneración guardada en la transacción.
+	 *
+	 * La diferencia se obtiene de `vector_descuentos_exoneraciones_recargos`; la antigua exoneración
+	 * por pertenecer el representante a `colaboradors` ya no se aplica.
+	 *
+	 * @param \App\Model\Entity\Studenttransaction|null $transaccion Transacción de matrícula o agosto.
+	 * @return array Estado de deuda, tarifas, abonos y saldos de la transacción.
+	 */
+	public function procesarMatriculaAgosto($transaccion = null)
 	{
 		$tarifasMatriculaAgosto =
 			[
@@ -7763,26 +7773,51 @@ class StudenttransactionsController extends AppController
 
 		$respuesta = '';
 
-		$vectorColaboradorsExoneradosDiferencias = [];
-		$this->loadModel('Colaboradors');
-		$colaboradors = $this->Colaboradors->find('all');
-		foreach ($colaboradors as $indiceColaborador => $colaborador)
-		{
-			$vectorColaboradorsExoneradosDiferencias[$colaborador->tipo_documento_identidad.$colaborador->numero_documento_identidad] = $colaborador->tipo_documento_identidad.$colaborador->numero_documento_identidad;
-		}
-
-		if (isset($vectorColaboradorsExoneradosDiferencias[$tipoDocumentoIdentidad.$numeroDocumentoIdentidad]))
-		{
-			$indicadorExoneradoDiferenciasInscripcion = 1;
-		}
-
 		$montoAbono = $transaccion->amount_dollar;
 		$montoPagadoNeto = $montoAbono;
+		$montoExoneracionDiferencia = 0;
+		$errorExoneracion = null;
+		$vectorDescuentosExoneracionesRecargos = [];
+		if (!empty($transaccion->vector_descuentos_exoneraciones_recargos))
+		{
+			$vectorDescuentosExoneracionesRecargos = json_decode($transaccion->vector_descuentos_exoneraciones_recargos, true);
+			if (!is_array($vectorDescuentosExoneracionesRecargos) || json_last_error() !== JSON_ERROR_NONE)
+			{
+				Log::error('El JSON de descuentos y exoneraciones de la transacción ' . $transaccion->id . ' no es válido.');
+				$errorExoneracion = 'El JSON de descuentos y exoneraciones de la transacción no es válido.';
+				$vectorDescuentosExoneracionesRecargos = [];
+			}
+		}
+
+		$descripcionExoneracionDiferencia = null;
+		if (preg_match('/^Matrícula (\d{4})$/u', $transaccion->transaction_description, $coincidencia))
+		{
+			$descripcionExoneracionDiferencia = 'Exoneración diferencia matrícula ' . $coincidencia[1];
+		}
+		elseif (preg_match('/^Ago (\d{4})$/D', $transaccion->transaction_description, $coincidencia))
+		{
+			$descripcionExoneracionDiferencia = 'Exoneración diferencia agosto ' . $coincidencia[1];
+		}
+		if ($descripcionExoneracionDiferencia !== null && isset($vectorDescuentosExoneracionesRecargos[$descripcionExoneracionDiferencia]))
+		{
+			$valorExoneracionDiferencia = $vectorDescuentosExoneracionesRecargos[$descripcionExoneracionDiferencia];
+			if (!is_numeric($valorExoneracionDiferencia) || (float)$valorExoneracionDiferencia < 0)
+			{
+				Log::error('El monto de la exoneración ' . $descripcionExoneracionDiferencia . ' de la transacción ' . $transaccion->id . ' no es válido.');
+				$errorExoneracion = 'El monto de la exoneración guardado en la transacción no es válido.';
+			}
+			else
+			{
+				$montoExoneracionDiferencia = round((float)$valorExoneracionDiferencia, 2);
+				$indicadorExoneradoDiferenciasInscripcion = $montoExoneracionDiferencia > 0 ? 1 : 0;
+			}
+		}
+
 		if ($transaccion->paid_out == 0)
 		{
 			$indicadorDeudaInscripcion = 1;
 			$saldoCuota = round($tarifaConDescuentoRecargo - $transaccion->amount_dollar, 2);
-            if ($indicadorExoneradoDiferenciasInscripcion == 1 || $transaccion->student->section->orden > 41)
+            if ($transaccion->student->section->orden > 41)
 			{
                 $saldoCuota = round($saldoCuota - $tarifasMatriculaAgosto[$transaccion->transaction_description]['diferencia'], 2);
             }
@@ -7793,7 +7828,7 @@ class StudenttransactionsController extends AppController
 				$saldoAnticipoAbonoInscripcion = round($tarifasMatriculaAgosto[$transaccion->transaction_description]['anticipoAbono'] - $montoAbonoAnticipoAbono, 2);
 
 				$montoAbonoDiferencia = 0;
-                if ($indicadorExoneradoDiferenciasInscripcion == 1 || $transaccion->student->section->orden > 41)
+                if ($transaccion->student->section->orden > 41)
 			    {
                     $saldoDiferenciaInscripcion = 0;
                 }
@@ -7824,7 +7859,7 @@ class StudenttransactionsController extends AppController
 			}
 			elseif ($tarifaConDescuentoRecargo > $transaccion->amount_dollar)
 			{
-				if ($indicadorExoneradoDiferenciasInscripcion == 1 || $transaccion->student->section->orden > 41)
+				if ($transaccion->student->section->orden > 41)
 				{
 					$indicadorDeudaInscripcion = 0;
 					$saldoCuota = 0;
@@ -7843,6 +7878,21 @@ class StudenttransactionsController extends AppController
 					$saldoDiferenciaInscripcion = $tarifasMatriculaAgosto[$transaccion->transaction_description]['diferencia'];
 				}
 			}
+		}
+
+		if ($montoExoneracionDiferencia > 0)
+		{
+			$saldoCuota = max(0, round($saldoCuota - $montoExoneracionDiferencia, 2));
+			$saldoDiferenciaInscripcion = max(0, round($saldoDiferenciaInscripcion - $montoExoneracionDiferencia, 2));
+			if ($saldoCuota <= 0)
+			{
+				$indicadorDeudaInscripcion = 0;
+			}
+		}
+		if ($errorExoneracion !== null)
+		{
+			$codigo_retorno = 1;
+			$mensaje = $errorExoneracion;
 		}
 
 		$respuesta =
@@ -8215,7 +8265,7 @@ class StudenttransactionsController extends AppController
             }
             if ($indicadorProcesarTransaccion == 1)
             {
-                $respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion, $representante->type_of_identification, $representante->identidy_card);
+                $respuestaProcesarMatriculaAgosto = $this->procesarMatriculaAgosto($transaccion);
                 $indicadorExoneradoDiferenciasInscripcion = $respuestaProcesarMatriculaAgosto['indicadorExoneradoDiferenciasInscripcion'];
                 $indicadorDeudaInscripcion = $respuestaProcesarMatriculaAgosto['indicadorDeudaInscripcion'];
                 if ($indicadorDeudaInscripcion == 1)

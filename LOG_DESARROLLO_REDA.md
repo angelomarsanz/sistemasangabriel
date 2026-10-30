@@ -1,5 +1,19 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-30] - Aplicar exoneración de diferencia en el formulario de cobranza
+- **Tarea:** Restar de la tarifa vigente de matrícula o agosto la exoneración registrada en el JSON de cada transacción durante la cobranza en línea.
+- **Archivos modificados:**
+    - **`src/Template/Bills/create_invoice.ctp`:** Después del ajuste por diferencia entre monto original y tarifa vigente, identifica la clave del JSON según «Matrícula AAAA» o «Ago AAAA» y descuenta el monto del vector `vector_descuentos_exoneraciones_recargos`. Si el JSON o el monto de exoneración es inválido, muestra las cuotas afectadas y bloquea los botones de cobro.
+    - **`manual_tecnico_sistema.md`:** Se documentó la regla de tarifa y que el JSON de transacciones ya se recibe mediante `StudentsController::relatedStudents` y `StudenttransactionsController::responsejson`; no se modificó `BillsController`, cuya acción `createInvoice` solo renderiza la vista.
+- **Validación:** `/opt/lampp/bin/php -l src/Template/Bills/create_invoice.ctp` sin errores; prueba Node sobre claves de matrícula/agosto, ausencia de atributo, JSON mal formado y montos inválidos, correcta; diff de documentación sin errores. `git diff --check` en la vista señala un espacio final preexistente en una línea ajena al cambio (parte de las modificaciones locales previas de esa vista), que se preservó.
+
+## [2026-10-29] - Aplicar exoneraciones de matrícula y agosto desde la transacción
+- **Tarea:** Sustituir en `procesarMatriculaAgosto` la exoneración de diferencia basada en la tabla `colaboradors` por el monto almacenado en el JSON de cada transacción.
+- **Archivos modificados:**
+    - **`src/Controller/StudenttransactionsController.php`:** Se eliminó la consulta y comparación contra `Colaboradors`, y se retiraron de la firma y llamadas los parámetros de identificación que ya no se necesitan. La acción ahora lee `vector_descuentos_exoneraciones_recargos`, identifica la clave «Exoneración diferencia matrícula AAAA» o «Exoneración diferencia agosto AAAA» según la descripción «Matrícula AAAA» o «Ago AAAA», y resta el monto JSON del saldo actual y del componente de diferencia, limitando ambos a cero. Se conserva la exoneración independiente para las secciones con orden mayor a 41. JSON inválido o montos no numéricos quedan registrados en el log y devuelven un código/mensaje de error sin aplicar exoneración.
+    - **`manual_tecnico_sistema.md`:** Se documentó la nueva fuente de exoneración y el manejo de errores.
+- **Validación:** `/opt/lampp/bin/php -l src/Controller/StudenttransactionsController.php`, prueba de claves de matrícula/agosto, ausencia de atributo y límite inferior del saldo, `git diff --check` y búsqueda de referencias a `Colaboradors` en el controlador, sin errores. PHPUnit no está disponible (`vendor/bin/phpunit` no existe).
+
 ## [2026-10-28] - Normalizar agosto al prefijo Ago en tarifas
 - **Tarea:** Asegurar que tanto el concepto de tarifa `Ago` como `Agosto` produzcan el prefijo `Ago` usado en las descripciones de las transacciones de estudiante.
 - **Archivos modificados:**

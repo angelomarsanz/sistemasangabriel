@@ -1,4 +1,7 @@
 <?php
+    /**
+     * Vista de cobranza a representantes y estudiantes, con cálculo de tarifas y exoneraciones por transacción.
+     */
     use Cake\Routing\Router;
 	if ($menuOption == "Recibo Consejo Educativo"):
 		$accionBusquedaFamilia = "findFamilyConsejoEducativo";
@@ -657,6 +660,7 @@
     var accountant = 1;
     var linePayments = " ";
     var valid = true;
+    var errorExoneracionesCobro = false;
     var studentBalance = 0.00;
     var indicatorUpdateAmount = 0;
     var paymentNumber = " ";
@@ -887,6 +891,11 @@
 
     function habilitaBotones()
     {
+        if (errorExoneracionesCobro)
+        {
+            return;
+        }
+
         $("#mark-quotas").attr('disabled', false);
         $("#uncheck-quotas").attr('disabled', false);
 		$("#adjust-fee").attr('disabled', false);
@@ -923,6 +932,11 @@
 
     function habilitarBotonesAjuste()
     {
+        if (errorExoneracionesCobro)
+        {
+            return;
+        }
+
         $("#mark-quotas").attr('disabled', false);
 		$("#uncheck-quotas").attr('disabled', false);
         $("#uncheck-quotas").attr('disabled', false);
@@ -1554,7 +1568,7 @@
 
 			$("#mark-quotas").html(nextPayment);
 
-			if (indicadorAjuste == 0)
+			if (indicadorAjuste == 0 && !errorExoneracionesCobro)
 			{
 				$("#mark-quotas").attr('disabled', false);
 				$("#adjust-fee").attr('disabled', false);
@@ -2266,6 +2280,12 @@
 
 		checkPredeterminado();
 		updateAmount();
+
+		if (errorExoneracionesCobro)
+		{
+			disableButtons();
+			return;
+		}
 
 		if (indicadorConsejoEducativo == 1)
 		{
@@ -3156,6 +3176,8 @@
 					}
 					else
 					{
+						errorExoneracionesCobro = false;
+						const erroresExoneraciones = [];
 						$.each(response.data.students, function(key, value)
 						{
 							idStudent = value.id;
@@ -3335,6 +3357,68 @@
 									tarifaDolar = dosDecimales(tarifaDolar - diferenciaOriginalActual);
 								}
 
+								const coincidenciaCuotaExonerable = monthlyPayment.match(/^(Matrícula|Ago)\s+(\d{4})$/);
+								if (coincidenciaCuotaExonerable)
+								{
+									const conceptoExoneracion = coincidenciaCuotaExonerable[1] == "Matrícula"
+										? "matrícula"
+										: "agosto";
+									const claveExoneracion = "Exoneración diferencia " + conceptoExoneracion + " " + coincidenciaCuotaExonerable[2];
+									let vectorDescuentosExoneraciones = value2.vector_descuentos_exoneraciones_recargos;
+
+									if (vectorDescuentosExoneraciones === null ||
+										vectorDescuentosExoneraciones === undefined ||
+										(typeof vectorDescuentosExoneraciones == "string" && vectorDescuentosExoneraciones.trim() == ""))
+									{
+										vectorDescuentosExoneraciones = {};
+									}
+									else
+									{
+										let jsonExoneracionInvalido = false;
+										if (typeof vectorDescuentosExoneraciones == "string")
+										{
+											try
+											{
+												vectorDescuentosExoneraciones = JSON.parse(vectorDescuentosExoneraciones);
+											}
+											catch (error)
+											{
+												console.error("No se pudo leer el JSON de exoneraciones de la transacción " + value2.id + ".", error);
+												erroresExoneraciones.push(value.surname + " " + value.second_surname + " - " + monthlyPayment);
+												vectorDescuentosExoneraciones = null;
+												jsonExoneracionInvalido = true;
+											}
+										}
+
+										if (!jsonExoneracionInvalido &&
+											(vectorDescuentosExoneraciones === null ||
+											typeof vectorDescuentosExoneraciones != "object" ||
+											Array.isArray(vectorDescuentosExoneraciones)))
+										{
+											console.error("El JSON de exoneraciones de la transacción " + value2.id + " no contiene un objeto.");
+											erroresExoneraciones.push(value.surname + " " + value.second_surname + " - " + monthlyPayment);
+											vectorDescuentosExoneraciones = null;
+										}
+									}
+
+									if (vectorDescuentosExoneraciones !== null &&
+										Object.prototype.hasOwnProperty.call(vectorDescuentosExoneraciones, claveExoneracion))
+									{
+										const montoExoneracionDiferencia = vectorDescuentosExoneraciones[claveExoneracion];
+										if (typeof montoExoneracionDiferencia == "number" &&
+											Number.isFinite(montoExoneracionDiferencia) &&
+											montoExoneracionDiferencia >= 0)
+										{
+											tarifaDolar = Math.max(0, dosDecimales(tarifaDolar - montoExoneracionDiferencia));
+										}
+										else
+										{
+											console.error("El monto de la exoneración " + claveExoneracion + " de la transacción " + value2.id + " no es válido.");
+											erroresExoneraciones.push(value.surname + " " + value.second_surname + " - " + monthlyPayment);
+										}
+									}
+								}
+
 								invoiced = value2.invoiced;
 
 								studentName = surname + ' ' + secondSurname + ' ' + firstName + ' ' + secondName;
@@ -3454,7 +3538,7 @@
 												}
 												else
 												{
-													if (anoEscolarMensualidad < 2025 && ordenGrado > 41)
+													if (anoEscolarMensualidad < 2023 && ordenGrado > 41)
 													{
 														montoDolar = 0;
 														montoPendienteDolar = 0;
@@ -3470,6 +3554,9 @@
 															montoDolar = dosDecimales(montoDolar + ajustesPagosInscripcion[monthlyPayment]);
 														}
 														montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
+
+
+														
 														if (montoPendienteDolar > 0)
 														{
 															montoAPagarDolar = montoPendienteDolar;
@@ -3663,7 +3750,20 @@
 								}
 							});
 						});
-						$("#header-messages").html(" ");
+						if (erroresExoneraciones.length > 0)
+						{
+							errorExoneracionesCobro = true;
+							disableButtons();
+							$("#header-messages").text(
+								"No se pudo validar la exoneración de estas cuotas: " +
+								erroresExoneraciones.join(", ") +
+								". No se puede continuar con el cobro hasta corregir los datos."
+							);
+						}
+						else
+						{
+							$("#header-messages").html(" ");
+						}
 						$("#related-students").html(students);
 					}
 				}
@@ -4600,6 +4700,10 @@
         $('#compensar').click(function(e)
         {
 			e.preventDefault();
+			if (errorExoneracionesCobro)
+			{
+				return;
+			}
 			$("#print-invoice").attr('disabled', false);
 			$("#ajuste-automatico").attr('disabled', false);
 			$(".record-payment").attr('disabled', false);
