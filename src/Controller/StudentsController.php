@@ -460,10 +460,10 @@ class StudentsController extends AppController
         foreach ($periodosEscolares as $periodoEscolar)
         {
             list($anioInicioPeriodo) = explode('-', $periodoEscolar);
-            // En Venezuela, matrícula y diferencia de agosto se asocian al año inicial del período escolar.
+            // La matrícula corresponde al inicio del período y agosto al año en que termina.
             $conceptosPorTipo = [
                 'matricula' => 'Matrícula ' . $anioInicioPeriodo,
-                'agosto' => 'Ago ' . $anioInicioPeriodo
+                'agosto' => 'Ago ' . ((int)$anioInicioPeriodo + 1)
             ];
 
             foreach ($conceptosPorTipo as $tipoExoneracion => $conceptoAno)
@@ -573,7 +573,7 @@ class StudentsController extends AppController
         {
             $conceptoAno = $tipoExoneracion === 'matricula'
                 ? 'Matrícula ' . $anioInicio
-                : 'Ago ' . $anioInicio;
+                : 'Ago ' . $anioTransaccion;
             if ($tarifa['conceptoAno'] === $conceptoAno)
             {
                 $tarifasConcepto[] = (float)$tarifa['tarifaDolar'];

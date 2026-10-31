@@ -1,5 +1,12 @@
 # Log de Desarrollo - REDA
 
+## [2026-10-31] - Calcular diferencia de agosto en el año final del período
+- **Tarea:** Corregir la diferencia de agosto para que use las tarifas «Ago» del año en que termina el período escolar en Venezuela.
+- **Archivos modificados:**
+    - **`src/Controller/StudentsController.php`:** `viewStudent` ahora consulta para agosto el año final del período, mientras mantiene matrícula con el año inicial. `actualizarExoneracionDiferencia` calcula la exoneración de agosto con la tarifa del mismo año de la transacción. Para 2026-2027, ambos lugares usan «Ago 2027», que produce la diferencia de 62 entre las tarifas 325 y 263; la clave del alumno sigue en el período 2026-2027.
+    - **`manual_tecnico_sistema.md`:** Se corrigió la documentación de los años aplicados a matrícula, agosto y al período escolar.
+- **Validación:** `/opt/lampp/bin/php -l src/Controller/StudentsController.php`, prueba de cálculo con las tarifas del volcado (`Matrícula 2026`: 325 - 263 = 62; `Ago 2027`: 325 - 263 = 62) y `git diff --check`, sin errores.
+
 ## [2026-10-30] - Aplicar exoneración de diferencia en el formulario de cobranza
 - **Tarea:** Restar de la tarifa vigente de matrícula o agosto la exoneración registrada en el JSON de cada transacción durante la cobranza en línea.
 - **Archivos modificados:**
