@@ -3538,7 +3538,7 @@
 												}
 												else
 												{
-													if (anoEscolarMensualidad < 2023 && ordenGrado > 41)
+													if (anoEscolarMensualidad < 2025 && ordenGrado > 41)
 													{
 														montoDolar = 0;
 														montoPendienteDolar = 0;
@@ -3554,9 +3554,7 @@
 															montoDolar = dosDecimales(montoDolar + ajustesPagosInscripcion[monthlyPayment]);
 														}
 														montoPendienteDolar = dosDecimales(tarifaDolar - montoDolar);
-
-
-														
+													
 														if (montoPendienteDolar > 0)
 														{
 															montoAPagarDolar = montoPendienteDolar;

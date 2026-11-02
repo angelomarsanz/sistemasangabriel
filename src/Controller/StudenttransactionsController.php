@@ -7744,9 +7744,6 @@ class StudenttransactionsController extends AppController
 				'Matrícula 2025' =>  ['tarifa' => 263, 'anticipoAbono' => 220, 'diferencia' => 43, 'descuentoRecargo' => 0],
 				'Ago 2026' => ['tarifa' => 263, 'anticipoAbono' => 220, 'diferencia' => 43, 'descuentoRecargo' => 0],
 
-				'Matrícula 2026' =>  ['tarifa' => 263, 'anticipoAbono' => 263, 'diferencia' => 0, 'descuentoRecargo' => 0],
-				'Ago 2027' => ['tarifa' => 263, 'anticipoAbono' => 263, 'diferencia' => 0, 'descuentoRecargo' => 0],
-
 				'Matrícula 2026' =>  ['tarifa' => 325, 'anticipoAbono' => 263, 'diferencia' => 62, 'descuentoRecargo' => 0],
 				'Ago 2027' => ['tarifa' => 325, 'anticipoAbono' => 263, 'diferencia' => 62, 'descuentoRecargo' => 0],
 			];
@@ -7817,23 +7814,24 @@ class StudenttransactionsController extends AppController
 		{
 			$indicadorDeudaInscripcion = 1;
 			$saldoCuota = round($tarifaConDescuentoRecargo - $transaccion->amount_dollar, 2);
-            if ($transaccion->student->section->orden > 41)
+			if ($transaccion->ano_escolar < 2025 && $transaccion->student->section->orden > 41)
 			{
                 $saldoCuota = round($saldoCuota - $tarifasMatriculaAgosto[$transaccion->transaction_description]['diferencia'], 2);
             }
-
+			
 			if ($transaccion->amount_dollar < $tarifasMatriculaAgosto[$transaccion->transaction_description]['anticipoAbono'])
 			{
 				$montoAbonoAnticipoAbono = $transaccion->amount_dollar;
 				$saldoAnticipoAbonoInscripcion = round($tarifasMatriculaAgosto[$transaccion->transaction_description]['anticipoAbono'] - $montoAbonoAnticipoAbono, 2);
 
 				$montoAbonoDiferencia = 0;
-                if ($transaccion->student->section->orden > 41)
+                
+				if ($transaccion->ano_escolar < 2025 && $transaccion->student->section->orden > 41)
 			    {
                     $saldoDiferenciaInscripcion = 0;
                 }
                 else
-                {
+                { 
 				    $saldoDiferenciaInscripcion = $tarifasMatriculaAgosto[$transaccion->transaction_description]['diferencia'];
                 }
 			}
@@ -7859,7 +7857,7 @@ class StudenttransactionsController extends AppController
 			}
 			elseif ($tarifaConDescuentoRecargo > $transaccion->amount_dollar)
 			{
-				if ($transaccion->student->section->orden > 41)
+				if ($transaccion->ano_escolar < 2025 && $transaccion->student->section->orden > 41)
 				{
 					$indicadorDeudaInscripcion = 0;
 					$saldoCuota = 0;
