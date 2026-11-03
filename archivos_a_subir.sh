@@ -42,11 +42,11 @@ ARCHIVOS_PHP_PUNTUALES=(
     #"src/Template/Parentsandguardians/view_data.ctp"
     #"src/Template/Parentsandguardians/consult_family.ctp"
 
-    "src/Template/Bills/create_invoice.ctp"
+    #"src/Template/Bills/create_invoice.ctp"
 
-    "src/Controller/StudenttransactionsController.php"
+    #"src/Controller/StudenttransactionsController.php"
     #"src/Controller/ParentsandguardiansController.php"
-    #"src/Controller/PaymentsController.php"
+    "src/Controller/PaymentsController.php"
     #"src/Controller/StudentsController.php"
     #"src/Controller/UsersController.php"
 )
