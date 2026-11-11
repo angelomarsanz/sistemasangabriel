@@ -27,26 +27,10 @@ ARCHIVOS_PHP_PUNTUALES=(
     #"js_csga/dist/main-script.js"
     #"webroot/js/main-script.js"
 
-    #"src/Model/Entity/User.php"
-    #"src/Model/Entity/Parentsandguardian.php"
-    #"src/Model/Entity/Student.php"
-    #"src/Model/Entity/Studenttransaction.php"
+    # Modelos creados y/o modificados
 
-    #"src/Template/Students/edit_status.ctp"
-    #"src/Template/Students/view_student.ctp"
+    # Vistas creadas y/o modificadas
 
-    #"src/Template/Studenttransactions/consulta_deuda_representante.ctp"
-    #"src/Template/Studenttransactions/general_morosidad_representantes.ctp"
-    #"src/Template/Studenttransactions/reporte_general_morosidad_representantes.ctp"
-
-    #"src/Template/Parentsandguardians/view_data.ctp"
-    #"src/Template/Parentsandguardians/consult_family.ctp"
-
-    #"src/Template/Bills/create_invoice.ctp"
-
-    #"src/Controller/StudenttransactionsController.php"
-    #"src/Controller/ParentsandguardiansController.php"
-    "src/Controller/PaymentsController.php"
-    #"src/Controller/StudentsController.php"
-    #"src/Controller/UsersController.php"
+    # Controladores creados y/o modificados
+    "src/Controller/TurnsController.php"
 )

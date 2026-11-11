@@ -996,6 +996,7 @@ class TurnsController extends AppController
 			$this->loadModel('Bills');
 			$this->loadModel('Monedas');
 			$this->loadModel('Pagos');	
+			$this->loadModel('Concepts');
 			
 			$payment = new PaymentsController();
 			
@@ -1111,6 +1112,25 @@ class TurnsController extends AppController
 			{
 				if ($factura->tipo_documento == "Nota de crédito")
 				{
+					// Buscar en la tabla concepts los conceptos relacionados con la nota de crédito y si el texto de alguno de los conceptos contiene la cadena "Descuento" no se debe agregar esa factura al vector de notas de crédito.
+					$concepts = $this->Concepts->find('all', [
+						'conditions' => ['bill_id' => $factura->id]
+					]);	
+					
+					$agregarFactura = true;
+					foreach ($concepts as $concept)
+					{
+						if (strpos($concept->concept, 'Descuento') !== false)
+						{
+							$agregarFactura = false;
+							break;
+						}
+					}
+					
+					if (!$agregarFactura)
+					{
+						continue;
+					}
 					$vectorNotasCredito[$factura->id_documento_padre] = $factura->id_documento_padre;
 				}
 			}	
