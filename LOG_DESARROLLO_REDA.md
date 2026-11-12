@@ -718,3 +718,15 @@
         - Se añadió documentación JSDoc a la función `addTableToSheet` para mejorar la mantenibilidad.
         - Se actualizó el encabezado PHP de la vista para incluir la funcionalidad de exportación a Excel.
 - **Documentación:** Se actualizó el manual técnico del sistema y este log de desarrollo.
+
+## [2026-11-12] - Notas de débito en el cierre de caja
+- **Tarea:** Incorporar notas de débito al subtotal fiscal y al importe a recibir, conservando la compatibilidad con cierres históricos.
+- **Archivos modificados o creados:**
+    - `src/Controller/TurnsController.php`: incorpora el renglón y el subtotal nuevos, asigna cada nota de débito al método de pago principal de la factura original, convierte con la tasa de la nota y suma su importe al subtotal y al monto a recibir. Valida pagos y tasas. En consolidados mixtos combina la clave histórica `Total facturas - notas de crédito + anticipos de inscripción` con la nueva `Total facturas - notas de crédito + notas de débito + anticipos de inscripción` sin alterar los cierres guardados.
+    - `src/Template/Turns/edit.ctp`: presenta las etiquetas de subtotal antiguas y nuevas en la vista previa y adapta la tabla fiscal a pantallas pequeñas; documenta el archivo y sus eventos.
+    - `src/Template/Element/Turns/reporte_cierre_detalle.ctp`: reconoce ambos subtotales en el cierre individual y consolidado y adapta la tabla fiscal a pantallas pequeñas.
+    - `tests/TestCase/Controller/TurnsCierreTest.php`: agrega pruebas de estructura, monedas, errores y consolidación histórica y mixta.
+    - `manual_tecnico_sistema.md`: documenta el cálculo, la compatibilidad histórica, las vistas y las pruebas.
+    - `previo_cambios_realizados.md`: registra el avance incremental y se restablece tras finalizar la tarea.
+    - `LOG_DESARROLLO_REDA.md`: registra esta intervención.
+- **Validación:** Sintaxis PHP 7.4 y cinco pruebas focalizadas satisfactorias mediante un adaptador local de aserciones; PHPUnit no está instalado. No se realizó un cierre real contra la base de datos.

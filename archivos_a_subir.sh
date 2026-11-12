@@ -30,7 +30,12 @@ ARCHIVOS_PHP_PUNTUALES=(
     # Modelos creados y/o modificados
 
     # Vistas creadas y/o modificadas
+    "src/Template/Turns/edit.ctp"
+    "src/Template/Element/Turns/reporte_cierre_detalle.ctp"
 
     # Controladores creados y/o modificados
     "src/Controller/TurnsController.php"
+
+    # Archivos para pruebas
+    "tests/TestCase/Controller/TurnsCierreTest.php"
 )

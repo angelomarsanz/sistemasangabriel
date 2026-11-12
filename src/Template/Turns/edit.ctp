@@ -1,4 +1,8 @@
 <?php
+/**
+ * Muestra la vista previa del cierre de turno, sus totales fiscales y los detalles de cobranza.
+ * Reconoce los subtotales fiscales históricos y los que incluyen notas de débito.
+ */
     use Cake\Routing\Router; 
 	$tipo_usuario = 0;
 	if ($current_user['role'] == 'Facturas'):
@@ -112,6 +116,7 @@
 						<br />
 						<div class="row">
 							<div class="col-md-12">					
+								<div class="table-responsive">
 								<table class="table table-striped table-hover">
 									<thead>	
 										<tr>
@@ -226,6 +231,8 @@
 																<?php
 																if ($clave == "Total facturas - notas de crédito + anticipos de inscripción"): ?>
 																	<td>Total facturas - notas de crédito</td>
+																<?php elseif ($clave == "Total facturas - notas de crédito + notas de débito + anticipos de inscripción"): ?>
+																	<td>Total facturas - notas de crédito + notas de débito</td>
 																<?php
 																else: ?>	
 																	<td><?= $clave ?></td>
@@ -254,6 +261,7 @@
 										endforeach; ?>	
 									</tbody>
 								</table>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -1977,6 +1985,7 @@
 	</div>
 </div>
 <script>
+	/** Prepara la validación del control fiscal y la exportación de la vista previa. */
     $(document).ready(function() 
     {
 		if ('<?= $lastNumber ?>' == 0)
@@ -1988,6 +1997,7 @@
 			$('#contadores').addClass('noverScreen');
 			$('#cerrar-turno').addClass('noverScreen');
 		}
+		/** Verifica el número de control antes de permitir el cierre. */
 		$('#verificar').click(function(e) 
         {
 			if ($('#control-number').val() == '<?= $lastControl ?>')
@@ -2003,6 +2013,7 @@
 			}
 		});
 	
+		/** Exporta los cuadros de la vista previa a Excel. */
 		$("#exportar-excel").click(function(){
 			
 			$("#previo-cierre").table2excel({

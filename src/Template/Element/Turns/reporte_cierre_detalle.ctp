@@ -1,6 +1,7 @@
 <?php
 /**
  * Presenta los cuadros y detalles contables del cierre diario individual, reutilizados por el consolidado.
+ * Reconoce los subtotales fiscales históricos y los que incluyen notas de débito.
  */
     use Cake\Routing\Router;
 	$esConsolidadoDetallado = !empty($esConsolidadoDetallado);
@@ -257,6 +258,7 @@
 						<br />
 						<div class="row">
 							<div class="col-md-12">
+								<div class="table-responsive">
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr>
@@ -345,6 +347,8 @@
 															<?php
 															if ($clave == "Total facturas - notas de crédito + anticipos de inscripción"): ?>
 																<td>Total facturas - notas de crédito</td>
+															<?php elseif ($clave == "Total facturas - notas de crédito + notas de débito + anticipos de inscripción"): ?>
+																<td>Total facturas - notas de crédito + notas de débito</td>
 															<?php
 															else: ?>
 																<td><?= $clave ?></td>
@@ -371,6 +375,7 @@
 										endforeach; ?>
 									</tbody>
 								</table>
+								</div>
 							</div>
 						</div>
 					</div>
