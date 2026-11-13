@@ -19,8 +19,9 @@ use Cake\I18n\Time;
  * y opción de cobro para evitar cruce de turnos por concurrencia de pestañas.
  * Los filtros de períodos y cierres consolidados están limitados a las cuentas
  * autorizadas, y solo listan cajeros de roles permitidos.
- * Los cierres nuevos suman las notas de débito y los consolidados reconocen
- * tanto la etiqueta histórica del subtotal como la actual.
+ * Los cierres nuevos suman las notas de débito usando los pagos de la factura
+ * original, incluso cuando la nota afecta a una nota de crédito; los
+ * consolidados reconocen la etiqueta histórica del subtotal y la actual.
  *
  * @property \App\Model\Table\TurnsTable $Turns
  */
@@ -994,7 +995,8 @@ class TurnsController extends AppController
 
     /**
      * Prepara los totales del cierre y confirma el cierre del turno.
-     * Incluye las notas de débito en el subtotal fiscal y en el monto a recibir.
+     * Incluye las notas de débito en el subtotal fiscal y en el monto a recibir,
+     * buscando la factura original si el documento afectado es una nota de crédito.
      *
      * @param string|null $id Identificador del turno.
      * @return \Cake\Network\Response|void Redirección o vista de cierre.
@@ -1432,11 +1434,18 @@ class TurnsController extends AppController
 					elseif ($factura->tipo_documento == "Nota de débito")
 					{
 						$indicadorNotasDebito = 1;
-						$facturaOriginal = $this->Bills->get($factura->id_documento_padre);
-						$pagosFacturaOriginal = $payment->busquedaPagosFactura($factura->id_documento_padre);
+						try
+						{
+							list($facturaOriginal, $pagosFacturaOriginal) = $this->obtenerPagosNotaDebito($factura, $payment);
+						}
+						catch (\InvalidArgumentException $error)
+						{
+							$this->Flash->error(__('No se puede calcular la nota de débito {0}: {1}', $factura->bill_number, $error->getMessage()));
+							return $this->redirect(['controller' => 'users', 'action' => 'wait']);
+						}
 						if ($pagosFacturaOriginal['codigoRetorno'] != 0 || (float)$facturaOriginal->tasa_cambio <= 0)
 						{
-							$this->Flash->error(__('No se puede calcular la nota de débito {0}: la factura original {1} no tiene pagos o tiene una tasa de dólar inválida.', $factura->bill_number, $factura->id_documento_padre));
+							$this->Flash->error(__('No se puede calcular la nota de débito {0}: el documento original {1} no tiene pagos o tiene una tasa de dólar inválida.', $factura->bill_number, $facturaOriginal->id));
 							return $this->redirect(['controller' => 'users', 'action' => 'wait']);
 						}
 
@@ -2311,6 +2320,58 @@ class TurnsController extends AppController
 				'vista',
 				'indicadorRecibosSeguro',
 				'indicadorRecibosSeguroAnulados']);
+		}
+	}
+
+	/**
+	 * Busca los pagos del documento original asociado a la nota de débito.
+	 *
+	 * @param \App\Model\Entity\Bill $nota Nota de débito.
+	 * @param \App\Controller\PaymentsController $payment Controlador de consulta de pagos.
+	 * @return array Documento original y resultado de la consulta de pagos.
+	 * @throws \InvalidArgumentException Si la referencia es inválida o no existe.
+	 */
+	private function obtenerPagosNotaDebito($nota, $payment)
+	{
+		$documento = $this->obtenerDocumentoPagoNotaDebito($nota);
+
+		return [$documento, $payment->busquedaPagosFactura($documento->id)];
+	}
+
+	/**
+	 * Obtiene el documento con pagos de una nota de débito.
+	 * Si el documento afectado es una nota de crédito, busca su factura original.
+	 *
+	 * @param \App\Model\Entity\Bill $nota Nota de débito.
+	 * @return \App\Model\Entity\Bill Documento cuyos pagos se utilizarán.
+	 * @throws \InvalidArgumentException Si la referencia es inválida o no existe.
+	 */
+	private function obtenerDocumentoPagoNotaDebito($nota)
+	{
+		$idDocumento = (int)$nota->id_documento_padre;
+		for ($paso = 0; $paso < 2; $paso++)
+		{
+			if ($idDocumento <= 0)
+			{
+				throw new \InvalidArgumentException('la referencia al documento original es inválida.');
+			}
+			try
+			{
+				$documento = $this->Bills->get($idDocumento);
+			}
+			catch (\Cake\Datasource\Exception\RecordNotFoundException $error)
+			{
+				throw new \InvalidArgumentException('no se encontró el documento original con ID ' . $idDocumento . '.', 0, $error);
+			}
+			if ($paso === 1 && $documento->tipo_documento !== 'Factura')
+			{
+				throw new \InvalidArgumentException('el documento ' . $idDocumento . ' asociado a la nota de crédito no es una factura.');
+			}
+			if ($documento->tipo_documento !== 'Nota de crédito')
+			{
+				return $documento;
+			}
+			$idDocumento = (int)$documento->id_documento_padre;
 		}
 	}
 

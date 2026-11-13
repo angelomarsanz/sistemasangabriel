@@ -1,6 +1,7 @@
 <?php
 /**
- * Pruebas del cálculo de notas de débito y de la compatibilidad de cierres consolidados.
+ * Pruebas de la búsqueda de la factura original, el cálculo de notas de débito
+ * y la compatibilidad de cierres consolidados.
  */
 namespace App\Test\TestCase\Controller;
 
@@ -45,16 +46,154 @@ class TurnsCierreTest extends TestCase
      *
      * @param string $nombre Nombre del método.
      * @param array $argumentos Argumentos para el método.
+     * @param \App\Controller\TurnsController|null $controlador Controlador de prueba opcional.
      * @return mixed Resultado del método.
      */
-    private function ejecutarMetodo($nombre, array $argumentos)
+    private function ejecutarMetodo($nombre, array $argumentos, $controlador = null)
     {
         $clase = new \ReflectionClass(TurnsController::class);
-        $controlador = $clase->newInstanceWithoutConstructor();
+        if ($controlador === null)
+        {
+            $controlador = $clase->newInstanceWithoutConstructor();
+        }
         $metodo = $clase->getMethod($nombre);
         $metodo->setAccessible(true);
 
         return $metodo->invokeArgs($controlador, $argumentos);
+    }
+
+    /**
+     * Construye un controlador con documentos simulados y registra los ID consultados.
+     *
+     * @param array $documentos Documentos indexados por ID.
+     * @return \App\Controller\TurnsController Controlador preparado.
+     */
+    private function crearControladorConDocumentos(array $documentos)
+    {
+        $clase = new \ReflectionClass(TurnsController::class);
+        $controlador = $clase->newInstanceWithoutConstructor();
+        $controlador->Bills = new class($documentos) {
+            public $consultados = [];
+            private $documentos;
+
+            /**
+             * Inicializa los documentos simulados.
+             *
+             * @param array $documentos Documentos indexados por ID.
+             */
+            public function __construct(array $documentos)
+            {
+                $this->documentos = $documentos;
+            }
+
+            /**
+             * Obtiene un documento simulado o informa que no existe.
+             *
+             * @param int $id Identificador consultado.
+             * @return object Documento correspondiente.
+             * @throws \Cake\Datasource\Exception\RecordNotFoundException Si no existe.
+             */
+            public function get($id)
+            {
+                $this->consultados[] = $id;
+                if (!isset($this->documentos[$id]))
+                {
+                    throw new \Cake\Datasource\Exception\RecordNotFoundException('Documento inexistente.');
+                }
+
+                return $this->documentos[$id];
+            }
+        };
+
+        return $controlador;
+    }
+
+    /**
+     * Comprueba la referencia directa y la referencia por una nota de crédito.
+     *
+     * @return void
+     */
+    public function testBuscarFacturaOriginalNotaDebito()
+    {
+        $factura = (object)['id' => 100, 'tipo_documento' => 'Factura', 'tasa_cambio' => 40, 'tasa_dolar_euro' => 1.25];
+        $credito = (object)['id' => 66296, 'tipo_documento' => 'Nota de crédito', 'id_documento_padre' => 100, 'tasa_cambio' => 100, 'tasa_dolar_euro' => 2];
+        foreach ([
+            [100, [100]],
+            [66296, [66296, 100]],
+        ] as $caso)
+        {
+            $controlador = $this->crearControladorConDocumentos([100 => $factura, 66296 => $credito]);
+            $nota = (object)['id_documento_padre' => $caso[0], 'amount_paid' => 400, 'tasa_cambio' => 20, 'tasa_euro' => 50];
+            $pagos = [
+                (object)['payment_type' => 'Efectivo', 'moneda' => '$', 'amount' => 6],
+                (object)['payment_type' => 'Transferencia', 'bank' => 'Banco', 'amount' => 400],
+            ];
+            $buscadorPagos = new class($pagos) {
+                public $consultados = [];
+                private $pagos;
+
+                /**
+                 * Inicializa los pagos simulados.
+                 *
+                 * @param array $pagos Pagos de la factura.
+                 */
+                public function __construct(array $pagos)
+                {
+                    $this->pagos = $pagos;
+                }
+
+                /**
+                 * Registra el documento consultado y devuelve sus pagos.
+                 *
+                 * @param int $id Identificador del documento.
+                 * @return array Resultado simulado.
+                 */
+                public function busquedaPagosFactura($id)
+                {
+                    $this->consultados[] = $id;
+
+                    return ['codigoRetorno' => 0, 'pagosFactura' => $this->pagos];
+                }
+            };
+            list($resultado, $pagosEncontrados) = $this->ejecutarMetodo('obtenerPagosNotaDebito', [$nota, $buscadorPagos], $controlador);
+            $this->assertSame($factura, $resultado);
+            $this->assertSame($caso[1], $controlador->Bills->consultados);
+            $this->assertSame([100], $buscadorPagos->consultados);
+            $convertidos = $this->ejecutarMetodo('convertirPagosDolar', [$pagosEncontrados['pagosFactura'], $resultado], $controlador);
+            $subtotal = 'Total facturas - notas de crédito + notas de débito + anticipos de inscripción';
+            $vector = ['Notas de débito' => ['Transferencia Bs.' => 0], $subtotal => ['Transferencia Bs.' => 5], 'Total a recibir de Cajero' => ['Transferencia Bs.' => 5]];
+            $this->ejecutarMetodo('aplicarNotaDebito', [&$vector, $nota, $convertidos, 'Cajero'], $controlador);
+            $this->assertEquals(400, $vector['Notas de débito']['Transferencia Bs.']);
+            $this->assertEquals(405, $vector[$subtotal]['Transferencia Bs.']);
+            $this->assertEquals(405, $vector['Total a recibir de Cajero']['Transferencia Bs.']);
+        }
+    }
+
+    /**
+     * Comprueba que las referencias rotas o que no conducen a una factura se rechacen.
+     *
+     * @return void
+     */
+    public function testReferenciasInvalidasNotaDebito()
+    {
+        $documentos = [
+            1 => (object)['id' => 1, 'tipo_documento' => 'Nota de crédito', 'id_documento_padre' => 0],
+            2 => (object)['id' => 2, 'tipo_documento' => 'Nota de crédito', 'id_documento_padre' => 99],
+            3 => (object)['id' => 3, 'tipo_documento' => 'Nota de crédito', 'id_documento_padre' => 3],
+        ];
+        foreach ([0, 98, 1, 2, 3] as $id)
+        {
+            $controlador = $this->crearControladorConDocumentos($documentos);
+            try
+            {
+                $this->ejecutarMetodo('obtenerDocumentoPagoNotaDebito', [(object)['id_documento_padre' => $id]], $controlador);
+                $this->fail('Se esperaba un error de referencia.');
+            }
+            catch (\InvalidArgumentException $error)
+            {
+                $this->assertNotEmpty($error->getMessage());
+            }
+        }
     }
 
     /**

@@ -4,6 +4,13 @@
 ## CHAT IA
 El chat de IA debe ser en idioma español
 
+## Respaldo diario obligatorio y pruebas con datos reales
+- **Antes de realizar cualquier cambio solicitado**, verificar que en `documentacion-sangabriel-3/BD/` exista al menos un archivo con nombre `sgadev_sangabriel-AAAAMMDD-HHMM.sql`, donde `AAAAMMDD` corresponda a la fecha local actual.
+- Si no existe un respaldo con la fecha de hoy, **detener el trabajo antes de modificar archivos o datos** y solicitar al usuario que genere el respaldo del día. No continuar hasta contar con él.
+- Si existe, identificar las tablas y columnas del respaldo involucradas en el cambio, realizar los ajustes y ejecutar pruebas que tengan en cuenta sus datos existentes. Informar explícitamente si alguna prueba no puede ejecutarse; no alterar datos reales permanentemente para probar sin autorización.
+- **Pruebas preliminares:** consultar los datos pertinentes del respaldo SQL y validar con ellos el comportamiento del código modificado; si la validación falla, corregir y volver a probar. No iniciar LAMPP ni el servidor nativo de CakePHP para realizar pruebas.
+- **Pruebas definitivas:** las realiza el usuario en su servidor Vesta de desarrollo, después de subir los cambios. Distinguir siempre las verificaciones preliminares realizadas de las pruebas definitivas pendientes.
+
 ## Memoria de Sesiones y Protocolo ante Fallas Eléctricas/Conexión (Copilot y Copilot CLI)
 - **Log de Progreso:** Cada vez que inicies una nueva sesión, debes leer obligatoriamente el archivo `LOG_DESARROLLO_REDA.md`. Esto te permitirá recordar automáticamente todos los trabajos realizados anteriormente sin que el usuario tenga que repetirlos.
 - **Protocolo de Protección contra Cortes Eléctricos / Pérdida de Internet (`previo_cambios_realizados.md`):**

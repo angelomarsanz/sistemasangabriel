@@ -730,3 +730,23 @@
     - `previo_cambios_realizados.md`: registra el avance incremental y se restablece tras finalizar la tarea.
     - `LOG_DESARROLLO_REDA.md`: registra esta intervención.
 - **Validación:** Sintaxis PHP 7.4 y cinco pruebas focalizadas satisfactorias mediante un adaptador local de aserciones; PHPUnit no está instalado. No se realizó un cierre real contra la base de datos.
+
+## [2026-11-13] - Factura original de notas de débito relacionadas con notas de crédito
+- **Tarea:** Buscar los pagos de la factura original cuando el documento afectado por una nota de débito es una nota de crédito.
+- **Archivos modificados:**
+    - `src/Controller/TurnsController.php`: resuelve el documento afectado y, si es una nota de crédito, sigue su `id_documento_padre` hasta la factura; consulta los pagos con el ID resuelto y compara las formas de pago con las tasas de ese documento. Informa referencias inválidas o inexistentes sin guardar un cierre incompleto.
+    - `tests/TestCase/Controller/TurnsCierreTest.php`: comprueba los casos con factura directa y nota de crédito intermedia, el ID consultado para los pagos, el uso de tasas distintas y los errores de referencia.
+    - `manual_tecnico_sistema.md`: describe la resolución de documentos y las pruebas añadidas.
+    - `previo_cambios_realizados.md`: registra el avance incremental y se restablece tras finalizar la tarea.
+    - `LOG_DESARROLLO_REDA.md`: registra esta intervención.
+- **Validación:** Sintaxis PHP 7.4 y siete pruebas focalizadas satisfactorias mediante un adaptador local de aserciones; PHPUnit no está instalado. No se ejecutó un cierre real contra la base de datos.
+
+## [2026-11-13] - Respaldo diario obligatorio y prueba parcial del turno 5523
+- **Tarea:** Registrar la obligación de verificar un respaldo diario antes de cada cambio y probar el cierre del turno 5523 con el caso real de nota de débito.
+- **Archivos modificados:**
+    - `.github/copilot-instructions.md`: exige comprobar el nombre y la fecha del respaldo SQL antes de los cambios y realizar pruebas preliminares con las tablas y columnas afectadas; si falta el respaldo, detenerse y solicitarlo. Prohíbe iniciar LAMPP o el servidor nativo de CakePHP para las pruebas y aclara que el usuario efectúa las pruebas definitivas en Vesta de desarrollo.
+    - `manual_tecnico_sistema.md`: documenta las directrices de respaldo y pruebas.
+    - `previo_cambios_realizados.md`: registra el avance incremental y se restablece tras finalizar la tarea.
+    - `LOG_DESARROLLO_REDA.md`: registra esta intervención.
+- **Validación parcial:** El respaldo `documentacion-sangabriel-3/BD/sgadev_sangabriel-20261113-1242.sql` contiene `turns`, `bills`, `payments` y `concepts`. El turno 5523 tiene estatus 1 y se verificó la cadena de documentos 66298 → 66296 → 66295. Los métodos reales de búsqueda y cálculo, ejecutados con datos seleccionados del respaldo, identificaron TDB/TDC Bs. y sumaron 26.796,30 Bs. a los renglones de la nota de débito, subtotal y total a recibir. No se modificó la base de datos.
+- **Alcance:** El servidor MySQL configurado rechazó la conexión; no se inició ningún servicio. Por indicación del usuario, la prueba definitiva del reporte completo corresponde a su servidor Vesta de desarrollo.
