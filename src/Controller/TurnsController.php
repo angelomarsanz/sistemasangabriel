@@ -19,6 +19,7 @@ use Cake\I18n\Time;
  * y opción de cobro para evitar cruce de turnos por concurrencia de pestañas.
  * Los filtros de períodos y cierres consolidados están limitados a las cuentas
  * autorizadas, y solo listan cajeros de roles permitidos.
+ * La vista previa y el reporte cerrado comparten los datos y el detalle del cierre.
  * Los cierres nuevos suman las notas de débito usando los pagos de la factura
  * original, incluso cuando la nota afecta a una nota de crédito; los
  * consolidados reconocen la etiqueta histórica del subtotal y la actual.
@@ -997,6 +998,7 @@ class TurnsController extends AppController
      * Prepara los totales del cierre y confirma el cierre del turno.
      * Incluye las notas de débito en el subtotal fiscal y en el monto a recibir,
      * buscando la factura original si el documento afectado es una nota de crédito.
+     * La vista previa reutiliza los mismos datos del reporte sin cerrar el turno.
      *
      * @param string|null $id Identificador del turno.
      * @return \Cake\Network\Response|void Redirección o vista de cierre.
@@ -2242,84 +2244,9 @@ class TurnsController extends AppController
 			}
 			
 			$vista = "turnsEdit";
-													
-			$this->set(compact
-				('turn',
-				'lastNumber',
-				'lastControl',
-				'facturas',
-				'vectorPagos',
-				'cajero',
-				'vectorTotalesRecibidos',
-				'vectorTotalesRecibidosPedidos', // Pedidos
-				'totalFormasPago',
-				'totalDescuentosRecargos',
-				'totalGeneralCompensado',
-				'totalGeneralFacturado',
-				'totalFacturasRecibos',
-				'tasaDolar',
-				'tasaEuro',
-				'indicadorFacturasAnticipos',
-				'indicadorServiciosEducativos',
-				'indicadorReintegros',
-				'indicadorReintegrosPedidos',
-				'indicadorCompras',
-				'indicadorComprasPedidos',
-				'indicadorVueltoCompra',
-				'indicadorNotasCredito',
-				'indicadorNotasDebito',
-				'indicadorSobrantes',
-				'indicadorSobrantesPedidos',
-				'indicadorFacturasRecibos',
-				'indicadorFacturasAnuladas',
-				'indicadorRecibosAnulados',
-				'indicadorPedidosAnulados',
-				'indicadorRecibosAnuladosPedidos',
-				'documentosAnulados',
-				'totalGeneralSobrantes',
-				'totalGeneralReintegrosSobrantes',
-				'vista',
-				'indicadorRecibosSeguro',
-				'indicadorRecibosSeguroAnulados'));	
-				
-			$this->set('_serialize', 
-				['turn',
-				'lastNumber',
-				'lastControl',				
-				'facturas',
-				'vectorPagos', 
-				'cajero', 
-				'vectorTotalesRecibidos',
-				'vectorTotalesRecibidosPedidos', // Pedidos
-				'totalFormasPago',
-				'totalDescuentosRecargos',				
-				'totalGeneralCompensado', 
-				'totalGeneralFacturado', 
-				'totalFacturasRecibos',
-				'tasaDolar', 
-				'tasaEuro',
-				'indicadorFacturasAnticipos',
-				'indicadorServiciosEducativos',
-				'indicadorReintegros',
-				'indicadorReintegrosPedidos',
-				'indicadorCompras',
-				'indicadorComprasPedidos',
-				'indicadorVueltoCompra',
-				'indicadorNotasCredito',
-				'indicadorNotasDebito',
-				'indicadorSobrantes',
-				'indicadorSobrantesPedidos',
-				'indicadorFacturasRecibos',
-				'indicadorFacturasAnuladas',
-				'indicadorRecibosAnulados',
-				'indicadorPedidosAnulados',
-				'indicadorRecibosAnuladosPedidos',
-				'documentosAnulados',
-				'totalGeneralSobrantes',
-				'totalGeneralReintegrosSobrantes',
-				'vista',
-				'indicadorRecibosSeguro',
-				'indicadorRecibosSeguroAnulados']);
+			$this->set(compact('lastNumber', 'lastControl', 'vista'));
+			$this->prepararDatosReporteCierre($turn);
+			$this->set('_serialize', array_merge($this->viewVars['_serialize'], ['lastNumber', 'lastControl', 'vista']));
 		}
 	}
 
@@ -3031,6 +2958,12 @@ class TurnsController extends AppController
         $this->set('_serialize', ['idTurn']);
     }
 	
+    /**
+     * Muestra el reporte de un turno cerrado.
+     *
+     * @param int|null $id Identificador del turno.
+     * @return \Cake\Network\Response|void Redirección o vista del reporte.
+     */
     public function reporteCierre($id = null)
     {
 		$turn = $this->Turns->get($id);
@@ -3041,6 +2974,18 @@ class TurnsController extends AppController
             return $this->redirect(['controller' => 'users', 'action' => 'wait']);
         }
 
+		$this->prepararDatosReporteCierre($turn);
+	}
+
+	/**
+	 * Prepara los datos compartidos por el reporte y la vista previa del cierre.
+	 *
+	 * @param \App\Model\Entity\Turn $turn Turno con sus totales calculados y guardados.
+	 * @return void
+	 */
+	private function prepararDatosReporteCierre($turn)
+	{
+		$id = $turn->id;
 		$this->loadModel('Bills');		
 		$payment = new PaymentsController();
 		$conceptos = new ConceptsController();
@@ -3169,6 +3114,23 @@ class TurnsController extends AppController
 		$facturas = $resultado['facturas'];
 		$pagosFacturas = $resultado['pagosFacturas'];
 		$facturasNotas = $resultado['facturasNotas'];
+		if ($codigoRetornoResultado == 2)
+		{
+			$pagosFacturas = [];
+			$facturasNotas = [];
+			foreach ($facturas as $documento)
+			{
+				if ($documento->tipo_documento == 'Nota de crédito' || $documento->tipo_documento == 'Nota de débito')
+				{
+					$documentoAfectado = $this->Bills->get($documento->id_documento_padre);
+					$facturasNotas[$documentoAfectado->id] = [
+						'controlAfectada' => $documentoAfectado->control_number,
+						'numeroAfectada' => $documentoAfectado->bill_number,
+						'fechaAfectada' => $documentoAfectado->date_and_time
+					];
+				}
+			}
+		}
 			
 		if ($codigoRetornoResultado != 1)
 		{

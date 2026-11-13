@@ -1,7 +1,7 @@
 <?php
 /**
- * Presenta los cuadros y detalles contables del cierre diario individual, reutilizados por el consolidado.
- * Reconoce los subtotales fiscales históricos y los que incluyen notas de débito.
+ * Presenta los cuadros y detalles contables del cierre en la vista previa, el reporte y el consolidado.
+ * Reconoce los subtotales fiscales históricos y actuales, y adapta las tablas a pantallas pequeñas.
  */
     use Cake\Routing\Router;
 	$esConsolidadoDetallado = !empty($esConsolidadoDetallado);
@@ -402,6 +402,7 @@
 					<div>
 						<div class="row">
 							<div class="col-md-12">
+								<div class="table-responsive">
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr>
@@ -473,6 +474,7 @@
 										</tr>
 									</tbody>
 								</table>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -497,6 +499,7 @@
 					<div>
 						<div class="row">
 							<div class="col-md-12">
+								<div class="table-responsive">
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr>
@@ -679,6 +682,7 @@
 										</tr>
 									</tbody>
 								</table>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -706,6 +710,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -751,6 +756,7 @@
 													</tr>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -776,6 +782,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -821,6 +828,7 @@
 													</tr>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -853,6 +861,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -897,6 +906,7 @@
 													</tr>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -922,6 +932,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -950,6 +961,7 @@
 													</tr>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -975,6 +987,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -1008,6 +1021,7 @@
 													</tr>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -1033,6 +1047,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -1077,6 +1092,7 @@
 													</tr>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -1108,6 +1124,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -1129,6 +1146,7 @@
 													endforeach; ?>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -1154,6 +1172,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -1181,6 +1200,7 @@
 													endforeach; ?>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -1269,6 +1289,7 @@
 							<br />
 							<div class="row">
 								<div class="col-md-12">
+									<div class="table-responsive">
 									<table class="table table-striped table-hover">
 										<thead>
 											<tr>
@@ -1370,6 +1391,7 @@
 											endforeach; ?>
 										</tbody>
 									</table>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -1402,6 +1424,7 @@
 					<div>
 						<div class="row">
 							<div class="col-md-12">
+								<div class="table-responsive">
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr>
@@ -1573,6 +1596,7 @@
 										</tr>
 									</tbody>
 								</table>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -1600,6 +1624,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -1644,6 +1669,7 @@
 													</tr>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -1669,6 +1695,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -1697,6 +1724,7 @@
 													</tr>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -1722,6 +1750,7 @@
 								<div>
 									<div class="row">
 										<div class="col-md-12">
+											<div class="table-responsive">
 											<table class="table table-striped table-hover">
 												<thead>
 													<tr>
@@ -1766,6 +1795,7 @@
 													</tr>
 												</tbody>
 											</table>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -1798,6 +1828,7 @@
 							<div>
 								<div class="row">
 									<div class="col-md-12">
+										<div class="table-responsive">
 										<table class="table table-striped table-hover">
 											<thead>
 												<tr>
@@ -1828,6 +1859,7 @@
 												endforeach; ?>
 											</tbody>
 										</table>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -1853,6 +1885,7 @@
 							<div>
 								<div class="row">
 									<div class="col-md-12">
+										<div class="table-responsive">
 										<table class="table table-striped table-hover">
 											<thead>
 												<tr>
@@ -1880,6 +1913,7 @@
 												endforeach; ?>
 											</tbody>
 										</table>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -1960,6 +1994,7 @@
 						<div>
 							<div class="row">
 								<div class="col-md-12">
+									<div class="table-responsive">
 									<table class="table table-striped table-hover">
 										<thead>
 											<tr>
@@ -2085,6 +2120,7 @@
 											</tr>
 										</tbody>
 									</table>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -2111,6 +2147,7 @@
 						<div>
 							<div class="row">
 								<div class="col-md-12">
+									<div class="table-responsive">
 									<table class="table table-striped table-hover">
 										<thead>
 											<tr>
@@ -2139,6 +2176,7 @@
 											endforeach; ?>
 										</tbody>
 									</table>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -2172,6 +2210,7 @@
 						<div>
 							<div class="row">
 								<div class="col-md-12">
+									<div class="table-responsive">
 									<table class="table table-striped table-hover">
 										<thead>
 											<tr>
@@ -2287,6 +2326,7 @@
 											</tr>
 										</tbody>
 									</table>
+									</div>
 									<p>Recibido: ______________________________</p>
 									<br />
 									<p>Diferencia: ____________________________</p>
@@ -2324,6 +2364,7 @@
 					<div>
 						<div class="row">
 							<div class="col-md-12">
+								<div class="table-responsive">
 								<table class="table table-striped table-hover">
 									<thead>
 										<tr>
@@ -2501,6 +2542,7 @@
 										</tr>
 									</tbody>
 								</table>
+								</div>
 							</div>
 						</div>
 					</div>

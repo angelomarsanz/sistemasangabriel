@@ -1,11 +1,12 @@
 <?php
 /**
- * Pruebas de la búsqueda de la factura original, el cálculo de notas de débito
- * y la compatibilidad de cierres consolidados.
+ * Pruebas de notas de débito, cierres consolidados y el detalle compartido
+ * entre la vista previa y el reporte de cierre.
  */
 namespace App\Test\TestCase\Controller;
 
 use App\Controller\TurnsController;
+use Cake\View\View;
 use PHPUnit\Framework\TestCase;
 
 class TurnsCierreTest extends TestCase
@@ -301,5 +302,117 @@ class TurnsCierreTest extends TestCase
         $this->assertEquals(5, $resultado['Efectivo $']);
         $this->assertEquals(10, $resultado['Efectivo €']);
         $this->assertEquals(5, $resultado['Transferencia Bs.']);
+    }
+
+    /**
+     * Comprueba que previo y reporte rendericen el mismo detalle para ambos roles.
+     *
+     * @return void
+     */
+    public function testPrevioYReporteCompartenDetalle()
+    {
+        $clase = new \ReflectionClass(TurnsController::class);
+        $controlador = $clase->newInstanceWithoutConstructor();
+        $controlador->Auth = new class {
+            /**
+             * Devuelve los datos de prueba del cajero.
+             *
+             * @param string $campo Campo solicitado.
+             * @return string Valor del campo.
+             */
+            public function user($campo)
+            {
+                return $campo === 'first_name' ? 'Cajero' : 'Prueba';
+            }
+        };
+        $turno = (object)['id' => 5523, 'turn' => '1', 'status' => 1, 'start_date' => new \DateTimeImmutable('2026-11-04')];
+        $datos = [
+            'turn' => $turno, 'lastNumber' => 133368, 'lastControl' => 10,
+            'cajero' => 'Cajero Prueba', 'consolidadoPeriodo' => false,
+            'vectorTotalesRecibidos' => $controlador->vectorTotalesRecibidos(),
+            'vectorTotalesRecibidosPedidos' => $controlador->vectorTotalesRecibidosPedidos(),
+            'totalFormasPago' => ['Total general cobrado Bs.' => ['montoBs' => 0]],
+            'vectorPagos' => [], 'facturas' => [], 'pagosFacturas' => [], 'facturasNotas' => [],
+            'documentosAnulados' => [], 'conceptosSeguro' => [], 'conceptosServicioEducativo' => [],
+            'conceptosConsejoEducativo' => [], 'tasaDolar' => 40, 'tasaEuro' => 50,
+            'totalGeneralSobrantes' => 0, 'totalGeneralReintegrosSobrantes' => 0,
+            'totalDescuentosRecargos' => 0, 'totalGeneralCompensado' => 0,
+            'totalGeneralFacturado' => 0, 'totalFacturasRecibos' => 0
+        ];
+        foreach ([
+            'indicadorFacturasAnticipos', 'indicadorServiciosEducativos', 'indicadorReintegros',
+            'indicadorReintegrosPedidos', 'indicadorCompras', 'indicadorComprasPedidos',
+            'indicadorVueltoCompra', 'indicadorNotasCredito', 'indicadorNotasDebito',
+            'indicadorFacturasRecibos', 'indicadorSobrantes', 'indicadorSobrantesPedidos',
+            'indicadorFacturasAnuladas', 'indicadorRecibosAnulados', 'indicadorPedidosAnulados',
+            'indicadorRecibosAnuladosPedidos', 'indicadorRecibosSeguro', 'indicadorRecibosSeguroAnulados',
+            'indicadorRecibosConsejoEducativo'
+        ] as $indicador)
+        {
+            $datos[$indicador] = 0;
+        }
+
+        foreach (['Seniat', 'Ventas generales'] as $rol)
+        {
+            $datos['rolCajero'] = $rol;
+            $previo = $this->renderizarVistaCierre('edit', $datos);
+            $reporte = $this->renderizarVistaCierre('reporte_cierre', $datos);
+            $patron = '/<div name="reporte_cierre" id="reporte-cierre".*?<\/script>/s';
+            $this->assertSame(1, preg_match($patron, $previo, $detallePrevio));
+            $this->assertSame(1, preg_match($patron, $reporte, $detalleReporte));
+            $this->assertSame($detalleReporte[0], $detallePrevio[0]);
+            $this->assertNotFalse(strpos($previo, 'id="factura-control"'));
+            $this->assertNotFalse(strpos($previo, 'id="cerrar-turno"'));
+            $this->assertFalse(strpos($reporte, 'id="cerrar-turno"'));
+            $this->assertSame(1, $turno->status);
+        }
+    }
+
+    /**
+     * Renderiza una vista sin conexión ni escritura de datos.
+     *
+     * @param string $plantilla Nombre de la plantilla.
+     * @param array $datos Variables del reporte.
+     * @return string HTML generado.
+     */
+    private function renderizarVistaCierre($plantilla, array $datos)
+    {
+        $vista = new View();
+        $vista->Form = new class {
+            /**
+             * Simula el campo del número de control.
+             *
+             * @param string $nombre Nombre del campo.
+             * @param array $opciones Opciones del campo.
+             * @return string HTML del campo.
+             */
+            public function input($nombre, $opciones) { return '<input id="control-number">'; }
+            /**
+             * Simula el inicio del formulario de cierre.
+             *
+             * @param object $entidad Turno.
+             * @return string HTML del formulario.
+             */
+            public function create($entidad) { return '<form method="post">'; }
+            /**
+             * Simula el botón de cierre.
+             *
+             * @param string $nombre Texto del botón.
+             * @param array $opciones Opciones del botón.
+             * @return string HTML del botón.
+             */
+            public function button($nombre, $opciones) { return '<button id="' . $opciones['id'] . '">' . $nombre . '</button>'; }
+            /**
+             * Cierra el formulario simulado.
+             *
+             * @return string HTML de cierre.
+             */
+            public function end() { return '</form>'; }
+        };
+        $vista->autoLayout = false;
+        $vista->setTemplatePath('Turns');
+        $vista->set($datos);
+
+        return $vista->render($plantilla);
     }
 }

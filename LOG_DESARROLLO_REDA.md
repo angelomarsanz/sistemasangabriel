@@ -750,3 +750,15 @@
     - `LOG_DESARROLLO_REDA.md`: registra esta intervención.
 - **Validación parcial:** El respaldo `documentacion-sangabriel-3/BD/sgadev_sangabriel-20261113-1242.sql` contiene `turns`, `bills`, `payments` y `concepts`. El turno 5523 tiene estatus 1 y se verificó la cadena de documentos 66298 → 66296 → 66295. Los métodos reales de búsqueda y cálculo, ejecutados con datos seleccionados del respaldo, identificaron TDB/TDC Bs. y sumaron 26.796,30 Bs. a los renglones de la nota de débito, subtotal y total a recibir. No se modificó la base de datos.
 - **Alcance:** El servidor MySQL configurado rechazó la conexión; no se inició ningún servicio. Por indicación del usuario, la prueba definitiva del reporte completo corresponde a su servidor Vesta de desarrollo.
+
+## [2026-11-13] - Unificación de la vista previa y el reporte de cierre
+- **Tarea:** Utilizar un único detalle contable para la vista previa y el reporte definitivo sin cerrar anticipadamente el turno.
+- **Archivos modificados:**
+    - `src/Controller/TurnsController.php`: extrae `prepararDatosReporteCierre()` para que la preparación y el reporte carguen los mismos vectores, documentos, pagos, conceptos e indicadores. Conserva el guardado existente de totales y vectores antes de la confirmación, sin cambiar el estado `1` de turno abierto; el formulario confirmado mantiene el cierre con estado `0`. Se preparan también las referencias de notas cuando el turno no tiene pagos.
+    - `src/Template/Turns/edit.ctp`: reemplaza el detalle duplicado por el elemento compartido y mantiene el aviso de turno abierto, la comprobación del número de control y la confirmación del cierre.
+    - `src/Template/Element/Turns/reporte_cierre_detalle.ctp`: se reutiliza para el previo, el reporte y el consolidado; se incorporan contenedores responsivos a las tablas contables.
+    - `tests/TestCase/Controller/TurnsCierreTest.php`: agrega comprobaciones de equivalencia del HTML contable y de los controles exclusivos del previo para los roles fiscal y no fiscal.
+    - `manual_tecnico_sistema.md`: documenta el flujo y la reutilización.
+    - `previo_cambios_realizados.md`: registra el avance incremental y se restablece tras finalizar la tarea.
+    - `LOG_DESARROLLO_REDA.md`: registra esta intervención.
+- **Validación preliminar:** Se verificó el respaldo diario `documentacion-sangabriel-3/BD/sgadev_sangabriel-20261113-1242.sql`. Con datos de las tablas involucradas se ejecutaron las acciones y vistas reales en SQLite en memoria para el turno fiscal 5523 y el no fiscal 5304: el estado permaneció abierto al preparar, los datos y el HTML contable coincidieron después de simular el cierre y las tablas renderizadas quedaron dentro de contenedores responsivos. Se comprobó la nota de débito de 26.796,30 Bs., la preparación sin pagos en el turno y el renderizado de consolidados. También se probaron los controles de verificación, ocho pruebas focalizadas con un adaptador local por ausencia de PHPUnit y la sintaxis PHP 7.4. No se inició ningún servicio ni se modificó la base restaurada; la prueba definitiva corresponde al usuario en Vesta de desarrollo.
